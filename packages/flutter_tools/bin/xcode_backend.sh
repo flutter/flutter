@@ -4,8 +4,8 @@
 # found in the LICENSE file.
 
 RunCommand() {
-  echo "♦ " $@
-  $@
+  echo "♦ $*"
+  "$@"
   return $?
 }
 
@@ -28,17 +28,17 @@ AssertExists() {
 BuildApp() {
   local project_path="${SOURCE_ROOT}/.."
   if [[ -n "$FLUTTER_APPLICATION_PATH" ]]; then
-    project_path=${FLUTTER_APPLICATION_PATH}
+    project_path="${FLUTTER_APPLICATION_PATH}"
   fi
 
   local target_path="lib/main.dart"
   if [[ -n "$FLUTTER_TARGET" ]]; then
-    target_path=${FLUTTER_TARGET}
+    target_path="${FLUTTER_TARGET}"
   fi
 
   local build_mode="release"
   if [[ -n "$FLUTTER_BUILD_MODE" ]]; then
-    build_mode=${FLUTTER_BUILD_MODE}
+    build_mode="${FLUTTER_BUILD_MODE}"
   fi
 
   local artifact_variant="unknown"
@@ -54,27 +54,27 @@ BuildApp() {
     framework_path="${FLUTTER_FRAMEWORK_DIR}"
   fi
 
-  AssertExists ${project_path}
+  AssertExists "${project_path}"
 
-  local derived_dir=${SOURCE_ROOT}/Flutter
-  RunCommand mkdir -p $derived_dir
-  AssertExists $derived_dir
+  local derived_dir="${SOURCE_ROOT}/Flutter"
+  RunCommand mkdir -p -- "$derived_dir"
+  AssertExists "$derived_dir"
 
-  RunCommand rm -f ${derived_dir}/Flutter.framework
-  RunCommand rm -f ${derived_dir}/app.dylib
-  RunCommand rm -f ${derived_dir}/app.flx
-  RunCommand cp -r ${framework_path}/Flutter.framework ${derived_dir}
-  RunCommand pushd ${project_path}
+  RunCommand rm -f -- "${derived_dir}/Flutter.framework"
+  RunCommand rm -f -- "${derived_dir}/app.dylib"
+  RunCommand rm -f -- "${derived_dir}/app.flx"
+  RunCommand cp -r -- "${framework_path}/Flutter.framework ${derived_dir}"
+  RunCommand pushd "${project_path}"
 
-  AssertExists ${target_path}
+  AssertExists "${target_path}"
 
-  local build_dir=${FLUTTER_BUILD_DIR:-build}
+  local build_dir="${FLUTTER_BUILD_DIR:-build}"
   local local_engine_flag=""
   if [[ -n "$LOCAL_ENGINE" ]]; then
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
   fi
 
-  if [[ $CURRENT_ARCH != "x86_64" ]]; then
+  if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
     local aot_flags=""
     if [[ "$build_mode" == "debug" ]]; then
       aot_flags="--interpreter --debug"
@@ -82,11 +82,11 @@ BuildApp() {
       aot_flags="--${build_mode}"
     fi
 
-    RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build aot \
-      --output-dir=${build_dir}/aot                                       \
-      --target-platform=ios                                               \
-      --target=${target_path}                                             \
-      ${aot_flags}                                                        \
+    RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build aot \
+      --output-dir="${build_dir}/aot"                                       \
+      --target-platform=ios                                                 \
+      --target="${target_path}"                                             \
+      ${aot_flags}                                                          \
       ${local_engine_flag}
 
     if [[ $? -ne 0 ]]; then
@@ -94,24 +94,24 @@ BuildApp() {
       exit -1
     fi
 
-    RunCommand cp ${build_dir}/aot/app.dylib ${derived_dir}/app.dylib
+    RunCommand cp -f -- "${build_dir}/aot/app.dylib" "${derived_dir}/app.dylib"
   else
-    RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o ${derived_dir}/app.dylib -)"
+    RunCommand eval "$(echo \"static const int Moo = 88;\" | xcrun clang -x c --shared -o "${derived_dir}/app.dylib" -)"
   fi
 
   local precompilation_flag=""
-  if [[ $CURRENT_ARCH != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
+  if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
     precompilation_flag="--precompiled"
   fi
 
-  RunCommand ${FLUTTER_ROOT}/bin/flutter --suppress-analytics build flx \
-    --target=${target_path}                                             \
-    --output-file=${derived_dir}/app.flx                                \
-    --snapshot=${build_dir}/snapshot_blob.bin                           \
-    --depfile=${build_dir}/snapshot_blob.bin.d                          \
-    --working-dir=${build_dir}/flx                                      \
-    ${precompilation_flag}                                              \
-    ${local_engine_flag}                                                \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics build flx \
+    --target="${target_path}"                                             \
+    --output-file="${derived_dir}/app.flx"                                \
+    --snapshot="${build_dir}/snapshot_blob.bin"                           \
+    --depfile="${build_dir}/snapshot_blob.bin.d"                          \
+    --working-dir="${build_dir}/flx"                                      \
+    ${precompilation_flag}                                                \
+    ${local_engine_flag}                                                  \
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."
@@ -144,7 +144,7 @@ LipoExecutable() {
   local all_executables=()
   for arch in $archs; do
     local output="${executable}_${arch}"
-    local lipo_info=$(lipo -info "${executable}")
+    local lipo_info="$(lipo -info "${executable}")"
     if [[ "${lipo_info}" == "Non-fat file:"* ]]; then
       if [[ "${lipo_info}" != *"${arch}" ]]; then
         echo "Non-fat binary ${executable} is not ${arch}. Running lipo -info:"
@@ -168,8 +168,8 @@ LipoExecutable() {
   lipo -output "${merged}" -create "${all_executables[@]}"
 
   # Replace the original executable with the thinned one and clean up.
-  cp -f "${merged}" "${executable}" > /dev/null
-  rm -f "${merged}" "${all_executables[@]}"
+  cp -f -- "${merged}" "${executable}" > /dev/null
+  rm -f -- "${merged}" "${all_executables[@]}"
 }
 
 # Destructively thins the specified framework to include only the specified
@@ -189,7 +189,7 @@ ThinAppFrameworks() {
   local frameworks_dir="${app_path}/Frameworks"
 
   [[ -d "$frameworks_dir" ]] || return 0
-  for framework_dir in "$(find "${app_path}" -type d -name "*.framework")"; do
+  for framework_dir in $(find "${app_path}" -type d -name "*.framework"); do
     ThinFramework "$framework_dir" "$ARCHS"
   done
 }
