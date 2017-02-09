@@ -20,6 +20,7 @@ void main() {
 
     testUsingContext('Emit missing status when nothing is installed', () async {
       when(xcode.isInstalled).thenReturn(false);
+      when(xcode.xcodeSelectPath).thenReturn('');
       IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..hasPythonSixModule = false
         ..hasHomebrew = false
@@ -30,6 +31,15 @@ void main() {
 
     testUsingContext('Emits partial status when Xcode is not installed', () async {
       when(xcode.isInstalled).thenReturn(false);
+      when(xcode.xcodeSelectPath).thenReturn('');
+      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+
+    testUsingContext('Emits partial status when Xcode is partially installed', () async {
+      when(xcode.isInstalled).thenReturn(false);
+      when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
       IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
       ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
