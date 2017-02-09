@@ -27,11 +27,11 @@ SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
 
 REM Test if Git is available on the Host
-where /q git.exe || ECHO Error: Unable to find git.exe in your PATH. && EXIT /B
+where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
-  EXIT /B
+  EXIT /B 1
 )
 
 REM Ensure that bin/cache exists.
@@ -95,4 +95,4 @@ IF /I "%exit_code%" EQU "253" (
   SET exit_code=%ERRORLEVEL%
 )
 
-EXIT %exit_code%
+EXIT /B %exit_code%
