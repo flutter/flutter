@@ -1,0 +1,221 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/widgets.dart';
+
+import 'test_widgets.dart';
+
+void main() {
+  testWidgets('ListView.builder mount/dismount smoke test', (WidgetTester tester) async {
+    List<int> callbackTracker = <int>[];
+
+    // the root view is 800x600 in the test environment
+    // so if our widget is 100 pixels tall, it should fit exactly 6 times.
+
+    Widget builder() {
+      return new FlipWidget(
+        left: new ListView.builder(
+          itemExtent: 100.0,
+          itemBuilder: (BuildContext context, int index) {
+            callbackTracker.add(index);
+            return new Container(
+              key: new ValueKey<int>(index),
+              height: 100.0,
+              child: new Text('$index'),
+            );
+          },
+        ),
+        right: new Text('Not Today'),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
+
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+
+    callbackTracker.clear();
+    testWidget.flip();
+    await tester.pump();
+
+    expect(callbackTracker, equals(<int>[]));
+
+    callbackTracker.clear();
+    testWidget.flip();
+    await tester.pump();
+
+    expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
+  });
+
+  testWidgets('ListView.builder vertical', (WidgetTester tester) async {
+    List<int> callbackTracker = <int>[];
+
+    // the root view is 800x600 in the test environment
+    // so if our widget is 200 pixels tall, it should fit exactly 3 times.
+    // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
+
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+      callbackTracker.add(index);
+      return new Container(
+        key: new ValueKey<int>(index),
+        width: 500.0, // this should be ignored
+        height: 400.0, // should be overridden by itemExtent
+        child: new Text('$index')
+      );
+    };
+
+    FlipWidget buildWidget() {
+      return new FlipWidget(
+        left: new ListView.builder(
+          controller: new ScrollController(initialScrollOffset: 300.0),
+          itemExtent: 200.0,
+          itemBuilder: itemBuilder,
+        ),
+        right: new Text('Not Today')
+      );
+    }
+
+    void jumpTo(double newScrollOffset) {
+      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      scrollable.position.jumpTo(newScrollOffset);
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    callbackTracker.clear();
+
+    jumpTo(400.0);
+    // now only 3 should fit, numbered 2-4.
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4]));
+    callbackTracker.clear();
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[2, 3, 4]));
+    callbackTracker.clear();
+
+    jumpTo(500.0);
+    // now 4 should fit, numbered 2-5.
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
+    callbackTracker.clear();
+  });
+
+  testWidgets('ListView.builder horizontal', (WidgetTester tester) async {
+    List<int> callbackTracker = <int>[];
+
+    // the root view is 800x600 in the test environment
+    // so if our widget is 200 pixels wide, it should fit exactly 4 times.
+    // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
+
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+      callbackTracker.add(index);
+      return new Container(
+        key: new ValueKey<int>(index),
+        width: 400.0, // this should be overridden by itemExtent
+        height: 500.0, // this should be ignored
+        child: new Text('$index'),
+      );
+    };
+
+    FlipWidget buildWidget() {
+      return new FlipWidget(
+        left: new ListView.builder(
+          controller: new ScrollController(initialScrollOffset: 300.0),
+          itemBuilder: itemBuilder,
+          itemExtent: 200.0,
+          scrollDirection: Axis.horizontal
+        ),
+        right: new Text('Not Today')
+      );
+    }
+
+    void jumpTo(double newScrollOffset) {
+      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      scrollable.position.jumpTo(newScrollOffset);
+    }
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+
+    callbackTracker.clear();
+
+    jumpTo(400.0);
+    // now only 4 should fit, numbered 2-5.
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[1, 2, 3, 4, 5]));
+    callbackTracker.clear();
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[2, 3, 4, 5]));
+    callbackTracker.clear();
+
+    jumpTo(500.0);
+    // now only 5 should fit, numbered 2-6.
+
+    await tester.pumpWidget(buildWidget());
+
+    expect(callbackTracker, equals(<int>[2, 3, 4, 5, 6]));
+    callbackTracker.clear();
+  });
+
+  testWidgets('ListView.builder 10 items, 2-3 items visible', (WidgetTester tester) async {
+    List<int> callbackTracker = <int>[];
+
+    // The root view is 800x600 in the test environment and our list
+    // items are 300 tall. Scrolling should cause two or three items
+    // to be built.
+
+    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+      callbackTracker.add(index);
+      return new Text('$index', key: new ValueKey<int>(index));
+    };
+
+    Widget testWidget = new ListView.builder(
+      itemBuilder: itemBuilder,
+      itemExtent: 300.0,
+      itemCount: 10,
+    );
+
+    void jumpTo(double newScrollOffset) {
+      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      scrollable.position.jumpTo(newScrollOffset);
+    }
+
+    await tester.pumpWidget(testWidget);
+    expect(callbackTracker, equals(<int>[0, 1]));
+    callbackTracker.clear();
+
+    jumpTo(150.0);
+    await tester.pump();
+
+    expect(callbackTracker, equals(<int>[2]));
+    callbackTracker.clear();
+
+    jumpTo(600.0);
+    await tester.pump();
+
+    expect(callbackTracker, equals(<int>[3]));
+    callbackTracker.clear();
+
+    jumpTo(750.0);
+    await tester.pump();
+
+    expect(callbackTracker, equals(<int>[4]));
+    callbackTracker.clear();
+  });
+
+}
