@@ -17,7 +17,7 @@ void main() {
   });
 
   test('SliverConstraints', () {
-    SliverConstraints a = new SliverConstraints(
+    SliverConstraints a = const SliverConstraints(
       axisDirection: AxisDirection.down,
       growthDirection: GrowthDirection.forward,
       userScrollDirection: ScrollDirection.idle,
@@ -44,7 +44,7 @@ void main() {
       crossAxisExtent: 40.0,
       viewportMainAxisExtent: 30.0,
     );
-    SliverConstraints d = new SliverConstraints(
+    SliverConstraints d = const SliverConstraints(
       axisDirection: AxisDirection.up,
       growthDirection: GrowthDirection.reverse,
       userScrollDirection: ScrollDirection.forward,
@@ -69,12 +69,12 @@ void main() {
   });
 
   test('SliverGeometry', () {
-    expect(new SliverGeometry().debugAssertIsValid, isTrue);
+    expect(const SliverGeometry().debugAssertIsValid, isTrue);
     expect(() {
-      new SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid;
+      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid;
     }, throwsFlutterError);
     expect(() {
-      new SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid;
+      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid;
     }, throwsFlutterError);
   });
 }

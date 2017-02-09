@@ -10,7 +10,7 @@ void main() {
     const FractionalOffset offset = const FractionalOffset(0.5, 0.25);
 
     expect(offset, hasOneLineDescription);
-    expect(offset.hashCode, equals(new FractionalOffset(0.5, 0.25).hashCode));
+    expect(offset.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
 
     expect(offset / 2.0, const FractionalOffset(0.25, 0.125));
     expect(offset ~/ 2.0, const FractionalOffset(0.0, 0.0));
@@ -20,7 +20,7 @@ void main() {
   test('FractionalOffset.lerp()', () {
     FractionalOffset a = FractionalOffset.topLeft;
     FractionalOffset b = FractionalOffset.topCenter;
-    expect(FractionalOffset.lerp(a, b, 0.25), equals(new FractionalOffset(0.125, 0.0)));
+    expect(FractionalOffset.lerp(a, b, 0.25), equals(const FractionalOffset(0.125, 0.0)));
 
     expect(FractionalOffset.lerp(null, null, 0.25), isNull);
     expect(FractionalOffset.lerp(null, b, 0.25), equals(b * 0.25));

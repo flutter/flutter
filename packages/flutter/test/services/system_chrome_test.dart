@@ -42,7 +42,7 @@ void main() {
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      new ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+        const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
     );
 
     expect(log, equals(<String>['{"method":"SystemChrome.setApplicationSwitcherDescription","args":[{"label":"Example label","primaryColor":4278255360}]}']));

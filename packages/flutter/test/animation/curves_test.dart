@@ -13,7 +13,7 @@ void main() {
     expect(Curves.linear, hasOneLineDescription);
     expect(const SawTooth(3), hasOneLineDescription);
     expect(const Interval(0.25, 0.75), hasOneLineDescription);
-    expect(new Interval(0.25, 0.75, curve: Curves.ease), hasOneLineDescription);
+    expect(const Interval(0.25, 0.75, curve: Curves.ease), hasOneLineDescription);
   });
 
   test('Curve flipped control test', () {

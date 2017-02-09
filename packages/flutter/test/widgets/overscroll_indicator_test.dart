@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
+          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
+          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -94,7 +94,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 2000.0)),
+          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -127,7 +127,7 @@ void main() {
       await tester.pumpWidget(
         new CustomScrollView(
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
@@ -144,7 +144,7 @@ void main() {
         new CustomScrollView(
           reverse: true,
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
@@ -161,7 +161,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
@@ -181,7 +181,7 @@ void main() {
       new CustomScrollView(
         scrollDirection: Axis.horizontal,
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
@@ -230,7 +230,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           reverse: true,
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),
@@ -247,7 +247,7 @@ void main() {
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: new SizedBox(height: 20.0)),
+            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),

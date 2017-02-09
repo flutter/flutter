@@ -19,18 +19,18 @@ class NotEquals {
 
 void main() {
   testWidgets('Keys', (WidgetTester tester) async {
-    expect(new ValueKey<int>(3) == new ValueKey<int>(3), isTrue);
-    expect(new ValueKey<num>(3) == new ValueKey<int>(3), isFalse);
-    expect(new ValueKey<int>(3) == new ValueKey<int>(2), isFalse);
+    expect(new ValueKey<int>(3) == new ValueKey<int>(3), isTrue); // ignore: prefer_const_constructors
+    expect(new ValueKey<num>(3) == new ValueKey<int>(3), isFalse); // ignore: prefer_const_constructors
+    expect(new ValueKey<int>(3) == new ValueKey<int>(2), isFalse); // ignore: prefer_const_constructors
     expect(const ValueKey<double>(double.NAN) == const ValueKey<double>(double.NAN), isFalse);
     
-    expect(new Key('') == new ValueKey<String>(''), isTrue);
-    expect(new ValueKey<String>('') == new ValueKey<String>(''), isTrue);
-    expect(new TestValueKey<String>('') == new ValueKey<String>(''), isFalse);
-    expect(new TestValueKey<String>('') == new TestValueKey<String>(''), isTrue);
+    expect(new Key('') == new ValueKey<String>(''), isTrue); // ignore: prefer_const_constructors
+    expect(new ValueKey<String>('') == new ValueKey<String>(''), isTrue); // ignore: prefer_const_constructors
+    expect(new TestValueKey<String>('') == new ValueKey<String>(''), isFalse); // ignore: prefer_const_constructors
+    expect(new TestValueKey<String>('') == new TestValueKey<String>(''), isTrue); // ignore: prefer_const_constructors
 
-    expect(new ValueKey<String>('') == new ValueKey<dynamic>(''), isFalse);
-    expect(new TestValueKey<String>('') == new TestValueKey<dynamic>(''), isFalse);
+    expect(new ValueKey<String>('') == new ValueKey<dynamic>(''), isFalse); // ignore: prefer_const_constructors
+    expect(new TestValueKey<String>('') == new TestValueKey<dynamic>(''), isFalse); // ignore: prefer_const_constructors
     
     expect(new UniqueKey() == new UniqueKey(), isFalse);
     LocalKey k = new UniqueKey();
@@ -41,10 +41,10 @@ void main() {
     expect(new ValueKey<LocalKey>(k) == new ValueKey<UniqueKey>(k), isFalse);
     expect(new ObjectKey(k) == new ObjectKey(k), isTrue);
 
-    expect(new ValueKey<NotEquals>(const NotEquals()) == new ValueKey<NotEquals>(const NotEquals()), isFalse);
-    expect(new ObjectKey(const NotEquals()) == new ObjectKey(const NotEquals()), isTrue);
+    expect(new ValueKey<NotEquals>(const NotEquals()) == new ValueKey<NotEquals>(const NotEquals()), isFalse); // ignore: prefer_const_constructors
+    expect(new ObjectKey(const NotEquals()) == new ObjectKey(const NotEquals()), isTrue); // ignore: prefer_const_constructors
     
-    expect(new ObjectKey(const Object()) == new ObjectKey(const Object()), isTrue);
+    expect(new ObjectKey(const Object()) == new ObjectKey(const Object()), isTrue); // ignore: prefer_const_constructors
     expect(new ObjectKey(new Object()) == new ObjectKey(new Object()), isFalse);
 
     expect(new ValueKey<bool>(true), hasOneLineDescription);

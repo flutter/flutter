@@ -183,7 +183,7 @@ void main() {
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: const TestVSync(),
-          child: new SizedBox(
+          child: const SizedBox(
             width: 100.0,
             height: 100.0,
           ),
@@ -196,7 +196,7 @@ void main() {
         child: new AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: tester,
-          child: new SizedBox(
+          child: const SizedBox(
             width: 200.0,
             height: 100.0,
           ),

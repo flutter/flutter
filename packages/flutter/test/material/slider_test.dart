@@ -152,7 +152,7 @@ void main() {
 
     expect(value, equals(0.5));
 
-    await gesture.moveBy(new Offset(1.0, 0.0));
+    await gesture.moveBy(const Offset(1.0, 0.0));
 
     expect(value, greaterThan(0.5));
 

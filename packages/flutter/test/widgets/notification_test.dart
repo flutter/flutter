@@ -66,6 +66,6 @@ void main() {
       onNotification: (MyNotification value) { },
       child: new Container(key: key),
     ));
-    expect(() { new MyNotification().dispatch(key.currentContext); }, throwsA(new isInstanceOf<AssertionError>()));
+    expect(() { new MyNotification().dispatch(key.currentContext); }, throwsA(const isInstanceOf<AssertionError>()));
   });
 }

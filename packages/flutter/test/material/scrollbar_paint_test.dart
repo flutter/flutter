@@ -11,7 +11,7 @@ void main() {
   testWidgets('Viewport2 basic test', (WidgetTester tester) async {
     await tester.pumpWidget(new Scrollbar2(
       child: new SingleChildScrollView(
-        child: new SizedBox(width: 4000.0, height: 4000.0),
+        child: const SizedBox(width: 4000.0, height: 4000.0),
       ),
     ));
     expect(find.byType(Scrollbar2), isNot(paints..rect()));

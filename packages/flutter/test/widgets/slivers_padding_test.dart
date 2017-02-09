@@ -85,11 +85,11 @@ void main() {
     result = tester.hitTestOnBinding(const Point(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Point(10.0, 60.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Point(100.0, 490.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(10.0, 520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -107,11 +107,11 @@ void main() {
     result = tester.hitTestOnBinding(const Point(10.0, 600.0-10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Point(10.0, 600.0-60.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(100.0, 600.0-100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Point(100.0, 600.0-490.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(10.0, 600.0-520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -129,11 +129,11 @@ void main() {
     result = tester.hitTestOnBinding(const Point(800.0-10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Point(800.0-60.0, 10.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(800.0-100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Point(800.0-490.0, 100.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(800.0-520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -151,11 +151,11 @@ void main() {
     result = tester.hitTestOnBinding(const Point(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
     result = tester.hitTestOnBinding(const Point(60.0, 10.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
     result = tester.hitTestOnBinding(const Point(490.0, 100.0));
-    expect(result.path.first.target, new isInstanceOf<RenderView>());
+    expect(result.path.first.target, const isInstanceOf<RenderView>());
     result = tester.hitTestOnBinding(const Point(520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
@@ -164,7 +164,7 @@ void main() {
     await tester.pumpWidget(new Viewport2(
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.all(100.0)),
+        new SliverPadding(padding: const EdgeInsets.all(100.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('x'))),
       ],
     ));
@@ -177,7 +177,7 @@ void main() {
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(90.0, 1.0, 110.0, 2.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 201.0, child: new Text('x'))),
       ],
     ));
@@ -187,7 +187,7 @@ void main() {
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(110.0, 1.0, 80.0, 2.0)),
         new SliverToBoxAdapter(child: new SizedBox(width: 201.0, child: new Text('x'))),
       ],
     ));
@@ -200,7 +200,7 @@ void main() {
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).endPadding, 1.0);
@@ -208,7 +208,7 @@ void main() {
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).endPadding, 4.0);
@@ -216,7 +216,7 @@ void main() {
       axisDirection: AxisDirection.right,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).endPadding, 8.0);
@@ -224,7 +224,7 @@ void main() {
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).endPadding, 2.0);
@@ -232,7 +232,7 @@ void main() {
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(99999.9),
       slivers: <Widget>[
-        new SliverPadding(padding: new EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
+        new SliverPadding(padding: const EdgeInsets.fromLTRB(1.0, 2.0, 4.0, 8.0)),
       ],
     ));
     expect(tester.renderObject<RenderSliverPadding>(find.byType(SliverPadding)).endPadding, 2.0);
