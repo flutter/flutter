@@ -27,7 +27,7 @@ Widget buildFrame() {
 }
 
 void main() {
-  testWidgets('LazyBlock is a build function (smoketest)', (WidgetTester tester) async {
+  testWidgets('ListView is a build function (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(buildFrame());
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsOneWidget);
