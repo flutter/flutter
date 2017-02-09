@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show ASCII;
+import 'dart:convert' show ASCII, LineSplitter;
 
 import 'package:stack_trace/stack_trace.dart';
 
@@ -29,7 +29,10 @@ abstract class Logger {
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative });
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  );
 
   /// Use this for verbose tracing output. Users can turn this output on in order
   /// to help diagnose issues with the toolchain or with their setup.
@@ -66,13 +69,18 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  ) {
     _status?.cancel();
     _status = null;
     if (terminal.supportsColor && ansiAlternative != null)
       message = ansiAlternative;
     if (emphasis)
       message = terminal.bolden(message);
+    if (indent != null && indent > 0)
+      message = LineSplitter.split(message).map((String line) => ' ' * indent + line).join('\n');
     if (newline)
       message = '$message\n';
     stdout.write(message);
@@ -114,7 +122,10 @@ class BufferLogger extends Logger {
   void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  ) {
     if (newline)
       _status.writeln(message);
     else
@@ -147,7 +158,10 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  ) {
     _emit(_LogType.status, message);
   }
 

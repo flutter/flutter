@@ -680,7 +680,10 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  ) {
     _messageController.add(new LogMessage('status', message));
   }
 
@@ -762,7 +765,10 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void printStatus(String message, { bool emphasis: false, bool newline: true, String ansiAlternative }) {
+  void printStatus(
+    String message,
+    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
+  ) {
     if (logToStdout) {
       print(message);
     } else {
