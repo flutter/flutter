@@ -8,9 +8,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
-    final Key avatarA = new Key('A');
-    final Key avatarC = new Key('C');
-    final Key avatarD = new Key('D');
+    final Key avatarA = const Key('A');
+    final Key avatarC = const Key('C');
+    final Key avatarD = const Key('D');
 
     await tester.pumpWidget(
       new Material(
@@ -146,7 +146,7 @@ void main() {
     ));
     expect(find.text('A'), findsOneWidget);
 
-    final Key avatarA = new Key('A');
+    final Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
       currentAccountPicture: new CircleAvatar(key: avatarA, child: new Text('A')),
       accountName: new Text('accountName'),

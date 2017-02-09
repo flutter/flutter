@@ -135,7 +135,7 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 
 /// A key that is unique across the entire app.
 ///
-/// Global keys uniquely indentify elements. Global keys provide access to other
+/// Global keys uniquely identify elements. Global keys provide access to other
 /// objects that are associated with elements, such as the a [BuildContext] and,
 /// for [StatefulWidget]s, a [State].
 ///

@@ -10,7 +10,7 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new DefaultTextStyle(
-          style: new TextStyle(
+          style: const TextStyle(
             fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
@@ -28,7 +28,7 @@ void main() {
           baseline: 180.0,
           baselineType: TextBaseline.alphabetic,
           child: new DefaultTextStyle(
-            style: new TextStyle(
+            style: const TextStyle(
               fontFamily: 'Ahem',
               fontSize: 100.0,
             ),

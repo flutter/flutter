@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
     String helloSnackBar = 'Hello SnackBar';
-    Key tapTarget = new Key('tap-target');
+    Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = new Key('tap-target');
+    Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = new Key('tap-target');
+    Key tapTarget = const Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = new Key('tap-target');
+    Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(

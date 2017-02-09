@@ -38,7 +38,7 @@ Future<Point> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged));
   await tester.tap(find.text('X'));
   await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(new Key('time-picker-dial')));
+  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {

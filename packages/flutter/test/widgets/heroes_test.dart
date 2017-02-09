@@ -5,9 +5,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-Key firstKey = new Key('first');
-Key secondKey = new Key('second');
-Key thirdKey = new Key('third');
+Key firstKey = const Key('first');
+Key secondKey = const Key('second');
+Key thirdKey = const Key('third');
 
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => new Material(

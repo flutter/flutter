@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
-    Key key = new Key('outerContainer');
+    Key key = const Key('outerContainer');
     await tester.pumpWidget(
       new Center(
         child: new Container(
@@ -42,7 +42,7 @@ void main() {
   testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/7672
 
-    final Key key = new Key('Container with BoxDecoration');
+    final Key key = const Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
       return new Center(
         child: new Container(
