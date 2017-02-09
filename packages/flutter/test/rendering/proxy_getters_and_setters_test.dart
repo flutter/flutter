@@ -8,10 +8,10 @@ import 'package:test/test.dart';
 
 void main() {
   test('RenderConstrainedBox getters and setters', () {
-    RenderConstrainedBox box = new RenderConstrainedBox(additionalConstraints: new BoxConstraints.tightFor(height: 10.0));
-    expect(box.additionalConstraints, new BoxConstraints(minHeight: 10.0, maxHeight: 10.0));
-    box.additionalConstraints = new BoxConstraints.tightFor(width: 10.0);
-    expect(box.additionalConstraints, new BoxConstraints(minWidth: 10.0, maxWidth: 10.0));
+    RenderConstrainedBox box = new RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(height: 10.0));
+    expect(box.additionalConstraints, const BoxConstraints(minHeight: 10.0, maxHeight: 10.0));
+    box.additionalConstraints = const BoxConstraints.tightFor(width: 10.0);
+    expect(box.additionalConstraints, const BoxConstraints(minWidth: 10.0, maxWidth: 10.0));
   });
 
   test('RenderLimitedBox getters and setters', () {

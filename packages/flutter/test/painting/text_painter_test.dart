@@ -16,7 +16,7 @@ void main() {
     painter.text = new TextSpan(text: text);
     painter.layout();
 
-    Offset caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: 0), ui.Rect.zero);
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
     expect(caretOffset.dx, 0);
     caretOffset = painter.getOffsetForCaret(new ui.TextPosition(offset: text.length), ui.Rect.zero);
     expect(caretOffset.dx, painter.width);

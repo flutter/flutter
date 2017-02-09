@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
   RenderObject target = key.currentContext.findRenderObject();
-  expect(target.parent, new isInstanceOf<RenderViewport2>());
+  expect(target.parent, const isInstanceOf<RenderViewport2>());
   SliverPhysicalParentData parentData = target.parentData;
   Offset actual = parentData.paintOffset;
   expect(actual, ideal);
@@ -40,11 +40,11 @@ void main() {
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
-    verifyPaintPosition(key1, new Offset(0.0, 0.0));
-    verifyPaintPosition(key2, new Offset(0.0, 0.0));
-    verifyPaintPosition(key3, new Offset(0.0, 0.0));
-    verifyPaintPosition(key4, new Offset(0.0, 0.0));
-    verifyPaintPosition(key5, new Offset(0.0, 50.0));
+    verifyPaintPosition(key1, const Offset(0.0, 0.0));
+    verifyPaintPosition(key2, const Offset(0.0, 0.0));
+    verifyPaintPosition(key3, const Offset(0.0, 0.0));
+    verifyPaintPosition(key4, const Offset(0.0, 0.0));
+    verifyPaintPosition(key5, const Offset(0.0, 50.0));
   });
 
   testWidgets('Sliver appbars - scrolling off screen', (WidgetTester tester) async {

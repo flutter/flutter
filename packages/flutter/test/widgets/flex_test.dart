@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: <Widget>[
-          new Flexible(child: new SizedBox(width: 100.0, height: 200.0)),
+          new Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
     );

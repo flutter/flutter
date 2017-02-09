@@ -10,7 +10,7 @@ void main() {
     const EdgeInsets insets = const EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0);
 
     expect(insets, hasOneLineDescription);
-    expect(insets.hashCode, equals(new EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0).hashCode));
+    expect(insets.hashCode, equals(const EdgeInsets.fromLTRB(5.0, 7.0, 11.0, 13.0).hashCode));
 
     expect(insets.topLeft, const Offset(5.0, 7.0));
     expect(insets.topRight, const Offset(-11.0, 7.0));

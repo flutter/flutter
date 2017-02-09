@@ -195,7 +195,7 @@ void main() {
     }
 
     testDecoration(shape: BoxShape.circle, expectClip: true);
-    testDecoration(borderRadius: new BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
+    testDecoration(borderRadius: const BorderRadius.all(const Radius.circular(16.0)), expectClip: true);
     testDecoration(expectClip: false);
   });
 }

@@ -192,7 +192,7 @@ void main() {
 
     await tester.pumpWidget(
       new GridView(
-        gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 4,
         ),
         children: new List<Widget>.generate(40, (int i) {
@@ -219,7 +219,7 @@ void main() {
 
     await tester.pumpWidget(
       new GridView(
-        gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
         ),
         children: new List<Widget>.generate(40, (int i) {
@@ -251,7 +251,7 @@ void main() {
 
     await tester.pumpWidget(
       new GridView(
-        gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200.0,
         ),
         children: new List<Widget>.generate(40, (int i) {
@@ -278,7 +278,7 @@ void main() {
 
     await tester.pumpWidget(
       new GridView(
-        gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 400.0,
         ),
         children: new List<Widget>.generate(40, (int i) {

@@ -22,7 +22,7 @@ void main() {
               children: <Widget>[
                 new AboutDrawerItem(
                   applicationVersion: '0.1.2',
-                  applicationIcon: new FlutterLogo(),
+                  applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     new Text('About box'),
@@ -90,7 +90,7 @@ void main() {
     });
 
     await tester.pumpWidget(new Center(
-      child: new LicensePage()
+      child: const LicensePage()
     ));
 
     expect(licenseFuture, isNotNull);

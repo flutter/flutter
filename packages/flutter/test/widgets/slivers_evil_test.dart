@@ -50,7 +50,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   TestScrollPhysics applyTo(ScrollPhysics parent) => new TestScrollPhysics(parent: parent);
 
   @override
-  Tolerance get tolerance => new Tolerance(velocity: 20.0, distance: 1.0);
+  Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
 class TestViewportScrollPosition extends ScrollPosition {
@@ -92,7 +92,7 @@ void main() {
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), pinned: true),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPadding(
-                    padding: new EdgeInsets.all(50.0),
+                    padding: const EdgeInsets.all(50.0),
                     child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
@@ -104,7 +104,7 @@ void main() {
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPadding(
-                    padding: new EdgeInsets.all(50.0),
+                    padding: const EdgeInsets.all(50.0),
                     child: new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
@@ -145,7 +145,7 @@ void main() {
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
                   new SliverPadding(
-                    padding: new EdgeInsets.symmetric(horizontal: 50.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 50.0),
                     child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),

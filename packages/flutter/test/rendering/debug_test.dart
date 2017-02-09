@@ -41,10 +41,10 @@ void main() {
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         s = new RenderSliverPadding(
-          padding: new EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
           child: new RenderSliverToBoxAdapter(
             child: b = new RenderPadding(
-              padding: new EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10.0),
             ),
           ),
         ),
@@ -63,12 +63,12 @@ void main() {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     RenderBox b = new RenderPadding(
-      padding: new EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(10.0),
       child: new RenderViewport2(
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           s = new RenderSliverPadding(
-            padding: new EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(10.0),
           ),
         ],
       ),

@@ -29,7 +29,7 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new IconTheme(
-          data: new IconThemeData(opacity: 0.5),
+          data: const IconThemeData(opacity: 0.5),
           child: const ImageIcon(_kImage),
         ),
       ),
