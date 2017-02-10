@@ -157,7 +157,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await new Future<Null>.delayed(new Duration(milliseconds: 300));
+      await new Future<Null>.delayed(const Duration(milliseconds: 300));
       isolate = await vm.isolates.first.loadRunnable();
     }
 

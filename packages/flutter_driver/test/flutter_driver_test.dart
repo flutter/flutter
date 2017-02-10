@@ -120,7 +120,7 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(new isInstanceOf<DriverError>()));
+            throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('finds by ValueKey', () async {
@@ -140,7 +140,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(new isInstanceOf<DriverError>()));
+        expect(driver.tap(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the tap command', () async {
@@ -159,7 +159,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(new isInstanceOf<DriverError>()));
+        expect(driver.getText(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the getText command', () async {
@@ -182,7 +182,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(new isInstanceOf<DriverError>()));
+        expect(driver.waitFor(null), throwsA(const isInstanceOf<DriverError>()));
       });
 
       test('sends the waitFor command', () async {
@@ -195,7 +195,7 @@ void main() {
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(seconds: 1));
+        await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(seconds: 1));
       });
     });
 
@@ -289,7 +289,7 @@ void main() {
           return new Completer<Map<String, dynamic>>().future;
         });
         try {
-          await driver.waitFor(find.byTooltip('foo'), timeout: new Duration(milliseconds: 100));
+          await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(milliseconds: 100));
           fail('expected an exception');
         } catch(error) {
           expect(error is DriverError, isTrue);

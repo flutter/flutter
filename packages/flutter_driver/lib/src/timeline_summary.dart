@@ -12,7 +12,7 @@ import 'package:path/path.dart' as path;
 import 'common.dart';
 import 'timeline.dart';
 
-final JsonEncoder _prettyEncoder = new JsonEncoder.withIndent('  ');
+final JsonEncoder _prettyEncoder = const JsonEncoder.withIndent('  ');
 
 /// The maximum amount of time considered safe to spend for a frame's build
 /// phase. Anything past that is in the danger of missing the frame as 60FPS.

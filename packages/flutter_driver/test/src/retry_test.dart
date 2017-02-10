@@ -38,13 +38,13 @@ void main() {
                 return retryCount;
               }
             },
-            new Duration(milliseconds: 30),
-            new Duration(milliseconds: 10)
+            const Duration(milliseconds: 30),
+            const Duration(milliseconds: 10)
           ),
           completion(2)
         );
 
-        fakeAsync.elapse(new Duration(milliseconds: 50));
+        fakeAsync.elapse(const Duration(milliseconds: 50));
 
         // Check that we didn't retry more times than necessary
         expect(retryCount, 2);
@@ -60,14 +60,14 @@ void main() {
           // that `retry` keeps trying until the counter reaches 2.
           retry(
             () async => retryCount++,
-            new Duration(milliseconds: 30),
-            new Duration(milliseconds: 10),
+            const Duration(milliseconds: 30),
+            const Duration(milliseconds: 10),
             predicate: (int value) => value == 2
           ),
           completion(2)
         );
 
-        fakeAsync.elapse(new Duration(milliseconds: 50));
+        fakeAsync.elapse(const Duration(milliseconds: 50));
       });
     });
 
@@ -83,15 +83,15 @@ void main() {
             retryCount++;
             throw 'error';
           },
-          new Duration(milliseconds: 7),
-          new Duration(milliseconds: 2)
+          const Duration(milliseconds: 7),
+          const Duration(milliseconds: 2)
         ).catchError((dynamic error, dynamic stackTrace) {
           timedOut = true;
           lastError = error;
           lastStackTrace = stackTrace;
         });
 
-        fakeAsync.elapse(new Duration(milliseconds: 10));
+        fakeAsync.elapse(const Duration(milliseconds: 10));
 
         expect(timedOut, isTrue);
         expect(lastError, 'error');
