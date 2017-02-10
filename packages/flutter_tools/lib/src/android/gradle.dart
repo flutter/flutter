@@ -26,6 +26,7 @@ enum FlutterPluginVersion {
   none,
   v1,
   v2,
+  managed,
 }
 
 bool isProjectUsingGradle() {
@@ -34,14 +35,22 @@ bool isProjectUsingGradle() {
 
 FlutterPluginVersion get flutterPluginVersion {
   File plugin = fs.file('android/buildSrc/src/main/groovy/FlutterPlugin.groovy');
-  if (!plugin.existsSync()) {
-    return FlutterPluginVersion.none;
+  if (plugin.existsSync()) {
+    String packageLine = plugin.readAsLinesSync().skip(4).first;
+    if (packageLine == "package io.flutter.gradle") {
+      return FlutterPluginVersion.v2;
+    }
+    return FlutterPluginVersion.v1;
   }
-  String packageLine = plugin.readAsLinesSync().skip(4).first;
-  if (packageLine == "package io.flutter.gradle") {
-    return FlutterPluginVersion.v2;
+  File appGradle = fs.file('android/app/build.gradle');
+  if (appGradle.existsSync()) {
+    for (String line in appGradle.readAsLinesSync()) {
+      if (line.contains(new RegExp(r"apply from: .*/flutter.gradle"))) {
+        return FlutterPluginVersion.managed;
+      }
+    }
   }
-  return FlutterPluginVersion.v1;
+  return FlutterPluginVersion.none;
 }
 
 String get gradleAppOut {
@@ -50,6 +59,8 @@ String get gradleAppOut {
       // Fall through. Pretend we're v1, and just go with it.
     case FlutterPluginVersion.v1:
       return gradleAppOutV1;
+    case FlutterPluginVersion.managed:
+      // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
       return gradleAppOutV2;
   }
@@ -197,6 +208,8 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
       // Fall through. Pretend it's v1, and just go for it.
     case FlutterPluginVersion.v1:
       return buildGradleProjectV1(gradlew);
+    case FlutterPluginVersion.managed:
+      // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
       return buildGradleProjectV2(gradlew, buildModeName);
   }
