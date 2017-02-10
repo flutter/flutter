@@ -24,7 +24,9 @@ path_flags = [
 
 source_extensions = [
   ".cc",
+  ".mm",
   ".cpp",
+  ".m",
   ".c",
 ]
 
@@ -60,6 +62,14 @@ def FlagsForNamedFile(filename):
 
   if not info:
     return None
+
+  extension = filename.rsplit(".", 1)[1]
+
+  if extension == "mm":
+    info.compiler_flags_.append("-x objc++")
+
+  if extension == "m":
+    info.compiler_flags_.append("-x objc")
 
   return MakeFlagsAbsolute(info.compiler_working_dir_,
                            info.compiler_flags_)
