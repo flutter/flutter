@@ -14,20 +14,19 @@ void main() {
     await tester.pumpWidget(new Center(
       child: new Container(
         height: 50.0,
-        child: new ScrollableList(
-          key: new GlobalKey(),
+        child: new ListView(
           itemExtent: 290.0,
           scrollDirection: Axis.horizontal,
           children: items.map((int item) {
             return new Container(
               child: new GestureDetector(
                 onTap: () { tapped.add(item); },
-                child: new Text('$item')
-              )
+                child: new Text('$item'),
+              ),
             );
-          })
-        )
-      )
+          }).toList(),
+        ),
+      ),
     ));
     await tester.scroll(find.text('2'), const Offset(-280.0, 0.0));
     await tester.pump(const Duration(seconds: 1));
@@ -52,20 +51,19 @@ void main() {
     await tester.pumpWidget(new Center(
       child: new Container(
         width: 50.0,
-        child: new ScrollableList(
-          key: new GlobalKey(),
+        child: new ListView(
           itemExtent: 290.0,
           scrollDirection: Axis.vertical,
           children: items.map((int item) {
             return new Container(
               child: new GestureDetector(
                 onTap: () { tapped.add(item); },
-                child: new Text('$item')
-              )
+                child: new Text('$item'),
+              ),
             );
-          })
-        )
-      )
+          }).toList(),
+        ),
+      ),
     ));
     await tester.scroll(find.text('1'), const Offset(0.0, -280.0));
     await tester.pump(const Duration(seconds: 1));
@@ -91,19 +89,18 @@ void main() {
     List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ScrollableList(
-        key: new GlobalKey(),
+      new ListView(
         itemExtent: 290.0,
         padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
         children: items.map((int item) {
           return new Container(
             child: new GestureDetector(
               onTap: () { tapped.add(item); },
-              child: new Text('$item')
-            )
+              child: new Text('$item'),
+            ),
           );
-        })
-      )
+        }).toList(),
+      ),
     );
     await tester.tapAt(const Point(200.0, 19.0));
     expect(tapped, equals(<int>[]));
@@ -157,26 +154,22 @@ void main() {
     List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ClampOverscrolls(
-        edge: ScrollableEdge.both,
-        child: new ScrollableList(
-          itemExtent: 200.0,
-          children: items.map((int item) {
-            return new Container(
-              child: new GestureDetector(
-                onTap: () { tapped.add(item); },
-                child: new Text('$item')
-              )
-            );
-          })
-        )
-      )
+      new ListView(
+        itemExtent: 200.0,
+        children: items.map((int item) {
+          return new Container(
+            child: new GestureDetector(
+              onTap: () { tapped.add(item); },
+              child: new Text('$item'),
+            ),
+          );
+        }).toList(),
+      ),
     );
 
     await tester.fling(find.text('0'), const Offset(0.0, 400.0), 1000.0);
-    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
-    expect(scrollable.scrollOffset, equals(0.0));
-    expect(scrollable.virtualScrollOffset, lessThan(0.0));
+    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    expect(scrollable.position.pixels, equals(0.0));
 
     await tester.tapAt(const Point(200.0, 100.0));
     expect(tapped, equals(<int>[0]));

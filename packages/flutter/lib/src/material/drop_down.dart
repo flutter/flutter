@@ -184,11 +184,12 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           textStyle: route.style,
           child: new ScrollConfiguration(
             delegate: new _DropdownScrollConfigurationDelegate(Theme.of(context).platform),
-            child: new Scrollbar(
-              child: new ScrollableList(
-                scrollableKey: config.route.scrollableKey,
+            child: new Scrollbar2(
+              child: new ListView(
+                controller: config.route.scrollController,
                 padding: _kMenuVerticalPadding,
                 itemExtent: _kMenuItemHeight,
+                shrinkWrap: true,
                 children: children,
               ),
             ),
@@ -206,7 +207,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
 
   Rect get buttonRect => route.buttonRect;
   int get selectedIndex => route.selectedIndex;
-  GlobalKey<ScrollableState> get scrollableKey => route.scrollableKey;
+  ScrollController get scrollController => route.scrollController;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -256,7 +257,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
         // TODO(ianh): Compute and set this during layout instead of being
         // lagged by one frame. https://github.com/flutter/flutter/issues/5751
-        scrollableKey.currentState.scrollTo(scrollOffset);
+        scrollController.jumpTo(scrollOffset);
       });
     }
 
@@ -299,7 +300,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     assert(style != null);
   }
 
-  final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>(debugLabel: '_DropdownMenu');
+  final ScrollController scrollController = new ScrollController();
   final List<DropdownMenuItem<T>> items;
   final Rect buttonRect;
   final int selectedIndex;
@@ -307,8 +308,8 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   final ThemeData theme;
   final TextStyle style;
 
-  // The layout gets this route's scrollableKey so that it can scroll the
-  /// selected item into position, but only on the initial layout.
+  // The layout gets this route's scrollController so that it can scroll the
+  // selected item into position, but only on the initial layout.
   bool initialLayout = true;
 
   @override
