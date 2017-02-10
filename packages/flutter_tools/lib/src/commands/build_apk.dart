@@ -14,6 +14,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../flx.dart' as flx;
@@ -82,11 +83,11 @@ class _ApkBuilder {
   String checkDependencies() {
     if (!_androidJar.existsSync())
       return 'Cannot find android.jar at ${_androidJar.path}';
-    if (!_aapt.existsSync())
+    if (!processManager.canRun(_aapt.path))
       return 'Cannot find aapt at ${_aapt.path}';
-    if (!_dx.existsSync())
+    if (!processManager.canRun(_dx.path))
       return 'Cannot find dx at ${_dx.path}';
-    if (!_zipalign.existsSync())
+    if (!processManager.canRun(_zipalign.path))
       return 'Cannot find zipalign at ${_zipalign.path}';
     if (_jarsigner == null)
       return 'Cannot find jarsigner in PATH.';

@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
-import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../runner/flutter_command.dart';
@@ -38,8 +37,7 @@ class FormatCommand extends FlutterCommand {
       );
     }
 
-    String executable = os.getExecutableName('dartfmt', winExtension: 'bat');
-    String dartfmt = path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', executable);
+    String dartfmt = path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartfmt');
     List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
     int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
