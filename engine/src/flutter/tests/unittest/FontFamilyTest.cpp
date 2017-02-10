@@ -529,12 +529,9 @@ void expectVSGlyphs(FontFamily* family, uint32_t codepoint, const std::set<uint3
 }
 
 TEST_F(FontFamilyTest, hasVariationSelectorTest) {
-    MinikinAutoUnref<MinikinFontForTest>
-            minikinFont(new MinikinFontForTest(kVsTestFont));
-    MinikinAutoUnref<FontFamily> family(
-            new FontFamily(std::vector<Font>{
-                    Font(minikinFont.get(), FontStyle())
-            }));
+    std::shared_ptr<MinikinFont> minikinFont(new MinikinFontForTest(kVsTestFont));
+    std::shared_ptr<FontFamily> family(
+            new FontFamily(std::vector<Font>{ Font(minikinFont, FontStyle()) }));
 
     android::AutoMutex _l(gMinikinLock);
 
@@ -585,10 +582,10 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
                 "Font " + testCase.fontPath + " should have a variation sequence table." :
                 "Font " + testCase.fontPath + " shouldn't have a variation sequence table.");
 
-        MinikinAutoUnref<MinikinFontForTest> minikinFont(
+        std::shared_ptr<MinikinFont> minikinFont(
                 new MinikinFontForTest(testCase.fontPath));
-        MinikinAutoUnref<FontFamily> family(new FontFamily(
-                std::vector<Font>{ Font(minikinFont.get(), FontStyle()) }));
+        std::shared_ptr<FontFamily> family(new FontFamily(
+                std::vector<Font>{ Font(minikinFont, FontStyle()) }));
         android::AutoMutex _l(gMinikinLock);
         EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
     }
@@ -599,13 +596,15 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
     const char kMultiAxisFont[] = kTestFontDir "/MultiAxis.ttf";
     const char kNoAxisFont[] = kTestFontDir "/Regular.ttf";
 
-    MinikinAutoUnref<MinikinFont> multiAxisFont(new MinikinFontForTest(kMultiAxisFont));
-    MinikinAutoUnref<FontFamily> multiAxisFamily(new FontFamily(
-            std::vector<Font>({Font(multiAxisFont.get(), FontStyle())})));
+    std::shared_ptr<MinikinFont> multiAxisFont(new MinikinFontForTest(kMultiAxisFont));
+    std::shared_ptr<FontFamily> multiAxisFamily(
+            std::shared_ptr<FontFamily>(new FontFamily(
+                    std::vector<Font>({Font(multiAxisFont, FontStyle())}))));
 
-    MinikinAutoUnref<MinikinFont> noAxisFont(new MinikinFontForTest(kNoAxisFont));
-    MinikinAutoUnref<FontFamily> noAxisFamily(new FontFamily(
-            std::vector<Font>({Font(noAxisFont.get(), FontStyle())})));
+    std::shared_ptr<MinikinFont> noAxisFont(new MinikinFontForTest(kNoAxisFont));
+    std::shared_ptr<FontFamily> noAxisFamily(
+            std::shared_ptr<FontFamily>(new FontFamily(
+                    std::vector<Font>({Font(noAxisFont, FontStyle())}))));
 
     {
         // Do not ceate new instance if none of variations are specified.
@@ -617,7 +616,7 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
     {
         // New instance should be used for supported variation.
         std::vector<FontVariation> variations = {{MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f}};
-        MinikinAutoUnref<FontFamily> newFamily(
+        std::shared_ptr<FontFamily> newFamily(
                 multiAxisFamily->createFamilyWithVariation(variations));
         EXPECT_NE(nullptr, newFamily.get());
         EXPECT_NE(multiAxisFamily.get(), newFamily.get());
@@ -629,7 +628,7 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
                 { MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f },
                 { MinikinFont::MakeTag('w', 'g', 'h', 't'), 1.0f }
         };
-        MinikinAutoUnref<FontFamily> newFamily(
+        std::shared_ptr<FontFamily> newFamily(
                 multiAxisFamily->createFamilyWithVariation(variations));
         EXPECT_NE(nullptr, newFamily.get());
         EXPECT_NE(multiAxisFamily.get(), newFamily.get());
@@ -649,7 +648,7 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
                 { MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f },
                 { MinikinFont::MakeTag('Z', 'Z', 'Z', 'Z'), 1.0f }
         };
-        MinikinAutoUnref<FontFamily> newFamily(
+        std::shared_ptr<FontFamily> newFamily(
                 multiAxisFamily->createFamilyWithVariation(variations));
         EXPECT_NE(nullptr, newFamily.get());
         EXPECT_NE(multiAxisFamily.get(), newFamily.get());

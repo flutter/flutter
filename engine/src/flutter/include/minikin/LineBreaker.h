@@ -159,8 +159,8 @@ class LineBreaker {
         // Minikin to do the shaping of the strings. The main thing that would need to be changed
         // is having some kind of callback (or virtual class, or maybe even template), which could
         // easily be instantiated with Minikin's Layout. Future work for when needed.
-        float addStyleRun(MinikinPaint* paint, const FontCollection* typeface, FontStyle style,
-                size_t start, size_t end, bool isRtl);
+        float addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCollection>& typeface,
+                FontStyle style, size_t start, size_t end, bool isRtl);
 
         void addReplacement(size_t start, size_t end, float width);
 

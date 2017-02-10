@@ -53,14 +53,14 @@ protected:
     virtual ~LayoutTest() {}
 
     virtual void SetUp() override {
-        mCollection = getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML);
+        mCollection = std::shared_ptr<FontCollection>(
+                getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
     }
 
     virtual void TearDown() override {
-        mCollection->Unref();
     }
 
-    FontCollection* mCollection;
+    std::shared_ptr<FontCollection> mCollection;
 };
 
 TEST_F(LayoutTest, doLayoutTest) {
@@ -70,8 +70,7 @@ TEST_F(LayoutTest, doLayoutTest) {
     float advances[kMaxAdvanceLength];
     std::vector<float> expectedValues;
 
-    Layout layout;
-    layout.setFontCollection(mCollection);
+    Layout layout(mCollection);
     std::vector<uint16_t> text;
 
     // The mock implementation returns 10.0f advance and 0,0-10x10 bounds for all glyph.
@@ -157,8 +156,7 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     std::vector<float> expectedValues;
     std::vector<uint16_t> text;
 
-    Layout layout;
-    layout.setFontCollection(mCollection);
+    Layout layout(mCollection);
 
     paint.wordSpacing = 5.0f;
 
@@ -252,8 +250,7 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     float advances[kMaxAdvanceLength];
     std::vector<float> expectedValues;
 
-    Layout layout;
-    layout.setFontCollection(mCollection);
+    Layout layout(mCollection);
     std::vector<uint16_t> text;
 
     // Negative word spacing also should work.
@@ -335,6 +332,27 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
         expectedValues[3] = 5.0f;
         expectedValues[4] = 5.0f;
         expectAdvances(expectedValues, advances, kMaxAdvanceLength);
+    }
+}
+
+TEST_F(LayoutTest, doLayoutTest_rtlTest) {
+    MinikinPaint paint;
+
+    std::vector<uint16_t> text = parseUnicodeString("'a' 'b' U+3042 U+3043 'c' 'd'");
+
+    Layout ltrLayout(mCollection);
+    ltrLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+
+    Layout rtlLayout(mCollection);
+    rtlLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_RTL, FontStyle(), paint);
+
+    ASSERT_EQ(ltrLayout.nGlyphs(), rtlLayout.nGlyphs());
+    ASSERT_EQ(6u, ltrLayout.nGlyphs());
+
+    size_t nGlyphs = ltrLayout.nGlyphs();
+    for (size_t i = 0; i < nGlyphs; ++i) {
+        EXPECT_EQ(ltrLayout.getFont(i), rtlLayout.getFont(nGlyphs - i - 1));
+        EXPECT_EQ(ltrLayout.getGlyphId(i), rtlLayout.getGlyphId(nGlyphs - i - 1));
     }
 }
 
