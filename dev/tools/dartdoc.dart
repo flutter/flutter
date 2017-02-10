@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 
 const String kDocRoot = 'dev/docs/doc';
@@ -61,11 +62,14 @@ dependencies:
   if (code != 0)
     exit(code);
 
+  createFooter('dev/docs/lib/footer.html');
+
   // Generate the documentation.
   List<String> args = <String>[
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
+    '--footer', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
     '--use-categories'
@@ -88,6 +92,18 @@ dependencies:
   sanityCheckDocs();
 
   createIndexAndCleanup();
+}
+
+void createFooter(String footerPath) {
+  ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+
+  String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
+
+  new File(footerPath).writeAsStringSync(
+    '<p class="text-center" style="font-size: 10px">'
+    'Generated on $timestamp - Version $gitHead</p>'
+  );
 }
 
 void sanityCheckDocs() {
