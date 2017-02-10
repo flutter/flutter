@@ -669,56 +669,56 @@ class _StandardCodec implements MessageCodec<dynamic> {
       }
     }
 
-    void writeMessage(dynamic payload) {
-      if (payload == null) {
+    void writeValue(dynamic value) {
+      if (value == null) {
         buffer.add(_kNull);
-      } else if (payload is bool) {
-        buffer.add(payload ? _kTrue : _kFalse);
-      } else if (payload is int) {
-        if (-0x7fffffff <= payload && payload < 0x7fffffff) {
+      } else if (value is bool) {
+        buffer.add(value ? _kTrue : _kFalse);
+      } else if (value is int) {
+        if (-0x7fffffff <= value && value < 0x7fffffff) {
           buffer.add(_kInt32);
-          fourBytes.setInt32(0, payload);
+          fourBytes.setInt32(0, value);
           buffer.addAll(fourBytes.buffer.asUint8List());
         }
-        else if (-0x7fffffffffffffff <= payload && payload < 0x7fffffffffffffff) {
+        else if (-0x7fffffffffffffff <= value && value < 0x7fffffffffffffff) {
           buffer.add(_kInt64);
-          eightBytes.setInt64(0, payload);
+          eightBytes.setInt64(0, value);
           buffer.addAll(eightBytes.buffer.asUint8List());
         }
         else {
           buffer.add(_kLargeInt);
-          final List<int> base64 = UTF8.encoder.convert(payload.toRadixString(64));
+          final List<int> base64 = UTF8.encoder.convert(value.toRadixString(64));
           writeSize(base64.length);
           buffer.addAll(base64);
         }
-      } else if (payload is double) {
+      } else if (value is double) {
         buffer.add(_kFloat64);
-        eightBytes.setFloat64(0, payload);
+        eightBytes.setFloat64(0, value);
         buffer.addAll(eightBytes.buffer.asUint8List());
-      } else if (payload is String) {
-        writeString(payload);
-      } else if (payload is ByteData) {
+      } else if (value is String) {
+        writeString(value);
+      } else if (value is ByteData) {
         buffer.add(_kByteData);
-        writeSize(payload.lengthInBytes);
-        buffer.addAll(payload.buffer.asUint8List());
-      } else if (payload is List) {
+        writeSize(value.lengthInBytes);
+        buffer.addAll(value.buffer.asUint8List());
+      } else if (value is List) {
         buffer.add(_kList);
-        writeSize(payload.length);
-        for (final dynamic item in payload) {
-          writeMessage(item);
+        writeSize(value.length);
+        for (final dynamic item in value) {
+          writeValue(item);
         }
-      } else if (payload is Map<String, dynamic>) {
+      } else if (value is Map<String, dynamic>) {
         buffer.add(_kMap);
-        writeSize(payload.length);
-        payload.forEach((String key, dynamic value) {
+        writeSize(value.length);
+        value.forEach((String key, dynamic value) {
           writeString(key);
-          writeMessage(value);
+          writeValue(value);
         });
       } else {
-        throw new ArgumentError.value(payload);
+        throw new ArgumentError.value(value);
       }
     }
-    writeMessage(message);
+    writeValue(message);
     return new Uint8List.fromList(buffer).buffer.asByteData();
   }
 
@@ -765,7 +765,7 @@ class _StandardCodec implements MessageCodec<dynamic> {
       }
     }
 
-    dynamic readPayload() {
+    dynamic readValue() {
       if (message.lengthInBytes <= offset)
         throw throw new FormatException('Message corrupted');
       dynamic result;
@@ -821,7 +821,7 @@ class _StandardCodec implements MessageCodec<dynamic> {
           final int length = readSize();
           result = new List<dynamic>(length);
           for (int i = 0; i < length; i++) {
-            result.add(readPayload());
+            result.add(readValue());
           }
           break;
         case _kMap:
@@ -829,14 +829,14 @@ class _StandardCodec implements MessageCodec<dynamic> {
           final int length = readSize();
           result = new Map<String, dynamic>();
           for (int i = 0; i < length; i++) {
-            result.put(readString(), readPayload());
+            result.put(readString(), readValue());
           }
           break;
         default: throw new FormatException('Message corrupted');
       }
       return result;
     }
-    final dynamic result = readPayload();
+    final dynamic result = readValue();
     if (offset != message.lengthInBytes)
       throw new FormatException('Message corrupted');
     return result;
