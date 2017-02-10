@@ -212,6 +212,8 @@ Future<String> _buildAotSnapshot(
 
   List<String> genSnapshotCmd = <String>[
     genSnapshot,
+    '--assert_initializer',
+    '--await_is_keyword',
     '--vm_snapshot_data=$vmSnapshotData',
     '--isolate_snapshot_data=$isolateSnapshotData',
     '--packages=${packageMap.packagesPath}',
