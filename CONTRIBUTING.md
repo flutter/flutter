@@ -82,8 +82,8 @@ Run the following steps, from the `src` directory created in the steps above:
 
 * `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
 * `gclient sync` to update your dependencies.
-* `./flutter/tools/gn --android --unoptimized` to prepare your build files.
-* `ninja -C out/android_debug_unopt` to actually build the Android binary.
+* `./flutter/tools/gn --android --unoptimized` to prepare your build files (or `--android --android_cpu [x86|x64] --unoptimized` for x86/x64 emulators) .
+* `ninja -C out/android_debug_unopt` to actually build the Android binary (or `out/android_debug_unopt_x64 for x86/x64 emulators).
 
 This builds a debug-enabled ("unoptimized") binary configured to run Dart in
 checked mode ("debug"). There are other versions, [discussed on the wiki](https://github.com/flutter/flutter/wiki/Flutter's-modes).
@@ -102,7 +102,7 @@ sure you have a device connected over USB and debugging enabled on that device:
 
  * `cd /path/to/flutter/examples/hello_world`
  * `pub get`
- * `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt`
+ * `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=android_debug_unopt` or `--local-engine=android_debug_unopt_x64`
 
 If you put the `engine` and `flutter` directories side-by-side, you can skip the
 tedious `--local-engine-src-path` option and the `flutter` tool will
@@ -125,16 +125,15 @@ to test the engine.
 * Make sure you have Xcode 7.3.0+ installed.
 * `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
 * `gclient sync` to update dependencies.
-* `./flutter/tools/gn --ios --unoptimized` to prepare build files.
+* `./flutter/tools/gn --ios --unoptimized` to prepare build files (or `--ios --simulator --unoptimized` for simulator).
   * For a discussion on the various flags and modes, [read this discussion](https://github.com/flutter/flutter/wiki/Flutter's-modes).
   * This also produces an Xcode project for working with the engine source code at `out/ios_debug_unopt`
-* `ninja -C out/ios_debug_unopt` to build iOS artifacts.
+* `ninja -C out/ios_debug_unopt` to build iOS artifacts (or `out/ios_debug_sim_unopt` for simulator).
 
 Once the artifacts are built, you can start using them in your application by following these steps:
 * `cd /path/to/flutter/examples/hello_world`
 * `pub get`
-* `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=ios_debug_unopt`
-  * Depending on the configuration you built, modify the `local-engine` flag.
+* `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=ios_debug_unopt` or `--local-engine=ios_debug_sim_unopt` for simulator
 * If you are debugging crashes in the engine, you can connect the `LLDB` debugger from `Xcode` by opening `ios/Runner.xcodeproj` and starting the application by clicking the Run button (CMD + R).
 
 
