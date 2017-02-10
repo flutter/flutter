@@ -134,7 +134,8 @@ Once the artifacts are built, you can start using them in your application by fo
 * `cd /path/to/flutter/examples/hello_world`
 * `pub get`
 * `../../bin/flutter run --local-engine-src-path /path/to/engine/src --local-engine=ios_debug_unopt` or `--local-engine=ios_debug_sim_unopt` for simulator
-* If you are debugging crashes in the engine, you can connect the `LLDB` debugger from `Xcode` by opening `ios/Runner.xcodeproj` and starting the application by clicking the Run button (CMD + R).
+  * If you are debugging crashes in the engine, you can connect the `LLDB` debugger from `Xcode` by opening `ios/Runner.xcworkspace` and starting the application by clicking the Run button (CMD + R).
+  * To debug non crashing code, open Xcode with `ios/Runner.xcworkspace`, expand Flutter->Runner->Supporting Files->main.m in the Runner project. Put a breakpoint in main() then set your desired breakpoint in the engine in lldb via `breakpoint set -...`.
 
 
 ### Desktop (Mac and Linux), for tests
