@@ -5,11 +5,11 @@
 import 'dart:async';
 import 'dart:convert' show ASCII, LineSplitter;
 
+import 'package:intl/intl.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
 import 'platform.dart';
-import 'utils.dart';
 
 final AnsiTerminal terminal = new AnsiTerminal();
 
@@ -274,6 +274,8 @@ class _AnsiStatus extends Status {
   }
 
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];
+  static final NumberFormat secondsFormat = new NumberFormat('0.0');
+  static final NumberFormat millisecondsFormat = new NumberFormat.decimalPattern();
 
   final String message;
   final bool expectSlowOperation;
@@ -298,9 +300,9 @@ class _AnsiStatus extends Status {
 
     if (expectSlowOperation) {
       double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
-      print('\b\b\b\b\b${seconds.toStringAsFixed(1).padLeft(4)}s');
+      print('\b\b\b\b\b${secondsFormat.format(seconds).padLeft(4)}s');
     } else {
-      print('\b\b\b\b\b${printWithSeparators(stopwatch.elapsedMilliseconds).toString().padLeft(3)}ms');
+      print('\b\b\b\b\b${millisecondsFormat.format(stopwatch.elapsedMilliseconds).padLeft(3)}ms');
     }
 
     timer.cancel();

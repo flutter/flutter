@@ -6,19 +6,6 @@ import 'package:flutter_tools/src/base/utils.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('utils', () {
-    test('printWithSeparators', () {
-      expect(printWithSeparators(3), '3');
-      expect(printWithSeparators(33), '33');
-      expect(printWithSeparators(333), '333');
-      expect(printWithSeparators(3333), '3,333');
-      expect(printWithSeparators(33333), '33,333');
-      expect(printWithSeparators(333333), '333,333');
-      expect(printWithSeparators(3333333), '3,333,333');
-      expect(printWithSeparators(33333333), '33,333,333');
-    });
-  });
-
   group('SettingsFile', () {
     test('parse', () {
       SettingsFile file = new SettingsFile.parse('''
