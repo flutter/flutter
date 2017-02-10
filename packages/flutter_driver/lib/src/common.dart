@@ -11,7 +11,7 @@ import 'package:file/memory.dart';
 /// The file system implementation used by this library.
 ///
 /// See [useMemoryFileSystemForTesting] and [restoreFileSystem].
-FileSystem fs = new LocalFileSystem();
+FileSystem fs = const LocalFileSystem();
 
 /// Overrides the file system so it can be tested without hitting the hard
 /// drive.
@@ -21,7 +21,7 @@ void useMemoryFileSystemForTesting() {
 
 /// Restores the file system to the default local file system implementation.
 void restoreFileSystem() {
-  fs = new LocalFileSystem();
+  fs = const LocalFileSystem();
 }
 
 /// Flutter Driver test ouputs directory.
