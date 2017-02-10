@@ -78,16 +78,16 @@ const char kSnapshotAssetKey[] = "snapshot_blob.bin";
 
 namespace {
 
-static const char* kDartMirrorsArgs[] = {
+// Arguments passed to the Dart VM in all configurations.
+static const char* kDartLanguageArgs[] = {
     "--enable_mirrors=false",
+    "--background_compilation",
+    "--await_is_keyword",
+    "--assert_initializer",
 };
 
 static const char* kDartPrecompilationArgs[] = {
     "--precompilation",
-};
-
-static const char* kDartBackgroundCompilationArgs[] = {
-    "--background_compilation",
 };
 
 static const char* kDartWriteProtectCodeArgs[] FTL_ALLOW_UNUSED_TYPE = {
@@ -608,9 +608,7 @@ void InitDartVM() {
     args.push_back(profiler_flag);
   }
 
-  PushBackAll(&args, kDartMirrorsArgs, arraysize(kDartMirrorsArgs));
-  PushBackAll(&args, kDartBackgroundCompilationArgs,
-              arraysize(kDartBackgroundCompilationArgs));
+  PushBackAll(&args, kDartLanguageArgs, arraysize(kDartLanguageArgs));
 
   if (IsRunningPrecompiledCode()) {
     PushBackAll(&args, kDartPrecompilationArgs,
