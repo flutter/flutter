@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
+import 'package:intl/intl_standalone.dart' as intl;
 
 import 'src/base/common.dart';
 import 'src/base/config.dart';
@@ -94,7 +95,7 @@ Future<Null> main(List<String> args) async {
   AppContext _executableContext = new AppContext();
 
   // Make the context current.
-  await _executableContext.runInZone(() {
+  await _executableContext.runInZone(() async {
     // Initialize the context with some defaults.
     // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
     // `test/src/context.dart`. If you update this list of defaults, look
@@ -119,6 +120,9 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());
+
+    // Initialize the system locale.
+    await intl.findSystemLocale();
 
     return Chain.capture<Future<Null>>(() async {
       await runner.run(args);

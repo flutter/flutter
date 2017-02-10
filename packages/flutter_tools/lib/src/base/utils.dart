@@ -54,19 +54,6 @@ String toTitleCase(String str) {
 /// Return the plural of the given word (`cat(s)`).
 String pluralize(String word, int count) => count == 1 ? word : word + 's';
 
-/// Return the value printed with commas every 3 digits.
-String printWithSeparators(int value) {
-  String str = '$value';
-
-  int index = 3;
-  while (index < str.length) {
-    str = str.substring(0, str.length - index) + ',' + str.substring(str.length - index);
-    index += 4;
-  }
-
-  return str;
-}
-
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
   String name = '$enumItem';
@@ -95,14 +82,7 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
-String getElapsedAsSeconds(Duration duration) {
-  double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
-  return '${seconds.toStringAsFixed(2)} seconds';
-}
-
-String getElapsedAsMilliseconds(Duration duration) {
-  return '${duration.inMilliseconds} ms';
-}
+String getElapsedAsMilliseconds(Duration duration) => '${duration.inMilliseconds} ms';
 
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
