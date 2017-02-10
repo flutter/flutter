@@ -8,14 +8,14 @@ import 'package:flutter/widgets.dart';
 const List<int> items = const <int>[0, 1, 2, 3, 4, 5];
 
 Widget buildFrame() {
-  return new ScrollableList(
-  itemExtent: 290.0,
-  scrollDirection: Axis.vertical,
-  children: items.map((int item) {
-    return new Container(
-      child: new Text('$item')
-    );
-  })
+  return new ListView(
+    itemExtent: 290.0,
+    scrollDirection: Axis.vertical,
+    children: items.map((int item) {
+      return new Container(
+        child: new Text('$item')
+      );
+    }).toList(),
   );
 }
 
@@ -65,7 +65,7 @@ void main() {
 
   testWidgets('Drag vertically', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new ScrollableList(
+      new ListView(
         itemExtent: 290.0,
         padding: const EdgeInsets.only(top: 250.0),
         scrollDirection: Axis.vertical,
@@ -73,8 +73,8 @@ void main() {
           return new Container(
             child: new Text('$item')
           );
-        })
-      )
+        }).toList(),
+      ),
     );
 
     await tester.pump();

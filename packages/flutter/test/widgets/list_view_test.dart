@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
+  testWidgets('ListView default control', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new ListView(itemExtent: 100.0)));
+  });
+
   testWidgets('ListView itemExtent control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new ListView(

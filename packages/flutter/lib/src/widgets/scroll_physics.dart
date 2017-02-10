@@ -64,6 +64,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   @override
+  double applyBoundaryConditions(ScrollPosition position, double value) => 0.0;
+
+  @override
   Simulation createBallisticSimulation(ScrollPosition position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
