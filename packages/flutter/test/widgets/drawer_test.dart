@@ -78,7 +78,7 @@ void main() {
         home: new Scaffold(
           key: scaffoldKey,
           drawer: new Drawer(
-            child: new Block(
+            child: new ListView(
               children: <Widget>[
                 new Text('drawer'),
                 new Container(
@@ -115,7 +115,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(textBox.localToGlobal(Point.origin).x, equals(textLeft));
 
-    await gesture.moveBy(const Offset(0.0, -50.0));
+    await gesture.moveBy(const Offset(0.0, 50.0));
     // drawer should be returning to visible
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));

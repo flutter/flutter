@@ -62,19 +62,19 @@ void main() {
     await gesture.up();
   });
 
-  testWidgets('Scroll anchor', (WidgetTester tester) async {
+  testWidgets('ListView reverse', (WidgetTester tester) async {
     int first = 0;
     int second = 0;
 
-    Widget buildBlock(ViewportAnchor scrollAnchor) {
-      return new Block(
+    Widget buildBlock({ bool reverse: false }) {
+      return new ListView(
         key: new UniqueKey(),
-        scrollAnchor: scrollAnchor,
+        reverse: reverse,
         children: <Widget>[
           new GestureDetector(
             onTap: () { ++first; },
             child: new Container(
-              height: 2000.0, // more than 600, the height of the test area
+              height: 350.0, // more than half the height of the test area
               decoration: const BoxDecoration(
                 backgroundColor: const Color(0xFF00FF00)
               )
@@ -83,7 +83,7 @@ void main() {
           new GestureDetector(
             onTap: () { ++second; },
             child: new Container(
-              height: 2000.0, // more than 600, the height of the test area
+              height: 350.0, // more than half the height of the test area
               decoration: const BoxDecoration(
                 backgroundColor: const Color(0xFF0000FF)
               )
@@ -93,32 +93,31 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildBlock(ViewportAnchor.end));
+    await tester.pumpWidget(buildBlock(reverse: true));
 
     Point target = const Point(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));
 
-    await tester.pumpWidget(buildBlock(ViewportAnchor.start));
+    await tester.pumpWidget(buildBlock(reverse: false));
 
     await tester.tapAt(target);
     expect(first, equals(1));
     expect(second, equals(1));
   });
 
-  testWidgets('Block scrollableKey', (WidgetTester tester) async {
-    // Regression test for https://github.com/flutter/flutter/issues/4046
-    // The Block's scrollableKey needs to become its Scrollable descendant's key.
-    final GlobalKey<ScrollableState<Scrollable>> key = new GlobalKey<ScrollableState<Scrollable>>();
+  testWidgets('ListView controller', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+
     Widget buildBlock() {
-      return new Block(
-        scrollableKey: key,
+      return new ListView(
+        controller: controller,
         children: <Widget>[new Text("A"), new Text("B"), new Text("C")]
       );
     }
     await tester.pumpWidget(buildBlock());
-    expect(key.currentState.scrollOffset, 0.0);
+    expect(controller.offset, equals(0.0));
   });
 
   testWidgets('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
