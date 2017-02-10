@@ -19,6 +19,7 @@
 
 #include <hb.h>
 
+#include <memory>
 #include <vector>
 
 #include <minikin/FontCollection.h>
@@ -71,37 +72,34 @@ enum {
 // Lifecycle and threading assumptions for Layout:
 // The object is assumed to be owned by a single thread; multiple threads
 // may not mutate it at the same time.
-// The lifetime of the FontCollection set through setFontCollection must
-// extend through the lifetime of the Layout object.
 class Layout {
 public:
 
-    Layout() : mGlyphs(), mAdvances(), mCollection(0), mFaces(), mAdvance(0), mBounds() {
+    Layout(const std::shared_ptr<FontCollection>& collection)
+        : mGlyphs(), mAdvances(), mCollection(collection), mFaces(), mAdvance(0), mBounds() {
         mBounds.setEmpty();
     }
 
-    // Clears layout, ready to be used again
-    void reset();
+    Layout(Layout&& layout) = default;
+
+    // Forbid copying and assignment.
+    Layout(const Layout&) = delete;
+    void operator=(const Layout&) = delete;
 
     void dump() const;
-    void setFontCollection(const FontCollection* collection);
 
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint);
 
     static float measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
-        const FontCollection* collection, float* advances);
+        const std::shared_ptr<FontCollection>& collection, float* advances);
 
     void draw(minikin::Bitmap*, int x0, int y0, float size) const;
 
-    // Deprecated. Nont needed. Remove when callers are removed.
-    static void init();
-
     // public accessors
     size_t nGlyphs() const;
-    // Does not bump reference; ownership is still layout
-    MinikinFont *getFont(int i) const;
+    const MinikinFont* getFont(int i) const;
     FontFakery getFakery(int i) const;
     unsigned int getGlyphId(int i) const;
     float getX(int i) const;
@@ -117,7 +115,7 @@ public:
     // start and count are the parameters to doLayout
     float getCharAdvance(size_t i) const { return mAdvances[i]; }
 
-    void getBounds(MinikinRect* rect);
+    void getBounds(MinikinRect* rect) const;
 
     // Purge all caches, useful in low memory conditions
     static void purgeCaches();
@@ -126,19 +124,22 @@ private:
     friend class LayoutCacheKey;
 
     // Find a face in the mFaces vector, or create a new entry
-    int findFace(FakedFont face, LayoutContext* ctx);
+    int findFace(const FakedFont& face, LayoutContext* ctx);
+
+    // Clears layout, ready to be used again
+    void reset();
 
     // Lay out a single bidi run
     // When layout is not null, layout info will be stored in the object.
     // When advances is not null, measurement results will be stored in the array.
     static float doLayoutRunCached(const uint16_t* buf, size_t runStart, size_t runLength,
         size_t bufSize, bool isRtl, LayoutContext* ctx, size_t dstStart,
-        const FontCollection* collection, Layout* layout, float* advances);
+        const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances);
 
     // Lay out a single word
     static float doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t bufStart, const FontCollection* collection,
-        Layout* layout, float* advances);
+        bool isRtl, LayoutContext* ctx, size_t bufStart,
+        const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances);
 
     // Lay out a single bidi run
     void doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
@@ -150,7 +151,7 @@ private:
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;
 
-    const FontCollection* mCollection;
+    std::shared_ptr<FontCollection> mCollection;
     std::vector<FakedFont> mFaces;
     float mAdvance;
     MinikinRect mBounds;

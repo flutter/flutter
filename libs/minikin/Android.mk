@@ -44,7 +44,6 @@ minikin_src_files := \
     LineBreaker.cpp \
     Measurement.cpp \
     MinikinInternal.cpp \
-    MinikinRefCounted.cpp \
     MinikinFont.cpp \
     MinikinFontFreeType.cpp \
     SparseBitSet.cpp \

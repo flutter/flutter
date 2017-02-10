@@ -17,20 +17,19 @@
 #ifndef MINIKIN_FONT_COLLECTION_H
 #define MINIKIN_FONT_COLLECTION_H
 
-#include <vector>
+#include <memory>
 #include <unordered_set>
+#include <vector>
 
-#include <minikin/MinikinRefCounted.h>
 #include <minikin/MinikinFont.h>
 #include <minikin/FontFamily.h>
 
 namespace minikin {
 
-class FontCollection : public MinikinRefCounted {
+class FontCollection {
 public:
-    explicit FontCollection(const std::vector<FontFamily*>& typefaces);
-
-    ~FontCollection();
+    explicit FontCollection(const std::vector<std::shared_ptr<FontFamily>>& typefaces);
+    explicit FontCollection(std::shared_ptr<FontFamily>&& typeface);
 
     struct Run {
         FakedFont fakedFont;
@@ -46,15 +45,13 @@ public:
     // selector pair, or invalid variation selector is passed.
     bool hasVariationSelector(uint32_t baseCodepoint, uint32_t variationSelector) const;
 
-    // Get the base font for the given style, useful for font-wide metrics.
-    MinikinFont* baseFont(FontStyle style);
-
     // Get base font with fakery information (fake bold could affect metrics)
     FakedFont baseFontFaked(FontStyle style);
 
     // Creates new FontCollection based on this collection while applying font variations. Returns
     // nullptr if none of variations apply to this collection.
-    FontCollection* createCollectionWithVariation(const std::vector<FontVariation>& variations);
+    std::shared_ptr<FontCollection>
+            createCollectionWithVariation(const std::vector<FontVariation>& variations);
 
     uint32_t getId() const;
 
@@ -67,12 +64,17 @@ private:
         size_t end;
     };
 
-    FontFamily* getFamilyForChar(uint32_t ch, uint32_t vs, uint32_t langListId, int variant) const;
+    // Initialize the FontCollection.
+    void init(const std::vector<std::shared_ptr<FontFamily>>& typefaces);
+
+    const std::shared_ptr<FontFamily>& getFamilyForChar(uint32_t ch, uint32_t vs,
+            uint32_t langListId, int variant) const;
 
     uint32_t calcFamilyScore(uint32_t ch, uint32_t vs, int variant, uint32_t langListId,
-                             FontFamily* fontFamily) const;
+            const std::shared_ptr<FontFamily>& fontFamily) const;
 
-    uint32_t calcCoverageScore(uint32_t ch, uint32_t vs, FontFamily* fontFamily) const;
+    uint32_t calcCoverageScore(uint32_t ch, uint32_t vs,
+            const std::shared_ptr<FontFamily>& fontFamily) const;
 
     static uint32_t calcLanguageMatchingScore(uint32_t userLangListId,
                                               const FontFamily& fontFamily);
@@ -88,19 +90,19 @@ private:
     // Highest UTF-32 code point that can be mapped
     uint32_t mMaxChar;
 
-    // This vector has ownership of the bitsets and typeface objects.
+    // This vector has pointers to the all font family instances in this collection.
     // This vector can't be empty.
-    std::vector<FontFamily*> mFamilies;
+    std::vector<std::shared_ptr<FontFamily>> mFamilies;
 
-    // This vector contains pointers into mInstances
-    // This vector can't be empty.
-    std::vector<FontFamily*> mFamilyVec;
-
-    // This vector has pointers to the font family instance which has cmap 14 subtable.
-    std::vector<FontFamily*> mVSFamilyVec;
-
-    // These are offsets into mInstanceVec, one range per page
+    // Following two vectors are pre-calculated tables for resolving coverage faster.
+    // For example, to iterate over all fonts which support Unicode code point U+XXYYZZ,
+    // iterate font families from mFamilyVec[mRanges[0xXXYY].start] to
+    // mFamilyVec[mRange[0xXXYY].end] instead of whole mFamilies.
     std::vector<Range> mRanges;
+    std::vector<std::shared_ptr<FontFamily>> mFamilyVec;
+
+    // This vector has pointers to the font family instances which have cmap 14 subtables.
+    std::vector<std::shared_ptr<FontFamily>> mVSFamilyVec;
 
     // Set of supported axes in this collection.
     std::unordered_set<AxisTag> mSupportedAxes;

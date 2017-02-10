@@ -44,7 +44,8 @@ void MinikinFontSkia::GetBounds(MinikinRect* bounds, uint32_t glyph_id,
     bounds->mBottom = skBounds.fBottom;
 }
 
-const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy) {
+const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size,
+        MinikinDestroyFunc* destroy) const {
     // we don't have a buffer to the font data, copy to own buffer
     const size_t tableSize = mTypeface->getTableSize(tag);
     *size = tableSize;
@@ -60,7 +61,7 @@ const void* MinikinFontSkia::GetTable(uint32_t tag, size_t* size, MinikinDestroy
     return buf;
 }
 
-SkTypeface *MinikinFontSkia::GetSkTypeface() {
+SkTypeface *MinikinFontSkia::GetSkTypeface() const {
     return mTypeface.get();
 }
 

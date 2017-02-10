@@ -69,9 +69,9 @@ void MinikinFontForTest::GetBounds(MinikinRect* bounds, uint32_t /* glyph_id */,
     bounds->mBottom = 10.0f;
 }
 
-MinikinFont* MinikinFontForTest::createFontWithVariation(
+std::shared_ptr<MinikinFont> MinikinFontForTest::createFontWithVariation(
         const std::vector<FontVariation>& variations) const {
-    return new MinikinFontForTest(mFontPath, mFontIndex, variations);
+    return std::shared_ptr<MinikinFont>(new MinikinFontForTest(mFontPath, mFontIndex, variations));
 }
 
 }  // namespace minikin

@@ -15,7 +15,8 @@
  */
 #include <benchmark/benchmark.h>
 
-#include <minikin/MinikinRefCounted.h>
+#include <memory>
+
 #include <minikin/FontCollection.h>
 #include <util/FontTestUtils.h>
 #include <util/UnicodeUtils.h>
@@ -27,7 +28,7 @@ const char* SYSTEM_FONT_PATH = "/system/fonts/";
 const char* SYSTEM_FONT_XML = "/system/etc/fonts.xml";
 
 static void BM_FontCollection_hasVariationSelector(benchmark::State& state) {
-    MinikinAutoUnref<FontCollection> collection(
+    std::shared_ptr<FontCollection> collection(
             getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
 
     uint32_t baseCp = state.range(0);
@@ -63,7 +64,7 @@ struct ItemizeTestCases {
 };
 
 static void BM_FontCollection_itemize(benchmark::State& state) {
-    MinikinAutoUnref<FontCollection> collection(
+    std::shared_ptr<FontCollection> collection(
             getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
 
     size_t testIndex = state.range(0);

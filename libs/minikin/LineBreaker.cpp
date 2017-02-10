@@ -129,7 +129,7 @@ static bool isLineBreakingHyphen(uint16_t c) {
 // width buffer.
 // This method finds the candidate word breaks (using the ICU break iterator) and sends them
 // to addCandidate.
-float LineBreaker::addStyleRun(MinikinPaint* paint, const FontCollection* typeface,
+float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCollection>& typeface,
         FontStyle style, size_t start, size_t end, bool isRtl) {
     float width = 0.0f;
     int bidiFlags = isRtl ? kBidi_Force_RTL : kBidi_Force_LTR;

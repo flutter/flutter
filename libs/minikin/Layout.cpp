@@ -104,8 +104,9 @@ struct LayoutContext {
 
 class LayoutCacheKey {
 public:
-    LayoutCacheKey(const FontCollection* collection, const MinikinPaint& paint, FontStyle style,
-            const uint16_t* chars, size_t start, size_t count, size_t nchars, bool dir)
+    LayoutCacheKey(const std::shared_ptr<FontCollection>& collection, const MinikinPaint& paint,
+            FontStyle style, const uint16_t* chars, size_t start, size_t count, size_t nchars,
+            bool dir)
             : mChars(chars), mNchars(nchars),
             mStart(start), mCount(count), mId(collection->getId()), mStyle(style),
             mSize(paint.size), mScaleX(paint.scaleX), mSkewX(paint.skewX),
@@ -129,8 +130,7 @@ public:
         mChars = NULL;
     }
 
-    void doLayout(Layout* layout, LayoutContext* ctx, const FontCollection* collection) const {
-        layout->setFontCollection(collection);
+    void doLayout(Layout* layout, LayoutContext* ctx) const {
         layout->mAdvances.resize(mCount, 0);
         ctx->clearHbFonts();
         layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx);
@@ -167,12 +167,13 @@ public:
         mCache.clear();
     }
 
-    Layout* get(LayoutCacheKey& key, LayoutContext* ctx, const FontCollection* collection) {
+    Layout* get(LayoutCacheKey& key, LayoutContext* ctx,
+            const std::shared_ptr<FontCollection>& collection) {
         Layout* layout = mCache.get(key);
         if (layout == NULL) {
             key.copyText();
-            layout = new Layout();
-            key.doLayout(layout, ctx, collection);
+            layout = new Layout(collection);
+            key.doLayout(layout, ctx);
             mCache.put(key, layout);
         }
         return layout;
@@ -262,10 +263,6 @@ void MinikinRect::join(const MinikinRect& r) {
     }
 }
 
-// Deprecated. Remove when callers are removed.
-void Layout::init() {
-}
-
 void Layout::reset() {
     mGlyphs.clear();
     mFaces.clear();
@@ -274,15 +271,10 @@ void Layout::reset() {
     mAdvance = 0;
 }
 
-void Layout::setFontCollection(const FontCollection* collection) {
-    mCollection = collection;
-}
-
 static hb_position_t harfbuzzGetGlyphHorizontalAdvance(hb_font_t* /* hbFont */, void* fontData,
         hb_codepoint_t glyph, void* /* userData */) {
     MinikinPaint* paint = reinterpret_cast<MinikinPaint*>(fontData);
-    MinikinFont* font = paint->font;
-    float advance = font->GetHorizontalAdvance(glyph, *paint);
+    float advance = paint->font->GetHorizontalAdvance(glyph, *paint);
     return 256 * advance + 0.5;
 }
 
@@ -343,7 +335,7 @@ void Layout::dump() const {
     }
 }
 
-int Layout::findFace(FakedFont face, LayoutContext* ctx) {
+int Layout::findFace(const FakedFont& face, LayoutContext* ctx) {
     unsigned int ix;
     for (ix = 0; ix < mFaces.size(); ix++) {
         if (mFaces[ix].font == face.font) {
@@ -610,7 +602,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 
 float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
-        const FontCollection* collection, float* advances) {
+        const std::shared_ptr<FontCollection>& collection, float* advances) {
     android::AutoMutex _l(gMinikinLock);
 
     LayoutContext ctx;
@@ -629,8 +621,8 @@ float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_
 }
 
 float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t dstStart, const FontCollection* collection,
-        Layout* layout, float* advances) {
+        bool isRtl, LayoutContext* ctx, size_t dstStart,
+        const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances) {
     HyphenEdit hyphen = ctx->paint.hyphenEdit;
     float advance = 0;
     if (!isRtl) {
@@ -668,8 +660,8 @@ float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count,
 }
 
 float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx, size_t bufStart, const FontCollection* collection,
-        Layout* layout, float* advances) {
+        bool isRtl, LayoutContext* ctx, size_t bufStart,
+        const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances) {
     LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
     LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
 
@@ -677,8 +669,8 @@ float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size
 
     float advance;
     if (ctx->paint.skipCache()) {
-        Layout layoutForWord;
-        key.doLayout(&layoutForWord, ctx, collection);
+        Layout layoutForWord(collection);
+        key.doLayout(&layoutForWord, ctx);
         if (layout) {
             layout->appendLayout(&layoutForWord, bufStart, wordSpacing);
         }
@@ -732,9 +724,6 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
     hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
     vector<FontCollection::Run> items;
     mCollection->itemize(buf + start, count, ctx->style, &items);
-    if (isRtl) {
-        std::reverse(items.begin(), items.end());
-    }
 
     vector<hb_feature_t> features;
     // Disable default-on non-required ligature features if letter-spacing
@@ -756,7 +745,9 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
 
     float x = mAdvance;
     float y = 0;
-    for (size_t run_ix = 0; run_ix < items.size(); run_ix++) {
+    for (int run_ix = isRtl ? items.size() - 1 : 0;
+            isRtl ? run_ix >= 0 : run_ix < static_cast<int>(items.size());
+            isRtl ? --run_ix : ++run_ix) {
         FontCollection::Run &run = items[run_ix];
         if (run.fakedFont.font == NULL) {
             ALOGE("no font for run starting u+%04x length %d", buf[run.start], run.end - run.start);
@@ -967,7 +958,7 @@ size_t Layout::nGlyphs() const {
     return mGlyphs.size();
 }
 
-MinikinFont* Layout::getFont(int i) const {
+const MinikinFont* Layout::getFont(int i) const {
     const LayoutGlyph& glyph = mGlyphs[i];
     return mFaces[glyph.font_ix].font;
 }
@@ -1000,7 +991,7 @@ void Layout::getAdvances(float* advances) {
     memcpy(advances, &mAdvances[0], mAdvances.size() * sizeof(float));
 }
 
-void Layout::getBounds(MinikinRect* bounds) {
+void Layout::getBounds(MinikinRect* bounds) const {
     bounds->set(mBounds);
 }
 
