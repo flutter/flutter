@@ -17,3 +17,5 @@ fi
 
 # generate the API docs, upload them
 ./dev/bots/docs.sh
+
+(cd packages/flutter && coveralls-lcov coverage/lcov.info)
