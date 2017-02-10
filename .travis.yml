@@ -13,10 +13,7 @@ install:
 before_script:
   - ./dev/bots/travis_setup.sh
 script:
-  - ./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart
-  - ./dev/bots/travis_upload.sh
-after_success:
-  - (cd packages/flutter && coveralls-lcov coverage/lcov.info)
+  - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart && ./dev/bots/travis_upload.sh)
 cache:
   directories:
     - $HOME/.pub-cache
