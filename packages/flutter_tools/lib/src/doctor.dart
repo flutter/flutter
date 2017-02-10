@@ -274,7 +274,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     if (installCount < 2) {
       messages.add(new ValidationMessage(
           'For information about managing plugins, see\n'
-          'https://www.jetbrains.com/help/idea/2016.2/managing-plugins.html'
+          'https://www.jetbrains.com/help/idea/managing-plugins.html'
       ));
     }
 
