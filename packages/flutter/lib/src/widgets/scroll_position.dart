@@ -275,7 +275,7 @@ class ScrollPosition extends ViewportOffset {
         }
         return true;
       });
-      double oldPixels = _pixels;
+      final double oldPixels = _pixels;
       _pixels = value - overScroll;
       if (_pixels != oldPixels) {
         notifyListeners();

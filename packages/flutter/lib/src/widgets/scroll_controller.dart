@@ -12,7 +12,9 @@ import 'scroll_position.dart';
 class ScrollController {
   ScrollController({
     this.initialScrollOffset: 0.0,
-  });
+  }) {
+    assert(initialScrollOffset != null);
+  }
 
   /// The initial value to use for [offset].
   ///

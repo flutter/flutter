@@ -124,7 +124,7 @@ abstract class ViewportOffset extends ChangeNotifier {
 
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('offset: ${pixels.toStringAsFixed(1)}');
+    description.add('offset: ${pixels?.toStringAsFixed(1)}');
   }
 }
 
