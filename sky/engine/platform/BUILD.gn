@@ -249,6 +249,7 @@ source_set("platform") {
     "//flutter/common",
     "//flutter/sky/engine/wtf",
     "//third_party/skia",
+    "//third_party/skia:effects",
     "//third_party/skia:gpu",
   ]
 

@@ -7,10 +7,7 @@
 namespace flow {
 
 sk_sp<SkImage> BitmapImageCreate(SkImageGenerator& generator) {
-  SkBitmap bitmap;
-  if (generator.tryGenerateBitmap(&bitmap))
-    return SkImage::MakeFromBitmap(bitmap);
-  return nullptr;
+  return SkImage::MakeFromGenerator(&generator);
 }
 
 }  // namespace flow

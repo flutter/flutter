@@ -37,7 +37,6 @@
 #include "flutter/sky/engine/wtf/RefCounted.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
 #include "flutter/sky/engine/wtf/text/WTFString.h"
-#include "third_party/skia/include/core/SkXfermode.h"
 
 namespace blink {
 

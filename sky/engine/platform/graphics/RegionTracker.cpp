@@ -158,7 +158,7 @@ static inline bool getDeviceClipAsRect(const GraphicsContext* context, SkRect& d
     }
 
     SkIRect deviceClipIRect;
-    if (context->canvas()->getClipDeviceBounds(&deviceClipIRect))
+    if (context->canvas()->getDeviceClipBounds(&deviceClipIRect))
         deviceClipRect.set(deviceClipIRect);
     else
         deviceClipRect.setEmpty();
