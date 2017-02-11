@@ -8,10 +8,12 @@ import 'package:flutter/rendering.dart';
 
 class CardModel {
   CardModel(this.value, this.height, this.color);
+
   int value;
   double height;
   Color color;
-  String get label => "Card $value";
+
+  String get label => 'Card $value';
   Key get key => new ObjectKey(this);
   GlobalKey get targetKey => new GlobalObjectKey(this);
 }
@@ -21,7 +23,7 @@ enum MarkerType { topLeft, bottomRight, touch }
 class _MarkerPainter extends CustomPainter {
   const _MarkerPainter({
     this.size,
-    this.type
+    this.type,
   });
 
   final double size;
@@ -56,10 +58,10 @@ class _MarkerPainter extends CustomPainter {
 
 class Marker extends StatelessWidget {
   Marker({
+    Key key,
     this.type: MarkerType.touch,
     this.position,
     this.size: 40.0,
-    Key key
   }) : super(key: key);
 
   final Point position;
@@ -77,10 +79,10 @@ class Marker extends StatelessWidget {
         child: new CustomPaint(
           painter: new _MarkerPainter(
             size: size,
-            type: type
-          )
-        )
-      )
+            type: type,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -92,7 +94,7 @@ class OverlayGeometryApp extends StatefulWidget {
 
 typedef void CardTapCallback(GlobalKey targetKey, Point globalPosition);
 
-class CardBuilder extends LazyBlockDelegate {
+class CardBuilder extends SliverChildDelegate {
   CardBuilder({ this.cardModels, this.onTapUp });
 
   final List<CardModel> cardModels;
@@ -102,7 +104,7 @@ class CardBuilder extends LazyBlockDelegate {
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   @override
-  Widget buildItem(BuildContext context, int index) {
+  Widget build(BuildContext context, int index) {
     if (index >= cardModels.length)
       return null;
     CardModel cardModel = cardModels[index];
@@ -115,20 +117,18 @@ class CardBuilder extends LazyBlockDelegate {
         child: new Container(
           height: cardModel.height,
           padding: const EdgeInsets.all(8.0),
-          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle))
-        )
-      )
+          child: new Center(child: new Text(cardModel.label, style: cardLabelStyle)),
+        ),
+      ),
     );
   }
 
   @override
-  bool shouldRebuild(CardBuilder oldDelegate) {
-    return oldDelegate.cardModels != cardModels;
-  }
+  int get estimatedChildCount => cardModels.length;
 
   @override
-  double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset) {
-    return (lastEndOffset - minOffset) * cardModels.length / (lastIndex + 1);
+  bool shouldRebuild(CardBuilder oldDelegate) {
+    return oldDelegate.cardModels != cardModels;
   }
 }
 
@@ -144,7 +144,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     ];
     cardModels = new List<CardModel>.generate(cardHeights.length, (int i) {
       Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
@@ -152,15 +152,18 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  void handleScroll(double offset) {
-    setState(() {
-      double dy = markersScrollOffset - offset;
-      markersScrollOffset = offset;
-      for (MarkerType type in markers.keys) {
-        Point oldPosition = markers[type];
-        markers[type] = new Point(oldPosition.x, oldPosition.y + dy);
-      }
-    });
+  bool handleScrollNotification(ScrollNotification2 notification) {
+    if (notification is ScrollUpdateNotification && notification.depth == 1) {
+      setState(() {
+        double dy = markersScrollOffset - notification.metrics.extentBefore;
+        markersScrollOffset = notification.metrics.extentBefore;
+        for (MarkerType type in markers.keys) {
+          Point oldPosition = markers[type];
+          markers[type] = new Point(oldPosition.x, oldPosition.y + dy);
+        }
+      });
+    }
+    return false;
   }
 
   void handleTapUp(GlobalKey target, Point globalPosition) {
@@ -182,15 +185,17 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         appBar: new AppBar(title: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: new LazyBlock(
-            onScroll: handleScroll,
-            delegate: new CardBuilder(
-              cardModels: cardModels,
-              onTapUp: handleTapUp
-            )
-          )
-        )
-      )
+          child: new NotificationListener<ScrollNotification2>(
+            onNotification: handleScrollNotification,
+            child: new ListView.custom(
+              childrenDelegate: new CardBuilder(
+                cardModels: cardModels,
+                onTapUp: handleTapUp,
+              ),
+            ),
+          ),
+        ),
+      ),
     ];
     for (MarkerType type in markers.keys)
       layers.add(new Marker(type: type, position: markers[type]));
@@ -203,9 +208,9 @@ void main() {
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200]
+      accentColor: Colors.redAccent[200],
     ),
     title: 'Cards',
-    home: new OverlayGeometryApp()
+    home: new OverlayGeometryApp(),
   ));
 }

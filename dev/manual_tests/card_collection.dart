@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
 class CardModel {
   CardModel(this.value, this.height) {
-    inputValue = new InputValue(text: "Item $value");
+    inputValue = new InputValue(text: 'Item $value');
   }
   int value;
   double height;
@@ -37,7 +37,6 @@ class CardCollectionState extends State<CardCollection> {
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
   bool _editable = false;
-  bool _snapToCenter = false;
   bool _fixedSizeCards = false;
   bool _sunshine = false;
   bool _varyFontSizes = false;
@@ -46,7 +45,7 @@ class CardCollectionState extends State<CardCollection> {
     List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     ];
     _cardModels = new List<CardModel>.generate(
       cardHeights.length,
@@ -58,7 +57,7 @@ class CardCollectionState extends State<CardCollection> {
     const int cardCount = 27;
     _cardModels = new List<CardModel>.generate(
       cardCount,
-      (int i) => new CardModel(i, kFixedCardHeight)
+      (int i) => new CardModel(i, kFixedCardHeight),
     );
   }
 
@@ -69,46 +68,10 @@ class CardCollectionState extends State<CardCollection> {
       _initVariableSizedCardModels();
   }
 
-  Iterable<int> get _cardIndices sync* {
-    for (int i = 0; i < _cardModels.length; i += 1)
-      yield i;
-  }
-
   @override
   void initState() {
     super.initState();
     _initCardModels();
-  }
-
-  double _variableSizeToSnapOffset(double scrollOffset) {
-    double cumulativeHeight = 0.0;
-    List<double> cumulativeHeights = _cardModels.map((CardModel card) {
-      cumulativeHeight += card.height + kCardMargins;
-      return cumulativeHeight;
-    })
-    .toList();
-
-    double offsetForIndex(int i) {
-      return (kCardMargins + _cardModels[i].height) / 2.0 + ((i == 0) ? 0.0 : cumulativeHeights[i - 1]);
-    }
-
-    for (int i = 0; i <  cumulativeHeights.length; i++) {
-      if (cumulativeHeights[i] >= scrollOffset)
-        return offsetForIndex(i);
-    }
-    return offsetForIndex(cumulativeHeights.length - 1);
-  }
-
-  double _fixedSizeToSnapOffset(double scrollOffset) {
-    int cardIndex = (scrollOffset.clamp(0.0, kFixedCardHeight * (_cardModels.length - 1)) / kFixedCardHeight).floor();
-    return cardIndex * kFixedCardHeight + kFixedCardHeight * 0.5;
-  }
-
-  double _toSnapOffset(double scrollOffset, Size containerSize) {
-    double halfHeight = containerSize.height / 2.0;
-    scrollOffset += halfHeight;
-    double result = _fixedSizeCards ? _fixedSizeToSnapOffset(scrollOffset) : _variableSizeToSnapOffset(scrollOffset);
-    return result - halfHeight;
   }
 
   void dismissCard(CardModel card) {
@@ -127,7 +90,6 @@ class CardCollectionState extends State<CardCollection> {
           children: <Widget>[
             new DrawerHeader(child: new Center(child: new Text('Options'))),
             buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
-            buildDrawerCheckbox("Snap fling scrolls to center", _snapToCenter, _toggleSnapToCenter),
             buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
             buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
@@ -148,11 +110,11 @@ class CardCollectionState extends State<CardCollection> {
             new DrawerItem(
               icon: new Icon(Icons.dvr),
               onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
-              child: new Text('Dump App to Console')
+              child: new Text('Dump App to Console'),
             ),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 
@@ -171,12 +133,6 @@ class CardCollectionState extends State<CardCollection> {
     setState(() {
       _fixedSizeCards = !_fixedSizeCards;
       _initCardModels();
-    });
-  }
-
-  void _toggleSnapToCenter() {
-    setState(() {
-      _snapToCenter = !_snapToCenter;
     });
   }
 
@@ -218,10 +174,10 @@ class CardCollectionState extends State<CardCollection> {
           new Expanded(child: new Text(label)),
           new Checkbox(
             value: value,
-            onChanged: enabled ? (_) { callback(); } : null
-          )
-        ]
-      )
+            onChanged: enabled ? (_) { callback(); } : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -235,10 +191,10 @@ class CardCollectionState extends State<CardCollection> {
           new Radio<Map<int, Color>>(
             value: itemValue,
             groupValue: currentValue,
-            onChanged: enabled ? onChanged : null
-          )
-        ]
-      )
+            onChanged: enabled ? onChanged : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -252,10 +208,10 @@ class CardCollectionState extends State<CardCollection> {
           new Radio<DismissDirection>(
             value: itemValue,
             groupValue: currentValue,
-            onChanged: enabled ? onChanged : null
-          )
-        ]
-      )
+            onChanged: enabled ? onChanged : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -269,10 +225,10 @@ class CardCollectionState extends State<CardCollection> {
           new Radio<TextAlign>(
             value: itemValue,
             groupValue: currentValue,
-            onChanged: enabled ? onChanged : null
-          )
-        ]
-      )
+            onChanged: enabled ? onChanged : null,
+          ),
+        ],
+      ),
     );
   }
 
@@ -285,15 +241,12 @@ class CardCollectionState extends State<CardCollection> {
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
         alignment: const FractionalOffset(0.0, 0.75),
-        child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title)
-      )
+        child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title),
+      ),
     );
   }
 
   Widget _buildCard(BuildContext context, int index) {
-    if (index >= _cardModels.length)
-      return null;
-
     CardModel cardModel = _cardModels[index];
     Widget card = new Dismissable(
       key: new ObjectKey(cardModel),
@@ -312,8 +265,8 @@ class CardCollectionState extends State<CardCollection> {
                   setState(() {
                     cardModel.inputValue = value;
                   });
-                }
-              )
+                },
+              ),
             )
           : new DefaultTextStyle.merge(
               context: context,
@@ -324,12 +277,12 @@ class CardCollectionState extends State<CardCollection> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  new Text(cardModel.inputValue.text, textAlign: _textAlign)
-                ]
-              )
-            )
-        )
-      )
+                  new Text(cardModel.inputValue.text, textAlign: _textAlign),
+                ],
+              ),
+            ),
+        ),
+      ),
     );
 
     String backgroundMessage;
@@ -378,21 +331,21 @@ class CardCollectionState extends State<CardCollection> {
                 new Expanded(
                   child: new Text(backgroundMessage,
                     style: backgroundTextStyle,
-                    textAlign: TextAlign.center
-                  )
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                rightArrowIcon
-              ]
-            )
-          )
-        )
-      )
+                rightArrowIcon,
+              ],
+            ),
+          ),
+        ),
+      ),
     );
 
     return new IconTheme(
       key: cardModel.key,
       data: const IconThemeData(color: Colors.white),
-      child: new Stack(children: <Widget>[background, card])
+      child: new Stack(children: <Widget>[background, card]),
     );
   }
 
@@ -401,64 +354,43 @@ class CardCollectionState extends State<CardCollection> {
         begin: FractionalOffset.topLeft,
         end: FractionalOffset.bottomLeft,
         colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
-        stops: <double>[0.1, 0.35]
+        stops: <double>[0.1, 0.35],
     )
     .createShader(bounds);
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget cardCollection;
-    if (_fixedSizeCards) {
-      cardCollection = new ScrollableList(
-        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null,
-        itemExtent: kFixedCardHeight,
-        children: _cardIndices.map<Widget>((int index) => _buildCard(context, index))
-      );
-    } else {
-      cardCollection = new LazyBlock(
-        delegate: new LazyBlockBuilder(builder: _buildCard),
-        snapOffsetCallback: _snapToCenter ? _toSnapOffset : null
-      );
-    }
+    Widget cardCollection = new ListView.builder(
+      itemExtent: _fixedSizeCards ? kFixedCardHeight : null,
+      itemCount: _cardModels.length,
+      itemBuilder: _buildCard,
+    );
 
     if (_sunshine) {
       cardCollection = new Stack(
         children: <Widget>[
           new Column(children: <Widget>[new Image.network(_sunshineURL)]),
-          new ShaderMask(child: cardCollection, shaderCallback: _createShader)
-        ]
+          new ShaderMask(child: cardCollection, shaderCallback: _createShader),
+        ],
       );
     }
 
     Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
       decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
-      child: cardCollection
+      child: cardCollection,
     );
-
-    if (_snapToCenter) {
-      Widget indicator = new IgnorePointer(
-        child: new Align(
-          alignment: FractionalOffset.centerLeft,
-          child: new Container(
-            height: 1.0,
-            decoration: new BoxDecoration(backgroundColor: const Color(0x80FFFFFF))
-          )
-        )
-      );
-      body = new Stack(children: <Widget>[body, indicator]);
-    }
 
     return new Theme(
       data: new ThemeData(
-        primarySwatch: _primaryColor
+        primarySwatch: _primaryColor,
       ),
       child: new Scaffold(
         appBar: _buildAppBar(context),
         drawer: _buildDrawer(),
-        body: body
-      )
+        body: body,
+      ),
     );
   }
 }
@@ -466,6 +398,6 @@ class CardCollectionState extends State<CardCollection> {
 void main() {
   runApp(new MaterialApp(
     title: 'Cards',
-    home: new CardCollection()
+    home: new CardCollection(),
   ));
 }
