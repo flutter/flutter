@@ -221,7 +221,7 @@ sk_sp<SkImage> TextureImageCreate(GrContext* context,
   {
     TRACE_EVENT0("flutter", "DecodeRecommended");
     // Try the guessed config.
-    if (generator.tryGenerateBitmap(&bitmap)) {
+    if (generator.tryGenerateBitmap(&bitmap, generator.getInfo(), nullptr)) {
       return TextureImageCreate(context, bitmap);
     }
   }

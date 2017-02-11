@@ -861,49 +861,9 @@ class MaskFilter extends NativeFieldWrapperClass2 {
   ///
   /// A blur is an expensive operation and should therefore be used sparingly.
   MaskFilter.blur(BlurStyle style, double sigma) {
-    _constructorBlur(style.index, sigma);
+    _constructor(style.index, sigma);
   }
-  void _constructorBlur(int style, double sigma) native "MaskFilter_constructorBlur";
-
-  /// Creates a mask filter that implements a pair of shadows for an occluding
-  /// object - one representing ambient occlusion, and one representing a
-  /// displaced shadow from a point light.
-  ///
-  /// `occluderHeight`: Height of occluding object off of ground plane.
-  ///
-  /// `lightPos`: Position of the light applied to this object.
-  ///
-  /// `lightRadius`: Radius of the light (light is assumed to be spherical).
-  ///
-  /// `ambientAlpha`: Base opacity of the ambient occlusion shadow.
-  ///
-  /// `spotAlpha`: Base opacity of the displaced spot shadow.
-  MaskFilter.shadow({
-    double occluderHeight: 0.0,
-    double lightPosX: 0.0,
-    double lightPosY: 0.0,
-    double lightPosZ: 0.0,
-    double lightRadius: 0.0,
-    double ambientAlpha: 0.0,
-    double spotAlpha: 0.0,
-  }) {
-    if (!(occluderHeight > 0.0 &&
-          lightPosZ > occluderHeight &&
-          lightRadius > 0.0 &&
-          ambientAlpha >= 0.0 &&
-          spotAlpha >= 0.0))
-      throw new ArgumentError("Invalid shadow mask filter parameters");
-
-    _constructorShadow(occluderHeight, lightPosX, lightPosY, lightPosZ,
-                       lightRadius, ambientAlpha, spotAlpha);
-  }
-  void _constructorShadow(double occluderHeight,
-                          double lightPosX,
-                          double lightPosY,
-                          double lightPosZ,
-                          double lightRadius,
-                          double ambientAlpha,
-                          double spotAlpha) native "MaskFilter_constructorShadow";
+  void _constructor(int style, double sigma) native "MaskFilter_constructor";
 }
 
 /// A description of a color filter to apply when drawing a shape or compositing

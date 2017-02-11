@@ -23,7 +23,6 @@
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkRRect.h"
 #include "third_party/skia/include/core/SkRect.h"
-#include "third_party/skia/include/core/SkXfermode.h"
 
 namespace flow {
 class ContainerLayer;
