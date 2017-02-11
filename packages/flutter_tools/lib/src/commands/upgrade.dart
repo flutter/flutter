@@ -58,10 +58,9 @@ class UpgradeCommand extends FlutterCommand {
     // if necessary.
     printStatus('');
     printStatus('Upgrading engine...');
-    String flutter = os.getExecutableName('flutter', winExtension: 'bat');
     code = await runCommandAndStreamOutput(
       <String>[
-        path.join(Cache.flutterRoot, 'bin', flutter), '--no-color', 'precache'
+        path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache'
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true

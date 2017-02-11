@@ -9,8 +9,8 @@ import 'package:path/path.dart' as path;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/process.dart';
+import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
@@ -120,7 +120,7 @@ Future<String> _buildAotSnapshot(
   String entryPointsDir, dartEntryPointsDir, snapshotterDir, genSnapshot;
 
   String engineSrc = tools.engineSrcPath;
-  String genSnapshotExecutable = os.getExecutableName('gen_snapshot');
+  String genSnapshotExecutable = 'gen_snapshot';
   if (engineSrc != null) {
     entryPointsDir  = path.join(engineSrc, 'flutter', 'runtime');
     dartEntryPointsDir = path.join(engineSrc, 'dart', 'runtime', 'bin');
@@ -168,7 +168,6 @@ Future<String> _buildAotSnapshot(
   String vmServicePath = path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
   List<String> filePaths = <String>[
-    genSnapshot,
     vmEntryPoints,
     ioEntryPoints,
     uiPath,
@@ -207,6 +206,10 @@ Future<String> _buildAotSnapshot(
   List<String> missingFiles = filePaths.where((String p) => !fs.isFileSync(p)).toList();
   if (missingFiles.isNotEmpty) {
     printError('Missing files: $missingFiles');
+    return null;
+  }
+  if (!processManager.canRun(genSnapshot)) {
+    printError('Cannot locate the genSnapshot executable');
     return null;
   }
 
