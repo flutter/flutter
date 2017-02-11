@@ -19,13 +19,15 @@ import 'sliver.dart';
 class PageController extends ScrollController {
   PageController({
     this.initialPage: 0,
-  });
+  }) {
+    assert(initialPage != null);
+  }
 
   final int initialPage;
 
   double get page {
-    final ScrollPosition position = this.position;
-    return position.pixels / position.viewportDimension;
+    final _PagePosition position = this.position;
+    return position.page;
   }
 
   Future<Null> animateToPage(int page, {
@@ -71,9 +73,13 @@ class _PagePosition extends ScrollPosition {
     state: state,
     initialPixels: null,
     oldPosition: oldPosition,
-  );
+  ) {
+    assert(initialPage != null);
+  }
 
   final int initialPage;
+
+  double get page => pixels / viewportDimension;
 
   @override
   bool applyViewportDimension(double viewportDimension) {
