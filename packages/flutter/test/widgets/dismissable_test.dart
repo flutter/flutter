@@ -13,48 +13,46 @@ DismissDirection reportedDismissDirection;
 List<int> dismissedItems = <int>[];
 Widget background;
 
-void handleOnResize(int item) {
-  expect(dismissedItems.contains(item), isFalse);
-}
-
-void handleOnDismissed(DismissDirection direction, int item) {
-  reportedDismissDirection = direction;
-  expect(dismissedItems.contains(item), isFalse);
-  dismissedItems.add(item);
-}
-
 Widget buildTest({ double startToEndThreshold }) {
-  Widget buildDismissableItem(int item) {
-    return new Dismissable(
-      key: new ValueKey<int>(item),
-      direction: dismissDirection,
-      onDismissed: (DismissDirection direction) {
-        handleOnDismissed(direction, item);
-      },
-      onResize: () {
-        handleOnResize(item);
-      },
-      background: background,
-      dismissThresholds: startToEndThreshold == null
-          ? <DismissDirection, double>{}
-          : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
-      child: new Container(
-        width: itemExtent,
-        height: itemExtent,
-        child: new Text(item.toString())
-      ),
-    );
-  }
+  return new StatefulBuilder(
+    builder: (BuildContext context, StateSetter setState) {
+      Widget buildDismissableItem(int item) {
+        return new Dismissable(
+          key: new ValueKey<int>(item),
+          direction: dismissDirection,
+          onDismissed: (DismissDirection direction) {
+            setState(() {
+              reportedDismissDirection = direction;
+              expect(dismissedItems.contains(item), isFalse);
+              dismissedItems.add(item);
+            });
+          },
+          onResize: () {
+            expect(dismissedItems.contains(item), isFalse);
+          },
+          background: background,
+          dismissThresholds: startToEndThreshold == null
+              ? <DismissDirection, double>{}
+              : <DismissDirection, double>{DismissDirection.startToEnd: startToEndThreshold},
+          child: new Container(
+            width: itemExtent,
+            height: itemExtent,
+            child: new Text(item.toString()),
+          ),
+        );
+      }
 
-  return new Container(
-      padding: const EdgeInsets.all(10.0),
-      child: new ScrollableList(
-        scrollDirection: scrollDirection,
-        itemExtent: itemExtent,
-        children: <int>[0, 1, 2, 3, 4]
-          .where((int i) => !dismissedItems.contains(i))
-          .map(buildDismissableItem),
-      )
+      return new Container(
+        padding: const EdgeInsets.all(10.0),
+        child: new ListView(
+          scrollDirection: scrollDirection,
+          itemExtent: itemExtent,
+          children: <int>[0, 1, 2, 3, 4]
+            .where((int i) => !dismissedItems.contains(i))
+            .map(buildDismissableItem).toList(),
+        ),
+      );
+    },
   );
 }
 
@@ -106,11 +104,11 @@ Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestu
 
   await dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
 
-  await tester.pumpWidget(buildTest()); // start the slide
-  await tester.pumpWidget(buildTest(), const Duration(seconds: 1)); // finish the slide and start shrinking...
-  await tester.pumpWidget(buildTest()); // first frame of shrinking animation
-  await tester.pumpWidget(buildTest(), const Duration(seconds: 1)); // finish the shrinking and call the callback...
-  await tester.pumpWidget(buildTest()); // rebuild after the callback removes the entry
+  await tester.pump(); // start the slide
+  await tester.pump(const Duration(seconds: 1)); // finish the slide and start shrinking...
+  await tester.pump(); // first frame of shrinking animation
+  await tester.pump(const Duration(seconds: 1)); // finish the shrinking and call the callback...
+  await tester.pump(); // rebuild after the callback removes the entry
 }
 
 class Test1215DismissableWidget extends StatelessWidget {
