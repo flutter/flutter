@@ -8,17 +8,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-final Random random = new Random();
-
-Future<dynamic> handleGetRandom(Map<String, dynamic> message) async {
-  final double min = message['min'].toDouble();
-  final double max = message['max'].toDouble();
-
-  return <String, double>{
-    'value': (random.nextDouble() * (max - min)) + min
-  };
-}
-
 class PlatformServices extends StatefulWidget {
   @override
   _PlatformServicesState createState() => new _PlatformServicesState();
