@@ -58,13 +58,16 @@ class ShrinePageState extends State<ShrinePage> {
           child: new Text('The shopping cart is empty')
         );
       }
-      return new MaterialList(children: config.shoppingCart.values.map((Order order) {
-        return new ListItem(
-          title: new Text(order.product.name),
-          leading: new Text('${order.quantity}'),
-          subtitle: new Text(order.product.vendor.name)
-        );
-      }).toList());
+      return new ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        children: config.shoppingCart.values.map((Order order) {
+          return new ListItem(
+            title: new Text(order.product.name),
+            leading: new Text('${order.quantity}'),
+            subtitle: new Text(order.product.vendor.name)
+          );
+        }).toList(),
+      );
     });
   }
 
