@@ -26,50 +26,6 @@ public class ExampleInstrumentedTest {
     public ActivityTestRule<ExampleActivity> activityRule =
         new ActivityTestRule<>(ExampleActivity.class);
 
-    @Test
-    public void testFlutterMessage() {
-        final Instrumentation instr = InstrumentationRegistry.getInstrumentation();
-
-        final JSONObject message = new JSONObject();
-        final int RANDOM_MIN = 1;
-        final int RANDOM_MAX = 1000;
-        try {
-            message.put("min", RANDOM_MIN);
-            message.put("max", RANDOM_MAX);
-        } catch (JSONException e) {
-            fail(e.getMessage());
-        }
-
-        final CountDownLatch latch = new CountDownLatch(1);
-        final AtomicInteger random = new AtomicInteger();
-
-        instr.runOnMainSync(new Runnable() {
-            public void run() {
-                final FlutterView flutterView = (FlutterView) activityRule.getActivity().findViewById(
-                    R.id.flutter_view);
-                flutterView.sendToFlutter("getRandom", message.toString(), new FlutterView.MessageReplyCallback() {
-                    public void onReply(String json) {
-                        try {
-                            JSONObject reply = new JSONObject(json);
-                            random.set(reply.getInt("value"));
-                        } catch (JSONException e) {
-                            fail(e.getMessage());
-                        } finally {
-                            latch.countDown();
-                        }
-                    }
-                });
-            }
-        });
-
-        try {
-            assertTrue(latch.await(2, TimeUnit.SECONDS));
-        } catch (InterruptedException e) {
-            fail(e.getMessage());
-        }
-        assertTrue(random.get() >= RANDOM_MIN);
-        assertTrue(random.get() < RANDOM_MAX);
-    }
 
     @Test
     public void testBitmap() {
@@ -77,8 +33,8 @@ public class ExampleInstrumentedTest {
         final BitmapPoller poller = new BitmapPoller(5);
         instr.runOnMainSync(new Runnable() {
             public void run() {
-                final FlutterView flutterView = (FlutterView) activityRule.getActivity().findViewById(
-                    R.id.flutter_view);
+                final FlutterView flutterView = (FlutterView) activityRule.getActivity()
+                    .getFlutterView();
 
                 // Call onPostResume to start the engine's renderer even if the activity
                 // is paused in the test environment.
