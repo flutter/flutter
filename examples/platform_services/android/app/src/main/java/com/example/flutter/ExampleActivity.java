@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import io.flutter.app.FlutterActivity;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 
@@ -24,21 +25,15 @@ import java.io.File;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class ExampleActivity extends Activity {
+public class ExampleActivity extends FlutterActivity {
     private static final String TAG = "ExampleActivity";
-
     private FlutterView flutterView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FlutterMain.ensureInitializationComplete(getApplicationContext(), null);
-        setContentView(R.layout.platform_services_layout);
-
-        flutterView = (FlutterView) findViewById(R.id.flutter_view);
-        flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
-
+        flutterView = getFlutterView();
         flutterView.addOnMessageListener("getLocation",
             new FlutterView.OnMessageListener() {
                 @Override
@@ -46,26 +41,6 @@ public class ExampleActivity extends Activity {
                     return onGetLocation(message);
                 }
             });
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (flutterView != null) {
-            flutterView.destroy();
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        flutterView.onPause();
-    }
-
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-        flutterView.onPostResume();
     }
 
     private String onGetLocation(String json) {
