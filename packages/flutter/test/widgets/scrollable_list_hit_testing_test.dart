@@ -120,33 +120,32 @@ void main() {
     List<int> tapped = <int>[];
 
     await tester.pumpWidget(
-      new ScrollableList(
-        key: new GlobalKey(),
+      new ListView(
         itemExtent: 290.0,
-        scrollAnchor: ViewportAnchor.end,
+        reverse: true,
         padding: const EdgeInsets.fromLTRB(5.0, 20.0, 15.0, 10.0),
         children: items.map((int item) {
           return new Container(
             child: new GestureDetector(
               onTap: () { tapped.add(item); },
-              child: new Text('$item')
-            )
+              child: new Text('$item'),
+            ),
           );
-        })
-      )
+        }).toList(),
+      ),
     );
     await tester.tapAt(const Point(200.0, 600.0 - 9.0));
     expect(tapped, equals(<int>[]));
     await tester.tapAt(const Point(200.0, 600.0 - 11.0));
-    expect(tapped, equals(<int>[5]));
+    expect(tapped, equals(<int>[0]));
     await tester.tapAt(const Point(4.0, 200.0));
-    expect(tapped, equals(<int>[5]));
+    expect(tapped, equals(<int>[0]));
     await tester.tapAt(const Point(6.0, 200.0));
-    expect(tapped, equals(<int>[5, 4]));
+    expect(tapped, equals(<int>[0, 1]));
     await tester.tapAt(const Point(800.0 - 14.0, 200.0));
-    expect(tapped, equals(<int>[5, 4]));
+    expect(tapped, equals(<int>[0, 1]));
     await tester.tapAt(const Point(800.0 - 16.0, 200.0));
-    expect(tapped, equals(<int>[5, 4, 4]));
+    expect(tapped, equals(<int>[0, 1, 1]));
   });
 
   testWidgets('Tap immediately following clamped overscroll', (WidgetTester tester) async {
