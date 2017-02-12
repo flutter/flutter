@@ -24,7 +24,7 @@ class ListDemoState extends State<ListDemo> {
   bool _showDividers = false;
   bool _reverseSort = false;
   List<String> items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
   void changeItemType(MaterialListType type) {
@@ -38,7 +38,7 @@ class ListDemoState extends State<ListDemo> {
     _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.black26))
+          border: new Border(top: new BorderSide(color: Colors.black26)),
         ),
         child: new ListView(
           shrinkWrap: true,
@@ -49,7 +49,7 @@ class ListDemoState extends State<ListDemo> {
               trailing: new Radio<MaterialListType>(
                 value: _showAvatars ? MaterialListType.oneLineWithAvatar : MaterialListType.oneLine,
                 groupValue: _itemType,
-                onChanged: changeItemType
+                onChanged: changeItemType,
               )
             ),
             new ListItem(
@@ -58,7 +58,7 @@ class ListDemoState extends State<ListDemo> {
               trailing: new Radio<MaterialListType>(
                 value: MaterialListType.twoLine,
                 groupValue: _itemType,
-                onChanged: changeItemType
+                onChanged: changeItemType,
               )
             ),
             new ListItem(
@@ -67,8 +67,8 @@ class ListDemoState extends State<ListDemo> {
               trailing: new Radio<MaterialListType>(
                 value: MaterialListType.threeLine,
                 groupValue: _itemType,
-                onChanged: changeItemType
-              )
+                onChanged: changeItemType,
+              ),
             ),
             new ListItem(
               dense: true,
@@ -80,8 +80,8 @@ class ListDemoState extends State<ListDemo> {
                     _showAvatars = value;
                   });
                   _bottomSheet?.setState(() { });
-                }
-              )
+                },
+              ),
             ),
             new ListItem(
               dense: true,
@@ -93,8 +93,8 @@ class ListDemoState extends State<ListDemo> {
                     _showIcons = value;
                   });
                   _bottomSheet?.setState(() { });
-                }
-              )
+                },
+              ),
             ),
             new ListItem(
               dense: true,
@@ -106,8 +106,8 @@ class ListDemoState extends State<ListDemo> {
                     _showDividers = value;
                   });
                   _bottomSheet?.setState(() { });
-                }
-              )
+                },
+              ),
             ),
             new ListItem(
               dense: true,
@@ -119,11 +119,11 @@ class ListDemoState extends State<ListDemo> {
                     _dense = value;
                   });
                   _bottomSheet?.setState(() { });
-                }
-              )
-            )
-          ]
-        )
+                },
+              ),
+            ),
+          ],
+        ),
       );
     });
   }
@@ -131,12 +131,10 @@ class ListDemoState extends State<ListDemo> {
   Widget buildListItem(BuildContext context, String item) {
     Widget secondary;
     if (_itemType == MaterialListType.twoLine) {
-      secondary = new Text(
-        "Additional item information."
-      );
+      secondary = new Text("Additional item information.");
     } else if (_itemType == MaterialListType.threeLine) {
       secondary = new Text(
-        "Even more additional list item information appears on line three."
+        "Even more additional list item information appears on line three.",
       );
     }
     return new ListItem(
@@ -145,15 +143,15 @@ class ListDemoState extends State<ListDemo> {
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
       title: new Text('This item represents $item.'),
       subtitle: secondary,
-      trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null
+      trailing: _showIcons ? new Icon(Icons.info, color: Theme.of(context).disabledColor) : null,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final String layoutText = _dense ? " \u2013 Dense" : "";
-    String  itemTypeText;
-    switch(_itemType) {
+    String itemTypeText;
+    switch (_itemType) {
       case MaterialListType.oneLine:
       case MaterialListType.oneLineWithAvatar:
         itemTypeText = 'Single-line';
@@ -183,22 +181,21 @@ class ListDemoState extends State<ListDemo> {
                 _reverseSort = !_reverseSort;
                 items.sort((String a, String b) => _reverseSort ? b.compareTo(a) : a.compareTo(b));
               });
-            }
+            },
           ),
           new IconButton(
             icon: new Icon(Icons.more_vert),
             tooltip: 'Show menu',
-            onPressed: () { showConfigurationSheet(context); }
-          )
-        ]
+            onPressed: () { showConfigurationSheet(context); },
+          ),
+        ],
       ),
-      body: new Scrollbar(
-        child: new MaterialList(
-          type: _itemType,
+      body: new Scrollbar2(
+        child: new ListView(
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
-          children: listItems
-        )
-      )
+          children: listItems.toList(),
+        ),
+      ),
     );
   }
 }
