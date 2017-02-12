@@ -92,54 +92,6 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     return null;
   }
 
-  /// The padding in the cross-axis direction on the side to the right when
-  /// facing away from the zero scroll offset in the scroll axis direction. (In
-  /// other words, for a vertical downwards-growing list, the padding on the
-  /// left.)
-  ///
-  /// Only valid after layout has started, since before layout the render object
-  /// doesn't know what direction it will be laid out in.
-  double get startPadding {
-    assert(constraints != null);
-    assert(constraints.axisDirection != null);
-    assert(constraints.growthDirection != null);
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        return padding.right;
-      case AxisDirection.right:
-        return padding.top;
-      case AxisDirection.down:
-        return padding.left;
-      case AxisDirection.left:
-        return padding.bottom;
-    }
-    return null;
-  }
-
-  /// The padding in the cross-axis direction on the side to the left when
-  /// facing away from the zero scroll offset in the scroll axis direction. (In
-  /// other words, for a vertical downwards-growing list, the padding on the
-  /// right.)
-  ///
-  /// Only valid after layout has started, since before layout the render object
-  /// doesn't know what direction it will be laid out in.
-  double get endPadding {
-    assert(constraints != null);
-    assert(constraints.axisDirection != null);
-    assert(constraints.growthDirection != null);
-    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
-      case AxisDirection.up:
-        return padding.left;
-      case AxisDirection.right:
-        return padding.bottom;
-      case AxisDirection.down:
-        return padding.right;
-      case AxisDirection.left:
-        return padding.top;
-    }
-    return null;
-  }
-
   /// The total padding in the [constraints.axisDirection]. (In other words, for
   /// a vertical downwards-growing list, the sum of the padding on the top and
   /// bottom.)
@@ -149,13 +101,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   double get mainAxisPadding {
     assert(constraints != null);
     assert(constraints.axis != null);
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        return padding.left + padding.right;
-      case Axis.vertical:
-        return padding.top + padding.bottom;
-    }
-    return null;
+    return padding.along(constraints.axis);
   }
 
   /// The total padding in the cross-axis direction. (In other words, for a
@@ -169,9 +115,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        return padding.top + padding.bottom;
+        return padding.vertical;
       case Axis.vertical:
-        return padding.left + padding.right;
+        return padding.horizontal;
     }
     return null;
   }
@@ -277,7 +223,18 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   double childCrossAxisPosition(RenderSliver child) {
     assert(child != null);
     assert(child == this.child);
-    return startPadding;
+    assert(constraints != null);
+    assert(constraints.axisDirection != null);
+    assert(constraints.growthDirection != null);
+    switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
+      case AxisDirection.up:
+      case AxisDirection.down:
+        return padding.left;
+      case AxisDirection.left:
+      case AxisDirection.right:
+        return padding.top;
+    }
+    return null;
   }
 
   @override
