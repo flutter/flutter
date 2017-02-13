@@ -216,7 +216,8 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        _inkFeatureRenderer.currentContext.findRenderObject().markNeedsPaint();
+        _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        renderer._didChangeLayout();
         return true;
       },
       child: new _InkFeatures(
@@ -290,6 +291,11 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   void _removeFeature(InkFeature feature) {
     _inkFeatures.remove(feature);
     markNeedsPaint();
+  }
+
+  void _didChangeLayout() {
+    if (_inkFeatures.isNotEmpty)
+      markNeedsPaint();
   }
 
   @override
