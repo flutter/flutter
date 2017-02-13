@@ -24,7 +24,7 @@ packages:
       name: collection
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.12.0"
+    version: "1.9.1"
   convert:
     description:
       name: convert
@@ -50,4 +50,4 @@ packages:
     source: hosted
     version: "1.1.3"
 sdks:
-  dart: ">=1.21.0-dev.1.0 <2.0.0"
+  dart: ">=1.17.0-dev.6.2 <2.0.0"
