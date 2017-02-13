@@ -37,6 +37,9 @@ class TimelineEvent {
       json['dur'] != null
         ? new Duration(microseconds: json['dur'])
         : null,
+      json['tdur'] != null
+        ? new Duration(microseconds: json['tdur'])
+        : null,
       json['ts'],
       json['tts'],
       json['args']
@@ -51,6 +54,7 @@ class TimelineEvent {
     this.processId,
     this.threadId,
     this.duration,
+    this.threadDuration,
     this.timestampMicros,
     this.threadTimestampMicros,
     this.arguments
@@ -92,6 +96,14 @@ class TimelineEvent {
   ///
   /// Corresponds to the "dur" field in the JSON event.
   final Duration duration;
+
+  /// The thread duration of the event.
+  ///
+  /// Note, some events are reported with duration. Others are reported as a
+  /// pair of begin/end events.
+  ///
+  /// Corresponds to the "tdur" field in the JSON event.
+  final Duration threadDuration;
 
   /// Time passed since tracing was enabled, in microseconds.
   ///

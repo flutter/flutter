@@ -17,6 +17,7 @@ void main() {
             'pid': 123,
             'tid': 234,
             'dur': 345,
+            'tdur': 245,
             'ts': 456,
             'tts': 567,
             'args': <String, dynamic>{
@@ -37,6 +38,7 @@ void main() {
       expect(e1.processId, 123);
       expect(e1.threadId, 234);
       expect(e1.duration, const Duration(microseconds: 345));
+      expect(e1.threadDuration, const Duration(microseconds: 245));
       expect(e1.timestampMicros, 456);
       expect(e1.threadTimestampMicros, 567);
       expect(e1.arguments, <String, dynamic>{ 'arg1': true });
@@ -48,6 +50,7 @@ void main() {
       expect(e2.processId, isNull);
       expect(e2.threadId, isNull);
       expect(e2.duration, isNull);
+      expect(e2.threadDuration, isNull);
       expect(e2.timestampMicros, isNull);
       expect(e2.threadTimestampMicros, isNull);
       expect(e2.arguments, isNull);
