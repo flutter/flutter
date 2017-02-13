@@ -81,8 +81,8 @@ RuntimeHolder::~RuntimeHolder() {
 }
 
 void RuntimeHolder::Init(
-    fidl::InterfaceHandle<modular::ApplicationEnvironment> environment,
-    fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services,
+    fidl::InterfaceHandle<app::ApplicationEnvironment> environment,
+    fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
   FTL_DCHECK(!rasterizer_);
   rasterizer_ = Rasterizer::Create();
@@ -99,7 +99,7 @@ void RuntimeHolder::Init(
 void RuntimeHolder::CreateView(
     const std::string& script_uri,
     fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    fidl::InterfaceRequest<modular::ServiceProvider> services) {
+    fidl::InterfaceRequest<app::ServiceProvider> services) {
   if (view_listener_binding_.is_bound()) {
     // TODO(jeffbrown): Refactor this to support multiple view instances
     // sharing the same underlying root bundle (but with different runtimes).
@@ -119,7 +119,7 @@ void RuntimeHolder::CreateView(
                             std::move(view_owner_request),
                             std::move(view_listener), script_uri);
 
-  modular::ServiceProviderPtr view_services;
+  app::ServiceProviderPtr view_services;
   view_->GetServiceProvider(GetProxy(&view_services));
 
   // Listen for input events.
@@ -200,7 +200,7 @@ void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
 }
 
 void RuntimeHolder::InitFidlInternal() {
-  fidl::InterfaceHandle<modular::ApplicationEnvironment> environment;
+  fidl::InterfaceHandle<app::ApplicationEnvironment> environment;
   environment_->Duplicate(GetProxy(&environment));
 
   Dart_Handle fidl_internal = Dart_LookupLibrary(ToDart("dart:fidl.internal"));

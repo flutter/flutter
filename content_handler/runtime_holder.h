@@ -38,12 +38,12 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(fidl::InterfaceHandle<modular::ApplicationEnvironment> environment,
-            fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services,
+  void Init(fidl::InterfaceHandle<app::ApplicationEnvironment> environment,
+            fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
   void CreateView(const std::string& script_uri,
                   fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-                  fidl::InterfaceRequest<modular::ServiceProvider> services);
+                  fidl::InterfaceRequest<app::ServiceProvider> services);
 
  private:
   // |blink::RuntimeDelegate| implementation:
@@ -75,9 +75,9 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void OnFrameComplete();
   void Invalidate();
 
-  modular::ApplicationEnvironmentPtr environment_;
-  modular::ServiceProviderPtr environment_services_;
-  fidl::InterfaceRequest<modular::ServiceProvider> outgoing_services_;
+  app::ApplicationEnvironmentPtr environment_;
+  app::ServiceProviderPtr environment_services_;
+  fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
 
   std::vector<char> root_bundle_data_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;

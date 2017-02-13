@@ -16,9 +16,9 @@ namespace flutter_runner {
 
 ApplicationControllerImpl::ApplicationControllerImpl(
     App* app,
-    modular::ApplicationPackagePtr application,
-    modular::ApplicationStartupInfoPtr startup_info,
-    fidl::InterfaceRequest<modular::ApplicationController> controller)
+    app::ApplicationPackagePtr application,
+    app::ApplicationStartupInfoPtr startup_info,
+    fidl::InterfaceRequest<app::ApplicationController> controller)
     : app_(app), binding_(this) {
   if (controller.is_pending()) {
     binding_.Bind(std::move(controller));
@@ -74,7 +74,7 @@ void ApplicationControllerImpl::ConnectToService(
 
 void ApplicationControllerImpl::CreateView(
     fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
-    fidl::InterfaceRequest<modular::ServiceProvider> services) {
+    fidl::InterfaceRequest<app::ServiceProvider> services) {
   runtime_holder_->CreateView(url_, std::move(view_owner_request),
                               std::move(services));
 }

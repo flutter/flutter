@@ -16,25 +16,25 @@
 
 namespace flutter_runner {
 
-class App : public modular::ApplicationRunner {
+class App : public app::ApplicationRunner {
  public:
   App();
   ~App();
 
-  // |modular::ApplicationRunner| implementation:
+  // |app::ApplicationRunner| implementation:
 
-  void StartApplication(modular::ApplicationPackagePtr application,
-                        modular::ApplicationStartupInfoPtr startup_info,
-                        fidl::InterfaceRequest<modular::ApplicationController>
+  void StartApplication(app::ApplicationPackagePtr application,
+                        app::ApplicationStartupInfoPtr startup_info,
+                        fidl::InterfaceRequest<app::ApplicationController>
                             controller) override;
 
   void Destroy(ApplicationControllerImpl* controller);
 
  private:
-  std::unique_ptr<modular::ApplicationContext> context_;
+  std::unique_ptr<app::ApplicationContext> context_;
   std::unique_ptr<Thread> gpu_thread_;
   std::unique_ptr<Thread> io_thread_;
-  fidl::BindingSet<modular::ApplicationRunner> runner_bindings_;
+  fidl::BindingSet<app::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>
       controllers_;
