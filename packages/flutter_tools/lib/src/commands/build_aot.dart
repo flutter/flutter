@@ -66,7 +66,7 @@ class BuildAotCommand extends BuildSubCommand {
     if (outputPath == null)
       throwToolExit(null);
 
-    printStatus('Built to $outputPath${fs.pathSeparator}.');
+    printStatus('Built to $outputPath${fs.path.separator}.');
   }
 }
 

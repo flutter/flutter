@@ -87,7 +87,7 @@ class BuildCleanCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     Directory buildDir = fs.directory(getBuildDirectory());
-    printStatus("Deleting '${buildDir.path}${fs.pathSeparator}'.");
+    printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
 
     if (!buildDir.existsSync())
       return;
