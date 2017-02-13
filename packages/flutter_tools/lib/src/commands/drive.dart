@@ -20,7 +20,6 @@ import '../device.dart';
 import '../globals.dart';
 import '../ios/simulators.dart' show SimControl, IOSSimulatorUtils;
 import '../resident_runner.dart';
-import 'build_apk.dart' as build_apk;
 import 'run.dart';
 
 /// Runs integration (a.k.a. end-to-end) tests.
@@ -261,16 +260,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   if (await fs.type(mainPath) != FileSystemEntityType.FILE) {
     printError('Tried to run $mainPath, but that file does not exist.');
     return null;
-  }
-
-  // TODO(devoncarew): We should remove the need to special case here.
-  if (command.device is AndroidDevice) {
-    printTrace('Building an APK.');
-    await build_apk.buildApk(
-      command.device.platform,
-      target: command.targetFile,
-      buildMode: command.getBuildMode()
-    );
   }
 
   printTrace('Stopping previously running application, if any.');
