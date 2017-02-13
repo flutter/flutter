@@ -25,6 +25,8 @@ analyzer:
   strong-mode:
     implicit-dynamic: false
   errors:
+    # treat missing required parameters as a warning (not a hint)
+    missing_required_param: warning
     # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
     # allow type narrowing
