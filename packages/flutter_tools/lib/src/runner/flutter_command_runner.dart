@@ -100,7 +100,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         hide: !verboseHelp,
         help:
             'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
-            'and serializes that recording to a directory with the path specified in this flag. If the\n'
+            'and file system access (reads and writes).\n'
+            'Serializes that recording to a directory with the path specified in this flag. If the\n'
             'directory does not already exist, it will be created.');
     argParser.addOption('replay-from',
         hide: !verboseHelp,
@@ -163,11 +164,21 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throwToolExit('--record-to and --replay-from cannot be used together.');
 
     if (globalResults['record-to'] != null) {
-      enableRecordingProcessManager(globalResults['record-to'].trim());
+      String recordTo = globalResults['record-to'].trim();
+      if (recordTo.isEmpty)
+        throwToolExit('record-to location not specified');
+      enableRecordingProcessManager(recordTo);
+      enableRecordingFileSystem(recordTo);
+      await enableRecordingPlatform(recordTo);
     }
 
     if (globalResults['replay-from'] != null) {
-      await enableReplayProcessManager(globalResults['replay-from'].trim());
+      String replayFrom = globalResults['replay-from'].trim();
+      if (replayFrom.isEmpty)
+        throwToolExit('replay-from location not specified');
+      await enableReplayProcessManager(replayFrom);
+      enableReplayFileSystem(replayFrom);
+      await enableReplayPlatform(replayFrom);
     }
 
     logger.quiet = globalResults['quiet'];
