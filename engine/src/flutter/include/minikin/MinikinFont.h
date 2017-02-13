@@ -126,6 +126,8 @@ public:
         return 0;
     }
 
+    virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
+
     virtual MinikinFont* createFontWithVariation(const std::vector<FontVariation>&) const {
         return nullptr;
     }

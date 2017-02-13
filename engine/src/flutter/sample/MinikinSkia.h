@@ -26,12 +26,15 @@ public:
         const MinikinPaint& paint) const;
 
     const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
+    const std::vector<minikin::FontVariation>& GetAxes() const {
+        return mAxes;
+    }
 
     SkTypeface *GetSkTypeface();
 
 private:
     sk_sp<SkTypeface> mTypeface;
-
+    std::vector<minikin::FontVariation> mAxes;
 };
 
 }  // namespace minikin
