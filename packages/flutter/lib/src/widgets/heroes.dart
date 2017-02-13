@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,14 +27,11 @@ enum _HeroFlightType {
   pop, // Fly the "to" hero and animate with the "from" route.
 }
 
-// TODO(hansmuller): maybe this should be a method on RenderBox
-Rect _globalRect(BuildContext context, { RenderObject ancestor }) {
+// The bounding box for context in global coordinates.
+Rect _globalRect(BuildContext context) {
   final RenderBox box = context.findRenderObject();
-  assert(box != null);
-  assert(box.hasSize);
-  Point topLeft = box.localToGlobal(Point.origin, ancestor: ancestor);
-  Point bottomRight = box.localToGlobal(box.size.bottomRight(Point.origin), ancestor: ancestor);
-  return new Rect.fromLTRB(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
+  assert(box != null && box.hasSize);
+  return MatrixUtils.transformRect(box.getTransformTo(null), Point.origin & box.size);
 }
 
 /// A widget that marks its child as being a candidate for hero animations.
@@ -77,6 +74,9 @@ Rect _globalRect(BuildContext context, { RenderObject ancestor }) {
 /// hero's widget is placed over where route B's hero's widget was, and then the
 /// animation goes the other way.
 class Hero extends StatefulWidget {
+  /// Create a hero.
+  ///
+  /// The [tag] and [child] parameters must not be null.
   Hero({
     Key key,
     @required this.tag,
@@ -173,14 +173,14 @@ class _HeroState extends State<Hero> {
 // Everything known about a hero flight that's to be started or restarted.
 class _HeroFlightManifest {
   _HeroFlightManifest({
-    this.type,
-    this.overlay,
-    this.navigatorRect,
-    this.fromRoute,
-    this.toRoute,
-    this.fromHero,
-    this.toHero,
-    this.createRectTween,
+    @required this.type,
+    @required this.overlay,
+    @required this.navigatorRect,
+    @required this.fromRoute,
+    @required this.toRoute,
+    @required this.fromHero,
+    @required this.toHero,
+    @required this.createRectTween,
   }) {
     assert(fromHero.config.tag == toHero.config.tag);
   }
@@ -296,7 +296,7 @@ class _HeroFlight {
   void start(_HeroFlightManifest initialManifest) {
     assert(() {
       final Animation<double> initial = initialManifest.animation;
-      switch(initialManifest.type) {
+      switch (initialManifest.type) {
         case _HeroFlightType.pop:
           return initial.value == 1.0 && initial.status == AnimationStatus.reverse;
         case _HeroFlightType.push:
@@ -396,7 +396,7 @@ class _HeroFlight {
     final RouteSettings from = manifest.fromRoute.settings;
     final RouteSettings to = manifest.toRoute.settings;
     final Object tag = manifest.tag;
-    return 'HeroFlight(for: $tag from: $from to: $to ${_proxyAnimation.parent})';
+    return 'HeroFlight(for: $tag, from: $from, to: $to ${_proxyAnimation.parent})';
   }
 }
 
