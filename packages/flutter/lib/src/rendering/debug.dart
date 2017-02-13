@@ -85,6 +85,9 @@ int debugPaintPointersColorValue = _kDebugPaintPointersColorValue;
 /// Overlay a rotating set of colors when repainting layers in checked mode.
 bool debugRepaintRainbowEnabled = false;
 
+/// Overlay a rotating set of colors when repainting text in checked mode.
+bool debugRepaintTextRainbowEnabled = false;
+
 /// The current color to overlay when repainting a layer.
 HSVColor debugCurrentRepaintColor = _kDebugCurrentRepaintColor;
 
@@ -162,6 +165,7 @@ bool debugAssertAllRenderVarsUnset(String reason) {
         debugPaintLayerBordersEnabled ||
         debugPaintPointersEnabled ||
         debugRepaintRainbowEnabled ||
+        debugRepaintTextRainbowEnabled ||
         debugPrintMarkNeedsPaintStacks ||
         debugPrintMarkNeedsLayoutStacks ||
         debugCheckIntrinsicSizes ||

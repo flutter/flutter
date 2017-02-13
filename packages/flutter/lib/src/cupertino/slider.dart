@@ -111,6 +111,14 @@ class CupertinoSlider extends StatefulWidget {
 
   @override
   _CupertinoSliderState createState() => new _CupertinoSliderState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('value: ${value.toStringAsFixed(1)}');
+    description.add('min: $min');
+    description.add('max: $max');
+  }
 }
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {

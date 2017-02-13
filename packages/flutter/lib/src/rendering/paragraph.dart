@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/gestures.dart';
 
 import 'box.dart';
+import 'debug.dart';
 import 'object.dart';
 import 'semantics.dart';
 
@@ -252,6 +253,16 @@ class RenderParagraph extends RenderBox {
     // works properly.
     _layoutTextWithConstraints(constraints);
     final Canvas canvas = context.canvas;
+
+    assert(() {
+      if (debugRepaintTextRainbowEnabled) {
+        Paint paint = new Paint()
+          ..color = debugCurrentRepaintColor.toColor();
+        canvas.drawRect(offset & size, paint);
+      }
+      return true;
+    });
+
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;
       if (_overflowShader != null)
