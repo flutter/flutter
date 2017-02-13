@@ -147,16 +147,6 @@ Future<String> ensureGradlew() async {
       printTrace('Using gradle from $gradle.');
     }
 
-    // Stamp the android/app/build.gradle file with the current android sdk and build tools version.
-    File appGradleFile = fs.file('android/app/build.gradle');
-    if (appGradleFile.existsSync()) {
-      _GradleFile gradleFile = new _GradleFile.parse(appGradleFile);
-      AndroidSdkVersion sdkVersion = androidSdk.latestVersion;
-      gradleFile.replace('compileSdkVersion', "${sdkVersion.sdkLevel}");
-      gradleFile.replace('buildToolsVersion', "'${sdkVersion.buildToolsVersionName}'");
-      gradleFile.writeContents(appGradleFile);
-    }
-
     // Run 'gradle wrapper'.
     List<String> command = logger.isVerbose
         ? <String>[gradle, 'wrapper']
@@ -256,27 +246,4 @@ Future<Null> buildGradleProjectV2(String gradlew, String buildModeName) async {
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
   apkFile.copySync('$gradleAppOutDir/app.apk');
   printStatus('Built $apkFilename (${getSizeAsMB(apkFile.lengthSync())}).');
-}
-
-class _GradleFile {
-  _GradleFile.parse(File file) {
-    contents = file.readAsStringSync();
-  }
-
-  String contents;
-
-  void replace(String key, String newValue) {
-    // Replace 'ws key ws value' with the new value.
-    final RegExp regex = new RegExp('\\s+$key\\s+(\\S+)', multiLine: true);
-    Match match = regex.firstMatch(contents);
-    if (match != null) {
-      String oldValue = match.group(1);
-      int offset = match.end - oldValue.length;
-      contents = contents.substring(0, offset) + newValue + contents.substring(match.end);
-    }
-  }
-
-  void writeContents(File file) {
-    file.writeAsStringSync(contents);
-  }
 }
