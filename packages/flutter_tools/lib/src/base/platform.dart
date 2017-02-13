@@ -12,7 +12,7 @@ import 'file_system.dart';
 export 'package:platform/platform.dart';
 
 const Platform _kLocalPlatform = const LocalPlatform();
-const String _kType = 'platform';
+const String _kRecordingType = 'platform';
 
 Platform get platform => context == null ? _kLocalPlatform : context[Platform];
 
@@ -24,13 +24,13 @@ Platform get platform => context == null ? _kLocalPlatform : context[Platform];
 /// non-empty directory as long as there is no collision with the `"platform"`
 /// subdirectory.
 Future<Null> enableRecordingPlatform(String location) async {
-  Directory dir = getRecordingSink(location, _kType);
+  Directory dir = getRecordingSink(location, _kRecordingType);
   File file = _getPlatformManifest(dir);
   await file.writeAsString(platform.toJson(), flush: true);
 }
 
 Future<Null> enableReplayPlatform(String location) async {
-  Directory dir = getReplaySource(location, _kType);
+  Directory dir = getReplaySource(location, _kRecordingType);
   File file = _getPlatformManifest(dir);
   String json = await file.readAsString();
   context.setVariable(Platform, new FakePlatform.fromJson(json));

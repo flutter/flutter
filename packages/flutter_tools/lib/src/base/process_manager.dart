@@ -12,7 +12,7 @@ import 'context.dart';
 import 'file_system.dart';
 import 'process.dart';
 
-const String _kType = 'process';
+const String _kRecordingType = 'process';
 
 /// The active process manager.
 ProcessManager get processManager => context[ProcessManager];
@@ -28,7 +28,7 @@ ProcessManager get processManager => context[ProcessManager];
 /// directory as long as there is no collision with the `"process"`
 /// subdirectory.
 void enableRecordingProcessManager(String location) {
-  Directory dir = getRecordingSink(location, _kType);
+  Directory dir = getRecordingSink(location, _kRecordingType);
   ProcessManager delegate = new LocalProcessManager();
   RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
   addShutdownHook(() => manager.flush(finishRunningProcesses: true));
@@ -44,7 +44,7 @@ void enableRecordingProcessManager(String location) {
 /// recorded (i.e. the result of having been previously passed to
 /// [enableRecordingProcessManager]), or a [ToolExit] will be thrown.
 Future<Null> enableReplayProcessManager(String location) async {
-  Directory dir = getReplaySource(location, _kType);
+  Directory dir = getReplaySource(location, _kRecordingType);
 
   ProcessManager manager;
   try {

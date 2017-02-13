@@ -15,7 +15,7 @@ import 'process.dart';
 export 'package:file/file.dart';
 export 'package:file/local.dart';
 
-const String _kType = 'file';
+const String _kRecordingType = 'file';
 const FileSystem _kLocalFs = const LocalFileSystem();
 
 /// Currently active implementation of the file system.
@@ -34,7 +34,7 @@ FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
 void enableRecordingFileSystem(String location) {
-  Directory dir = getRecordingSink(location, _kType);
+  Directory dir = getRecordingSink(location, _kRecordingType);
   RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
   addShutdownHook(() => fileSystem.recording.flush());
@@ -50,7 +50,7 @@ void enableRecordingFileSystem(String location) {
 /// been recorded (i.e. the result of having been previously passed to
 /// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
 void enableReplayFileSystem(String location) {
-  Directory dir = getReplaySource(location, _kType);
+  Directory dir = getReplaySource(location, _kRecordingType);
   context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
 }
 
@@ -105,11 +105,11 @@ Directory getRecordingSink(String dirname, String basename) {
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
     case FileSystemEntityType.FILE:
     case FileSystemEntityType.LINK:
-      throwToolExit('Invalid record-to location: $dirname');
+      throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
     case FileSystemEntityType.DIRECTORY:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
-        throwToolExit('Invalid record-to location: $dirname');
+        throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
     case FileSystemEntityType.NOT_FOUND:
       _kLocalFs.directory(location).createSync(recursive: true);
@@ -127,6 +127,6 @@ Directory getRecordingSink(String dirname, String basename) {
 Directory getReplaySource(String dirname, String basename) {
   Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
   if (!dir.existsSync())
-    throwToolExit('Invalid replay-from location: $dirname');
+    throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
   return dir;
 }
