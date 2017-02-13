@@ -58,7 +58,7 @@ bool inRepo(List<String> fileList) {
   if (fileList == null || fileList.isEmpty)
     fileList = <String>[path.current];
   String root = path.normalize(path.absolute(Cache.flutterRoot));
-  String prefix = root + fs.pathSeparator;
+  String prefix = root + fs.path.separator;
   for (String file in fileList) {
     file = path.normalize(path.absolute(file));
     if (file == root || file.startsWith(prefix))

@@ -12,42 +12,26 @@ import 'context.dart';
 import 'file_system.dart';
 import 'process.dart';
 
+const String _kRecordingType = 'process';
+
 /// The active process manager.
 ProcessManager get processManager => context[ProcessManager];
 
-/// Enables recording of process invocation activity to the specified location.
+/// Enables recording of process invocation activity to the specified base
+/// recording [location].
 ///
 /// This sets the [active process manager](processManager) to one that records
 /// all process activity before delegating to a [LocalProcessManager].
 ///
-/// [location] must either represent a valid, empty directory or a non-existent
-/// file system entity, in which case a directory will be created at that path.
-/// Process invocation activity will be serialized to opaque files in that
-/// directory. The resulting (populated) directory will be suitable for use
-/// with [enableReplayProcessManager].
+/// Activity will be recorded in a subdirectory of [location] named `"process"`.
+/// It is permissible for [location] to represent an existing non-empty
+/// directory as long as there is no collision with the `"process"`
+/// subdirectory.
 void enableRecordingProcessManager(String location) {
-  if (location.isEmpty)
-    throwToolExit('record-to location not specified');
-  switch (fs.typeSync(location, followLinks: false)) {
-    case FileSystemEntityType.FILE:
-    case FileSystemEntityType.LINK:
-      throwToolExit('record-to location must reference a directory');
-      break;
-    case FileSystemEntityType.DIRECTORY:
-      if (fs.directory(location).listSync(followLinks: false).isNotEmpty)
-        throwToolExit('record-to directory must be empty');
-      break;
-    case FileSystemEntityType.NOT_FOUND:
-      fs.directory(location).createSync(recursive: true);
-  }
-  Directory dir = fs.directory(location);
-
+  Directory dir = getRecordingSink(location, _kRecordingType);
   ProcessManager delegate = new LocalProcessManager();
   RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
-  addShutdownHook(() async {
-    await manager.flush(finishRunningProcesses: true);
-  });
-
+  addShutdownHook(() => manager.flush(finishRunningProcesses: true));
   context.setVariable(ProcessManager, manager);
 }
 
@@ -58,13 +42,9 @@ void enableRecordingProcessManager(String location) {
 ///
 /// [location] must represent a directory to which process activity has been
 /// recorded (i.e. the result of having been previously passed to
-/// [enableRecordingProcessManager]).
+/// [enableRecordingProcessManager]), or a [ToolExit] will be thrown.
 Future<Null> enableReplayProcessManager(String location) async {
-  if (location.isEmpty)
-    throwToolExit('replay-from location not specified');
-  Directory dir = fs.directory(location);
-  if (!dir.existsSync())
-    throwToolExit('replay-from location must reference a directory');
+  Directory dir = getReplaySource(location, _kRecordingType);
 
   ProcessManager manager;
   try {

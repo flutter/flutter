@@ -7,6 +7,11 @@
 # See the configuration guide for more
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
+# There are three similar analysis options files in the flutter repo:
+#   - .analysis_options
+#   - .analysis_options_repo (this file)
+#   - packages/flutter/lib/analysis_options_user.yaml
+#
 # This file contains the analysis options used by 'flutter analyze' when analyzing
 # the flutter repository. It is very similar to .analysis_options;
 # the only difference (currently) is the public_member_api_docs option,

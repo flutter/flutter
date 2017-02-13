@@ -5,14 +5,17 @@
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
+import 'package:file/record_replay.dart';
 import 'package:path/path.dart' as path;
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
+import 'process.dart';
 
 export 'package:file/file.dart';
 export 'package:file/local.dart';
 
+const String _kRecordingType = 'file';
 const FileSystem _kLocalFs = const LocalFileSystem();
 
 /// Currently active implementation of the file system.
@@ -20,6 +23,36 @@ const FileSystem _kLocalFs = const LocalFileSystem();
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
 FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
+
+/// Enables recording of file system activity to the specified base recording
+/// [location].
+///
+/// This sets the [active file system](fs) to one that records all invocation
+/// activity before delegating to a [LocalFileSystem].
+///
+/// Activity will be recorded in a subdirectory of [location] named `"file"`.
+/// It is permissible for [location] to represent an existing non-empty
+/// directory as long as there is no collision with the `"file"` subdirectory.
+void enableRecordingFileSystem(String location) {
+  Directory dir = getRecordingSink(location, _kRecordingType);
+  RecordingFileSystem fileSystem = new RecordingFileSystem(
+      delegate: _kLocalFs, destination: dir);
+  addShutdownHook(() => fileSystem.recording.flush());
+  context.setVariable(FileSystem, fileSystem);
+}
+
+/// Enables file system replay mode.
+///
+/// This sets the [active file system](fs) to one that replays invocation
+/// activity from a previously recorded set of invocations.
+///
+/// [location] must represent a directory to which file system activity has
+/// been recorded (i.e. the result of having been previously passed to
+/// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
+void enableReplayFileSystem(String location) {
+  Directory dir = getReplaySource(location, _kRecordingType);
+  context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
+}
 
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
@@ -55,4 +88,45 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
       throw new Exception('${entity.path} is neither File nor Directory');
     }
   });
+}
+
+/// Gets a directory to act as a recording destination, creating the directory
+/// as necessary.
+///
+/// The directory will exist in the local file system, be named [basename], and
+/// be a child of the directory identified by [dirname].
+///
+/// If the target directory already exists as a directory, the existing
+/// directory must be empty, or a [ToolExit] will be thrown. If the target
+/// directory exists as an entity other than a directory, a [ToolExit] will
+/// also be thrown.
+Directory getRecordingSink(String dirname, String basename) {
+  String location = _kLocalFs.path.join(dirname, basename);
+  switch (_kLocalFs.typeSync(location, followLinks: false)) {
+    case FileSystemEntityType.FILE:
+    case FileSystemEntityType.LINK:
+      throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
+      break;
+    case FileSystemEntityType.DIRECTORY:
+      if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
+        throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
+      break;
+    case FileSystemEntityType.NOT_FOUND:
+      _kLocalFs.directory(location).createSync(recursive: true);
+  }
+  return _kLocalFs.directory(location);
+}
+
+/// Gets a directory that holds a saved recording to be used for the purpose of
+/// replay.
+///
+/// The directory will exist in the local file system, be named [basename], and
+/// be a child of the directory identified by [dirname].
+///
+/// If the target directory does not exist, a [ToolExit] will be thrown.
+Directory getReplaySource(String dirname, String basename) {
+  Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
+  if (!dir.existsSync())
+    throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
+  return dir;
 }
