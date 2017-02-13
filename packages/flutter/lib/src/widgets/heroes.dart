@@ -37,6 +37,45 @@ Rect _globalRect(BuildContext context, { RenderObject ancestor }) {
   return new Rect.fromLTRB(topLeft.x, topLeft.y, bottomRight.x, bottomRight.y);
 }
 
+/// A widget that marks its child as being a candidate for hero animations.
+///
+/// When a [PageRoute] is pushed or popped with the [Navigator], the entire
+/// screen's content is replaced. An old route disappears and a new route
+/// appears. If there's a common visual feature on both routes then it can
+/// be helpful for orienting the user for the feature to physically move from
+/// one page to the other during the routes' transition. Such an animation
+/// is called a *hero animation*. The hero widgets "fly" in the Navigator's
+/// overlay during the transition and while they're in-flight they're
+/// not shown in their original locations in the old and new routes.
+///
+/// To label a widget as such a feature, wrap it in a [Hero] widget. When
+/// navigation happens, the [Hero] widgets on each route are identified
+/// by the [HeroController]. For each pair of [Hero] widgets that have the
+/// same tag, a hero animation is triggered.
+///
+/// If a [Hero] is already in flight when navigation occurs, its
+/// flight animation will be redirected to its new destination.
+///
+/// Routes must not contain more than one [Hero] for each [tag].
+///
+/// ## Discussion
+///
+/// Heroes and the [Navigator]'s [Overlay] [Stack] must be axis-aligned for
+/// all this to work. The top left and bottom right coordinates of each animated
+/// Hero will be converted to global coordinates and then from there converted
+/// to that [Stack]'s coordinate space, and the entire Hero subtree will, for
+/// the duration of the animation, be lifted out of its original place, and
+/// positioned on that stack. If the [Hero] isn't axis aligned, this is going to
+/// fail in a rather ugly fashion. Don't rotate your heroes!
+///
+/// To make the animations look good, it's critical that the widget tree for the
+/// hero in both locations be essentially identical. The widget of the *target*
+/// is used to do the transition: when going from route A to route B, route B's
+/// hero's widget is placed over route A's hero's widget, and route A's hero is
+/// hidden. Then the widget is animated to route B's hero's position, and then
+/// the widget is inserted into route B. When going back from B to A, route A's
+/// hero's widget is placed over where route B's hero's widget was, and then the
+/// animation goes the other way.
 class Hero extends StatefulWidget {
   Hero({
     Key key,
@@ -47,8 +86,18 @@ class Hero extends StatefulWidget {
     assert(child != null);
   }
 
+  /// The identifier for this particular hero. If the tag of this hero matches
+  /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
+  /// a hero animation will be triggered.
   final Object tag;
 
+  /// The widget subtree that will "fly" from one route to another during a
+  /// [Naviator] push or pop transition.
+  ///
+  /// The appearance of this subtree should be similar to the appearance of
+  /// the subtrees of any other heroes in the application with the same [tag].
+  /// Changes in scale and aspect ratio work well in hero animations, changes
+  /// in layout or composition do not.
   final Widget child;
 
   // Returns a map of all of the heroes in context, indexed by hero tag.
@@ -121,6 +170,7 @@ class _HeroState extends State<Hero> {
   }
 }
 
+// Everything known about a hero flight that's to be started or restarted.
 class _HeroFlightManifest {
   _HeroFlightManifest({
     this.type,
@@ -147,7 +197,10 @@ class _HeroFlightManifest {
   Object get tag => fromHero.config.tag;
 
   Animation<double> get animation {
-    return (type == _HeroFlightType.push) ? toRoute.animation : fromRoute.animation;
+    return new CurvedAnimation(
+      parent: (type == _HeroFlightType.push) ? toRoute.animation : fromRoute.animation,
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   @override
@@ -156,22 +209,7 @@ class _HeroFlightManifest {
   }
 }
 
-// The animation that drives the Hero's flight can change if the flight is
-// restarted. The overall animation is always curved.
-class _HeroFlightProxyAnimation extends ProxyAnimation {
-  @override
-  set parent(Animation<double> value) {
-    if (value == null) {
-      super.parent = null;
-    } else {
-      super.parent = new CurvedAnimation(
-        parent: value,
-        curve: Curves.fastOutSlowIn
-      );
-    }
-  }
-}
-
+// Builds the in-flight hero widget.
 class _HeroFlight {
   _HeroFlight(this.onFlightEnded) {
     _proxyAnimation = new ProxyAnimation()..addStatusListener(_handleAnimationUpdate);
@@ -414,6 +452,10 @@ class HeroController extends NavigatorObserver {
       final PageRoute<dynamic> from = fromRoute;
       final PageRoute<dynamic> to = toRoute;
       final Animation<double> animation = (flightType == _HeroFlightType.push) ? to.animation : from.animation;
+
+      // A "user" gesture may have already completed the pop.
+      if (flightType == _HeroFlightType.pop && animation.status == AnimationStatus.dismissed)
+        return;
 
       // Putting a route offstage changes its animation value to 1.0.
       // Once this frame completes, we'll know where the heroes in the toRoute

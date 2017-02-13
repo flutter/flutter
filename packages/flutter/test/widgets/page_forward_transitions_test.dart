@@ -132,6 +132,8 @@ void main() {
     navigator.pop();
     expect(state(), equals('E')); // transition 1<-2 is at 1.0, just reversed
     await tester.pump();
+    await tester.pump();
+
     expect(state(), equals('BDE')); // transition 1<-2 is at 1.0
 
     await tester.pump(kFourTenthsOfTheTransitionDuration);

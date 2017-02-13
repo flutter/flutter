@@ -113,6 +113,7 @@ void main() {
     expect(Navigator.canPop(containerKey2.currentContext), isTrue);
     Navigator.pop(containerKey2.currentContext);
     await tester.pump();
+    await tester.pump();
 
     expect(find.text('Home'), isOnstage);
     expect(find.text('Settings'), isOnstage);

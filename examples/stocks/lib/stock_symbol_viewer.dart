@@ -81,7 +81,6 @@ class StockSymbolPage extends StatelessWidget {
               stock: stock,
               arrow: new Hero(
                 tag: stock,
-                turns: 2,
                 child: new StockArrow(percentChange: stock.percentChange)
               )
             )
