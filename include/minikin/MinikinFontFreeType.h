@@ -50,6 +50,10 @@ public:
 
     const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
 
+    const std::vector<minikin::FontVariation>& GetAxes() const {
+        return mAxes;
+    }
+
     // TODO: provide access to raw data, as an optimization.
 
     // Not a virtual method, as the protocol to access rendered
@@ -63,6 +67,7 @@ public:
 private:
     FT_Face mTypeface;
     static int32_t sIdCounter;
+    std::vector<minikin::FontVariation> mAxes;
 };
 
 }  // namespace minikin
