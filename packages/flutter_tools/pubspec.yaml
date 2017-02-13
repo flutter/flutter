@@ -23,7 +23,7 @@ dependencies:
   package_config: '>=0.1.5 <2.0.0'
   path: ^1.4.0
   platform: 1.0.1
-  process: 2.0.0
+  process: 2.0.1
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
   usage: ^3.0.0
