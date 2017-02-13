@@ -338,7 +338,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
     return result;
 
   excludeDirs = excludeDirs.map(
-    (String exclude) => path.absolute(exclude) + fs.pathSeparator).toList();
+    (String exclude) => path.absolute(exclude) + fs.path.separator).toList();
 
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
