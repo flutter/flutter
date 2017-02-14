@@ -225,8 +225,8 @@ Future<Device> findTargetDevice() async {
       printError('Failed to start iOS Simulator.');
       return null;
     }
-  } else if (os.isLinux) {
-    // On Linux, for now, we just grab the first connected device we can find.
+  } else if (os.isLinux || os.isWindows) {
+    // On Linux and Windows, for now, we just grab the first connected device we can find.
     if (devices.isEmpty) {
       printError('No devices found.');
       return null;
@@ -236,9 +236,6 @@ Future<Device> findTargetDevice() async {
     }
     printStatus('Using device ${devices.first.name}.');
     return devices.first;
-  } else if (os.isWindows) {
-    printError('Windows is not yet supported.');
-    return null;
   } else {
     printError('The operating system on this computer is not supported.');
     return null;

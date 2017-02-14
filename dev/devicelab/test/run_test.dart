@@ -14,7 +14,7 @@ void main() {
       for (String testName in testNames) {
         options..addAll(<String>['-t', testName]);
       }
-      Process scriptProcess = await Process.start(
+      ProcessResult scriptProcess = Process.runSync(
         '../../bin/cache/dart-sdk/bin/dart',
         options,
       );
@@ -35,7 +35,7 @@ void main() {
 
     test('exits with code 1 when task throws', () async {
       expect(await runScript(<String>['smoke_test_throws']), 1);
-    }, skip: Platform.isWindows); // TODO(goderbauer): figure out why this fails on Windows
+    });
 
     test('exits with code 1 when fails', () async {
       expect(await runScript(<String>['smoke_test_failure']), 1);

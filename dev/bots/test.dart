@@ -53,7 +53,6 @@ Future<Null> main() async {
       workingDirectory: p.join(flutterRoot, 'packages', 'flutter_driver'),
       expectFailure: true,
       printOutput: false,
-      skip: Platform.isWindows, // TODO(goderbauer): run on Windows when 'drive' command works
   );
 
   List<String> coverageFlags = <String>[];
