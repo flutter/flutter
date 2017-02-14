@@ -308,8 +308,7 @@ void main() {
     expect(find.text('RIGHT CHILD'), findsNothing);
   });
 
-  // A regression test for https://github.com/flutter/flutter/issues/5095
-  testWidgets('TabBar left/right fling reverse', (WidgetTester tester) async {
+  testWidgets('TabBar left/right fling reverse (1)', (WidgetTester tester) async {
     List<String> tabs = <String>['LEFT', 'RIGHT'];
 
     await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
@@ -321,11 +320,64 @@ void main() {
     TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(flingStart, const Offset(200.0, 0.0), 10000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(controller.index, 0);
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+  });
+
+  testWidgets('TabBar left/right fling reverse (2)', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    expect(find.text('LEFT'), findsOneWidget);
+    expect(find.text('RIGHT'), findsOneWidget);
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+
+    TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
+    expect(controller.index, 0);
+
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
+    await tester.pump();
+    // this is similar to a test above, but that one does many more pumps
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(controller.index, 1);
+    expect(find.text('LEFT CHILD'), findsNothing);
+    expect(find.text('RIGHT CHILD'), findsOneWidget);
+  });
+
+  // A regression test for https://github.com/flutter/flutter/issues/5095
+  testWidgets('TabBar left/right fling reverse (2)', (WidgetTester tester) async {
+    List<String> tabs = <String>['LEFT', 'RIGHT'];
+
+    await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
+    expect(find.text('LEFT'), findsOneWidget);
+    expect(find.text('RIGHT'), findsOneWidget);
+    expect(find.text('LEFT CHILD'), findsOneWidget);
+    expect(find.text('RIGHT CHILD'), findsNothing);
+
+    TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
+    expect(controller.index, 0);
+
+    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    TestGesture gesture = await tester.startGesture(flingStart);
+    for (int index = 0; index > 50; index += 1) {
+      await gesture.moveBy(const Offset(-10.0, 0.0));
+      await tester.pump(const Duration(milliseconds: 1));
+    }
     // End the fling by reversing direction. This should cause not cause
     // a change to the selected tab, everything should just settle back to
     // to where it started.
-    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
-    await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), -10000.0);
+    for (int index = 0; index > 50; index += 1) {
+      await gesture.moveBy(const Offset(10.0, 0.0));
+      await tester.pump(const Duration(milliseconds: 1));
+    }
+    await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(controller.index, 0);

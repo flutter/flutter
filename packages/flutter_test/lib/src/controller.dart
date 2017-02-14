@@ -313,9 +313,9 @@ class WidgetController {
   /// then one frame is pumped each time that amount of time elapses while
   /// sending events, or each time an event is synthesised, whichever is rarer.
   Future<Null> flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1, Duration frameInterval: const Duration(milliseconds: 16) }) {
+    assert(offset.distance > 0.0);
+    assert(velocity > 0.0); // velocity is pixels/second
     return TestAsyncUtils.guard(() async {
-      assert(offset.distance > 0.0);
-      assert(velocity != 0.0);   // velocity is pixels/second
       final TestPointer p = new TestPointer(pointer);
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
