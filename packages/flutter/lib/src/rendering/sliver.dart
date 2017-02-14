@@ -1159,18 +1159,13 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
       return;
     if (attached)
       _offset.removeListener(markNeedsLayout);
-    if (_offset.pixels != value.pixels)
-      markNeedsLayout();
     _offset = value;
     if (attached)
       _offset.addListener(markNeedsLayout);
-    if (hasSize) {
-      // If we already have a size, then we should re-report the dimensions
-      // to the new ViewportOffset. If we don't then we'll report them when
-      // we establish the dimensions later, so don't worry about it now.
-      if (!rereportDimensions())
-        markNeedsLayout();
-    }
+    // We need to go through layout even if the new offset has the same pixels
+    // value as the old offset so that we will apply our viewport and content
+    // dimensions.
+    markNeedsLayout();
   }
 
   @override
@@ -1506,21 +1501,6 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
   @protected
   double computeChildMainAxisPosition(RenderSliver child, double parentMainAxisPosition);
 
-  /// Notifies the [offset] of the render object's new dimensions.
-  ///
-  /// Implementations must call [ViewportOffset.applyViewportDimension] and
-  /// [ViewportOffset.applyContentDimensions], in that order.
-  ///
-  /// Return the value returned by [ViewportOffset.applyContentDimensions]:
-  /// false if the [ViewportOffset] did not accept the new dimensions
-  /// unconditionally, but instead wants to relayout the render object (e.g.
-  /// because it changed its mind about the actual offset that the viewport
-  /// should be laid out at), and true if the [ViewportOffset] was happy with
-  /// the given dimensions and does not think that anything need change. If this
-  /// function returns false, the caller will call [markNeedsLayout].
-  @protected
-  bool rereportDimensions();
-
   @protected
   int indexOfFirstChild();
 
@@ -1662,7 +1642,6 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
       if (correction != 0.0) {
         offset.correctBy(correction);
       } else {
-        // when updating this, also update rereportDimensions
         if (offset.applyContentDimensions(
               math.min(0.0, _minScrollExtent + mainAxisExtent * anchor),
               math.max(0.0, _maxScrollExtent - mainAxisExtent * (1.0 - anchor)),
@@ -1823,31 +1802,6 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
   }
 
   @override
-  bool rereportDimensions() {
-    assert(_minScrollExtent != null);
-    assert(_maxScrollExtent != null);
-    assert(anchor != null);
-    double effectiveExtent;
-    switch (axis) {
-      case Axis.vertical:
-        effectiveExtent = size.height;
-        break;
-      case Axis.horizontal:
-        effectiveExtent = size.width;
-        break;
-    }
-    assert(effectiveExtent != null);
-    final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
-    final bool didAcceptContentDimension = offset.applyContentDimensions(
-       // when updating this, also update similar code in performLayout() and
-       // performResize().
-       math.min(0.0, _minScrollExtent + effectiveExtent * anchor),
-       math.max(0.0, _maxScrollExtent - effectiveExtent * (1.0 - anchor)),
-     );
-     return didAcceptViewportDimension && didAcceptContentDimension;
-  }
-
-  @override
   int indexOfFirstChild() {
     assert(center != null);
     assert(center.parent == this);
@@ -1994,7 +1948,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
             effectiveExtent = constraints.constrainWidth(_shrinkWrapExtent);
             break;
         }
-        // when updating this, also update similar code in rereportDimensions
         final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
         final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
         if (didAcceptViewportDimension && didAcceptContentDimension)
@@ -2093,24 +2046,6 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
         return (size.width - parentMainAxisPosition) - childParentData.layoutOffset;
     }
     return 0.0;
-  }
-
-  @override
-  bool rereportDimensions() {
-    assert(_maxScrollExtent != null);
-    double effectiveExtent;
-    switch (axis) {
-      case Axis.vertical:
-        effectiveExtent = size.height;
-        break;
-      case Axis.horizontal:
-        effectiveExtent = size.width;
-        break;
-    }
-    assert(effectiveExtent != null);
-    final bool didAcceptViewportDimension = offset.applyViewportDimension(effectiveExtent);
-    final bool didAcceptContentDimension = offset.applyContentDimensions(0.0, math.max(0.0, _maxScrollExtent - effectiveExtent));
-    return didAcceptViewportDimension && didAcceptContentDimension;
   }
 
   @override
