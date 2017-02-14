@@ -1,3 +1,6 @@
+os:
+  - linux
+  - osx
 sudo: false
 addons:
   apt:
