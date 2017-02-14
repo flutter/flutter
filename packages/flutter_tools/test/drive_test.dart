@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -24,7 +22,8 @@ void main() {
   group('drive', () {
     DriveCommand command;
     Device mockDevice;
-    MemoryFileSystem memoryFileSystem;
+    MemoryFileSystem fs;
+    Directory cwd;
 
     void withMockDevice([Device mock]) {
       mockDevice = mock ?? new MockDevice();
@@ -35,14 +34,13 @@ void main() {
     setUp(() {
       command = new DriveCommand();
       applyMocksToCommand(command);
-      memoryFileSystem = new MemoryFileSystem();
-      String cwd = '/some/app';
-      memoryFileSystem.directory(cwd).createSync(recursive: true);
-      memoryFileSystem.currentDirectory = cwd;
-      memoryFileSystem.directory('test').createSync();
-      memoryFileSystem.directory('test_driver').createSync();
-      memoryFileSystem.file('pubspec.yaml').createSync();
-      memoryFileSystem.file('.packages').createSync();
+      fs = new MemoryFileSystem();
+      cwd = fs.systemTempDirectory.createTempSync('some_app_');
+      fs.currentDirectory = cwd;
+      fs.directory('test').createSync();
+      fs.directory('test_driver').createSync();
+      fs.file('pubspec.yaml')..createSync();
+      fs.file('.packages').createSync();
       setExitFunctionForTests();
       targetDeviceFinder = () {
         throw 'Unexpected call to targetDeviceFinder';
@@ -69,29 +67,33 @@ void main() {
 
     testUsingContext('returns 1 when test file is not found', () async {
       withMockDevice();
+
+      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+
       List<String> args = <String>[
         'drive',
-        '--target=/some/app/test/e2e.dart',
+        '--target=$testApp}',
       ];
       try {
         await createTestCommandRunner(command).run(args);
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-        expect(e.message, contains('Test file not found: /some/app/test_driver/e2e_test.dart'));
+        expect(e.message, contains('Test file not found: $testFile'));
       }
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     testUsingContext('returns 1 when app fails to run', () async {
       withMockDevice();
       appStarter = expectAsync((DriveCommand command) async => null);
 
-      String testApp = '/some/app/test_driver/e2e.dart';
-      String testFile = '/some/app/test_driver/e2e_test.dart';
+      String testApp = fs.path.join(cwd.path, 'test_driver', 'e2e.dart');
+      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
-      MemoryFileSystem memFs = memoryFileSystem;
+      MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() { }');
       await memFs.file(testFile).writeAsString('main() { }');
 
@@ -107,11 +109,11 @@ void main() {
         expect(e.message, contains('Application failed to start. Will not run test. Quitting.'));
       }
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
-      String appFile = '/not/in/my/app.dart';
+      String appFile = fs.path.join(cwd.dirname, 'other_app', 'app.dart');
       List<String> args = <String>[
         'drive',
         '--target=$appFile',
@@ -122,15 +124,15 @@ void main() {
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
         expect(testLogger.errorText, contains(
-          'Application file $appFile is outside the package directory /some/app',
+            'Application file $appFile is outside the package directory ${cwd.path}',
         ));
       }
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
-      String appFile = '/some/app/main.dart';
+      String appFile = fs.path.join(cwd.path, 'main.dart');
       List<String> args = <String>[
         'drive',
         '--target=$appFile',
@@ -141,19 +143,19 @@ void main() {
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
         expect(testLogger.errorText, contains(
-          'Application file main.dart must reside in one of the '
-          'sub-directories of the package structure, not in the root directory.',
+            'Application file main.dart must reside in one of the '
+            'sub-directories of the package structure, not in the root directory.',
         ));
       }
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     testUsingContext('returns 0 when test ends successfully', () async {
       withMockDevice();
 
-      String testApp = '/some/app/test/e2e.dart';
-      String testFile = '/some/app/test_driver/e2e_test.dart';
+      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync((DriveCommand command) async {
         return new LaunchResult.succeeded();
@@ -166,7 +168,7 @@ void main() {
         return true;
       });
 
-      MemoryFileSystem memFs = memoryFileSystem;
+      MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
@@ -177,14 +179,14 @@ void main() {
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     testUsingContext('returns exitCode set by test runner', () async {
       withMockDevice();
 
-      String testApp = '/some/app/test/e2e.dart';
-      String testFile = '/some/app/test_driver/e2e_test.dart';
+      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync((DriveCommand command) async {
         return new LaunchResult.succeeded();
@@ -196,7 +198,7 @@ void main() {
         return true;
       });
 
-      MemoryFileSystem memFs = memoryFileSystem;
+      MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
@@ -212,7 +214,7 @@ void main() {
         expect(e.message, isNull);
       }
     }, overrides: <Type, Generator>{
-      FileSystem: () => memoryFileSystem,
+      FileSystem: () => fs,
     });
 
     group('findTargetDevice', () {
@@ -225,7 +227,7 @@ void main() {
         Device device = await findTargetDevice();
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
     });
 
@@ -233,6 +235,7 @@ void main() {
       void setOs() {
         when(os.isMacOS).thenReturn(true);
         when(os.isLinux).thenReturn(false);
+        when(os.isWindows).thenReturn(false);
       }
 
       testUsingContext('uses existing emulator', () async {
@@ -244,7 +247,7 @@ void main() {
         Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
 
       testUsingContext('uses existing Android device if and there are no simulators', () async {
@@ -257,7 +260,7 @@ void main() {
         Device device = await findTargetDevice();
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
 
       testUsingContext('launches emulator', () async {
@@ -271,21 +274,23 @@ void main() {
         Device device = await findTargetDevice();
         expect(device.name, 'new-simulator');
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
     });
 
-    group('findTargetDevice on Linux', () {
+    void findTargetDeviceOnLinuxOrWindows({bool isWindows: false, bool isLinux: false}) {
+      assert(isWindows != isLinux);
       void setOs() {
         when(os.isMacOS).thenReturn(false);
-        when(os.isLinux).thenReturn(true);
+        when(os.isLinux).thenReturn(isLinux);
+        when(os.isWindows).thenReturn(isWindows);
       }
 
       testUsingContext('returns null if no devices found', () async {
         setOs();
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
 
       testUsingContext('uses existing Android device', () async {
@@ -297,10 +302,18 @@ void main() {
         Device device = await findTargetDevice();
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
-        FileSystem: () => memoryFileSystem,
+        FileSystem: () => fs,
       });
+    }
+
+    group('findTargetDevice on Linux', () {
+      findTargetDeviceOnLinuxOrWindows(isLinux: true);
     });
-  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when drive command is working
+
+    group('findTargetDevice on Windows', () {
+      findTargetDeviceOnLinuxOrWindows(isWindows: true);
+    });
+  });
 }
 
 class MockDevice extends Mock implements Device {
