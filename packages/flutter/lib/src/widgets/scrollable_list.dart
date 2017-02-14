@@ -164,6 +164,7 @@ class ScrollableList extends StatelessWidget {
   }
 }
 
+@deprecated
 class _VirtualListViewport extends VirtualViewport {
   _VirtualListViewport(
     this.onExtentsChanged,
@@ -259,6 +260,7 @@ class _VirtualListViewport extends VirtualViewport {
   _VirtualListViewportElement createElement() => new _VirtualListViewportElement(this);
 }
 
+@deprecated
 class _VirtualListViewportElement extends VirtualViewportElement {
   _VirtualListViewportElement(VirtualViewport widget) : super(widget);
 

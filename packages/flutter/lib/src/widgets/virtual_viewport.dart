@@ -24,9 +24,11 @@ import 'framework.dart';
 ///    the viewport).
 ///
 /// Used by [ScrollableList.onExtentsChanged], etc.
+@deprecated
 typedef void ExtentsChangedCallback(double contentExtent, double containerExtent);
 
 /// An abstract widget whose children are not all materialized.
+@deprecated
 abstract class VirtualViewport extends RenderObjectWidget {
   /// The offset from the [ViewportAnchor] at which the viewport should start painting children.
   double get startOffset;
@@ -34,6 +36,7 @@ abstract class VirtualViewport extends RenderObjectWidget {
   _WidgetProvider _createWidgetProvider();
 }
 
+@deprecated
 abstract class _WidgetProvider {
   void didUpdateWidget(@checked VirtualViewport oldWidget, @checked VirtualViewport newWidget);
   int get virtualChildCount;
@@ -46,6 +49,7 @@ abstract class _WidgetProvider {
 /// This class is a building block for building a widget that has more children
 /// than it wishes to display at any given time. For example, [ScrollableList]
 /// uses this element to materialize only those children that are visible.
+@deprecated
 abstract class VirtualViewportElement extends RenderObjectElement {
   /// Creates an element that materializes a contiguous subset of its children.
   ///
@@ -235,6 +239,7 @@ abstract class VirtualViewportElement extends RenderObjectElement {
 ///
 /// The iterator is advanced just far enough to obtain widgets for the children
 /// that need to be materialized.
+@deprecated
 abstract class VirtualViewportFromIterable extends VirtualViewport {
   /// The children, some of which might be materialized.
   Iterable<Widget> get children;
@@ -243,6 +248,7 @@ abstract class VirtualViewportFromIterable extends VirtualViewport {
   _IterableWidgetProvider _createWidgetProvider() => new _IterableWidgetProvider();
 }
 
+@deprecated
 class _IterableWidgetProvider extends _WidgetProvider {
   int _length;
   Iterator<Widget> _iterator;
@@ -287,12 +293,14 @@ class _IterableWidgetProvider extends _WidgetProvider {
 /// Signature of a callback that returns the sublist of widgets in the given range.
 ///
 /// Used by [ScrollableLazyList.itemBuilder], etc.
+@deprecated
 typedef List<Widget> ItemListBuilder(BuildContext context, int start, int count);
 
 /// A VirtualViewport that represents its children using [ItemListBuilder].
 ///
 /// This widget is less ergonomic than [VirtualViewportFromIterable] but scales to
 /// unlimited numbers of children.
+@deprecated
 abstract class VirtualViewportFromBuilder extends VirtualViewport {
   /// The total number of children that can be built.
   int get itemCount;
@@ -307,6 +315,7 @@ abstract class VirtualViewportFromBuilder extends VirtualViewport {
   _LazyWidgetProvider _createWidgetProvider() => new _LazyWidgetProvider();
 }
 
+@deprecated
 class _LazyWidgetProvider extends _WidgetProvider {
   int _length;
   int _base;
