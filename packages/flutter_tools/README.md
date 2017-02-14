@@ -4,5 +4,7 @@ Tools for building Flutter applications.
 
 To run the tests:
 
-- pub get
-- pub run test
+```shell
+pub get
+FLUTTER_ROOT=$PWD/../.. dart --checked test/all.dart
+```
