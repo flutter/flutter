@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -71,6 +70,6 @@ Directory _createSdkDirectory({ bool withAndroidN: false }) {
 }
 
 void _createSdkFile(Directory dir, String filePath) {
-  File file = fs.file(path.join(dir.path, filePath));
+  File file = fs.file(fs.path.join(dir.path, filePath));
   file.createSync(recursive: true);
 }

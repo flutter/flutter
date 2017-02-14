@@ -11,15 +11,14 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/dependency_checker.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = path.dirname(path.fromUri(platform.script));
-    final String dataPath = path.join(basePath, 'data', 'dart_dependencies_test');
+    final String basePath = fs.path.dirname(fs.path.fromUri(platform.script));
+    final String dataPath = fs.path.join(basePath, 'data', 'dart_dependencies_test');
     MemoryFileSystem testFileSystem;
 
     setUp(() {
@@ -28,11 +27,11 @@ void main()  {
     });
 
     testUsingContext('good', () {
-      final String testPath = path.join(dataPath, 'good');
-      final String mainPath = path.join(testPath, 'main.dart');
-      final String fooPath = path.join(testPath, 'foo.dart');
-      final String barPath = path.join(testPath, 'lib', 'bar.dart');
-      final String packagesPath = path.join(testPath, '.packages');
+      final String testPath = fs.path.join(dataPath, 'good');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String fooPath = fs.path.join(testPath, 'foo.dart');
+      final String barPath = fs.path.join(testPath, 'lib', 'bar.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
       DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
       DependencyChecker dependencyChecker =
@@ -59,10 +58,10 @@ void main()  {
       expect(dependencyChecker.check(baseTime), isTrue);
     });
     testUsingContext('syntax error', () {
-      final String testPath = path.join(dataPath, 'syntax_error');
-      final String mainPath = path.join(testPath, 'main.dart');
-      final String fooPath = path.join(testPath, 'foo.dart');
-      final String packagesPath = path.join(testPath, '.packages');
+      final String testPath = fs.path.join(dataPath, 'syntax_error');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String fooPath = fs.path.join(testPath, 'foo.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
 
       DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
@@ -89,7 +88,7 @@ void main()  {
       String destinationPath = '/some/test/location';
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
       copyDirectorySync(
-        new LocalFileSystem().directory(path.join(dataPath, 'changed_sdk_location')),
+        new LocalFileSystem().directory(fs.path.join(dataPath, 'changed_sdk_location')),
         fs.directory(destinationPath));
       fs.currentDirectory = destinationPath;
 

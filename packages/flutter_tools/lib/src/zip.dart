@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
-import 'package:path/path.dart' as path;
 
 import 'devfs.dart';
 import 'base/file_system.dart';
@@ -74,7 +73,7 @@ class _ZipToolBuilder extends ZipBuilder {
     int count = entries.length;
     entries.forEach((String archivePath, DevFSContent content) {
       content.contentsAsBytes().then<Null>((List<int> data) {
-        File file = fs.file(path.join(zipBuildDir.path, archivePath));
+        File file = fs.file(fs.path.join(zipBuildDir.path, archivePath));
         file.parent.createSync(recursive: true);
         file.writeAsBytes(data).then<Null>((File value) {
           count -= 1;

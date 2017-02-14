@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:path/path.dart' as path;
 
 import '../android/android_sdk.dart';
 import '../base/common.dart';
@@ -124,10 +123,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
       String script = platform.script.toFilePath();
-      if (path.basename(script) == kSnapshotFileName)
-        return path.dirname(path.dirname(path.dirname(script)));
-      if (path.basename(script) == kFlutterToolsScriptFileName)
-        return path.dirname(path.dirname(path.dirname(path.dirname(script))));
+      if (fs.path.basename(script) == kSnapshotFileName)
+        return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
+      if (fs.path.basename(script) == kFlutterToolsScriptFileName)
+        return fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(script))));
 
       // If run from a bare script within the repo.
       if (script.contains('flutter/packages/'))
@@ -188,7 +187,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initialiser uses it).
-    Cache.flutterRoot = path.normalize(path.absolute(globalResults['flutter-root']));
+    Cache.flutterRoot = fs.path.normalize(fs.path.absolute(globalResults['flutter-root']));
 
     if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
       await Cache.lock();
@@ -199,7 +198,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     _checkFlutterCopy();
 
     if (globalResults.wasParsed('packages'))
-      PackageMap.globalPackagesPath = path.normalize(path.absolute(globalResults['packages']));
+      PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(globalResults['packages']));
 
     // See if the user specified a specific device.
     deviceManager.specifiedDeviceId = globalResults['device-id'];
@@ -224,7 +223,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   String _tryEnginePath(String enginePath) {
-    if (fs.isDirectorySync(path.join(enginePath, 'out')))
+    if (fs.isDirectorySync(fs.path.join(enginePath, 'out')))
       return enginePath;
     return null;
   }
@@ -236,15 +235,15 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       try {
         Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         if (engineUri != null) {
-          engineSourcePath = path.dirname(path.dirname(path.dirname(path.dirname(engineUri.path))));
-          bool dirExists = fs.isDirectorySync(path.join(engineSourcePath, 'out'));
+          engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
+          bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
           if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
             engineSourcePath = null;
         }
       } on FileSystemException { } on FormatException { }
 
       if (engineSourcePath == null)
-        engineSourcePath = _tryEnginePath(path.join(Cache.flutterRoot, '../engine/src'));
+        engineSourcePath = _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
 
       if (engineSourcePath == null) {
         printError('Unable to detect local Flutter engine build directory.\n'
@@ -274,7 +273,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throw new ProcessExit(2);
     }
 
-    String engineBuildPath = path.normalize(path.join(enginePath, 'out', localEngine));
+    String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
     if (!fs.isDirectorySync(engineBuildPath)) {
       printError('No Flutter engine build found at $engineBuildPath.');
       throw new ProcessExit(2);
@@ -290,16 +289,16 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    return _gatherProjectPaths(path.absolute(Cache.flutterRoot))
+    return _gatherProjectPaths(fs.path.absolute(Cache.flutterRoot))
       .map((String dir) => fs.directory(dir))
       .toList();
   }
 
   static List<String> _gatherProjectPaths(String rootPath) {
-    if (fs.isFileSync(path.join(rootPath, '.dartignore')))
+    if (fs.isFileSync(fs.path.join(rootPath, '.dartignore')))
       return <String>[];
 
-    if (fs.isFileSync(path.join(rootPath, 'pubspec.yaml')))
+    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
       return <String>[rootPath];
 
     return fs.directory(rootPath)
@@ -312,15 +311,15 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   /// Get the entry-points we want to analyze in the Flutter repo.
   List<Directory> getRepoAnalysisEntryPoints() {
-    final String rootPath = path.absolute(Cache.flutterRoot);
+    final String rootPath = fs.path.absolute(Cache.flutterRoot);
     final List<Directory> result = <Directory>[
       // not bin, and not the root
-      fs.directory(path.join(rootPath, 'dev')),
-      fs.directory(path.join(rootPath, 'examples')),
+      fs.directory(fs.path.join(rootPath, 'dev')),
+      fs.directory(fs.path.join(rootPath, 'examples')),
     ];
     // And since analyzer refuses to look at paths that end in "packages/":
     result.addAll(
-      _gatherProjectPaths(path.join(rootPath, 'packages'))
+      _gatherProjectPaths(fs.path.join(rootPath, 'packages'))
       .map<Directory>((String path) => fs.directory(path))
     );
     return result;
@@ -329,7 +328,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   void _checkFlutterCopy() {
     // If the current directory is contained by a flutter repo, check that it's
     // the same flutter that is currently running.
-    String directory = path.normalize(path.absolute(fs.currentDirectory.path));
+    String directory = fs.path.normalize(fs.path.absolute(fs.currentDirectory.path));
 
     // Check if the cwd is a flutter dir.
     while (directory.isNotEmpty) {
@@ -347,7 +346,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         break;
       }
 
-      String parent = path.dirname(directory);
+      String parent = fs.path.dirname(directory);
       if (parent == directory)
         break;
       directory = parent;
@@ -361,7 +360,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib
         Uri rootUri = flutterUri.resolve('../../..');
-        String flutterPath = path.normalize(fs.file(rootUri).absolute.path);
+        String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
 
         if (!fs.isDirectorySync(flutterPath)) {
           printError(
@@ -394,14 +393,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   // Check if `bin/flutter` and `bin/cache/engine.stamp` exist.
   bool _isDirectoryFlutterRepo(String directory) {
     return
-      fs.isFileSync(path.join(directory, 'bin/flutter')) &&
-      fs.isFileSync(path.join(directory, 'bin/cache/engine.stamp'));
+      fs.isFileSync(fs.path.join(directory, 'bin/flutter')) &&
+      fs.isFileSync(fs.path.join(directory, 'bin/cache/engine.stamp'));
   }
 }
 
 bool _compareResolvedPaths(String path1, String path2) {
-  path1 = fs.directory(path.absolute(path1)).resolveSymbolicLinksSync();
-  path2 = fs.directory(path.absolute(path2)).resolveSymbolicLinksSync();
+  path1 = fs.directory(fs.path.absolute(path1)).resolveSymbolicLinksSync();
+  path2 = fs.directory(fs.path.absolute(path2)).resolveSymbolicLinksSync();
 
   return path1 == path2;
 }

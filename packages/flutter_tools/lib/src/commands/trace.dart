@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -160,7 +158,7 @@ class Tracing {
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
 Future<Null> downloadStartupTrace(VMService observatory) async {
-  String traceInfoFilePath = path.join(getBuildDirectory(), 'start_up_info.json');
+  String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
   File traceInfoFile = fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.

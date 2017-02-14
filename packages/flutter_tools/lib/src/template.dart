@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:mustache/mustache.dart' as mustache;
-import 'package:path/path.dart' as path;
 
 import 'base/file_system.dart';
 import 'cache.dart';
@@ -39,14 +38,14 @@ class Template {
         continue;
       }
 
-      String relativePath = path.relative(entity.path,
+      String relativePath = fs.path.relative(entity.path,
           from: baseDir.absolute.path);
 
       if (relativePath.contains(_kTemplateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = path.absolute(entity.path);
+        _templateFilePaths[relativePath] = fs.path.absolute(entity.path);
       }
     }
   }
@@ -71,14 +70,14 @@ class Template {
     String destinationDirPath = destination.absolute.path;
 
     _templateFilePaths.forEach((String relativeDestPath, String absoluteSrcPath) {
-      String finalDestinationPath = path
+      String finalDestinationPath = fs.path
           .join(destinationDirPath, relativeDestPath)
           .replaceAll(_kCopyTemplateExtension, '')
           .replaceAll(_kTemplateExtension, '');
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       File finalDestinationFile = fs.file(finalDestinationPath);
-      String relativePathForLogging = path.relative(finalDestinationFile.path);
+      String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
@@ -132,7 +131,7 @@ class Template {
 }
 
 Directory _templateDirectoryInPackage(String name) {
-  String templatesDir = path.join(Cache.flutterRoot,
+  String templatesDir = fs.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
-  return fs.directory(path.join(templatesDir, name));
+  return fs.directory(fs.path.join(templatesDir, name));
 }

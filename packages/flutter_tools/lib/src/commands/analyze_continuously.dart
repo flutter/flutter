@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -41,7 +40,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = 'Flutter repository';
       printTrace('Analyzing Flutter repository:');
       for (String projectPath in directories)
-        printTrace('  ${path.relative(projectPath)}');
+        printTrace('  ${fs.path.relative(projectPath)}');
     } else {
       directories = <String>[fs.currentDirectory.path];
       analysisTarget = fs.currentDirectory.path;
@@ -157,9 +156,9 @@ class AnalysisServer {
   int _id = 0;
 
   Future<Null> start() async {
-    String snapshot = path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
+    String snapshot = fs.path.join(sdk, 'bin/snapshots/analysis_server.dart.snapshot');
     List<String> command = <String>[
-      path.join(dartSdkPath, 'bin', 'dart'),
+      fs.path.join(dartSdkPath, 'bin', 'dart'),
       snapshot,
       '--sdk',
       sdk,
@@ -309,7 +308,7 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   @override
   String toString() {
-    String relativePath = path.relative(file);
+    String relativePath = fs.path.relative(file);
     return '${severity.toLowerCase().padLeft(7)} • $message • $relativePath:$startLine:$startColumn';
   }
 

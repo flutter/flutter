@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 
 import 'application_package.dart';
 import 'asset.dart';
@@ -37,7 +36,7 @@ abstract class ResidentRunner {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
     _packagesFilePath =
-        packagesFilePath ?? path.absolute(PackageMap.globalPackagesPath);
+        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
     if (projectAssets != null)
       _assetBundle = new AssetBundle.fixed(_projectRootPath, projectAssets);
     else
@@ -133,7 +132,7 @@ abstract class ResidentRunner {
       }
       int sizeKB = (await outputFile.length()) ~/ 1024;
       status.stop();
-      printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kB).');
+      printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
       status.stop();
       printError('Error taking screenshot: $error');
@@ -377,9 +376,9 @@ class OperationResult {
 String findMainDartFile([String target]) {
   if (target == null)
     target = '';
-  String targetPath = path.absolute(target);
+  String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))
-    return path.join(targetPath, 'lib', 'main.dart');
+    return fs.path.join(targetPath, 'lib', 'main.dart');
   else
     return targetPath;
 }

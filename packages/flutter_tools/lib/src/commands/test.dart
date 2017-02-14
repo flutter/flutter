@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
 import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../base/common.dart';
@@ -69,7 +68,7 @@ class TestCommand extends FlutterCommand {
     return directory.listSync(recursive: true, followLinks: false)
                     .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
                       fs.isFileSync(entity.path))
-                    .map((FileSystemEntity entity) => path.absolute(entity.path));
+                    .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
   }
 
   Directory get _currentPackageTestDir {
@@ -83,7 +82,7 @@ class TestCommand extends FlutterCommand {
     try {
       if (testDirectory != null) {
         printTrace('switching to directory $testDirectory to run tests');
-        PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
+        PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
         fs.currentDirectory = testDirectory;
       }
       printTrace('running test package with arguments: $testArgs');
@@ -139,7 +138,7 @@ class TestCommand extends FlutterCommand {
 
       Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
-        File sourceFile = coverageFile.copySync(path.join(tempDir.path, 'lcov.source.info'));
+        File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
         ProcessResult result = processManager.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
@@ -173,7 +172,7 @@ class TestCommand extends FlutterCommand {
     testArgs.add('--');
 
     Directory testDir;
-    Iterable<String> files = argResults.rest.map((String testPath) => path.absolute(testPath)).toList();
+    Iterable<String> files = argResults.rest.map((String testPath) => fs.path.absolute(testPath)).toList();
     if (argResults['start-paused']) {
       if (files.length != 1)
         throwToolExit('When using --start-paused, you must specify a single test file to run.', exitCode: 1);

@@ -31,6 +31,7 @@ import 'devices_test.dart' as devices_test;
 import 'doctor_test.dart' as doctor_test;
 import 'drive_test.dart' as drive_test;
 import 'forbid_dart_io_test.dart' as forbid_dart_io_test;
+import 'forbid_package_path_test.dart' as forbid_package_path_test;
 import 'format_test.dart' as format_test;
 import 'hot_test.dart' as hot_test;
 import 'install_test.dart' as install_test;
@@ -70,6 +71,7 @@ void main() {
   doctor_test.main();
   drive_test.main();
   forbid_dart_io_test.main();
+  forbid_package_path_test.main();
   format_test.main();
   hot_test.main();
   install_test.main();

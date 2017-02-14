@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
@@ -18,11 +16,11 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
-  String flutterRoot = path.normalize(Cache.flutterRoot);
+  String flutterRoot = fs.path.normalize(Cache.flutterRoot);
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  String applicationRoot = path.normalize(fs.currentDirectory.path);
+  String applicationRoot = fs.path.normalize(fs.currentDirectory.path);
   localsBuffer.writeln('FLUTTER_APPLICATION_PATH=$applicationRoot');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
@@ -36,19 +34,19 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  String flutterFrameworkDir = path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
+  String flutterFrameworkDir = fs.path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
 
   if (tools.isLocalEngine)
     localsBuffer.writeln('LOCAL_ENGINE=${tools.engineBuildPath}');
 
-  File localsFile = fs.file(path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
 Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  String absProjPath = path.absolute(xcodeProjPath);
+  String absProjPath = fs.path.absolute(xcodeProjPath);
   String out = runCheckedSync(<String>[
     '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
   ]);

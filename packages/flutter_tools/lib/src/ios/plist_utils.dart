@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import '../base/file_system.dart';
 import '../base/process.dart';
 
@@ -20,7 +18,7 @@ String getValueFromFile(String plistFilePath, String key) {
   if (!fs.isFileSync(plistFilePath))
     return null;
 
-  String normalizedPlistPath = path.withoutExtension(path.absolute(plistFilePath));
+  String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
 
   try {
     String value = runCheckedSync(<String>[

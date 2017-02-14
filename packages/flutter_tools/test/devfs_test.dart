@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -20,8 +19,8 @@ import 'src/context.dart';
 import 'src/mocks.dart';
 
 void main() {
-  final String filePath = path.join('bar', 'foo.txt');
-  final String filePath2 = path.join('foo', 'bar.txt');
+  final String filePath = fs.path.join('bar', 'foo.txt');
+  final String filePath2 = fs.path.join('foo', 'bar.txt');
   Directory tempDir;
   String basePath;
   DevFS devFS;
@@ -68,7 +67,7 @@ void main() {
 
     testUsingContext('create dev file system', () async {
       // simulate workspace
-      File file = fs.file(path.join(basePath, filePath));
+      File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -83,25 +82,25 @@ void main() {
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test ${path.join('bar', 'foo.txt')}',
-        'writeFile test ${path.join('packages', 'somepkg', 'somefile.txt')}',
+        'writeFile test ${fs.path.join('bar', 'foo.txt')}',
+        'writeFile test ${fs.path.join('packages', 'somepkg', 'somefile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
     });
     testUsingContext('add new file to local file system', () async {
-      File file = fs.file(path.join(basePath, filePath2));
+      File file = fs.file(fs.path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${path.join('foo', 'bar.txt')}',
+        'writeFile test ${fs.path.join('foo', 'bar.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 7);
     });
     testUsingContext('modify existing file on local file system', () async {
-      File file = fs.file(path.join(basePath, filePath));
+      File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
       int bytes = await devFS.update();
@@ -112,17 +111,17 @@ void main() {
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
       bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${path.join('bar', 'foo.txt')}',
+        'writeFile test ${fs.path.join('bar', 'foo.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 6);
     }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when updateFileModificationTime is ported to Windows
     testUsingContext('delete a file from the local file system', () async {
-      File file = fs.file(path.join(basePath, filePath));
+      File file = fs.file(fs.path.join(basePath, filePath));
       await file.delete();
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${path.join('bar', 'foo.txt')}',
+        'deleteFile test ${fs.path.join('bar', 'foo.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 0);
@@ -132,7 +131,7 @@ void main() {
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test ${path.join('packages', 'newpkg', 'anotherfile.txt')}',
+        'writeFile test ${fs.path.join('packages', 'newpkg', 'anotherfile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 51);
@@ -217,7 +216,7 @@ void main() {
 
     testUsingContext('create dev file system', () async {
       // simulate workspace
-      File file = fs.file(path.join(basePath, filePath));
+      File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -232,8 +231,8 @@ void main() {
       int bytes = await devFS.update();
       vmService.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test ${path.join('bar', 'foo.txt')}',
-        'writeFile test ${path.join('packages', 'somepkg', 'somefile.txt')}',
+        'writeFile test ${fs.path.join('bar', 'foo.txt')}',
+        'writeFile test ${fs.path.join('packages', 'somepkg', 'somefile.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
@@ -329,16 +328,16 @@ void _cleanupTempDirs() {
 
 Future<Null> _createPackage(String pkgName, String pkgFileName) async {
   final Directory pkgTempDir = _newTempDir();
-  File pkgFile = fs.file(path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName));
+  File pkgFile = fs.file(fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName));
   await pkgFile.parent.create(recursive: true);
   pkgFile.writeAsBytesSync(<int>[11, 12, 13]);
   _packages[pkgName] = pkgTempDir;
   StringBuffer sb = new StringBuffer();
   _packages.forEach((String pkgName, Directory pkgTempDir) {
-    Uri pkgPath = path.toUri(path.join(pkgTempDir.path, pkgName, 'lib'));
+    Uri pkgPath = fs.path.toUri(fs.path.join(pkgTempDir.path, pkgName, 'lib'));
     sb.writeln('$pkgName:$pkgPath');
   });
-  fs.file(path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
+  fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
 
-String _inAssetBuildDirectory(String filename) => path.join(getAssetBuildDirectory(), filename);
+String _inAssetBuildDirectory(String filename) => fs.path.join(getAssetBuildDirectory(), filename);

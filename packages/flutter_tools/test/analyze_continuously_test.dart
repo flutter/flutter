@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/commands/analyze_continuously.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -71,12 +70,12 @@ void main() {
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode: false }) {
-  File pubspecFile = fs.file(path.join(directory.path, 'pubspec.yaml'));
+  File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project
 ''');
 
-  File dartFile = fs.file(path.join(directory.path, 'lib', 'main.dart'));
+  File dartFile = fs.file(fs.path.join(directory.path, 'lib', 'main.dart'));
   dartFile.parent.createSync();
   dartFile.writeAsStringSync('''
 void main() {

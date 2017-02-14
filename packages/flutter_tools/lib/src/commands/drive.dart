@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
@@ -140,25 +138,25 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    String appFile = path.normalize(targetFile);
+    String appFile = fs.path.normalize(targetFile);
 
     // This command extends `flutter start` and therefore CWD == package dir
     String packageDir = fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
     // for the corresponding test file relative to it.
-    if (!path.isRelative(appFile)) {
-      if (!path.isWithin(packageDir, appFile)) {
+    if (!fs.path.isRelative(appFile)) {
+      if (!fs.path.isWithin(packageDir, appFile)) {
         printError(
           'Application file $appFile is outside the package directory $packageDir'
         );
         return null;
       }
 
-      appFile = path.relative(appFile, from: packageDir);
+      appFile = fs.path.relative(appFile, from: packageDir);
     }
 
-    List<String> parts = path.split(appFile);
+    List<String> parts = fs.path.split(appFile);
 
     if (parts.length < 2) {
       printError(
@@ -171,9 +169,9 @@ class DriveCommand extends RunCommandBase {
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    String pathWithNoExtension = path.withoutExtension(path.joinAll(
+    String pathWithNoExtension = fs.path.withoutExtension(fs.path.joinAll(
       <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
-    return '${pathWithNoExtension}_test${path.extension(appFile)}';
+    return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
 
@@ -317,11 +315,11 @@ void restoreTestRunner() {
 Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
-  PackageMap.globalPackagesPath = path.normalize(path.absolute(PackageMap.globalPackagesPath));
+  PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   List<String> args = testArgs.toList()
     ..add('--packages=${PackageMap.globalPackagesPath}')
     ..add('-rexpanded');
-  String dartVmPath = path.join(dartSdkPath, 'bin', 'dart');
+  String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   int result = await runCommandAndStreamOutput(
     <String>[dartVmPath]..addAll(args),
     environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }

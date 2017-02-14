@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main()  {
@@ -16,7 +15,7 @@ void main()  {
   String projectRoot = tempDir.path;
   String assetPath = 'banana.txt';
   String assetContents = 'banana';
-  File tempFile = fs.file(path.join(projectRoot, assetPath));
+  File tempFile = fs.file(fs.path.join(projectRoot, assetPath));
   tempFile.parent.createSync(recursive: true);
   tempFile.writeAsBytesSync(UTF8.encode(assetContents));
 

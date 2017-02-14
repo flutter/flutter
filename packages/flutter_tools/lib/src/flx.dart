@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -20,9 +18,9 @@ import 'zip.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultFlxOutputPath => path.join(getBuildDirectory(), 'app.flx');
-String get defaultSnapshotPath => path.join(getBuildDirectory(), 'snapshot_blob.bin');
-String get defaultDepfilePath => path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultFlxOutputPath => fs.path.join(getBuildDirectory(), 'app.flx');
+String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
+String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kSnapshotKey = 'snapshot_blob.bin';
@@ -89,7 +87,7 @@ Future<Null> build({
   snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   File snapshotFile;
 
   if (!precompiledSnapshot) {
@@ -135,7 +133,7 @@ Future<Null> assemble({
 }) async {
   outputPath ??= defaultFlxOutputPath;
   workingDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   printTrace('Building $outputPath');
 
   // Build the asset bundle.

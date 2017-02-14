@@ -4,15 +4,13 @@
 
 import 'dart:convert';
 
-import 'package:path/path.dart' as path;
-
 import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
 class Config {
   Config([File configFile]) {
-    _configFile = configFile ?? fs.file(path.join(_userHomeDir(), '.flutter_settings'));
+    _configFile = configFile ?? fs.file(fs.path.join(_userHomeDir(), '.flutter_settings'));
     if (_configFile.existsSync())
       _values = JSON.decode(_configFile.readAsStringSync());
   }

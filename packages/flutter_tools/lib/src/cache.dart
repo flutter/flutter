@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -52,7 +50,7 @@ class Cache {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
-    _lock = fs.file(path.join(flutterRoot, 'bin', 'cache', 'lockfile')).openSync(mode: FileMode.WRITE);
+    _lock = fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).openSync(mode: FileMode.WRITE);
     bool locked = false;
     bool printed = false;
     while (!locked) {
@@ -91,7 +89,7 @@ class Cache {
 
   static String get engineRevision {
     if (_engineRevision == null) {
-      File revisionFile = fs.file(path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
+      File revisionFile = fs.file(fs.path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
       if (revisionFile.existsSync())
         _engineRevision = revisionFile.readAsStringSync().trim();
     }
@@ -103,14 +101,14 @@ class Cache {
   /// Return the top-level directory in the cache; this is `bin/cache`.
   Directory getRoot() {
     if (_rootOverride != null)
-      return fs.directory(path.join(_rootOverride.path, 'bin', 'cache'));
+      return fs.directory(fs.path.join(_rootOverride.path, 'bin', 'cache'));
     else
-      return fs.directory(path.join(flutterRoot, 'bin', 'cache'));
+      return fs.directory(fs.path.join(flutterRoot, 'bin', 'cache'));
   }
 
   /// Return a directory in the cache dir. For `pkg`, this will return `bin/cache/pkg`.
   Directory getCacheDir(String name) {
-    Directory dir = fs.directory(path.join(getRoot().path, name));
+    Directory dir = fs.directory(fs.path.join(getRoot().path, name));
     if (!dir.existsSync())
       dir.createSync(recursive: true);
     return dir;
@@ -122,11 +120,11 @@ class Cache {
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
-    return fs.directory(path.join(getCacheArtifacts().path, name));
+    return fs.directory(fs.path.join(getCacheArtifacts().path, name));
   }
 
   String getVersionFor(String artifactName) {
-    File versionFile = fs.file(path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
+    File versionFile = fs.file(fs.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -140,7 +138,7 @@ class Cache {
   }
 
   File getStampFileFor(String artifactName) {
-    return fs.file(path.join(getRoot().path, '$artifactName.stamp'));
+    return fs.file(fs.path.join(getRoot().path, '$artifactName.stamp'));
   }
 
   bool isUpToDate() {
@@ -156,11 +154,11 @@ class Cache {
     Uri url = Uri.parse(urlStr);
     Directory thirdPartyDir = getArtifactDirectory('third_party');
 
-    Directory serviceDir = fs.directory(path.join(thirdPartyDir.path, serviceName));
+    Directory serviceDir = fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
     if (!serviceDir.existsSync())
       serviceDir.createSync(recursive: true);
 
-    File cachedFile = fs.file(path.join(serviceDir.path, url.pathSegments.last));
+    File cachedFile = fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
       try {
         await _downloadFileToCache(url, cachedFile, unzip);
@@ -197,7 +195,7 @@ class Cache {
       if (location is Directory && !location.existsSync())
         location.createSync(recursive: true);
 
-      File tempFile = fs.file(path.join(fs.systemTempDirectory.path, '${url.toString().hashCode}.zip'));
+      File tempFile = fs.file(fs.path.join(fs.systemTempDirectory.path, '${url.toString().hashCode}.zip'));
       tempFile.writeAsBytesSync(fileBytes, flush: true);
       os.unzip(tempFile, location);
       tempFile.deleteSync();
@@ -311,14 +309,14 @@ class FlutterEngine {
   bool isUpToDate() {
     Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
-      String pkgPath = path.join(pkgDir.path, pkgName);
+      String pkgPath = fs.path.join(pkgDir.path, pkgName);
       if (!fs.directory(pkgPath).existsSync())
         return false;
     }
 
     Directory engineDir = cache.getArtifactDirectory(kName);
     for (List<String> toolsDir in _getBinaryDirs()) {
-      Directory dir = fs.directory(path.join(engineDir.path, toolsDir[0]));
+      Directory dir = fs.directory(fs.path.join(engineDir.path, toolsDir[0]));
       if (!dir.existsSync())
         return false;
     }
@@ -332,7 +330,7 @@ class FlutterEngine {
 
     Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
-      String pkgPath = path.join(pkgDir.path, pkgName);
+      String pkgPath = fs.path.join(pkgDir.path, pkgName);
       Directory dir = fs.directory(pkgPath);
       if (dir.existsSync())
         dir.deleteSync(recursive: true);
@@ -346,14 +344,14 @@ class FlutterEngine {
     for (List<String> toolsDir in _getBinaryDirs()) {
       String cacheDir = toolsDir[0];
       String urlPath = toolsDir[1];
-      Directory dir = fs.directory(path.join(engineDir.path, cacheDir));
+      Directory dir = fs.directory(fs.path.join(engineDir.path, cacheDir));
       await _downloadItem('Downloading $cacheDir tools...', url + urlPath, dir);
 
       _makeFilesExecutable(dir);
 
-      File frameworkZip = fs.file(path.join(dir.path, 'Flutter.framework.zip'));
+      File frameworkZip = fs.file(fs.path.join(dir.path, 'Flutter.framework.zip'));
       if (frameworkZip.existsSync()) {
-        Directory framework = fs.directory(path.join(dir.path, 'Flutter.framework'));
+        Directory framework = fs.directory(fs.path.join(dir.path, 'Flutter.framework'));
         framework.createSync();
         os.unzip(frameworkZip, framework);
       }
@@ -365,7 +363,7 @@ class FlutterEngine {
   void _makeFilesExecutable(Directory dir) {
     for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
-        String name = path.basename(entity.path);
+        String name = fs.path.basename(entity.path);
         if (name == 'sky_snapshot' || name == 'sky_shell')
           os.makeExecutable(entity);
       }

@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 void main() {
@@ -12,7 +11,7 @@ void main() {
 
   setUp(() {
     Directory tempDiretory = fs.systemTempDirectory.createTempSync('flutter_test');
-    File file = fs.file(path.join(tempDiretory.path, '.settings'));
+    File file = fs.file(fs.path.join(tempDiretory.path, '.settings'));
     config = new Config(file);
   });
 

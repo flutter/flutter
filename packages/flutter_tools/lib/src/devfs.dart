@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
-import 'package:path/path.dart' as path;
-
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -298,7 +296,7 @@ class DevFS {
       _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
       fsName = fsName {
     _packagesFilePath =
-        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
   DevFS.operations(this._operations,
@@ -308,7 +306,7 @@ class DevFS {
       })
     : _httpWriter = null {
     _packagesFilePath =
-        packagesFilePath ?? path.join(rootDirectory.path, kPackagesFileName);
+        packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
 
   final DevFSOperations _operations;
@@ -365,7 +363,7 @@ class DevFS {
 
     // Handle deletions.
     printTrace('Scanning for deleted files');
-    String assetBuildDirPrefix = getAssetBuildDirectory() + path.separator;
+    String assetBuildDirPrefix = getAssetBuildDirectory() + fs.path.separator;
     final List<String> toRemove = new List<String>();
     _entries.forEach((String devicePath, DevFSContent content) {
       if (!content._exists) {
@@ -446,7 +444,7 @@ class DevFS {
   void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
-    final String devicePath = path.join(getAssetBuildDirectory(), archivePath);
+    final String devicePath = fs.path.join(getAssetBuildDirectory(), archivePath);
 
     _entries[devicePath] = content;
     content._exists = true;
@@ -472,7 +470,7 @@ class DevFS {
                                Set<String> fileFilter}) async {
     String prefix = directoryName;
     if (prefix == null) {
-      prefix = path.relative(directory.path, from: rootDirectory.path);
+      prefix = fs.path.relative(directory.path, from: rootDirectory.path);
       if (prefix == '.')
         prefix = '';
     }
@@ -494,20 +492,20 @@ class DevFS {
           continue;
         }
         assert((file is Link) || (file is File));
-        if (ignoreDotFiles && path.basename(file.path).startsWith('.')) {
+        if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
           // Skip dot files.
           continue;
         }
         final String relativePath =
-            path.relative(file.path, from: directory.path);
-        final String devicePath = path.join(prefix, relativePath);
+            fs.path.relative(file.path, from: directory.path);
+        final String devicePath = fs.path.join(prefix, relativePath);
         bool filtered = false;
         if ((fileFilter != null) &&
             !fileFilter.contains(devicePath)) {
           if (packagesDirectoryName != null) {
             // Double check the filter for packages/packagename/
             final String packagesDevicePath =
-                path.join(packagesDirectoryName, relativePath);
+                fs.path.join(packagesDirectoryName, relativePath);
             if (!fileFilter.contains(packagesDevicePath)) {
               // File was not in the filter set.
               filtered = true;
@@ -544,13 +542,13 @@ class DevFS {
       // This project's own package.
       final bool isProjectPackage = uri.toString() == 'lib/';
       final String directoryName =
-          isProjectPackage ? 'lib' : path.join('packages', packageName);
+          isProjectPackage ? 'lib' : fs.path.join('packages', packageName);
       // If this is the project's package, we need to pass both
       // package:<package_name> and lib/ as paths to be checked against
       // the filter because we must support both package: imports and relative
       // path imports within the project's own code.
       final String packagesDirectoryName =
-          isProjectPackage ? path.join('packages', packageName) : null;
+          isProjectPackage ? fs.path.join('packages', packageName) : null;
       Directory directory = fs.directory(uri);
       bool packageExists =
           await _scanDirectory(directory,

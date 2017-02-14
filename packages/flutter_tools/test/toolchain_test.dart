@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/toolchain.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -21,11 +20,11 @@ void main() {
 
       expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.debug).path,
-        endsWith(path.join('cache', 'artifacts', 'engine', 'android-arm'))
+        endsWith(fs.path.join('cache', 'artifacts', 'engine', 'android-arm'))
       );
       expect(
         toolConfig.getEngineArtifactsDirectory(TargetPlatform.android_arm, BuildMode.release).path,
-        endsWith(path.join('cache', 'artifacts', 'engine', 'android-arm-release'))
+        endsWith(fs.path.join('cache', 'artifacts', 'engine', 'android-arm-release'))
       );
       expect(tempDir, isNotNull);
       tempDir.deleteSync(recursive: true);

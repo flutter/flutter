@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show JSON;
 
-import 'package:path/path.dart' as path;
-
 import '../android/android_sdk.dart';
 import '../android/gradle.dart';
 import '../base/common.dart';
@@ -39,8 +37,8 @@ const String _kDebugKeystoreKeyAlias = "chromiumdebugkey";
 // Password for the Chromium debug keystore
 const String _kDebugKeystorePassword = "chromium";
 
-// Default APK output path.
-String get _defaultOutputPath => path.join(getAndroidBuildDirectory(), 'app.apk');
+// Default APK output fs.path.
+String get _defaultOutputPath => fs.path.join(getAndroidBuildDirectory(), 'app.apk');
 
 /// Copies files into a new directory structure.
 class _AssetBuilder {
@@ -54,7 +52,7 @@ class _AssetBuilder {
   }
 
   void add(File asset, String relativePath) {
-    String destPath = path.join(_assetDir.path, relativePath);
+    String destPath = fs.path.join(_assetDir.path, relativePath);
     ensureDirectoryExists(destPath);
     asset.copySync(destPath);
   }
@@ -176,7 +174,7 @@ class BuildApkCommand extends BuildSubCommand {
       help: 'Android manifest XML file.');
     argParser.addOption('resources',
       abbr: 'r',
-      help: 'Resources directory path.');
+      help: 'Resources directory fs.path.');
     argParser.addOption('output-file',
       abbr: 'o',
       defaultsTo: _defaultOutputPath,
@@ -301,12 +299,12 @@ Future<_ApkComponents> _findApkComponents(
   } else {
     Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildMode);
 
-    components.icuData = fs.file(path.join(artifacts.path, 'icudtl.dat'));
+    components.icuData = fs.file(fs.path.join(artifacts.path, 'icudtl.dat'));
     components.jars = <File>[
-      fs.file(path.join(artifacts.path, 'classes.dex.jar'))
+      fs.file(fs.path.join(artifacts.path, 'classes.dex.jar'))
     ];
-    components.libSkyShell = fs.file(path.join(artifacts.path, 'libsky_shell.so'));
-    components.debugKeystore = fs.file(path.join(artifacts.path, 'chromium-debug.keystore'));
+    components.libSkyShell = fs.file(fs.path.join(artifacts.path, 'libsky_shell.so'));
+    components.debugKeystore = fs.file(fs.path.join(artifacts.path, 'chromium-debug.keystore'));
   }
 
   await parseServiceConfigs(components.services, jars: components.jars);
@@ -465,7 +463,7 @@ bool _needsRebuild(
   if (!fs.isFileSync('$apkPath.sha1'))
     return true;
 
-  String lastBuildType = _readBuildMeta(path.dirname(apkPath))['targetBuildType'];
+  String lastBuildType = _readBuildMeta(fs.path.dirname(apkPath))['targetBuildType'];
   String targetBuildType = _getTargetBuildTypeToken(platform, buildMode, fs.file(apkPath));
   if (lastBuildType != targetBuildType)
     return true;
@@ -534,7 +532,7 @@ Future<Null> buildAndroid(
   if (components == null)
     throwToolExit('Failure building APK: unable to find components.');
 
-  String typeName = path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
+  String typeName = fs.path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
   Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...',
       expectSlowOperation: true);
 
@@ -567,7 +565,7 @@ Future<Null> buildAndroid(
     if (!fs.isDirectorySync(aotPath))
       throwToolExit('AOT snapshot does not exist: $aotPath');
     for (String aotFilename in kAotSnapshotFiles) {
-      String aotFilePath = path.join(aotPath, aotFilename);
+      String aotFilePath = fs.path.join(aotPath, aotFilename);
       if (!fs.isFileSync(aotFilePath))
         throwToolExit('Missing AOT snapshot file: $aotFilePath');
       components.extraFiles['assets/$aotFilename'] = fs.file(aotFilePath);
@@ -584,7 +582,7 @@ Future<Null> buildAndroid(
   printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
   _writeBuildMetaEntry(
-    path.dirname(outputFile),
+    fs.path.dirname(outputFile),
     'targetBuildType',
     _getTargetBuildTypeToken(platform, buildMode, fs.file(outputFile))
   );
@@ -640,7 +638,7 @@ Future<Null> buildApk(
 }
 
 Map<String, dynamic> _readBuildMeta(String buildDirectoryPath) {
-  File buildMetaFile = fs.file(path.join(buildDirectoryPath, 'build_meta.json'));
+  File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
   if (buildMetaFile.existsSync())
     return JSON.decode(buildMetaFile.readAsStringSync());
   return <String, dynamic>{};
@@ -649,7 +647,7 @@ Map<String, dynamic> _readBuildMeta(String buildDirectoryPath) {
 void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) {
   Map<String, dynamic> meta = _readBuildMeta(buildDirectoryPath);
   meta[key] = value;
-  File buildMetaFile = fs.file(path.join(buildDirectoryPath, 'build_meta.json'));
+  File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
   buildMetaFile.writeAsStringSync(toPrettyJson(meta));
 }
 

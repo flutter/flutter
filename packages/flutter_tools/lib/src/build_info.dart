@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import 'base/context.dart';
+import 'base/file_system.dart';
 import 'base/platform.dart';
 import 'base/utils.dart';
 import 'globals.dart';
@@ -129,7 +128,7 @@ String getBuildDirectory() {
     return 'build';
 
   String buildDir = config.getValue('build-dir') ?? 'build';
-  if (path.isAbsolute(buildDir)) {
+  if (fs.path.isAbsolute(buildDir)) {
     throw new Exception(
         'build-dir config setting in ${config.configPath} must be relative');
   }
@@ -144,15 +143,15 @@ String getAndroidBuildDirectory() {
 
 /// Returns the AOT build output directory.
 String getAotBuildDirectory() {
-  return path.join(getBuildDirectory(), 'aot');
+  return fs.path.join(getBuildDirectory(), 'aot');
 }
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return path.join(getBuildDirectory(), 'flx');
+  return fs.path.join(getBuildDirectory(), 'flx');
 }
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return path.join(getBuildDirectory(), 'ios');
+  return fs.path.join(getBuildDirectory(), 'ios');
 }

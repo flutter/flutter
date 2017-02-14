@@ -21,7 +21,6 @@ import 'package:flutter_tools/src/toolchain.dart';
 import 'package:flutter_tools/src/usage.dart';
 
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -70,9 +69,9 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(SimControl, () => new MockSimControl());
     testContext.putIfAbsent(Usage, () => new MockUsage());
 
-    final String basePath = path.dirname(path.fromUri(platform.script));
+    final String basePath = fs.path.dirname(fs.path.fromUri(platform.script));
     final String flutterRoot =
-        path.normalize(path.join(basePath, '..', '..', '..'));
+        fs.path.normalize(fs.path.join(basePath, '..', '..', '..'));
     try {
       return await testContext.runInZone(() {
         // Apply the overrides to the test context in the zone since their

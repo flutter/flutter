@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
@@ -257,7 +256,7 @@ class HotRunner extends ResidentRunner {
   DevFS _devFS;
 
   Future<Uri> _initDevFS() {
-    String fsName = path.basename(projectRootPath);
+    String fsName = fs.path.basename(projectRootPath);
     _devFS = new DevFS(vmService,
                        fsName,
                        fs.directory(projectRootPath),
@@ -324,7 +323,7 @@ class HotRunner extends ResidentRunner {
 
   Future<Null> _launchFromDevFS(ApplicationPackage package,
                                 String mainScript) async {
-    String entryPath = path.relative(mainScript, from: projectRootPath);
+    String entryPath = fs.path.relative(mainScript, from: projectRootPath);
     String deviceEntryPath =
         _devFS.baseUri.resolve(entryPath).toFilePath();
     String devicePackagesPath =
@@ -435,7 +434,7 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'Dart Source Error');
     String reloadMessage;
     try {
-      String entryPath = path.relative(mainPath, from: projectRootPath);
+      String entryPath = fs.path.relative(mainPath, from: projectRootPath);
       String deviceEntryPath =
           _devFS.baseUri.resolve(entryPath).toFilePath();
       String devicePackagesPath =

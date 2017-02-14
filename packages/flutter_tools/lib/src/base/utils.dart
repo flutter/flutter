@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:math' show Random;
 
 import 'package:crypto/crypto.dart';
-import 'package:path/path.dart' as path;
 
 import 'file_system.dart';
 import 'platform.dart';
@@ -66,7 +65,7 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
 
   while (true) {
     String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-    File file = fs.file(path.join(dir.path, name));
+    File file = fs.file(fs.path.join(dir.path, name));
     if (!file.existsSync())
       return file;
     i++;

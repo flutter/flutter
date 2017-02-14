@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
 import 'package:pub_semver/pub_semver.dart';
 
 import '../base/common.dart';
@@ -69,20 +68,20 @@ class AndroidSdk {
       androidHomeDir = platform.environment[kAndroidHome];
     } else if (platform.isLinux) {
       if (homeDirPath != null)
-        androidHomeDir = path.join(homeDirPath, 'Android', 'Sdk');
+        androidHomeDir = fs.path.join(homeDirPath, 'Android', 'Sdk');
     } else if (platform.isMacOS) {
       if (homeDirPath != null)
-        androidHomeDir = path.join(homeDirPath, 'Library', 'Android', 'sdk');
+        androidHomeDir = fs.path.join(homeDirPath, 'Library', 'Android', 'sdk');
     } else if (platform.isWindows) {
       if (homeDirPath != null)
-        androidHomeDir = path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
+        androidHomeDir = fs.path.join(homeDirPath, 'AppData', 'Local', 'Android', 'sdk');
     }
 
     if (androidHomeDir != null) {
       if (validSdkDirectory(androidHomeDir))
         return new AndroidSdk(androidHomeDir);
-      if (validSdkDirectory(path.join(androidHomeDir, 'sdk')))
-        return new AndroidSdk(path.join(androidHomeDir, 'sdk'));
+      if (validSdkDirectory(fs.path.join(androidHomeDir, 'sdk')))
+        return new AndroidSdk(fs.path.join(androidHomeDir, 'sdk'));
     }
 
     File aaptBin = os.which('aapt'); // in build-tools/$version/aapt
@@ -109,7 +108,7 @@ class AndroidSdk {
   }
 
   static bool validSdkDirectory(String dir) {
-    return fs.isDirectorySync(path.join(dir, 'platform-tools'));
+    return fs.isDirectorySync(fs.path.join(dir, 'platform-tools'));
   }
 
   List<AndroidSdkVersion> get sdkVersions => _sdkVersions;
@@ -131,30 +130,30 @@ class AndroidSdk {
   }
 
   String getPlatformToolsPath(String binaryName) {
-    return path.join(directory, 'platform-tools', binaryName);
+    return fs.path.join(directory, 'platform-tools', binaryName);
   }
 
   void _init() {
     List<String> platforms = <String>[]; // android-22, ...
 
-    Directory platformsDir = fs.directory(path.join(directory, 'platforms'));
+    Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
-        .map((FileSystemEntity entity) => path.basename(entity.path))
+        .map((FileSystemEntity entity) => fs.path.basename(entity.path))
         .where((String name) => name.startsWith('android-'))
         .toList();
     }
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
-    Directory buildToolsDir = fs.directory(path.join(directory, 'build-tools'));
+    Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()
         .map((FileSystemEntity entity) {
           try {
-            return new Version.parse(path.basename(entity.path));
+            return new Version.parse(fs.path.basename(entity.path));
           } catch (error) {
             return null;
           }
@@ -243,11 +242,11 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getPlatformsPath(String itemName) {
-    return path.join(sdk.directory, 'platforms', platformVersionName, itemName);
+    return fs.path.join(sdk.directory, 'platforms', platformVersionName, itemName);
   }
 
   String getBuildToolsPath(String binaryName) {
-    return path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
+    return fs.path.join(sdk.directory, 'build-tools', buildToolsVersionName, binaryName);
   }
 
   @override

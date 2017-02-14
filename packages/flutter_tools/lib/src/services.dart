@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
@@ -86,7 +85,7 @@ Future<String> getServiceFromUrl(
     return await cache.getThirdPartyFile(url, serviceName, unzip: unzip);
   } else {
     // Assume url is a path relative to the service's root dir.
-    return path.join(rootDir, url);
+    return fs.path.join(rootDir, url);
   }
 }
 
@@ -107,7 +106,7 @@ File generateServiceDefinitions(
       }).toList();
 
   Map<String, dynamic> json = <String, dynamic>{ 'services': services };
-  File servicesFile = fs.file(path.join(dir, 'services.json'));
+  File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
   return servicesFile;
 }
