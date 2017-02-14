@@ -20,7 +20,7 @@ void main() {
     }
 
     Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
-      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'dur': duration
+      'name': 'Frame', 'ph': 'X', 'ts': timeStamp, 'tdur': duration
     };
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
