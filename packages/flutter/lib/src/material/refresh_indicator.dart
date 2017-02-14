@@ -71,11 +71,6 @@ enum _DismissTransition {
 /// it returns. The refresh indicator disappears after the callback's
 /// Future has completed.
 ///
-/// The required [scrollableKey] parameter identifies the scrollable widget
-/// whose scrollOffset is monitored by this RefreshIndicator. The same
-/// scrollableKey must also be set on the scrollable. See [Block.scrollableKey],
-/// [ScrollableList.scrollableKey], etc.
-///
 /// See also:
 ///
 ///  * <https://material.google.com/patterns/swipe-to-refresh.html>

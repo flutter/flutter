@@ -45,7 +45,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body = new MaterialList(
+    Widget body = new MaterialList( // ignore: DEPRECATED_MEMBER_USE
       type: MaterialListType.threeLine,
       padding: const EdgeInsets.all(8.0),
       scrollableKey: _scrollableKey,

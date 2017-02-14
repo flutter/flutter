@@ -22,6 +22,7 @@ import 'scroll_behavior.dart';
 ///
 /// See also [LazyBlockBuilder] for an implementation of LazyBlockDelegate based
 /// on an [IndexedWidgetBuilder] closure.
+@Deprecated('use SliverChildDelegate instead')
 abstract class LazyBlockDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -86,9 +87,10 @@ abstract class LazyBlockDelegate {
   double estimateTotalExtent(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset);
 }
 
-/// Signature for callbacks that estimate the total height of a [LazyBlock]'s contents.
+/// Signature for callbacks that estimate the total height of a `LazyBlock`'s contents.
 ///
-/// See [LazyBlockDelegate.estimateTotalExtent] for details.
+/// See `LazyBlockDelegate.estimateTotalExtent` for details.
+@deprecated
 typedef double TotalExtentEstimator(int firstIndex, int lastIndex, double minOffset, double firstStartOffset, double lastEndOffset);
 
 /// Uses an [IndexedWidgetBuilder] to provide children for [LazyBlock].
@@ -100,6 +102,7 @@ typedef double TotalExtentEstimator(int firstIndex, int lastIndex, double minOff
 /// [estimateTotalExtent] callback.
 ///
 /// See also [LazyBlockViewport].
+@Deprecated('use SliverChildBuilderDelegate instead')
 class LazyBlockBuilder extends LazyBlockDelegate {
   /// Creates a LazyBlockBuilder based on the given builder.
   LazyBlockBuilder({ this.builder, this.totalExtentEstimator }) {
@@ -143,6 +146,7 @@ class LazyBlockBuilder extends LazyBlockDelegate {
 /// Uses a [List<Widget>] to provide children for [LazyBlock].
 ///
 /// See also [LazyBlockViewport].
+@Deprecated('use SliverChildListDelegate instead')
 class LazyBlockChildren extends LazyBlockDelegate {
   /// Creates a LazyBlockChildren that displays the given children.
   ///
@@ -202,6 +206,7 @@ class LazyBlockChildren extends LazyBlockDelegate {
 /// Consider [Block] if you have a small number of children that will only
 /// scroll in unusual circumstances (e.g. when the user's device is smaller than
 /// expected).
+@Deprecated('use ListView instead')
 class LazyBlock extends StatelessWidget {
   /// Creates an infinite scrolling list of variable height children.
   ///
@@ -301,7 +306,7 @@ class LazyBlock extends StatelessWidget {
   }
 }
 
-/// Signature used by [LazyBlockViewport] to report its interior and exterior dimensions.
+/// Signature used by `LazyBlockViewport` to report its interior and exterior dimensions.
 ///
 ///  * The `firstIndex` is the index of the child that is visible at the
 ///    starting edge of the viewport.
@@ -323,6 +328,7 @@ class LazyBlock extends StatelessWidget {
 ///  * The `containerExtent` is the exterior dimension of the viewport (i.e.,
 ///    the amount of the thing inside the viewport that is visible from outside
 ///    the viewport).
+@deprecated
 typedef void LazyBlockExtentsChangedCallback(int firstIndex, int lastIndex, double firstStartOffset, double lastEndOffset, double minScrollOffset, double containerExtent);
 
 /// A viewport on an infinite list of variable height children.
@@ -346,6 +352,7 @@ typedef void LazyBlockExtentsChangedCallback(int firstIndex, int lastIndex, doub
 /// is only one child.
 ///
 /// For a scrollable version of this widget, see [LazyBlock].
+@deprecated
 class LazyBlockViewport extends RenderObjectWidget {
   /// Creates a viewport on an infinite list of variable height children.
   ///
@@ -395,8 +402,10 @@ class LazyBlockViewport extends RenderObjectWidget {
   _RenderLazyBlock createRenderObject(BuildContext context) => new _RenderLazyBlock();
 }
 
+@deprecated
 class _LazyBlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
+@deprecated
 class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
   _RenderLazyBlock({
     Offset paintOffset: Offset.zero,
@@ -471,6 +480,7 @@ class _RenderLazyBlock extends RenderVirtualViewport<_LazyBlockParentData> {
   }
 }
 
+@deprecated
 class _LazyBlockElement extends RenderObjectElement {
   _LazyBlockElement(LazyBlockViewport widget) : super(widget);
 

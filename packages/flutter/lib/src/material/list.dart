@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 ///
 /// See also:
 ///
-///  * [MaterialList]
 ///  * [ListItem]
 ///  * [kListItemExtent]
 ///  * <https://material.google.com/components/lists.html#lists-specs>
@@ -57,6 +56,7 @@ Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>
 ///    expand.
 ///  * [GridView]
 ///  * <https://material.google.com/components/lists.html>
+@Deprecated('use ListView instead')
 class MaterialList extends StatelessWidget {
   /// Creates a material list.
   ///
