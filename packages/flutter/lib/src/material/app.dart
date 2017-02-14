@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 
 import 'arc.dart';
 import 'colors.dart';
-import 'overscroll_indicator.dart';
 import 'page.dart';
 import 'theme.dart';
 
@@ -189,30 +188,6 @@ class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
 
   @override
   ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.android);
-
-  ScrollableEdge _overscrollIndicatorEdge(ScrollableEdge edge) {
-    switch (edge) {
-      case ScrollableEdge.leading:
-        return ScrollableEdge.trailing;
-      case ScrollableEdge.trailing:
-        return ScrollableEdge.leading;
-      case ScrollableEdge.both:
-        return ScrollableEdge.none;
-      case ScrollableEdge.none:
-        return ScrollableEdge.both;
-    }
-    return ScrollableEdge.both;
-  }
-
-  @override
-  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) {
-    // Only introduce an overscroll indicator for the edges of the scrollable
-    // that aren't already clamped.
-    return new OverscrollIndicator(
-      edge: _overscrollIndicatorEdge(ClampOverscrolls.of(context)?.edge),
-      child: scrollWidget
-    );
-  }
 
   @override
   bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
