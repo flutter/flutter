@@ -25,7 +25,7 @@ dependencies:
   process: 2.0.1
   pub_semver: ^1.0.0
   stack_trace: ^1.4.0
-  usage: ^3.0.0
+  usage: ^3.0.0+1
   vm_service_client: '0.2.2+4'
   web_socket_channel: ^1.0.4
   xml: ^2.4.1
