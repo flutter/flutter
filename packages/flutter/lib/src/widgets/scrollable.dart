@@ -157,7 +157,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
 
   bool _shouldUpdatePosition(Scrollable2 oldConfig) {
     return config.physics?.runtimeType != oldConfig.physics?.runtimeType
-        || config.controller?.runtimeType != config.controller?.runtimeType;
+        || config.controller?.runtimeType != oldConfig.controller?.runtimeType;
   }
 
   @override

@@ -5,6 +5,32 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+class TestScrollPosition extends ScrollPosition {
+  TestScrollPosition({
+    ScrollPhysics physics,
+    AbstractScrollState state,
+    double initialPixels: 0.0,
+    ScrollPosition oldPosition,
+  }) : super(
+    physics: physics,
+    state: state,
+    initialPixels: initialPixels,
+    oldPosition: oldPosition,
+  );
+}
+
+class TestScrollController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new TestScrollPosition(
+      physics: physics,
+      state: state,
+      initialPixels: initialScrollOffset,
+      oldPosition: oldPosition,
+    );
+  }
+}
+
 void main() {
   testWidgets('SingleChildScrollView control test', (WidgetTester tester) async {
     await tester.pumpWidget(new SingleChildScrollView(
@@ -22,5 +48,72 @@ void main() {
     await tester.scroll(find.byType(SingleChildScrollView), const Offset(-200.0, -200.0));
 
     expect(box.localToGlobal(Point.origin), equals(const Point(0.0, -200.0)));
+  });
+
+  testWidgets('Changing controllers changes scroll position', (WidgetTester tester) async {
+    TestScrollController controller = new TestScrollController();
+
+    await tester.pumpWidget(new SingleChildScrollView(
+      child: new Container(
+        height: 2000.0,
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF00FF00),
+        ),
+      ),
+    ));
+
+    await tester.pumpWidget(new SingleChildScrollView(
+      controller: controller,
+      child: new Container(
+        height: 2000.0,
+        decoration: const BoxDecoration(
+          backgroundColor: const Color(0xFF00FF00),
+        ),
+      ),
+    ));
+
+    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    expect(scrollable.position, const isInstanceOf<TestScrollPosition>());
+  });
+
+  testWidgets('Changing scroll controller inside dirty layout builder does not assert', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 750.0,
+        child: new LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return new SingleChildScrollView(
+              child: new Container(
+                height: 2000.0,
+                decoration: const BoxDecoration(
+                  backgroundColor: const Color(0xFF00FF00),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 700.0,
+        child: new LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return new SingleChildScrollView(
+              controller: controller,
+              child: new Container(
+                height: 2000.0,
+                decoration: const BoxDecoration(
+                  backgroundColor: const Color(0xFF00FF00),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ));
   });
 }
