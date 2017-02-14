@@ -102,7 +102,7 @@ Instructions to update the Android Tools version that the bots download by execu
    The following packages are currently installed:
    * Android SDK Tools
    * Android SDK platform-tools
-   * Android SDK Build-tools 23.0.1
+   * Android SDK Build-tools 24.0.3
    * Android 6.0 (API 23)
      * SDK Platform 23
    * Extras
