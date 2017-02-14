@@ -57,7 +57,6 @@ export 'src/material/list.dart';
 export 'src/material/list_item.dart';
 export 'src/material/material.dart';
 export 'src/material/mergeable_material.dart';
-export 'src/material/overscroll_indicator.dart';
 export 'src/material/page.dart';
 export 'src/material/paginated_data_table.dart';
 export 'src/material/popup_menu.dart';
