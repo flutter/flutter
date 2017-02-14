@@ -15,9 +15,7 @@ cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 
 # Upload new API docs when on Travis and branch is master
 
-if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then
-  if [ "$TRAVIS_BRANCH" = "master" ]; then
-    cd dev/docs
-    firebase deploy --project docs-flutter-io
-  fi
+if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then
+  cd dev/docs
+  firebase deploy --project docs-flutter-io
 fi
