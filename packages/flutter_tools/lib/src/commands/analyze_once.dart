@@ -282,7 +282,7 @@ class PackageDependency {
 }
 
 class PackageDependencyTracker {
-  // This is a map from package names to objects that track the fs.path.s
+  // This is a map from package names to objects that track the paths
   // involved (sources and targets).
   Map<String, PackageDependency> packages = <String, PackageDependency>{};
 

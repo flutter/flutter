@@ -21,8 +21,7 @@ void main() {
         .map(_asFile)
         .forEach((File file) {
           for (String line in file.readAsLinesSync()) {
-            if (line.startsWith(new RegExp('import.*package:path/path.dart')) &&
-                !line.contains('ignore: package_path_import')) {
+            if (line.startsWith(new RegExp('import.*package:path/path.dart'))) {
               fail("${file.path} imports 'package:path/path.dart'; use 'fs.path' instead");
             }
           }
@@ -32,7 +31,6 @@ void main() {
   });
 }
 
-bool _isDartFile(FileSystemEntity entity) =>
-    entity is File && entity.path.endsWith('.dart');
+bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
 
 File _asFile(FileSystemEntity entity) => entity;
