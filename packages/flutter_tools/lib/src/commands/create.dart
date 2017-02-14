@@ -8,10 +8,13 @@ import '../android/android.dart' as android;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
+import '../flx.dart' as flx;
 import '../globals.dart';
+import '../ios/xcodeproj.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
@@ -99,7 +102,8 @@ class CreateCommand extends FlutterCommand {
     );
     printStatus('Wrote $generatedCount files.');
 
-    printStatus('');
+    updateXcodeGeneratedProperties(dirPath, BuildMode.debug, flx.defaultMainPath);
+    printStatus('Wrote Xcode settings.');
 
     if (argResults['pub'])
       await pubGet(directory: dirPath);
