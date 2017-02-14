@@ -224,6 +224,7 @@ class _DevFSHttpWriter {
   final Uri httpAddress;
 
   static const int kMaxInFlight = 6;
+  static const int kMaxRetries = 3;
 
   int _inFlight = 0;
   Map<String, DevFSContent> _outstanding;
@@ -258,9 +259,12 @@ class _DevFSHttpWriter {
     }
   }
 
-  Future<Null> _scheduleWrite(String devicePath,
-                              DevFSContent content,
-                              DevFSProgressReporter progressReporter) async {
+  Future<Null> _scheduleWrite(
+    String devicePath,
+    DevFSContent content,
+    DevFSProgressReporter progressReporter, [
+    int retry = 0,
+  ]) async {
     try {
       HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
@@ -272,7 +276,13 @@ class _DevFSHttpWriter {
       HttpClientResponse response = await request.close();
       await response.drain<Null>();
     } catch (e) {
-      printError('Error writing "$devicePath" to DevFS: $e');
+      if (retry < kMaxRetries) {
+        printTrace('Retrying writing "$devicePath" to DevFS due to error: $e');
+        _scheduleWrite(devicePath, content, progressReporter, retry + 1);
+        return;
+      } else {
+        printError('Error writing "$devicePath" to DevFS: $e');
+      }
     }
     if (progressReporter != null) {
       _done++;
