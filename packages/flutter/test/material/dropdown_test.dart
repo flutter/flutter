@@ -59,7 +59,7 @@ bool sameGeometry(RenderBox box1, RenderBox box2) {
 
 
 void main() {
-  testWidgets('Drop down button control test', (WidgetTester tester) async {
+  testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';
     void didChangeValue(String newValue) {
       value = newValue;
@@ -98,7 +98,7 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('Drop down button with no app', (WidgetTester tester) async {
+  testWidgets('Dropdown button with no app', (WidgetTester tester) async {
     String value = 'one';
     void didChangeValue(String newValue) {
       value = newValue;
@@ -151,7 +151,7 @@ void main() {
     expect(value, equals('two'));
   });
 
-  testWidgets('Drop down screen edges', (WidgetTester tester) async {
+  testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int value = 4;
     List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
     for (int i = 0; i < 20; ++i)
@@ -203,7 +203,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
   });
 
-  testWidgets('Drop down button aligns selected menu item', (WidgetTester tester) async {
+  testWidgets('Dropdown button aligns selected menu item', (WidgetTester tester) async {
     Key buttonKey = new UniqueKey();
     String value = 'two';
 
@@ -237,7 +237,7 @@ void main() {
     checkSelectedItemTextGeometry(tester, 'two');
   });
 
-  testWidgets('Drop down button with isDense:true aligns selected menu item', (WidgetTester tester) async {
+  testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
     Key buttonKey = new UniqueKey();
     String value = 'two';
 
@@ -290,7 +290,7 @@ void main() {
     RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
-    // A DropDown button with a null value should be the same size as a
+    // A Dropdown button with a null value should be the same size as a
     // one with a non-null value.
     expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxNullValue.localToGlobal(Point.origin)));
     expect(buttonBox.size, equals(buttonBoxNullValue.size));
@@ -342,7 +342,7 @@ void main() {
     RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
-    // A DropDown button with a null value and a hint should be the same size as a
+    // A Dropdown button with a null value and a hint should be the same size as a
     // one with a non-null value.
     expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxHintValue.localToGlobal(Point.origin)));
     expect(buttonBox.size, equals(buttonBoxHintValue.size));
