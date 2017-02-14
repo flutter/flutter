@@ -398,6 +398,51 @@ class ClipPath extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget representing a physical layer that clips its children to a shape.
+class PhysicalModel extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with a rounded-rectangular clip.
+  PhysicalModel({
+    Key key,
+    @required this.shape,
+    this.borderRadius: BorderRadius.zero,
+    @required this.elevation,
+    @required this.color,
+    Widget child,
+  }) : super(key: key, child: child) {
+    if (shape == BoxShape.rectangle)
+      assert(borderRadius != null);
+    assert(shape != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
+
+  /// The type of shape.
+  final BoxShape shape;
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  final BorderRadius borderRadius;
+
+  /// The z-coordinate at which to place this physical object.
+  final int elevation;
+
+  /// The background color.
+  final Color color;
+
+  @override
+  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
+    renderObject
+      ..shape = shape
+      ..borderRadius = borderRadius
+      ..elevation = elevation
+      ..color = color;
+  }
+}
 
 // POSITIONING AND SIZING NODES
 

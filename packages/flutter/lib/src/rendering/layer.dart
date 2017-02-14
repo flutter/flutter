@@ -521,3 +521,45 @@ class BackdropFilterLayer extends ContainerLayer {
     builder.pop();
   }
 }
+
+class PhysicalModelLayer extends ContainerLayer {
+  /// Creates a layer with a rounded-rectangular clip.
+  ///
+  /// The [clipRRect] property must be non-null before the compositing phase of
+  /// the pipeline.
+  PhysicalModelLayer({
+    @required this.clipRRect,
+    @required this.elevation,
+    @required this.color,
+  }) {
+    assert(clipRRect != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
+
+  /// The rounded-rect to clip in the parent's coordinate system
+  RRect clipRRect;
+
+  /// The z-coordinate at which to place this physical object.
+  int elevation;
+
+  /// The background color.
+  Color color;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    builder.pushPhysicalModel(
+      rrect: clipRRect.shift(layerOffset),
+      elevation: elevation,
+      color: color,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('clipRRect: $clipRRect');
+  }
+}

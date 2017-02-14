@@ -1181,6 +1181,108 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }
 }
 
+/// Creates a physical model layer that clips its children to a rounded
+/// rectangle.
+class RenderPhysicalModel extends _RenderCustomClip<RRect> {
+  /// Creates a rounded-rectangular clip.
+  ///
+  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
+  /// right-angled corners.
+  RenderPhysicalModel({
+    RenderBox child,
+    BoxShape shape,
+    BorderRadius borderRadius: BorderRadius.zero,
+    int elevation,
+    Color color,
+  }) : _shape = shape,
+       _borderRadius = borderRadius,
+       _elevation = elevation,
+       _color = color,
+       super(child: child) {
+    if (shape == BoxShape.rectangle)
+      assert(_borderRadius != null);
+  }
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  /// The shape of the layer.
+  BoxShape get shape => _shape;
+  BoxShape _shape;
+  set shape (BoxShape value) {
+    assert(value != null);
+    if (_shape == value)
+      return;
+    _shape = value;
+    _markNeedsClip();
+  }
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  BorderRadius get borderRadius => _borderRadius;
+  BorderRadius _borderRadius;
+  set borderRadius (BorderRadius value) {
+    assert(value != null);
+    if (_borderRadius == value)
+      return;
+    _borderRadius = value;
+    _markNeedsClip();
+  }
+
+  /// The z-coordinate at which to place this material.
+  int get elevation => _elevation;
+  int _elevation;
+  set elevation (int value) {
+    assert(value != null);
+    if (_elevation == value)
+      return;
+    _elevation = value;
+    markNeedsPaint();
+  }
+
+  /// The background color.
+  Color get color => _color;
+  Color _color;
+  set color (Color value) {
+    assert(value != null);
+    if (_color == value)
+      return;
+    _color = value;
+    markNeedsPaint();
+  }
+
+  @override
+  RRect get _defaultClip {
+    if (_shape == BoxShape.rectangle) {
+      return _borderRadius.toRRect(Point.origin & size);
+    } else {
+      Rect rect = Point.origin & size;
+      return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    }
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Point position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      _updateClip();
+      context.pushPhysicalModel(offset, _clip.outerRect, _clip, _elevation, _color, super.paint);
+    }
+  }
+}
+
 /// Where to paint a box decoration.
 enum DecorationPosition {
   /// Paint the box decoration behind the children.
