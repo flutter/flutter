@@ -20,8 +20,7 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
-  String applicationRoot = fs.path.normalize(fs.currentDirectory.path);
-  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=$applicationRoot');
+  localsBuffer.writeln('FLUTTER_APPLICATION_PATH=${fs.path.normalize(projectPath)}');
 
   // Relative to FLUTTER_APPLICATION_PATH, which is [Directory.current].
   localsBuffer.writeln('FLUTTER_TARGET=$target');

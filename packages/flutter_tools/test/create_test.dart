@@ -66,6 +66,15 @@ void main() {
           expect(original, formatted, reason: file.path);
         }
       }
+
+      // Generated Xcode settings
+      String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+      expectExists(xcodeConfigPath);
+      File xcodeConfigFile = fs.file(fs.path.join(temp.path, xcodeConfigPath));
+      String xcodeConfig = xcodeConfigFile.readAsStringSync();
+      expect(xcodeConfig, contains('FLUTTER_ROOT='));
+      expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
+      expect(xcodeConfig, contains('FLUTTER_FRAMEWORK_DIR='));
     });
 
     // Verify that we can regenerate over an existing project.
