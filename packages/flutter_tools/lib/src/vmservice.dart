@@ -12,7 +12,6 @@ import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'globals.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
