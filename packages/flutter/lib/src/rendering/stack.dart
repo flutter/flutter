@@ -68,12 +68,12 @@ class RelativeRect {
 
   /// Returns a new rectangle object translated by the given offset.
   RelativeRect shift(Offset offset) {
-    return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
+    return new RelativeRect.fromLTRB(left + offset.dx, top + offset.dy, right - offset.dx, bottom - offset.dy);
   }
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
   RelativeRect inflate(double delta) {
-    return new RelativeRect.fromLTRB(left - delta, top - delta, right + delta, bottom + delta);
+    return new RelativeRect.fromLTRB(left - delta, top - delta, right - delta, bottom - delta);
   }
 
   /// Returns a new rectangle with edges moved inwards by the given delta.
@@ -91,7 +91,7 @@ class RelativeRect {
     );
   }
 
-  /// Convert this RelativeRect to a Rect, in the coordinate space of the container.
+  /// Convert this [RelativeRect] to a [Rect], in the coordinate space of the container.
   Rect toRect(Rect container) {
     return new Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
   }

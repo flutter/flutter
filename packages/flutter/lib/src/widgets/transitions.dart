@@ -321,11 +321,8 @@ class PositionedTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Positioned(
-      top: rect.value.top,
-      right: rect.value.right,
-      bottom: rect.value.bottom,
-      left: rect.value.left,
+    return new Positioned.fromRelativeRect(
+      rect: rect.value,
       child: child,
     );
   }

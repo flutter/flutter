@@ -1658,8 +1658,8 @@ class Positioned extends ParentDataWidget<Stack> {
   /// set to null.
   Positioned.fromRect({
     Key key,
-    Widget child,
-    Rect rect
+    Rect rect,
+    @required Widget child,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -1668,15 +1668,31 @@ class Positioned extends ParentDataWidget<Stack> {
        bottom = null,
        super(key: key, child: child);
 
+  /// Creates a Positioned object with the values from the given [RelativeRect].
+  ///
+  /// This sets the [left], [top], [right], and [bottom] properties from the
+  /// given [RelativeRect]. The [height] and [width] properties are set to null.
+  Positioned.fromRelativeRect({
+    Key key,
+    RelativeRect rect,
+    @required Widget child,
+  }) : left = rect.left,
+       top = rect.top,
+       right = rect.right,
+       bottom = rect.bottom,
+       width = null,
+       height = null,
+       super(key: key, child: child);
+
   /// Creates a Positioned object with [left], [top], [right], and [bottom] set
   /// to 0.0 unless a value for them is passed.
   Positioned.fill({
     Key key,
-    Widget child,
     this.left: 0.0,
     this.top: 0.0,
     this.right: 0.0,
-    this.bottom: 0.0
+    this.bottom: 0.0,
+    @required Widget child,
   }) : width = null,
        height = null,
        super(key: key, child: child);
