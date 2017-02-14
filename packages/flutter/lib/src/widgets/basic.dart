@@ -829,6 +829,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
       height = double.INFINITY,
       super(key: key, child: child);
 
+  SizedBox.fromSize({ Key key, Widget child, Size size })
+    : width = size?.width,
+      height = size?.height,
+      super(key: key, child: child);
+
   /// If non-null, requires the child to have exactly this width.
   final double width;
 
@@ -1658,8 +1663,8 @@ class Positioned extends ParentDataWidget<Stack> {
   /// set to null.
   Positioned.fromRect({
     Key key,
-    Widget child,
-    Rect rect
+    Rect rect,
+    @required Widget child,
   }) : left = rect.left,
        top = rect.top,
        width = rect.width,
@@ -1672,11 +1677,11 @@ class Positioned extends ParentDataWidget<Stack> {
   /// to 0.0 unless a value for them is passed.
   Positioned.fill({
     Key key,
-    Widget child,
     this.left: 0.0,
     this.top: 0.0,
     this.right: 0.0,
-    this.bottom: 0.0
+    this.bottom: 0.0,
+    @required Widget child,
   }) : width = null,
        height = null,
        super(key: key, child: child);

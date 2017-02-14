@@ -6,6 +6,32 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('SizedBox constructors', (WidgetTester tester) async {
+    final SizedBox a = const SizedBox();
+    expect(a.width, isNull);
+    expect(a.height, isNull);
+
+    final SizedBox b = const SizedBox(width: 10.0);
+    expect(b.width, 10.0);
+    expect(b.height, isNull);
+
+    final SizedBox c = const SizedBox(width: 10.0, height: 20.0);
+    expect(c.width, 10.0);
+    expect(c.height, 20.0);
+
+    final SizedBox d = new SizedBox.fromSize();
+    expect(d.width, isNull);
+    expect(d.height, isNull);
+
+    final SizedBox e = new SizedBox.fromSize(size: const Size(1.0, 2.0));
+    expect(e.width, 1.0);
+    expect(e.height, 2.0);
+
+    final SizedBox f = const SizedBox.expand();
+    expect(f.width, double.INFINITY);
+    expect(f.height, double.INFINITY);
+  });
+
   testWidgets('SizedBox - no child', (WidgetTester tester) async {
     GlobalKey patient = new GlobalKey();
 
