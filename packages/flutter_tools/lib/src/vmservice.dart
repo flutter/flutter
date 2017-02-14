@@ -7,12 +7,21 @@ import 'dart:convert' show BASE64;
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'globals.dart';
+
+/// A function that opens a two-way communication channel to the specified [uri].
+typedef StreamChannel<dynamic> OpenChannel(Uri uri);
+
+OpenChannel _openChannel = _defaultOpenChannel;
+
+StreamChannel<dynamic> _defaultOpenChannel(Uri uri) =>
+    new IOWebSocketChannel.connect(uri.toString());
 
 /// The default VM service request timeout.
 const Duration kDefaultRequestTimeout = const Duration(seconds: 10);
@@ -30,19 +39,27 @@ class VMService {
     });
   }
 
+  @visibleForTesting
+  static void setOpenChannelForTesting(OpenChannel openChannel) {
+    _openChannel = openChannel;
+  }
+
   /// Connect to a Dart VM Service at [httpUri].
   ///
   /// Requests made via the returns [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
-  static Future<VMService> connect(Uri httpUri, { Duration requestTimeout: kDefaultRequestTimeout }) async {
+  static Future<VMService> connect(
+    Uri httpUri, {
+    Duration requestTimeout: kDefaultRequestTimeout,
+  }) async {
     Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    WebSocket ws;
+    StreamChannel<dynamic> channel;
     try {
-      ws = await WebSocket.connect(wsUri.toString());
+      channel = _openChannel(wsUri);
     } catch (e) {
       return new Future<VMService>.error('Failed to connect to $wsUri\n  $e');
     }
-    rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(new IOWebSocketChannel(ws).cast()));
+    rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel.cast()));
     peer.listen();
     return new VMService._(peer, httpUri, wsUri, requestTimeout);
   }
