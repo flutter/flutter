@@ -18,11 +18,11 @@ import 'scrollable.dart' show Scrollable2, Scrollable2State;
 /// not defined, but must be consistent. For example, they could be in pixels,
 /// or in percentages, or in units of the [extentInside] (in the latter case,
 /// [extentInside] would always be 1.0).
-class ScrollableMetrics {
+class ScrollMetrics {
   /// Create a description of the metrics of a [Scrollable2]'s contents.
   ///
   /// The three arguments must be present, non-null, finite, and non-negative.
-  const ScrollableMetrics({
+  const ScrollMetrics({
     @required this.extentBefore,
     @required this.extentInside,
     @required this.extentAfter,
@@ -34,9 +34,11 @@ class ScrollableMetrics {
   /// described by [extentInside].
   final double extentBefore;
 
-  /// The quantity of visible content. If [extentBefore] and [extentAfter] are
-  /// non-zero, then this is typically the height of the viewport. It could be
-  /// less if there is less content visible than the size of the viewport.
+  /// The quantity of visible content.
+  ///
+  /// If [extentBefore] and [extentAfter] are non-zero, then this is typically
+  /// the height of the viewport. It could be less if there is less content
+  /// visible than the size of the viewport.
   final double extentInside;
 
   /// The quantity of content conceptually "below" the currently visible content
@@ -65,13 +67,12 @@ abstract class ScrollNotification2 extends LayoutChangedNotification {
 
   Axis get axis => axisDirectionToAxis(axisDirection);
 
-  final ScrollableMetrics metrics;
+  final ScrollMetrics metrics;
 
   /// The build context of the [Scrollable2] that fired this notification.
   ///
   /// This can be used to find the scrollable's render objects to determine the
   /// size of the viewport, for instance.
-  // TODO(ianh): Maybe just fold those into the ScrollableMetrics?
   final BuildContext context;
 
   /// The number of [Scrollable2] widgets that this notification has bubbled

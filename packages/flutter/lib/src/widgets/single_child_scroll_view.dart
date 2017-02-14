@@ -84,7 +84,6 @@ class SingleChildScrollView extends StatelessWidget {
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
-          key: key,
           axisDirection: axisDirection,
           offset: offset,
           child: contents,

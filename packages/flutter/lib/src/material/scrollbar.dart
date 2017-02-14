@@ -98,7 +98,7 @@ class _ScrollbarController extends ChangeNotifier {
     super.dispose();
   }
 
-  ScrollableMetrics _lastMetrics;
+  ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
 
   static const double _kMinThumbExtent = 18.0;
@@ -106,7 +106,7 @@ class _ScrollbarController extends ChangeNotifier {
   static const Duration _kThumbFadeDuration = const Duration(milliseconds: 300);
   static const Duration _kFadeOutTimeout = const Duration(milliseconds: 600);
 
-  void update(ScrollableMetrics metrics, AxisDirection axisDirection) {
+  void update(ScrollMetrics metrics, AxisDirection axisDirection) {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
     if (_fadeController.status == AnimationStatus.completed) {
