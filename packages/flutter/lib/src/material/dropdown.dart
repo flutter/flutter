@@ -79,23 +79,17 @@ class _DropdownMenuPainter extends CustomPainter {
 
 // Do not use the platform-specific default scroll configuration.
 // Dropdown menus should never overscroll or display an overscroll indicator.
-class _DropdownScrollConfigurationDelegate extends ScrollConfigurationDelegate {
-  const _DropdownScrollConfigurationDelegate(this._platform);
+class _DropdownScrollBehavior extends ScrollBehavior2 {
+  const _DropdownScrollBehavior();
 
   @override
-  TargetPlatform get platform => _platform;
-  final TargetPlatform _platform;
+  TargetPlatform getPlatform(BuildContext context) => Theme.of(context).platform;
 
   @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: platform);
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) => child;
 
   @override
-  Widget wrapScrollWidget(BuildContext context, Widget scrollWidget) {
-    return new ClampOverscrolls(edge: ScrollableEdge.both, child: scrollWidget);
-  }
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => platform != old.platform;
+  ScrollPhysics getScrollPhysics(BuildContext context) => const ClampingScrollPhysics();
 }
 
 class _DropdownMenu<T> extends StatefulWidget {
@@ -182,8 +176,8 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
         child: new Material(
           type: MaterialType.transparency,
           textStyle: route.style,
-          child: new ScrollConfiguration(
-            delegate: new _DropdownScrollConfigurationDelegate(Theme.of(context).platform),
+          child: new ScrollConfiguration2(
+            behavior: const _DropdownScrollBehavior(),
             child: new Scrollbar(
               child: new ListView(
                 controller: config.route.scrollController,
@@ -406,7 +400,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 ///
 /// See also:
 ///
-///  * [DropdownButtonHideUnderline], which prevents its descendant drop down buttons
+///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
 ///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
 ///  * <https://material.google.com/components/buttons.html#buttons-dropdown-buttons>

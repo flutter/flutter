@@ -55,7 +55,7 @@ new FlatButton(
 // Member variable holding value.
 String dropdownValue;
 
-// Drop down button with string values.
+// Dropdown button with string values.
 new DropdownButton<String>(
   value: dropdownValue,
   onChanged: (String newValue) {
