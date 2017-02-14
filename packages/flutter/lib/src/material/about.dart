@@ -447,7 +447,7 @@ class _LicensePageState extends State<LicensePage> {
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,
-        child: new Scrollbar2(
+        child: new Scrollbar(
           child: new ListView(
             padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
             shrinkWrap: true,

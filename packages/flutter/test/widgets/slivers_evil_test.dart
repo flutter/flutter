@@ -74,7 +74,7 @@ void main() {
     await tester.pumpWidget(
       new ScrollConfiguration2(
         behavior: new TestBehavior(),
-        child: new Scrollbar2(
+        child: new Scrollbar(
           child: new Scrollable2(
             axisDirection: AxisDirection.down,
             physics: const TestScrollPhysics(),

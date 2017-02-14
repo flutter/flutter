@@ -9,13 +9,13 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Viewport2 basic test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Scrollbar2(
+    await tester.pumpWidget(new Scrollbar(
       child: new SingleChildScrollView(
         child: const SizedBox(width: 4000.0, height: 4000.0),
       ),
     ));
-    expect(find.byType(Scrollbar2), isNot(paints..rect()));
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar2), paints..rect());
+    expect(find.byType(Scrollbar), paints..rect());
   });
 }

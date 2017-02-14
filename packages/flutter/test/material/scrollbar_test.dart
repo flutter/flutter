@@ -16,7 +16,7 @@ void main() {
           ),
           height: 200.0,
           width: 300.0,
-          child: new Scrollbar2(
+          child: new Scrollbar(
             child: new ListView(
               children: <Widget>[
                 new Container(height: 40.0, child: new Text('0')),

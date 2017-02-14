@@ -184,7 +184,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
           textStyle: route.style,
           child: new ScrollConfiguration(
             delegate: new _DropdownScrollConfigurationDelegate(Theme.of(context).platform),
-            child: new Scrollbar2(
+            child: new Scrollbar(
               child: new ListView(
                 controller: config.route.scrollController,
                 padding: _kMenuVerticalPadding,

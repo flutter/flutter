@@ -190,7 +190,7 @@ class ListDemoState extends State<ListDemo> {
           ),
         ],
       ),
-      body: new Scrollbar2(
+      body: new Scrollbar(
         child: new ListView(
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
           children: listItems.toList(),
