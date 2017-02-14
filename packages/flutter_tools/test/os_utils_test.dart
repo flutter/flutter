@@ -5,7 +5,6 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -23,7 +22,7 @@ void main() {
     });
 
     testUsingContext('makeExecutable', () async {
-      File file = fs.file(path.join(temp.path, 'foo.script'));
+      File file = fs.file(fs.path.join(temp.path, 'foo.script'));
       file.writeAsStringSync('hello world');
       os.makeExecutable(file);
 

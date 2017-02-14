@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
-
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
@@ -56,27 +54,27 @@ class ToolConfiguration {
       // Create something like `android-arm` or `android-arm-release`.
       String dirName = getNameForTargetPlatform(platform) + suffix;
       Directory engineDir = cache.getArtifactDirectory('engine');
-      return fs.directory(path.join(engineDir.path, dirName));
+      return fs.directory(fs.path.join(engineDir.path, dirName));
     }
   }
 
   String getHostToolPath(HostTool tool) {
     if (engineBuildPath == null) {
-      return path.join(cache.getArtifactDirectory('engine').path,
+      return fs.path.join(cache.getArtifactDirectory('engine').path,
                        getNameForHostPlatform(getCurrentHostPlatform()),
                        _kHostToolFileName[tool]);
     }
 
     if (tool == HostTool.SkySnapshot) {
-      String clangPath = path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
+      String clangPath = fs.path.join(engineBuildPath, 'clang_x64', 'sky_snapshot');
       if (fs.isFileSync(clangPath))
         return clangPath;
-      return path.join(engineBuildPath, 'sky_snapshot');
+      return fs.path.join(engineBuildPath, 'sky_snapshot');
     } else if (tool == HostTool.SkyShell) {
       if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
-        return path.join(engineBuildPath, 'sky_shell');
+        return fs.path.join(engineBuildPath, 'sky_shell');
       } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
-        return path.join(engineBuildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+        return fs.path.join(engineBuildPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
       }
     }
 

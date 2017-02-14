@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -36,8 +34,8 @@ Future<Null> pubGet({
   if (directory == null)
     directory = fs.currentDirectory.path;
 
-  File pubSpecYaml = fs.file(path.join(directory, 'pubspec.yaml'));
-  File dotPackages = fs.file(path.join(directory, '.packages'));
+  File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
+  File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
@@ -47,7 +45,7 @@ Future<Null> pubGet({
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     String command = upgrade ? 'upgrade' : 'get';
-    Status status = logger.startProgress("Running 'flutter packages $command' in ${path.basename(directory)}...",
+    Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
     int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],

@@ -4,10 +4,9 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../application_package.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -64,7 +63,7 @@ class BuildIOSCommand extends BuildSubCommand {
 
     String logTarget = forSimulator ? 'simulator' : 'device';
 
-    String typeName = path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
+    String typeName = fs.path.basename(tools.getEngineArtifactsDirectory(TargetPlatform.ios, getBuildMode()).path);
     Status status = logger.startProgress('Building $app for $logTarget ($typeName)...',
         expectSlowOperation: true);
     XcodeBuildResult result = await buildXcodeProject(

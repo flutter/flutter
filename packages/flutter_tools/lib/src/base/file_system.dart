@@ -6,7 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:file/record_replay.dart';
-import 'package:path/path.dart' as path;
+
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
@@ -56,7 +56,7 @@ void enableReplayFileSystem(String location) {
 
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
-  String dirPath = path.dirname(filePath);
+  String dirPath = fs.path.dirname(filePath);
   if (fs.isDirectorySync(dirPath))
     return;
   try {
@@ -77,7 +77,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
     destDir.createSync(recursive: true);
 
   srcDir.listSync().forEach((FileSystemEntity entity) {
-    String newPath = path.join(destDir.path, path.basename(entity.path));
+    String newPath = fs.path.join(destDir.path, fs.path.basename(entity.path));
     if (entity is File) {
       File newFile = destDir.fileSystem.file(newPath);
       newFile.writeAsBytesSync(entity.readAsBytesSync());

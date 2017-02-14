@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:package_config/packages_file.dart' as packages_file;
-import 'package:path/path.dart' as path;
 
 import '../base/file_system.dart';
 
@@ -46,7 +45,7 @@ class PackageMap {
     List<String> pathSegments = packageUri.pathSegments.toList();
     String packageName = pathSegments.removeAt(0);
     Uri packageBase = map[packageName];
-    String packageRelativePath = path.joinAll(pathSegments);
+    String packageRelativePath = fs.path.joinAll(pathSegments);
     return packageBase.resolve(packageRelativePath).path;
   }
 
@@ -54,7 +53,7 @@ class PackageMap {
     if (fs.isFileSync(packagesPath))
       return null;
     String message = '$packagesPath does not exist.';
-    String pubspecPath = path.absolute(path.dirname(packagesPath), 'pubspec.yaml');
+    String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
     if (fs.isFileSync(pubspecPath))
       message += '\nDid you run "flutter packages get" in this directory?';
     else

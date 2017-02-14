@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../android/android.dart' as android;
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -68,21 +66,21 @@ class CreateCommand extends FlutterCommand {
 
     await Cache.instance.updateAll();
 
-    String flutterRoot = path.absolute(Cache.flutterRoot);
+    String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
-    String flutterPackagesDirectory = path.join(flutterRoot, 'packages');
-    String flutterPackagePath = path.join(flutterPackagesDirectory, 'flutter');
-    if (!fs.isFileSync(path.join(flutterPackagePath, 'pubspec.yaml')))
+    String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
+    String flutterPackagePath = fs.path.join(flutterPackagesDirectory, 'flutter');
+    if (!fs.isFileSync(fs.path.join(flutterPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
 
-    String flutterDriverPackagePath = path.join(flutterRoot, 'packages', 'flutter_driver');
-    if (!fs.isFileSync(path.join(flutterDriverPackagePath, 'pubspec.yaml')))
+    String flutterDriverPackagePath = fs.path.join(flutterRoot, 'packages', 'flutter_driver');
+    if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = path.normalize(projectDir.absolute.path);
-    String relativePath = path.relative(dirPath);
-    String projectName = _normalizeProjectName(path.basename(dirPath));
+    String dirPath = fs.path.normalize(projectDir.absolute.path);
+    String relativePath = fs.path.relative(dirPath);
+    String projectName = _normalizeProjectName(fs.path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
     if (error != null)
@@ -141,10 +139,10 @@ Your main program file is lib/main.dart in the $relativePath directory.
       String flutterPackagesDirectory, { bool renderDriverTest: false }) {
     fs.directory(dirPath).createSync(recursive: true);
 
-    flutterPackagesDirectory = path.normalize(flutterPackagesDirectory);
+    flutterPackagesDirectory = fs.path.normalize(flutterPackagesDirectory);
     flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
-    printStatus('Creating project ${path.relative(dirPath)}...');
+    printStatus('Creating project ${fs.path.relative(dirPath)}...');
 
     Map<String, dynamic> templateContext = <String, dynamic>{
       'projectName': projectName,
@@ -168,7 +166,7 @@ Your main program file is lib/main.dart in the $relativePath directory.
 
     if (renderDriverTest) {
       Template driverTemplate = new Template.fromName('driver');
-      fileCount += driverTemplate.render(fs.directory(path.join(dirPath, 'test_driver')),
+      fileCount += driverTemplate.render(fs.directory(fs.path.join(dirPath, 'test_driver')),
           templateContext, overwriteExisting: false);
     }
 
@@ -229,7 +227,7 @@ String _validateProjectName(String projectName) {
 /// Return `null` if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
-  if (path.isWithin(flutterRoot, dirPath)) {
+  if (fs.path.isWithin(flutterRoot, dirPath)) {
     return "Cannot create a project within the Flutter SDK.\n"
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
@@ -251,9 +249,9 @@ String _validateProjectDir(String dirPath, { String flutterRoot }) {
 }
 
 String _relativePath({ String from, String to }) {
-  String result = path.relative(to, from: from);
-  // `path.relative()` doesn't always return a correct result: dart-lang/path#12.
-  if (fs.isDirectorySync(path.join(from, result)))
+  String result = fs.path.relative(to, from: from);
+  // `fs.path.relative()` doesn't always return a correct result: dart-lang/path#12.
+  if (fs.isDirectorySync(fs.path.join(from, result)))
     return result;
   return to;
 }

@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -18,8 +17,8 @@ import 'src/context.dart';
 
 void main() {
   group('test', () {
-    final String automatedTestsDirectory = path.join('..', '..', 'dev', 'automated_tests');
-    final String flutterTestDirectory = path.join(automatedTestsDirectory, 'flutter_test');
+    final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
+    final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
@@ -30,7 +29,7 @@ void main() {
       return _testFile('test_async_utils_unguarded', 1, automatedTestsDirectory, flutterTestDirectory);
     });
     testUsingContext('Missing flutter_test dependency', () async {
-      final String missingDependencyTests = path.join('..', '..', 'dev', 'missing_dependency_tests');
+      final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
     });
@@ -38,16 +37,16 @@ void main() {
 }
 
 Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {
-  final String fullTestName = path.join(testDirectory, '${testName}_test.dart');
+  final String fullTestName = fs.path.join(testDirectory, '${testName}_test.dart');
   final File testFile = fs.file(fullTestName);
   expect(testFile.existsSync(), true);
-  final String fullTestExpectation = path.join(testDirectory, '${testName}_expectation.txt');
+  final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   expect(expectationFile.existsSync(), true);
   final ProcessResult exec = await Process.run(
-    path.join(dartSdkPath, 'bin', 'dart'),
+    fs.path.join(dartSdkPath, 'bin', 'dart'),
     <String>[
-      path.absolute(path.join('bin', 'flutter_tools.dart')),
+      fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
       'test',
       '--no-color',
       fullTestName

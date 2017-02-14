@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
@@ -86,8 +85,8 @@ class AndroidApk extends ApplicationPackage {
       manifestPath = gradleManifestPath;
       apkPath = gradleAppOut;
     } else {
-      manifestPath = path.join('android', 'AndroidManifest.xml');
-      apkPath = path.join(getAndroidBuildDirectory(), 'app.apk');
+      manifestPath = fs.path.join('android', 'AndroidManifest.xml');
+      apkPath = fs.path.join(getAndroidBuildDirectory(), 'app.apk');
     }
 
     if (!fs.isFileSync(manifestPath))
@@ -125,7 +124,7 @@ class AndroidApk extends ApplicationPackage {
   String get packagePath => apkPath;
 
   @override
-  String get name => path.basename(apkPath);
+  String get name => fs.path.basename(apkPath);
 }
 
 /// Tests whether a [FileSystemEntity] is an iOS bundle directory
@@ -142,14 +141,14 @@ abstract class IOSApp extends ApplicationPackage {
       Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
       addShutdownHook(() async => await tempDir.delete(recursive: true));
       os.unzip(fs.file(applicationBinary), tempDir);
-      Directory payloadDir = fs.directory(path.join(tempDir.path, 'Payload'));
+      Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
     } on StateError catch (e, stackTrace) {
       printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);
       return null;
     }
 
-    String plistPath = path.join(bundleDir.path, 'Info.plist');
+    String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
     String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null)
       return null;
@@ -157,7 +156,7 @@ abstract class IOSApp extends ApplicationPackage {
     return new PrebuiltIOSApp(
       ipaPath: applicationBinary,
       bundleDir: bundleDir,
-      bundleName: path.basename(bundleDir.path),
+      bundleName: fs.path.basename(bundleDir.path),
       projectBundleId: id,
     );
   }
@@ -166,15 +165,15 @@ abstract class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
 
-    String plistPath = path.join('ios', 'Runner', 'Info.plist');
+    String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
     String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null)
       return null;
-    String projectPath = path.join('ios', 'Runner.xcodeproj');
+    String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
     id = substituteXcodeVariables(id, projectPath, 'Runner');
 
     return new BuildableIOSApp(
-      appDirectory: path.join('ios'),
+      appDirectory: fs.path.join('ios'),
       projectBundleId: id
     );
   }
@@ -207,7 +206,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return path.join(getIosBuildDirectory(), 'Release-$type', kBundleName);
+    return fs.path.join(getIosBuildDirectory(), 'Release-$type', kBundleName);
   }
 }
 

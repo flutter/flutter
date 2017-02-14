@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
-import 'package:path/path.dart' as path;
 
 import 'context.dart';
 import 'file_system.dart';
@@ -106,7 +105,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
         continue;
 
-      File destFile = fs.file(path.join(targetDirectory.path, archiveFile.name));
+      File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
@@ -162,9 +161,9 @@ String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
       return directory;
-    String parent = path.dirname(directory);
+    String parent = fs.path.dirname(directory);
     if (directory == parent) return null;
     directory = parent;
   }

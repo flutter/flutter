@@ -6,8 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:path/path.dart' as path;
-
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
@@ -319,17 +317,17 @@ class IOSSimulator extends Device {
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
-  String get xcrunPath => path.join('/usr', 'bin', 'xcrun');
+  String get xcrunPath => fs.path.join('/usr', 'bin', 'xcrun');
 
   String _getSimulatorPath() {
-    return path.join(homeDirPath, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
+    return fs.path.join(homeDirPath, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
   }
 
   String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
     String simulatorPath = _getSimulatorPath();
     if (simulatorPath == null)
       return null;
-    return path.join(simulatorPath, 'data');
+    return fs.path.join(simulatorPath, 'data');
   }
 
   @override
@@ -438,9 +436,9 @@ class IOSSimulator extends Device {
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
-        '--flx=${path.absolute(path.join(getBuildDirectory(), 'app.flx'))}',
-        '--dart-main=${path.absolute(mainPath)}',
-        '--packages=${path.absolute('.packages')}',
+        '--flx=${fs.path.absolute(fs.path.join(getBuildDirectory(), 'app.flx'))}',
+        '--dart-main=${fs.path.absolute(mainPath)}',
+        '--packages=${fs.path.absolute('.packages')}',
       ]);
     }
 
@@ -520,7 +518,7 @@ class IOSSimulator extends Device {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
 
     // Step 3: Install the updated bundle to the simulator.
-    SimControl.instance.install(id, path.absolute(bundle.path));
+    SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
   Future<Null> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app) =>
@@ -536,14 +534,14 @@ class IOSSimulator extends Device {
       ApplicationPackage app, String localFile, String targetFile) async {
     if (p.platform.isMacOS) {
       String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      runCheckedSync(<String>['cp', localFile, path.join(simulatorHomeDirectory, targetFile)]);
+      runCheckedSync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
       return true;
     }
     return false;
   }
 
   String get logFilePath {
-    return path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
@@ -587,13 +585,13 @@ class IOSSimulator extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) async {
-    Directory desktopDir = fs.directory(path.join(homeDirPath, 'Desktop'));
+    Directory desktopDir = fs.directory(fs.path.join(homeDirPath, 'Desktop'));
 
     // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
 
     Set<File> getScreenshots() {
       return new Set<File>.from(desktopDir.listSync().where((FileSystemEntity entity) {
-        String name = path.basename(entity.path);
+        String name = fs.path.basename(entity.path);
         return entity is File && name.startsWith('Simulator') && name.endsWith('.png');
       }));
     }

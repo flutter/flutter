@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
@@ -35,11 +33,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<Null> _downloadCoverageData() async {
     Status status = logger.startProgress("Downloading lcov data for package:flutter...", expectSlowOperation: true);
     final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
-    final String coverageDir = path.join(Cache.flutterRoot, 'packages/flutter/coverage');
-    fs.file(path.join(coverageDir, 'lcov.base.info'))
+    final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
+    fs.file(fs.path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
-    fs.file(path.join(coverageDir, 'lcov.info'))
+    fs.file(fs.path.join(coverageDir, 'lcov.info'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(data, flush: true);
     status.stop();

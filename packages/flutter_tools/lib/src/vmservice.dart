@@ -7,10 +7,10 @@ import 'dart:convert' show BASE64;
 
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:path/path.dart' as path;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 
+import 'base/file_system.dart';
 import 'base/io.dart';
 import 'globals.dart';
 
@@ -35,7 +35,7 @@ class VMService {
   /// Requests made via the returns [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
   static Future<VMService> connect(Uri httpUri, { Duration requestTimeout: kDefaultRequestTimeout }) async {
-    Uri wsUri = httpUri.replace(scheme: 'ws', path: path.join(httpUri.path, 'ws'));
+    Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     WebSocket ws;
     try {
       ws = await WebSocket.connect(wsUri.toString());

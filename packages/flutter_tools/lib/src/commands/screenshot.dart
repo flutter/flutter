@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
-import 'package:path/path.dart' as path;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -139,6 +138,6 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<Null> showOutputFileInfo(File outputFile) async {
     int sizeKB = (await outputFile.length()) ~/ 1024;
-    printStatus('Screenshot written to ${path.relative(outputFile.path)} (${sizeKB}kB).');
+    printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

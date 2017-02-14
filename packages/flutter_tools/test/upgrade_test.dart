@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -58,11 +57,11 @@ void main() {
 
         String proj = temp.path;
         expect(findProjectRoot(proj), proj);
-        expect(findProjectRoot(path.join(proj, 'lib')), proj);
+        expect(findProjectRoot(fs.path.join(proj, 'lib')), proj);
 
-        String hello = path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
-        expect(findProjectRoot(path.join(hello, 'lib')), hello);
+        expect(findProjectRoot(fs.path.join(hello, 'lib')), hello);
       });
 
       testUsingContext('outside project', () async {

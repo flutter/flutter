@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -123,9 +122,9 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   args.add(dir.path);
   await runner.run(args);
 
-  String mainPath = path.join(dir.path, 'lib', 'main.dart');
+  String mainPath = fs.path.join(dir.path, 'lib', 'main.dart');
   expect(fs.file(mainPath).existsSync(), true);
-  String flutterToolsPath = path.absolute(path.join('bin', 'flutter_tools.dart'));
+  String flutterToolsPath = fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
   ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
     workingDirectory: dir.path

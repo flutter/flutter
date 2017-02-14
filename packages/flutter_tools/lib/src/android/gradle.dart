@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -83,7 +81,7 @@ String _locateSystemGradle() {
   if (gradleDir != null) {
     if (fs.isFileSync(gradleDir))
       return gradleDir;
-    return path.join(gradleDir, 'bin', 'gradle');
+    return fs.path.join(gradleDir, 'bin', 'gradle');
   }
 
   // Look relative to Android Studio.
@@ -98,14 +96,14 @@ String _locateSystemGradle() {
   if (studioPath != null) {
     // '/Applications/Android Studio.app/Contents/gradle/gradle-2.10/bin/gradle'
     if (os.isMacOS && !studioPath.endsWith('Contents'))
-      studioPath = path.join(studioPath, 'Contents');
+      studioPath = fs.path.join(studioPath, 'Contents');
 
-    Directory dir = fs.directory(path.join(studioPath, 'gradle'));
+    Directory dir = fs.directory(fs.path.join(studioPath, 'gradle'));
     if (dir.existsSync()) {
       // We find the first valid gradle directory.
       for (FileSystemEntity entity in dir.listSync()) {
-        if (entity is Directory && path.basename(entity.path).startsWith('gradle-')) {
-          String executable = path.join(entity.path, 'bin', 'gradle');
+        if (entity is Directory && fs.path.basename(entity.path).startsWith('gradle-')) {
+          String executable = fs.path.join(entity.path, 'bin', 'gradle');
           if (fs.isFileSync(executable))
             return executable;
         }

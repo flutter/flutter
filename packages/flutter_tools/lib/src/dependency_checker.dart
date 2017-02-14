@@ -9,8 +9,6 @@ import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
 import 'asset.dart';
 
-import 'package:path/path.dart' as pathos;
-
 class DependencyChecker {
   final DartDependencySetBuilder builder;
   final Set<String> _dependencies = new Set<String>();
@@ -38,7 +36,7 @@ class DependencyChecker {
         if (path.startsWith('package:')) {
           path = packageMap.pathForPackage(Uri.parse(path));
         } else {
-          path = pathos.join(builder.projectRootPath, path);
+          path = fs.path.join(builder.projectRootPath, path);
         }
         _dependencies.add(path);
       }

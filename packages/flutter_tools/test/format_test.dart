@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/format.dart';
-import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -38,7 +37,7 @@ void main() {
     testUsingContext('a file', () async {
       await createProject();
 
-      File srcFile = fs.file(path.join(temp.path, 'lib', 'main.dart'));
+      File srcFile = fs.file(fs.path.join(temp.path, 'lib', 'main.dart'));
       String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 

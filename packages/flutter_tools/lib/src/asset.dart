@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:json_schema/json_schema.dart';
-import 'package:path/path.dart' as path;
 import 'package:yaml/yaml.dart';
 
 import 'base/file_system.dart';
@@ -46,7 +45,7 @@ class AssetBundle {
     for (String asset in assets) {
       if (asset == '')
         continue;
-      final String assetPath = path.join(projectRoot, asset);
+      final String assetPath = fs.path.join(projectRoot, asset);
       final String archivePath = asset;
       entries[archivePath] = new DevFSFileContent(fs.file(assetPath));
     }
@@ -74,7 +73,7 @@ class AssetBundle {
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
-    packagesPath ??= path.absolute(PackageMap.globalPackagesPath);
+    packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     Object manifest;
     try {
       manifest = _loadFlutterManifest(manifestPath);
@@ -95,7 +94,7 @@ class AssetBundle {
     }
     Map<String, dynamic> manifestDescriptor = manifest;
     manifestDescriptor = manifestDescriptor['flutter'] ?? <String, dynamic>{};
-    String assetBasePath = path.dirname(path.absolute(manifestPath));
+    String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
 
     _lastBuildTimestamp = new DateTime.now();
 
@@ -193,7 +192,7 @@ class _Asset {
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
-  String fontsPath = path.join(path.absolute(Cache.flutterRoot),
+  String fontsPath = fs.path.join(fs.path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
   return loadYaml(fs.file(fontsPath).readAsStringSync());
@@ -212,8 +211,8 @@ List<_Asset> _getMaterialAssets(String fontSet) {
     for (Map<String, dynamic> font in family['fonts']) {
       String assetKey = font['asset'];
       result.add(new _Asset(
-        base: path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
-        source: path.basename(assetKey),
+        base: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
+        source: fs.path.basename(assetKey),
         relativePath: assetKey
       ));
     }
@@ -338,7 +337,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
     return result;
 
   excludeDirs = excludeDirs.map(
-    (String exclude) => path.absolute(exclude) + fs.path.separator).toList();
+    (String exclude) => fs.path.absolute(exclude) + fs.path.separator).toList();
 
   if (manifestDescriptor.containsKey('assets')) {
     for (String asset in manifestDescriptor['assets']) {
@@ -354,8 +353,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
       // Find asset variants
       String assetPath = baseAsset.assetFile.path;
-      String assetFilename = path.basename(assetPath);
-      Directory assetDir = fs.directory(path.dirname(assetPath));
+      String assetFilename = fs.path.basename(assetPath);
+      Directory assetDir = fs.directory(fs.path.dirname(assetPath));
 
       List<FileSystemEntity> files = assetDir.listSync(recursive: true);
 
@@ -367,11 +366,11 @@ Map<_Asset, List<_Asset>> _parseAssets(
         if (excludeDirs.any((String exclude) => entity.path.startsWith(exclude)))
           continue;
 
-        if (path.basename(entity.path) == assetFilename && entity.path != assetPath) {
-          String key = path.relative(entity.path, from: baseAsset.base);
+        if (fs.path.basename(entity.path) == assetFilename && entity.path != assetPath) {
+          String key = fs.path.relative(entity.path, from: baseAsset.base);
           String assetEntry;
           if (baseAsset.symbolicPrefix != null)
-            assetEntry = path.join(baseAsset.symbolicPrefix, key);
+            assetEntry = fs.path.join(baseAsset.symbolicPrefix, key);
           variants.add(new _Asset(base: baseAsset.base, assetEntry: assetEntry, relativePath: key));
         }
       }
@@ -407,7 +406,7 @@ _Asset _resolveAsset(
   String assetBase,
   String asset
 ) {
-  if (asset.startsWith('packages/') && !fs.isFileSync(path.join(assetBase, asset))) {
+  if (asset.startsWith('packages/') && !fs.isFileSync(fs.path.join(assetBase, asset))) {
     // Convert packages/flutter_gallery_assets/clouds-0.png to clouds-0.png.
     String packageKey = asset.substring(9);
     String relativeAsset = asset;
@@ -436,9 +435,9 @@ dynamic _loadFlutterManifest(String manifestPath) {
 }
 
 Future<int> _validateFlutterManifest(Object manifest) async {
-  String schemaPath = path.join(path.absolute(Cache.flutterRoot),
+  String schemaPath = fs.path.join(fs.path.absolute(Cache.flutterRoot),
       'packages', 'flutter_tools', 'schema', 'pubspec_yaml.json');
-  Schema schema = await Schema.createSchemaFromUrl(path.toUri(schemaPath).toString());
+  Schema schema = await Schema.createSchemaFromUrl(fs.path.toUri(schemaPath).toString());
 
   Validator validator = new Validator(schema);
   if (validator.validate(manifest)) {

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert' show UTF8;
 
 import 'package:archive/archive.dart';
-import 'package:path/path.dart' as path;
 
 import 'android/android_workflow.dart';
 import 'base/common.dart';
@@ -300,8 +299,8 @@ abstract class IntelliJValidator extends DoctorValidator {
 
   String _readPackageVersion(String packageName) {
     String jarPath = packageName.endsWith('.jar')
-        ? path.join(pluginsPath, packageName)
-        : path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
+        ? fs.path.join(pluginsPath, packageName)
+        : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
     // TODO(danrubel) look for a better way to extract a single 2K file from the zip
     // rather than reading the entire file into memory.
     try {
@@ -318,7 +317,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   bool hasPackage(String packageName) {
-    String packagePath = path.join(pluginsPath, packageName);
+    String packagePath = fs.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar'))
       return fs.isFileSync(packagePath);
     return fs.isDirectorySync(packagePath);
@@ -356,18 +355,18 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
     for (FileSystemEntity dir in fs.directory(homeDirPath).listSync()) {
       if (dir is Directory) {
-        String name = path.basename(dir.path);
+        String name = fs.path.basename(dir.path);
         IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
             String version = name.substring(id.length + 1);
             String installPath;
             try {
-              installPath = fs.file(path.join(dir.path, 'system', '.home')).readAsStringSync();
+              installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
             } catch (e) {
               // ignored
             }
             if (installPath != null && fs.isDirectorySync(installPath)) {
-              String pluginsPath = path.join(dir.path, 'config', 'plugins');
+              String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
               addValidator(title, version, installPath, pluginsPath);
             }
           }
@@ -392,10 +391,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     List<DoctorValidator> validators = <DoctorValidator>[];
-    List<String> installPaths = <String>['/Applications', path.join(homeDirPath, 'Applications')];
+    List<String> installPaths = <String>['/Applications', fs.path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
-      String name = path.basename(dir.path);
+      String name = fs.path.basename(dir.path);
       _dirNameToId.forEach((String dirName, String id) {
         if (name == dirName) {
           String title = IntelliJValidator._idToTitle[id];
@@ -437,7 +436,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     if (_version == null) {
       String plist;
       try {
-        plist = fs.file(path.join(installPath, 'Contents', 'Info.plist')).readAsStringSync();
+        plist = fs.file(fs.path.join(installPath, 'Contents', 'Info.plist')).readAsStringSync();
         int index = plist.indexOf('CFBundleShortVersionString');
         if (index > 0) {
           int start = plist.indexOf('<string>', index);
@@ -462,7 +461,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     List<String> split = version.split('.');
     String major = split[0];
     String minor = split[1];
-    return path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
+    return fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
   }
 }
 

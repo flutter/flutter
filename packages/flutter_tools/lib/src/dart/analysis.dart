@@ -21,7 +21,6 @@ import 'package:linter/src/rules.dart' as linter; // ignore: implementation_impo
 import 'package:cli_util/cli_util.dart' as cli_util;
 import 'package:package_config/packages.dart' show Packages;
 import 'package:package_config/src/packages_impl.dart' show MapPackages; // ignore: implementation_imports
-import 'package:path/path.dart' as path;
 import 'package:plugin/manager.dart';
 import 'package:plugin/plugin.dart';
 
@@ -47,7 +46,7 @@ class AnalysisDriver {
   DriverOptions options;
 
   String get sdkDir {
-    return options.dartSdkPath ?? path.absolute(cli_util.getSdkDir().path);
+    return options.dartSdkPath ?? fs.path.absolute(cli_util.getSdkDir().path);
   }
 
   List<AnalysisErrorDescription> analyze(Iterable<File> files) {
@@ -74,7 +73,7 @@ class AnalysisDriver {
     List<Source> sources = <Source>[];
     ChangeSet changeSet = new ChangeSet();
     for (File file in files) {
-      JavaFile sourceFile = new JavaFile(path.normalize(file.absolute.path));
+      JavaFile sourceFile = new JavaFile(fs.path.normalize(file.absolute.path));
       Source source = new FileBasedSource(sourceFile, sourceFile.toURI());
       Uri uri = context.sourceFactory.restoreUri(source);
       if (uri != null) {

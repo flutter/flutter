@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/process.dart';
 import '../cache.dart';
@@ -60,7 +59,7 @@ class UpgradeCommand extends FlutterCommand {
     printStatus('Upgrading engine...');
     code = await runCommandAndStreamOutput(
       <String>[
-        path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache'
+        fs.path.join(Cache.flutterRoot, 'bin', 'flutter'), '--no-color', 'precache'
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true

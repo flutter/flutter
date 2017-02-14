@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:path/path.dart' as path;
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:test/test.dart';
 
@@ -31,7 +31,7 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title) : super(title);
 
   @override
-  String get pluginsPath => path.join('test', 'data', 'intellij', 'plugins');
+  String get pluginsPath => fs.path.join('test', 'data', 'intellij', 'plugins');
 
   @override
   String get version => 'test.test.test';

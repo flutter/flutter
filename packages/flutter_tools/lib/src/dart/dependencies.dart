@@ -4,8 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:path/path.dart' as path;
-
+import '../base/file_system.dart';
 import '../base/process.dart';
 import '../toolchain.dart';
 
@@ -37,7 +36,7 @@ class DartDependencySetBuilder {
       if (!line.startsWith('package:')) {
         // We convert the uris so that they are relative to the project
         // root.
-        line = path.relative(line, from: projectRootPath);
+        line = fs.path.relative(line, from: projectRootPath);
       }
       minimalDependencies.add(line);
     }

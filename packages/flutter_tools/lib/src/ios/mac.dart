@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert' show JSON;
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 
 import '../application_package.dart';
 import '../base/context.dart';
@@ -133,11 +132,11 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
-    if (path.extension(entity.path) == '.xcworkspace') {
+    if (fs.path.extension(entity.path) == '.xcworkspace') {
       commands.addAll(<String>[
-        '-workspace', path.basename(entity.path),
-        '-scheme', path.basenameWithoutExtension(entity.path),
-        "BUILD_DIR=${path.absolute(getIosBuildDirectory())}",
+        '-workspace', fs.path.basename(entity.path),
+        '-scheme', fs.path.basenameWithoutExtension(entity.path),
+        "BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}",
       ]);
       break;
     }
@@ -191,7 +190,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     Match match = regexp.firstMatch(result.stdout);
     String outputDir;
     if (match != null)
-      outputDir = path.join(app.appDirectory, match.group(1));
+      outputDir = fs.path.join(app.appDirectory, match.group(1));
     return new XcodeBuildResult(success:true, output: outputDir);
   }
 }
@@ -320,17 +319,17 @@ Future<Null> _addServicesToBundle(Directory bundle) async {
   printTrace("Found ${services.length} service definition(s).");
 
   // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
-  Directory frameworksDirectory = fs.directory(path.join(bundle.path, "Frameworks"));
+  Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, "Frameworks"));
   await _copyServiceFrameworks(services, frameworksDirectory);
 
   // Step 3: Copy the service definitions manifest at the correct spot for
   //         xcodebuild to pick up.
-  File manifestFile = fs.file(path.join(bundle.path, "ServiceDefinitions.json"));
+  File manifestFile = fs.file(fs.path.join(bundle.path, "ServiceDefinitions.json"));
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
 Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
-  printTrace("Copying service frameworks to '${path.absolute(frameworksDirectory.path)}'.");
+  printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {
     String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
@@ -351,7 +350,7 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
-    'framework': path.basenameWithoutExtension(service['ios-framework'])
+    'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
   Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);

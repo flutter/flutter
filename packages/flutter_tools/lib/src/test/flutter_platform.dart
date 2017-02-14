@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as path;
 import 'package:stream_channel/stream_channel.dart';
 
 import 'package:test/src/backend/test_platform.dart'; // ignore: implementation_imports
@@ -164,7 +163,7 @@ class _FlutterPlatform extends PlatformPlugin {
       File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
-        testUrl: path.toUri(path.absolute(testPath)).toString(),
+        testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
         encodedWebsocketUrl: Uri.encodeComponent("ws://${_kHost.address}:${server.port}"),
       ));
 

@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:coverage/coverage.dart';
-import 'package:path/path.dart' as path;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -66,7 +65,7 @@ class CoverageCollector {
     if (formatter == null) {
       Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
       String packagePath = fs.currentDirectory.path;
-      List<String> reportOn = <String>[path.join(packagePath, 'lib')];
+      List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
       formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     String result = await formatter.format(_globalHitmap);

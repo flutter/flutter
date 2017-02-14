@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/args.dart';
-import 'package:path/path.dart' as path;
 
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -56,11 +55,11 @@ abstract class AnalyzeBase {
 /// If [fileList] is empty, then return `true` if the current directory resides inside the Flutter repository.
 bool inRepo(List<String> fileList) {
   if (fileList == null || fileList.isEmpty)
-    fileList = <String>[path.current];
-  String root = path.normalize(path.absolute(Cache.flutterRoot));
+    fileList = <String>[fs.path.current];
+  String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
   String prefix = root + fs.path.separator;
   for (String file in fileList) {
-    file = path.normalize(path.absolute(file));
+    file = fs.path.normalize(fs.path.absolute(file));
     if (file == root || file.startsWith(prefix))
       return true;
   }
