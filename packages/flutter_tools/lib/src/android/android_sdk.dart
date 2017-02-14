@@ -24,6 +24,7 @@ const String kAndroidHome = 'ANDROID_HOME';
 // $ANDROID_HOME/build-tools/22.0.1/aapt
 // $ANDROID_HOME/build-tools/23.0.2/aapt
 // $ANDROID_HOME/build-tools/24.0.0-preview/aapt
+// $ANDROID_HOME/build-tools/25.0.2/apksigner
 
 // $ANDROID_HOME/platforms/android-22/android.jar
 // $ANDROID_HOME/platforms/android-23/android.jar
@@ -225,6 +226,8 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get zipalignPath => getBuildToolsPath('zipalign');
 
+  String get apksignerPath => getBuildToolsPath('apksigner');
+
   List<String> validateSdkWellFormed() {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
@@ -237,6 +240,9 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
     if (_canRun(zipalignPath) != null)
       return <String>[_canRun(zipalignPath)];
+
+    if (_canRun(apksignerPath) != null)
+      return <String>[_canRun(apksignerPath) + ' (Requires Android SDK Build Tools 24.0.3 or newer.)'];
 
     return <String>[];
   }
