@@ -50,11 +50,14 @@ class Markdown extends MarkdownRaw {
   }
 }
 
-/// A [Widget] that renders markdown formatted text. It supports all standard
-/// markdowns from the original markdown specification found here:
-/// https://daringfireball.net/projects/markdown/ This class doesn't implement
-/// any scrolling behavior, if you want scrolling either wrap the widget in
-/// a [ScrollableViewport] or use the [Markdown] widget.
+/// A [Widget] that renders markdown formatted text.
+///
+/// It supports all standard markdowns from the original markdown specification
+/// found here: <https://daringfireball.net/projects/markdown/>
+///
+/// This class doesn't implement any scrolling behavior, if you want scrolling
+/// either wrap the widget in a [SingleChildScrollView] or use the [Markdown]
+/// widget.
 class MarkdownBody extends MarkdownBodyRaw {
 
   /// Creates a new Markdown [Widget] that renders the markdown formatted string

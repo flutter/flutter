@@ -9,31 +9,31 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('Simple string', (WidgetTester tester) {
-      tester.pumpWidget(new MarkdownBody(data: 'Hello'));
+  testWidgets('Simple string', (WidgetTester tester) async {
+      await tester.pumpWidget(new MarkdownBody(data: 'Hello'));
 
       Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
       _expectTextStrings(widgets, <String>['Hello']);
   });
 
-  testWidgets('Header', (WidgetTester tester) {
-      tester.pumpWidget(new MarkdownBody(data: '# Header'));
+  testWidgets('Header', (WidgetTester tester) async {
+      await tester.pumpWidget(new MarkdownBody(data: '# Header'));
 
       Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
       _expectTextStrings(widgets, <String>['Header']);
   });
 
-  testWidgets('Empty string', (WidgetTester tester) {
-      tester.pumpWidget(new MarkdownBody(data: ''));
+  testWidgets('Empty string', (WidgetTester tester) async {
+      await tester.pumpWidget(new MarkdownBody(data: ''));
 
       Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column]);
   });
 
-  testWidgets('Ordered list', (WidgetTester tester) {
-      tester.pumpWidget(new MarkdownBody(data: '1. Item 1\n1. Item 2\n2. Item 3'));
+  testWidgets('Ordered list', (WidgetTester tester) async {
+      await tester.pumpWidget(new MarkdownBody(data: '1. Item 1\n1. Item 2\n2. Item 3'));
 
       Iterable<Widget> widgets = tester.allWidgets;
       _expectTextStrings(widgets, <String>[
@@ -46,8 +46,8 @@ void main() {
       );
   });
 
-  testWidgets('Unordered list', (WidgetTester tester) {
-      tester.pumpWidget(new MarkdownBody(data: '- Item 1\n- Item 2\n- Item 3'));
+  testWidgets('Unordered list', (WidgetTester tester) async {
+      await tester.pumpWidget(new MarkdownBody(data: '- Item 1\n- Item 2\n- Item 3'));
 
       Iterable<Widget> widgets = tester.allWidgets;
       _expectTextStrings(widgets, <String>[
@@ -60,13 +60,13 @@ void main() {
       );
   });
 
-  testWidgets('Scrollable wrapping', (WidgetTester tester) {
-      tester.pumpWidget(new Markdown(data: ''));
+  testWidgets('Scrollable wrapping', (WidgetTester tester) async {
+      await tester.pumpWidget(new Markdown(data: ''));
 
       List<Widget> widgets = tester.allWidgets.toList();
       _expectWidgetTypes(widgets.take(2), <Type>[
         Markdown,
-        ScrollableViewport,
+        SingleChildScrollView,
       ]);
       _expectWidgetTypes(widgets.reversed.take(3).toList().reversed, <Type>[
         Padding,
@@ -75,8 +75,8 @@ void main() {
       ]);
   });
 
-  testWidgets('Links', (WidgetTester tester) {
-      tester.pumpWidget(new Markdown(data: '[Link Text](href)'));
+  testWidgets('Links', (WidgetTester tester) async {
+      await tester.pumpWidget(new Markdown(data: '[Link Text](href)'));
 
       RichText textWidget = tester.allWidgets.firstWhere((Widget widget) => widget is RichText);
       TextSpan span = textWidget.text;
@@ -84,29 +84,29 @@ void main() {
       expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
   });
 
-  testWidgets('Changing config - data', (WidgetTester tester) {
-      tester.pumpWidget(new Markdown(data: 'Data1'));
+  testWidgets('Changing config - data', (WidgetTester tester) async {
+      await tester.pumpWidget(new Markdown(data: 'Data1'));
       _expectTextStrings(tester.allWidgets, <String>['Data1']);
 
       String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
-      tester.pumpWidget(new Markdown(data: 'Data1'));
+      await tester.pumpWidget(new Markdown(data: 'Data1'));
       String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
       expect(stateBefore, equals(stateAfter));
 
-      tester.pumpWidget(new Markdown(data: 'Data2'));
+      await tester.pumpWidget(new Markdown(data: 'Data2'));
       _expectTextStrings(tester.allWidgets, <String>['Data2']);
   });
 
-  testWidgets('Changing config - style', (WidgetTester tester) {
+  testWidgets('Changing config - style', (WidgetTester tester) async {
       ThemeData theme = new ThemeData.light();
 
       MarkdownStyle style1 = new MarkdownStyle.defaultFromTheme(theme);
       MarkdownStyle style2 = new MarkdownStyle.largeFromTheme(theme);
 
-      tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style1));
+      await tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style1));
 
       String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
-      tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style2));
+      await tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style2));
       String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
       expect(stateBefore, isNot(stateAfter));
   });
