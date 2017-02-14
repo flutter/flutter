@@ -107,6 +107,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
     }
   }
 
+  Type _lastNotificationType;
+  final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
+
   bool _handleScrollNotification(ScrollNotification2 notification) {
     if (notification.depth != 0)
       return false;
@@ -119,27 +122,35 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       } else {
         assert(false);
       }
+      bool isLeading = controller == _leadingController;
+      if (_lastNotificationType != OverscrollNotification) {
+        OverscrollIndicatorNotification confirmationNotification = new OverscrollIndicatorNotification(leading: isLeading);
+        confirmationNotification.dispatch(context);
+        _accepted[isLeading] = confirmationNotification._accepted;
+      }
       assert(controller != null);
       assert(notification.axis == config.axis);
-      if (notification.velocity != 0.0) {
-        assert(notification.dragDetails == null);
-        controller.absorbImpact(notification.velocity.abs());
-      } else {
-        assert(notification.overscroll != 0.0);
-        if (notification.dragDetails != null) {
-          assert(notification.dragDetails.globalPosition != null);
-          final RenderBox renderer = notification.context.findRenderObject();
-          assert(renderer != null);
-          assert(renderer.hasSize);
-          final Size size = renderer.size;
-          final Point position = renderer.globalToLocal(notification.dragDetails.globalPosition);
-          switch (notification.axis) {
-            case Axis.horizontal:
-              controller.pull(notification.overscroll.abs(), size.width, position.y.clamp(0.0, size.height), size.height);
-              break;
-            case Axis.vertical:
-              controller.pull(notification.overscroll.abs(), size.height, position.x.clamp(0.0, size.width), size.width);
-              break;
+      if (_accepted[isLeading]) {
+        if (notification.velocity != 0.0) {
+          assert(notification.dragDetails == null);
+          controller.absorbImpact(notification.velocity.abs());
+        } else {
+          assert(notification.overscroll != 0.0);
+          if (notification.dragDetails != null) {
+            assert(notification.dragDetails.globalPosition != null);
+            final RenderBox renderer = notification.context.findRenderObject();
+            assert(renderer != null);
+            assert(renderer.hasSize);
+            final Size size = renderer.size;
+            final Point position = renderer.globalToLocal(notification.dragDetails.globalPosition);
+            switch (notification.axis) {
+              case Axis.horizontal:
+                controller.pull(notification.overscroll.abs(), size.width, position.y.clamp(0.0, size.height), size.height);
+                break;
+              case Axis.vertical:
+                controller.pull(notification.overscroll.abs(), size.height, position.x.clamp(0.0, size.width), size.width);
+                break;
+            }
           }
         }
       }
@@ -149,6 +160,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         _trailingController.scrollEnd();
       }
     }
+    _lastNotificationType = notification.runtimeType;
     return false;
   }
 
@@ -464,5 +476,26 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
   bool shouldRepaint(_GlowingOverscrollIndicatorPainter oldDelegate) {
     return oldDelegate.leadingController != leadingController
         || oldDelegate.trailingController != trailingController;
+  }
+}
+
+class OverscrollIndicatorNotification extends Notification with ViewportNotificationMixin {
+  OverscrollIndicatorNotification({
+    this.leading,
+  });
+
+  final bool leading;
+
+  bool _accepted = true;
+
+  /// Call this method if the glow should be prevented.
+  void disallowGlow() {
+    _accepted = false;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('side: ${leading ? "leading edge" : "trailing edge"}');
   }
 }

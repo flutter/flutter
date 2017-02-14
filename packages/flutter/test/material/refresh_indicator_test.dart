@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
-
 bool refreshCalled = false;
 
 Future<Null> refresh() {
@@ -26,10 +24,8 @@ void main() {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: refresh,
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: refresh,
+        child: new ListView(
           children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
             return new SizedBox(
               height: 200.0,
@@ -52,15 +48,13 @@ void main() {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: refresh,
-        location: RefreshIndicatorLocation.bottom,
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: refresh,
+        child: new ListView(
+          reverse: true,
           children: <Widget>[
             new SizedBox(
               height: 200.0,
-              child: new Text('X')
+              child: new Text('X'),
             ),
           ],
         ),
@@ -75,18 +69,88 @@ void main() {
     expect(refreshCalled, true);
   });
 
+  testWidgets('RefreshIndicator - top - position', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      new RefreshIndicator(
+        onRefresh: holdRefresh,
+        child: new ListView(
+          children: <Widget>[
+            new SizedBox(
+              height: 200.0,
+              child: new Text('X'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, lessThan(300.0));
+  });
+
+  testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      new RefreshIndicator(
+        onRefresh: holdRefresh,
+        child: new ListView(
+          reverse: true,
+          children: <Widget>[
+            new SizedBox(
+              height: 200.0,
+              child: new Text('X'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, greaterThan(300.0));
+  });
+
+  testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      new RefreshIndicator(
+        onRefresh: refresh,
+        child: new ListView(
+          children: <Widget>[
+            new SizedBox(
+              height: 200.0,
+              child: new Text('X'),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // this fling is horizontal, not up or down
+    await tester.fling(find.text('X'), const Offset(1.0, 0.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    expect(refreshCalled, false);
+  });
+
   testWidgets('RefreshIndicator - not enough', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: refresh,
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: refresh,
+        child: new ListView(
           children: <Widget>[
             new SizedBox(
               height: 200.0,
-              child: new Text('X')
+              child: new Text('X'),
             ),
           ],
         ),
@@ -105,14 +169,12 @@ void main() {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: holdRefresh, // this one never returns
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: holdRefresh, // this one never returns
+        child: new ListView(
           children: <Widget>[
             new SizedBox(
               height: 200.0,
-              child: new Text('X')
+              child: new Text('X'),
             ),
           ],
         ),
@@ -147,14 +209,12 @@ void main() {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: refresh,
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: refresh,
+        child: new ListView(
           children: <Widget>[
             new SizedBox(
               height: 200.0,
-              child: new Text('X')
+              child: new Text('X'),
             ),
           ],
         ),
@@ -190,14 +250,12 @@ void main() {
     refreshCalled = false;
     await tester.pumpWidget(
       new RefreshIndicator(
-        scrollableKey: scrollableKey,
-        refresh: refresh,
-        child: new Block( // ignore: DEPRECATED_MEMBER_USE
-          scrollableKey: scrollableKey,
+        onRefresh: refresh,
+        child: new ListView(
           children: <Widget>[
             new SizedBox(
               height: 200.0,
-              child: new Text('X')
+              child: new Text('X'),
             ),
           ],
         ),
