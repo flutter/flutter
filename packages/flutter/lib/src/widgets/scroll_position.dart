@@ -228,8 +228,8 @@ class ScrollPosition extends ViewportOffset {
   /// The metrics do not need to be in absolute (pixel) units, but they must be
   /// in consistent units (so that they can be compared over time or used to
   /// drive diagrammatic user interfaces such as scrollbars).
-  ScrollableMetrics getMetrics() {
-    return new ScrollableMetrics(
+  ScrollMetrics getMetrics() {
+    return new ScrollMetrics(
       extentBefore: math.max(pixels - minScrollExtent, 0.0),
       extentInside: math.min(pixels, maxScrollExtent) - math.max(pixels, minScrollExtent) + math.min(viewportDimension, maxScrollExtent - minScrollExtent),
       extentAfter: math.max(maxScrollExtent - pixels, 0.0),

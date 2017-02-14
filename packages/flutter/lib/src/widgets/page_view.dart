@@ -189,7 +189,7 @@ class PageView extends BoxScrollView {
     return new NotificationListener<ScrollNotification2>(
       onNotification: (ScrollNotification2 notification) {
         if (notification.depth == 1 && onPageChanged != null && notification is ScrollEndNotification) {
-          final ScrollableMetrics metrics = notification.metrics;
+          final ScrollMetrics metrics = notification.metrics;
           onPageChanged(metrics.extentBefore ~/ metrics.viewportDimension);
         }
         return false;

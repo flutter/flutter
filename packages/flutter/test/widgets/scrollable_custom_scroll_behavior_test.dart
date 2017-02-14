@@ -41,19 +41,19 @@ class TestScrollPosition extends ScrollPosition {
   }
 
   @override
-  ScrollableMetrics getMetrics() {
+  ScrollMetrics getMetrics() {
     double insideExtent = viewportDimension;
     double beforeExtent = _pixels - minScrollExtent;
     double afterExtent = maxScrollExtent - _pixels;
     if (insideExtent > 0.0) {
-      return new ScrollableMetrics(
+      return new ScrollMetrics(
         extentBefore: physics.extentMultiplier * beforeExtent / insideExtent,
         extentInside: physics.extentMultiplier,
         extentAfter: physics.extentMultiplier * afterExtent / insideExtent,
         viewportDimension: viewportDimension,
       );
     } else {
-      return new ScrollableMetrics(
+      return new ScrollMetrics(
         extentBefore: 0.0,
         extentInside: 0.0,
         extentAfter: 0.0,
