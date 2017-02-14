@@ -172,11 +172,11 @@ SkISize VulkanSwapchain::GetSize() const {
 
 static sk_sp<SkColorSpace> SkColorSpaceFromVkFormat(VkFormat format) {
   if (GrVkFormatIsSRGB(format, nullptr /* dont care */)) {
-    return SkColorSpace::MakeNamed(SkColorSpace::Named::kSRGB_Named);
+    return SkColorSpace::MakeSRGB();
   }
 
   if (format == VK_FORMAT_R16G16B16A16_SFLOAT) {
-    return SkColorSpace::MakeNamed(SkColorSpace::Named::kSRGBLinear_Named);
+    return SkColorSpace::MakeSRGBLinear();
   }
 
   return nullptr;
