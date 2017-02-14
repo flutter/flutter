@@ -23,7 +23,7 @@ void main() {
     TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollStartNotification>());
-    expect(notification.depth, equals(1));
+    expect(notification.depth, equals(0));
     ScrollStartNotification start = notification;
     expect(start.dragDetails, isNotNull);
     expect(start.dragDetails.globalPosition, equals(const Point(100.0, 100.0)));
@@ -31,7 +31,7 @@ void main() {
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollUpdateNotification>());
-    expect(notification.depth, equals(1));
+    expect(notification.depth, equals(0));
     ScrollUpdateNotification update = notification;
     expect(update.dragDetails, isNotNull);
     expect(update.dragDetails.globalPosition, equals(const Point(90.0, 90.0)));
@@ -40,7 +40,7 @@ void main() {
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollEndNotification>());
-    expect(notification.depth, equals(1));
+    expect(notification.depth, equals(0));
     ScrollEndNotification end = notification;
     expect(end.dragDetails, isNotNull);
     expect(end.dragDetails.velocity, equals(Velocity.zero));
@@ -93,9 +93,7 @@ void main() {
     expect(depth0Types, equals(types));
     expect(depth1Types, equals(types));
 
-    // These values might not be what we want in the end.
-    // See <https://github.com/flutter/flutter/issues/8017>.
-    expect(depth0Values, equals(<int>[1, 1, 1, 1, 1]));
-    expect(depth1Values, equals(<int>[2, 2, 2, 2, 2]));
+    expect(depth0Values, equals(<int>[0, 0, 0, 0, 0]));
+    expect(depth1Values, equals(<int>[1, 1, 1, 1, 1]));
   });
 }
