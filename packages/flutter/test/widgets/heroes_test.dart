@@ -357,4 +357,36 @@ void main() {
     // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
     await tester.pump(const Duration(hours: 1));
   });
+
+  testWidgets('One route, two heroes, same tag, throws', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new ListView(
+          children: <Widget>[
+            new Hero(tag: 'a', child: new Text('a')),
+            new Hero(tag: 'a', child: new Text('a too')),
+            new Builder(
+              builder: (BuildContext context) {
+                return new FlatButton(
+                  child: new Text('push'),
+                  onPressed: () {
+                    Navigator.push(context, new PageRouteBuilder<Null>(
+                      pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+                        return new Text('fail');
+                      },
+                    ));
+                  },
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('push'));
+    await tester.pump();
+    expect(tester.takeException(), isFlutterError);
+  });
+
 }

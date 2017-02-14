@@ -149,6 +149,7 @@ void main() {
     expect(find.text('Y'), findsOneWidget);
 
     await tester.pump();
+    await tester.pump();
     expect(find.text('X'), findsOneWidget);
     expect(find.text('Y'), findsOneWidget);
 
