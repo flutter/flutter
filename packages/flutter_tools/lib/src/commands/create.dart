@@ -101,9 +101,9 @@ class CreateCommand extends FlutterCommand {
       renderDriverTest: argResults['with-driver-test']
     );
     printStatus('Wrote $generatedCount files.');
+    printStatus('');
 
     updateXcodeGeneratedProperties(dirPath, BuildMode.debug, flx.defaultMainPath);
-    printStatus('Wrote Xcode settings.');
 
     if (argResults['pub'])
       await pubGet(directory: dirPath);
