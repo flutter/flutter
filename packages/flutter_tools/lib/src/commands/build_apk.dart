@@ -10,6 +10,7 @@ import '../android/gradle.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
@@ -67,14 +68,14 @@ class _ApkBuilder {
   File _aapt;
   File _dx;
   File _zipalign;
-  File _apksigner;
+  File _jarsigner;
 
   _ApkBuilder(this.sdk) {
     _androidJar = fs.file(sdk.androidJarPath);
     _aapt = fs.file(sdk.aaptPath);
     _dx = fs.file(sdk.dxPath);
     _zipalign = fs.file(sdk.zipalignPath);
-    _apksigner = fs.file(sdk.apksignerPath);
+    _jarsigner = os.which('jarsigner');
   }
 
   String checkDependencies() {
@@ -86,8 +87,10 @@ class _ApkBuilder {
       return 'Cannot find dx at ${_dx.path}';
     if (!processManager.canRun(_zipalign.path))
       return 'Cannot find zipalign at ${_zipalign.path}';
-    if (!processManager.canRun(_apksigner.path))
-      return 'Cannot find apksigner at ${_apksigner.path}';
+    if (_jarsigner == null)
+      return 'Cannot find jarsigner in PATH.';
+    if (!_jarsigner.existsSync())
+      return 'Cannot find jarsigner at ${_jarsigner.path}';
     return null;
   }
 
@@ -120,13 +123,15 @@ class _ApkBuilder {
   }
 
   void sign(File keystore, String keystorePassword, String keyAlias, String keyPassword, File outputApk) {
-    assert(_apksigner != null);
-    runCheckedSync(<String>[_apksigner.path, 'sign',
-      '--ks', keystore.path,
-      '--ks-key-alias', keyAlias,
-      '--ks-pass', 'pass:$keystorePassword',
-      '--key-pass', 'pass:$keyPassword',
+    assert(_jarsigner != null);
+    runCheckedSync(<String>[_jarsigner.path,
+      '-keystore', keystore.path,
+      '-storepass', keystorePassword,
+      '-keypass', keyPassword,
+      '-digestalg', 'SHA1',
+      '-sigalg', 'MD5withRSA',
       outputApk.path,
+      keyAlias,
     ]);
   }
 
@@ -366,13 +371,14 @@ int _buildApk(
       unalignedApk, components.manifest, assetBuilder.directory,
       artifactBuilder.directory, components.resources, buildMode
     );
+
+    int signResult = _signApk(builder, components, unalignedApk, keystore, buildMode);
+    if (signResult != 0)
+      return signResult;
+
     File finalApk = fs.file(outputFile);
     ensureDirectoryExists(finalApk.path);
     builder.align(unalignedApk, finalApk);
-
-    int signResult = _signApk(builder, components, finalApk, keystore, buildMode);
-    if (signResult != 0)
-      return signResult;
 
     printTrace('calculateSha: $outputFile');
     File apkShaFile = fs.file('$outputFile.sha1');
