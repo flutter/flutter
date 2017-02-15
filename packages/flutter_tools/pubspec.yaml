@@ -15,9 +15,7 @@ dependencies:
   file: 2.0.1
   http: ^0.11.3
   intl: '>=0.14.0 <0.15.0'
-  # TODO(tvolkert): Change to ^2.0.0 after manually vetting 2.0.4 release,
-  # which contains https://github.com/dart-lang/json_rpc_2/pull/19
-  json_rpc_2: 2.0.3
+  json_rpc_2: ^2.0.0
   json_schema: 1.0.6
   linter: 0.1.30-alpha.1
   meta: ^1.0.4
