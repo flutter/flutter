@@ -615,6 +615,7 @@ class VM extends ServiceObjectOwner {
       return null;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
+      return null;
     }
   }
 
