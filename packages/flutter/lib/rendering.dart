@@ -28,7 +28,7 @@ export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/custom_layout.dart';
 export 'src/rendering/debug.dart';
-export 'src/rendering/editable_line.dart';
+export 'src/rendering/editable.dart';
 export 'src/rendering/error.dart';
 export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';

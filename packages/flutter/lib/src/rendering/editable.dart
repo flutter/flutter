@@ -2,13 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'object.dart';
-import 'viewport.dart';
+import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
@@ -39,14 +41,6 @@ class TextSelectionPoint {
   final TextDirection direction;
 }
 
-/// Signature for the callback used by [RenderEditable] to determine the paint offset when
-/// the dimensions of the render box change.
-///
-/// The return value should be the new paint offset to use.
-///
-/// Used by [RenderEditable.onPaintOffsetUpdateNeeded].
-typedef Offset RenderEditablePaintOffsetNeededCallback(ViewportDimensions dimensions, Rect caretRect);
-
 /// A single line of editable text.
 class RenderEditable extends RenderBox {
   /// Creates a render object for a single line of editable text.
@@ -58,15 +52,18 @@ class RenderEditable extends RenderBox {
     Color selectionColor,
     double textScaleFactor: 1.0,
     TextSelection selection,
+    @required ViewportOffset offset,
     this.onSelectionChanged,
-    Offset paintOffset: Offset.zero,
-    this.onPaintOffsetUpdateNeeded,
   }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
        _maxLines = maxLines,
        _selection = selection,
-       _paintOffset = paintOffset {
+       _offset = offset {
+    assert(showCursor != null);
+    assert(maxLines != null);
+    assert(textScaleFactor != null);
+    assert(offset != null);
     assert(!showCursor || cursorColor != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
@@ -78,9 +75,6 @@ class RenderEditable extends RenderBox {
 
   /// Called when the selection changes.
   SelectionChangedHandler onSelectionChanged;
-
-  /// Called when the inner or outer dimensions of this render object change.
-  RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   /// The text to display
   TextSpan get text => _textPainter.text;
@@ -106,6 +100,7 @@ class RenderEditable extends RenderBox {
   bool get showCursor => _showCursor;
   bool _showCursor;
   set showCursor(bool value) {
+    assert(value != null);
     if (_showCursor == value)
       return;
     _showCursor = value;
@@ -118,6 +113,7 @@ class RenderEditable extends RenderBox {
   int get maxLines => _maxLines;
   int _maxLines;
   set maxLines(int value) {
+    assert(value != null);
     if (_maxLines == value)
       return;
     _maxLines = value;
@@ -165,14 +161,57 @@ class RenderEditable extends RenderBox {
   /// If the text content is larger than the editable line itself, the editable
   /// line clips the text. This property controls which part of the text is
   /// visible by shifting the text by the given offset before clipping.
-  Offset get paintOffset => _paintOffset;
-  Offset _paintOffset;
-  set paintOffset(Offset value) {
-    if (_paintOffset == value)
+  ViewportOffset get offset => _offset;
+  ViewportOffset _offset;
+  set offset(ViewportOffset value) {
+    assert(value != null);
+    if (_offset == value)
       return;
-    _paintOffset = value;
-    markNeedsPaint();
+    if (attached)
+      _offset.removeListener(markNeedsPaint);
+    _offset = value;
+    if (attached)
+      _offset.addListener(markNeedsPaint);
+    markNeedsLayout();
   }
+
+  bool get _isMultiline => maxLines > 1;
+
+  Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
+
+  Offset get _paintOffset {
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return new Offset(-offset.pixels, 0.0);
+      case Axis.vertical:
+        return new Offset(0.0, -offset.pixels);
+    }
+    return null;
+  }
+
+  double get _viewportExtent {
+    assert(hasSize);
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return size.width;
+      case Axis.vertical:
+        return size.height;
+    }
+    return null;
+  }
+
+  double _getMaxScrollExtent(Size contentSize) {
+    assert(hasSize);
+    switch (_viewportAxis) {
+      case Axis.horizontal:
+        return math.max(0.0, contentSize.width - size.width);
+      case Axis.vertical:
+        return math.max(0.0, contentSize.height - size.height);
+    }
+    return null;
+  }
+
+  bool _hasVisualOverflow = false;
 
   /// Returns the global coordinates of the endpoints of the given selection.
   ///
@@ -187,17 +226,17 @@ class RenderEditable extends RenderBox {
     // clean at this point.
     _textPainter.layout(maxWidth: _maxContentWidth);
 
-    Offset offset = _paintOffset;
+    final Offset paintOffset = _paintOffset;
 
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
-      Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      Point start = new Point(0.0, _preferredLineHeight) + caretOffset + offset;
+      final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
+      final Point start = new Point(0.0, _preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
-      List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
-      Point start = new Point(boxes.first.start, boxes.first.bottom) + offset;
-      Point end = new Point(boxes.last.end, boxes.last.bottom) + offset;
+      final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
+      final Point start = new Point(boxes.first.start, boxes.first.bottom) + paintOffset;
+      final Point end = new Point(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         new TextSelectionPoint(localToGlobal(start), boxes.first.direction),
         new TextSelectionPoint(localToGlobal(end), boxes.last.direction),
@@ -207,26 +246,24 @@ class RenderEditable extends RenderBox {
 
   /// Returns the position in the text for the given global coordinate.
   TextPosition getPositionForPoint(Point globalPosition) {
-    globalPosition += -paintOffset;
+    globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
   }
 
   /// Returns the Rect in local coordinates for the caret at the given text
   /// position.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
-    Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
+    final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
     return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, _preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
-  Size _contentSize;
-
   double get _preferredLineHeight => _textPainter.preferredLineHeight;
 
   double get _maxContentWidth {
-    return _maxLines > 1 ?
-      constraints.maxWidth - (_kCaretGap + _kCaretWidth) :
-      double.INFINITY;
+    if (_maxLines > 1)
+      return constraints.maxWidth - (_kCaretGap + _kCaretWidth);
+    return double.INFINITY;
   }
 
   @override
@@ -257,15 +294,15 @@ class RenderEditable extends RenderBox {
   Point _lastTapDownPosition;
   Point _longPressPosition;
   void _handleTapDown(TapDownDetails details) {
-    _lastTapDownPosition = details.globalPosition + -paintOffset;
+    _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
 
   void _handleTap() {
     assert(_lastTapDownPosition != null);
-    final Point global = _lastTapDownPosition;
+    final Point globalPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
       onSelectionChanged(new TextSelection.fromPosition(position), this, false);
     }
   }
@@ -277,16 +314,16 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleLongPress() {
-    final Point global = _longPressPosition;
+    final Point globalPosition = _longPressPosition;
     _longPressPosition = null;
     if (onSelectionChanged != null) {
-      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(global).toOffset());
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
       onSelectionChanged(_selectWordAtOffset(position), this, true);
     }
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    TextRange word = _textPainter.getWordBoundary(position);
+    final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
       return new TextSelection.fromPosition(position);
@@ -297,41 +334,34 @@ class RenderEditable extends RenderBox {
 
   @override
   void performLayout() {
-    Size oldSize = hasSize ? size : null;
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     _textPainter.layout(maxWidth: _maxContentWidth);
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
       _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
     ));
-    Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
-    assert(_selection != null);
-    Rect caretRect = getLocalRectForCaret(_selection.extent);
-    if (onPaintOffsetUpdateNeeded != null && (size != oldSize || contentSize != _contentSize || !_withinBounds(caretRect)))
-      onPaintOffsetUpdateNeeded(new ViewportDimensions(containerSize: size, contentSize: contentSize), caretRect);
-    _contentSize = contentSize;
-  }
-
-  bool _withinBounds(Rect caretRect) {
-    Rect bounds = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
-    return (bounds.contains(caretRect.topLeft) && bounds.contains(caretRect.bottomRight));
+    final Size contentSize = new Size(_textPainter.width + _kCaretGap + _kCaretWidth, _textPainter.height);
+    final double _maxScrollExtent = _getMaxScrollExtent(contentSize);
+    _hasVisualOverflow = _maxScrollExtent > 0.0;
+    offset.applyViewportDimension(_viewportExtent);
+    offset.applyContentDimensions(0.0, _maxScrollExtent);
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset) {
-    Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
-    Paint paint = new Paint()..color = _cursorColor;
+    final Offset caretOffset = _textPainter.getOffsetForCaret(_selection.extent, _caretPrototype);
+    final Paint paint = new Paint()..color = _cursorColor;
     canvas.drawRect(_caretPrototype.shift(caretOffset + effectiveOffset), paint);
   }
 
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
     assert(_selectionRects != null);
-    Paint paint = new Paint()..color = _selectionColor;
+    final Paint paint = new Paint()..color = _selectionColor;
     for (ui.TextBox box in _selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    Offset effectiveOffset = offset + _paintOffset;
+    final Offset effectiveOffset = offset + _paintOffset;
 
     if (_selection != null) {
       if (_selection.isCollapsed && _showCursor && cursorColor != null) {
@@ -345,8 +375,6 @@ class RenderEditable extends RenderBox {
     _textPainter.paint(context.canvas, effectiveOffset);
   }
 
-  bool get _hasVisualOverflow => _contentSize.width > size.width;
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow)
@@ -357,4 +385,24 @@ class RenderEditable extends RenderBox {
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('cursorColor: $_cursorColor');
+    description.add('showCursor: $_showCursor');
+    description.add('maxLines: $_maxLines');
+    description.add('selectionColor: $_selectionColor');
+    description.add('textScaleFactor: $textScaleFactor');
+    description.add('selection: $_selection');
+    description.add('offset: $_offset');
+  }
+
+  @override
+  String debugDescribeChildren(String prefix) {
+    return '$prefix \u2558\u2550\u2566\u2550\u2550 text \u2550\u2550\u2550\n'
+           '${text.toString("$prefix   \u2551 ")}' // TextSpan includes a newline
+           '$prefix   \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\n'
+           '$prefix\n';
+  }
 }

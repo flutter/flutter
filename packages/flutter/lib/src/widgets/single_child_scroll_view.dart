@@ -184,13 +184,13 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   bool get isRepaintBoundary => true;
 
-  double get _effectiveExtent {
+  double get _viewportExtent {
     assert(hasSize);
     switch (axis) {
-      case Axis.vertical:
-        return size.height;
       case Axis.horizontal:
         return size.width;
+      case Axis.vertical:
+        return size.height;
     }
     return null;
   }
@@ -265,7 +265,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       size = constraints.constrain(child.size);
     }
 
-    offset.applyViewportDimension(_effectiveExtent);
+    offset.applyViewportDimension(_viewportExtent);
     offset.applyContentDimensions(_minScrollExtent, _maxScrollExtent);
   }
 
