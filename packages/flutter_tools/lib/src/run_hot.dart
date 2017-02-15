@@ -42,6 +42,7 @@ class HotRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.benchmarkMode: false,
     this.applicationBinary,
+    this.kernelFilePath,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -64,6 +65,7 @@ class HotRunner extends ResidentRunner {
   final Map<String, int> benchmarkData = new Map<String, int>();
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
+  String kernelFilePath;
 
   @override
   Future<int> run({
@@ -156,6 +158,11 @@ class HotRunner extends ResidentRunner {
     String modeName = getModeName(debuggingOptions.buildMode);
     printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
 
+    // Include kernel code
+    DevFSContent kernelContent;
+    if (kernelFilePath != null)
+      kernelContent = new DevFSFileContent(fs.file(kernelFilePath));
+
     // Start the application.
     Future<LaunchResult> futureResult = device.startApp(
       package,
@@ -165,6 +172,7 @@ class HotRunner extends ResidentRunner {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
+      kernelContent: kernelContent,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
     );
 

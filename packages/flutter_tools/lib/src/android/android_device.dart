@@ -15,6 +15,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -268,6 +269,7 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
+    DevFSContent kernelContent,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {
@@ -287,6 +289,7 @@ class AndroidDevice extends Device {
       await buildApk(platform,
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
+          kernelContent: kernelContent,
           applicationNeedsRebuild: applicationNeedsRebuild
       );
     }
