@@ -71,7 +71,13 @@ enum _TestResult { crashed, harnessBailed, testBailed }
 typedef Future<Null> _Finalizer();
 
 class _FlutterPlatform extends PlatformPlugin {
-  _FlutterPlatform({ this.shellPath, this.collector, this.debuggerMode, this.explicitObservatoryPort, this.explicitDiagnosticPort }) {
+  _FlutterPlatform({
+    this.shellPath,
+    this.collector,
+    this.debuggerMode,
+    this.explicitObservatoryPort,
+    this.explicitDiagnosticPort,
+  }) {
     assert(shellPath != null);
   }
 
@@ -113,14 +119,14 @@ class _FlutterPlatform extends PlatformPlugin {
       localController.stream,
       remoteSink,
     );
-    _startTest(testPath, localChannel, ourTestCount).whenComplete(() {
-      testCompleteCompleter.complete();
-    });
+    testCompleteCompleter.complete(_startTest(testPath, localChannel, ourTestCount));
     return remoteChannel;
   }
 
   Future<Null> _startTest(String testPath, StreamChannel<dynamic> controller, int ourTestCount) async {
     printTrace('test $ourTestCount: starting test $testPath');
+
+    dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
 
     final List<_Finalizer> finalizers = <_Finalizer>[];
     bool subprocessActive = false;
@@ -334,6 +340,7 @@ class _FlutterPlatform extends PlatformPlugin {
         controller.sink.addError(error, stack);
       } else {
         printError('unhandled error during test:\n$testPath\n$error');
+        outOfBandError ??= error;
       }
     } finally {
       printTrace('test $ourTestCount: cleaning up...');
@@ -346,6 +353,7 @@ class _FlutterPlatform extends PlatformPlugin {
             controller.sink.addError(error, stack);
           } else {
             printError('unhandled error during finalization of test:\n$testPath\n$error');
+            outOfBandError ??= error;
           }
         }
       }
@@ -357,6 +365,10 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     assert(!subprocessActive);
     assert(controllerSinkClosed);
+    if (outOfBandError != null) {
+      printTrace('test $ourTestCount: finished with out-of-band failure');
+      throw outOfBandError;
+    }
     printTrace('test $ourTestCount: finished');
     return null;
   }
