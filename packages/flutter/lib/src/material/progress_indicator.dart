@@ -432,7 +432,7 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
 /// An indicator for the progress of refreshing the contents of a widget.
 ///
 /// Typically used for swipe-to-refresh interactions. See [RefreshIndicator] for
-/// a complete implementation of swipe-to-refresh driven by a [Scrollable]
+/// a complete implementation of swipe-to-refresh driven by a [Scrollable2]
 /// widget.
 ///
 /// See also:
@@ -442,7 +442,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Creates a refresh progress indicator.
   ///
   /// Rather than creating a refresh progress indicator directly, consider using
-  /// a [RefreshIndicator] together with a [Scrollable] widget.
+  /// a [RefreshIndicator] together with a [Scrollable2] widget.
   RefreshProgressIndicator({
     Key key,
     double value,

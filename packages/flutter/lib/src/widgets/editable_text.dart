@@ -135,7 +135,7 @@ class InputValue {
 ///  * [InputField], which adds tap-to-focus and cut, copy, and paste commands.
 ///  * [TextField], which is a full-featured, material-design text input field
 ///    with placeholder text, labels, and [Form] integration.
-class EditableText extends Scrollable {
+class EditableText extends Scrollable { // ignore: DEPRECATED_MEMBER_USE
   /// Creates a basic text input control.
   ///
   /// The [value] argument must not be null.
@@ -226,7 +226,7 @@ class EditableText extends Scrollable {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends ScrollableState<EditableText> implements TextInputClient {
+class EditableTextState extends ScrollableState<EditableText> implements TextInputClient { // ignore: DEPRECATED_MEMBER_USE
   Timer _cursorTimer;
   bool _showCursor = false;
 

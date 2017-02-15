@@ -136,7 +136,6 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   List<CardModel> cardModels;
   Map<MarkerType, Point> markers = new Map<MarkerType, Point>();
   double markersScrollOffset = 0.0;
-  ScrollListener scrollListener;
 
   @override
   void initState() {
@@ -173,8 +172,8 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(new Point(size.width, size.height));
-      final ScrollableState scrollable = Scrollable.of(target.currentContext);
-      markersScrollOffset = scrollable.scrollOffset;
+      final Scrollable2State scrollable = Scrollable2.of(target.currentContext);
+      markersScrollOffset = scrollable.position.pixels;
     });
   }
 
