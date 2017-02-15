@@ -28,6 +28,7 @@ apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
+    private File flutterExecutable
     private String localEngine
     private Properties localProperties
 
@@ -70,6 +71,12 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
+        String flutterExecutableName = localProperties.getProperty("flutter.executable")
+        if (flutterExecutableName == null) {
+            throw new GradleException("flutter.executable must be set to the name of the flutter executable")
+        }
+        flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
+
         String flutterJarPath = localProperties.getProperty("flutter.jar")
         if (flutterJarPath != null) {
             File flutterJar = project.file(flutterJarPath)
@@ -86,7 +93,7 @@ class FlutterPlugin implements Plugin<Project> {
             File releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
             if (!debugFlutterJar.isFile()) {
                 project.exec {
-                    executable "${flutterRoot}/bin/flutter"
+                    executable flutterExecutable.absolutePath
                     args "precache"
                 }
                 if (!debugFlutterJar.isFile()) {
@@ -139,6 +146,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             FlutterTask flutterTask = project.tasks.create("flutterBuild${variant.name.capitalize()}", FlutterTask) {
                 flutterRoot this.flutterRoot
+                flutterExecutable this.flutterExecutable
                 buildMode variant.name
                 localEngine this.localEngine
                 targetPath target
@@ -164,6 +172,7 @@ class FlutterExtension {
 
 class FlutterTask extends DefaultTask {
     File flutterRoot
+    File flutterExecutable
     String buildMode
     String localEngine
     String targetPath
@@ -200,7 +209,7 @@ class FlutterTask extends DefaultTask {
 
         if (buildMode != "debug") {
             project.exec {
-                executable "${flutterRoot}/bin/flutter"
+                executable flutterExecutable.absolutePath
                 workingDir sourceDir
                 if (localEngine != null) {
                     args "--local-engine", localEngine
@@ -214,7 +223,7 @@ class FlutterTask extends DefaultTask {
         }
 
         project.exec {
-            executable "${flutterRoot}/bin/flutter"
+            executable flutterExecutable.absolutePath
             workingDir sourceDir
             if (localEngine != null) {
                 args "--local-engine", localEngine
