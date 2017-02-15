@@ -56,8 +56,10 @@ Future<Null> main() async {
   );
 
   List<String> coverageFlags = <String>[];
-  if (Platform.environment['TRAVIS'] != null && Platform.environment['TRAVIS_PULL_REQUEST'] == 'false')
+  if (Platform.environment['TRAVIS'] != null && Platform.environment['TRAVIS_PULL_REQUEST'] == 'false') {
     coverageFlags.add('--coverage');
+    coverageFlags.add('-v');
+  }
 
   // Run tests.
   await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter'),
