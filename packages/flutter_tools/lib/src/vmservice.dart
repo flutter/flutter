@@ -10,7 +10,9 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'globals.dart';
 
@@ -30,10 +32,13 @@ const Duration kLongRequestTimeout = const Duration(minutes: 1);
 
 /// A connection to the Dart VM Service.
 class VMService {
-  VMService._(this.peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
+  VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
     _vm = new VM._empty(this);
+    _peer.listen().catchError((dynamic e, StackTrace stackTrace) {
+      _connectionError.completeError(e, stackTrace);
+    });
 
-    peer.registerMethod('streamNotify', (rpc.Parameters event) {
+    _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
     });
   }
@@ -47,26 +52,21 @@ class VMService {
   ///
   /// Requests made via the returns [VMService] time out after [requestTimeout]
   /// amount of time, which is [kDefaultRequestTimeout] by default.
-  static Future<VMService> connect(
+  static VMService connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
-  }) async {
+  }) {
     Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    StreamChannel<dynamic> channel;
-    try {
-      channel = _openChannel(wsUri);
-    } catch (e) {
-      return new Future<VMService>.error('Failed to connect to $wsUri\n  $e');
-    }
+    StreamChannel<dynamic> channel = _openChannel(wsUri);
     rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel.cast()));
-    peer.listen();
     return new VMService._(peer, httpUri, wsUri, requestTimeout);
   }
 
   final Uri httpAddress;
   final Uri wsAddress;
-  final rpc.Peer peer;
+  final rpc.Peer _peer;
   final Duration _requestTimeout;
+  final Completer<Map<String, dynamic>> _connectionError = new Completer<Map<String, dynamic>>();
 
   VM _vm;
   /// The singleton [VM] object. Owns [Isolate] and [FlutterView] objects.
@@ -77,8 +77,9 @@ class VMService {
 
   Set<String> _listeningFor = new Set<String>();
 
-  bool get isClosed => peer.isClosed;
-  Future<Null> get done => peer.done;
+  /// Whether our connection to the VM service has been closed;
+  bool get isClosed => _peer.isClosed;
+  Future<Null> get done => _peer.done;
 
   // Events
   Stream<ServiceEvent> get onDebugEvent => onEvent('Debug');
@@ -92,6 +93,16 @@ class VMService {
   Stream<ServiceEvent> onEvent(String streamId) {
     _streamListen(streamId);
     return _getEventController(streamId).stream;
+  }
+
+  Future<Map<String, dynamic>> _sendRequest(
+    String method,
+    Map<String, dynamic> params,
+  ) {
+    return Future.any(<Future<Map<String, dynamic>>>[
+      _peer.sendRequest(method, params),
+      _connectionError.future,
+    ]);
   }
 
   StreamController<ServiceEvent> _getEventController(String eventName) {
@@ -130,8 +141,7 @@ class VMService {
   Future<Null> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await peer.sendRequest('streamListen',
-                             <String, dynamic>{ 'streamId': streamId });
+      await _sendRequest('streamListen', <String, dynamic>{ 'streamId': streamId });
     }
   }
 
@@ -315,7 +325,7 @@ abstract class ServiceObject {
       _inProgressReload = null;
     }
 
-    return _inProgressReload;
+    return await _inProgressReload;
   }
 
   /// Update [this] using [map] as a source. [map] can be a service reference.
@@ -594,8 +604,8 @@ class VM extends ServiceObjectOwner {
     assert(params != null);
     timeout ??= _vmService._requestTimeout;
     try {
-      Map<String, dynamic> result = await _vmService.peer
-          .sendRequest(method, params)
+      Map<String, dynamic> result = await _vmService
+          ._sendRequest(method, params)
           .timeout(timeout);
       return result;
     } on TimeoutException {
@@ -603,6 +613,8 @@ class VM extends ServiceObjectOwner {
       if (timeoutFatal)
         throw new TimeoutException('Request to Dart VM Service timed out: $method($params)');
       return null;
+    } on WebSocketChannelException catch (error) {
+      throwToolExit('Error connecting to observatory: $error');
     }
   }
 

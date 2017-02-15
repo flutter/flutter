@@ -194,7 +194,7 @@ abstract class ResidentRunner {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
-    vmService = await VMService.connect(uri);
+    vmService = VMService.connect(uri);
     printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
