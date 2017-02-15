@@ -92,7 +92,9 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         messages.addAll(validationResult.map((String message) {
           return new ValidationMessage.error(message);
         }));
-        messages.add(new ValidationMessage('Try re-installing or updating your Android SDK.'));
+        messages.add(new ValidationMessage(
+          'Try re-installing or updating your Android SDK,\n'
+          'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
       }
     }
 

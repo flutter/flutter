@@ -242,7 +242,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
       return <String>[_canRun(zipalignPath)];
 
     if (_canRun(apksignerPath) != null)
-      return <String>[_canRun(apksignerPath) + ' (Requires Android SDK Build Tools 24.0.3 or newer.)'];
+      return <String>[_canRun(apksignerPath) + '\napksigner requires Android SDK Build Tools 24.0.3 or newer.'];
 
     return <String>[];
   }
