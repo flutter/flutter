@@ -9,7 +9,7 @@
 
 namespace blink {
 
-TEST(FontCacheAndroid, fallbackFontForCharacter)
+TEST(FontCacheMobile, fallbackFontForCharacter)
 {
     // A Latin character in the common locale system font, but not in the
     // Chinese locale-preferred font.

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011 Google Inc. All rights reserved.
+ * Copyright (c) 2017 Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,21 +34,38 @@
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
 #include "flutter/sky/engine/platform/fonts/FontFaceCreationParams.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
+#include "flutter/sky/engine/platform/text/LocaleToScriptMapping.h"
 #include "third_party/skia/include/core/SkTypeface.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 
 namespace blink {
+
+// SkFontMgr requires script-based locale names, like "zh-Hant" and "zh-Hans",
+// instead of "zh-CN" and "zh-TW".
+static CString toSkFontMgrLocale(const String& locale)
+{
+    if (!locale.startsWith("zh", TextCaseInsensitive))
+        return locale.ascii();
+    switch (localeToScriptCodeForFontSelection(locale)) {
+    case USCRIPT_SIMPLIFIED_HAN:
+        return "zh-Hans";
+    case USCRIPT_TRADITIONAL_HAN:
+        return "zh-Hant";
+    default:
+        return locale.ascii();
+    }
+}
 
 static AtomicString getFamilyNameForCharacter(UChar32 c, const FontDescription& fontDescription)
 {
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     const char* bcp47Locales[2];
     int localeCount = 0;
-    CString defaultLocale = defaultLanguage().ascii();
+    CString defaultLocale = toSkFontMgrLocale(defaultLanguage());
     bcp47Locales[localeCount++] = defaultLocale.data();
     CString fontLocale;
     if (!fontDescription.locale().isEmpty()) {
-        fontLocale = fontDescription.locale().ascii();
+        fontLocale = toSkFontMgrLocale(fontDescription.locale());
         bcp47Locales[localeCount++] = fontLocale.data();
     }
     sk_sp<SkTypeface> typeface(fm->matchFamilyStyleCharacter(0, SkFontStyle(), bcp47Locales, localeCount, c));
@@ -66,29 +83,6 @@ PassRefPtr<SimpleFontData> FontCache::fallbackFontForCharacter(const FontDescrip
     if (familyName.isEmpty())
         return getLastResortFallbackFont(fontDescription, DoNotRetain);
     return fontDataFromFontPlatformData(getFontPlatformData(fontDescription, FontFaceCreationParams(familyName)), DoNotRetain);
-}
-
-// static
-AtomicString FontCache::getGenericFamilyNameForScript(const AtomicString& familyName, const FontDescription& fontDescription)
-{
-    // This is a hack to use the preferred font for CJK scripts.
-    // FIXME: Use new Skia API once Android system supports per-family and per-script fallback fonts.
-    UChar32 examplerChar;
-    switch (fontDescription.script()) {
-    case USCRIPT_SIMPLIFIED_HAN:
-    case USCRIPT_TRADITIONAL_HAN:
-    case USCRIPT_KATAKANA_OR_HIRAGANA:
-        examplerChar = 0x4E00; // A common character in Japanese and Chinese.
-        break;
-    case USCRIPT_HANGUL:
-        examplerChar = 0xAC00;
-        break;
-    default:
-        // For other scripts, use the default generic family mapping logic.
-        return familyName;
-    }
-
-    return getFamilyNameForCharacter(examplerChar, fontDescription);
 }
 
 } // namespace blink

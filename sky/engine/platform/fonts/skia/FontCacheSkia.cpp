@@ -129,7 +129,7 @@ PassRefPtr<SimpleFontData> FontCache::fallbackOnStandardFontStyle(
     return nullptr;
 }
 
-#if !OS(WIN) && !OS(ANDROID)
+#if !OS(WIN) && !OS(ANDROID) && !OS(IOS)
 PassRefPtr<SimpleFontData> FontCache::fallbackFontForCharacter(const FontDescription& fontDescription, UChar32 c, const SimpleFontData*)
 {
     // First try the specified font with standard style & weight.

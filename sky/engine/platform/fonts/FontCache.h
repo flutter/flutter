@@ -94,9 +94,7 @@ public:
     PassRefPtr<OpenTypeVerticalData> getVerticalData(const FontFileKey&, const FontPlatformData&);
 #endif
 
-#if OS(ANDROID)
-    static AtomicString getGenericFamilyNameForScript(const AtomicString& familyName, const FontDescription&);
-#else
+#if !OS(ANDROID) && !OS(IOS)
     struct PlatformFallbackFont {
         String name;
         CString filename;
