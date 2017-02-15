@@ -9,24 +9,40 @@ Key firstKey = const Key('first');
 Key secondKey = const Key('second');
 Key thirdKey = const Key('third');
 
+Key homeRouteKey = const Key('homeRoute');
+Key routeTwoKey = const Key('routeTwo');
+Key routeThreeKey = const Key('routeThree');
+
 final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
   '/': (BuildContext context) => new Material(
     child: new ListView(
+      key: homeRouteKey,
       children: <Widget>[
         new Container(height: 100.0, width: 100.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
         new Container(height: 100.0, width: 100.0),
-        new FlatButton(child: new Text('two'), onPressed: () => Navigator.pushNamed(context, '/two')),
+        new FlatButton(
+          child: new Text('two'),
+          onPressed: () { Navigator.pushNamed(context, '/two'); }
+        ),
       ]
     )
   ),
   '/two': (BuildContext context) => new Material(
     child: new ListView(
+      key: routeTwoKey,
       children: <Widget>[
+        new FlatButton(
+          child: new Text('pop'),
+          onPressed: () { Navigator.pop(context); }
+        ),
         new Container(height: 150.0, width: 150.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
         new Container(height: 150.0, width: 150.0),
-        new FlatButton(child: new Text('three'), onPressed: () => Navigator.push(context, new ThreeRoute())),
+        new FlatButton(
+          child: new Text('three'),
+          onPressed: () { Navigator.push(context, new ThreeRoute()); },
+        ),
       ]
     )
   ),
@@ -35,6 +51,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
 class ThreeRoute extends MaterialPageRoute<Null> {
   ThreeRoute() : super(builder: (BuildContext context) {
     return new Material(
+      key: routeThreeKey,
       child: new ListView(
         children: <Widget>[
           new Container(height: 200.0, width: 200.0),
@@ -389,4 +406,138 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
+  testWidgets('Hero push transition interrupted by a pop', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      routes: routes
+    ));
+
+    // Initially the firstKey Card on the '/' route is visible
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // Pushes MaterialPageRoute '/two'.
+    await tester.tap(find.text('two'));
+
+    // Start the flight of Hero 'a' from route '/' to route '/two'. Route '/two'
+    // is now offstage.
+    await tester.pump();
+
+    final double initialHeight = tester.getSize(find.byKey(firstKey)).height;
+    final double finalHeight = tester.getSize(find.byKey(secondKey, skipOffstage: false)).height;
+    expect(finalHeight, greaterThan(initialHeight)); // simplify the checks below
+
+    // Build the first hero animation frame in the navigator's overlay.
+    await tester.pump();
+
+    // At this point the hero widgets have been replaced by placeholders
+    // and the destination hero has been moved to the overlay.
+    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), findsNothing);
+    expect(find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)), findsNothing);
+    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(secondKey), isOnstage);
+
+    // The duration of a MaterialPageRoute's transition is 300ms.
+    // At 150ms Hero 'a' is mid-flight.
+    await tester.pump(const Duration(milliseconds: 150));
+    final double height150ms = tester.getSize(find.byKey(secondKey)).height;
+    expect(height150ms, greaterThan(initialHeight));
+    expect(height150ms, lessThan(finalHeight));
+
+    // Pop route '/two' before the push transition to '/two' has finished.
+    await tester.tap(find.text('pop'));
+
+    // Restart the flight of Hero 'a'. Now it's flying from route '/two' to
+    // route '/'.
+    await tester.pump();
+
+    // After flying in the opposite direction for 50ms Hero 'a' will
+    // be smaller than it was, but bigger than its initial size.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double height100ms = tester.getSize(find.byKey(secondKey)).height;
+    expect(height100ms, lessThan(height150ms));
+    expect(finalHeight, greaterThan(height100ms));
+
+    // Hero a's return flight at 149ms. The outgoing (push) flight took
+    // 150ms so we should be just about back to where Hero 'a' started.
+    final double epsilon = 0.001;
+    await tester.pump(const Duration(milliseconds: 99));
+    closeTo(tester.getSize(find.byKey(secondKey)).height - initialHeight, epsilon);
+
+    // The flight is finished. We're back to where we started.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(firstKey), isInCard);
+    expect(find.byKey(secondKey), findsNothing);
+  });
+
+  testWidgets('Hero pop transition interrupted by a push', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(routes: routes)
+    );
+
+    // Pushes MaterialPageRoute '/two'.
+    await tester.tap(find.text('two'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Now the secondKey Card on the '/2' route is visible
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(firstKey), findsNothing);
+
+    // Pop MaterialPageRoute '/two'.
+    await tester.tap(find.text('pop'));
+
+    // Start the flight of Hero 'a' from route '/two' to route '/'. Route '/two'
+    // is now offstage.
+    await tester.pump();
+
+    final double initialHeight = tester.getSize(find.byKey(secondKey)).height;
+    final double finalHeight = tester.getSize(find.byKey(firstKey, skipOffstage: false)).height;
+    expect(finalHeight, lessThan(initialHeight)); // simplify the checks below
+
+    // Build the first hero animation frame in the navigator's overlay.
+    await tester.pump();
+
+    // At this point the hero widgets have been replaced by placeholders
+    // and the destination hero has been moved to the overlay.
+    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), findsNothing);
+    expect(find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)), findsNothing);
+    expect(find.byKey(firstKey), isOnstage);
+    expect(find.byKey(secondKey), findsNothing);
+
+    // The duration of a MaterialPageRoute's transition is 300ms.
+    // At 150ms Hero 'a' is mid-flight.
+    await tester.pump(const Duration(milliseconds: 150));
+    final double height150ms = tester.getSize(find.byKey(firstKey)).height;
+    expect(height150ms, lessThan(initialHeight));
+    expect(height150ms, greaterThan(finalHeight));
+
+    // Push route '/two' before the pop transition from '/two' has finished.
+    await tester.tap(find.text('two'));
+
+    // Restart the flight of Hero 'a'. Now it's flying from route '/' to
+    // route '/two'.
+    await tester.pump();
+
+    // After flying in the opposite direction for 50ms Hero 'a' will
+    // be smaller than it was, but bigger than its initial size.
+    await tester.pump(const Duration(milliseconds: 50));
+    final double height100ms = tester.getSize(find.byKey(firstKey)).height;
+    expect(height100ms, greaterThan(height150ms));
+    expect(finalHeight, lessThan(height100ms));
+
+    // Hero a's return flight at 149ms. The outgoing (push) flight took
+    // 150ms so we should be just about back to where Hero 'a' started.
+    final double epsilon = 0.001;
+    await tester.pump(const Duration(milliseconds: 99));
+    closeTo(tester.getSize(find.byKey(firstKey)).height - initialHeight, epsilon);
+
+    // The flight is finished. We're back to where we started.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(secondKey), isInCard);
+    expect(find.byKey(firstKey), findsNothing);
+  });
 }
