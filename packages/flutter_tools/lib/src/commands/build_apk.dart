@@ -15,6 +15,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../devfs.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../resident_runner.dart';
@@ -481,6 +482,7 @@ Future<Null> buildAndroid(
   String target,
   String flxPath,
   String aotPath,
+  DevFSContent kernelContent,
   ApkKeystoreInfo keystore,
   bool applicationNeedsRebuild: false
 }) async {
@@ -545,6 +547,7 @@ Future<Null> buildAndroid(
     // Build the FLX.
     flxPath = await flx.buildFlx(
       mainPath: findMainDartFile(target),
+      kernelContent: kernelContent,
       precompiledSnapshot: isAotBuildMode(buildMode),
       includeRobotoFonts: false);
 
@@ -614,6 +617,7 @@ Future<Null> buildApk(
   TargetPlatform platform, {
   String target,
   BuildMode buildMode: BuildMode.debug,
+  DevFSContent kernelContent,
   bool applicationNeedsRebuild: false,
 }) async {
   if (isProjectUsingGradle()) {
@@ -632,6 +636,7 @@ Future<Null> buildApk(
       buildMode,
       force: false,
       target: target,
+      kernelContent: kernelContent,
       applicationNeedsRebuild: applicationNeedsRebuild,
     );
   }
