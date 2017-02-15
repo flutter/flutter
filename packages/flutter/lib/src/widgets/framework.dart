@@ -95,7 +95,7 @@ class UniqueKey extends LocalKey {
   UniqueKey();
 
   @override
-  String toString() => '[$hashCode]';
+  String toString() => '[#$hashCode]';
 }
 
 /// A key that takes its identity from the object used as its value.
@@ -123,8 +123,8 @@ class ObjectKey extends LocalKey {
   @override
   String toString() {
     if (runtimeType == ObjectKey)
-      return '[${value.runtimeType}@${value.hashCode}]';
-    return '[$runtimeType ${value.runtimeType}@${value.hashCode}]';
+      return '[${value.runtimeType}#${value.hashCode}]';
+    return '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
   }
 }
 
@@ -310,8 +310,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     if (this.runtimeType == LabeledGlobalKey)
-      return '[GlobalKey ${_debugLabel ?? hashCode}]';
-    return '[$runtimeType ${_debugLabel ?? hashCode}]';
+      return '[GlobalKey#${_debugLabel ?? hashCode}]';
+    return '[$runtimeType#${_debugLabel ?? hashCode}]';
   }
 }
 
@@ -341,7 +341,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   int get hashCode => identityHashCode(value);
 
   @override
-  String toString() => '[$runtimeType ${value.runtimeType}@${value.hashCode}]';
+  String toString() => '[$runtimeType ${value.runtimeType}#${value.hashCode}]';
 }
 
 /// This class is a work-around for the "is" operator not accepting a variable value as its right operand
@@ -1040,7 +1040,7 @@ abstract class State<T extends StatefulWidget> {
   String toString() {
     final List<String> data = <String>[];
     debugFillDescription(data);
-    return '$runtimeType(${data.join("; ")})';
+    return '$runtimeType#$hashCode(${data.join("; ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -1055,7 +1055,6 @@ abstract class State<T extends StatefulWidget> {
   @protected
   @mustCallSuper
   void debugFillDescription(List<String> description) {
-    description.add('$hashCode');
     assert(() {
       if (_debugLifecycleState != _StateLifecycle.ready)
         description.add('$_debugLifecycleState');

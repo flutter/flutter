@@ -126,12 +126,12 @@ void main() {
     expect(result, <String, String>{});
     expect(console, <Matcher>[
       matches(
-        'RenderView\\([0-9]+\\)\n'
-        '   debug mode enabled - ${Platform.operatingSystem}\n'
-        '   window size: Size\\(800.0, 600.0\\) \\(in physical pixels\\)\n'
-        '   device pixel ratio: 1.0 \\(physical pixels per logical pixel\\)\n'
-        '   configuration: Size\\(800.0, 600.0\\) at 1.0x \\(in logical pixels\\)\n'
-        '\n'
+        r'RenderView#[0-9]+\n'
+        r'   debug mode enabled - [a-zA-Z]+\n'
+        r'   window size: Size\(800\.0, 600\.0\) \(in physical pixels\)\n'
+        r'   device pixel ratio: 1\.0 \(physical pixels per logical pixel\)\n'
+        r'   configuration: Size\(800\.0, 600\.0\) at 1\.0x \(in logical pixels\)\n'
+        r'\n'
       ),
     ]);
     console.clear();

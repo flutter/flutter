@@ -78,7 +78,7 @@ class TestAssetBundle extends CachingAssetBundle {
   }
 
   @override
-  String toString() => '$runtimeType@$hashCode()';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 class TestAssetImage extends AssetImage {
