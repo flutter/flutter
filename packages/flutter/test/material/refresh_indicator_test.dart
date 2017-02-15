@@ -28,7 +28,7 @@ void main() {
       new RefreshIndicator(
         scrollableKey: scrollableKey,
         refresh: refresh,
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
             return new SizedBox(
@@ -55,7 +55,7 @@ void main() {
         scrollableKey: scrollableKey,
         refresh: refresh,
         location: RefreshIndicatorLocation.bottom,
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <Widget>[
             new SizedBox(
@@ -81,7 +81,7 @@ void main() {
       new RefreshIndicator(
         scrollableKey: scrollableKey,
         refresh: refresh,
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <Widget>[
             new SizedBox(
@@ -107,7 +107,7 @@ void main() {
       new RefreshIndicator(
         scrollableKey: scrollableKey,
         refresh: holdRefresh, // this one never returns
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <Widget>[
             new SizedBox(
@@ -149,7 +149,7 @@ void main() {
       new RefreshIndicator(
         scrollableKey: scrollableKey,
         refresh: refresh,
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <Widget>[
             new SizedBox(
@@ -192,7 +192,7 @@ void main() {
       new RefreshIndicator(
         scrollableKey: scrollableKey,
         refresh: refresh,
-        child: new Block(
+        child: new Block( // ignore: DEPRECATED_MEMBER_USE
           scrollableKey: scrollableKey,
           children: <Widget>[
             new SizedBox(
