@@ -2396,7 +2396,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a human understandable name.
   @override
   String toString() {
-    String header = '$runtimeType';
+    String header = '$runtimeType($hashCode)';
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject target = parent;
