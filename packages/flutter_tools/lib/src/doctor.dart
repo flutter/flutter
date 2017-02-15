@@ -126,7 +126,7 @@ class Doctor {
       for (ValidationMessage message in result.messages) {
         String text = message.message.replaceAll('\n', '\n      ');
         if (message.isError) {
-          printStatus('    x $text', emphasis: true);
+          printStatus('    ✗ $text', emphasis: true);
         } else {
           printStatus('    • $text');
         }

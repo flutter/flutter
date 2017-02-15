@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show ASCII, LineSplitter;
 
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
@@ -53,6 +54,7 @@ class Status {
 typedef void _FinishCallback();
 
 class StdoutLogger extends Logger {
+
   Status _status;
 
   @override
@@ -83,6 +85,11 @@ class StdoutLogger extends Logger {
       message = LineSplitter.split(message).map((String line) => ' ' * indent + line).join('\n');
     if (newline)
       message = '$message\n';
+    writeToStdOut(message);
+  }
+
+  @protected
+  void writeToStdOut(String message) {
     stdout.write(message);
   }
 
@@ -103,6 +110,24 @@ class StdoutLogger extends Logger {
         return new Status();
       }
     }
+  }
+}
+
+/// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
+/// the Windows console with alternative symbols.
+///
+/// This exists because of https://github.com/dart-lang/sdk/issues/28571.
+class WindowsStdoutLogger extends StdoutLogger {
+
+  @override
+  void writeToStdOut(String message) {
+    stdout.write(message
+        .replaceAll('✗', 'X')
+        .replaceAll('✓', '+')
+        .replaceAll('•', '*')
+    );
+    // TODO(goderbauer): find a way to replace all other non-printable characters
+    //     with the unrepresentable character symbol '�'
   }
 }
 
@@ -217,7 +242,7 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    // TODO(devoncarew): This detection does not work for Windows.
+    // TODO(devoncarew): This detection does not work for Windows (https://github.com/dart-lang/sdk/issues/28614).
     String term = platform.environment['TERM'];
     supportsColor = term != null && term != 'dumb';
   }
