@@ -24,6 +24,10 @@ using tonic::ToDart;
 namespace blink {
 namespace {
 
+void DeleteReleaseProc(const void* ptr, void* context) {
+  delete static_cast<std::vector<uint8_t>*>(context);
+}
+
 sk_sp<SkImage> DecodeImage(std::vector<uint8_t> buffer) {
   TRACE_EVENT0("blink", "DecodeImage");
 
@@ -48,7 +52,17 @@ sk_sp<SkImage> DecodeImage(std::vector<uint8_t> buffer) {
 
   // Then, as a fallback, try to create a regular Skia managed image. These
   // don't require a context ready.
-  return flow::BitmapImageCreate(*generator);
+  std::vector<uint8_t>* data_buffer =
+      new std::vector<uint8_t>(std::move(buffer));
+  if (data_buffer == nullptr)
+    return nullptr;
+  sk_data = SkData::MakeWithProc(data_buffer->data(), data_buffer->size(),
+                                 DeleteReleaseProc, data_buffer);
+  if (sk_data == nullptr) {
+    delete data_buffer;
+    return nullptr;
+  }
+  return SkImage::MakeFromEncoded(sk_data);
 }
 
 void InvokeImageCallback(sk_sp<SkImage> image,
