@@ -46,7 +46,9 @@ App::App() {
                                      ui_task_runner,   // UI
                                      io_task_runner    // IO
                                      ));
-  blink::Settings::Set(blink::Settings());
+  blink::Settings settings;
+  settings.enable_observatory = true;
+  blink::Settings::Set(settings);
   blink::InitRuntime();
 
   blink::SetFontProvider(
