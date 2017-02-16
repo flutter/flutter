@@ -22,5 +22,5 @@ void main() {
     expect(image, isNotNull);
     expect(image.width, 1);
     expect(image.height, 1);
-  }, skip: 'https://github.com/flutter/flutter/issues/8200');
+  });
 }
