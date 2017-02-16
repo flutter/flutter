@@ -43,6 +43,7 @@ class IOSDevice extends Device {
     _iproxyPath = _checkForCommand('iproxy');
     _debuggerPath = _checkForCommand('idevicedebug');
     _loggerPath = _checkForCommand('idevicesyslog');
+    _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
         'ios-deploy',
         'To copy files to iOS devices, please install ios-deploy. '
@@ -68,6 +69,9 @@ class IOSDevice extends Device {
 
   String _loggerPath;
   String get loggerPath => _loggerPath;
+
+  String _screenshotPath;
+  String get screenshotPath => _screenshotPath;
 
   String _pusherPath;
   String get pusherPath => _pusherPath;
@@ -117,23 +121,21 @@ class IOSDevice extends Device {
     return runSync(<String>[informerPath, '-k', infoKey, '-u', deviceID]).trim();
   }
 
-  static final Map<String, String> _commandMap = <String, String>{};
   static String _checkForCommand(
     String command, [
     String macInstructions = _ideviceinstallerInstructions
   ]) {
-    return _commandMap.putIfAbsent(command, () {
-      try {
-        command = runCheckedSync(<String>['which', command]).trim();
-      } catch (e) {
-        if (p.platform.isMacOS) {
-          printError('$command not found. $macInstructions');
-        } else {
-          printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
-        }
+    try {
+      command = runCheckedSync(<String>['which', command]).trim();
+    } catch (e) {
+      if (p.platform.isMacOS) {
+        printError('$command not found. $macInstructions');
+      } else {
+        printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
       }
-      return command;
-    });
+      return null;
+    }
+    return command;
   }
 
   @override
@@ -362,14 +364,12 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => false;
+  bool get supportsScreenshot => screenshotPath != null && screenshotPath.isNotEmpty;
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    // We could use idevicescreenshot here (installed along with the brew
-    // ideviceinstaller tools). It however requires a developer disk image on
-    // the device.
-    return new Future<Null>.error('Taking screenshots is not supported on iOS devices. Consider using a simulator instead.');
+    runCheckedSync(<String>[screenshotPath, outputFile.path]);
+    return new Future<Null>.value();
   }
 }
 
