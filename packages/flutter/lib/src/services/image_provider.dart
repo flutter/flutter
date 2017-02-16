@@ -298,6 +298,12 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   }
 }
 
+/// Abstract class to listen network image loading success or failure.
+abstract class NetworkImageLoadingListener {
+  void networkImageLoadingSuccess();
+  void networkImageLoadingFailed();
+}
+
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// Cache headers from the server are ignored.
@@ -308,13 +314,17 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 });
+  const NetworkImage(this.url, { this.scale: 1.0,
+    this.networkImageLoadingListener: null });
 
   /// The URL from which the image will be fetched.
   final String url;
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
+
+  /// The image loading listener.
+  final NetworkImageLoadingListener networkImageLoadingListener;
 
   @override
   Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
@@ -337,17 +347,25 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
     final Uri resolved = Uri.base.resolve(key.url);
     final http.Response response = await http.get(resolved);
-    if (response == null || response.statusCode != 200)
+
+    if (response == null || response.statusCode != 200) {
+      networkImageLoadingListener?.networkImageLoadingFailed();
       return null;
+    }
 
     Uint8List bytes = response.bodyBytes;
-    if (bytes.lengthInBytes == 0)
+    if (bytes.lengthInBytes == 0) {
+      networkImageLoadingListener?.networkImageLoadingFailed();
       return null;
+    }
 
     final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
+    if (image == null) {
+      networkImageLoadingListener?.networkImageLoadingFailed();
       return null;
+    }
 
+    networkImageLoadingListener?.networkImageLoadingSuccess();
     return new ImageInfo(
       image: image,
       scale: key.scale,
