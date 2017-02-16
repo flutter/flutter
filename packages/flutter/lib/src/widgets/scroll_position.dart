@@ -750,7 +750,7 @@ class DrivenScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    position.beginBallisticActivity(velocity);
+    position?.beginBallisticActivity(velocity);
   }
 
   @override
