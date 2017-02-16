@@ -595,8 +595,9 @@ class IOSSimulator extends Device {
   bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) async {
+  Future<Null> takeScreenshot(File outputFile) {
     SimControl.instance.takeScreenshot(outputFile.path);
+    return new Future<Null>.value();
   }
 }
 
