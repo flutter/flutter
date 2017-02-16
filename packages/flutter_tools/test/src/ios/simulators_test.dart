@@ -1,6 +1,17 @@
+import 'dart:io' show ProcessResult;
+
+import 'package:file/file.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
-import 'package:flutter_tools/src/ios/simulators.dart';
+import '../context.dart';
+
+class MockXcode extends Mock implements Xcode {}
+class MockFile extends Mock implements File {}
+class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
   group('compareIosVersions', () {
@@ -84,5 +95,64 @@ void main() {
     test('iPhone 7 Plus is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone 7 Plus').isSupported(), true);
     });
+  });
+
+  group('Simulator screenshot', () {
+    MockXcode mockXcode;
+    MockProcessManager mockProcessManager;
+    IOSSimulator deviceUnderTest;
+
+    setUp(() {
+      mockXcode = new MockXcode();
+      mockProcessManager = new MockProcessManager();
+      // Let everything else return exit code 0 so process.dart doesn't crash.
+      when(
+        mockProcessManager.runSync(any, environment: null, workingDirectory:  null)
+      ).thenReturn(
+        new ProcessResult(2, 0, '', null)
+      );
+      // Doesn't matter what the device is.
+      deviceUnderTest = new IOSSimulator('x', name: 'iPhone SE');
+    });
+
+    testUsingContext(
+      'old Xcode doesn\'t support screenshot',
+      () {
+        when(mockXcode.xcodeMajorVersion).thenReturn(7);
+        when(mockXcode.xcodeMinorVersion).thenReturn(1);
+        expect(deviceUnderTest.supportsScreenshot, false);
+      },
+      overrides: <Type, Generator>{ Xcode: () => mockXcode }
+    );
+
+    testUsingContext(
+      'Xcode 8.2+ supports screenshots',
+      () {
+        when(mockXcode.xcodeMajorVersion).thenReturn(8);
+        when(mockXcode.xcodeMinorVersion).thenReturn(2);
+        expect(deviceUnderTest.supportsScreenshot, true);
+        MockFile mockFile = new MockFile();
+        when(mockFile.path).thenReturn('/some/path/to/screenshot.png');
+        deviceUnderTest.takeScreenshot(mockFile);
+        verify(mockProcessManager.runSync(
+          <String>[
+              '/usr/bin/xcrun',
+              'simctl',
+              'io',
+              'booted',
+              'screenshot',
+              '/some/path/to/screenshot.png'
+          ],
+          environment: null,
+          workingDirectory: null
+        ));
+      },
+      overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+        // Test a real one. Screenshot doesn't require instance states.
+        SimControl: () => new SimControl(),
+        Xcode: () => mockXcode,
+      }
+    );
   });
 }

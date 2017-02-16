@@ -76,6 +76,12 @@ class Xcode {
   String _xcodeVersionText;
   String get xcodeVersionText => _xcodeVersionText;
 
+  int _xcodeMajorVersion;
+  int get xcodeMajorVersion => _xcodeMajorVersion;
+
+  int _xcodeMinorVersion;
+  int get xcodeMinorVersion => _xcodeMinorVersion;
+
   final RegExp xcodeVersionRegex = new RegExp(r'Xcode ([0-9.]+)');
 
   bool get xcodeVersionSatisfactory {
@@ -85,10 +91,10 @@ class Xcode {
     String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
     List<String> components = version.split('.');
 
-    int major = int.parse(components[0]);
-    int minor = components.length == 1 ? 0 : int.parse(components[1]);
+    _xcodeMajorVersion = int.parse(components[0]);
+    _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
 
-    return _xcodeVersionCheckValid(major, minor);
+    return _xcodeVersionCheckValid(_xcodeMajorVersion, _xcodeMinorVersion);
   }
 }
 
