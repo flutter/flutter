@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -49,7 +50,7 @@ class BuildAotCommand extends BuildSubCommand {
     if (platform == null)
       throwToolExit('Unknown platform: $targetPlatform');
 
-    String typeName = fs.path.basename(tools.getEngineArtifactsDirectory(platform, getBuildMode()).path);
+    String typeName = artifacts.getEngineType(platform, getBuildMode());
     Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
         expectSlowOperation: true);
     String outputPath = await buildAotSnapshot(
@@ -115,33 +116,7 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  String entryPointsDir, dartEntryPointsDir, snapshotterDir, genSnapshot;
-
-  String engineSrc = tools.engineSrcPath;
-  String genSnapshotExecutable = 'gen_snapshot';
-  if (engineSrc != null) {
-    entryPointsDir  = fs.path.join(engineSrc, 'flutter', 'runtime');
-    dartEntryPointsDir = fs.path.join(engineSrc, 'dart', 'runtime', 'bin');
-    snapshotterDir = fs.path.join(engineSrc, 'flutter', 'lib', 'snapshot');
-    String engineOut = tools.getEngineArtifactsDirectory(platform, buildMode).path;
-    if (platform == TargetPlatform.ios) {
-      genSnapshot = fs.path.join(engineOut, 'clang_x64', genSnapshotExecutable);
-    } else {
-      String host32BitToolchain = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
-      genSnapshot = fs.path.join(engineOut, host32BitToolchain, genSnapshotExecutable);
-    }
-  } else {
-    String artifactsDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
-    entryPointsDir = artifactsDir;
-    dartEntryPointsDir = entryPointsDir;
-    snapshotterDir = entryPointsDir;
-    if (platform == TargetPlatform.ios) {
-      genSnapshot = fs.path.join(artifactsDir, genSnapshotExecutable);
-    } else {
-      String hostToolsDir = fs.path.join(artifactsDir, getNameForHostPlatform(getCurrentHostPlatform()));
-      genSnapshot = fs.path.join(hostToolsDir, genSnapshotExecutable);
-    }
-  }
+  String genSnapshot = artifacts.getArtifactPath(Artifact.genSnapshot, platform, buildMode);
 
   Directory outputDir = fs.directory(outputPath);
   outputDir.createSync(recursive: true);
@@ -150,8 +125,8 @@ Future<String> _buildAotSnapshot(
   String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
   String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 
-  String vmEntryPoints = fs.path.join(entryPointsDir, 'dart_vm_entry_points.txt');
-  String ioEntryPoints = fs.path.join(dartEntryPointsDir, 'dart_io_entries.txt');
+  String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
+  String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
 
   PackageMap packageMap = new PackageMap(PackageMap.globalPackagesPath);
   String packageMapError = packageMap.checkValid();
@@ -184,13 +159,13 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      vmEntryPointsAndroid = fs.path.join(entryPointsDir, 'dart_vm_entry_points_android.txt');
+      vmEntryPointsAndroid = artifacts.getArtifactPath(Artifact.dartVmEntryPointsAndroidTxt, platform, buildMode);
       filePaths.addAll(<String>[
         vmEntryPointsAndroid,
       ]);
       break;
     case TargetPlatform.ios:
-      snapshotDartIOS = fs.path.join(snapshotterDir, 'snapshot.dart');
+      snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
       assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
       filePaths.addAll(<String>[
         snapshotDartIOS,

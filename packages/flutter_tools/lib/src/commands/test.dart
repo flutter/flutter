@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:test/src/executable.dart' as test; // ignore: implementation_imports
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/os.dart';
 import '../cache.dart';
@@ -19,7 +19,6 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/flutter_platform.dart' as loader;
-import '../toolchain.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand() {
@@ -190,7 +189,7 @@ class TestCommand extends FlutterCommand {
     }
     testArgs.addAll(files);
 
-    final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? platform.environment['SKY_SHELL'];
+    final String shellPath = artifacts.getArtifactPath(Artifact.skyShell);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
     loader.installHook(

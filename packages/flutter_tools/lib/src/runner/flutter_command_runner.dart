@@ -8,6 +8,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 
 import '../android/android_sdk.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -19,7 +20,6 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../toolchain.dart';
 import '../usage.dart';
 import '../version.dart';
 
@@ -206,8 +206,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     // Set up the tooling configuration.
     String enginePath = _findEnginePath(globalResults);
     if (enginePath != null) {
-      ToolConfiguration.instance.engineSrcPath = enginePath;
-      ToolConfiguration.instance.engineBuildPath = _findEngineBuildPath(globalResults, enginePath);
+      Artifacts.useLocalEngine(enginePath, _findEngineBuildPath(globalResults, enginePath));
     }
 
     // The Android SDK could already have been set by tests.

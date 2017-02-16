@@ -7,6 +7,7 @@ import 'dart:convert' show JSON;
 
 import '../android/android_sdk.dart';
 import '../android/gradle.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -285,28 +286,12 @@ Future<_ApkComponents> _findApkComponents(
   components.manifest = fs.file(manifest);
   components.resources = resources == null ? null : fs.directory(resources);
   components.extraFiles = extraFiles != null ? extraFiles : <String, File>{};
-
-  if (tools.isLocalEngine) {
-    String abiDir = getAbiDirectory(platform);
-    String enginePath = tools.engineSrcPath;
-    String buildDir = tools.getEngineArtifactsDirectory(platform, buildMode).path;
-
-    components.icuData = fs.file('$enginePath/third_party/icu/android/icudtl.dat');
-    components.jars = <File>[
-      fs.file('$buildDir/gen/flutter/shell/platform/android/android/classes.dex.jar')
-    ];
-    components.libSkyShell = fs.file('$buildDir/gen/flutter/shell/platform/android/android/android/libs/$abiDir/libsky_shell.so');
-    components.debugKeystore = fs.file('$enginePath/build/android/ant/chromium-debug.keystore');
-  } else {
-    Directory artifacts = tools.getEngineArtifactsDirectory(platform, buildMode);
-
-    components.icuData = fs.file(fs.path.join(artifacts.path, 'icudtl.dat'));
-    components.jars = <File>[
-      fs.file(fs.path.join(artifacts.path, 'classes.dex.jar'))
-    ];
-    components.libSkyShell = fs.file(fs.path.join(artifacts.path, 'libsky_shell.so'));
-    components.debugKeystore = fs.file(fs.path.join(artifacts.path, 'chromium-debug.keystore'));
-  }
+  components.icuData = fs.file(artifacts.getArtifactPath(Artifact.icudtlDat, platform, buildMode));
+  components.jars = <File>[
+    fs.file(artifacts.getArtifactPath(Artifact.classesDexJar, platform, buildMode))
+  ];
+  components.libSkyShell = fs.file(artifacts.getArtifactPath(Artifact.libskyShellSo, platform, buildMode));
+  components.debugKeystore = fs.file(artifacts.getArtifactPath(Artifact.chromiumDebugKeyStore, platform, buildMode));
 
   await parseServiceConfigs(components.services, jars: components.jars);
 
@@ -534,8 +519,8 @@ Future<Null> buildAndroid(
   if (components == null)
     throwToolExit('Failure building APK: unable to find components.');
 
-  String typeName = fs.path.basename(tools.getEngineArtifactsDirectory(platform, buildMode).path);
-  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode ($typeName)...',
+  String typeName = artifacts.getEngineType(platform, buildMode);
+  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode  ($typeName)...',
       expectSlowOperation: true);
 
   if (flxPath != null && flxPath.isNotEmpty) {
@@ -658,8 +643,10 @@ void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) 
 
 String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode, File outputBinary) {
   String buildType = getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
-  if (tools.isLocalEngine)
-    buildType += ' [${tools.engineBuildPath}]';
+  if (artifacts is LocalEngineArtifacts) {
+    LocalEngineArtifacts localEngineArtifacts = artifacts;
+    buildType += ' [${localEngineArtifacts.engineOutPath}]';
+  }
   if (outputBinary.existsSync())
     buildType += ' [${outputBinary.lastModifiedSync().millisecondsSinceEpoch}]';
   return buildType;
