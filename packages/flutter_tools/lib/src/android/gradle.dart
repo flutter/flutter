@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -176,8 +177,8 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
   File localProperties = fs.file('android/local.properties');
   if (!localProperties.existsSync()) {
     localProperties.writeAsStringSync(
-        'sdk.dir=${androidSdk.directory}\n'
-        'flutter.sdk=${Cache.flutterRoot}\n'
+        'sdk.dir=${_escapePath(androidSdk.directory)}\n'
+        'flutter.sdk=${_escapePath(Cache.flutterRoot)}\n'
     );
   }
   // Update the local.properties file with the build mode.
@@ -202,6 +203,8 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
       return buildGradleProjectV2(gradlew, buildModeName);
   }
 }
+
+String _escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
 
 Future<Null> buildGradleProjectV1(String gradlew) async {
   // Run 'gradlew build'.
