@@ -179,7 +179,6 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
     localProperties.writeAsStringSync(
         'sdk.dir=${_escapePath(androidSdk.directory)}\n'
         'flutter.sdk=${_escapePath(Cache.flutterRoot)}\n'
-        'flutter.executable=${platform.isWindows ? 'flutter.bat' : 'flutter'}\n'
     );
   }
   // Update the local.properties file with the build mode.

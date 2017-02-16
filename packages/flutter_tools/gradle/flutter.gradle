@@ -2,6 +2,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import com.android.builder.model.AndroidProject
+import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -71,10 +72,7 @@ class FlutterPlugin implements Plugin<Project> {
             throw new GradleException("flutter.sdk must point to the Flutter SDK directory")
         }
 
-        String flutterExecutableName = localProperties.getProperty("flutter.executable")
-        if (flutterExecutableName == null) {
-            throw new GradleException("flutter.executable must be set to the name of the flutter executable")
-        }
+        String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
         String flutterJarPath = localProperties.getProperty("flutter.jar")
