@@ -147,7 +147,6 @@ class _InputFieldState extends State<InputField> {
               cursorColor: themeData.textSelectionColor,
               selectionColor: themeData.textSelectionColor,
               selectionControls: materialTextSelectionControls,
-              platform: Theme.of(context).platform,
               keyboardType: config.keyboardType,
               onChanged: config.onChanged,
               onSubmitted: config.onSubmitted,
