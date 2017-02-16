@@ -54,27 +54,11 @@ class ScrollMetrics {
   }
 }
 
-abstract class ScrollNotification2 extends LayoutChangedNotification {
-  /// Creates a notification about scrolling.
-  ScrollNotification2({
-    @required Scrollable2State scrollable,
-  }) : axisDirection = scrollable.config.axisDirection,
-       metrics = scrollable.position.getMetrics(),
-       context = scrollable.context;
-
-  /// The direction that positive scroll offsets indicate.
-  final AxisDirection axisDirection;
-
-  Axis get axis => axisDirectionToAxis(axisDirection);
-
-  final ScrollMetrics metrics;
-
-  /// The build context of the [Scrollable2] that fired this notification.
-  ///
-  /// This can be used to find the scrollable's render objects to determine the
-  /// size of the viewport, for instance.
-  final BuildContext context;
-
+/// Mixin for [Notification]s that track how many [RenderAbstractViewport] they
+/// have bubbled through.
+///
+/// This is used by [ScrollNotification2] and [OverscrollIndicatorNotification].
+abstract class ViewportNotificationMixin extends Notification {
   /// The number of viewports that this notification has bubbled through.
   ///
   /// Typically listeners only respond to notifications with a [depth] of zero.
@@ -95,9 +79,36 @@ abstract class ScrollNotification2 extends LayoutChangedNotification {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
+  }
+}
+
+abstract class ScrollNotification2 extends LayoutChangedNotification with ViewportNotificationMixin {
+  /// Creates a notification about scrolling.
+  ScrollNotification2({
+    @required Scrollable2State scrollable,
+  }) : axisDirection = scrollable.config.axisDirection,
+       metrics = scrollable.position.getMetrics(),
+       context = scrollable.context;
+
+  /// The direction that positive scroll offsets indicate.
+  final AxisDirection axisDirection;
+
+  Axis get axis => axisDirectionToAxis(axisDirection);
+
+  final ScrollMetrics metrics;
+
+  /// The build context of the [Scrollable2] that fired this notification.
+  ///
+  /// This can be used to find the scrollable's render objects to determine the
+  /// size of the viewport, for instance.
+  final BuildContext context;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     description.add('$axisDirection');
     description.add('metrics: $metrics');
-    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
   }
 }
 
