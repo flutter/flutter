@@ -324,7 +324,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 class TestImage extends ui.Image {

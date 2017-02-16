@@ -75,7 +75,7 @@ class BackgroundImageProvider extends ImageProvider<BackgroundImageProvider> {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 class TestImage extends ui.Image {

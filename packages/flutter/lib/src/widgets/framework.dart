@@ -309,9 +309,10 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
 
   @override
   String toString() {
+    String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
     if (this.runtimeType == LabeledGlobalKey)
-      return '[GlobalKey#${_debugLabel ?? hashCode}]';
-    return '[$runtimeType#${_debugLabel ?? hashCode}]';
+      return '[GlobalKey$tag]';
+    return '[$runtimeType$tag]';
   }
 }
 
