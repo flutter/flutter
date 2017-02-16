@@ -74,6 +74,7 @@ extern const uint8_t* observatory_assets_archive;
 
 namespace blink {
 
+const char kKernelAssetKey[] = "kernel_blob.bin";
 const char kSnapshotAssetKey[] = "snapshot_blob.bin";
 
 namespace {
@@ -256,6 +257,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   // Are we running from a Dart source file?
   const bool running_from_source = StringEndsWith(entry_uri, ".dart");
 
+  std::vector<uint8_t> kernel_data;
   std::vector<uint8_t> snapshot_data;
   std::string entry_path;
   if (!IsRunningPrecompiledCode()) {
@@ -269,6 +271,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       ftl::RefPtr<ZipAssetStore> zip_asset_store =
           ftl::MakeRefCounted<ZipAssetStore>(
               GetUnzipperProviderForPath(std::move(bundle_path)));
+      zip_asset_store->GetAsBuffer(kKernelAssetKey, &kernel_data);
       zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
     }
   }
@@ -305,7 +308,11 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                              std::move(jni_class_provider));
 #endif
 
-    if (!snapshot_data.empty()) {
+    if (!kernel_data.empty()) {
+      // We are running kernel code.
+      FTL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(kernel_data.data(),
+                                                                  kernel_data.size()))));
+    } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
       FTL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),
                                                         snapshot_data.size())));

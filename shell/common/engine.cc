@@ -88,6 +88,12 @@ void Engine::RunBundle(const std::string& bundle_path) {
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot();
   } else {
+    std::vector<uint8_t> kernel;
+    if (GetAssetAsBuffer(blink::kKernelAssetKey, &kernel)) {
+      runtime_->dart_controller()->RunFromKernel(kernel.data(),
+                                                 kernel.size());
+      return;
+    }
     std::vector<uint8_t> snapshot;
     if (!GetAssetAsBuffer(blink::kSnapshotAssetKey, &snapshot))
       return;

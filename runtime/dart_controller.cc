@@ -105,6 +105,13 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   return LogIfError(result);
 }
 
+void DartController::RunFromKernel(const uint8_t* buffer, size_t size) {
+  tonic::DartState::Scope scope(dart_state());
+  LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(buffer, size)));
+  if (SendStartMessage(Dart_RootLibrary()))
+    exit(1);
+}
+
 void DartController::RunFromPrecompiledSnapshot() {
   TRACE_EVENT0("flutter", "DartController::RunFromPrecompiledSnapshot");
   FTL_DCHECK(Dart_CurrentIsolate() == nullptr);
