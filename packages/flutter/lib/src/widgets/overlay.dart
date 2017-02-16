@@ -150,7 +150,7 @@ class OverlayEntry {
   }
 
   @override
-  String toString() => '$runtimeType@$hashCode(opaque: $opaque; maintainState: $maintainState)';
+  String toString() => '$runtimeType#$hashCode(opaque: $opaque; maintainState: $maintainState)';
 }
 
 class _OverlayEntry extends StatefulWidget {

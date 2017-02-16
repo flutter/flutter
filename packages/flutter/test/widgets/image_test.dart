@@ -291,12 +291,12 @@ void main() {
     TestImageProvider imageProvider = new TestImageProvider();
     await tester.pumpWidget(new Image(image: imageProvider));
     State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
-    expect(image.toString(), matches(new RegExp(r'_ImageState\([0-9]+; stream: ImageStream\(OneFrameImageStreamCompleter; unresolved; 1 listener\); pixels: null\)')));
+    expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(stream: ImageStream\(OneFrameImageStreamCompleter; unresolved; 1 listener\); pixels: null\)')));
     imageProvider.complete();
     await tester.pump();
-    expect(image.toString(), matches(new RegExp(r'_ImageState\([0-9]+; stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 1 listener\); pixels: \[100×100\] @ 1\.0x\)')));
+    expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 1 listener\); pixels: \[100×100\] @ 1\.0x\)')));
     await tester.pumpWidget(new Container());
-    expect(image.toString(), matches(new RegExp(r'_ImageState\([0-9]+; _StateLifecycle.defunct; not mounted; stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 0 listeners\); pixels: \[100×100\] @ 1\.0x\)')));
+    expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(_StateLifecycle.defunct; not mounted; stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 0 listeners\); pixels: \[100×100\] @ 1\.0x\)')));
   });
 
 }
@@ -324,7 +324,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  String toString() => '$runtimeType($hashCode)';
+  String toString() => '$runtimeType#$hashCode()';
 }
 
 class TestImage extends ui.Image {
