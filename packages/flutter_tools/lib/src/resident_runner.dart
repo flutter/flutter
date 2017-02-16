@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'android/gradle.dart';
 import 'application_package.dart';
 import 'asset.dart';
 import 'base/common.dart';
@@ -387,7 +388,12 @@ String getMissingPackageHintForPlatform(TargetPlatform platform) {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
-      return 'Is your project missing an android/AndroidManifest.xml?\nConsider running "flutter create ." to create one.';
+    case TargetPlatform.android_x86:
+      String manifest = 'android/AndroidManifest.xml';
+      if (isProjectUsingGradle()) {
+        manifest = gradleManifestPath;
+      }
+      return 'Is your project missing an $manifest?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';
     default:
