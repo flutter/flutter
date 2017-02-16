@@ -481,7 +481,6 @@ class SliverGeometry {
     assert(visible != null);
     assert(hasVisualOverflow != null);
     assert(scrollOffsetCorrection != null);
-    assert(scrollOffsetCorrection == 0.0);
     return true;
   }
 
