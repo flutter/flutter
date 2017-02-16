@@ -40,6 +40,9 @@ extern void* kDartIsolateSnapshotInstructions;
 
 #endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
+// Name of the kernel blob asset within the FLX bundle.
+extern const char kKernelAssetKey[];
+
 // Name of the snapshot blob asset within the FLX bundle.
 extern const char kSnapshotAssetKey[];
 
