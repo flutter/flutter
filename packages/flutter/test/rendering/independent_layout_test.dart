@@ -10,17 +10,19 @@ import 'rendering_tester.dart';
 
 class TestLayout {
   TestLayout() {
-    // viewport incoming constraints are tight 800x600
-    // viewport is vertical by default
-    root = new RenderViewport(
-      child: new RenderCustomPaint(
-        painter: new TestCallbackPainter(
-          onPaint: () { painted = true; }
+    // incoming constraints are tight 800x600
+    root = new RenderPositionedBox(
+      child: new RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
+        child: new RenderCustomPaint(
+          painter: new TestCallbackPainter(
+            onPaint: () { painted = true; }
+          ),
+          child: child = new RenderConstrainedBox(
+            additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
+          ),
         ),
-        child: child = new RenderConstrainedBox(
-          additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0)
-        )
-      )
+      ),
     );
   }
   RenderBox root;

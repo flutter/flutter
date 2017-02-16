@@ -33,7 +33,7 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
-          child: new Viewport(
+          child: new SingleChildScrollView(
             child: new TwoLevelList(
               children: <Widget>[
                 new TwoLevelListItem(title: new Text('Top'), key: topKey),
@@ -91,7 +91,7 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
-          child: new Viewport(
+          child: new SingleChildScrollView(
             child: new TwoLevelList(
               children: <Widget>[
                 new TwoLevelSublist(

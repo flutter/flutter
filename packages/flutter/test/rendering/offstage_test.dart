@@ -12,19 +12,21 @@ void main() {
   test("offstage", () {
     RenderBox child;
     bool painted = false;
-    // viewport incoming constraints are tight 800x600
-    // viewport is vertical by default
-    RenderBox root = new RenderViewport(
-      child: new RenderOffstage(
-        child: new RenderCustomPaint(
-          painter: new TestCallbackPainter(
-            onPaint: () { painted = true; }
+    // incoming constraints are tight 800x600
+    RenderBox root = new RenderPositionedBox(
+      child: new RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
+        child: new RenderOffstage(
+          child: new RenderCustomPaint(
+            painter: new TestCallbackPainter(
+              onPaint: () { painted = true; },
+            ),
+            child: child = new RenderConstrainedBox(
+              additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0),
+            ),
           ),
-          child: child = new RenderConstrainedBox(
-            additionalConstraints: const BoxConstraints.tightFor(height: 10.0, width: 10.0)
-          )
-        )
-      )
+        ),
+      ),
     );
     expect(child.hasSize, isFalse);
     expect(painted, isFalse);

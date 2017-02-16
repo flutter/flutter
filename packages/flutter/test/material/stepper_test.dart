@@ -313,7 +313,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(scrollableState.position.pixels, greaterThan(0.0));
-  }, skip: Scrollable != Scrollable2); // TODO(abarth): re-enable when ensureVisible is implemented
+  });
 
   testWidgets('Stepper index test', (WidgetTester tester) async {
     await tester.pumpWidget(

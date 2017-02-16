@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 
+export 'package:flutter/foundation.dart' show TargetPlatform;
 export 'package:flutter/animation.dart';
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
@@ -43,10 +44,7 @@ export 'package:flutter/rendering.dart' show
   SingleChildLayoutDelegate,
   TextOverflow,
   ValueChanged,
-  ValueGetter,
-  ViewportAnchor,
-  ViewportDimensions,
-  ViewportDimensionsChangeCallback;
+  ValueGetter;
 
 // PAINTING NODES
 
@@ -1372,72 +1370,6 @@ class Baseline extends SingleChildRenderObjectWidget {
     renderObject
       ..baseline = baseline
       ..baselineType = baselineType;
-  }
-}
-
-/// A widget that's bigger on the inside.
-///
-/// The child of a viewport can layout to a larger size along the viewport's
-/// [mainAxis] than the viewport itself. If that happens, only a portion of the
-/// child will be visible through the viewport. The portion of the child that is
-/// visible is controlled by the scroll offset.
-///
-/// Viewport is the core scrolling primitive in the system, but it can be used
-/// in other situations.
-class Viewport extends SingleChildRenderObjectWidget {
-  /// Creates a widget that's bigger on the inside.
-  ///
-  /// The [mainAxis] and [paintOffset] arguments must not be null.
-  Viewport({
-    Key key,
-    this.paintOffset: Offset.zero,
-    this.mainAxis: Axis.vertical,
-    this.anchor: ViewportAnchor.start,
-    this.onPaintOffsetUpdateNeeded,
-    Widget child
-  }) : super(key: key, child: child) {
-    assert(mainAxis != null);
-    assert(paintOffset != null);
-  }
-
-  /// The offset at which to paint the child.
-  ///
-  /// The offset can be non-zero only in the [mainAxis].
-  final Offset paintOffset;
-
-  /// The direction in which the child is permitted to be larger than the viewport.
-  ///
-  /// The child is given layout constraints that are fully unconstrained along
-  /// the main axis (e.g., the child can be as tall as it wants if the main axis
-  /// is vertical).
-  final Axis mainAxis;
-
-  /// The end of the viewport from which the paint offset is computed.
-  ///
-  /// See [ViewportAnchor] for more detail.
-  final ViewportAnchor anchor;
-
-  /// Called when the interior or exterior dimensions of the viewport change.
-  final ViewportDimensionsChangeCallback onPaintOffsetUpdateNeeded;
-
-  @override
-  RenderViewport createRenderObject(BuildContext context) {
-    return new RenderViewport(
-      paintOffset: paintOffset,
-      mainAxis: mainAxis,
-      anchor: anchor,
-      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded
-    );
-  }
-
-  @override
-  void updateRenderObject(BuildContext context, RenderViewport renderObject) {
-    // Order dependency: RenderViewport validates scrollOffset based on mainAxis.
-    renderObject
-      ..mainAxis = mainAxis
-      ..anchor = anchor
-      ..paintOffset = paintOffset
-      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded;
   }
 }
 

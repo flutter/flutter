@@ -167,32 +167,6 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
-class _ScrollLikeCupertinoDelegate extends ScrollConfigurationDelegate {
-  const _ScrollLikeCupertinoDelegate();
-
-  @override
-  TargetPlatform get platform => TargetPlatform.iOS;
-
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.iOS);
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
-}
-
-class _ScrollLikeMountainViewDelegate extends ScrollConfigurationDelegate {
-  const _ScrollLikeMountainViewDelegate(this.platform);
-
-  @override
-  final TargetPlatform platform;
-
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new OverscrollWhenScrollableBehavior(platform: TargetPlatform.android);
-
-  @override
-  bool updateShouldNotify(ScrollConfigurationDelegate old) => false;
-}
-
 class _MaterialScrollBehavior extends ScrollBehavior2 {
   @override
   TargetPlatform getPlatform(BuildContext context) {
@@ -233,18 +207,6 @@ class _MaterialAppState extends State<MaterialApp> {
     return null;
   }
 
-  ScrollConfigurationDelegate _getScrollDelegate(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-        return const _ScrollLikeMountainViewDelegate(TargetPlatform.android);
-      case TargetPlatform.fuchsia:
-        return const _ScrollLikeMountainViewDelegate(TargetPlatform.fuchsia);
-      case TargetPlatform.iOS:
-        return const _ScrollLikeCupertinoDelegate();
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     ThemeData theme = config.theme ?? new ThemeData.fallback();
@@ -282,11 +244,6 @@ class _MaterialAppState extends State<MaterialApp> {
       }
       return true;
     });
-
-    result = new ScrollConfiguration(
-      delegate: _getScrollDelegate(theme.platform),
-      child: result
-    );
 
     return new ScrollConfiguration2(
       behavior: new _MaterialScrollBehavior(),

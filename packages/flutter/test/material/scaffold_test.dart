@@ -78,8 +78,7 @@ void main() {
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
-    GlobalKey<ScrollableState<Scrollable>> drawerKey =
-        new GlobalKey<ScrollableState<Scrollable>>(debugLabel: 'drawer');
+    Key drawerKey = new UniqueKey();
     const double appBarHeight = 256.0;
 
     ScrollController scrollOffset = new ScrollController();
