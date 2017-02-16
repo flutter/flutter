@@ -1452,12 +1452,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     return result;
   }
-  @Deprecated(
-    'If you are using needsLayout for an assert, switch to debugNeedsLayout. '
-    'If you are using it for actual runtime logic, please contact the Flutter '
-    'team to let us know what your use case is. We intend to remove this getter.'
-  )
-  bool get needsLayout => _needsLayout;
   bool _needsLayout = true;
 
   RenderObject _relayoutBoundary;
