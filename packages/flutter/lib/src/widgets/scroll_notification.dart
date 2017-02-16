@@ -75,15 +75,19 @@ abstract class ScrollNotification2 extends LayoutChangedNotification {
   /// size of the viewport, for instance.
   final BuildContext context;
 
-  /// The number of [Scrollable2] widgets that this notification has bubbled
-  /// through. Typically listeners only respond to notifications with a [depth]
-  /// of zero.
+  /// The number of viewports that this notification has bubbled through.
+  ///
+  /// Typically listeners only respond to notifications with a [depth] of zero.
+  ///
+  /// Specifically, this is the number of [Widget]s representing
+  /// [RenderAbstractViewport] render objects through which this notification
+  /// has bubbled.
   int get depth => _depth;
   int _depth = 0;
 
   @override
   bool visitAncestor(Element element) {
-    if (element.widget is Scrollable2)
+    if (element is RenderObjectElement && element.renderObject is RenderAbstractViewport)
       _depth += 1;
     return super.visitAncestor(element);
   }
@@ -93,7 +97,7 @@ abstract class ScrollNotification2 extends LayoutChangedNotification {
     super.debugFillDescription(description);
     description.add('$axisDirection');
     description.add('metrics: $metrics');
-    description.add('depth: $depth');
+    description.add('depth: $depth (${ depth == 0 ? "local" : "remote"})');
   }
 }
 

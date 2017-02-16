@@ -193,7 +193,11 @@ class TestCommand extends FlutterCommand {
     final String shellPath = tools.getHostToolPath(HostTool.SkyShell) ?? platform.environment['SKY_SHELL'];
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
-    loader.installHook(shellPath: shellPath, collector: collector, debuggerMode: argResults['start-paused']);
+    loader.installHook(
+      shellPath: shellPath,
+      collector: collector,
+      debuggerMode: argResults['start-paused'],
+    );
 
     Cache.releaseLockEarly();
 

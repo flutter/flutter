@@ -820,13 +820,22 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.INFINITY].
 class SizedBox extends SingleChildRenderObjectWidget {
-  /// Creates a box of a specific size.
+  /// Creates a fixed size box. The [width] and [height] parameters can be null
+  /// to indicate that the size of the box should not be constrained in
+  /// the corresponding dimension.
   const SizedBox({ Key key, this.width, this.height, Widget child })
     : super(key: key, child: child);
 
+  /// Creates a box that will become as large as its parent allows.
   const SizedBox.expand({ Key key, Widget child })
     : width = double.INFINITY,
       height = double.INFINITY,
+      super(key: key, child: child);
+
+  /// Creates a box with the specified size.
+  SizedBox.fromSize({ Key key, Widget child, Size size })
+    : width = size?.width,
+      height = size?.height,
       super(key: key, child: child);
 
   /// If non-null, requires the child to have exactly this width.

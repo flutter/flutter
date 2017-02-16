@@ -512,7 +512,7 @@ class BoxHitTestEntry extends HitTestEntry {
   final Point localPosition;
 
   @override
-  String toString() => '${target.runtimeType}@$localPosition';
+  String toString() => '${target.runtimeType}#${target.hashCode}@$localPosition';
 }
 
 /// Parent data used by [RenderBox] and its subclasses.

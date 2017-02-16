@@ -13,6 +13,7 @@ import '../base/platform.dart' as p;
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../globals.dart';
@@ -190,6 +191,7 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
+    DevFSContent kernelContent,
     bool applicationNeedsRebuild: false,
   }) async {
     if (!prebuiltApplication) {

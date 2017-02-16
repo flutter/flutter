@@ -15,6 +15,7 @@ import '../base/platform.dart' as p;
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../devfs.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -248,6 +249,10 @@ class SimControl {
       args.addAll(launchArgs);
     runCheckedSync(args);
   }
+
+  void takeScreenshot(String outputPath) {
+    runCheckedSync(<String>[_xcrunPath, 'simctl', 'io', 'booted', 'screenshot', outputPath]);
+  }
 }
 
 /// Enumerates all data sections of `xcrun simctl list --json` command.
@@ -414,6 +419,7 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
+    DevFSContent kernelContent,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {
@@ -580,44 +586,18 @@ class IOSSimulator extends Device {
       logFile.writeAsBytesSync(<int>[]);
   }
 
-  @override
-  bool get supportsScreenshot => true;
+  bool get _xcodeVersionSupportsScreenshot {
+    return Xcode.instance.xcodeMajorVersion > 8 ||
+        (Xcode.instance.xcodeMajorVersion == 8 && Xcode.instance.xcodeMinorVersion >= 2);
+  }
 
   @override
-  Future<Null> takeScreenshot(File outputFile) async {
-    Directory desktopDir = fs.directory(fs.path.join(homeDirPath, 'Desktop'));
+  bool get supportsScreenshot => _xcodeVersionSupportsScreenshot;
 
-    // 'Simulator Screen Shot Mar 25, 2016, 2.59.43 PM.png'
-
-    Set<File> getScreenshots() {
-      return new Set<File>.from(desktopDir.listSync().where((FileSystemEntity entity) {
-        String name = fs.path.basename(entity.path);
-        return entity is File && name.startsWith('Simulator') && name.endsWith('.png');
-      }));
-    }
-
-    Set<File> existingScreenshots = getScreenshots();
-
-    runSync(<String>[
-      'osascript',
-      '-e',
-      'activate application "Simulator"\n'
-        'tell application "System Events" to keystroke "s" using command down'
-    ]);
-
-    // There is some latency here from the applescript call.
-    await new Future<Null>.delayed(new Duration(seconds: 1));
-
-    Set<File> shots = getScreenshots().difference(existingScreenshots);
-
-    if (shots.isEmpty) {
-      printError('Unable to locate the screenshot file.');
-      return false;
-    }
-
-    File shot = shots.first;
-    outputFile.writeAsBytesSync(shot.readAsBytesSync());
-    shot.delete();
+  @override
+  Future<Null> takeScreenshot(File outputFile) {
+    SimControl.instance.takeScreenshot(outputFile.path);
+    return new Future<Null>.value();
   }
 }
 

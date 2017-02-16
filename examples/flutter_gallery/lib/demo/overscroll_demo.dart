@@ -45,8 +45,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body = new MaterialList( // ignore: DEPRECATED_MEMBER_USE
-      type: MaterialListType.threeLine,
+    Widget body = new Block( // ignore: DEPRECATED_MEMBER_USE
       padding: const EdgeInsets.all(8.0),
       scrollableKey: _scrollableKey,
       children: _items.map((String item) {
@@ -56,7 +55,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
           title: new Text('This item represents $item.'),
           subtitle: new Text('Even more additional list item information appears on line three.')
         );
-      })
+      }).toList(),
     );
 
     String  indicatorTypeText;

@@ -181,17 +181,17 @@ class CommonFinders {
     return new _ElementPredicateFinder(predicate, description: description, skipOffstage: skipOffstage);
   }
 
-  /// Looks for widgets that match the pattern of descendant finder under the
-  /// widget tree with ancestor as the root.
+  /// Finds widgets that are descendants of the [of] parameter and that match
+  /// the [matching] parameter.
   ///
   /// Example:
   ///
   ///     expect(find.descendant(
   ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
-///       ), findsOneWidget);
+  ///     ), findsOneWidget);
   ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  /// If the [skipOffstage] argument is true (the default), then nodes that are
+  /// [Offstage] or that are from inactive [Route]s are skipped.
   Finder descendant({ Finder of, Finder matching, bool skipOffstage: true }) {
     return new _DescendantFinder(of, matching, skipOffstage: skipOffstage);
   }

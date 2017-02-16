@@ -620,7 +620,7 @@ abstract class _SemanticsFragment {
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics });
 
   @override
-  String toString() => '$runtimeType($hashCode)';
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// Represents a subtree that doesn't need updating, it already has a
@@ -1452,12 +1452,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     return result;
   }
-  @Deprecated(
-    'If you are using needsLayout for an assert, switch to debugNeedsLayout. '
-    'If you are using it for actual runtime logic, please contact the Flutter '
-    'team to let us know what your use case is. We intend to remove this getter.'
-  )
-  bool get needsLayout => _needsLayout;
   bool _needsLayout = true;
 
   RenderObject _relayoutBoundary;
@@ -2396,7 +2390,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a human understandable name.
   @override
   String toString() {
-    String header = '$runtimeType';
+    String header = '$runtimeType#$hashCode';
     if (_relayoutBoundary != null && _relayoutBoundary != this) {
       int count = 1;
       RenderObject target = parent;

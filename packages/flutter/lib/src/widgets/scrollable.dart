@@ -157,7 +157,7 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
 
   bool _shouldUpdatePosition(Scrollable2 oldConfig) {
     return config.physics?.runtimeType != oldConfig.physics?.runtimeType
-        || config.controller?.runtimeType != config.controller?.runtimeType;
+        || config.controller?.runtimeType != oldConfig.controller?.runtimeType;
   }
 
   @override
@@ -370,16 +370,7 @@ typedef void ScrollListener(double scrollOffset);
 /// Used by [Scrollable.snapOffsetCallback].
 typedef double SnapOffsetCallback(double scrollOffset, Size containerSize);
 
-/// A base class for scrollable widgets.
-///
-/// If you have a list of widgets and want them to be able to scroll if there is
-/// insufficient room, consider using [Block].
-///
-/// Commonly used classes that are based on Scrollable include [ScrollableList]
-/// and [ScrollableViewport].
-///
-/// Widgets that subclass [Scrollable] typically use state objects that subclass
-/// [ScrollableState].
+/// Will be removed soon.
 class Scrollable extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -1246,6 +1237,7 @@ class ScrollNotification extends Notification {
 ///  * [ScrollableList], if you have many identically-sized children.
 ///  * [GridView], if your children are in a grid pattern.
 ///  * [LazyBlock], if you have many children of varying sizes.
+@Deprecated('use SingleChildScrollView')
 class ScrollableViewport extends StatelessWidget {
   /// Creates a simple scrolling widget that has a single child.
   ///
@@ -1379,6 +1371,7 @@ class ScrollableViewport extends StatelessWidget {
 ///  * [LazyBlock], if you have many children with varying heights.
 ///  * [ScrollableList], if all your children are the same height.
 ///  * [ScrollableViewport], if you only have one child.
+@Deprecated('use ListView instead')
 class Block extends StatelessWidget {
   /// Creates a scrollable array of children.
   Block({

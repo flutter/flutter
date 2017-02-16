@@ -10,6 +10,42 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
+/// The kind of list items contained in a material design list.
+///
+/// See also:
+///
+///  * [ListItem]
+///  * [kListItemExtent]
+///  * <https://material.google.com/components/lists.html#lists-specs>
+enum MaterialListType {
+  /// A list item that contains a single line of text.
+  oneLine,
+
+  /// A list item that contains a [CircleAvatar] followed by a single line of text.
+  oneLineWithAvatar,
+
+  /// A list item that contains two lines of text.
+  twoLine,
+
+  /// A list item that contains three lines of text.
+  threeLine
+}
+
+/// The vertical extent of the different types of material list items.
+///
+/// See also:
+///
+///  * [MaterialListType]
+///  * [ListItem]
+///  * [kListItemExtent]
+///  * <https://material.google.com/components/lists.html#lists-specs>
+Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
+  MaterialListType.oneLine: 48.0,
+  MaterialListType.oneLineWithAvatar: 56.0,
+  MaterialListType.twoLine: 72.0,
+  MaterialListType.threeLine: 88.0,
+};
+
 /// A single row typically containing an icon and some text.
 ///
 /// List items are one to three lines of text optionally flanked by icons or
@@ -32,7 +68,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [MaterialList], which takes a list of [ListItem] widgets and shows them
+///  * [ListView], which takes a list of [ListItem] widgets and shows them
 ///    as a scrolling list.
 ///  * [Card], which can be used with [Column] to show a few [ListItem]s.
 ///  * [CircleAvatar], which shows an icon representing a person.

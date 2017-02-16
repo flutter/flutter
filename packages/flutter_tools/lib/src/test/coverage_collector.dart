@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:coverage/coverage.dart';
+import 'package:coverage/coverage.dart' as coverage;
 
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -19,7 +19,7 @@ class CoverageCollector {
     if (_globalHitmap == null)
       _globalHitmap = hitmap;
     else
-      mergeHitmaps(hitmap, _globalHitmap);
+      coverage.mergeHitmaps(hitmap, _globalHitmap);
   }
 
   /// Collects coverage for the given [Process] using the given `port`.
@@ -37,13 +37,18 @@ class CoverageCollector {
     process.exitCode.then<Null>((int code) {
       exitCode = code;
     });
+    if (exitCode != null)
+      throw new Exception('Failed to collect coverage, process terminated before coverage could be collected.');
 
     printTrace('pid $pid (port $port): collecting coverage data...');
-    final Map<String, dynamic> data = await collect(host.address, port, false, false);
+    final Map<String, dynamic> data = await coverage.collect(host.address, port, false, false).timeout(
+      const Duration(seconds: 30),
+      onTimeout: () { throw new Exception('Failed to collect coverage, it took more than thirty seconds.'); },
+    );
     printTrace('pid $pid (port $port): ${ exitCode != null ? "process terminated prematurely with exit code $exitCode; aborting" : "collected coverage data; merging..." }');
     if (exitCode != null)
-      throw new Exception('Failed to collect coverage, process terminated prematurely.');
-    _addHitmap(createHitmap(data['coverage']));
+      throw new Exception('Failed to collect coverage, process terminated while coverage was being collected.');
+    _addHitmap(coverage.createHitmap(data['coverage']));
     printTrace('pid $pid (port $port): done merging coverage data into global coverage map.');
   }
 
@@ -56,17 +61,17 @@ class CoverageCollector {
   /// If [timeout] is specified, the future will timeout (with a
   /// [TimeoutException]) after the specified duration.
   Future<String> finalizeCoverage({
-    Formatter formatter,
+    coverage.Formatter formatter,
     Duration timeout,
   }) async {
     printTrace('formating coverage data');
     if (_globalHitmap == null)
       return null;
     if (formatter == null) {
-      Resolver resolver = new Resolver(packagesPath: PackageMap.globalPackagesPath);
+      coverage.Resolver resolver = new coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       String packagePath = fs.currentDirectory.path;
       List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
-      formatter = new LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
+      formatter = new coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     String result = await formatter.format(_globalHitmap);
     _globalHitmap = null;

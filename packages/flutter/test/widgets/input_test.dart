@@ -581,7 +581,6 @@ void main() {
     expect(inputValue.text, cutValue);
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
 
-
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     GlobalKey inputKey = new GlobalKey();
     InputValue inputValue = InputValue.empty;
@@ -640,6 +639,7 @@ void main() {
     // Now the first line is scrolled up, and the fourth line is visible.
     Point newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
     Point newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+
     expect(newFirstPos.y, lessThan(firstPos.y));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);

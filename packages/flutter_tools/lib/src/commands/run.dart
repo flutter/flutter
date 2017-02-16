@@ -94,6 +94,11 @@ class RunCommand extends RunCommandBase {
     argParser.addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.');
+    argParser.addOption('kernel',
+        hide: !verboseHelp,
+        help: 'Path to a pre-built kernel blob to use when running.\n'
+              'This option only exists for testing new kernel code execution on devices\n'
+              'and is not needed during normal application development.');
     argParser.addOption('snapshotter',
         hide: !verboseHelp,
         help: 'Specify the path to the sky_snapshot binary.');
@@ -259,6 +264,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: options,
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
+        kernelFilePath: argResults['kernel'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],

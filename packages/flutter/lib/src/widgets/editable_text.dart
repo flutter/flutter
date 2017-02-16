@@ -5,14 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart' show RenderEditable, SelectionChangedHandler, RenderEditablePaintOffsetNeededCallback;
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus.dart';
 import 'framework.dart';
 import 'media_query.dart';
-import 'scroll_behavior.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
 
@@ -135,32 +136,33 @@ class InputValue {
 ///  * [InputField], which adds tap-to-focus and cut, copy, and paste commands.
 ///  * [TextField], which is a full-featured, material-design text input field
 ///    with placeholder text, labels, and [Form] integration.
-class EditableText extends Scrollable {
+class EditableText extends StatefulWidget {
   /// Creates a basic text input control.
   ///
   /// The [value] argument must not be null.
   EditableText({
     Key key,
     @required this.value,
-    this.focusKey,
+    @required this.focusKey,
     this.obscureText: false,
-    this.style,
-    this.cursorColor,
+    @required this.style,
+    @required this.cursorColor,
     this.textScaleFactor,
-    int maxLines: 1,
+    this.maxLines: 1,
     this.autofocus: false,
     this.selectionColor,
     this.selectionControls,
-    @required this.platform,
     this.keyboardType,
     this.onChanged,
-    this.onSubmitted
-  }) : maxLines = maxLines, super(
-    key: key,
-    initialScrollOffset: 0.0,
-    scrollDirection: maxLines > 1 ? Axis.vertical : Axis.horizontal
-  ) {
+    this.onSubmitted,
+  }) : super(key: key) {
     assert(value != null);
+    assert(focusKey != null);
+    assert(obscureText != null);
+    assert(style != null);
+    assert(cursorColor != null);
+    assert(maxLines != null);
+    assert(autofocus != null);
   }
 
   /// The string being displayed in this widget.
@@ -206,12 +208,6 @@ class EditableText extends Scrollable {
   /// Optional delegate for building the text selection handles and toolbar.
   final TextSelectionControls selectionControls;
 
-  /// The platform whose behavior should be approximated, in particular
-  /// for scroll physics. (See [ScrollBehavior.platform].)
-  ///
-  /// Must not be null.
-  final TargetPlatform platform;
-
   /// The type of keyboard to use for editing the text.
   final TextInputType keyboardType;
 
@@ -226,7 +222,7 @@ class EditableText extends Scrollable {
 }
 
 /// State for a [EditableText].
-class EditableTextState extends ScrollableState<EditableText> implements TextInputClient {
+class EditableTextState extends State<EditableText> implements TextInputClient {
   Timer _cursorTimer;
   bool _showCursor = false;
 
@@ -234,11 +230,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  @override
-  ExtentScrollBehavior createScrollBehavior() => new BoundedBehavior(platform: config.platform);
-
-  @override
-  BoundedBehavior get scrollBehavior => super.scrollBehavior;
+  final ScrollController _scrollController = new ScrollController();
 
   @override
   void initState() {
@@ -259,41 +251,17 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
 
   bool get _isMultiline => config.maxLines > 1;
 
-  double _contentExtent = 0.0;
-  double _containerExtent = 0.0;
-
-  Offset _handlePaintOffsetUpdateNeeded(ViewportDimensions dimensions, Rect caretRect) {
-    // We make various state changes here but don't have to do so in a
-    // setState() callback because we are called during layout and all
-    // we're updating is the new offset, which we are providing to the
-    // render object via our return value.
-    _contentExtent = _isMultiline ?
-      dimensions.contentSize.height :
-      dimensions.contentSize.width;
-    _containerExtent = _isMultiline ?
-      dimensions.containerSize.height :
-      dimensions.containerSize.width;
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      contentExtent: _contentExtent,
-      containerExtent: _containerExtent,
-      // TODO(ianh): We should really only do this when text is added,
-      // not generally any time the size changes.
-      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
-    ));
-    updateGestureDetector();
-    return scrollOffsetToPixelDelta(scrollOffset);
-  }
-
   // Calculate the new scroll offset so the cursor remains visible.
-  double _getScrollOffsetForCaret(Rect caretRect, double containerExtent) {
-    double caretStart = _isMultiline ? caretRect.top : caretRect.left;
-    double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
-    double newScrollOffset = scrollOffset;
+  double _getScrollOffsetForCaret(Rect caretRect) {
+    final double caretStart = _isMultiline ? caretRect.top : caretRect.left;
+    final double caretEnd = _isMultiline ? caretRect.bottom : caretRect.right;
+    double scrollOffset = _scrollController.offset;
+    final double viewportExtent = _scrollController.position.viewportDimension;
     if (caretStart < 0.0)  // cursor before start of bounds
-      newScrollOffset += pixelOffsetToScrollOffset(-caretStart);
-    else if (caretEnd >= containerExtent)  // cursor after end of bounds
-      newScrollOffset += pixelOffsetToScrollOffset(-(caretEnd - containerExtent));
-    return newScrollOffset;
+      scrollOffset += caretStart;
+    else if (caretEnd >= viewportExtent)  // cursor after end of bounds
+      scrollOffset += caretEnd - viewportExtent;
+    return scrollOffset;
   }
 
   // True if the focus was explicitly requested last frame. This ensures we
@@ -302,8 +270,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
 
   void _attachOrDetachKeyboard(bool focused) {
     if (focused && !_isAttachedToKeyboard && (_requestingFocus || config.autofocus)) {
-      _textInputConnection = TextInput.attach(
-          this, new TextInputConfiguration(inputType: config.keyboardType))
+      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
         ..show();
     } else if (!focused) {
@@ -364,7 +331,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
-    InputValue newInput = _currentValue.copyWith(selection: selection, composing: TextRange.empty);
+    final InputValue newInput = _currentValue.copyWith(selection: selection, composing: TextRange.empty);
     if (config.onChanged != null)
       config.onChanged(newInput);
 
@@ -393,14 +360,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
     assert(!newInput.composing.isValid);  // composing range must be empty while selecting
     if (config.onChanged != null)
       config.onChanged(newInput);
-
-    didUpdateScrollBehavior(scrollBehavior.updateExtents(
-      // TODO(mpcomplete): should just be able to pass
-      // scrollBehavior.containerExtent here (and remove the member var), but
-      // scrollBehavior gets re-created too often, and is sometimes
-      // uninitialized here. Investigate if this is a bug.
-      scrollOffset: _getScrollOffsetForCaret(caretRect, _containerExtent)
-    ));
+    _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
@@ -429,9 +389,12 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
       _textInputConnection.close();
       _textInputConnection = null;
     }
+    assert(!_isAttachedToKeyboard);
     if (_cursorTimer != null)
       _stopCursorTimer();
+    assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
+    _selectionOverlay = null;
     super.dispose();
   }
 
@@ -442,11 +405,7 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
   }
 
   @override
-  Widget buildContent(BuildContext context) {
-    assert(config.style != null);
-    assert(config.focusKey != null);
-    assert(config.cursorColor != null);
-
+  Widget build(BuildContext context) {
     bool focused = Focus.at(config.focusKey.currentContext);
     _attachOrDetachKeyboard(focused);
 
@@ -464,20 +423,24 @@ class EditableTextState extends ScrollableState<EditableText> implements TextInp
       }
     }
 
-    return new ClipRect(
-      child: new _Editable(
-        value: _currentValue,
-        style: config.style,
-        cursorColor: config.cursorColor,
-        showCursor: _showCursor,
-        maxLines: config.maxLines,
-        selectionColor: config.selectionColor,
-        textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-        obscureText: config.obscureText,
-        onSelectionChanged: _handleSelectionChanged,
-        paintOffset: scrollOffsetToPixelDelta(scrollOffset),
-        onPaintOffsetUpdateNeeded: _handlePaintOffsetUpdateNeeded
-      )
+    return new Scrollable2(
+      axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
+      controller: _scrollController,
+      physics: const ClampingScrollPhysics(),
+      viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        return new _Editable(
+          value: _currentValue,
+          style: config.style,
+          cursorColor: config.cursorColor,
+          showCursor: _showCursor,
+          maxLines: config.maxLines,
+          selectionColor: config.selectionColor,
+          textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+          obscureText: config.obscureText,
+          offset: offset,
+          onSelectionChanged: _handleSelectionChanged,
+        );
+      },
     );
   }
 }
@@ -493,9 +456,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.selectionColor,
     this.textScaleFactor,
     this.obscureText,
+    this.offset,
     this.onSelectionChanged,
-    this.paintOffset,
-    this.onPaintOffsetUpdateNeeded
   }) : super(key: key);
 
   final InputValue value;
@@ -506,9 +468,8 @@ class _Editable extends LeafRenderObjectWidget {
   final Color selectionColor;
   final double textScaleFactor;
   final bool obscureText;
+  final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
-  final Offset paintOffset;
-  final RenderEditablePaintOffsetNeededCallback onPaintOffsetUpdateNeeded;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -520,9 +481,8 @@ class _Editable extends LeafRenderObjectWidget {
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
       selection: value.selection,
+      offset: offset,
       onSelectionChanged: onSelectionChanged,
-      paintOffset: paintOffset,
-      onPaintOffsetUpdateNeeded: onPaintOffsetUpdateNeeded
     );
   }
 
@@ -536,9 +496,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
       ..selection = value.selection
-      ..onSelectionChanged = onSelectionChanged
-      ..paintOffset = paintOffset
-      ..onPaintOffsetUpdateNeeded = onPaintOffsetUpdateNeeded;
+      ..offset = offset
+      ..onSelectionChanged = onSelectionChanged;
   }
 
   TextSpan get _styledTextSpan {

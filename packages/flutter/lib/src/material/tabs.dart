@@ -726,7 +726,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (_warpUnderwayCount > 0)
       return false;
 
-    if (notification.depth != 1)
+    if (notification.depth != 0)
       return false;
 
     if (notification is ScrollStartNotification) {

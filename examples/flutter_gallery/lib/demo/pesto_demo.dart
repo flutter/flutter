@@ -29,20 +29,16 @@ final ThemeData _kTheme = new ThemeData(
 );
 
 class PestoHome extends StatelessWidget {
-  static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
-
   @override
   Widget build(BuildContext context) {
-    return new RecipeGridPage(recipes: kPestoRecipes, scrollableKey: scrollableKey);
+    return new RecipeGridPage(recipes: kPestoRecipes);
   }
 }
 
 class PestoFavorites extends StatelessWidget {
-  static final GlobalKey<ScrollableState> scrollableKey = new GlobalKey<ScrollableState>();
-
   @override
   Widget build(BuildContext context) {
-    return new RecipeGridPage(recipes: _favoriteRecipes.toList(), scrollableKey: scrollableKey);
+    return new RecipeGridPage(recipes: _favoriteRecipes.toList());
   }
 }
 
@@ -67,10 +63,9 @@ class PestoStyle extends TextStyle {
 
 // Displays a grid of recipe cards.
 class RecipeGridPage extends StatefulWidget {
-  RecipeGridPage({ Key key, this.recipes, this.scrollableKey }) : super(key: key);
+  RecipeGridPage({ Key key, this.recipes }) : super(key: key);
 
   final List<Recipe> recipes;
-  final GlobalKey<ScrollableState> scrollableKey;
 
   @override
   _RecipeGridPageState createState() => new _RecipeGridPageState();

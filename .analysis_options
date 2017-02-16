@@ -47,6 +47,7 @@ linter:
 
     # === error rules ===
     - avoid_empty_else
+    - avoid_slow_async_io
     # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
     - cancel_subscriptions
     # - close_sinks # https://github.com/flutter/flutter/issues/5789
@@ -91,7 +92,6 @@ linter:
     - super_goes_last
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
-    # - unawaited_futures # https://github.com/flutter/flutter/issues/5793
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
 

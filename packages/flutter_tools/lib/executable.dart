@@ -105,7 +105,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(Platform, () => new LocalPlatform());
     context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
-    context.putIfAbsent(Logger, () => new StdoutLogger());
+    context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
 
     // Order-independent context entries
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
