@@ -136,7 +136,7 @@ static hb_position_t harfBuzzGetGlyphHorizontalKerning(hb_font_t*, void* fontDat
     if (typeface->getKerningPairAdjustments(glyphs, 2, kerningAdjustments)) {
         SkScalar upm = SkIntToScalar(typeface->getUnitsPerEm());
         SkScalar size = hbFontData->m_paint.getTextSize();
-        return SkiaScalarToHarfBuzzPosition(SkScalarMulDiv(SkIntToScalar(kerningAdjustments[0]), size, upm));
+        return SkiaScalarToHarfBuzzPosition(kerningAdjustments[0] * size / upm);
     }
 
     return 0;
@@ -158,7 +158,7 @@ static hb_position_t harfBuzzGetGlyphVerticalKerning(hb_font_t*, void* fontData,
     if (typeface->getKerningPairAdjustments(glyphs, 2, kerningAdjustments)) {
         SkScalar upm = SkIntToScalar(typeface->getUnitsPerEm());
         SkScalar size = hbFontData->m_paint.getTextSize();
-        return SkiaScalarToHarfBuzzPosition(SkScalarMulDiv(SkIntToScalar(kerningAdjustments[0]), size, upm));
+        return SkiaScalarToHarfBuzzPosition(kerningAdjustments[0] * size / upm);
     }
 
     return 0;
