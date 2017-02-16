@@ -73,8 +73,10 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // We must inform our parent that this sliver cannot fulfill
         // its contract and that we need a scroll offset correction.
         geometry = new SliverGeometry(
-          scrollOffsetCorrection: -childScrollOffset(firstChild),
+          scrollOffsetCorrection: -scrollOffset,
         );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+        childParentData.layoutOffset = 0.0;
         return;
       }
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
