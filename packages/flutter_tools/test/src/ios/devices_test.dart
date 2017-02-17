@@ -4,10 +4,10 @@
 
 import 'dart:io' show ProcessResult;
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -29,7 +29,7 @@ void main() {
     testUsingContext(
       'screenshot without ideviceinstaller error',
       () async {
-        when(mockOutputFile.path).thenReturn(path.join('some', 'test', 'path', 'image.png'));
+        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
         // Let everything else return exit code 0 so process.dart doesn't crash.
         // The matcher order is important.
         when(
@@ -50,7 +50,7 @@ void main() {
         verify(mockProcessManager.runSync(
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
         verifyNever(mockProcessManager.runSync(
-          <String>['idevicescreenshot', path.join('some', 'test', 'path', 'image.png')],
+          <String>['idevicescreenshot', fs.path.join('some', 'test', 'path', 'image.png')],
           environment: null,
           workingDirectory: null
         ));
@@ -62,7 +62,7 @@ void main() {
     testUsingContext(
       'screenshot with ideviceinstaller gets command',
       () async {
-        when(mockOutputFile.path).thenReturn(path.join('some', 'test', 'path', 'image.png'));
+        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
         // Let everything else return exit code 0.
         // The matcher order is important.
         when(
@@ -75,7 +75,7 @@ void main() {
           mockProcessManager.runSync(
             <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
         ).thenReturn(
-          new ProcessResult(3, 0, path.join('some', 'path', 'to', 'iscreenshot'), null)
+          new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), null)
         );
 
         iosDeviceUnderTest = new IOSDevice('1234');
@@ -84,8 +84,8 @@ void main() {
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
         verify(mockProcessManager.runSync(
           <String>[
-            path.join('some', 'path', 'to', 'iscreenshot'),
-            path.join('some', 'test', 'path', 'image.png')
+            fs.path.join('some', 'path', 'to', 'iscreenshot'),
+            fs.path.join('some', 'test', 'path', 'image.png')
           ],
           environment: null,
           workingDirectory: null

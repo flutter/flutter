@@ -1,10 +1,10 @@
 import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -133,7 +133,7 @@ void main() {
         when(mockXcode.xcodeMinorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         MockFile mockFile = new MockFile();
-        when(mockFile.path).thenReturn(path.join('some', 'path', 'to', 'screenshot.png'));
+        when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
         deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.runSync(
           <String>[
@@ -142,7 +142,7 @@ void main() {
               'io',
               'booted',
               'screenshot',
-              path.join('some', 'path', 'to', 'screenshot.png'),
+              fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null
