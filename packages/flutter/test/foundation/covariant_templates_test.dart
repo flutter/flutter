@@ -18,6 +18,6 @@ void main() {
     A<X> ayAsAx = ay;
     expect(() {
       ayAsAx.u = new X();
-    }, throws);
+    }, throwsA(const isInstanceOf<AssertionError>()));
   });
 }

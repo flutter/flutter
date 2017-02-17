@@ -67,7 +67,7 @@ const Matcher isNotInCard = const _IsNotInCard();
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// A matcher for functions that throw [FlutterError].
-const Matcher throwsFlutterError = const Throws(isFlutterError);
+Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for [FlutterError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();

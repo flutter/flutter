@@ -76,12 +76,14 @@ void main() {
       }).toList()
     ));
 
-    expect(() => controller.offset, throws);
+    Matcher isAssertionError = const isInstanceOf<AssertionError>();
+
+    expect(() => controller.offset, throwsA(isAssertionError));
     expect(controller2.offset, equals(653.0));
     expect(realOffset(), equals(controller2.offset));
 
-    expect(() => controller.jumpTo(120.0), throws);
-    expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throws);
+    expect(() => controller.jumpTo(120.0), throwsA(isAssertionError));
+    expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throwsA(isAssertionError));
 
     await tester.pumpWidget(new ListView(
       key: const Key('second'),
