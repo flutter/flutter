@@ -62,7 +62,7 @@ def UpdateTools(tools_name):
     version = f.read().strip()
   # Return if installed binaries are up to date.
   if version == GetInstalledVersion(version_stamp):
-    return
+    return True
 
   # Remove the old install directory checked out from git.
   if os.path.exists(os.path.join(INSTALL_DIR, '.git')):
@@ -82,7 +82,7 @@ def UpdateTools(tools_name):
                   archive_path]
   if not RunCommand(download_cmd):
     print ('WARNING: Failed to download Android tools.')
-    return
+    return False
 
   print "Extracting Android tools (" + tools_name + ")"
   with tarfile.open(archive_path) as arch:
@@ -91,6 +91,7 @@ def UpdateTools(tools_name):
   # Write version as the last step.
   with open(os.path.join(INSTALL_DIR, version_stamp), 'w+') as f:
     f.write('%s\n' % version)
+  return True
 
 def main(argv):
   option_parser = optparse.OptionParser()
@@ -110,10 +111,13 @@ def main(argv):
     option_parser.print_help()
     sys.exit(1)
 
-  if options.type in ('sdk', 'both'):
-    UpdateTools('sdk')
-  if options.type in ('ndk', 'both'):
-    UpdateTools('ndk')
+  if options.type in ('sdk', 'both') and not UpdateTools('sdk'):
+    print ('ERROR: Failed to download sdk.')
+    sys.exit(1)
+
+  if options.type in ('ndk', 'both') and not UpdateTools('ndk'):
+    print ('ERROR: Failed to download ndk.')
+    sys.exit(1)
 
 if __name__ == '__main__':
   sys.exit(main(sys.argv))
