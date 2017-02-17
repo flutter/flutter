@@ -555,6 +555,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || expandedHeight != oldDelegate.expandedHeight
         || topPadding != oldDelegate.topPadding;
   }
+
+  @override
+  String toString() {
+    return '$runtimeType#$hashCode(topPadding: ${topPadding.toStringAsFixed(1)}, bottomHeight: ${_bottomHeight.toStringAsFixed(1)}, ...)';
+  }
 }
 
 class SliverAppBar extends StatelessWidget {

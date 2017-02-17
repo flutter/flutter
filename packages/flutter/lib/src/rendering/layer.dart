@@ -87,9 +87,13 @@ abstract class Layer {
     List<String> description = <String>[];
     debugFillDescription(description);
     result += description.map((String description) => "$descriptionPrefix$description\n").join();
-    if (childrenDescription == '')
-      result += '$prefixOtherLines\n';
-    result += childrenDescription;
+    if (childrenDescription == '') {
+      String prefix = prefixOtherLines.trimRight();
+      if (prefix != '')
+        result += '$prefix\n';
+    } else {
+      result += childrenDescription;
+    }
     return result;
   }
 

@@ -1903,11 +1903,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   OffsetLayer _layer;
   /// The compositing layer that this render object uses to repaint.
   ///
-  /// Call only when [isRepaintBoundary] is true.
+  /// Call only when [isRepaintBoundary] is true and the render object has
+  /// already painted.
+  ///
+  /// To access the layer in debug code, even when it might be inappropriate to
+  /// access it (e.g. because it is dirty), consider [debugLayer].
   OffsetLayer get layer {
     assert(isRepaintBoundary);
     assert(!_needsPaint);
     return _layer;
+  }
+  /// In debug mode, the compositing layer that this render object uses to repaint.
+  ///
+  /// This getter is intended for debugging purposes only. In release builds, it
+  /// always returns null. In debug builds, it returns the layer even if the layer
+  /// is dirty.
+  ///
+  /// For production code, consider [layer].
+  OffsetLayer get debugLayer {
+    OffsetLayer result;
+    assert(() {
+      result = _layer;
+      return true;
+    });
+    return result;
   }
 
   bool _needsCompositingBitsUpdate = false; // set to true when a child is added
@@ -2422,9 +2441,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
       .map<String>((String line) => "$descriptionPrefix$line\n")
       .join();
-    if (childrenDescription == '')
-      result += '$prefixOtherLines\n';
-    result += childrenDescription;
+    if (childrenDescription == '') {
+      String prefix = prefixOtherLines.trimRight();
+      if (prefix != '')
+        result += '$prefix\n';
+    } else {
+      result += childrenDescription;
+    }
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
