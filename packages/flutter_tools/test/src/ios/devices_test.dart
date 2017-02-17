@@ -7,6 +7,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -28,7 +29,7 @@ void main() {
     testUsingContext(
       'screenshot without ideviceinstaller error',
       () async {
-        when(mockOutputFile.path).thenReturn('/some/test/path/image.png');
+        when(mockOutputFile.path).thenReturn(path.join('some', 'test', 'path', 'image.png'));
         // Let everything else return exit code 0 so process.dart doesn't crash.
         // The matcher order is important.
         when(
@@ -49,19 +50,19 @@ void main() {
         verify(mockProcessManager.runSync(
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
         verifyNever(mockProcessManager.runSync(
-          <String>['idevicescreenshot', '/some/test/path/image.png'],
+          <String>['idevicescreenshot', path.join('some', 'test', 'path', 'image.png')],
           environment: null,
           workingDirectory: null
         ));
         expect(testLogger.errorText, contains('brew install ideviceinstaller'));
       },
-      overrides: <Type, Generator>{ ProcessManager: () => mockProcessManager }
+      overrides: <Type, Generator>{ProcessManager: () => mockProcessManager}
     );
 
     testUsingContext(
       'screenshot with ideviceinstaller gets command',
       () async {
-        when(mockOutputFile.path).thenReturn('/some/test/path/image.png');
+        when(mockOutputFile.path).thenReturn(path.join('some', 'test', 'path', 'image.png'));
         // Let everything else return exit code 0.
         // The matcher order is important.
         when(
@@ -74,7 +75,7 @@ void main() {
           mockProcessManager.runSync(
             <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
         ).thenReturn(
-          new ProcessResult(3, 0, '/some/path/to/iscreenshot', null)
+          new ProcessResult(3, 0, path.join('some', 'path', 'to', 'iscreenshot'), null)
         );
 
         iosDeviceUnderTest = new IOSDevice('1234');
@@ -82,12 +83,15 @@ void main() {
         verify(mockProcessManager.runSync(
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
         verify(mockProcessManager.runSync(
-          <String>['/some/path/to/iscreenshot', '/some/test/path/image.png'],
+          <String>[
+            path.join('some', 'path', 'to', 'iscreenshot'),
+            path.join('some', 'test', 'path', 'image.png')
+          ],
           environment: null,
           workingDirectory: null
         ));
       },
-      overrides: <Type, Generator>{ ProcessManager: () => mockProcessManager }
+      overrides: <Type, Generator>{ProcessManager: () => mockProcessManager}
     );
   });
 }
