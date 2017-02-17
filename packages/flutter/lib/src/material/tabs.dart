@@ -312,14 +312,27 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
   double get value => _indexChangeProgress(controller);
 }
 
-/// A material design widget that displays a horizontal row of tabs. Typically
-/// created as part of an [AppBar] and in conjuction with a [TabBarView].
+/// A material design widget that displays a horizontal row of tabs.
 ///
-/// If a [TabController] is not provided, then there must be a [DefaultTabController]
-/// ancestor.
+/// Typically created as part of an [AppBar] and in conjuction with a
+/// [TabBarView].
 ///
-/// Requires one of its ancestors to be a [Material] widget
+/// If a [TabController] is not provided, then there must be a
+/// [DefaultTabController] ancestor.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+///  * [TabBarView], which displays the contents that the tab bar is selecting
+///    between.
 class TabBar extends StatefulWidget implements AppBarBottomWidget {
+  /// Creates a material design tab bar.
+  ///
+  /// The [tabs] argument must not be nuull and must have more than one widget.
+  ///
+  /// If a [TabController] is not provided, then there must be a
+  /// [DefaultTabController] ancestor.
   TabBar({
     Key key,
     @required this.tabs,
