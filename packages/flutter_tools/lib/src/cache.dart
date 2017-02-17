@@ -256,6 +256,7 @@ class FlutterEngine {
       binaryDirs
         ..addAll(_osxBinaryDirs)
         ..addAll(_linuxBinaryDirs)
+        ..addAll(_windowsBinaryDirs)
         ..addAll(_androidBinaryDirs)
         ..addAll(_iosBinaryDirs);
     else if (platform.isLinux)
