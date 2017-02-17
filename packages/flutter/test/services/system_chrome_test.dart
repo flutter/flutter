@@ -14,6 +14,7 @@ void main() {
     // Flush all microtasks
     await tester.idle();
     expect(tester.binding.microtaskCount, equals(0));
+    await tester.idle();
 
     // The second call with the same value should be a no-op
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
