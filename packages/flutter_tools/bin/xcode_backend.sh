@@ -163,12 +163,12 @@ LipoExecutable() {
     fi
   done
 
+  # Generate a merged binary from the architecture-specific executables.
+  # Skip this step for non-fat executables.
   if [[ ${#all_executables[@]} > 0 ]]; then
-    # Merge desired architectures.
     local merged="${executable}_merged"
     lipo -output "${merged}" -create "${all_executables[@]}"
 
-    # Replace the original executable with the thinned one and clean up.
     cp -f -- "${merged}" "${executable}" > /dev/null
     rm -f -- "${merged}" "${all_executables[@]}"
   fi
