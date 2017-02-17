@@ -50,7 +50,7 @@ abstract class SliverChildDelegate {
   @protected
   void debugFillDescription(List<String> description) {
     try {
-      int children = estimatedChildCount;
+      final int children = estimatedChildCount;
       if (children != null)
         description.add('estimated child count: $children');
     } catch (e) {
