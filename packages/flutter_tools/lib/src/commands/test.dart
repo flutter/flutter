@@ -172,7 +172,7 @@ class TestCommand extends FlutterCommand {
     testArgs.add('--');
 
     Directory testDir;
-    Iterable<String> files = argResults.rest.map((String testPath) => fs.path.absolute(testPath)).toList();
+    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
     if (argResults['start-paused']) {
       if (files.length != 1)
         throwToolExit('When using --start-paused, you must specify a single test file to run.', exitCode: 1);

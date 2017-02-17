@@ -140,7 +140,7 @@ class AndroidSdk {
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
-        .map((FileSystemEntity entity) => fs.path.basename(entity.path))
+        .map<String>((FileSystemEntity entity) => fs.path.basename(entity.path))
         .where((String name) => name.startsWith('android-'))
         .toList();
     }
