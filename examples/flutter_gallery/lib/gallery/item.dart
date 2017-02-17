@@ -42,6 +42,8 @@ class GalleryItem extends StatelessWidget {
   }
 }
 
+// When editing this list, make sure you keep it in sync with
+// the list in ../../test_driver/transitions_perf_test.dart
 final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
   // Demos
   new GalleryItem(
@@ -163,12 +165,6 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     buildRoute: (BuildContext context) => new ModalBottomSheetDemo()
   ),
   new GalleryItem(
-    title: 'Over-scroll',
-    subtitle: 'Refresh and overscroll indicators',
-    routeName: OverscrollDemo.routeName,
-    buildRoute: (BuildContext context) => new OverscrollDemo()
-  ),
-  new GalleryItem(
     title: 'Page selector',
     subtitle: 'PageView with indicator',
     routeName: PageSelectorDemo.routeName,
@@ -185,6 +181,12 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     subtitle: 'All kinds: linear, circular, indeterminate, etc',
     routeName: ProgressIndicatorDemo.routeName,
     buildRoute: (BuildContext context) => new ProgressIndicatorDemo()
+  ),
+  new GalleryItem(
+    title: 'Pull to refresh',
+    subtitle: 'Refresh indicators',
+    routeName: OverscrollDemo.routeName,
+    buildRoute: (BuildContext context) => new OverscrollDemo()
   ),
   new GalleryItem(
     title: 'Scrollable tabs',
