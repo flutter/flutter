@@ -105,35 +105,37 @@ void main() {
   });
 
   test('Invalid transform parameter should assert', () {
-    expect(() => const SawTooth(2).transform(-0.0001), throws);
-    expect(() => const SawTooth(2).transform(1.0001), throws);
+    Matcher isAssertionError = const isInstanceOf<AssertionError>();
 
-    expect(() => const Interval(0.0, 1.0).transform(-0.0001), throws);
-    expect(() => const Interval(0.0, 1.0).transform(1.0001), throws);
+    expect(() => const SawTooth(2).transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const SawTooth(2).transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => const Threshold(0.5).transform(-0.0001), throws);
-    expect(() => const Threshold(0.5).transform(1.0001), throws);
+    expect(() => const Interval(0.0, 1.0).transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const Interval(0.0, 1.0).transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => const ElasticInCurve().transform(-0.0001), throws);
-    expect(() => const ElasticInCurve().transform(1.0001), throws);
+    expect(() => const Threshold(0.5).transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const Threshold(0.5).transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => const ElasticOutCurve().transform(-0.0001), throws);
-    expect(() => const ElasticOutCurve().transform(1.0001), throws);
+    expect(() => const ElasticInCurve().transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const ElasticInCurve().transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(-0.0001), throws);
-    expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(1.0001), throws);
+    expect(() => const ElasticOutCurve().transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const ElasticOutCurve().transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => Curves.decelerate.transform(-0.0001), throws);
-    expect(() => Curves.decelerate.transform(1.0001), throws);
+    expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(-0.0001), throwsA(isAssertionError));
+    expect(() => const Cubic(0.42, 0.0, 0.58, 1.0).transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => Curves.bounceIn.transform(-0.0001), throws);
-    expect(() => Curves.bounceIn.transform(1.0001), throws);
+    expect(() => Curves.decelerate.transform(-0.0001), throwsA(isAssertionError));
+    expect(() => Curves.decelerate.transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => Curves.bounceOut.transform(-0.0001), throws);
-    expect(() => Curves.bounceOut.transform(1.0001), throws);
+    expect(() => Curves.bounceIn.transform(-0.0001), throwsA(isAssertionError));
+    expect(() => Curves.bounceIn.transform(1.0001), throwsA(isAssertionError));
 
-    expect(() => Curves.bounceInOut.transform(-0.0001), throws);
-    expect(() => Curves.bounceInOut.transform(1.0001), throws);
+    expect(() => Curves.bounceOut.transform(-0.0001), throwsA(isAssertionError));
+    expect(() => Curves.bounceOut.transform(1.0001), throwsA(isAssertionError));
+
+    expect(() => Curves.bounceInOut.transform(-0.0001), throwsA(isAssertionError));
+    expect(() => Curves.bounceInOut.transform(1.0001), throwsA(isAssertionError));
   });
 
 }

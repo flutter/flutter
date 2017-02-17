@@ -37,8 +37,8 @@ void updateFileModificationTime(String path,
 /// Matcher for functions that throw ToolExit.
 Matcher throwsToolExit([int exitCode]) {
   return exitCode == null
-    ? const Throws(isToolExit)
-    : new Throws(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
+    ? throwsA(isToolExit)
+    : throwsA(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
 }
 
 /// Matcher for [ToolExit]s.
