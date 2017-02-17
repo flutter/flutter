@@ -4,8 +4,6 @@
 
 source_set("flow") {
   sources = [
-    "bitmap_image.cc",
-    "bitmap_image.h",
     "compositor_context.cc",
     "compositor_context.h",
     "instrumentation.cc",
@@ -41,7 +39,6 @@ source_set("flow") {
     "raster_cache.h",
     "scene_update_context.cc",
     "scene_update_context.h",
-    "texture_image.h",
   ]
 
   deps = [
@@ -57,7 +54,6 @@ source_set("flow") {
     sources += [
       "layers/child_scene_layer.cc",
       "layers/child_scene_layer.h",
-      "texture_image_none.cc",
     ]
     public_deps = [
       "//apps/mozart/lib/skia",
@@ -68,7 +64,6 @@ source_set("flow") {
       "gl_connection.cc",
       "gl_connection.h",
       "open_gl.h",
-      "texture_image_gles2.cc",
     ]
   }
 }
