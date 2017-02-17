@@ -924,6 +924,18 @@ class Isolate extends ServiceObjectOwner {
       timeoutFatal: false,
     );
   }
+
+  Future<Null> flutterPlatformOverride([String platform]) async {
+    Map<String, String> result = await invokeFlutterExtensionRpcRaw(
+      'ext.flutter.platformOverride',
+      params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
+      timeout: const Duration(seconds: 5),
+      timeoutFatal: false,
+    );
+    if (result != null && result.containsKey('value') && result['value'] is String)
+      return result['value'];
+    return 'unknown';
+  }
 }
 
 class ServiceMap extends ServiceObject implements Map<String, dynamic> {

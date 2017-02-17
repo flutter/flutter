@@ -4,6 +4,7 @@
 
 import 'assertions.dart';
 import 'print.dart';
+import 'platform.dart';
 
 /// Returns true if none of the foundation library debug variables have been
 /// changed.
@@ -20,7 +21,8 @@ import 'print.dart';
 /// a complete list.
 bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride: debugPrintThrottled }) {
   assert(() {
-    if (debugPrint != debugPrintOverride)
+    if (debugPrint != debugPrintOverride ||
+        debugDefaultTargetPlatformOverride != null)
       throw new FlutterError(reason);
     return true;
   });

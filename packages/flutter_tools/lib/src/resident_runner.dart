@@ -111,24 +111,26 @@ abstract class ResidentRunner {
     Status status = logger.startProgress('Taking screenshot...');
     File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
-      if (vmService != null)
-        await vmService.vm.refreshViews();
-      try {
-        if (isRunningDebug)
+      if (supportsServiceProtocol && isRunningDebug) {
+        if (vmService != null)
+          await vmService.vm.refreshViews();
+        try {
           await currentView.uiIsolate.flutterDebugAllowBanner(false);
-      } catch (error) {
-        status.stop();
-        printError(error);
+        } catch (error) {
+          status.stop();
+          printError(error);
+        }
       }
       try {
         await device.takeScreenshot(outputFile);
       } finally {
-        try {
-          if (isRunningDebug)
+        if (supportsServiceProtocol && isRunningDebug) {
+          try {
             await currentView.uiIsolate.flutterDebugAllowBanner(true);
-        } catch (error) {
-          status.stop();
-          printError(error);
+          } catch (error) {
+            status.stop();
+            printError(error);
+          }
         }
       }
       int sizeKB = (await outputFile.length()) ~/ 1024;
@@ -137,6 +139,18 @@ abstract class ResidentRunner {
     } catch (error) {
       status.stop();
       printError('Error taking screenshot: $error');
+    }
+  }
+
+  Future<String> _debugRotatePlatform() async {
+    if (vmService != null)
+      await vmService.vm.refreshViews();
+    switch (await currentView.uiIsolate.flutterPlatformOverride()) {
+      case 'iOS':
+        return await currentView.uiIsolate.flutterPlatformOverride('android');
+      case 'android':
+      default:
+        return await currentView.uiIsolate.flutterPlatformOverride('iOS');
     }
   }
 
@@ -228,25 +242,31 @@ abstract class ResidentRunner {
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
-      if (!supportsServiceProtocol)
+      if (supportsServiceProtocol) {
+        await _debugDumpApp();
         return true;
-      await _debugDumpApp();
-      return true;
+      }
     } else if (lower == 't') {
-      if (!supportsServiceProtocol)
+      if (supportsServiceProtocol) {
+        await _debugDumpRenderTree();
         return true;
-      await _debugDumpRenderTree();
-      return true;
+      }
     } else if (lower == 'p') {
-      if (!supportsServiceProtocol)
+      if (supportsServiceProtocol && isRunningDebug) {
+        await _debugToggleDebugPaintSizeEnabled();
         return true;
-      await _debugToggleDebugPaintSizeEnabled();
-      return true;
+      }
     } else if (lower == 's') {
-      if (!supportsServiceProtocol || !device.supportsScreenshot)
+      if (device.supportsScreenshot) {
+        await _screenshot();
         return true;
-      await _screenshot();
-      return true;
+      }
+    } else if (lower == 'o') {
+      if (supportsServiceProtocol && isRunningDebug) {
+        String platform = await _debugRotatePlatform();
+        print('Switched operating system to: $platform');
+        return true;
+      }
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
@@ -347,7 +367,10 @@ abstract class ResidentRunner {
     if (supportsServiceProtocol) {
       printStatus('To dump the widget hierarchy of the app (debugDumpApp), press "w".');
       printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
-      printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+      if (isRunningDebug) {
+        printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+        printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+      }
     }
     if (device.supportsScreenshot)
       printStatus('To save a screenshot to flutter.png, press "s".');

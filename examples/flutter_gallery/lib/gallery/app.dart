@@ -54,7 +54,7 @@ class GalleryAppState extends State<GalleryApp> {
   bool _showPerformanceOverlay = false;
   bool _checkerboardRasterCacheImages = false;
   double _timeDilation = 1.0;
-  TargetPlatform _platform = defaultTargetPlatform;
+  TargetPlatform _platform;
 
   Timer _timeDilationTimer;
 
@@ -94,7 +94,7 @@ class GalleryAppState extends State<GalleryApp> {
       } : null,
       onPlatformChanged: (TargetPlatform value) {
         setState(() {
-          _platform = value;
+          _platform = value == defaultTargetPlatform ? null : value;
         });
       },
       timeDilation: _timeDilation,
@@ -128,7 +128,7 @@ class GalleryAppState extends State<GalleryApp> {
     return new MaterialApp(
       title: 'Flutter Gallery',
       color: Colors.grey[500],
-      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform),
+      theme: (_useLightTheme ? _kGalleryLightTheme : _kGalleryDarkTheme).copyWith(platform: _platform ?? defaultTargetPlatform),
       showPerformanceOverlay: _showPerformanceOverlay,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       routes: _kRoutes,
