@@ -450,16 +450,15 @@ class _GlowingOverscrollIndicatorPainter extends CustomPainter {
         break;
       case AxisDirection.left:
         canvas.save();
-        canvas.translate(0.0, size.height);
-        canvas.rotate(-piOver2);
+        canvas.rotate(piOver2);
+        canvas.scale(1.0, -1.0);
         controller.paint(canvas, new Size(size.height, size.width));
         canvas.restore();
         break;
       case AxisDirection.right:
         canvas.save();
-        canvas.translate(size.width, size.height);
-        canvas.rotate(-piOver2);
-        canvas.scale(1.0, -1.0);
+        canvas.translate(size.width, 0.0);
+        canvas.rotate(piOver2);
         controller.paint(canvas, new Size(size.height, size.width));
         canvas.restore();
         break;

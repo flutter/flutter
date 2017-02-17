@@ -187,11 +187,11 @@ void main() {
     );
     RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle()..scale(y: -1.0));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle()
-                          ..rotate(angle: -math.PI / 2.0)..scale(y: -1.0)..circle());
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()
+                          ..rotate(angle: math.PI / 2.0)..circle());
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -237,7 +237,7 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..scale(y: -1.0)..rotate(angle: -math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
@@ -254,7 +254,7 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..scale(y: -1.0));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
   });
 }
