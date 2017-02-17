@@ -50,7 +50,7 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.flutterFramework:
       return 'Flutter.framework';
   }
-  // TODO(goderbauer): This is dead code (https://github.com/dart-lang/sdk/issues/28798).
+  assert(false, 'Invalid artifact $artifact.');
   return null;
 }
 
@@ -85,10 +85,10 @@ class CachedArtifacts extends Artifacts {
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
-        assert(mode == null, '$platform does not support different build modes.');
+        assert(mode == null, 'Platform $platform does not support different build modes.');
         return _getHostArtifactPath(artifact, platform);
     }
-    // TODO(goderbauer): This is dead code (https://github.com/dart-lang/sdk/issues/28798).
+    assert(false, 'Invalid platform $platform.');
     return null;
   }
 
@@ -108,14 +108,14 @@ class CachedArtifacts extends Artifacts {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
       case Artifact.dartVmEntryPointsAndroidTxt:
-        assert(mode != BuildMode.debug, '$artifact only available in non-debug mode.');
+        assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
-        assert(mode != BuildMode.debug, '$artifact only available in non-debug mode.');
+        assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return fs.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
       default:
-        assert(false, '$artifact not available for $platform.');
+        assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
   }
@@ -130,7 +130,7 @@ class CachedArtifacts extends Artifacts {
       case Artifact.flutterFramework:
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       default:
-        assert(false, '$artifact not available for $platform.');
+        assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
   }
@@ -144,7 +144,7 @@ class CachedArtifacts extends Artifacts {
         String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       default:
-        assert(false, '$artifact not available for $platform.');
+        assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
   }
@@ -155,17 +155,17 @@ class CachedArtifacts extends Artifacts {
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
-        assert(mode == null, '$platform does not support different build modes.');
+        assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        assert(mode != null, 'Need to specify a build mode for $platform.');
+        assert(mode != null, 'Need to specify a build mode for platform $platform.');
         String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
         return fs.path.join(engineDir, platformName + suffix);
     }
-    // TODO(goderbauer): This is dead code (https://github.com/dart-lang/sdk/issues/28798).
+    assert(false, 'Invalid platform $platform.');
     return null;
   }
 
@@ -214,7 +214,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
-    // TODO(goderbauer): This is dead code (https://github.com/dart-lang/sdk/issues/28798).
+    assert(false, 'Invalid artifact $artifact.');
     return null;
   }
 
@@ -246,7 +246,7 @@ class LocalEngineArtifacts extends Artifacts {
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
       return fs.path.join(engineOutPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
     }
-    throw new Exception('Unsupported $platform.');
+    throw new Exception('Unsupported platform $platform.');
   }
 
   String _getAbiDirectory(TargetPlatform platform) {
@@ -258,7 +258,7 @@ class LocalEngineArtifacts extends Artifacts {
       case TargetPlatform.android_x86:
         return 'x86';
       default:
-        throw new Exception('Unsupported $platform.');
+        throw new Exception('Unsupported platform $platform.');
     }
   }
 }
