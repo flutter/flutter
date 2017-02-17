@@ -234,15 +234,22 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       genSnapshotCmd.addAll(<String>[
+        '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_instructions=$vmSnapshotInstructions',
         '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
-        '--no-sim-use-hardfp',
+        '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
         '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
       ]);
       break;
     case TargetPlatform.ios:
-      genSnapshotCmd.add(interpreter ? snapshotDartIOS : '--assembly=$assembly');
+      if (interpreter) {
+        genSnapshotCmd.add('--snapshot_kind=core');
+        genSnapshotCmd.add(snapshotDartIOS);
+      } else {
+        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotCmd.add('--assembly=$assembly');
+      }
       break;
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
