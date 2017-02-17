@@ -8,12 +8,16 @@ import 'package:test/test.dart';
 
 void main() {
   setUp(() {
-    String flutterTools = fs.path.join(platform.environment['FLUTTER_ROOT'],
-        'packages', 'flutter_tools');
+    String flutterRoot = platform.environment['FLUTTER_ROOT'];
+    if (flutterRoot == null)
+      throw new Exception('Please set FLUTTER_ROOT env var before running tests.');
+    String flutterTools = fs.path.join(flutterRoot, 'packages', 'flutter_tools');
     assert(fs.path.equals(fs.currentDirectory.path, flutterTools));
   });
 
   test('no unauthorized imports of dart:io', () {
+    bool _isNotWhitelisted(FileSystemEntity entity) => entity.path != fs.path.join('lib', 'src', 'base', 'io.dart');
+
     for (String path in <String>['lib', 'bin']) {
       fs.directory(path)
         .listSync(recursive: true)
@@ -31,12 +35,25 @@ void main() {
       );
     }
   });
+
+  test('no unauthorized imports of package:path', () {
+    for (String path in <String>['lib', 'bin', 'test']) {
+      fs.directory(path)
+          .listSync(recursive: true)
+          .where(_isDartFile)
+          .map(_asFile)
+          .forEach((File file) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(new RegExp('import.*package:path/path.dart'))) {
+            fail("${file.path} imports 'package:path/path.dart'; use 'fs.path' instead");
+          }
+        }
+      }
+      );
+    }
+  });
 }
 
-bool _isDartFile(FileSystemEntity entity) =>
-    entity is File && entity.path.endsWith('.dart');
-
-bool _isNotWhitelisted(FileSystemEntity entity) =>
-    entity.path != fs.path.join('lib', 'src', 'base', 'io.dart');
+bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
 
 File _asFile(FileSystemEntity entity) => entity;
