@@ -46,6 +46,8 @@ class SceneBuilder : public ftl::RefCountedThreadSafe<SceneBuilder>,
                       double maskRectTop,
                       double maskRectBottom,
                       int blendMode);
+  void pushPhysicalModel(const RRect& rrect, int elevation, int color);
+
   void pop();
 
   void addPerformanceOverlay(uint64_t enabledOptions,
