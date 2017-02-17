@@ -101,7 +101,7 @@ Individual tests can also be run directly, e.g. `flutter test lib/my_app_test.da
 
 Flutter tests use [package:flutter_test](https://github.com/flutter/flutter/tree/master/packages/flutter_test) which provides flutter-specific extensions on top of [package:test](https://pub.dartlang.org/packages/test).
 
-`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, start the test with the `--start-paused` option to prevent the test from completing immediately.
+`flutter test` runs tests inside the flutter shell. To debug tests in Observatory, use the `--start-paused` option to start the test in a paused state and wait for connection from a debugger. This option lets you set breakpoints before the test runs.
 
 To run all the tests for the entire Flutter repository, the same way that Travis runs them, run `dart dev/bots/test.dart`.
 
