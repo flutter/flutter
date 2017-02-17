@@ -151,7 +151,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     });
   }
 
-  bool handleScrollNotification(ScrollNotification2 notification) {
+  bool handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification && notification.depth == 1) {
       setState(() {
         double dy = markersScrollOffset - notification.metrics.extentBefore;
@@ -172,7 +172,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(new Point(size.width, size.height));
-      final Scrollable2State scrollable = Scrollable2.of(target.currentContext);
+      final ScrollableState scrollable = Scrollable.of(target.currentContext);
       markersScrollOffset = scrollable.position.pixels;
     });
   }
@@ -184,7 +184,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         appBar: new AppBar(title: new Text('Tap a Card')),
         body: new Container(
           padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-          child: new NotificationListener<ScrollNotification2>(
+          child: new NotificationListener<ScrollNotification>(
             onNotification: handleScrollNotification,
             child: new ListView.custom(
               childrenDelegate: new CardBuilder(

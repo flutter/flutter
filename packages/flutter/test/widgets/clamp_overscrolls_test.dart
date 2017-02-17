@@ -62,7 +62,7 @@ void main() {
     // BouncingScrollPhysics
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));
-    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
     await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
     await tester.pump();
@@ -77,7 +77,7 @@ void main() {
     // ClampingScrollPhysics
 
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
-    scrollable = scrollable = tester.state(find.byType(Scrollable2));
+    scrollable = scrollable = tester.state(find.byType(Scrollable));
 
     await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
     await tester.pump();

@@ -24,7 +24,7 @@ class _GenerationTextState extends State<GenerationText> {
 
 Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   globalGeneration += 1;
-  return tester.pumpWidget(new Viewport2(
+  return tester.pumpWidget(new Viewport(
     offset: new ViewportOffset.fixed(offset),
     slivers: <Widget>[
       new SliverList(
@@ -49,7 +49,7 @@ void verify(WidgetTester tester, List<Point> answerKey, String text) {
 }
 
 void main() {
-  testWidgets('Viewport2+SliverBlock with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock with GlobalKey reparenting', (WidgetTester tester) async {
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
     verify(tester, <Point>[
       const Point(0.0, 0.0),

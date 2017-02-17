@@ -83,7 +83,7 @@ void main() {
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4]));
     callbackTracker.clear();
 
-    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(400.0); // now only 3 should fit, numbered 2-4.
 
     await tester.pumpWidget(builder());
@@ -134,7 +134,7 @@ void main() {
 
     callbackTracker.clear();
 
-    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(400.0); // now only 4 should fit, numbered 2-5.
 
     await tester.pumpWidget(builder());
@@ -278,7 +278,7 @@ void main() {
     expect(list.childScrollOffset(list.firstChild), equals(0.0));
     expect(list.geometry.scrollExtent, equals(300.0));
 
-    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     expect(position.viewportDimension, equals(600.0));
     expect(position.minScrollExtent, equals(0.0));

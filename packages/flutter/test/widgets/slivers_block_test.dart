@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import '../rendering/mock_canvas.dart';
 
 Future<Null> test(WidgetTester tester, double offset) {
-  return tester.pumpWidget(new Viewport2(
+  return tester.pumpWidget(new Viewport(
     offset: new ViewportOffset.fixed(offset),
     slivers: <Widget>[
       new SliverList(
@@ -38,9 +38,9 @@ void verify(WidgetTester tester, List<Point> answerKey, String text) {
 }
 
 void main() {
-  testWidgets('Viewport2+SliverBlock basic test', (WidgetTester tester) async {
+  testWidgets('Viewport+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
-    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 0.0),
       const Point(0.0, 400.0),
@@ -71,10 +71,10 @@ void main() {
     ], 'ab');
   });
 
-  testWidgets('Viewport2 with GlobalKey reparenting', (WidgetTester tester) async {
+  testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
     Key key1 = new GlobalKey();
     ViewportOffset offset = new ViewportOffset.zero();
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[
         new SliverList(
@@ -91,7 +91,7 @@ void main() {
       const Point(0.0, 251.0),
       const Point(0.0, 503.0),
     ], 'abc');
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[
         new SliverList(
@@ -108,7 +108,7 @@ void main() {
       const Point(0.0, 253.0),
       const Point(0.0, 504.0),
     ], 'cab');
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[
         new SliverList(
@@ -125,7 +125,7 @@ void main() {
       const Point(0.0, 251.0),
       const Point(0.0, 504.0),
     ], 'acb');
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[
         new SliverList(
@@ -140,7 +140,7 @@ void main() {
       const Point(0.0, 0.0),
       const Point(0.0, 251.0),
     ], 'ab');
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[
         new SliverList(
@@ -159,8 +159,8 @@ void main() {
     ], 'acb');
   });
 
-  testWidgets('Viewport2 overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
-    await tester.pumpWidget(new Viewport2(
+  testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverToBoxAdapter(
@@ -169,9 +169,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), isNot(paints..clipRect()));
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverToBoxAdapter(
@@ -180,9 +180,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverToBoxAdapter(
@@ -191,9 +191,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverToBoxAdapter(
@@ -202,11 +202,11 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
   });
 
-  testWidgets('Viewport2 overflow clipping of SliverBlock', (WidgetTester tester) async {
-    await tester.pumpWidget(new Viewport2(
+  testWidgets('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverList(
@@ -217,9 +217,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), isNot(paints..clipRect()));
+    expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverList(
@@ -230,9 +230,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.fixed(100.0),
       slivers: <Widget>[
         new SliverList(
@@ -243,9 +243,9 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport2(
+    await tester.pumpWidget(new Viewport(
       offset: new ViewportOffset.zero(),
       slivers: <Widget>[
         new SliverList(
@@ -256,6 +256,6 @@ void main() {
       ],
     ));
 
-    expect(find.byType(Viewport2), paints..clipRect());
+    expect(find.byType(Viewport), paints..clipRect());
   });
 }

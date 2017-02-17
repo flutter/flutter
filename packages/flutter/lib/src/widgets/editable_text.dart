@@ -423,7 +423,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       }
     }
 
-    return new Scrollable2(
+    return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
       physics: const ClampingScrollPhysics(),

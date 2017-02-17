@@ -167,7 +167,7 @@ void main() {
     );
 
     await tester.fling(find.text('0'), const Offset(0.0, 400.0), 1000.0);
-    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position.pixels, equals(0.0));
 
     await tester.tapAt(const Point(200.0, 100.0));

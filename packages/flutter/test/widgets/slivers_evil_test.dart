@@ -32,7 +32,7 @@ class TestSliverPersistentHeaderDelegate extends SliverPersistentHeaderDelegate 
   bool shouldRebuild(TestSliverPersistentHeaderDelegate oldDelegate) => false;
 }
 
-class TestBehavior extends ScrollBehavior2 {
+class TestBehavior extends ScrollBehavior {
   @override
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
     return new GlowingOverscrollIndicator(
@@ -72,14 +72,14 @@ void main() {
   testWidgets('Evil test of sliver features - 1', (WidgetTester tester) async {
     final GlobalKey centerKey = new GlobalKey();
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestBehavior(),
         child: new Scrollbar(
-          child: new Scrollable2(
+          child: new Scrollable(
             axisDirection: AxisDirection.down,
             physics: const TestScrollPhysics(),
             viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return new Viewport2(
+              return new Viewport(
                 axisDirection: AxisDirection.down,
                 anchor: 0.25,
                 offset: offset,
@@ -158,7 +158,7 @@ void main() {
         ),
       ),
     );
-    ScrollPosition position = tester.state<Scrollable2State>(find.byType(Scrollable2)).position;
+    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));

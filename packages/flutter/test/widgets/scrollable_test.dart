@@ -24,12 +24,12 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
 const double dragOffset = 200.0;
 
 double getScrollOffset(WidgetTester tester) {
-  RenderViewport2 viewport = tester.renderObject(find.byType(Viewport2));
+  RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   return viewport.offset.pixels;
 }
 
 void resetScrollOffset(WidgetTester tester) {
-  RenderViewport2 viewport = tester.renderObject(find.byType(Viewport2));
+  RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   ScrollPosition position = viewport.offset;
   position.jumpTo(0.0);
 }
@@ -37,7 +37,7 @@ void resetScrollOffset(WidgetTester tester) {
 void main() {
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.android);
-    await tester.fling(find.byType(Viewport2), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
@@ -47,7 +47,7 @@ void main() {
     resetScrollOffset(tester);
 
     await pumpTest(tester, TargetPlatform.iOS);
-    await tester.fling(find.byType(Viewport2), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
@@ -59,7 +59,7 @@ void main() {
 
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.iOS);
-    await tester.fling(find.byType(Viewport2), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);
@@ -69,7 +69,7 @@ void main() {
     resetScrollOffset(tester);
 
     await pumpTest(tester, TargetPlatform.android);
-    await tester.fling(find.byType(Viewport2), const Offset(0.0, -dragOffset), 1000.0);
+    await tester.fling(find.byType(Viewport), const Offset(0.0, -dragOffset), 1000.0);
     expect(getScrollOffset(tester), dragOffset);
     await tester.pump(); // trigger fling
     expect(getScrollOffset(tester), dragOffset);

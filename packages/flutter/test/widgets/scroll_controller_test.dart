@@ -22,7 +22,7 @@ void main() {
     ));
 
     double realOffset() {
-      return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
 
     expect(controller.offset, equals(0.0));
@@ -121,7 +121,7 @@ void main() {
     ));
 
     double realOffset() {
-      return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
 
     expect(controller.offset, equals(209.0));

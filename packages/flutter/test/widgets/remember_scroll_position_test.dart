@@ -58,7 +58,7 @@ void main() {
     expect(find.text('10'), findsNothing);
     expect(find.text('100'), findsNothing);
 
-    tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(1000.0);
+    tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(1000.0);
     await tester.pump(const Duration(seconds: 1));
 
     // we're 600 pixels high, each item is 100 pixels high, scroll position is
@@ -96,7 +96,7 @@ void main() {
 
     // Ensure we don't clamp the scroll offset even during the navigation.
     // https://github.com/flutter/flutter/issues/4883
-    Scrollable2State state = tester.state(find.byType(Scrollable2).first);
+    ScrollableState state = tester.state(find.byType(Scrollable).first);
     expect(state.position.pixels, equals(1000.0));
 
     await tester.pump(const Duration(seconds: 1));

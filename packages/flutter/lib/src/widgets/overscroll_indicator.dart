@@ -49,7 +49,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   final bool showTrailing;
 
   /// The direction of positive scroll offsets in the viewport of the
-  /// [Scrollable2] whose overscrolls are to be visualized.
+  /// [Scrollable] whose overscrolls are to be visualized.
   final AxisDirection axisDirection;
 
   Axis get axis => axisDirectionToAxis(axisDirection);
@@ -58,11 +58,11 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   final Color color;
 
   /// The subtree to place inside the overscroll indicator. This should include
-  /// a source of [ScrollNotification2] notifications, typically a [Scrollable2]
+  /// a source of [ScrollNotification] notifications, typically a [Scrollable]
   /// widget.
   ///
   /// Typically a [GlowingOverscrollIndicator] is created by a
-  /// [ScrollBehavior2.buildViewportChrome] method, in which case
+  /// [ScrollBehavior.buildViewportChrome] method, in which case
   /// the child is usually the one provided as an argument to that method.
   final Widget child;
 
@@ -110,7 +110,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   Type _lastNotificationType;
   final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
 
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.depth != 0)
       return false;
     if (notification is OverscrollNotification) {
@@ -173,7 +173,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification2>(
+    return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: new RepaintBoundary(
         child: new CustomPaint(

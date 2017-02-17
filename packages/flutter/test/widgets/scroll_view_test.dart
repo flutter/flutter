@@ -69,7 +69,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
 
-    Viewport2 viewport = tester.widget(find.byType(Viewport2));
+    Viewport viewport = tester.widget(find.byType(Viewport));
     expect(viewport.offset.pixels, equals(2400.0));
   });
 

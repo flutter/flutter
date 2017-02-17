@@ -167,7 +167,7 @@ class MaterialApp extends StatefulWidget {
   _MaterialAppState createState() => new _MaterialAppState();
 }
 
-class _MaterialScrollBehavior extends ScrollBehavior2 {
+class _MaterialScrollBehavior extends ScrollBehavior {
   @override
   TargetPlatform getPlatform(BuildContext context) {
     return Theme.of(context).platform;
@@ -245,7 +245,7 @@ class _MaterialAppState extends State<MaterialApp> {
       return true;
     });
 
-    return new ScrollConfiguration2(
+    return new ScrollConfiguration(
       behavior: new _MaterialScrollBehavior(),
       child: result
     );
