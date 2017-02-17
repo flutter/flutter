@@ -121,7 +121,7 @@ class ScrollController {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('$runtimeType#$hashCode(');
     if (initialScrollOffset != 0.0)
       result.write('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
