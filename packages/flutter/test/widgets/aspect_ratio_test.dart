@@ -35,8 +35,8 @@ void main() {
     Key childKey = new UniqueKey();
     await tester.pumpWidget(
       new Center(
-        child: new Viewport(
-          mainAxis: Axis.horizontal,
+        child: new SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
           child: new AspectRatio(
             aspectRatio: 2.0,
             child: new Container(

@@ -192,7 +192,6 @@ class Focus extends StatefulWidget {
     _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       focusScope.focusState._setFocusedWidget(key);
-      Scrollable.ensureVisible(focusedContext);  // ignore: DEPRECATED_MEMBER_USE
       Scrollable2.ensureVisible(focusedContext);
     }
   }
@@ -360,7 +359,6 @@ class _FocusState extends State<Focus> {
     BuildContext focusedContext = _focusedWidget?.currentContext;
     if (focusedContext == null)
       return;
-    Scrollable.ensureVisible(focusedContext);  // ignore: DEPRECATED_MEMBER_USE
     Scrollable2.ensureVisible(focusedContext);
   }
 

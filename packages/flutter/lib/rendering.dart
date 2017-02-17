@@ -53,7 +53,6 @@ export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
 export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
-export 'src/rendering/viewport.dart';
 export 'src/rendering/viewport_offset.dart';
 
 export 'package:flutter/foundation.dart' show

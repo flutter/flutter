@@ -321,7 +321,7 @@ class CardCollectionState extends State<CardCollection> {
     Widget background = new Positioned.fill(
       child: new Container(
         margin: const EdgeInsets.all(4.0),
-        child: new Viewport(
+        child: new SingleChildScrollView(
           child: new Container(
             height: cardModel.height,
             decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
