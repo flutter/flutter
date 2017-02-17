@@ -12,6 +12,7 @@
 #include "flutter/flow/layers/container_layer.h"
 #include "flutter/flow/layers/opacity_layer.h"
 #include "flutter/flow/layers/performance_overlay_layer.h"
+#include "flutter/flow/layers/physical_model_layer.h"
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
@@ -45,6 +46,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushColorFilter)                  \
   V(SceneBuilder, pushBackdropFilter)               \
   V(SceneBuilder, pushShaderMask)                   \
+  V(SceneBuilder, pushPhysicalModel)                \
   V(SceneBuilder, pop)                              \
   V(SceneBuilder, addPicture)                       \
   V(SceneBuilder, addChildScene)                    \
@@ -150,6 +152,20 @@ void SceneBuilder::pushShaderMask(Shader* shader,
                                         maskRectRight, maskRectBottom));
   layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
   addLayer(std::move(layer), m_cullRects.top());
+}
+
+void SceneBuilder::pushPhysicalModel(const RRect& rrect,
+                                     int elevation,
+                                     int color) {
+  SkRect cullRect;
+  if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
+    cullRect = SkRect::MakeEmpty();
+
+  std::unique_ptr<flow::PhysicalModelLayer> layer(new flow::PhysicalModelLayer());
+  layer->set_rrect(rrect.sk_rrect);
+  layer->set_elevation(elevation);
+  layer->set_color(color);
+  addLayer(std::move(layer), cullRect);
 }
 
 void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer,
