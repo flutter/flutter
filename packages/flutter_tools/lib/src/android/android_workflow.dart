@@ -35,11 +35,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         String androidHomeDir = platform.environment[kAndroidHome];
         messages.add(new ValidationMessage.error(
           '$kAndroidHome = $androidHomeDir\n'
-          'but Android Studio / Android SDK not found at this location.'
+          'but Android SDK not found at this location.'
         ));
       } else {
         messages.add(new ValidationMessage.error(
-          'Android Studio / Android SDK not found. Download from https://developer.android.com/sdk/\n'
+          'Android SDK not found. Download from https://developer.android.com/sdk/\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'
         ));
       }
@@ -63,7 +63,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
 
       List<String> validationResult = androidSdk.validateSdkWellFormed();
-      // Empty result means SDK is well formated.
+      // Empty result means SDK is well formed.
 
       if (validationResult.isEmpty) {
         const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';

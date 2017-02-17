@@ -106,6 +106,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(FileSystem, () => new LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
+    context.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
     context.putIfAbsent(DeviceManager, () => new DeviceManager());
@@ -114,7 +115,6 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
     context.putIfAbsent(Xcode, () => new Xcode());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());

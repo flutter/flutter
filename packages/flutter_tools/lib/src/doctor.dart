@@ -8,6 +8,7 @@ import 'dart:convert' show UTF8;
 import 'package:archive/archive.dart';
 
 import 'android/android_workflow.dart';
+import 'android/android_studio_validator.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -15,6 +16,7 @@ import 'base/platform.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
+import 'ios/plist_utils.dart';
 import 'version.dart';
 
 Doctor get doctor => context[Doctor];
@@ -43,6 +45,7 @@ class Doctor {
       _validators.add(_iosWorkflow);
 
     List<DoctorValidator> ideValidators = <DoctorValidator>[];
+    ideValidators.addAll(AndroidStudioValidator.allValidators);
     ideValidators.addAll(IntelliJValidator.installedValidators);
     if (ideValidators.isNotEmpty)
       _validators.addAll(ideValidators);
@@ -434,23 +437,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   @override
   String get version {
     if (_version == null) {
-      String plist;
-      try {
-        plist = fs.file(fs.path.join(installPath, 'Contents', 'Info.plist')).readAsStringSync();
-        int index = plist.indexOf('CFBundleShortVersionString');
-        if (index > 0) {
-          int start = plist.indexOf('<string>', index);
-          if (start > 0) {
-            int end = plist.indexOf('</string>', start);
-            if (end > 0) {
-              _version = plist.substring(start + 8, end);
-            }
-          }
-        }
-      } on FileSystemException catch (_) {
-        // ignored
-      }
-      _version ??= 'unknown';
+      String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
+      _version = getValueFromFile(plistFile, kCFBundleShortVersionStringKey) ?? 'unknown';
     }
     return _version;
   }
