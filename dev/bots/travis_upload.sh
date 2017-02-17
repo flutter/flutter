@@ -17,5 +17,7 @@ if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ] && [ 
   (cd packages/flutter && coveralls-lcov coverage/lcov.info)
 fi
 
-# generate the API docs, upload them
-./dev/bots/docs.sh
+if [ "$SHARD" = "docs" ]; then
+  # generate the API docs, upload them
+  ./dev/bots/docs.sh
+fi
