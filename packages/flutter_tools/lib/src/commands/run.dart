@@ -213,7 +213,7 @@ class RunCommand extends RunCommandBase {
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        app = daemon.appDomain.startApp(
+        app = await daemon.appDomain.startApp(
           device, fs.currentDirectory.path, targetFile, route,
           getBuildMode(), argResults['start-paused'], hotMode,
           applicationBinary: argResults['use-application-binary'],

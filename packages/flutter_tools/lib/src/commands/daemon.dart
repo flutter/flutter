@@ -310,7 +310,7 @@ class AppDomain extends Domain {
 
     BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
 
-    AppInstance app = startApp(
+    AppInstance app = await startApp(
         device, projectDirectory, target, route,
         buildMode, startPaused, enableHotReload);
 
@@ -322,14 +322,14 @@ class AppDomain extends Domain {
     };
   }
 
-  AppInstance startApp(
+  Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
     BuildMode buildMode, bool startPaused, bool enableHotReload, {
     String applicationBinary,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
-  }) {
+  }) async {
     DebuggingOptions options;
 
     switch (buildMode) {
@@ -401,7 +401,7 @@ class AppDomain extends Domain {
       _sendAppEvent(app, 'started');
     });
 
-    app._runInZone(this, () async {
+    await app._runInZone(this, () async {
       try {
         await runner.run(
           connectionInfoCompleter: connectionInfoCompleter,
