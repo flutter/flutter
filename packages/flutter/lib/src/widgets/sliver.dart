@@ -39,6 +39,24 @@ abstract class SliverChildDelegate {
   ) => null;
 
   bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
+
+  @override
+  String toString() {
+    List<String> description = <String>[];
+    debugFillDescription(description);
+    return '$runtimeType#$hashCode(${description.join(", ")})';
+  }
+
+  @protected
+  void debugFillDescription(List<String> description) {
+    try {
+      int children = estimatedChildCount;
+      if (children != null)
+        description.add('estimated child count: $children');
+    } catch (e) {
+      description.add('estimated child count: EXCEPTION (${e.runtimeType})');
+    }
+  }
 }
 
 class SliverChildBuilderDelegate extends SliverChildDelegate {

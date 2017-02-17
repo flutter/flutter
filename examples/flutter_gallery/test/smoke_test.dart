@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection' show LinkedHashSet;
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -25,6 +26,36 @@ Finder findGalleryItemByRouteName(WidgetTester tester, String routeName) {
   });
 }
 
+int errors = 0;
+
+void reportToStringError(String name, String route, int lineNumber, List<String> lines, String message) {
+  // If you're on line 12, then it has index 11.
+  // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
+  // That's (lineNumber-1)-margin .. (lineNumber-1)+margin, or lineNumber-(margin+1) .. lineNumber+(margin-1)
+  int margin = 5;
+  int firstLine = math.max(0, lineNumber - margin);
+  int lastLine = math.min(lines.length, lineNumber + margin);
+  print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
+  errors += 1;
+}
+
+void verifyToStringOutput(String name, String route, String testString) {
+  int lineNumber = 0;
+  List<String> lines = testString.split('\n');
+  if (!testString.endsWith('\n'))
+    reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
+  for (String line in lines) {
+    lineNumber += 1;
+    if (line == '' && lineNumber != lines.length) {
+      reportToStringError(name, route, lineNumber, lines, 'found empty line');
+    } else if (line.contains('Instance of ')) {
+      reportToStringError(name, route, lineNumber, lines, 'found a class that does not have its own toString');
+    } else if (line.endsWith(' ')) {
+      reportToStringError(name, route, lineNumber, lines, 'found a line with trailing whitespace');
+    }
+  }
+}
+
 // Start a gallery demo and then go back. This function assumes that the
 // we're starting on the home route and that the submenu that contains
 // the item for a demo that pushes route 'routeName' is already open.
@@ -33,12 +64,43 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   final Finder menuItem = findGalleryItemByRouteName(tester, routeName);
   expect(menuItem, findsOneWidget);
 
+  // Don't use pumpUntilNoTransientCallbacks in this function, because some of
+  // the smoketests have infinitely-running animations (e.g. the progress
+  // indicators demo).
+
   await tester.tap(menuItem);
   await tester.pump(); // Launch the demo.
-  await tester.pump(const Duration(seconds: 1)); // Wait until the demo has opened.
-
+  await tester.pump(const Duration(milliseconds: 400)); // Wait until the demo has opened.
   expect(find.text(kCaption), findsNothing);
-  await tester.pump(const Duration(seconds: 1)); // Leave the demo on the screen briefly for manual testing.
+
+  // Leave the demo on the screen briefly for manual testing.
+  await tester.pump(const Duration(milliseconds: 400));
+
+  // Scroll the demo around a bit.
+  await tester.flingFrom(const Point(400.0, 300.0), const Offset(-100.0, 0.0), 500.0);
+  await tester.flingFrom(const Point(400.0, 300.0), const Offset(0.0, -100.0), 500.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 200));
+  await tester.pump(const Duration(milliseconds: 400));
+
+  // Verify that the dumps are pretty.
+  verifyToStringOutput('debugDumpApp', routeName, WidgetsBinding.instance.renderViewElement.toStringDeep());
+  verifyToStringOutput('debugDumpRenderTree', routeName, RendererBinding.instance?.renderView?.toStringDeep());
+  verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+
+  // Scroll the demo around a bit more.
+  await tester.flingFrom(const Point(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 50));
+  await tester.pump(const Duration(milliseconds: 200));
+  await tester.pump(const Duration(milliseconds: 400));
+  await tester.flingFrom(const Point(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+  await tester.flingFrom(const Point(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
 
   // Go back
   Finder backButton = find.byTooltip('Back');
@@ -46,7 +108,7 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.tap(backButton);
   await tester.pump(); // Start the pop "back" operation.
   await tester.pump(); // Complete the willPop() Future.
-  await tester.pump(const Duration(seconds: 1)); // Wait until it has finished.
+  await tester.pump(const Duration(milliseconds: 400)); // Wait until it has finished.
   return null;
 }
 
@@ -70,6 +132,8 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
     await smokeDemo(tester, routeName);
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }
+
+  expect(errors, 0);
 
   Finder navigationMenuButton = find.byTooltip('Open navigation menu');
   expect(navigationMenuButton, findsOneWidget);

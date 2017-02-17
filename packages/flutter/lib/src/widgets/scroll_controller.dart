@@ -118,4 +118,21 @@ class ScrollController {
       oldPosition: oldPosition,
     );
   }
+
+  @override
+  String toString() {
+    StringBuffer result = new StringBuffer();
+    result.write('$runtimeType#$hashCode(');
+    if (initialScrollOffset != 0.0)
+      result.write('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
+    if (_positions.isEmpty) {
+      result.write('no clients');
+    } else if (_positions.length == 1) {
+      result.write('one client, offset $offset');
+    } else {
+      result.write('${_positions.length} clients');
+    }
+    result.write(')');
+    return result.toString();
+  }
 }

@@ -178,12 +178,12 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     try {
       description.add('maxExtent: ${maxExtent.toStringAsFixed(1)}');
     } catch (e) {
-      description.add('maxExtent: EXCEPTION (${e.runtimeType}) WHILE COMPUTING MAX EXTENT');
+      description.add('maxExtent: EXCEPTION (${e.runtimeType})');
     }
     try {
       description.add('child position: ${childMainAxisPosition(child).toStringAsFixed(1)}');
     } catch (e) {
-      description.add('child position: EXCEPTION (${e.runtimeType}) WHILE COMPUTING CHILD POSITION');
+      description.add('child position: EXCEPTION (${e.runtimeType})');
     }
   }
 }

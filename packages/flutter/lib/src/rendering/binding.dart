@@ -266,7 +266,7 @@ void debugDumpRenderTree() {
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.layer?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 }
 
 /// Prints a textual representation of the entire semantics tree.

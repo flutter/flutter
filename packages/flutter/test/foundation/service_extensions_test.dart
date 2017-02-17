@@ -130,7 +130,6 @@ void main() {
         r'   window size: Size\(800\.0, 600\.0\) \(in physical pixels\)\n'
         r'   device pixel ratio: 1\.0 \(physical pixels per logical pixel\)\n'
         r'   configuration: Size\(800\.0, 600\.0\) at 1\.0x \(in logical pixels\)\n'
-        r'\n'
       ),
     ]);
     console.clear();
