@@ -152,7 +152,8 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               recipe: recipe,
               onTap: () { showRecipePage(context, recipe); },
             );
-          }
+          },
+          childCount: config.recipes.length,
         ),
       ),
     );
