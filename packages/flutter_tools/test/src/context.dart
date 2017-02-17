@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,7 +18,6 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:flutter_tools/src/toolchain.dart';
 import 'package:flutter_tools/src/usage.dart';
 
 import 'package:mockito/mockito.dart';
@@ -53,7 +53,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(Doctor, () => new MockDoctor());
     testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     testContext.putIfAbsent(Cache, () => new Cache());
-    testContext.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
+    testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
     testContext.putIfAbsent(Config, () => new Config());
     testContext.putIfAbsent(OperatingSystemUtils, () {
       MockOperatingSystemUtils os = new MockOperatingSystemUtils();

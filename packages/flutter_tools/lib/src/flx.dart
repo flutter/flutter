@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -12,7 +13,6 @@ import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'build_info.dart';
 import 'globals.dart';
-import 'toolchain.dart';
 import 'zip.dart';
 
 const String defaultMainPath = 'lib/main.dart';
@@ -88,7 +88,7 @@ Future<Null> build({
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
-  snapshotterPath ??= tools.getHostToolPath(HostTool.SkySnapshot);
+  snapshotterPath ??= artifacts.getArtifactPath(Artifact.skySnapshot);
   outputPath ??= defaultFlxOutputPath;
   kernelPath ??= defaultKernelPath;
   snapshotPath ??= defaultSnapshotPath;

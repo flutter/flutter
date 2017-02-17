@@ -41,6 +41,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/artifacts.dart';
 import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
@@ -49,7 +50,6 @@ import 'src/ios/mac.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
 import 'src/runner/flutter_command_runner.dart';
-import 'src/toolchain.dart';
 import 'src/usage.dart';
 
 
@@ -113,7 +113,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(Doctor, () => new Doctor());
     context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     context.putIfAbsent(Cache, () => new Cache());
-    context.putIfAbsent(ToolConfiguration, () => new ToolConfiguration());
+    context.putIfAbsent(Artifacts, () => new CachedArtifacts());
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
     context.putIfAbsent(Xcode, () => new Xcode());

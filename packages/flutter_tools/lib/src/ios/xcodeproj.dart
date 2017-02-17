@@ -5,6 +5,7 @@
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
+import '../artifacts.dart';
 import '../cache.dart';
 import '../globals.dart';
 
@@ -33,11 +34,13 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  String flutterFrameworkDir = fs.path.normalize(tools.getEngineArtifactsDirectory(TargetPlatform.ios, mode).path);
+  String flutterFrameworkDir = fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
   localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
 
-  if (tools.isLocalEngine)
-    localsBuffer.writeln('LOCAL_ENGINE=${tools.engineBuildPath}');
+  if (artifacts is LocalEngineArtifacts) {
+    LocalEngineArtifacts localEngineArtifacts = artifacts;
+    localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+  }
 
   File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);

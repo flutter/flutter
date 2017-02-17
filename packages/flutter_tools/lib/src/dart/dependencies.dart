@@ -4,9 +4,9 @@
 
 import 'dart:convert';
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
-import '../toolchain.dart';
 
 class DartDependencySetBuilder {
   DartDependencySetBuilder(this.mainScriptPath,
@@ -19,7 +19,7 @@ class DartDependencySetBuilder {
 
   Set<String> build() {
     final String skySnapshotPath =
-        ToolConfiguration.instance.getHostToolPath(HostTool.SkySnapshot);
+        Artifacts.instance.getArtifactPath(Artifact.skySnapshot);
 
     final List<String> args = <String>[
       skySnapshotPath,
