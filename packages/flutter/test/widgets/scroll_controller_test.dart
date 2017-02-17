@@ -143,4 +143,21 @@ void main() {
     expect(controller.offset, equals(105.0));
     expect(realOffset(), equals(controller.offset));
   });
+
+  testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+
+    await tester.pumpWidget(new ListView(
+      controller: controller,
+      children: <Widget>[ new Container(height: 200000.0) ],
+    ));
+
+    controller.animateTo(1000.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+
+    await tester.pump(); // Start the animation.
+
+    // We will now change the tree on the same frame as the animation ends.
+    await tester.pumpWidget(new Container(), const Duration(seconds: 2));
+  });
+
 }
