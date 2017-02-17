@@ -9,9 +9,8 @@ import 'package:test/test.dart';
 void main() {
   setUp(() {
     String flutterRoot = platform.environment['FLUTTER_ROOT'];
-    if (flutterRoot == null) {
+    if (flutterRoot == null)
       throw new Exception('Please set FLUTTER_ROOT env var before running tests.');
-    }
     String flutterTools = fs.path.join(flutterRoot, 'packages', 'flutter_tools');
     assert(fs.path.equals(fs.currentDirectory.path, flutterTools));
   });
