@@ -41,4 +41,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // transition is complete
   });
+
+  testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
+    await tester.pumpWidget(new GalleryApp());
+    await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
+
+    await tester.tap(find.text('Pesto'));
+    await tester.pump(); // Launch pesto
+    await tester.pump(const Duration(seconds: 1)); // transition is complete
+
+    await tester.fling(find.text('Pesto Bruschetta'), const Offset(0.0, -200.0), 10000.0);
+    await tester.pump(); // start fling
+    await tester.pumpUntilNoTransientCallbacks();
+    expect(find.text('Sicilian-Style sardines'), findsOneWidget);
+  });
 }
