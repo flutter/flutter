@@ -17,7 +17,7 @@ class FooState extends State<Foo> {
   Widget build(BuildContext context) {
     return new LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        return new ScrollConfiguration2(
+        return new ScrollConfiguration(
           behavior: new FooScrollBehavior(),
           child: new ListView(
             controller: scrollController,
@@ -72,7 +72,7 @@ class FooState extends State<Foo> {
   }
 }
 
-class FooScrollBehavior extends ScrollBehavior2 {
+class FooScrollBehavior extends ScrollBehavior {
   @override
   bool shouldNotify(FooScrollBehavior old) => true;
 }
@@ -80,10 +80,10 @@ class FooScrollBehavior extends ScrollBehavior2 {
 void main() {
   testWidgets('Can animate scroll after setState', (WidgetTester tester) async {
     await tester.pumpWidget(new Foo());
-    expect(tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels, 0.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels, 200.0);
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
   });
 }

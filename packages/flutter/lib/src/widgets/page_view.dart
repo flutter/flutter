@@ -186,8 +186,8 @@ class PageView extends BoxScrollView {
   @override
   Widget build(BuildContext context) {
     final Widget scrollable = super.build(context);
-    return new NotificationListener<ScrollNotification2>(
-      onNotification: (ScrollNotification2 notification) {
+    return new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 && onPageChanged != null && notification is ScrollEndNotification) {
           final ScrollMetrics metrics = notification.metrics;
           onPageChanged(metrics.extentBefore ~/ metrics.viewportDimension);

@@ -47,7 +47,7 @@ enum _RefreshIndicatorMode {
 
 /// A widget that supports the Material "swipe to refresh" idiom.
 ///
-/// When the child's [Scrollable2] descendant overscrolls, an animated circular
+/// When the child's [Scrollable] descendant overscrolls, an animated circular
 /// progress indicator is faded into view. When the scroll ends, if the
 /// indicator has been dragged far enough for it to become completely opaque,
 /// the [onRefresh] callback is called. The callback is expected to update the
@@ -160,7 +160,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     super.dispose();
   }
 
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (notification.depth != 0)
       return false;
     if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
@@ -343,7 +343,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   Widget build(BuildContext context) {
-    Widget child = new NotificationListener<ScrollNotification2>(
+    Widget child = new NotificationListener<ScrollNotification>(
       key: _key,
       onNotification: _handleScrollNotification,
       child: new NotificationListener<OverscrollIndicatorNotification>(

@@ -219,7 +219,7 @@ class ScrollPosition extends ViewportOffset {
     beginBallisticActivity(0.0);
   }
 
-  /// Returns a description of the [Scrollable2].
+  /// Returns a description of the [Scrollable].
   ///
   /// Accurately describing the metrics typicaly requires using information
   /// provided by the viewport to the [applyViewportDimension] and

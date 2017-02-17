@@ -11,8 +11,8 @@ export 'package:flutter/rendering.dart' show
   AxisDirection,
   GrowthDirection;
 
-class Viewport2 extends MultiChildRenderObjectWidget {
-  Viewport2({
+class Viewport extends MultiChildRenderObjectWidget {
+  Viewport({
     Key key,
     this.axisDirection: AxisDirection.down,
     this.anchor: 0.0,
@@ -30,8 +30,8 @@ class Viewport2 extends MultiChildRenderObjectWidget {
   final Key center;
 
   @override
-  RenderViewport2 createRenderObject(BuildContext context) {
-    return new RenderViewport2(
+  RenderViewport createRenderObject(BuildContext context) {
+    return new RenderViewport(
       axisDirection: axisDirection,
       anchor: anchor,
       offset: offset,
@@ -39,14 +39,14 @@ class Viewport2 extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderViewport2 renderObject) {
+  void updateRenderObject(BuildContext context, RenderViewport renderObject) {
     renderObject.axisDirection = axisDirection;
     renderObject.anchor = anchor;
     renderObject.offset = offset;
   }
 
   @override
-  Viewport2Element createElement() => new Viewport2Element(this);
+  ViewportElement createElement() => new ViewportElement(this);
 
   @override
   void debugFillDescription(List<String> description) {
@@ -62,15 +62,15 @@ class Viewport2 extends MultiChildRenderObjectWidget {
   }
 }
 
-class Viewport2Element extends MultiChildRenderObjectElement {
+class ViewportElement extends MultiChildRenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
-  Viewport2Element(Viewport2 widget) : super(widget);
+  ViewportElement(Viewport widget) : super(widget);
 
   @override
-  Viewport2 get widget => super.widget;
+  Viewport get widget => super.widget;
 
   @override
-  RenderViewport2 get renderObject => super.renderObject;
+  RenderViewport get renderObject => super.renderObject;
 
   @override
   void mount(Element parent, dynamic newSlot) {

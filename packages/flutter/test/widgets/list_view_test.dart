@@ -75,7 +75,7 @@ void main() {
     expect(log, equals(<int>[0, 1, 2]));
     log.clear();
 
-    Scrollable2State state = tester.state(find.byType(Scrollable2));
+    ScrollableState state = tester.state(find.byType(Scrollable));
     ScrollPosition position = state.position;
     position.jumpTo(2025.0);
 

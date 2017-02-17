@@ -123,7 +123,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 /// Useful if, for instance, you're trying to align multiple descendants.
 ///
 /// In the widgets library, only the [SizeChangedLayoutNotifier] class and
-/// [Scrollable2] classes dispatch this notification (specifically, they dispatch
+/// [Scrollable] classes dispatch this notification (specifically, they dispatch
 /// [SizeChangedLayoutNotification]s and [ScrollNotification]s respectively).
 /// Transitions, in particular, do not. Changing one's layout in one's build
 /// function does not cause this notification to be dispatched automatically. If

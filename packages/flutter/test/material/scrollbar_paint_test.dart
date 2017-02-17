@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('Viewport2 basic test', (WidgetTester tester) async {
+  testWidgets('Viewport basic test', (WidgetTester tester) async {
     await tester.pumpWidget(new Scrollbar(
       child: new SingleChildScrollView(
         child: const SizedBox(width: 4000.0, height: 4000.0),

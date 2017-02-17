@@ -141,7 +141,7 @@ void main() {
       ],
     ));
 
-    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position.maxScrollExtent, 0.0);
 
     await tester.pumpWidget(new ListView(

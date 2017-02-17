@@ -37,7 +37,7 @@ void main() {
     debugPaintSizeEnabled = true;
     RenderSliver s;
     RenderBox b;
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         s = new RenderSliverPadding(
@@ -64,7 +64,7 @@ void main() {
     RenderSliver s;
     RenderBox b = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
-      child: new RenderViewport2(
+      child: new RenderViewport(
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           s = new RenderSliverPadding(

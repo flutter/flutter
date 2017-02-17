@@ -9,8 +9,8 @@ import 'framework.dart';
 import 'scroll_physics.dart';
 import 'overscroll_indicator.dart';
 
-class ScrollBehavior2 {
-  const ScrollBehavior2();
+class ScrollBehavior {
+  const ScrollBehavior();
 
   /// The platform whose scroll physics should be implemented.
   ///
@@ -53,25 +53,25 @@ class ScrollBehavior2 {
     return null;
   }
 
-  bool shouldNotify(@checked ScrollBehavior2 oldDelegate) => false;
+  bool shouldNotify(@checked ScrollBehavior oldDelegate) => false;
 }
 
-class ScrollConfiguration2 extends InheritedWidget {
-  const ScrollConfiguration2({
+class ScrollConfiguration extends InheritedWidget {
+  const ScrollConfiguration({
     Key key,
     @required this.behavior,
     @required Widget child,
   }) : super(key: key, child: child);
 
-  final ScrollBehavior2 behavior;
+  final ScrollBehavior behavior;
 
-  static ScrollBehavior2 of(BuildContext context) {
-    final ScrollConfiguration2 configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration2);
-    return configuration?.behavior ?? const ScrollBehavior2();
+  static ScrollBehavior of(BuildContext context) {
+    final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
+    return configuration?.behavior ?? const ScrollBehavior();
   }
 
   @override
-  bool updateShouldNotify(ScrollConfiguration2 old) {
+  bool updateShouldNotify(ScrollConfiguration old) {
     assert(behavior != null);
     return behavior.runtimeType != old.behavior.runtimeType
         || behavior.shouldNotify(old.behavior);

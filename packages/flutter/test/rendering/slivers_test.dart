@@ -8,8 +8,8 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test('RenderViewport2 basic test - no children', () {
-    RenderViewport2 root = new RenderViewport2(
+  test('RenderViewport basic test - no children', () {
+    RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
     );
     layout(root);
@@ -17,9 +17,9 @@ void main() {
     pumpFrame();
   });
 
-  test('RenderViewport2 basic test - down', () {
+  test('RenderViewport basic test - down', () {
     RenderBox a, b, c, d, e;
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -75,9 +75,9 @@ void main() {
     expect(result.path.first.target, equals(c));
   });
 
-  test('RenderViewport2 basic test - up', () {
+  test('RenderViewport basic test - up', () {
     RenderBox a, b, c, d, e;
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -128,9 +128,9 @@ void main() {
     expect(result.path.first.target, equals(c));
   });
 
-  test('RenderViewport2 basic test - right', () {
+  test('RenderViewport basic test - right', () {
     RenderBox a, b, c, d, e;
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -181,9 +181,9 @@ void main() {
     expect(result.path.first.target, equals(c));
   });
 
-  test('RenderViewport2 basic test - left', () {
+  test('RenderViewport basic test - left', () {
     RenderBox a, b, c, d, e;
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[

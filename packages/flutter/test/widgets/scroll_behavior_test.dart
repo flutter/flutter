@@ -5,7 +5,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-class TestScrollBehavior extends ScrollBehavior2 {
+class TestScrollBehavior extends ScrollBehavior {
   TestScrollBehavior(this.flag);
 
   final bool flag;
@@ -31,15 +31,15 @@ void main() {
       key: key,
       child: new Builder(
         builder: (BuildContext context) {
-          behavior = ScrollConfiguration2.of(context);
-          position = Scrollable2.of(context).position;
+          behavior = ScrollConfiguration.of(context);
+          position = Scrollable.of(context).position;
           return new Container(height: 1000.0);
         },
       ),
     );
 
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior(true),
         child: scrollView,
       ),
@@ -54,7 +54,7 @@ void main() {
 
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior(false),
         child: scrollView,
       ),

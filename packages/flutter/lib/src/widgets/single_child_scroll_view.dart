@@ -35,7 +35,7 @@ import 'scrollable.dart';
 /// * [ListView], which handles multiple children in a scrolling list.
 /// * [GridView], which handles multiple children in a scrolling grid.
 /// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable2], which handles arbitrary scrolling effects.
+/// * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
   SingleChildScrollView({
     Key key,
@@ -78,7 +78,7 @@ class SingleChildScrollView extends StatelessWidget {
     Widget contents = child;
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
-    return new Scrollable2(
+    return new Scrollable(
       axisDirection: axisDirection,
       controller: controller,
       physics: physics,

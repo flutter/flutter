@@ -574,7 +574,7 @@ class SliverLogicalParentData extends ParentData {
 class SliverLogicalContainerParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderSliver> { }
 
 /// Parent data structure used by parents of slivers that position their
-/// children using absolute coordinates. For example, used by [RenderViewport2].
+/// children using absolute coordinates. For example, used by [RenderViewport].
 ///
 /// This data structure is optimised for fast painting, at the cost of requiring
 /// additional work during layout when the children change their offsets. It is
@@ -715,12 +715,12 @@ abstract class RenderSliver extends RenderObject {
   /// that this sliver can cover.
   ///
   /// For example, if an [AxisDirection.down] viewport with an
-  /// [RenderViewport2.anchor] of 0.5 has a single sliver with a height of 100.0
+  /// [RenderViewport.anchor] of 0.5 has a single sliver with a height of 100.0
   /// and its [centerOffsetAdjustment] returns 50.0, then the sliver will be
   /// centered in the viewport when the scroll offset is 0.0.
   ///
   /// The distance here is in the opposite direction of the
-  /// [RenderViewport2.axisDirection], so values will typically be positive.
+  /// [RenderViewport.axisDirection], so values will typically be positive.
   double get centerOffsetAdjustment => 0.0;
 
   /// Determines the set of render objects located at the given position.
@@ -1126,10 +1126,10 @@ abstract class RenderAbstractViewport implements RenderObject {
 // /// - [RenderBox], which explains more about the Box protocol.
 // /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
 // ///   placed inside a [RenderSliver] (the opposite of this class).
-abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
+abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
     extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
     implements RenderAbstractViewport {
-  RenderViewportBase2({
+  RenderViewportBase({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
   }) : _axisDirection = axisDirection,
@@ -1528,9 +1528,9 @@ abstract class RenderViewportBase2<ParentDataClass extends ContainerParentDataMi
 // /// - [RenderBox], which explains more about the Box protocol.
 // /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
 // ///   placed inside a [RenderSliver] (the opposite of this class).
-// /// - [RenderShrinkWrappingViewport], a variant of [RenderViewport2] that
+// /// - [RenderShrinkWrappingViewport], a variant of [RenderViewport] that
 // ///   shrink-wraps its contents along the main axis.
-class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentData> {
+class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentData> {
   /// Creates a viewport for [RenderSliver] objects.
   ///
   /// If the [center] is not specified, then the first child in the `children`
@@ -1538,7 +1538,7 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
   ///
   /// The [offset] must be specified. For testing purposes, consider passing a
   /// [new ViewportOffset.zero] or [new ViewportOffset.fixed].
-  RenderViewport2({
+  RenderViewport({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
     double anchor: 0.0,
@@ -1653,14 +1653,14 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
       if (count >= _kMaxLayoutCycles) {
         assert(count != 1);
         throw new FlutterError(
-          'A RenderViewport2 exceeded its maximum number of layout cycles.\n'
-          'RenderViewport2 render objects, during layout, can retry if either their '
+          'A RenderViewport exceeded its maximum number of layout cycles.\n'
+          'RenderViewport render objects, during layout, can retry if either their '
           'slivers or their ViewportOffset decide that the offset should be corrected '
           'to take into account information collected during that layout.\n'
-          'In the case of this RenderViewport2 object, however, this happened $count '
+          'In the case of this RenderViewport object, however, this happened $count '
           'times and still there was no consensus on the scroll offset. This usually '
           'indicates a bug. Specifically, it means that one of the following three '
-          'problems is being experienced by the RenderViewport2 object:\n'
+          'problems is being experienced by the RenderViewport object:\n'
           ' * One of the RenderSliver children or the ViewportOffset have a bug such'
           ' that they always think that they need to correct the offset regardless.\n'
           ' * Some combination of the RenderSliver children and the ViewportOffset'
@@ -1685,7 +1685,7 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
     _maxScrollExtent = 0.0;
     _hasVisualOverflow = false;
 
-    // centerOffset is the offset from the leading edge of the RenderViewport2
+    // centerOffset is the offset from the leading edge of the RenderViewport
     // to the zero scroll offset (the line between the forward slivers and the
     // reverse slivers). The other two are that, but clamped to the visible
     // region of the viewport.
@@ -1865,12 +1865,12 @@ class RenderViewport2 extends RenderViewportBase2<SliverPhysicalContainerParentD
 // ///
 // /// See also:
 // ///
-// /// - [RenderViewport2], a viewport that does not shrink-wrap its contents
+// /// - [RenderViewport], a viewport that does not shrink-wrap its contents
 // /// - [RenderSliver], which explains more about the Sliver protocol.
 // /// - [RenderBox], which explains more about the Box protocol.
 // /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
 // ///   placed inside a [RenderSliver] (the opposite of this class).
-class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalContainerParentData> {
+class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalContainerParentData> {
   /// Creates a viewport (for [RenderSliver] objects) that shrink-wraps its
   /// contents.
   ///
@@ -2084,7 +2084,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase2<SliverLogicalCont
 ///
 /// - [RenderSliver], which explains more about the Sliver protocol.
 /// - [RenderBox], which explains more about the Box protocol.
-/// - [RenderViewport2], which allows [RenderSliver] objects to be placed inside
+/// - [RenderViewport], which allows [RenderSliver] objects to be placed inside
 ///   a [RenderBox] (the opposite of this class).
 class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   /// Creates a [RenderSliver] that wraps a [RenderBox].

@@ -13,8 +13,8 @@ void main() {
       ]
     ));
 
-    Scrollable2State scrollable =
-      tester.state<Scrollable2State>(find.byType(Scrollable2));
+    ScrollableState scrollable =
+      tester.state<ScrollableState>(find.byType(Scrollable));
 
     expect(scrollable.position.pixels, equals(0.0));
 

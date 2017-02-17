@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 Future<Null> test(WidgetTester tester, double offset, { double anchor: 0.0 }) {
-  return tester.pumpWidget(new Viewport2(
+  return tester.pumpWidget(new Viewport(
     anchor: anchor / 600.0,
     offset: new ViewportOffset.fixed(offset),
     slivers: <Widget>[
@@ -32,9 +32,9 @@ void verify(WidgetTester tester, List<Point> idealPositions, List<bool> idealVis
 }
 
 void main() {
-  testWidgets('Viewport2 basic test', (WidgetTester tester) async {
+  testWidgets('Viewport basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
-    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 0.0),
       const Point(0.0, 400.0),
@@ -71,9 +71,9 @@ void main() {
     ], <bool>[false, false, true, true, false]);
   });
 
-  testWidgets('Viewport2 anchor test', (WidgetTester tester) async {
+  testWidgets('Viewport anchor test', (WidgetTester tester) async {
     await test(tester, 0.0, anchor: 100.0);
-    expect(tester.renderObject<RenderBox>(find.byType(Viewport2)).size, equals(const Size(800.0, 600.0)));
+    expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
     verify(tester, <Point>[
       const Point(0.0, 100.0),
       const Point(0.0, 500.0),

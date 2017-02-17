@@ -17,7 +17,7 @@ void main() {
     ));
 
     double getCurrentOffset() {
-      return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
 
     await tester.fling(find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);

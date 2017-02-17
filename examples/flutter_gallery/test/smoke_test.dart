@@ -126,7 +126,7 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
 
   for (String routeName in routeNames) {
     Finder finder = findGalleryItemByRouteName(tester, routeName);
-    Scrollable2.ensureVisible(tester.element(finder), alignment: 0.5);
+    Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
     await tester.pump();
     await tester.pumpUntilNoTransientCallbacks();
     await smokeDemo(tester, routeName);

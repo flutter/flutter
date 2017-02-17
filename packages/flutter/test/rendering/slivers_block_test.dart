@@ -77,7 +77,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -151,7 +151,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport2 root = new RenderViewport2(
+    RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[

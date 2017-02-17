@@ -722,7 +722,7 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   // Called when the PageView scrolls
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (_warpUnderwayCount > 0)
       return false;
 
@@ -760,7 +760,7 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification2>(
+    return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: new PageView(
         controller: _pageController,

@@ -66,23 +66,23 @@ void main() {
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.vertical));
 
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).y, equals(300.0));
 
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).y, equals(500.0));
 
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).y, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
@@ -93,23 +93,23 @@ void main() {
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.horizontal));
 
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).x, equals(500.0));
 
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).x, equals(700.0));
 
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).x, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
@@ -120,23 +120,23 @@ void main() {
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.vertical, reverse: true));
 
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
 
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).y, equals(300.0));
 
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).y, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).y, equals(500.0));
 
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
@@ -147,23 +147,23 @@ void main() {
 
       await tester.pumpWidget(buildSingleChildScrollView(Axis.horizontal, reverse: true));
 
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));
 
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).x, equals(300.0));
 
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).x, equals(100.0));
 
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).x, equals(700.0));
 
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));
@@ -209,11 +209,11 @@ void main() {
         )
       );
 
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).y, closeTo(100.0, 0.1));
 
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).y, closeTo(500.0, 0.1));
     });
@@ -223,34 +223,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.vertical));
 
       await prepare(480.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).y, equals(300.0));
 
       await prepare(735.0);
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).y, equals(500.0));
 
       await prepare(123.0);
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).y, equals(100.0));
 
       await prepare(523.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
@@ -259,34 +259,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.horizontal));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
 
       await prepare(843.0);
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).x, equals(500.0));
 
       await prepare(415.0);
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).x, equals(700.0));
 
       await prepare(46.0);
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).x, equals(100.0));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
@@ -295,34 +295,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.vertical, reverse: true));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).y, equals(500.0));
 
       await prepare(230.0);
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).y, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).y, equals(300.0));
 
       await prepare(345.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
@@ -331,34 +331,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.horizontal, reverse: true));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).x, equals(700.0));
 
       await prepare(230.0);
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).x, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).x, equals(300.0));
 
       await prepare(345.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));
@@ -368,12 +368,12 @@ void main() {
     testWidgets('ListView ensureVisible negative child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       double getOffset() {
-        return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+        return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
       }
 
       Widget buildSliver(int i) {
@@ -387,9 +387,9 @@ void main() {
         child: new SizedBox(
           width: 600.0,
           height: 400.0,
-          child: new Scrollable2(
+          child: new Scrollable(
             viewportBuilder: (BuildContext context, ViewportOffset offset) {
-              return new Viewport2(
+              return new Viewport(
                 offset: offset,
                 center: const ValueKey<int>(4),
                 slivers: <Widget>[
@@ -408,12 +408,12 @@ void main() {
       ));
 
       await prepare(-125.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(getOffset(), equals(-200.0));
 
       await prepare(-225.0);
-      Scrollable2.ensureVisible(findContext(2));
+      Scrollable.ensureVisible(findContext(2));
       await tester.pump();
       expect(getOffset(), equals(-400.0));
     }, skip: true);
@@ -421,7 +421,7 @@ void main() {
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
@@ -461,11 +461,11 @@ void main() {
       );
 
       await prepare(321.0);
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).y, closeTo(100.0, 0.1));
 
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).y, closeTo(500.0, 0.1));
     });
@@ -475,34 +475,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.vertical, shrinkWrap: true));
 
       await prepare(480.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).y, equals(300.0));
 
       await prepare(735.0);
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).y, equals(500.0));
 
       await prepare(123.0);
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).y, equals(100.0));
 
       await prepare(523.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).y, equals(100.0));
@@ -511,34 +511,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.horizontal, shrinkWrap: true));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
 
       await prepare(843.0);
-      Scrollable2.ensureVisible(findContext(6));
+      Scrollable.ensureVisible(findContext(6));
       await tester.pump();
       expect(tester.getTopLeft(findKey(6)).x, equals(500.0));
 
       await prepare(415.0);
-      Scrollable2.ensureVisible(findContext(4), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(4), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(4)).x, equals(700.0));
 
       await prepare(46.0);
-      Scrollable2.ensureVisible(findContext(0), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(0), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(0)).x, equals(100.0));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getTopLeft(findKey(3)).x, equals(100.0));
@@ -547,34 +547,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.vertical, reverse: true, shrinkWrap: true));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).y, equals(500.0));
 
       await prepare(230.0);
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).y, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).y, equals(300.0));
 
       await prepare(345.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).y, equals(500.0));
@@ -583,34 +583,34 @@ void main() {
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
       Future<Null> prepare(double offset) async {
-        tester.state<Scrollable2State>(find.byType(Scrollable2)).position.jumpTo(offset);
+        tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(buildListView(Axis.horizontal, reverse: true, shrinkWrap: true));
 
       await prepare(211.0);
-      Scrollable2.ensureVisible(findContext(3));
+      Scrollable.ensureVisible(findContext(3));
       await tester.pump();
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));
 
       await prepare(23.0);
-      Scrollable2.ensureVisible(findContext(0));
+      Scrollable.ensureVisible(findContext(0));
       await tester.pump();
       expect(tester.getBottomRight(findKey(0)).x, equals(700.0));
 
       await prepare(230.0);
-      Scrollable2.ensureVisible(findContext(2), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(2), alignment: 1.0);
       await tester.pump();
       expect(tester.getTopLeft(findKey(2)).x, equals(100.0));
 
       await prepare(1083.0);
-      Scrollable2.ensureVisible(findContext(6), alignment: 1.0);
+      Scrollable.ensureVisible(findContext(6), alignment: 1.0);
       await tester.pump();
       expect(tester.getBottomRight(findKey(6)).x, equals(300.0));
 
       await prepare(345.0);
-      Scrollable2.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
+      Scrollable.ensureVisible(findContext(3), duration: const Duration(seconds: 1));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1020));
       expect(tester.getBottomRight(findKey(3)).x, equals(700.0));

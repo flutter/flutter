@@ -35,7 +35,7 @@ void main() {
     expect(painter, doesNotOverscroll);
 
     // the scroll gesture from tester.scroll happens in zero time, so nothing should appear:
-    await tester.scroll(find.byType(Scrollable2), const Offset(0.0, 100.0));
+    await tester.scroll(find.byType(Scrollable), const Offset(0.0, 100.0));
     expect(painter, doesNotOverscroll);
     await tester.pump(); // allow the ticker to register itself
     expect(painter, doesNotOverscroll);
@@ -224,7 +224,7 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior1(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -242,7 +242,7 @@ void main() {
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior2(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -259,14 +259,14 @@ void main() {
   });
 }
 
-class TestScrollBehavior1 extends ScrollBehavior2 {
+class TestScrollBehavior1 extends ScrollBehavior {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF00FF00);
   }
 }
 
-class TestScrollBehavior2 extends ScrollBehavior2 {
+class TestScrollBehavior2 extends ScrollBehavior {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF0000FF);

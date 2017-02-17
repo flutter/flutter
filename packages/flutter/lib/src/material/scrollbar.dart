@@ -17,7 +17,7 @@ class Scrollbar extends StatefulWidget {
   }) : super(key: key);
 
   /// The subtree to place inside the [Scrollbar]. This should include
-  /// a source of [ScrollNotification2] notifications, typically a [Scrollable2]
+  /// a source of [ScrollNotification] notifications, typically a [Scrollable]
   /// widget.
   final Widget child;
 
@@ -35,7 +35,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     _controller.color = Theme.of(context).highlightColor;
   }
 
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification)
       _controller.update(notification.metrics, notification.axisDirection);
@@ -50,7 +50,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification2>(
+    return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       // TODO(ianh): Maybe we should try to collapse out these repaint
       // boundaries when the scroll bars are invisible.
