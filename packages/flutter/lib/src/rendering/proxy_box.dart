@@ -1777,6 +1777,9 @@ abstract class CustomPainter {
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
   bool hitTest(Point position) => null;
+
+  @override
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// Provides a canvas on which to draw during the paint phase.
