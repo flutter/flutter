@@ -120,10 +120,9 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
 void expect(dynamic actual, dynamic matcher, {
   String reason,
   bool verbose: false,
-  dynamic formatter
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -138,9 +137,8 @@ void expect(dynamic actual, dynamic matcher, {
 void expectSync(dynamic actual, dynamic matcher, {
   String reason,
   bool verbose: false,
-  dynamic formatter
 }) {
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose, formatter: formatter);
+  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 class X {}
 
@@ -18,6 +18,6 @@ void main() {
     A<X> ayAsAx = ay;
     expect(() {
       ayAsAx.u = new X();
-    }, throws);
+    }, throwsAssertionError);
   });
 }
