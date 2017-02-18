@@ -82,8 +82,8 @@ class TabController extends ChangeNotifier {
   /// selected tab is changed, the animation's value equals [index]. The
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
-  final AnimationController _animationController;
   Animation<double> get animation => _animationController.view;
+  final AnimationController _animationController;
 
   /// The total number of tabs. Must be greater than one.
   final int length;
@@ -217,6 +217,9 @@ class _TabControllerScope extends InheritedWidget {
 /// }
 /// ```
 class DefaultTabController extends StatefulWidget {
+  /// Creates a default tab controller for the given [child] widget.
+  ///
+  /// The [length] argument must be great than one.
   DefaultTabController({
     Key key,
     @required this.length,

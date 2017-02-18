@@ -143,6 +143,8 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     setSemanticsEnabled(ui.window.semanticsEnabled);
   }
 
+  /// Whether the render tree associated with this binding should produce a tree
+  /// of [SemanticsNode] objects.
   void setSemanticsEnabled(bool enabled) {
     if (enabled) {
       _semanticsHandle ??= _pipelineOwner.ensureSemantics();

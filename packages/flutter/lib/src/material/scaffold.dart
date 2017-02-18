@@ -492,6 +492,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
 
+  /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => config.drawer != null;
 
   /// Opens the [Drawer] (if any).

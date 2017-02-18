@@ -9,8 +9,9 @@ import 'object.dart';
 
 const double _kMaxWidth = 100000.0;
 const double _kMaxHeight = 100000.0;
+
 // Line length to fit small phones without dynamically checking size.
-const String line = '\n────────────────────\n\n';
+const String _kLine = '\n\n────────────────────\n\n';
 
 /// A render object used as a placeholder when an error occurs.
 ///
@@ -45,8 +46,8 @@ class RenderErrorBox extends RenderBox {
         ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
         builder.addText(
-          '$message$line$message$line$message$line$message$line$message$line$message$line'
-          '$message$line$message$line$message$line$message$line$message$line$message'
+          '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine'
+          '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message'
         );
         _paragraph = builder.build();
       }
