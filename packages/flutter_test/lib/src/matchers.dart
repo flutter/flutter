@@ -69,8 +69,14 @@ const Matcher hasOneLineDescription = const _HasOneLineDescription();
 /// A matcher for functions that throw [FlutterError].
 Matcher throwsFlutterError = throwsA(isFlutterError);
 
+/// A matcher for functions that throw [AssertionError].
+Matcher throwsAssertionError = throwsA(isAssertionError);
+
 /// A matcher for [FlutterError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+
+/// A matcher for [AssertionError].
+const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///

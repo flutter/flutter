@@ -9,25 +9,25 @@ void main() {
   test('debugAssertAllSchedulerVarsUnset control test', () {
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, isNot(throwsA(isFlutterError)));
+    }, isNot(throwsFlutterError));
 
     debugPrintBeginFrameBanner = true;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, throwsA(isFlutterError));
+    }, throwsFlutterError);
 
     debugPrintBeginFrameBanner = false;
     debugPrintEndFrameBanner = true;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, throwsA(isFlutterError));
+    }, throwsFlutterError);
 
     debugPrintEndFrameBanner = false;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, isNot(throwsA(isFlutterError)));
+    }, isNot(throwsFlutterError));
   });
 }
