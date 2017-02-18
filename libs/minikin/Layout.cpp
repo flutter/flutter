@@ -22,6 +22,7 @@
 #include <math.h>
 #include <string>
 #include <unicode/ubidi.h>
+#include <unicode/utf16.h>
 #include <vector>
 
 #include <log/log.h>
@@ -242,7 +243,7 @@ android::hash_t LayoutCacheKey::computeHash() const {
     hash = android::JenkinsHashMix(hash, hash_type(mSkewX));
     hash = android::JenkinsHashMix(hash, hash_type(mLetterSpacing));
     hash = android::JenkinsHashMix(hash, hash_type(mPaintFlags));
-    hash = android::JenkinsHashMix(hash, hash_type(mHyphenEdit.hasHyphen()));
+    hash = android::JenkinsHashMix(hash, hash_type(mHyphenEdit.getHyphen()));
     hash = android::JenkinsHashMix(hash, hash_type(mIsRtl));
     hash = android::JenkinsHashMixShorts(hash, mChars, mNchars);
     return android::JenkinsHashWhiten(hash);
@@ -623,7 +624,7 @@ float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_
 float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         bool isRtl, LayoutContext* ctx, size_t dstStart,
         const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances) {
-    HyphenEdit hyphen = ctx->paint.hyphenEdit;
+    const uint32_t originalHyphen = ctx->paint.hyphenEdit.getHyphen();
     float advance = 0;
     if (!isRtl) {
         // left to right
@@ -632,8 +633,15 @@ float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count,
         size_t wordend;
         for (size_t iter = start; iter < start + count; iter = wordend) {
             wordend = getNextWordBreakForCache(buf, iter, bufSize);
-            // Only apply hyphen to the last word in the string.
-            ctx->paint.hyphenEdit = wordend >= start + count ? hyphen : HyphenEdit();
+            // Only apply hyphen to the first or last word in the string.
+            uint32_t hyphen = originalHyphen;
+            if (iter != start) { // Not the first word
+                hyphen &= ~HyphenEdit::MASK_START_OF_LINE;
+            }
+            if (wordend < start + count) { // Not the last word
+                hyphen &= ~HyphenEdit::MASK_END_OF_LINE;
+            }
+            ctx->paint.hyphenEdit = hyphen;
             size_t wordcount = std::min(start + count, wordend) - iter;
             advance += doLayoutWord(buf + wordstart, iter - wordstart, wordcount,
                     wordend - wordstart, isRtl, ctx, iter - dstStart, collection, layout,
@@ -647,8 +655,15 @@ float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count,
         size_t wordend = end == 0 ? 0 : getNextWordBreakForCache(buf, end - 1, bufSize);
         for (size_t iter = end; iter > start; iter = wordstart) {
             wordstart = getPrevWordBreakForCache(buf, iter, bufSize);
-            // Only apply hyphen to the last (leftmost) word in the string.
-            ctx->paint.hyphenEdit = iter == end ? hyphen : HyphenEdit();
+            // Only apply hyphen to the first (rightmost) or last (leftmost) word in the string.
+            uint32_t hyphen = originalHyphen;
+            if (wordstart > start) { // Not the first word
+                hyphen &= ~HyphenEdit::MASK_START_OF_LINE;
+            }
+            if (iter != end) { // Not the last word
+                hyphen &= ~HyphenEdit::MASK_END_OF_LINE;
+            }
+            ctx->paint.hyphenEdit = hyphen;
             size_t bufStart = std::max(start, wordstart);
             advance += doLayoutWord(buf + wordstart, bufStart - wordstart, iter - bufStart,
                     wordend - wordstart, isRtl, ctx, bufStart - dstStart, collection, layout,
@@ -719,6 +734,134 @@ static void addFeatures(const string &str, vector<hb_feature_t>* features) {
     }
 }
 
+static inline hb_codepoint_t determineHyphenChar(hb_codepoint_t preferredHyphen, hb_font_t* font) {
+    if (preferredHyphen == 0x2010 /* HYPHEN */
+                || preferredHyphen == 0x058A /* ARMENIAN_HYPHEN */
+                || preferredHyphen == 0x05BE /* HEBREW PUNCTUATION MAQAF */
+                || preferredHyphen == 0x1400 /* CANADIAN SYLLABIC HYPHEN */) {
+        hb_codepoint_t glyph;
+        // Fallback to ASCII HYPHEN-MINUS if the font didn't have a glyph for the preferred hyphen.
+        // Note that we intentionally don't do anything special if the font doesn't have a
+        // HYPHEN-MINUS either, so a tofu could be shown, hinting towards something missing.
+        if (!hb_font_get_nominal_glyph(font, preferredHyphen, &glyph)) {
+            return 0x002D; // HYPHEN-MINUS
+        }
+    }
+    return preferredHyphen;
+}
+
+static inline void addHyphenToHbBuffer(hb_buffer_t* buffer, hb_font_t* font, uint32_t hyphen,
+        uint32_t cluster) {
+    const uint32_t* hyphenStr = HyphenEdit::getHyphenString(hyphen);
+    while (*hyphenStr != 0) {
+        hb_codepoint_t hyphenChar = determineHyphenChar(*hyphenStr, font);
+        hb_buffer_add(buffer, hyphenChar, cluster);
+        hyphenStr++;
+    }
+}
+
+// Returns the cluster value assigned to the first codepoint added to the buffer, which can be used
+// to translate cluster values returned by HarfBuzz to input indices.
+static inline uint32_t addToHbBuffer(hb_buffer_t* buffer,
+        const uint16_t* buf, size_t start, size_t count, size_t bufSize,
+        ssize_t scriptRunStart, ssize_t scriptRunEnd,
+        HyphenEdit hyphenEdit, hb_font_t* hbFont) {
+
+    // Only hyphenate the very first script run for starting hyphens.
+    const uint32_t startHyphen = (scriptRunStart == 0)
+            ? hyphenEdit.getStart()
+            : HyphenEdit::NO_EDIT;
+    // Only hyphenate the very last script run for ending hyphens.
+    const uint32_t endHyphen = (static_cast<size_t>(scriptRunEnd) == count)
+            ? hyphenEdit.getEnd()
+            : HyphenEdit::NO_EDIT;
+
+    // In the following code, we drop the pre-context and/or post-context if there is a
+    // hyphen edit at that end. This is not absolutely necessary, since HarfBuzz uses
+    // contexts only for joining scripts at the moment, e.g. to determine if the first or
+    // last letter of a text range to shape should take a joining form based on an
+    // adjacent letter or joiner (that comes from the context).
+    //
+    // TODO: Revisit this for:
+    // 1. Desperate breaks for joining scripts like Arabic (where it may be better to keep
+    //    the context);
+    // 2. Special features like start-of-word font features (not implemented in HarfBuzz
+    //    yet).
+
+    // We don't have any start-of-line replacement edit yet, so we don't need to check for
+    // those.
+    if (HyphenEdit::isInsertion(startHyphen)) {
+        // A cluster value of zero guarantees that the inserted hyphen will be in the same
+        // cluster with the next codepoint, since there is no pre-context.
+        addHyphenToHbBuffer(buffer, hbFont, startHyphen, 0 /* cluster value */);
+    }
+
+    const uint16_t* hbText;
+    int hbTextLength;
+    unsigned int hbItemOffset;
+    unsigned int hbItemLength = scriptRunEnd - scriptRunStart; // This is >= 1.
+
+    const bool hasEndInsertion = HyphenEdit::isInsertion(endHyphen);
+    const bool hasEndReplacement = HyphenEdit::isReplacement(endHyphen);
+    if (hasEndReplacement) {
+        // Skip the last code unit while copying the buffer for HarfBuzz if it's a replacement. We
+        // don't need to worry about non-BMP characters yet since replacements are only done for
+        // code units at the moment.
+        hbItemLength -= 1;
+    }
+
+    if (startHyphen == HyphenEdit::NO_EDIT) {
+        // No edit at the beginning. Use the whole pre-context.
+        hbText = buf;
+        hbItemOffset = start + scriptRunStart;
+    } else {
+        // There's an edit at the beginning. Drop the pre-context and start the buffer at where we
+        // want to start shaping.
+        hbText = buf + start + scriptRunStart;
+        hbItemOffset = 0;
+    }
+
+    if (endHyphen == HyphenEdit::NO_EDIT) {
+        // No edit at the end, use the whole post-context.
+        hbTextLength = (buf + bufSize) - hbText;
+    } else {
+        // There is an edit at the end. Drop the post-context.
+        hbTextLength = hbItemOffset + hbItemLength;
+    }
+
+    hb_buffer_add_utf16(buffer, hbText, hbTextLength, hbItemOffset, hbItemLength);
+
+    unsigned int numCodepoints;
+    hb_glyph_info_t* cpInfo = hb_buffer_get_glyph_infos(buffer, &numCodepoints);
+
+    // Add the hyphen at the end, if there's any.
+    if (hasEndInsertion || hasEndReplacement) {
+        // When a hyphen is inserted, by assigning the added hyphen and the last
+        // codepoint added to the HarfBuzz buffer to the same cluster, we can make sure
+        // that they always remain in the same cluster, even if the last codepoint gets
+        // merged into another cluster (for example when it's a combining mark).
+        //
+        // When a replacement happens instead, we want it to get the cluster value of
+        // the character it's replacing, which is one "codepoint length" larger than
+        // the last cluster. But since the character replaced is always just one
+        // code unit, we can just add 1.
+        uint32_t hyphenCluster;
+        if (numCodepoints == 0) {
+            // Nothing was added to the HarfBuzz buffer. This can only happen if
+            // we have a replacement that is replacing a one-code unit script run.
+            hyphenCluster = 0;
+        } else {
+            hyphenCluster = cpInfo[numCodepoints - 1].cluster + (uint32_t) hasEndReplacement;
+        }
+        addHyphenToHbBuffer(buffer, hbFont, endHyphen, hyphenCluster);
+        // Since we have just added to the buffer, cpInfo no longer necessarily points to
+        // the right place. Refresh it.
+        cpInfo = hb_buffer_get_glyph_infos(buffer, nullptr /* we don't need the size */);
+    }
+    return cpInfo[0].cluster;
+}
+
+
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         bool isRtl, LayoutContext* ctx) {
     hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
@@ -769,10 +912,21 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
         // TODO: if there are multiple scripts within a font in an RTL run,
         // we need to reorder those runs. This is unlikely with our current
         // font stack, but should be done for correctness.
-        ssize_t srunend;
-        for (ssize_t srunstart = run.start; srunstart < run.end; srunstart = srunend) {
-            srunend = srunstart;
-            hb_script_t script = getScriptRun(buf + start, run.end, &srunend);
+
+        // Note: scriptRunStart and scriptRunEnd, as well as run.start and run.end, run between 0
+        // and count.
+        ssize_t scriptRunEnd;
+        for (ssize_t scriptRunStart = run.start;
+                scriptRunStart < run.end;
+                scriptRunStart = scriptRunEnd) {
+            scriptRunEnd = scriptRunStart;
+            hb_script_t script = getScriptRun(buf + start, run.end, &scriptRunEnd /* iterator */);
+            // After the last line, scriptRunEnd is guaranteed to have increased, since the only
+            // time getScriptRun does not increase its iterator is when it has already reached the
+            // end of the buffer. But that can't happen, since if we have already reached the end
+            // of the buffer, we should have had (scriptRunEnd == run.end), which means
+            // (scriptRunStart == run.end) which is impossible due to the exit condition of the for
+            // loop. So we can be sure that scriptRunEnd > scriptRunStart.
 
             double letterSpace = 0.0;
             double letterSpaceHalfLeft = 0.0;
@@ -804,30 +958,29 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 }
                 hb_buffer_set_language(buffer, hbLanguage->getHbLanguage());
             }
-            hb_buffer_add_utf16(buffer, buf, bufSize, srunstart + start, srunend - srunstart);
-            if (ctx->paint.hyphenEdit.hasHyphen() && srunend > srunstart) {
-                // TODO: check whether this is really the desired semantics. It could have the
-                // effect of assigning the hyphen width to a nonspacing mark
-                unsigned int lastCluster = start + srunend - 1;
 
-                hb_codepoint_t hyphenChar = 0x2010; // HYPHEN
-                hb_codepoint_t glyph;
-                // Fallback to ASCII HYPHEN-MINUS if the font didn't have a glyph for HYPHEN. Note
-                // that we intentionally don't do anything special if the font doesn't have a
-                // HYPHEN-MINUS either, so a tofu could be shown, hinting towards something
-                // missing.
-                if (!hb_font_get_glyph(hbFont, hyphenChar, 0, &glyph)) {
-                    hyphenChar = 0x002D; // HYPHEN-MINUS
-                }
-                hb_buffer_add(buffer, hyphenChar, lastCluster);
-            }
+            const uint32_t clusterStart = addToHbBuffer(
+                buffer,
+                buf, start, count, bufSize,
+                scriptRunStart, scriptRunEnd,
+                ctx->paint.hyphenEdit, hbFont);
+
             hb_shape(hbFont, buffer, features.empty() ? NULL : &features[0], features.size());
             unsigned int numGlyphs;
             hb_glyph_info_t* info = hb_buffer_get_glyph_infos(buffer, &numGlyphs);
             hb_glyph_position_t* positions = hb_buffer_get_glyph_positions(buffer, NULL);
+
+            // At this point in the code, the cluster values in the info buffer correspond to the
+            // input characters with some shift. The cluster value clusterStart corresponds to the
+            // first character passed to HarfBuzz, which is at buf[start + scriptRunStart] whose
+            // advance needs to be saved into mAdvances[scriptRunStart]. So cluster values need to
+            // be reduced by (clusterStart - scriptRunStart) to get converted to indices of
+            // mAdvances.
+            const ssize_t clusterOffset = clusterStart - scriptRunStart;
+
             if (numGlyphs)
             {
-                mAdvances[info[0].cluster - start] += letterSpaceHalfLeft;
+                mAdvances[info[0].cluster - clusterOffset] += letterSpaceHalfLeft;
                 x += letterSpaceHalfLeft;
             }
             for (unsigned int i = 0; i < numGlyphs; i++) {
@@ -840,8 +993,8 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                         positions[i].x_offset, positions[i].y_offset);
 #endif
                 if (i > 0 && info[i - 1].cluster != info[i].cluster) {
-                    mAdvances[info[i - 1].cluster - start] += letterSpaceHalfRight;
-                    mAdvances[info[i].cluster - start] += letterSpaceHalfLeft;
+                    mAdvances[info[i - 1].cluster - clusterOffset] += letterSpaceHalfRight;
+                    mAdvances[info[i].cluster - clusterOffset] += letterSpaceHalfLeft;
                     x += letterSpace;
                 }
 
@@ -871,17 +1024,17 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
                 }
                 glyphBounds.offset(x + xoff, y + yoff);
                 mBounds.join(glyphBounds);
-                if (info[i].cluster - start < count) {
-                    mAdvances[info[i].cluster - start] += xAdvance;
+                if (static_cast<size_t>(info[i].cluster - clusterOffset) < count) {
+                    mAdvances[info[i].cluster - clusterOffset] += xAdvance;
                 } else {
                     ALOGE("cluster %zu (start %zu) out of bounds of count %zu",
-                        info[i].cluster - start, start, count);
+                        info[i].cluster - clusterOffset, start, count);
                 }
                 x += xAdvance;
             }
             if (numGlyphs)
             {
-                mAdvances[info[numGlyphs - 1].cluster - start] += letterSpaceHalfRight;
+                mAdvances[info[numGlyphs - 1].cluster - clusterOffset] += letterSpaceHalfRight;
                 x += letterSpaceHalfRight;
             }
         }

@@ -328,7 +328,8 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(uint32_t ch,
     return familyVec[bestFamilyIndex];
 }
 
-const uint32_t NBSP = 0xA0;
+const uint32_t NBSP = 0x00A0;
+const uint32_t SOFT_HYPHEN = 0x00AD;
 const uint32_t ZWJ = 0x200C;
 const uint32_t ZWNJ = 0x200D;
 const uint32_t HYPHEN = 0x2010;
@@ -421,8 +422,8 @@ void FontCollection::itemize(const uint16_t *string, size_t string_size, FontSty
             if (isStickyWhitelisted(ch)) {
                 // Continue using existing font as long as it has coverage and is whitelisted
                 shouldContinueRun = lastFamily->getCoverage().get(ch);
-            } else if (isVariationSelector(ch)) {
-                // Always continue if the character is a variation selector.
+            } else if (ch == SOFT_HYPHEN || isVariationSelector(ch)) {
+                // Always continue if the character is the soft hyphen or a variation selector.
                 shouldContinueRun = true;
             }
         }

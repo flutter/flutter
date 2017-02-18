@@ -21,24 +21,12 @@
 #include <memory>
 
 #include <minikin/FontFamily.h>
+#include <minikin/Hyphenator.h>
 
 // An abstraction for platform fonts, allowing Minikin to be used with
 // multiple actual implementations of fonts.
 
 namespace minikin {
-
-// The hyphen edit represents an edit to the string when a word is
-// hyphenated. The most common hyphen edit is adding a "-" at the end
-// of a syllable, but nonstandard hyphenation allows for more choices.
-class HyphenEdit {
-public:
-    HyphenEdit() : hyphen(0) { }
-    HyphenEdit(uint32_t hyphenInt) : hyphen(hyphenInt) { }  // NOLINT(implicit)
-    bool hasHyphen() const { return hyphen != 0; }
-    bool operator==(const HyphenEdit &other) const { return hyphen == other.hyphen; }
-private:
-    uint32_t hyphen;
-};
 
 class MinikinFont;
 

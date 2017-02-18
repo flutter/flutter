@@ -198,18 +198,18 @@ class LineBreaker {
             size_t lineNumber;  // only updated for non-constant line widths
             size_t preSpaceCount;  // preceding space count before breaking
             size_t postSpaceCount;  // preceding space count after breaking
-            uint8_t hyphenEdit;
+            HyphenationType hyphenType;
         };
 
         float currentLineWidth() const;
 
         void addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak,
-                size_t preSpaceCount, size_t postSpaceCount, float penalty, uint8_t hyph);
+                size_t preSpaceCount, size_t postSpaceCount, float penalty, HyphenationType hyph);
 
         void addCandidate(Candidate cand);
 
         // push an actual break to the output. Takes care of setting flags for tab
-        void pushBreak(int offset, float width, uint8_t hyph);
+        void pushBreak(int offset, float width, uint8_t hyphenEdit);
 
         float getSpaceWidth() const;
 
@@ -220,11 +220,12 @@ class LineBreaker {
         void finishBreaksOptimal();
 
         WordBreaker mWordBreaker;
+        icu::Locale mLocale;
         std::vector<uint16_t>mTextBuf;
         std::vector<float>mCharWidths;
 
         Hyphenator* mHyphenator;
-        std::vector<uint8_t> mHyphBuf;
+        std::vector<HyphenationType> mHyphBuf;
 
         // layout parameters
         BreakStrategy mStrategy = kBreakStrategy_Greedy;

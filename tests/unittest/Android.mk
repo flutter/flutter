@@ -62,6 +62,7 @@ LOCAL_STATIC_LIBRARIES += \
     libxml2
 
 LOCAL_SRC_FILES += \
+    ../util/FileUtils.cpp \
     ../util/FontTestUtils.cpp \
     ../util/MinikinFontForTest.cpp \
     ../util/UnicodeUtils.cpp \
@@ -70,6 +71,7 @@ LOCAL_SRC_FILES += \
     FontFamilyTest.cpp \
     FontLanguageListCacheTest.cpp \
     HbFontCacheTest.cpp \
+    HyphenatorTest.cpp \
     MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutTest.cpp \
