@@ -191,4 +191,18 @@ void main() {
 
     expect(find.text('Arizona'), findsOneWidget);
   });
+
+  testWidgets('PageView in zero-size container', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 0.0,
+        height: 0.0,
+        child: new PageView(
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Alabama'), findsOneWidget);
+  });
 }
