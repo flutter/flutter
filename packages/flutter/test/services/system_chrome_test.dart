@@ -14,10 +14,6 @@ void main() {
     // Flush all microtasks
     await tester.idle();
     expect(tester.binding.microtaskCount, equals(0));
-    // TODO(tvolkert): This is a dirty hack caused by package:test's expect()
-    // method queueing a microtask. Remove once a version of package:test is
-    // published that doesn't do this.
-    await tester.idle();
 
     // The second call with the same value should be a no-op
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
