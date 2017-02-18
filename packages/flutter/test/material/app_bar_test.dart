@@ -252,4 +252,41 @@ void main() {
     expect(tester.getSize(hamburger), new Size(56.0, 56.0));
   });
 
+  testWidgets('test actions icon is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('X'),
+            actions: <Widget> [
+              new IconButton(
+                icon: new Icon(Icons.share),
+                onPressed: null,
+                tooltip: 'Share',
+                size: 20.0,
+              ),
+              new IconButton(
+                icon: new Icon(Icons.add),
+                onPressed: null,
+                tooltip: 'Add',
+                size: 60.0,
+              ),
+            ],
+          ),
+        )
+      )
+    );
+
+    Finder addButton = find.byTooltip('Add');
+    // Right padding is 4dp.
+    expect(tester.getTopRight(addButton), new Point(800.0 - 4.0, 0.0));
+    // It's still the size it was plus the 2 * 8dp padding from IconButton.
+    expect(tester.getSize(addButton), new Size(60.0 + 2 * 8.0, 56.0));
+
+    Finder shareButton = find.byTooltip('Share');
+    // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
+    expect(tester.getSize(shareButton), new Size(48.0, 56.0));
+  });
+
 }

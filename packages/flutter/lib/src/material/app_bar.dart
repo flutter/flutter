@@ -16,6 +16,7 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'popup_menu.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'theme.dart';
@@ -176,6 +177,9 @@ class AppBar extends StatefulWidget {
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
+  ///
+  /// [IconButton]s and [PopupMenuButton]s' minimum width will be automatically
+  /// expanded to the recommended minimum touch target size of 48dp.
   ///
   /// For example:
   ///
@@ -388,12 +392,22 @@ class AppBarState extends State<AppBar> {
       );
     }
     if (config.actions != null && config.actions.isNotEmpty) {
+      // Expand to at least 48dp if IconButton or PopupMenuButton.
+      List<Widget> sizedActions = config.actions.map<Widget>((Widget action) {
+        return action is IconButton || action is PopupMenuButton ?
+            new ConstrainedBox(
+              constraints: new BoxConstraints(minWidth: 48.0),
+              child: action,
+            ) :
+            action;
+
+      }).toList();
       toolbarChildren.add(
         new LayoutId(
           id: _ToolbarSlot.actions,
           child: new Row(
             mainAxisSize: MainAxisSize.min,
-            children: config.actions,
+            children: sizedActions,
           ),
         ),
       );
