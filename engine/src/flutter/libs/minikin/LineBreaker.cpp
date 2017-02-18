@@ -63,7 +63,7 @@ const float SHRINKABILITY = 1.0 / 3.0;
 
 void LineBreaker::setLocale(const icu::Locale& locale, Hyphenator* hyphenator) {
     mWordBreaker.setLocale(locale);
-
+    mLocale = locale;
     mHyphenator = hyphenator;
 }
 
@@ -73,7 +73,7 @@ void LineBreaker::setText() {
     // handle initial break here because addStyleRun may never be called
     mWordBreaker.next();
     mCandidates.clear();
-    Candidate cand = {0, 0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0};
+    Candidate cand = {0, 0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, HyphenationType::DONT_BREAK};
     mCandidates.push_back(cand);
 
     // reset greedy breaker state
@@ -104,24 +104,6 @@ void LineBreaker::setIndents(const std::vector<float>& indents) {
 static bool isLineEndSpace(uint16_t c) {
     return c == '\n' || c == ' ' || c == 0x1680 || (0x2000 <= c && c <= 0x200A && c != 0x2007) ||
             c == 0x205F || c == 0x3000;
-}
-
-// This function determines whether a character is like U+2010 HYPHEN in
-// line breaking and usage: a character immediately after which line breaks
-// are allowed, but words containing it should not be automatically
-// hyphenated. This is a curated set, created by manually inspecting all
-// the characters that have the Unicode line breaking property of BA or HY
-// and seeing which ones are hyphens.
-static bool isLineBreakingHyphen(uint16_t c) {
-    return (c == 0x002D || // HYPHEN-MINUS
-            c == 0x058A || // ARMENIAN HYPHEN
-            c == 0x05BE || // HEBREW PUNCTUATION MAQAF
-            c == 0x1400 || // CANADIAN SYLLABICS HYPHEN
-            c == 0x2010 || // HYPHEN
-            c == 0x2013 || // EN DASH
-            c == 0x2027 || // HYPHENATION POINT
-            c == 0x2E17 || // DOUBLE OBLIQUE HYPHEN
-            c == 0x2E40);  // DOUBLE HYPHEN
 }
 
 // Ordinarily, this method measures the text in the range given. However, when paint
@@ -161,7 +143,6 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
     ParaWidth lastBreakWidth = mWidth;
     ParaWidth postBreak = mWidth;
     size_t postSpaceCount = mSpaceCount;
-    bool temporarilySkipHyphenation = false;
     for (size_t i = start; i < end; i++) {
         uint16_t c = mTextBuf[i];
         if (c == CHAR_TAB) {
@@ -181,21 +162,22 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
             }
         }
         if (i + 1 == current) {
-            // TODO: Add a new type of HyphenEdit for breaks whose hyphen already exists, so
-            // we can pass the whole word down to Hyphenator like the soft hyphen case.
-            bool wordEndsInHyphen = isLineBreakingHyphen(c);
             size_t wordStart = mWordBreaker.wordStart();
             size_t wordEnd = mWordBreaker.wordEnd();
             if (paint != nullptr && mHyphenator != nullptr &&
                     mHyphenationFrequency != kHyphenationFrequency_None &&
-                    !wordEndsInHyphen && !temporarilySkipHyphenation &&
                     wordStart >= start && wordEnd > wordStart &&
                     wordEnd - wordStart <= LONGEST_HYPHENATED_WORD) {
-                mHyphenator->hyphenate(&mHyphBuf, &mTextBuf[wordStart], wordEnd - wordStart);
+                mHyphenator->hyphenate(&mHyphBuf,
+                        &mTextBuf[wordStart],
+                        wordEnd - wordStart,
+                        mLocale);
 #if VERBOSE_DEBUG
                 std::string hyphenatedString;
                 for (size_t j = wordStart; j < wordEnd; j++) {
-                    if (mHyphBuf[j - wordStart]) hyphenatedString.push_back('-');
+                    if (mHyphBuf[j - wordStart] == HyphenationType::BREAK_AND_INSERT_HYPHEN) {
+                        hyphenatedString.push_back('-');
+                    }
                     // Note: only works with ASCII, should do UTF-8 conversion here
                     hyphenatedString.push_back(buffer()[j]);
                 }
@@ -204,32 +186,33 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
 
                 // measure hyphenated substrings
                 for (size_t j = wordStart; j < wordEnd; j++) {
-                    uint8_t hyph = mHyphBuf[j - wordStart];
-                    if (hyph) {
-                        paint->hyphenEdit = hyph;
-
+                    HyphenationType hyph = mHyphBuf[j - wordStart];
+                    if (hyph != HyphenationType::DONT_BREAK) {
+                        paint->hyphenEdit = HyphenEdit::editForThisLine(hyph);
                         const float firstPartWidth = Layout::measureText(mTextBuf.data(),
                                 lastBreak, j - lastBreak, mTextBuf.size(), bidiFlags, style,
                                 *paint, typeface, nullptr);
                         ParaWidth hyphPostBreak = lastBreakWidth + firstPartWidth;
-                        paint->hyphenEdit = 0;
 
+                        paint->hyphenEdit = HyphenEdit::editForNextLine(hyph);
                         const float secondPartWidth = Layout::measureText(mTextBuf.data(), j,
                                 afterWord - j, mTextBuf.size(), bidiFlags, style, *paint,
                                 typeface, nullptr);
                         ParaWidth hyphPreBreak = postBreak - secondPartWidth;
+
                         addWordBreak(j, hyphPreBreak, hyphPostBreak, postSpaceCount, postSpaceCount,
                                 hyphenPenalty, hyph);
+
+                        paint->hyphenEdit = HyphenEdit::NO_EDIT;
                     }
                 }
             }
-            // Skip hyphenating the next word if and only if the present word ends in a hyphen
-            temporarilySkipHyphenation = wordEndsInHyphen;
 
             // Skip break for zero-width characters inside replacement span
             if (paint != nullptr || current == end || mCharWidths[current] > 0) {
                 float penalty = hyphenPenalty * mWordBreaker.breakBadness();
-                addWordBreak(current, mWidth, postBreak, mSpaceCount, postSpaceCount, penalty, 0);
+                addWordBreak(current, mWidth, postBreak, mSpaceCount, postSpaceCount, penalty,
+                        HyphenationType::DONT_BREAK);
             }
             lastBreak = current;
             lastBreakWidth = mWidth;
@@ -243,7 +226,7 @@ float LineBreaker::addStyleRun(MinikinPaint* paint, const std::shared_ptr<FontCo
 // add a word break (possibly for a hyphenated fragment), and add desperate breaks if
 // needed (ie when word exceeds current line width)
 void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth postBreak,
-        size_t preSpaceCount, size_t postSpaceCount, float penalty, uint8_t hyph) {
+        size_t preSpaceCount, size_t postSpaceCount, float penalty, HyphenationType hyph) {
     Candidate cand;
     ParaWidth width = mCandidates.back().preBreak;
     if (postBreak - width > currentLineWidth()) {
@@ -262,7 +245,7 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
                 cand.preSpaceCount = postSpaceCount;
                 cand.postSpaceCount = postSpaceCount;
                 cand.penalty = SCORE_DESPERATE;
-                cand.hyphenEdit = 0;
+                cand.hyphenType = HyphenationType::BREAK_AND_DONT_INSERT_HYPHEN;
 #if VERBOSE_DEBUG
                 ALOGD("desperate cand: %zd %g:%g",
                         mCandidates.size(), cand.postBreak, cand.preBreak);
@@ -279,7 +262,7 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
     cand.penalty = penalty;
     cand.preSpaceCount = preSpaceCount;
     cand.postSpaceCount = postSpaceCount;
-    cand.hyphenEdit = hyph;
+    cand.hyphenType = hyph;
 #if VERBOSE_DEBUG
     ALOGD("cand: %zd %g:%g", mCandidates.size(), cand.postBreak, cand.preBreak);
 #endif
@@ -296,7 +279,7 @@ void LineBreaker::addCandidate(Candidate cand) {
             mBestBreak = candIndex;
         }
         pushBreak(mCandidates[mBestBreak].offset, mCandidates[mBestBreak].postBreak - mPreBreak,
-                mCandidates[mBestBreak].hyphenEdit);
+                HyphenEdit::editForThisLine(mCandidates[mBestBreak].hyphenType));
         mBestScore = SCORE_INFTY;
 #if VERBOSE_DEBUG
         ALOGD("break: %d %g", mBreaks.back(), mWidths.back());
@@ -310,11 +293,11 @@ void LineBreaker::addCandidate(Candidate cand) {
     }
 }
 
-void LineBreaker::pushBreak(int offset, float width, uint8_t hyph) {
+void LineBreaker::pushBreak(int offset, float width, uint8_t hyphenEdit) {
     mBreaks.push_back(offset);
     mWidths.push_back(width);
     int flags = (mFirstTabIndex < mBreaks.back()) << kTab_Shift;
-    flags |= hyph;
+    flags |= hyphenEdit;
     mFlags.push_back(flags);
     mFirstTabIndex = INT_MAX;
 }
@@ -345,7 +328,8 @@ void LineBreaker::computeBreaksGreedy() {
     // All breaks but the last have been added in addCandidate already.
     size_t nCand = mCandidates.size();
     if (nCand == 1 || mLastBreak != nCand - 1) {
-        pushBreak(mCandidates[nCand - 1].offset, mCandidates[nCand - 1].postBreak - mPreBreak, 0);
+        pushBreak(mCandidates[nCand - 1].offset, mCandidates[nCand - 1].postBreak - mPreBreak,
+                HyphenEdit::NO_EDIT);
         // don't need to update mBestScore, because we're done
 #if VERBOSE_DEBUG
         ALOGD("final break: %d %g", mBreaks.back(), mWidths.back());
@@ -365,7 +349,11 @@ void LineBreaker::finishBreaksOptimal() {
         prev = mCandidates[i].prev;
         mBreaks.push_back(mCandidates[i].offset);
         mWidths.push_back(mCandidates[i].postBreak - mCandidates[prev].preBreak);
-        mFlags.push_back(mCandidates[i].hyphenEdit);
+        int flags = HyphenEdit::editForThisLine(mCandidates[i].hyphenType);
+        if (prev > 0) {
+            flags |= HyphenEdit::editForNextLine(mCandidates[prev].hyphenType);
+        }
+        mFlags.push_back(flags);
     }
     std::reverse(mBreaks.begin(), mBreaks.end());
     std::reverse(mWidths.begin(), mWidths.end());

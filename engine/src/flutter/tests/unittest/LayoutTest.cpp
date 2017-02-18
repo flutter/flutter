@@ -356,6 +356,53 @@ TEST_F(LayoutTest, doLayoutTest_rtlTest) {
     }
 }
 
+TEST_F(LayoutTest, hyphenationTest) {
+    Layout layout(mCollection);
+    std::vector<uint16_t> text;
+
+    // The mock implementation returns 10.0f advance for all glyphs.
+    {
+        SCOPED_TRACE("one word with no hyphen edit");
+        text = utf8ToUtf16("oneword");
+        MinikinPaint paint;
+        paint.hyphenEdit = HyphenEdit::NO_EDIT;
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        EXPECT_EQ(70.0f, layout.getAdvance());
+    }
+    {
+        SCOPED_TRACE("one word with hyphen insertion at the end");
+        text = utf8ToUtf16("oneword");
+        MinikinPaint paint;
+        paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_END;
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        EXPECT_EQ(80.0f, layout.getAdvance());
+    }
+    {
+        SCOPED_TRACE("one word with hyphen replacement at the end");
+        text = utf8ToUtf16("oneword");
+        MinikinPaint paint;
+        paint.hyphenEdit = HyphenEdit::REPLACE_WITH_HYPHEN_AT_END;
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        EXPECT_EQ(70.0f, layout.getAdvance());
+    }
+    {
+        SCOPED_TRACE("one word with hyphen insertion at the start");
+        text = utf8ToUtf16("oneword");
+        MinikinPaint paint;
+        paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_START;
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        EXPECT_EQ(80.0f, layout.getAdvance());
+    }
+    {
+        SCOPED_TRACE("one word with hyphen insertion at the both ends");
+        text = utf8ToUtf16("oneword");
+        MinikinPaint paint;
+        paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_START | HyphenEdit::INSERT_HYPHEN_AT_END;
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        EXPECT_EQ(90.0f, layout.getAdvance());
+    }
+}
+
 // TODO: Add more test cases, e.g. measure text, letter spacing.
 
 }  // namespace minikin

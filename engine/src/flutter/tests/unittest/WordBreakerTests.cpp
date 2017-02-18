@@ -39,7 +39,7 @@ typedef ICUTestBase WordBreakerTest;
 TEST_F(WordBreakerTest, basic) {
     uint16_t buf[] = {'h', 'e', 'l', 'l' ,'o', ' ', 'w', 'o', 'r', 'l', 'd'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(6, breaker.next());  // after "hello "
@@ -57,7 +57,7 @@ TEST_F(WordBreakerTest, basic) {
 TEST_F(WordBreakerTest, softHyphen) {
     uint16_t buf[] = {'h', 'e', 'l', 0x00AD, 'l' ,'o', ' ', 'w', 'o', 'r', 'l', 'd'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(7, breaker.next());  // after "hel{SOFT HYPHEN}lo "
@@ -70,10 +70,23 @@ TEST_F(WordBreakerTest, softHyphen) {
     EXPECT_EQ(0, breaker.breakBadness());
 }
 
+TEST_F(WordBreakerTest, hardHyphen) {
+    // Hyphens should not allow breaks anymore.
+    uint16_t buf[] = {'s', 'u', 'g', 'a', 'r', '-', 'f', 'r', 'e', 'e'};
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getUS());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ((ssize_t)NELEM(buf), breaker.wordEnd());
+    EXPECT_EQ(0, breaker.breakBadness());
+}
+
 TEST_F(WordBreakerTest, postfixAndPrefix) {
     uint16_t buf[] = {'U', 'S', 0x00A2, ' ', 'J', 'P', 0x00A5}; // US¢ JP¥
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
 
@@ -111,7 +124,7 @@ TEST_F(WordBreakerTest, zwjEmojiSequences) {
         UTF16(0x1F431), 0x200D, UTF16(0x1F464),
     };
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(7, breaker.next());  // after man + zwj + heart + zwj + man
@@ -134,7 +147,7 @@ TEST_F(WordBreakerTest, emojiWithModifier) {
         0x270C, 0xFE0F, UTF16(0x1F3FF)  // victory hand + emoji style + type 6 fitzpatrick modifier
     };
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(4, breaker.next());  // after boy + type 1-2 fitzpatrick modifier
@@ -157,7 +170,7 @@ TEST_F(WordBreakerTest, flagsSequenceSingleFlag) {
     ParseUnicode(buf, BUF_SIZE, flags.c_str(), &size, nullptr);
 
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, size);
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(kFlagLength, breaker.next());  // end of the first flag
@@ -182,7 +195,7 @@ TEST_F(WordBreakerTest, flagsSequence) {
     ParseUnicode(buf, BUF_SIZE, flagSequence.c_str(), &size, nullptr);
 
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, size);
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(kFlagLength, breaker.next());  // end of the first flag sequence
@@ -197,7 +210,7 @@ TEST_F(WordBreakerTest, punct) {
     uint16_t buf[] = {0x00A1, 0x00A1, 'h', 'e', 'l', 'l' ,'o', ',', ' ', 'w', 'o', 'r', 'l', 'd',
         '!', '!'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(9, breaker.next());  // after "¡¡hello, "
@@ -214,7 +227,7 @@ TEST_F(WordBreakerTest, email) {
     uint16_t buf[] = {'f', 'o', 'o', '@', 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm',
         ' ', 'x'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
@@ -233,7 +246,7 @@ TEST_F(WordBreakerTest, mailto) {
     uint16_t buf[] = {'m', 'a', 'i', 'l', 't', 'o', ':', 'f', 'o', 'o', '@',
         'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm', ' ', 'x'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(7, breaker.next());  // after "mailto:"
@@ -257,7 +270,7 @@ TEST_F(WordBreakerTest, emailNonAscii) {
     uint16_t buf[] = {'f', 'o', 'o', '@', 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm',
         0x4E00};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
@@ -276,7 +289,7 @@ TEST_F(WordBreakerTest, emailCombining) {
     uint16_t buf[] = {'f', 'o', 'o', '@', 'e', 'x', 'a', 'm', 'p', 'l', 'e', '.', 'c', 'o', 'm',
         0x0303, ' ', 'x'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(11, breaker.next());  // after "foo@example"
@@ -294,7 +307,7 @@ TEST_F(WordBreakerTest, emailCombining) {
 TEST_F(WordBreakerTest, lonelyAt) {
     uint16_t buf[] = {'a', ' ', '@', ' ', 'b'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(2, breaker.next());  // after "a "
@@ -314,7 +327,7 @@ TEST_F(WordBreakerTest, url) {
     uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'e', 'x', 'a', 'm', 'p', 'l', 'e',
         '.', 'c', 'o', 'm', ' ', 'x'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
@@ -340,7 +353,7 @@ TEST_F(WordBreakerTest, urlBreakChars) {
     uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '.', 'b', '/', '~', 'c', ',', 'd',
         '-', 'e', '?', 'f', '=', 'g', '&', 'h', '#', 'i', '%', 'j', '_', 'k', '/', 'l'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
@@ -399,7 +412,7 @@ TEST_F(WordBreakerTest, urlBreakChars) {
 TEST_F(WordBreakerTest, urlNoHyphenBreak) {
     uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '-', '/', 'b'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
@@ -415,7 +428,7 @@ TEST_F(WordBreakerTest, urlNoHyphenBreak) {
 TEST_F(WordBreakerTest, urlEndsWithSlash) {
     uint16_t buf[] = {'h', 't', 't', 'p', ':', '/', '/', 'a', '/'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ(5, breaker.next());  // after "http:"
@@ -431,7 +444,7 @@ TEST_F(WordBreakerTest, urlEndsWithSlash) {
 TEST_F(WordBreakerTest, emailStartsWithSlash) {
     uint16_t buf[] = {'/', 'a', '@', 'b'};
     WordBreaker breaker;
-    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setLocale(icu::Locale::getUS());
     breaker.setText(buf, NELEM(buf));
     EXPECT_EQ(0, breaker.current());
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end

@@ -22,13 +22,14 @@
 namespace minikin {
 
 const char* enUsHyph = "/system/usr/hyphen-data/hyph-en-us.hyb";
+const icu::Locale& usLocale = icu::Locale::getUS();
 
 static void BM_Hyphenator_short_word(benchmark::State& state) {
     Hyphenator* hyphenator = Hyphenator::loadBinary(readWholeFile(enUsHyph).data());
     std::vector<uint16_t> word = utf8ToUtf16("hyphen");
-    std::vector<uint8_t> result;
+    std::vector<HyphenationType> result;
     while (state.KeepRunning()) {
-        hyphenator->hyphenate(&result, word.data(), word.size());
+        hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
     }
     Hyphenator::loadBinary(nullptr);
 }
@@ -40,9 +41,9 @@ static void BM_Hyphenator_long_word(benchmark::State& state) {
     Hyphenator* hyphenator = Hyphenator::loadBinary(readWholeFile(enUsHyph).data());
     std::vector<uint16_t> word = utf8ToUtf16(
             "Pneumonoultramicroscopicsilicovolcanoconiosis");
-    std::vector<uint8_t> result;
+    std::vector<HyphenationType> result;
     while (state.KeepRunning()) {
-        hyphenator->hyphenate(&result, word.data(), word.size());
+        hyphenator->hyphenate(&result, word.data(), word.size(), usLocale);
     }
     Hyphenator::loadBinary(nullptr);
 }
