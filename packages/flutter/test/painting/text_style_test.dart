@@ -14,8 +14,7 @@ void main() {
       fontWeight: FontWeight.w800,
       height: 123.0,
     );
-    // ignore: ASSIGNMENT_TO_FINAL
-    expect(() { s1.fontFamily = 'test'; }, throwsA(isNoSuchMethodError));
+    expect(() { s1.fontFamily = 'test'; }, throwsA(isNoSuchMethodError)); // ignore: ASSIGNMENT_TO_FINAL
     expect(s1.fontFamily, isNull);
     expect(s1.fontSize, 10.0);
     expect(s1.fontWeight, FontWeight.w800);

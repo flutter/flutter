@@ -120,7 +120,6 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
 void expect(dynamic actual, dynamic matcher, {
   String reason,
   bool verbose: false,
-  @Deprecated("Removed from package:test") dynamic formatter
 }) {
   TestAsyncUtils.guardSync();
   test_package.expect(actual, matcher, reason: reason, verbose: verbose);
@@ -138,7 +137,6 @@ void expect(dynamic actual, dynamic matcher, {
 void expectSync(dynamic actual, dynamic matcher, {
   String reason,
   bool verbose: false,
-  @Deprecated("Removed from package:test") dynamic formatter
 }) {
   test_package.expect(actual, matcher, reason: reason, verbose: verbose);
 }
