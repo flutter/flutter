@@ -108,8 +108,8 @@ void main() {
 
     Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).x, 72.0);
-    // The toolbar's contents are padded on the right by 8.0
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0));
+    // The toolbar's contents are padded on the right by 4.0
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -119,13 +119,13 @@ void main() {
 
     expect(tester.getTopLeft(title).x, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).x, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {
@@ -165,8 +165,8 @@ void main() {
 
     // Centering a title with width 620 within the 800 pixel wide test widget
     // would mean that its left edge would have to be 90. We reserve 72
-    // on the left and the padded actions occupy 90 + 8 on the right. That
-    // leaves 630, so the title is right justified but its width isn't changed.
+    // on the left and the padded actions occupy 90 + 4 on the right. That
+    // leaves 634, so the title is right justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
@@ -176,7 +176,7 @@ void main() {
       const SizedBox(width: 45.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 8);
+    expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -232,6 +232,24 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(titleKey)));
     expect(yCenter(appBarKey), equals(yCenter(action0Key)));
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
+  });
+
+  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('X'),
+          ),
+          drawer: new Column(), // Doesn't really matter. Triggers a hamburger regardless.
+        )
+      )
+    );
+
+    Finder hamburger = find.byTooltip('Open navigation menu');
+    expect(tester.getTopLeft(hamburger), new Point(0.0, 0.0));
+    expect(tester.getSize(hamburger), new Size(56.0, 56.0));
   });
 
 }

@@ -46,8 +46,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   // space bewteen the leading and actions widgets).
   final bool centerTitle;
 
-  static const double kLeadingWidth = 40.0; // Same size as an IconButton
-  static const double kTitleLeft = 64.0; // The AppBar pads left and right an additional 8.0.
+  static const double kLeadingWidth = 56.0; // So it's square with kToolbarHeight.
+  static const double kTitleLeft = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
 
   @override
   void performLayout(Size size) {
@@ -339,7 +339,7 @@ class AppBarState extends State<AppBar> {
       if (_hasDrawer) {
         leading = new IconButton(
           icon: new Icon(Icons.menu),
-          alignment: FractionalOffset.centerLeft,
+          alignment: FractionalOffset.center,
           onPressed: _handleDrawerButton,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
@@ -358,7 +358,7 @@ class AppBarState extends State<AppBar> {
           assert(backIcon != null);
           leading = new IconButton(
             icon: new Icon(backIcon),
-            alignment: FractionalOffset.centerLeft,
+            alignment: FractionalOffset.center,
             onPressed: _handleBackButton,
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );
@@ -400,7 +400,7 @@ class AppBarState extends State<AppBar> {
     }
 
     Widget toolbar = new Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.only(right: 4.0),
       child: new CustomMultiChildLayout(
         delegate: new _ToolbarLayout(
           centerTitle: config._getEffectiveCenterTitle(themeData),
