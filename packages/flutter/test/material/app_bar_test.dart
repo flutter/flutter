@@ -252,7 +252,8 @@ void main() {
     expect(tester.getSize(hamburger), new Size(56.0, 56.0));
   });
 
-  testWidgets('test actions icon is 4dp from edge and 48dp min', (WidgetTester tester) async {
+  testWidgets('test actions IconButton is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    Key commentIconKey = new Key('Comment');
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
@@ -260,6 +261,11 @@ void main() {
           appBar: new AppBar(
             title: new Text('X'),
             actions: <Widget> [
+              new Icon(
+                Icons.comment,
+                key: commentIconKey,
+                size: 30.0,
+              ),
               new IconButton(
                 icon: new Icon(Icons.share),
                 onPressed: null,
@@ -287,6 +293,10 @@ void main() {
     Finder shareButton = find.byTooltip('Share');
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), new Size(48.0, 56.0));
+
+    Finder commentIcon = find.byKey(commentIconKey);
+    // Don't change things that are not IconButtons or PopupMenuButtons.
+    expect(tester.getSize(commentIcon), new Size(30.0, 30.0));
   });
 
 }
