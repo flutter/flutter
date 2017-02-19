@@ -204,5 +204,17 @@ void main() {
     ));
 
     expect(find.text('Alabama'), findsOneWidget);
+
+    await tester.pumpWidget(new Center(
+      child: new SizedBox(
+        width: 200.0,
+        height: 200.0,
+        child: new PageView(
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    ));
+
+    expect(find.text('Alabama'), findsOneWidget);
   });
 }

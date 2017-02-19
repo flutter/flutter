@@ -86,7 +86,7 @@ class _PagePosition extends ScrollPosition {
     final double oldViewportDimensions = this.viewportDimension;
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = oldPixels == null ? initialPage.toDouble() : oldPixels / oldViewportDimensions;
+    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? initialPage.toDouble() : oldPixels / oldViewportDimensions;
     final double newPixels = page * viewportDimension;
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
