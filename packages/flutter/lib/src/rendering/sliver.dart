@@ -42,6 +42,7 @@ enum GrowthDirection {
   reverse,
 }
 
+/// A direction along either the horizontal or vertical [Axis].
 enum AxisDirection {
   /// Zero is at the bottom and positive values are above it: ⇈
   ///
@@ -130,7 +131,17 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
   return null;
 }
 
+/// Immutable layout constraints for [RenderSliver] layout.
+///
+/// The [SliverConstraints] describe the current scroll state of the viewport
+/// from the point of view of the sliver receiving the constraints. For example,
+/// a [scrollOffset] of zero means that the leading edge of the sliver is
+/// visible in the viewport, not that the viewport itself has a zero scroll
+/// offset.
 class SliverConstraints extends Constraints {
+  /// Creates sliver constraints with the given information.
+  ///
+  /// All of the argument must not be null.
   const SliverConstraints({
     @required this.axisDirection,
     @required this.growthDirection,
@@ -142,6 +153,8 @@ class SliverConstraints extends Constraints {
     @required this.viewportMainAxisExtent,
   });
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
   SliverConstraints copyWith({
     AxisDirection axisDirection,
     GrowthDirection growthDirection,
@@ -252,6 +265,7 @@ class SliverConstraints extends Constraints {
   /// For a vertical list, this is the height of the viewport.
   final double viewportMainAxisExtent;
 
+  /// The axis along which the [scrollOffset] and [remainingPaintExtent] are measured.
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   /// Return what the [growthDirection] would be if the [axisDirection] was
@@ -293,6 +307,14 @@ class SliverConstraints extends Constraints {
         && remainingPaintExtent >= 0.0;
   }
 
+  /// Returns [BoxConstraints] that reflects the sliver constraints.
+  ///
+  /// The `minExtent` and `maxExtent` are used as the constraints in the main
+  /// axis. If non-null, the given `crossAxisExtent` is used as a tight
+  /// constraint in the cross axis. Otherwise, the [crossAxisExtent] from this
+  /// object is used as a constraint in the cross axis.
+  ///
+  /// Useful for slivers that have [RenderBox] children.
   BoxConstraints asBoxConstraints({
     double minExtent: 0.0,
     double maxExtent: double.INFINITY,
@@ -376,7 +398,19 @@ class SliverConstraints extends Constraints {
   }
 }
 
+/// Describes the amount of space occupied by a [RenderSliver].
+///
+/// A sliver can occupy space in several different ways, which is why this class
+/// contains multiple values.
 class SliverGeometry {
+  /// Creates an object that describes the amount of space occupied by a sliver.
+  ///
+  /// If the [layoutExtent] argument is null, [layoutExtent] defaults to the
+  /// [paintExtent]. If the [hitTestExtent] argument is null, [hitTestExtent]
+  /// defaults to the [paintExtent]. If [visible] is null, [visible] defaults to
+  /// whether [paintExtent] is greater than zero.
+  ///
+  /// The other arguments must not be null.
   const SliverGeometry({
     this.scrollExtent: 0.0,
     this.paintExtent: 0.0,
@@ -390,7 +424,8 @@ class SliverGeometry {
        hitTestExtent = hitTestExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
 
-  static final SliverGeometry zero = const SliverGeometry();
+  /// A sliver that occupies no space at all.
+  static const SliverGeometry zero = const SliverGeometry();
 
   /// The (estimated) total scroll extent that this sliver has content for. In
   /// other words, the scroll offset of the end of the last bit of content of
@@ -449,6 +484,9 @@ class SliverGeometry {
   /// parent will be rerun.
   final double scrollOffsetCorrection;
 
+  /// Asserts that this geometry is internally consistent.
+  ///
+  /// Does nothing if asserts are disabled. Always returns true.
   bool get debugAssertIsValid {
     assert(scrollExtent != null);
     assert(scrollExtent >= 0.0);
@@ -517,7 +555,14 @@ class SliverGeometry {
   }
 }
 
+/// A hit test entry used by [RenderSliver].
+///
+/// The coordinate system used by this hit test entry is relative to the
+/// [AxisDirection] of the target sliver.
 class SliverHitTestEntry extends HitTestEntry {
+  /// Creates a sliver hit test entry.
+  ///
+  /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
   const SliverHitTestEntry(RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,
@@ -571,10 +616,14 @@ class SliverLogicalParentData extends ParentData {
   String toString() => 'layoutOffset=${layoutOffset.toStringAsFixed(1)}';
 }
 
+/// Parent data for slivers that have multiple children and that position their
+/// children using layout offsets.
 class SliverLogicalContainerParentData extends SliverLogicalParentData with ContainerParentDataMixin<RenderSliver> { }
 
 /// Parent data structure used by parents of slivers that position their
-/// children using absolute coordinates. For example, used by [RenderViewport].
+/// children using absolute coordinates.
+///
+/// For example, used by [RenderViewport].
 ///
 /// This data structure is optimised for fast painting, at the cost of requiring
 /// additional work during layout when the children change their offsets. It is
@@ -587,6 +636,10 @@ class SliverPhysicalParentData extends ParentData {
   /// top left visible corner of the sliver.
   Offset paintOffset = Offset.zero;
 
+  /// Apply the [paintOffset] to the given [transform].
+  ///
+  /// Used to implement [RenderObject.applyPaintTransform] by slivers that use
+  /// [SliverPhysicalParentData].
   void applyPaintTransform(Matrix4 transform) {
     transform.translate(paintOffset.dx, paintOffset.dy);
   }
@@ -595,6 +648,8 @@ class SliverPhysicalParentData extends ParentData {
   String toString() => 'paintOffset=$paintOffset';
 }
 
+/// Parent data for slivers that have multiple children and that position their
+/// children using absolute coordinates.
 class SliverPhysicalContainerParentData extends SliverPhysicalParentData with ContainerParentDataMixin<RenderSliver> { }
 
 String _debugCompareFloats(String labelA, double valueA, String labelB, double valueB) {
@@ -624,7 +679,16 @@ abstract class RenderSliver extends RenderObject {
   @override
   SliverConstraints get constraints => super.constraints;
 
-  // layout output
+  /// The amount of space this sliver occupies.
+  ///
+  /// This value is stale whenever this object is marked as needing layout.
+  /// During [performLayout], do not read the [geometry] of a child unless you
+  /// pass true for parentUsesSize when calling the child's [layout] function.
+  ///
+  /// The geometry of a sliver should be set only during the sliver's
+  /// [performLayout] or [performResize] functions. If you wish to change the
+  /// geometry of a sliver outside of those functins, call [markNeedsLayout]
+  /// instead to schedule a layout of the sliver.
   SliverGeometry get geometry => _geometry;
   SliverGeometry _geometry;
   set geometry(SliverGeometry value) {
@@ -856,6 +920,16 @@ abstract class RenderSliver extends RenderObject {
     return 0.0;
   }
 
+  /// Returns the distance along the cross axis from the zero of the cross axis
+  /// to the nearest side of the given child.
+  ///
+  /// For example, if the [constraints] describe this sliver as having an axis
+  /// direction of [AxisDirection.down], then this is the distance from the left
+  /// of the sliver to the left of the child. Similarly, if the [constraints]
+  /// describe this sliver as having an axis direction of [AxisDirection.up],
+  /// then this is value is the same.
+  ///
+  /// Calling this for a child that is not visible is not valid.
   @protected
   double childCrossAxisPosition(@checked RenderObject child) => 0.0;
 
@@ -1104,9 +1178,18 @@ abstract class RenderSliverHelpers implements RenderSliver {
 // THE MAIN VIEWPORT CLASS
 // Transitions from the RenderBox world to the RenderSliver world.
 
-typedef RenderSliver _Advancer(RenderSliver child);
-
+/// An interface for render objects that are bigger on the inside.
+///
+/// Some render objects, such as [RenderViewport], present a portion of their
+/// content, which can be controlled by a [ViewportOffset]. This interface lets
+/// the framework recognize such render objects and interact with them without
+/// having specific knowledge of all the various types of viewports.
 abstract class RenderAbstractViewport implements RenderObject {
+  /// Returns the [RenderAbstractViewport] that most closely encloses the given
+  /// render object.
+  ///
+  /// If the object does not have a [RenderAbstractViewport] as an ancestor,
+  /// this function returns null.
   static RenderAbstractViewport of(RenderObject object) {
     while (object != null) {
       if (object is RenderAbstractViewport)
@@ -1116,8 +1199,22 @@ abstract class RenderAbstractViewport implements RenderObject {
     return null;
   }
 
+  /// Returns the offset that would be needed to reveal the target render object.
+  ///
+  /// The `alignment` argument describes where the target should be positioned
+  /// after applying the returned offset. If `alignment` is 0.0, the child must
+  /// be positioned as close to the leading edge of the viewport as possible. If
+  /// `alignment` is 1.0, the child must be positioned as close to the trailing
+  /// edge of the viewport as possible. If `alignment` is 0.5, the child must be
+  /// positioned as close to the center of the viewport as possible.
+  ///
+  /// The target might not be a direct child of this viewport but it must be a
+  /// descendant of the viewport and there must not be any other
+  /// [RenderAbstractViewport] objects between the target and this object.
   double getOffsetToReveal(RenderObject target, double alignment);
 }
+
+typedef RenderSliver _Advancer(RenderSliver child);
 
 // ///
 // /// See also:
