@@ -20,7 +20,7 @@ class _DebugSize extends Size {
   final bool _canBeUsedByParent;
 }
 
-/// Immutable layout constraints for box layout.
+/// Immutable layout constraints for [RenderBox] layout.
 ///
 /// A size respects a BoxConstraints if, and only if, all of the following
 /// relations hold:
