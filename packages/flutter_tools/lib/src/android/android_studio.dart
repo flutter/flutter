@@ -125,7 +125,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     void _checkForStudio(String path) {
       if (!fs.isDirectorySync(path))
         return;
-      List<Directory> directories = fs
+      Iterable<Directory> directories = fs
           .directory(path)
           .listSync()
           .where((FileSystemEntity e) => e is Directory);
