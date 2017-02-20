@@ -39,9 +39,9 @@ Future<Null> main(List<String> args) async {
   executableContext.setVariable(Logger, new StdoutLogger());
   executableContext.runInZone(() {
     // Initialize the context with some defaults.
-    context.putIfAbsent(Platform, () => new LocalPlatform());
-    context.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
+    context.putIfAbsent(Platform, () => const LocalPlatform());
+    context.putIfAbsent(FileSystem, () => const LocalFileSystem());
+    context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());

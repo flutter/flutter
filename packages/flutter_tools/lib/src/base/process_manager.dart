@@ -29,7 +29,7 @@ ProcessManager get processManager => context[ProcessManager];
 /// subdirectory.
 void enableRecordingProcessManager(String location) {
   Directory dir = getRecordingSink(location, _kRecordingType);
-  ProcessManager delegate = new LocalProcessManager();
+  ProcessManager delegate = const LocalProcessManager();
   RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
   addShutdownHook(() => manager.flush(finishRunningProcesses: true));
   context.setVariable(ProcessManager, manager);

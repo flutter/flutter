@@ -102,9 +102,9 @@ Future<Null> main(List<String> args) async {
     // in those locations as well to see if you need a similar update there.
 
     // Seed these context entries first since others depend on them
-    context.putIfAbsent(Platform, () => new LocalPlatform());
-    context.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    context.putIfAbsent(ProcessManager, () => new LocalProcessManager());
+    context.putIfAbsent(Platform, () => const LocalPlatform());
+    context.putIfAbsent(FileSystem, () => const LocalFileSystem());
+    context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     context.putIfAbsent(Logger, () => platform.isWindows ? new WindowsStdoutLogger() : new StdoutLogger());
     context.putIfAbsent(Config, () => new Config());
 

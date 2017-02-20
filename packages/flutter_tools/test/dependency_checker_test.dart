@@ -88,7 +88,7 @@ void main()  {
       String destinationPath = '/some/test/location';
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
       copyDirectorySync(
-        new LocalFileSystem().directory(fs.path.join(dataPath, 'changed_sdk_location')),
+        const LocalFileSystem().directory(fs.path.join(dataPath, 'changed_sdk_location')),
         fs.directory(destinationPath));
       fs.currentDirectory = destinationPath;
 

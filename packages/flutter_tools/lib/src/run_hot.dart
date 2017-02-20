@@ -314,7 +314,7 @@ class HotRunner extends ResidentRunner {
     if (_devFS != null) {
       // Cleanup the devFS; don't wait indefinitely, and ignore any errors.
       await _devFS.destroy()
-        .timeout(new Duration(milliseconds: 250))
+        .timeout(const Duration(milliseconds: 250))
         .catchError((dynamic error) {
           printTrace('$error');
         });
