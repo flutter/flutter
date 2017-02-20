@@ -34,7 +34,8 @@ String get gradleExecutable {
   // See if the user has explicitly configured gradle-dir.
   String gradleDir = config.getValue('gradle-dir');
   if (gradleDir != null) {
-    if (fs.isFileSync(gradleDir)) return gradleDir;
+    if (fs.isFileSync(gradleDir))
+      return gradleDir;
     return fs.path.join(gradleDir, 'bin', 'gradle');
   }
   return androidStudio?.gradleExecutable ?? os.which('gradle')?.path;
@@ -89,20 +90,20 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   @override
   int compareTo(AndroidStudio other) {
     int result = version.compareTo(other.version);
-    if (result == 0) {
+    if (result == 0)
       return directory.compareTo(other.directory);
-    }
     return result;
   }
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio latestValid() {
-    String cfgStudio = config.getValue('android-studio-dir');
-    if (cfgStudio != null) {
-      String cfgStudioPath = cfgStudio;
-      if (os.isMacOS && !cfgStudioPath.endsWith('Contents'))
-        cfgStudioPath = fs.path.join(cfgStudioPath, 'Contents');
-      return new AndroidStudio(cfgStudioPath, configured: cfgStudio);
+    String configuredStudio = config.getValue('android-studio-dir');
+    if (configuredStudio != null) {
+      String configuredStudioPath = configuredStudio;
+      if (os.isMacOS && !configuredStudioPath.endsWith('Contents'))
+        configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
+      return new AndroidStudio(configuredStudioPath,
+          configured: configuredStudio);
     }
 
     // Find all available Studio installations.
@@ -138,15 +139,15 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _checkForStudio('/Applications');
     _checkForStudio(fs.path.join(homeDirPath, 'Applications'));
 
-    String cfgStudioDir = config.getValue('android-studio-dir');
-    if (cfgStudioDir != null) {
-      FileSystemEntity cfgStudio = fs.file(cfgStudioDir);
-      if (cfgStudio.basename == 'Contents') {
-        cfgStudio = cfgStudio.parent;
+    String configuredStudioDir = config.getValue('android-studio-dir');
+    if (configuredStudioDir != null) {
+      FileSystemEntity configuredStudio = fs.file(configuredStudioDir);
+      if (configuredStudio.basename == 'Contents') {
+        configuredStudio = configuredStudio.parent;
       }
       if (!candidatePaths
-          .any((FileSystemEntity e) => e.path == cfgStudio.path)) {
-        candidatePaths.add(cfgStudio);
+          .any((FileSystemEntity e) => e.path == configuredStudio.path)) {
+        candidatePaths.add(configuredStudio);
       }
     }
 
@@ -183,9 +184,10 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    String cfgStudioDir = config.getValue('android-studio-dir');
-    if (cfgStudioDir != null && !_hasStudioAt(cfgStudioDir)) {
-      studios.add(new AndroidStudio(cfgStudioDir, configured: cfgStudioDir));
+    String configuredStudioDir = config.getValue('android-studio-dir');
+    if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
+      studios.add(new AndroidStudio(configuredStudioDir,
+          configured: configuredStudioDir));
     }
 
     if (platform.isLinux) {

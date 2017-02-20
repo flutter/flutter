@@ -34,25 +34,8 @@ String osName() {
 
 class Doctor {
   Doctor() {
-    _validators.add(new _FlutterValidator());
-
     _androidWorkflow = new AndroidWorkflow();
-    if (_androidWorkflow.appliesToHostPlatform)
-      _validators.add(_androidWorkflow);
-
     _iosWorkflow = new IOSWorkflow();
-    if (_iosWorkflow.appliesToHostPlatform)
-      _validators.add(_iosWorkflow);
-
-    List<DoctorValidator> ideValidators = <DoctorValidator>[];
-    ideValidators.addAll(AndroidStudioValidator.allValidators);
-    ideValidators.addAll(IntelliJValidator.installedValidators);
-    if (ideValidators.isNotEmpty)
-      _validators.addAll(ideValidators);
-    else
-      _validators.add(new NoIdeValidator());
-
-    _validators.add(new DeviceValidator());
   }
 
   IOSWorkflow _iosWorkflow;
@@ -63,10 +46,34 @@ class Doctor {
 
   AndroidWorkflow get androidWorkflow => _androidWorkflow;
 
-  List<DoctorValidator> _validators = <DoctorValidator>[];
+  List<DoctorValidator> _validators;
+
+  List<DoctorValidator> get validators {
+    if (_validators == null) {
+      _validators = <DoctorValidator>[];
+      _validators.add(new _FlutterValidator());
+
+      if (_androidWorkflow.appliesToHostPlatform)
+        _validators.add(_androidWorkflow);
+
+      if (_iosWorkflow.appliesToHostPlatform)
+        _validators.add(_iosWorkflow);
+
+      List<DoctorValidator> ideValidators = <DoctorValidator>[];
+      ideValidators.addAll(AndroidStudioValidator.allValidators);
+      ideValidators.addAll(IntelliJValidator.installedValidators);
+      if (ideValidators.isNotEmpty)
+        _validators.addAll(ideValidators);
+      else
+        _validators.add(new NoIdeValidator());
+
+      _validators.add(new DeviceValidator());
+    }
+    return _validators;
+  }
 
   List<Workflow> get workflows {
-    return new List<Workflow>.from(_validators.where((DoctorValidator validator) => validator is Workflow));
+    return new List<Workflow>.from(validators.where((DoctorValidator validator) => validator is Workflow));
   }
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
@@ -79,7 +86,7 @@ class Doctor {
 
     bool allGood = true;
 
-    for (DoctorValidator validator in _validators) {
+    for (DoctorValidator validator in validators) {
       ValidationResult result = await validator.validate();
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
@@ -111,7 +118,7 @@ class Doctor {
     bool firstLine = true;
     bool doctorResult = true;
 
-    for (DoctorValidator validator in _validators) {
+    for (DoctorValidator validator in validators) {
       if (!firstLine)
         printStatus('');
       firstLine = false;

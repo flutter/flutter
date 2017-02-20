@@ -107,7 +107,7 @@ class ConfiguredGradleValidator extends DoctorValidator {
     if (processManager.canRun(gradleExecutable)) {
       type = ValidationType.partial;
       ProcessResult result =
-          processManager.runSync([gradleExecutable, '--version']);
+          processManager.runSync(<String>[gradleExecutable, '--version']);
       if (result.exitCode == 0) {
         version = result.stdout
             .toString()
