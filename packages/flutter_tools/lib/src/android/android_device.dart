@@ -459,7 +459,7 @@ class AndroidDevice extends Device {
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    return new Future<List<DiscoveredApp>>.delayed(new Duration(seconds: 1), () {
+    return new Future<List<DiscoveredApp>>.delayed(const Duration(seconds: 1), () {
       logs.cancel();
       return result;
     });

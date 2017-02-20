@@ -37,7 +37,7 @@ class Config {
   }
 
   void _flushValues() {
-    String json = new JsonEncoder.withIndent('  ').convert(_values);
+    String json = const JsonEncoder.withIndent('  ').convert(_values);
     json = '$json\n';
     _configFile.writeAsStringSync(json);
   }

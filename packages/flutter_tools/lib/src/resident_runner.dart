@@ -218,7 +218,7 @@ abstract class ResidentRunner {
     for (int i = 0; vmService.vm.mainView == null && i < 5; i++) {
       // If the VM doesn't yet have a view, wait for one to show up.
       printTrace('Waiting for Flutter view');
-      await new Future<Null>.delayed(new Duration(seconds: 1));
+      await new Future<Null>.delayed(const Duration(seconds: 1));
       await vmService.vm.refreshViews();
     }
     currentView = vmService.vm.mainView;
@@ -354,7 +354,7 @@ abstract class ResidentRunner {
       if ((currentView != null) && (currentView.uiIsolate != null)) {
         // TODO(johnmccutchan): Wait for the exit command to complete.
         currentView.uiIsolate.flutterExit();
-        await new Future<Null>.delayed(new Duration(milliseconds: 100));
+        await new Future<Null>.delayed(const Duration(milliseconds: 100));
       }
     }
     appFinished();

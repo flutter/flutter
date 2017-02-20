@@ -73,7 +73,7 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
 }
 
 String toPrettyJson(Object jsonable) {
-  return new JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
+  return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
 }
 
 /// Return a String - with units - for the size in MB of the given number of bytes.

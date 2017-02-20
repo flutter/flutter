@@ -97,7 +97,7 @@ class TestCommand extends FlutterCommand {
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
     Status status = logger.startProgress('Collecting coverage information...');
     String coverageData = await collector.finalizeCoverage(
-      timeout: new Duration(seconds: 30),
+      timeout: const Duration(seconds: 30),
     );
     status.stop();
     printTrace('coverage information collection complete');

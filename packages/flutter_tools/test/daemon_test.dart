@@ -32,7 +32,7 @@ void main() {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext.setVariable(Platform, new LocalPlatform());
+      appContext.setVariable(Platform, const LocalPlatform());
       appContext.setVariable(Logger, notifyingLogger);
       appContext.setVariable(Doctor, new Doctor());
       if (platform.isMacOS)

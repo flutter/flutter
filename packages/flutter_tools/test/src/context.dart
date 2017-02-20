@@ -42,9 +42,9 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
-    testContext.putIfAbsent(Platform, () => new LocalPlatform());
-    testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    testContext.putIfAbsent(ProcessManager, () => new LocalProcessManager());
+    testContext.putIfAbsent(Platform, () => const LocalPlatform());
+    testContext.putIfAbsent(FileSystem, () => const LocalFileSystem());
+    testContext.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
     testContext.putIfAbsent(Config, () => new Config());
 

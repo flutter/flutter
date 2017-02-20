@@ -236,7 +236,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
-    }, timeout: new Timeout(new Duration(seconds: 5)));
+    }, timeout: const Timeout(const Duration(seconds: 5)));
 
     testUsingContext('delete dev file system', () async {
       await devFS.destroy();

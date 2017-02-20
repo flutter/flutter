@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 
 void main()  {
   // Create a temporary directory and write a single file into it.
-  FileSystem fs = new LocalFileSystem();
+  FileSystem fs = const LocalFileSystem();
   Directory tempDir = fs.systemTempDirectory.createTempSync();
   String projectRoot = tempDir.path;
   String assetPath = 'banana.txt';

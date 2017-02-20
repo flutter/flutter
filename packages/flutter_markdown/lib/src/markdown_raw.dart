@@ -249,7 +249,7 @@ class _Renderer implements md.NodeVisitor {
         linkInfo = _linkHandler.createLinkInfo(element.attributes['href']);
       }
 
-      TextStyle style = _markdownStyle.styles[element.tag] ?? new TextStyle();
+      TextStyle style = _markdownStyle.styles[element.tag] ?? const TextStyle();
       List<_MarkdownNode> styleElement = <_MarkdownNode>[new _MarkdownNodeTextStyle(style, linkInfo)];
       _currentBlock.stack.add(new _MarkdownNodeList(styleElement));
     }
@@ -338,7 +338,7 @@ class _Block {
   _Block(this.tag, this.attributes, this.markdownStyle, this.listIndents, this.blockPosition) {
     TextStyle style = markdownStyle.styles[tag];
     if (style == null)
-      style = new TextStyle(color: const Color(0xffff0000));
+      style = const TextStyle(color: const Color(0xffff0000));
 
     stack = <_MarkdownNode>[new _MarkdownNodeList(<_MarkdownNode>[new _MarkdownNodeTextStyle(style)])];
     subBlocks = <_Block>[];
@@ -398,7 +398,7 @@ class _Block {
         }
         else {
           bullet = new Padding(
-            padding: new EdgeInsets.only(right: 5.0),
+            padding: const EdgeInsets.only(right: 5.0),
             child: new Text(
               "${blockPosition + 1}.",
               textAlign: TextAlign.right
