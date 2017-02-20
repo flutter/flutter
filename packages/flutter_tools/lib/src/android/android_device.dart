@@ -196,10 +196,6 @@ class AndroidDevice extends Device {
     return '/data/local/tmp/sky.${app.id}.sha1';
   }
 
-  String _getDeviceApkSha1(ApplicationPackage app) {
-    return runCheckedSync(adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(app)]));
-  }
-
   String _getSourceSha1(ApplicationPackage app) {
     AndroidApk apk = app;
     File shaFile = fs.file('${apk.apkPath}.sha1');
