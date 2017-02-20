@@ -123,6 +123,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
     void _checkForStudio(String path) {
+      if (!fs.isDirectorySync(path))
+        return;
       List<Directory> directories = fs
           .directory(path)
           .listSync()
