@@ -46,6 +46,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
     testContext.putIfAbsent(ProcessManager, () => new LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
+    testContext.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
     testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
@@ -54,7 +55,6 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     testContext.putIfAbsent(Cache, () => new Cache());
     testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    testContext.putIfAbsent(Config, () => new Config());
     testContext.putIfAbsent(OperatingSystemUtils, () {
       MockOperatingSystemUtils os = new MockOperatingSystemUtils();
       when(os.isWindows).thenReturn(false);
