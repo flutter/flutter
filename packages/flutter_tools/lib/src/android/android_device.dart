@@ -213,11 +213,7 @@ class AndroidDevice extends Device {
   bool isAppInstalled(ApplicationPackage app) {
     // This call takes 400ms - 600ms.
     String listOut = runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-    if (!LineSplitter.split(listOut).contains("package:${app.id}"))
-      return false;
-
-    // Check the application SHA.
-    return _getDeviceApkSha1(app) == _getSourceSha1(app);
+    return LineSplitter.split(listOut).contains("package:${app.id}");
   }
 
   @override
