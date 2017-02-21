@@ -43,7 +43,7 @@ class OrderItem extends StatelessWidget {
                 ),
               ),
             ),
-            new SizedBox(height: 24.0),
+            const SizedBox(height: 24.0),
             new Row(
               children: <Widget>[
                 new Padding(
@@ -66,9 +66,9 @@ class OrderItem extends StatelessWidget {
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
-                  new SizedBox(height: 24.0),
+                  const SizedBox(height: 24.0),
                   new Text(product.description, style: theme.featureStyle),
-                  new SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                   new Padding(
                     padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 88.0),
                     child: new DropdownButtonHideUnderline(
@@ -94,7 +94,7 @@ class OrderItem extends StatelessWidget {
                       ),
                     ),
                   ),
-                  new SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                   new SizedBox(
                     height: 24.0,
                     child: new Align(
@@ -102,9 +102,9 @@ class OrderItem extends StatelessWidget {
                       child: new Text(product.vendor.name, style: theme.vendorTitleStyle),
                     ),
                   ),
-                  new SizedBox(height: 16.0),
+                  const SizedBox(height: 16.0),
                   new Text(product.vendor.description, style: theme.vendorStyle),
-                  new SizedBox(height: 24.0),
+                  const SizedBox(height: 24.0),
                 ],
               ),
             ),
@@ -186,13 +186,13 @@ class _OrderPageState extends State<OrderPage> {
                 quantity: currentOrder.quantity,
                 quantityChanged: (int value) { updateOrder(quantity: value); },
               ),
-              new SizedBox(height: 24.0),
+              const SizedBox(height: 24.0),
             ]),
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(8.0),
             child: new SliverGrid(
-              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 8.0,
                 crossAxisSpacing: 8.0,

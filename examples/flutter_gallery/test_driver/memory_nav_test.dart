@@ -37,6 +37,6 @@ void main() {
         await new Future<Null>.delayed(kWaitBetweenActions);
       }
       await completer.future;
-    }, timeout: new Timeout(new Duration(minutes: 1)));
+    }, timeout: const Timeout(const Duration(minutes: 1)));
   });
 }

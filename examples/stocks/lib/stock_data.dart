@@ -78,7 +78,7 @@ class StockDataFetcher {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
         return null;
       }
-      JsonDecoder decoder = new JsonDecoder();
+      JsonDecoder decoder = const JsonDecoder();
       callback(new StockData(decoder.convert(json)));
       if (_nextChunk < _kChunkCount)
         _fetchNextChunk();

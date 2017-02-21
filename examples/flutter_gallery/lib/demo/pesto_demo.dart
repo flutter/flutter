@@ -140,7 +140,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     return new SliverPadding(
       padding: padding,
       child: new SliverGrid(
-        gridDelegate: new SliverGridDelegateWithMaxCrossAxisExtent(
+        gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,
           mainAxisSpacing: 8.0,
@@ -299,7 +299,7 @@ class RecipePage extends StatefulWidget {
 
 class _RecipePageState extends State<RecipePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final TextStyle menuItemStyle = new PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
+  final TextStyle menuItemStyle = const PestoStyle(fontSize: 15.0, color: Colors.black54, height: 24.0/15.0);
 
   double _getAppBarHeight(BuildContext context) => MediaQuery.of(context).size.height * 0.3;
 
@@ -448,7 +448,7 @@ class RecipeSheet extends StatelessWidget {
             ),
             new TableRow(
               children: <Widget>[
-                new SizedBox(),
+                const SizedBox(),
                 new Padding(
                   padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
                   child: new Text(recipe.description, style: descriptionStyle)
@@ -457,7 +457,7 @@ class RecipeSheet extends StatelessWidget {
             ),
             new TableRow(
               children: <Widget>[
-                new SizedBox(),
+                const SizedBox(),
                 new Padding(
                   padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
                   child: new Text('Ingredients', style: headingStyle)
@@ -471,7 +471,7 @@ class RecipeSheet extends StatelessWidget {
           ))..add(
             new TableRow(
               children: <Widget>[
-                new SizedBox(),
+                const SizedBox(),
                 new Padding(
                   padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
                   child: new Text('Steps', style: headingStyle)

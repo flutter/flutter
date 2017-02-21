@@ -46,7 +46,7 @@ Widget toStyledText(String name, String text) {
               style: _kUnderline,
               text: name
             ),
-            new TextSpan(text: ':')
+            const TextSpan(text: ':')
           ]
         ),
         new TextSpan(text: text)
@@ -108,7 +108,7 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
     return new GestureDetector(
       onTap: _handleTap,
       child: new Container(
-        padding: new EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: new Column(
           children: children,
           mainAxisAlignment: MainAxisAlignment.center,

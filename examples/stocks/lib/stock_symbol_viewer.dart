@@ -22,7 +22,7 @@ class _StockSymbolView extends StatelessWidget {
 
     TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
-      padding: new EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(20.0),
       child: new Column(
         children: <Widget>[
           new Row(
@@ -47,11 +47,11 @@ class _StockSymbolView extends StatelessWidget {
           ),
           new RichText(
             text: new TextSpan(
-              style: DefaultTextStyle.of(context).style.merge(new TextStyle(fontSize: 8.0)),
+              style: DefaultTextStyle.of(context).style.merge(const TextStyle(fontSize: 8.0)),
               text: 'Prices may be delayed by ',
               children: <TextSpan>[
-                new TextSpan(text: 'several', style: new TextStyle(fontStyle: FontStyle.italic)),
-                new TextSpan(text: ' years.'),
+                const TextSpan(text: 'several', style: const TextStyle(fontStyle: FontStyle.italic)),
+                const TextSpan(text: ' years.'),
               ]
             )
           ),
@@ -75,7 +75,7 @@ class StockSymbolPage extends StatelessWidget {
       ),
       body: new SingleChildScrollView(
         child: new Container(
-          margin: new EdgeInsets.all(20.0),
+          margin: const EdgeInsets.all(20.0),
           child: new Card(
             child: new _StockSymbolView(
               stock: stock,
@@ -99,7 +99,7 @@ class StockSymbolBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      padding: new EdgeInsets.all(10.0),
+      padding: const EdgeInsets.all(10.0),
       decoration: new BoxDecoration(
         border: new Border(top: new BorderSide(color: Colors.black26))
       ),

@@ -32,7 +32,7 @@ class UpdaterState extends State<Updater> {
   Future<Null> _checkForUpdates() async {
     // Only prompt once a day
     if (_lastUpdateCheck != null &&
-        new DateTime.now().difference(_lastUpdateCheck) < new Duration(days: 1)) {
+        new DateTime.now().difference(_lastUpdateCheck) < const Duration(days: 1)) {
       return; // We already checked for updates recently
     }
     _lastUpdateCheck = new DateTime.now();

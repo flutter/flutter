@@ -135,7 +135,7 @@ class VendorItem extends StatelessWidget {
               child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover),
             ),
           ),
-          new SizedBox(width: 8.0),
+          const SizedBox(width: 8.0),
           new Expanded(
             child: new Text(vendor.name, style: ShrineTheme.of(context).vendorItemStyle),
           ),

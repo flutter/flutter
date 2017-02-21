@@ -134,10 +134,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     } else {
       body = new SingleChildScrollView(
         child: new Padding(
-          padding: new EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: new RichText(
             text: new TextSpan(
-              style: new TextStyle(fontFamily: 'monospace', fontSize: 10.0),
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 10.0),
               children: <TextSpan>[
                 new DartSyntaxHighlighter(style).format(_exampleCode)
               ]

@@ -215,9 +215,9 @@ class GalleryDrawer extends StatelessWidget {
     );
 
     final Widget aboutItem = new AboutDrawerItem(
-      icon: new FlutterLogo(),
+      icon: const FlutterLogo(),
       applicationVersion: '2016 Q3 Preview',
-      applicationIcon: new FlutterLogo(),
+      applicationIcon: const FlutterLogo(),
       applicationLegalese: '© 2016 The Chromium Authors',
       aboutBoxChildren: <Widget>[
         new Padding(

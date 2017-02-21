@@ -59,7 +59,7 @@ void main() {
     // sanity check
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Account Balance'), findsNothing);
-    await tester.pump(new Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Account Balance'), findsNothing);
 

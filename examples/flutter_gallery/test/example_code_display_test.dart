@@ -23,7 +23,7 @@ void main() {
     final Point allDemosOrigin = tester.getTopRight(find.text('Demos'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
-      await tester.scrollAt(allDemosOrigin, new Offset(0.0, -100.0));
+      await tester.scrollAt(allDemosOrigin, const Offset(0.0, -100.0));
       await tester.pump(); // start the scroll
       await tester.pump(const Duration(seconds: 1));
     }
