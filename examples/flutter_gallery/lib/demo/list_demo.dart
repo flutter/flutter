@@ -10,10 +10,10 @@ class ListDemo extends StatefulWidget {
   static const String routeName = '/list';
 
   @override
-  ListDemoState createState() => new ListDemoState();
+  _ListDemoState createState() => new _ListDemoState();
 }
 
-class ListDemoState extends State<ListDemo> {
+class _ListDemoState extends State<ListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
@@ -34,8 +34,8 @@ class ListDemoState extends State<ListDemo> {
     _bottomSheet?.setState(() { });
   }
 
-  void showConfigurationSheet(BuildContext appContext) {
-    _bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
+  void _showConfigurationSheet() {
+    final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
         decoration: new BoxDecoration(
           border: new Border(top: new BorderSide(color: Colors.black26)),
@@ -126,6 +126,18 @@ class ListDemoState extends State<ListDemo> {
         ),
       );
     });
+
+    setState(() {
+      _bottomSheet = bottomSheet;
+    });
+
+    _bottomSheet.closed.whenComplete(() {
+      if (mounted) {
+        setState(() {
+          _bottomSheet = null;
+        });
+      }
+    });
   }
 
   Widget buildListItem(BuildContext context, String item) {
@@ -186,7 +198,7 @@ class ListDemoState extends State<ListDemo> {
           new IconButton(
             icon: new Icon(Icons.more_vert),
             tooltip: 'Show menu',
-            onPressed: () { showConfigurationSheet(context); },
+            onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
           ),
         ],
       ),
