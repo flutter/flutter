@@ -312,7 +312,7 @@ class _AppBarState extends State<AppBar> {
     super.dependenciesChanged();
     ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
-    _canPop = ModalRoute.of(context)?.canPop() ?? false;
+    _canPop = ModalRoute.of(context)?.canPop ?? false;
   }
 
   void _handleDrawerButton() {
