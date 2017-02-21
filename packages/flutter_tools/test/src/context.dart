@@ -35,7 +35,7 @@ typedef dynamic Generator();
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
-  bool skip: false,
+  bool skip,
 }) {
   test(description, () async {
     AppContext testContext = new AppContext();
