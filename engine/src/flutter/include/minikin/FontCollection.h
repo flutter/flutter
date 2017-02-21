@@ -26,6 +26,8 @@
 
 namespace minikin {
 
+class FontLanguages;
+
 class FontCollection {
 public:
     explicit FontCollection(const std::vector<std::shared_ptr<FontFamily>>& typefaces);
@@ -73,15 +75,16 @@ private:
     void init(const std::vector<std::shared_ptr<FontFamily>>& typefaces);
 
     const std::shared_ptr<FontFamily>& getFamilyForChar(uint32_t ch, uint32_t vs,
-            uint32_t langListId, int variant) const;
+            const FontLanguages& styleLanguages, int variant) const;
 
-    uint32_t calcFamilyScore(uint32_t ch, uint32_t vs, int variant, uint32_t langListId,
+    uint32_t calcFamilyScore(uint32_t ch, uint32_t vs, int variant,
+            const FontLanguages& styleLanguages,
             const std::shared_ptr<FontFamily>& fontFamily) const;
 
     uint32_t calcCoverageScore(uint32_t ch, uint32_t vs,
             const std::shared_ptr<FontFamily>& fontFamily) const;
 
-    static uint32_t calcLanguageMatchingScore(uint32_t userLangListId,
+    static uint32_t calcLanguageMatchingScore(const FontLanguages& styleLanguages,
                                               const FontFamily& fontFamily);
 
     static uint32_t calcVariantMatchingScore(int variant, const FontFamily& fontFamily);

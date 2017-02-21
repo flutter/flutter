@@ -41,7 +41,7 @@ using std::vector;
 namespace minikin {
 
 FontStyle::FontStyle(int variant, int weight, bool italic)
-        : FontStyle(FontLanguageListCache::kEmptyListId, variant, weight, italic) {
+        : FontStyle(kEmptyLanguageListId, variant, weight, italic) {
 }
 
 FontStyle::FontStyle(uint32_t languageListId, int variant, int weight, bool italic)
@@ -56,8 +56,8 @@ android::hash_t FontStyle::hash() const {
 
 // static
 uint32_t FontStyle::registerLanguageList(const std::string& languages) {
-    android::AutoMutex _l(gMinikinLock);
-    return FontLanguageListCache::getId(languages);
+    ScopedLock _l(gLock);
+    return putLanguageListToCacheLocked(languages);
 }
 
 // static
@@ -76,7 +76,7 @@ Font::Font(std::shared_ptr<MinikinFont>&& typeface, FontStyle style)
 }
 
 void Font::loadAxes() {
-    android::AutoMutex _l(gMinikinLock);
+    ScopedLock _l(gLock);
     const uint32_t fvarTag = MinikinFont::MakeTag('f', 'v', 'a', 'r');
     HbBlob fvarTable(getFontTable(typeface.get(), fvarTag));
     if (fvarTable.size() == 0) {
@@ -104,7 +104,7 @@ FontFamily::FontFamily(std::vector<Font>&& fonts) : FontFamily(0 /* variant */, 
 }
 
 FontFamily::FontFamily(int variant, std::vector<Font>&& fonts)
-    : FontFamily(FontLanguageListCache::kEmptyListId, variant, std::move(fonts)) {
+    : FontFamily(kEmptyLanguageListId, variant, std::move(fonts)) {
 }
 
 FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
@@ -117,7 +117,7 @@ FontFamily::~FontFamily() {
 
 bool FontFamily::analyzeStyle(const std::shared_ptr<MinikinFont>& typeface, int* weight,
         bool* italic) {
-    android::AutoMutex _l(gMinikinLock);
+    ScopedLock _l(gLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
     HbBlob os2Table(getFontTable(typeface.get(), os2Tag));
     if (os2Table.get() == nullptr) return false;
@@ -162,7 +162,7 @@ FakedFont FontFamily::getClosestMatch(FontStyle style) const {
 }
 
 bool FontFamily::isColorEmojiFamily() const {
-    const FontLanguages& languageList = FontLanguageListCache::getById(mLangId);
+    const FontLanguages& languageList = getFontLanguagesFromCacheLocked(mLangId);
     for (size_t i = 0; i < languageList.size(); ++i) {
         if (languageList[i].getEmojiStyle() == FontLanguage::EMSTYLE_EMOJI) {
             return true;
@@ -172,7 +172,7 @@ bool FontFamily::isColorEmojiFamily() const {
 }
 
 void FontFamily::computeCoverage() {
-    android::AutoMutex _l(gMinikinLock);
+    ScopedLock _l(gLock);
     const FontStyle defaultStyle;
     const MinikinFont* typeface = getClosestMatch(defaultStyle).font;
     const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
@@ -190,7 +190,7 @@ void FontFamily::computeCoverage() {
 }
 
 bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) const {
-    assertMinikinLocked();
+    assertLocked(gLock);
     if (variationSelector != 0 && !mHasVSTable) {
         // Early exit if the variation selector is specified but the font doesn't have a cmap format
         // 14 subtable.
