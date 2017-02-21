@@ -51,7 +51,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
 ApplicationControllerImpl::~ApplicationControllerImpl() = default;
 
-void ApplicationControllerImpl::Kill(const KillCallback& callback) {
+void ApplicationControllerImpl::Kill() {
   runtime_holder_.reset();
   app_->Destroy(this);
   // |this| has been deleted at this point.

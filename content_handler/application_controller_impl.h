@@ -33,7 +33,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
 
   // |app::ApplicationController| implementation
 
-  void Kill(const KillCallback& callback) override;
+  void Kill() override;
   void Detach() override;
 
   // |app::ServiceProvider| implementation
