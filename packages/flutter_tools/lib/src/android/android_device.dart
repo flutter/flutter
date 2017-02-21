@@ -196,10 +196,6 @@ class AndroidDevice extends Device {
     return '/data/local/tmp/sky.${app.id}.sha1';
   }
 
-  String _getDeviceApkSha1(ApplicationPackage app) {
-    return runCheckedSync(adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(app)]));
-  }
-
   String _getSourceSha1(ApplicationPackage app) {
     AndroidApk apk = app;
     File shaFile = fs.file('${apk.apkPath}.sha1');
@@ -213,11 +209,7 @@ class AndroidDevice extends Device {
   bool isAppInstalled(ApplicationPackage app) {
     // This call takes 400ms - 600ms.
     String listOut = runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-    if (!LineSplitter.split(listOut).contains("package:${app.id}"))
-      return false;
-
-    // Check the application SHA.
-    return _getDeviceApkSha1(app) == _getSourceSha1(app);
+    return LineSplitter.split(listOut).contains("package:${app.id}");
   }
 
   @override
