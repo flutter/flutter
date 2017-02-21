@@ -35,7 +35,7 @@ typedef dynamic Generator();
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
-  bool skip,
+  bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   test(description, () async {
     AppContext testContext = new AppContext();
