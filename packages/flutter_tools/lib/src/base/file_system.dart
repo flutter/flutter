@@ -77,10 +77,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
     destDir.createSync(recursive: true);
 
   srcDir.listSync().forEach((FileSystemEntity entity) {
-    String basename = destDir.fileSystem.path.joinAll(
-        entity.fileSystem.path.split(entity.fileSystem.path.basename(entity.path))
-    );
-    String newPath = fs.path.join(destDir.path, basename);
+    String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       File newFile = destDir.fileSystem.file(newPath);
       newFile.writeAsBytesSync(entity.readAsBytesSync());
