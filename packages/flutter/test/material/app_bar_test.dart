@@ -165,18 +165,18 @@ void main() {
 
     // Centering a title with width 620 within the 800 pixel wide test widget
     // would mean that its left edge would have to be 90. We reserve 72
-    // on the left and the padded actions occupy 90 + 4 on the right. That
-    // leaves 634, so the title is right justified but its width isn't changed.
+    // on the left and the padded actions occupy 96 + 4 on the right. That
+    // leaves 628, so the title is right justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
     titleWidth = 620.0;
     actions = <Widget>[
-      const SizedBox(width: 45.0),
-      const SizedBox(width: 45.0)
+      const SizedBox(width: 48.0),
+      const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 4);
+    expect(tester.getTopLeft(title).x, 800 - 620 - 48 - 48 - 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -252,8 +252,7 @@ void main() {
     expect(tester.getSize(hamburger), new Size(56.0, 56.0));
   });
 
-  testWidgets('test actions IconButton is 4dp from edge and 48dp min', (WidgetTester tester) async {
-    Key commentIconKey = new Key('Comment');
+  testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
@@ -261,11 +260,6 @@ void main() {
           appBar: new AppBar(
             title: new Text('X'),
             actions: <Widget> [
-              new Icon(
-                Icons.comment,
-                key: commentIconKey,
-                size: 30.0,
-              ),
               new IconButton(
                 icon: new Icon(Icons.share),
                 onPressed: null,
@@ -293,10 +287,6 @@ void main() {
     Finder shareButton = find.byTooltip('Share');
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), new Size(48.0, 56.0));
-
-    Finder commentIcon = find.byKey(commentIconKey);
-    // Don't change things that are not IconButtons or PopupMenuButtons.
-    expect(tester.getSize(commentIcon), new Size(30.0, 30.0));
   });
 
 }

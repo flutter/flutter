@@ -178,8 +178,8 @@ class AppBar extends StatefulWidget {
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
   ///
-  /// [IconButton]s and [PopupMenuButton]s' minimum width will be automatically
-  /// expanded to the recommended minimum touch target size of 48dp.
+  /// Widgets' minimum width will be automatically expanded to the recommended minimum touch target
+  /// size of 48dp.
   ///
   /// For example:
   ///
@@ -392,16 +392,14 @@ class AppBarState extends State<AppBar> {
       );
     }
     if (config.actions != null && config.actions.isNotEmpty) {
-      // Expand to at least 48dp if IconButton or PopupMenuButton.
-      List<Widget> sizedActions = config.actions.map<Widget>((Widget action) {
-        return action is IconButton || action is PopupMenuButton ?
-            new ConstrainedBox(
-              constraints: new BoxConstraints(minWidth: 48.0),
-              child: action,
-            ) :
-            action;
-
-      }).toList();
+      // Expand action widgets to at least 48dp.
+      List<Widget> sizedActions = new List<Widget>();
+      for (Widget action in config.actions) {
+        sizedActions.add(new ConstrainedBox(
+          constraints: new BoxConstraints(minWidth: 48.0),
+          child: action,
+        ));
+      }
       toolbarChildren.add(
         new LayoutId(
           id: _ToolbarSlot.actions,
