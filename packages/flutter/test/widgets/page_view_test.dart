@@ -217,4 +217,51 @@ void main() {
 
     expect(find.text('Alabama'), findsOneWidget);
   });
+
+  testWidgets('Page changes at halfway point', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    await tester.pumpWidget(new PageView(
+      onPageChanged: (int page) { log.add(page); },
+      children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+    ));
+
+    expect(log, isEmpty);
+
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    // The page view is 800.0 wide, so this move is just short of halfway.
+    await gesture.moveBy(const Offset(-380.0, 0.0));
+
+    expect(log, isEmpty);
+
+    // We've crossed the halfway mark.
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+
+    expect(log, equals(const <int>[1]));
+    log.clear();
+
+    // Moving a bit more should not generate redundant notifications.
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+
+    expect(log, isEmpty);
+
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
+
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
+
+    expect(log, isEmpty);
+
+    await gesture.up();
+    await tester.pumpUntilNoTransientCallbacks();
+
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+  });
+
 }

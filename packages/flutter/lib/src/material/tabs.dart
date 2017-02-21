@@ -639,8 +639,6 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
-  double _offsetAnchor;
-  double _offsetBias = 0.0;
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
@@ -742,30 +740,11 @@ class _TabBarViewState extends State<TabBarView> {
     if (notification.depth != 0)
       return false;
 
-    if (notification is ScrollStartNotification) {
-      _offsetAnchor = null;
-    } else if (notification is ScrollUpdateNotification) {
-      if (!_controller.indexIsChanging) {
-        _offsetAnchor ??= _pageController.page;
-        _controller.offset = (_offsetBias + _pageController.page - _offsetAnchor).clamp(-1.0, 1.0);
-      }
-    } else if (notification is ScrollEndNotification) {
-      // Either the the animation that follows a fling has completed and we've landed
-      // on a new tab view, or a new pointer gesture has interrupted the fling
-      // animation before it has completed.
-      final double integralScrollOffset = _pageController.page.floorToDouble();
-      if (integralScrollOffset == _pageController.page) {
-        _offsetBias = 0.0;
-        // The animation duration is short since the tab indicator and this
-        // page view have already moved.
-        _controller.animateTo(
-          integralScrollOffset.floor(),
-          duration: const Duration(milliseconds: 30)
-        );
-      } else {
-        // The fling scroll animation was interrupted.
-        _offsetBias = _controller.offset;
-      }
+    if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
+      _currentIndex = _pageController.page.round();
+      if (_currentIndex != _controller.index)
+        _controller.index = _currentIndex;
+      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     }
 
     return false;
