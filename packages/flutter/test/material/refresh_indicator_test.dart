@@ -26,6 +26,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: refresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
             return new SizedBox(
               height: 200.0,
@@ -51,6 +52,7 @@ void main() {
         onRefresh: refresh,
         child: new ListView(
           reverse: true,
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -75,6 +77,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: holdRefresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -99,6 +102,7 @@ void main() {
         onRefresh: holdRefresh,
         child: new ListView(
           reverse: true,
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -122,6 +126,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: refresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -147,6 +152,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: refresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -171,6 +177,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: holdRefresh, // this one never returns
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -211,6 +218,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: refresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
@@ -252,6 +260,7 @@ void main() {
       new RefreshIndicator(
         onRefresh: refresh,
         child: new ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
             new SizedBox(
               height: 200.0,
