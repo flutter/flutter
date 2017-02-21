@@ -53,7 +53,7 @@ class ScrollBehavior {
     return null;
   }
 
-  bool shouldNotify(@checked ScrollBehavior oldDelegate) => false;
+  bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 }
 
 class ScrollConfiguration extends InheritedWidget {

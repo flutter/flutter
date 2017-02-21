@@ -125,7 +125,7 @@ class _HasSemantics extends Matcher {
   final TestSemantics _semantics;
 
   @override
-  bool matches(@checked SemanticsTester item, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
     return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState);
   }
 

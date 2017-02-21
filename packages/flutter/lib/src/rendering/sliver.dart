@@ -913,7 +913,7 @@ abstract class RenderSliver extends RenderObject {
   /// of the sliver whereas [childScrollOffset] gives the distance from sliver's
   /// zero scroll offset.
   @protected
-  double childMainAxisPosition(@checked RenderObject child) {
+  double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
       throw new FlutterError('$runtimeType does not implement childPosition.');
     });
@@ -931,7 +931,7 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// Calling this for a child that is not visible is not valid.
   @protected
-  double childCrossAxisPosition(@checked RenderObject child) => 0.0;
+  double childCrossAxisPosition(covariant RenderObject child) => 0.0;
 
   /// Returns the scroll offset for the leading edge of the given child.
   ///
@@ -941,7 +941,7 @@ abstract class RenderSliver extends RenderObject {
   /// [childMainAxisPosition] gives the distance from the leading _visible_ edge
   /// of the sliver whereas [childScrollOffset] gives the distance from sliver's
   /// zero scroll offset.
-  double childScrollOffset(@checked RenderObject child) {
+  double childScrollOffset(covariant RenderObject child) {
     assert(child.parent == this);
     return 0.0;
   }

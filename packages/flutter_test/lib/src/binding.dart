@@ -847,7 +847,7 @@ class _LiveTestRenderView extends RenderView {
   @override
   TestViewConfiguration get configuration => super.configuration;
   @override
-  set configuration(@checked TestViewConfiguration value) { super.configuration = value; }
+  set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
 
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
 

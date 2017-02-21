@@ -83,7 +83,7 @@ class AbstractNode {
   /// Subclasses with children should [attach] all their children to the same
   /// [owner] whenever this method is called.
   @mustCallSuper
-  void attach(@checked Object owner) {
+  void attach(covariant Object owner) {
     assert(owner != null);
     assert(_owner == null);
     _owner = owner;
@@ -111,7 +111,7 @@ class AbstractNode {
   /// Subclasses should call this function when they acquire a new child.
   @protected
   @mustCallSuper
-  void adoptChild(@checked AbstractNode child) {
+  void adoptChild(covariant AbstractNode child) {
     assert(child != null);
     assert(child._parent == null);
     assert(() {
@@ -132,7 +132,7 @@ class AbstractNode {
   /// Subclasses should call this function when they lose a child.
   @protected
   @mustCallSuper
-  void dropChild(@checked AbstractNode child) {
+  void dropChild(covariant AbstractNode child) {
     assert(child != null);
     assert(child._parent == this);
     assert(child.attached == attached);

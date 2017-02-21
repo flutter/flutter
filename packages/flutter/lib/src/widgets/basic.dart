@@ -1860,7 +1860,7 @@ class Flex extends MultiChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, @checked RenderFlex renderObject) {
+  void updateRenderObject(BuildContext context, covariant RenderFlex renderObject) {
     renderObject
       ..direction = direction
       ..mainAxisAlignment = mainAxisAlignment

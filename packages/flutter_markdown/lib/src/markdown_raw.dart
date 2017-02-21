@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:markdown/markdown.dart' as md;
-import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
 
@@ -67,7 +66,7 @@ class MarkdownRaw extends StatelessWidget {
 
   MarkdownBodyRaw createMarkdownBody({
     String data,
-    @checked MarkdownStyleRaw markdownStyle,
+    covariant MarkdownStyleRaw markdownStyle,
     SyntaxHighlighter syntaxHighlighter,
     MarkdownLinkCallback onTapLink
   }) {
