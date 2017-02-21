@@ -7,7 +7,7 @@ import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -232,14 +232,9 @@ void main() {
     });
 
     group('findTargetDevice on iOS', () {
-      void setOs() {
-        when(os.isMacOS).thenReturn(true);
-        when(os.isLinux).thenReturn(false);
-        when(os.isWindows).thenReturn(false);
-      }
+      Platform macOsPlatform() => new FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('uses existing emulator', () async {
-        setOs();
         withMockDevice();
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator).thenReturn(true);
@@ -248,10 +243,10 @@ void main() {
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        Platform: () => macOsPlatform(),
       });
 
       testUsingContext('uses existing Android device if and there are no simulators', () async {
-        setOs();
         mockDevice = new MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
         when(mockDevice.isLocalEmulator).thenReturn(false);
@@ -261,10 +256,10 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        Platform: () => macOsPlatform(),
       });
 
       testUsingContext('launches emulator', () async {
-        setOs();
         when(SimControl.instance.boot()).thenReturn(true);
         Device emulator = new MockDevice();
         when(emulator.name).thenReturn('new-simulator');
@@ -275,26 +270,23 @@ void main() {
         expect(device.name, 'new-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        Platform: () => macOsPlatform(),
       });
     });
 
-    void findTargetDeviceOnLinuxOrWindows({bool isWindows: false, bool isLinux: false}) {
-      assert(isWindows != isLinux);
-      void setOs() {
-        when(os.isMacOS).thenReturn(false);
-        when(os.isLinux).thenReturn(isLinux);
-        when(os.isWindows).thenReturn(isWindows);
-      }
+    void findTargetDeviceOnOperatingSystem(String operatingSystem) {
+      assert(operatingSystem == 'windows' || operatingSystem == 'linux');
+
+      Platform platform() => new FakePlatform(operatingSystem: operatingSystem);
 
       testUsingContext('returns null if no devices found', () async {
-        setOs();
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        Platform: () => platform(),
       });
 
       testUsingContext('uses existing Android device', () async {
-        setOs();
         mockDevice = new MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
         withMockDevice(mockDevice);
@@ -303,15 +295,16 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
+        Platform: () => platform(),
       });
     }
 
     group('findTargetDevice on Linux', () {
-      findTargetDeviceOnLinuxOrWindows(isLinux: true);
+      findTargetDeviceOnOperatingSystem('linux');
     });
 
     group('findTargetDevice on Windows', () {
-      findTargetDeviceOnLinuxOrWindows(isWindows: true);
+      findTargetDeviceOnOperatingSystem('windows');
     });
   });
 }

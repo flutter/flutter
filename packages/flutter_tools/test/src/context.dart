@@ -42,7 +42,7 @@ void testUsingContext(String description, dynamic testMethod(), {
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
-    testContext.putIfAbsent(Platform, () => const LocalPlatform());
+    testContext.putIfAbsent(Platform, () => new _FakePlatform());
     testContext.putIfAbsent(FileSystem, () => const LocalFileSystem());
     testContext.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
@@ -55,11 +55,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     testContext.putIfAbsent(Cache, () => new Cache());
     testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    testContext.putIfAbsent(OperatingSystemUtils, () {
-      MockOperatingSystemUtils os = new MockOperatingSystemUtils();
-      when(os.isWindows).thenReturn(false);
-      return os;
-    });
+    testContext.putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils());
     testContext.putIfAbsent(Xcode, () => new Xcode());
     testContext.putIfAbsent(IOSSimulatorUtils, () {
       MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
@@ -142,6 +138,13 @@ class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
     when(this.getConnectedDevices()).thenReturn(<SimDevice>[]);
   }
+}
+
+class _FakePlatform extends FakePlatform {
+  _FakePlatform() : super.fromPlatform(const LocalPlatform());
+
+  @override
+  bool get isWindows => false;
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

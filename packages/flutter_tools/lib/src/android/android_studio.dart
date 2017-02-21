@@ -100,7 +100,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     String configuredStudio = config.getValue('android-studio-dir');
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
-      if (os.isMacOS && !configuredStudioPath.endsWith('Contents'))
+      if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
         configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
       return new AndroidStudio(configuredStudioPath,
           configured: configuredStudio);
