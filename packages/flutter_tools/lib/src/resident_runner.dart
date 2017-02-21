@@ -13,7 +13,7 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/os.dart';
+import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -157,7 +157,7 @@ abstract class ResidentRunner {
   void registerSignalHandlers() {
     assert(stayResident);
     ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    if (!os.isWindows) // TODO(goderbauer): enable on Windows when https://github.com/dart-lang/sdk/issues/28603 is fixed
+    if (!platform.isWindows) // TODO(goderbauer): enable on Windows when https://github.com/dart-lang/sdk/issues/28603 is fixed
       ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
