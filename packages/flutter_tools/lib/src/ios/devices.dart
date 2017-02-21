@@ -244,6 +244,7 @@ class IOSDevice extends Device {
       id,
       '--bundle',
       bundle.path,
+      '--no-wifi',
       '--justlaunch',
     ];
 
