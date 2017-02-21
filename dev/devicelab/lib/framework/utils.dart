@@ -318,7 +318,7 @@ T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
 }
 
 String jsonEncode(dynamic data) {
-  return new JsonEncoder.withIndent('  ').convert(data) + '\n';
+  return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
 Future<Null> getFlutter(String revision) async {

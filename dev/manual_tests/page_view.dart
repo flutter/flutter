@@ -40,7 +40,7 @@ class PageViewAppState extends State<PageViewApp> {
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels;
-  Size pageSize = new Size(200.0, 200.0);
+  Size pageSize = const Size(200.0, 200.0);
   Axis scrollDirection = Axis.horizontal;
   bool itemsWrap = false;
 

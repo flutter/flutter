@@ -63,7 +63,7 @@ Future<Null> main(List<String> rawArgs) async {
       exitCode = 1;
 
     print('Task result:');
-    print(new JsonEncoder.withIndent('  ').convert(result));
+    print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
   }
 }
@@ -115,7 +115,7 @@ final ArgParser _argParser = new ArgParser()
     splitCommas: true,
     callback: (List<String> value) {
       if (value.isNotEmpty) {
-        throw new FormatException(
+        throw const FormatException(
           'Invalid option --test. Did you mean --task (-t)?',
         );
       }

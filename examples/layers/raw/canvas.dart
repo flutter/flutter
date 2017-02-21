@@ -42,7 +42,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.rotate(math.PI/4.0);
 
   ui.Gradient yellowBlue = new ui.Gradient.linear(
-    <ui.Point>[new ui.Point(-radius, -radius), new ui.Point(0.0, 0.0)],
+    <ui.Point>[new ui.Point(-radius, -radius), const ui.Point(0.0, 0.0)],
     <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]
   );
   canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
@@ -61,7 +61,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.restore();
 
   paint.color = const ui.Color.fromARGB(128, 255, 0, 0);
-  canvas.drawCircle(new ui.Point(150.0, 300.0), radius, paint);
+  canvas.drawCircle(const ui.Point(150.0, 300.0), radius, paint);
 
   // When we're done issuing painting commands, we end the recording an receive
   // a Picture, which is an immutable record of the commands we've issued. You

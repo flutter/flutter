@@ -169,7 +169,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
       final RenderBox box = target.currentContext.findRenderObject();
-      markers[MarkerType.topLeft] = box.localToGlobal(new Point(0.0, 0.0));
+      markers[MarkerType.topLeft] = box.localToGlobal(const Point(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(new Point(size.width, size.height));
       final ScrollableState scrollable = Scrollable.of(target.currentContext);

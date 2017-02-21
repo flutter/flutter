@@ -56,7 +56,7 @@ final List<String> unsynchedDemoTitles = <String>[
   'Progress indicators',
 ];
 
-final FileSystem _fs = new LocalFileSystem();
+final FileSystem _fs = const LocalFileSystem();
 
 const Duration kWaitBetweenActions = const Duration(milliseconds: 250);
 
@@ -123,7 +123,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
   // Save the durations Map to a file.
   final File file = await _fs.file(outputPath).create(recursive: true);
-  await file.writeAsString(new JsonEncoder.withIndent('  ').convert(durations));
+  await file.writeAsString(const JsonEncoder.withIndent('  ').convert(durations));
 }
 
 void main() {
@@ -176,6 +176,6 @@ void main() {
       await summary.writeSummaryToFile('transitions', pretty: true);
       String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
-    }, timeout: new Timeout(new Duration(minutes: 5)));
+    }, timeout: const Timeout(const Duration(minutes: 5)));
   });
 }

@@ -95,7 +95,7 @@ class _DateTimePicker extends StatelessWidget {
             onPressed: () { _selectDate(context); },
           ),
         ),
-        new SizedBox(width: 12.0),
+        const SizedBox(width: 12.0),
         new Expanded(
           flex: 3,
           child: new _InputDropdown(

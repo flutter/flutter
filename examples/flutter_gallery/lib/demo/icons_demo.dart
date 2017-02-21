@@ -122,7 +122,7 @@ class IconsDemoState extends State<IconsDemo> {
               new Expanded(
                 child: new Center(
                   child: new IconTheme(
-                    data: new IconThemeData(opacity: 1.0),
+                    data: const IconThemeData(opacity: 1.0),
                     child: new Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
