@@ -31,6 +31,7 @@
 namespace minikin {
 
 class MinikinFont;
+class FontLanguages;
 
 // FontStyle represents all style information needed to select an actual font
 // from a collection. The implementation is packed into two 32-bit words
@@ -168,6 +169,7 @@ private:
     int mVariant;
     std::vector<Font> mFonts;
     std::unordered_set<AxisTag> mSupportedAxes;
+    std::unique_ptr<FontLanguages> mLanguages;
 
     SparseBitSet mCoverage;
     bool mHasVSTable;

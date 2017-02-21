@@ -25,13 +25,8 @@
 
 namespace minikin {
 
-android::Mutex gMinikinLock;
-
-void assertMinikinLocked() {
-#ifdef ENABLE_RACE_DETECTION
-    LOG_ALWAYS_FATAL_IF(gMinikinLock.tryLock() == 0);
-#endif
-}
+std::mutex gMutex;
+std::unique_lock<std::mutex> gLock(gMutex, std::defer_lock);
 
 bool isEmoji(uint32_t c) {
     // U+2695 U+2640 U+2642 are not in emoji category in Unicode 9 but they are now emoji category.
@@ -86,7 +81,7 @@ bool isEmojiBase(uint32_t c) {
 }
 
 hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag) {
-    assertMinikinLocked();
+    assertLocked(gLock);
     hb_font_t* font = getHbFontLocked(minikinFont);
     hb_face_t* face = hb_font_get_face(font);
     hb_blob_t* blob = hb_face_reference_table(face, tag);

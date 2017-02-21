@@ -30,15 +30,15 @@ typedef ICUTestBase FontLanguagesTest;
 typedef ICUTestBase FontLanguageTest;
 
 static const FontLanguages& createFontLanguages(const std::string& input) {
-    android::AutoMutex _l(gMinikinLock);
-    uint32_t langId = FontLanguageListCache::getId(input);
-    return FontLanguageListCache::getById(langId);
+    ScopedLock _l(gLock);
+    uint32_t langId = putLanguageListToCacheLocked(input);
+    return getFontLanguagesFromCacheLocked(langId);
 }
 
 static FontLanguage createFontLanguage(const std::string& input) {
-    android::AutoMutex _l(gMinikinLock);
-    uint32_t langId = FontLanguageListCache::getId(input);
-    return FontLanguageListCache::getById(langId)[0];
+    ScopedLock _l(gLock);
+    uint32_t langId = putLanguageListToCacheLocked(input);
+    return getFontLanguagesFromCacheLocked(langId)[0];
 }
 
 static FontLanguage createFontLanguageWithoutICUSanitization(const std::string& input) {
@@ -533,7 +533,7 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
     std::shared_ptr<FontFamily> family(
             new FontFamily(std::vector<Font>{ Font(minikinFont, FontStyle()) }));
 
-    android::AutoMutex _l(gMinikinLock);
+    ScopedLock _l(gLock);
 
     const uint32_t kVS1 = 0xFE00;
     const uint32_t kVS2 = 0xFE01;
@@ -586,7 +586,7 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
                 new MinikinFontForTest(testCase.fontPath));
         std::shared_ptr<FontFamily> family(new FontFamily(
                 std::vector<Font>{ Font(minikinFont, FontStyle()) }));
-        android::AutoMutex _l(gMinikinLock);
+        ScopedLock _l(gLock);
         EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
     }
 }

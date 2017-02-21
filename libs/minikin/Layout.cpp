@@ -28,7 +28,6 @@
 #include <log/log.h>
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
-#include <utils/Singleton.h>
 #include <utils/String16.h>
 
 #include <hb-icu.h>
@@ -201,7 +200,7 @@ static unsigned int disabledDecomposeCompatibility(hb_unicode_funcs_t*, hb_codep
     return 0;
 }
 
-class LayoutEngine : public ::android::Singleton<LayoutEngine> {
+class LayoutEngine {
 public:
     LayoutEngine() {
         unicodeFunctions = hb_unicode_funcs_create(hb_icu_get_unicode_funcs());
@@ -212,8 +211,26 @@ public:
         hb_buffer_set_unicode_funcs(hbBuffer, unicodeFunctions);
     }
 
+    Layout* getCachedLayout(LayoutCacheKey& key, LayoutContext* ctx,
+            const std::shared_ptr<FontCollection>& collection) {
+        assertLocked(gLock);
+        return layoutCache.get(key, ctx, collection);
+    }
+
+    void clearLayoutCache() {
+        assertLocked(gLock);
+        layoutCache.clear();
+    }
+
     hb_buffer_t* hbBuffer;
     hb_unicode_funcs_t* unicodeFunctions;
+
+    static LayoutEngine& getInstance() {
+        static LayoutEngine instance;
+        return instance;
+    }
+
+private:
     LayoutCache layoutCache;
 };
 
@@ -288,8 +305,7 @@ static hb_bool_t harfbuzzGetGlyphHorizontalOrigin(hb_font_t* /* hbFont */, void*
 }
 
 hb_font_funcs_t* getHbFontFuncs(bool forColorBitmapFont) {
-    assertMinikinLocked();
-
+    assertLocked(gLock);
     static hb_font_funcs_t* hbFuncs = nullptr;
     static hb_font_funcs_t* hbFuncsForColorBitmap = nullptr;
 
@@ -585,8 +601,7 @@ BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSi
 
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
-    android::AutoMutex _l(gMinikinLock);
-
+    ScopedLock _l(gLock);
     LayoutContext ctx;
     ctx.style = style;
     ctx.paint = paint;
@@ -604,8 +619,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
         const std::shared_ptr<FontCollection>& collection, float* advances) {
-    android::AutoMutex _l(gMinikinLock);
-
+    ScopedLock _l(gLock);
     LayoutContext ctx;
     ctx.style = style;
     ctx.paint = paint;
@@ -677,7 +691,6 @@ float Layout::doLayoutRunCached(const uint16_t* buf, size_t start, size_t count,
 float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         bool isRtl, LayoutContext* ctx, size_t bufStart,
         const std::shared_ptr<FontCollection>& collection, Layout* layout, float* advances) {
-    LayoutCache& cache = LayoutEngine::getInstance().layoutCache;
     LayoutCacheKey key(collection, ctx->paint, ctx->style, buf, start, count, bufSize, isRtl);
 
     float wordSpacing = count == 1 && isWordSpace(buf[start]) ? ctx->paint.wordSpacing : 0;
@@ -694,7 +707,7 @@ float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size
         }
         advance = layoutForWord.getAdvance();
     } else {
-        Layout* layoutForWord = cache.get(key, ctx, collection);
+        Layout* layoutForWord = LayoutEngine::getInstance().getCachedLayout(key, ctx, collection);
         if (layout) {
             layout->appendLayout(layoutForWord, bufStart, wordSpacing);
         }
@@ -947,7 +960,7 @@ void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t
             hb_buffer_set_script(buffer, script);
             hb_buffer_set_direction(buffer, isRtl? HB_DIRECTION_RTL : HB_DIRECTION_LTR);
             const FontLanguages& langList =
-                    FontLanguageListCache::getById(ctx->style.getLanguageListId());
+                    getFontLanguagesFromCacheLocked(ctx->style.getLanguageListId());
             if (langList.size() != 0) {
                 const FontLanguage* hbLanguage = &langList[0];
                 for (size_t i = 0; i < langList.size(); ++i) {
@@ -1149,17 +1162,9 @@ void Layout::getBounds(MinikinRect* bounds) const {
 }
 
 void Layout::purgeCaches() {
-    android::AutoMutex _l(gMinikinLock);
-    LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
-    layoutCache.clear();
+    ScopedLock _l(gLock);
+    LayoutEngine::getInstance().clearLayoutCache();
     purgeHbFontCacheLocked();
 }
 
 }  // namespace minikin
-
-// Unable to define the static data member outside of android.
-// TODO: introduce our own Singleton to drop android namespace.
-namespace android {
-ANDROID_SINGLETON_STATIC_INSTANCE(minikin::LayoutEngine);
-}  // namespace android
-
