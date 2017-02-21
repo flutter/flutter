@@ -117,4 +117,16 @@ void main() {
     expect(buildCounter, 2);
   });
 
+  testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(home: new Text('Home')));
+
+    expect(find.text('Home'), findsOneWidget);
+
+    NavigatorState navigator = tester.state(find.byType(Navigator));
+    bool result = await navigator.maybePop();
+
+    expect(result, isFalse);
+
+    expect(find.text('Home'), findsOneWidget);
+  });
 }

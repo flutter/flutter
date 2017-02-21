@@ -70,10 +70,14 @@ abstract class Route<T> {
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
   /// called by [Naviagtor.willPop].
   ///
+  /// By default, routes veto a pop if they're the first route in the history
+  /// (i.e., if [isFirst]). This behavior prevents the user from popping the
+  /// first route off the history and being stranded at a blank screen.
+  ///
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  Future<bool> willPop() async => true;
+  Future<bool> willPop() async => !isFirst;
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then

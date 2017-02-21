@@ -316,6 +316,11 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   }
 
   @override
+  Future<bool> willPop() async {
+    return willHandlePopInternally || await super.willPop();
+  }
+
+  @override
   bool didPop(T result) {
     if (_localHistory != null && _localHistory.isNotEmpty) {
       LocalHistoryEntry entry = _localHistory.removeLast();
@@ -401,7 +406,7 @@ class _ModalScope extends StatefulWidget {
 
 class _ModalScopeState extends State<_ModalScope> {
   // See addScopedWillPopCallback, removeScopedWillPopCallback in ModalRoute.
-  List<WillPopCallback> willPopCallbacks = <WillPopCallback>[];
+  final List<WillPopCallback> _willPopCallbacks = <WillPopCallback>[];
 
   @override
   void initState() {
@@ -424,12 +429,12 @@ class _ModalScopeState extends State<_ModalScope> {
 
   void addWillPopCallback(WillPopCallback callback) {
     assert(mounted);
-    willPopCallbacks.add(callback);
+    _willPopCallbacks.add(callback);
   }
 
   void removeWillPopCallback(WillPopCallback callback) {
     assert(mounted);
-    willPopCallbacks.remove(callback);
+    _willPopCallbacks.remove(callback);
   }
 
   void _animationStatusChanged(AnimationStatus status) {
@@ -461,7 +466,7 @@ class _ModalScopeState extends State<_ModalScope> {
                 child: new _ModalScopeStatus(
                   route: config.route,
                   isCurrent: config.route.isCurrent,
-                  canPop: config.route.canPop(),
+                  canPop: config.route.canPop,
                   child: config.page,
                 ),
               ),
@@ -655,7 +660,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ProxyAnimation _forwardAnimationProxy;
 
   /// Return the value of the first callback added with
-  /// [addScopedWillPopCallback] that returns false. Otherwise return true.
+  /// [addScopedWillPopCallback] that returns false. Otherwise return
+  /// [super.willPop()].
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives
@@ -673,11 +679,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<bool> willPop() async {
     final _ModalScopeState scope = _scopeKey.currentState;
     assert(scope != null);
-    for (WillPopCallback callback in new List<WillPopCallback>.from(scope.willPopCallbacks)) {
+    for (WillPopCallback callback in new List<WillPopCallback>.from(scope._willPopCallbacks)) {
       if (!await callback())
         return false;
     }
-    return true;
+    return await super.willPop();
   }
 
   /// Enables this route to veto attempts by the user to dismiss it.
@@ -754,7 +760,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [removeScopedWillPopCallback], which removes a callback.
   @protected
   bool get hasScopedWillPopCallback {
-    return _scopeKey.currentState == null || _scopeKey.currentState.willPopCallbacks.length > 0;
+    return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.length > 0;
   }
 
   @override
@@ -773,7 +779,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// When this changes, the route will rebuild, and any widgets that used
   /// [ModalRoute.of] will be notified.
-  bool canPop() => !isFirst || willHandlePopInternally;
+  bool get canPop => !isFirst || willHandlePopInternally;
 
   // Internals
 
