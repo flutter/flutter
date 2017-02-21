@@ -18,7 +18,7 @@ abstract class SliverPersistentHeaderDelegate {
 
   double get maxExtent;
 
-  bool shouldRebuild(@checked SliverPersistentHeaderDelegate oldDelegate);
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate);
 }
 
 class SliverPersistentHeader extends StatelessWidget {
@@ -116,17 +116,17 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(@checked RenderObject child, Null slot) {
+  void insertChildRenderObject(covariant RenderObject child, Null slot) {
     renderObject.child = child;
   }
 
   @override
-  void moveChildRenderObject(@checked RenderObject child, Null slot) {
+  void moveChildRenderObject(covariant RenderObject child, Null slot) {
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(@checked RenderObject child) {
+  void removeChildRenderObject(covariant RenderObject child) {
     renderObject.child = null;
   }
 

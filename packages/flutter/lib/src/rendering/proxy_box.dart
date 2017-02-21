@@ -918,7 +918,7 @@ abstract class CustomClipper<T> {
   /// It's possible that the [getClip] method will get called even if
   /// [shouldReclip] returns false or if the [shouldReclip] method is never
   /// called at all (e.g. if the box changes size).
-  bool shouldReclip(@checked CustomClipper<T> oldClipper);
+  bool shouldReclip(covariant CustomClipper<T> oldClipper);
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -1761,7 +1761,7 @@ abstract class CustomPainter {
   /// repaints should be avoided as much as possible, a [RepaintBoundary] or
   /// [RenderRepaintBoundary] (or other render object with [isRepaintBoundary]
   /// set to true) might be helpful.
-  bool shouldRepaint(@checked CustomPainter oldDelegate);
+  bool shouldRepaint(covariant CustomPainter oldDelegate);
 
   /// Called whenever a hit test is being performed on an object that is using
   /// this custom paint delegate.

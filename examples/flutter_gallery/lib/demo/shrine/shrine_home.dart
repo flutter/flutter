@@ -111,7 +111,7 @@ class ShrineGridDelegate extends SliverGridDelegate {
   }
 
   @override
-  bool shouldRelayout(@checked SliverGridDelegate oldDelegate) => false;
+  bool shouldRelayout(covariant SliverGridDelegate oldDelegate) => false;
 }
 
 /// Displays the Vendor's name and avatar.

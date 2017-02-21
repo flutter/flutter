@@ -227,7 +227,7 @@ abstract class SliverGridDelegate {
   /// Returns information about the size and position of the tiles in the grid.
   SliverGridLayout getLayout(SliverConstraints constraints);
 
-  bool shouldRelayout(@checked SliverGridDelegate oldDelegate);
+  bool shouldRelayout(covariant SliverGridDelegate oldDelegate);
 }
 
 /// Creates grid layouts with a fixed number of tiles in the cross axis.

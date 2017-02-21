@@ -21,7 +21,6 @@ export 'src/foundation/print.dart';
 export 'src/foundation/synchronous_future.dart';
 
 export 'package:meta/meta.dart' show
-  checked,
   mustCallSuper,
   optionalTypeArgs,
   protected,

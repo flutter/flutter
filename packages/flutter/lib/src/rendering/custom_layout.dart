@@ -243,7 +243,7 @@ abstract class MultiChildLayoutDelegate {
   /// This should compare the fields of the current delegate and the given
   /// `oldDelegate` and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(@checked MultiChildLayoutDelegate oldDelegate);
+  bool shouldRelayout(covariant MultiChildLayoutDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.

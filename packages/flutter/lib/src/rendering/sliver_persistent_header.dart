@@ -133,7 +133,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   ///
   /// If there is no child, this should return 0.0.
   @override
-  double childMainAxisPosition(@checked RenderObject child) => super.childMainAxisPosition(child);
+  double childMainAxisPosition(covariant RenderObject child) => super.childMainAxisPosition(child);
 
   @override
   bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {

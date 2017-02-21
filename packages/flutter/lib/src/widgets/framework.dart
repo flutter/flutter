@@ -824,7 +824,7 @@ abstract class State<T extends StatefulWidget> {
   /// super.didUpdateConfig(oldConfig).
   // TODO(abarth): Add @mustCallSuper.
   @protected
-  void didUpdateConfig(@checked T oldConfig) { }
+  void didUpdateConfig(covariant T oldConfig) { }
 
   /// Called whenever the application is reassembled during debugging.
   ///
@@ -1189,7 +1189,7 @@ abstract class InheritedWidget extends ProxyWidget {
   /// The given widget is guaranteed to have the same [runtimeType] as this
   /// object.
   @protected
-  bool updateShouldNotify(@checked InheritedWidget oldWidget);
+  bool updateShouldNotify(covariant InheritedWidget oldWidget);
 }
 
 /// RenderObjectWidgets provide the configuration for [RenderObjectElement]s,
@@ -1226,13 +1226,13 @@ abstract class RenderObjectWidget extends Widget {
   /// [createElement] method. See, for example,
   /// [SingleChildRenderObjectElement.update].
   @protected
-  void updateRenderObject(BuildContext context, @checked RenderObject renderObject) { }
+  void updateRenderObject(BuildContext context, covariant RenderObject renderObject) { }
 
   /// A render object previously associated with this widget has been removed
   /// from the tree. The given [RenderObject] will be of the same type as
   /// returned by this object's [createRenderObject].
   @protected
-  void didUnmountRenderObject(@checked RenderObject renderObject) { }
+  void didUnmountRenderObject(covariant RenderObject renderObject) { }
 }
 
 /// A superclass for RenderObjectWidgets that configure RenderObject subclasses
@@ -2141,7 +2141,7 @@ abstract class Element implements BuildContext {
   ///
   /// This function is called only during the "active" lifecycle state.
   @mustCallSuper
-  void update(@checked Widget newWidget) {
+  void update(covariant Widget newWidget) {
     // This code is hot when hot reloading, so we try to
     // only call _AssertionError._evaluateAssertion once.
     assert(_debugLifecycleState == _ElementLifecycle.active
@@ -3159,7 +3159,7 @@ abstract class ProxyElement extends ComponentElement {
   /// Called during [update] after changing the widget associated with this
   /// element but before rebuilding this element.
   @protected
-  void notifyClients(@checked ProxyWidget oldWidget);
+  void notifyClients(covariant ProxyWidget oldWidget);
 }
 
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
@@ -3483,7 +3483,7 @@ abstract class RenderObjectElement extends BuildableElement {
   }
 
   @override
-  void update(@checked RenderObjectWidget newWidget) {
+  void update(covariant RenderObjectWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
     assert(() { _debugUpdateRenderObjectOwner(); return true; });
@@ -3729,7 +3729,7 @@ abstract class RenderObjectElement extends BuildableElement {
   /// element has a list of children, the previous sibling is a convenient value
   /// for the slot.
   @protected
-  void insertChildRenderObject(@checked RenderObject child, @checked dynamic slot);
+  void insertChildRenderObject(covariant RenderObject child, covariant dynamic slot);
 
   /// Move the given child to the given slot.
   ///
@@ -3740,13 +3740,13 @@ abstract class RenderObjectElement extends BuildableElement {
   /// element has a list of children, the previous sibling is a convenient value
   /// for the slot.
   @protected
-  void moveChildRenderObject(@checked RenderObject child, @checked dynamic slot);
+  void moveChildRenderObject(covariant RenderObject child, covariant dynamic slot);
 
   /// Remove the given child from [renderObject].
   ///
   /// The given child is guaranteed to have [renderObject] as its parent.
   @protected
-  void removeChildRenderObject(@checked RenderObject child);
+  void removeChildRenderObject(covariant RenderObject child);
 
   @override
   void debugFillDescription(List<String> description) {

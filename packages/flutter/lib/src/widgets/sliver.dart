@@ -38,7 +38,7 @@ abstract class SliverChildDelegate {
     double trailingScrollOffset,
   ) => null;
 
-  bool shouldRebuild(@checked SliverChildDelegate oldDelegate);
+  bool shouldRebuild(covariant SliverChildDelegate oldDelegate);
 
   @override
   String toString() {
@@ -81,7 +81,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   int get estimatedChildCount => childCount;
 
   @override
-  bool shouldRebuild(@checked SliverChildBuilderDelegate oldDelegate) => true;
+  bool shouldRebuild(covariant SliverChildBuilderDelegate oldDelegate) => true;
 }
 
 // ///
@@ -127,7 +127,7 @@ class SliverChildListDelegate extends SliverChildDelegate {
   int get estimatedChildCount => children.length;
 
   @override
-  bool shouldRebuild(@checked SliverChildListDelegate oldDelegate) {
+  bool shouldRebuild(covariant SliverChildListDelegate oldDelegate) {
     return children != oldDelegate.children;
   }
 }
@@ -427,7 +427,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void insertChildRenderObject(@checked RenderObject child, int slot) {
+  void insertChildRenderObject(covariant RenderObject child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     renderObject.insert(child, after: _currentBeforeChild);
@@ -439,14 +439,14 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void moveChildRenderObject(@checked RenderObject child, int slot) {
+  void moveChildRenderObject(covariant RenderObject child, int slot) {
     // TODO(ianh): At some point we should be better about noticing when a
     // particular LocalKey changes slot, and handle moving the nodes around.
     assert(false);
   }
 
   @override
-  void removeChildRenderObject(@checked RenderObject child) {
+  void removeChildRenderObject(covariant RenderObject child) {
     assert(_currentlyUpdatingChildIndex != null);
     renderObject.remove(child);
   }

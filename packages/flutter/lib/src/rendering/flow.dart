@@ -108,7 +108,7 @@ abstract class FlowDelegate {
   /// This should compare the fields of the current delegate and the given
   /// oldDelegate and return true if the fields are such that the layout would
   /// be different.
-  bool shouldRelayout(@checked FlowDelegate oldDelegate) => false;
+  bool shouldRelayout(covariant FlowDelegate oldDelegate) => false;
 
   /// Override this method to return true when the children need to be
   /// repainted. This should compare the fields of the current delegate and the
@@ -123,7 +123,7 @@ abstract class FlowDelegate {
   /// The flow container might repaint even if this function returns false, for
   /// example if layout triggers painting (e.g., if [shouldRelayout] returns
   /// true).
-  bool shouldRepaint(@checked FlowDelegate oldDelegate);
+  bool shouldRepaint(covariant FlowDelegate oldDelegate);
 
   /// Override this method to include additional information in the
   /// debugging data printed by [debugDumpRenderTree] and friends.

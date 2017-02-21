@@ -6,7 +6,6 @@ import 'dart:collection';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
 final List<String> results = <String>[];
 
@@ -45,7 +44,7 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didReplace(@checked TestRoute oldRoute) {
+  void didReplace(covariant TestRoute oldRoute) {
     log('didReplace ${oldRoute.name}');
     super.didReplace(oldRoute);
   }
@@ -60,13 +59,13 @@ class TestRoute extends LocalHistoryRoute<String> {
   }
 
   @override
-  void didPopNext(@checked TestRoute nextRoute) {
+  void didPopNext(covariant TestRoute nextRoute) {
     log('didPopNext ${nextRoute.name}');
     super.didPopNext(nextRoute);
   }
 
   @override
-  void didChangeNext(@checked TestRoute nextRoute) {
+  void didChangeNext(covariant TestRoute nextRoute) {
     log('didChangeNext ${nextRoute?.name}');
     super.didChangeNext(nextRoute);
   }

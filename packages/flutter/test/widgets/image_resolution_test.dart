@@ -11,7 +11,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:meta/meta.dart';
 
 class TestImage extends ui.Image {
   TestImage(this.scale);
@@ -97,7 +96,7 @@ class TestAssetImage extends AssetImage {
   }
 
   @override
-  Future<ui.Image> decodeImage(@checked TestByteData data) {
+  Future<ui.Image> decodeImage(covariant TestByteData data) {
     return new SynchronousFuture<ui.Image>(new TestImage(data.scale));
   }
 }
