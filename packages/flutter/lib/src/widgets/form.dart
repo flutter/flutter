@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
 import 'routes.dart';
+import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
 /// (e.g. [Input] widgets).
@@ -64,35 +65,6 @@ class Form extends StatefulWidget {
 class FormState extends State<Form> {
   int _generation = 0;
   Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
-  ModalRoute<dynamic> _route;
-
-  @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    if (_route != null && config.onWillPop != null)
-      _route.removeScopedWillPopCallback(config.onWillPop);
-    _route = ModalRoute.of(context);
-    if (_route != null && config.onWillPop != null)
-      _route.addScopedWillPopCallback(config.onWillPop);
-  }
-
-  @override
-  void didUpdateConfig(Form oldConfig) {
-    assert(_route == ModalRoute.of(context));
-    if (config.onWillPop != oldConfig.onWillPop && _route != null) {
-      if (oldConfig.onWillPop != null)
-        _route.removeScopedWillPopCallback(oldConfig.onWillPop);
-      if (config.onWillPop != null)
-        _route.addScopedWillPopCallback(config.onWillPop);
-    }
-  }
-
-  @override
-  void dispose() {
-    if (_route != null && config.onWillPop != null)
-      _route.removeScopedWillPopCallback(config.onWillPop);
-    super.dispose();
-  }
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.
@@ -114,10 +86,13 @@ class FormState extends State<Form> {
   Widget build(BuildContext context) {
     if (config.autovalidate)
       _validate();
-    return new _FormScope(
-      formState: this,
-      generation: _generation,
-      child: config.child
+    return new WillPopScope(
+      onWillPop: config.onWillPop,
+      child: new _FormScope(
+        formState: this,
+        generation: _generation,
+        child: config.child,
+      ),
     );
   }
 

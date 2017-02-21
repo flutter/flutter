@@ -688,10 +688,29 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Enables this route to veto attempts by the user to dismiss it.
   ///
-  /// This callback is typically added by a stateful descendant of the modal route.
-  /// A stateful widget shown in a modal route, like the child passed to
-  /// [showDialog], can look up its modal route and then add a callback in its
-  /// `dependenciesChanged` method:
+  /// This callback is typically added using a [WillPopScope] widget. That
+  /// widget finds the enclosing [ModalRoute] and uses this function to register
+  /// this callback:
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new WillPopScope(
+  ///     onWillPop: askTheUserIfTheyAreSure,
+  ///     child: ...,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// This callback runs asynchronously and it's possible that it will be called
+  /// after its route has been disposed. The callback should check [mounted]
+  /// before doing anything.
+  ///
+  /// A typical application of this callback would be to warn the user about
+  /// unsaved [Form] data if the user attempts to back out of the form. In that
+  /// case, use the [Form.onWillPop] property to register the callback.
+  ///
+  /// To register a callback manually, look up the enclosing [ModalRoute] in a
+  /// [State.dependenciesChanged] callback:
   ///
   /// ```dart
   /// ModalRoute<dynamic> _route;
@@ -705,32 +724,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// }
   /// ```
   ///
-  /// A typical application of this callback would be to warn the user about
-  /// unsaved [Form] data if the user attempts to back out of the form.
-  ///
-  /// This callback runs asynchronously and it's possible that it will be called
-  /// after its route has been disposed. The callback should check [mounted] before
-  /// doing anything.
-  ///
-  /// A widget that adds a scopedWillPopCallback must ensure that the callback
-  /// is removed with [removeScopedWillPopCallback] by the time the widget has
-  /// been disposed. A stateful widget can do this in its dispose method
-  /// (continuing the previous example):
+  /// If you register a callback manually, be sure to remove the callback with
+  /// [removeScopedWillPopCallback] by the time the widget has been disposed. A
+  /// stateful widget can do this in its dispose method (continuing the previous
+  /// example):
   ///
   /// ```dart
   /// @override
   /// void dispose() {
   ///   _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
+  ///   _route = null;
   ///   super.dispose();
   /// }
   /// ```
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  /// * [willPop], which runs the callbacks added with this method.
-  /// * [removeScopedWillPopCallback], which removes a callback from the list
-  ///   that [willPop] checks.
+  ///  * [WillPopScope], which manages the registration and unregistration
+  ///    process automatically.
+  ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  ///  * [willPop], which runs the callbacks added with this method.
+  ///  * [removeScopedWillPopCallback], which removes a callback from the list
+  ///    that [willPop] checks.
   void addScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null);
     _scopeKey.currentState.addWillPopCallback(callback);

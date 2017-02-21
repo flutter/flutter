@@ -66,5 +66,6 @@ export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';
 export 'src/widgets/viewport.dart';
+export 'src/widgets/will_pop_scope.dart';
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
