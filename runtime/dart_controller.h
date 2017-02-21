@@ -19,9 +19,9 @@ class DartController {
   DartController();
   ~DartController();
 
-  void RunFromKernel(const uint8_t* buffer, size_t size);
-  void RunFromPrecompiledSnapshot();
-  void RunFromSnapshot(const uint8_t* buffer, size_t size);
+  tonic::DartErrorHandleType RunFromKernel(const uint8_t* buffer, size_t size);
+  tonic::DartErrorHandleType RunFromPrecompiledSnapshot();
+  tonic::DartErrorHandleType RunFromSnapshot(const uint8_t* buffer, size_t size);
   tonic::DartErrorHandleType RunFromSource(const std::string& main,
                                            const std::string& packages);
 
