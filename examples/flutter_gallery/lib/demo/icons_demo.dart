@@ -45,10 +45,10 @@ class IconsDemoState extends State<IconsDemo> {
     });
   }
 
-  Widget buildIconButton(double size, IconData icon, bool enabled) {
+  Widget buildIconButton(double iconSize, IconData icon, bool enabled) {
     return new IconButton(
       icon: new Icon(icon),
-      size: size,
+      iconSize: iconSize,
       color: iconColor,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null

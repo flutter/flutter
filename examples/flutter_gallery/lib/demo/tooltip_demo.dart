@@ -41,7 +41,7 @@ class TooltipDemo extends StatelessWidget {
               ),
               new Center(
                 child: new IconButton(
-                  size: 48.0,
+                  iconSize: 48.0,
                   icon: new Icon(Icons.call),
                   color: theme.iconTheme.color,
                   tooltip: 'Place a phone call',
