@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../doctor.dart';
@@ -63,11 +62,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
 
       List<String> validationResult = androidSdk.validateSdkWellFormed();
-      // Empty result means SDK is well formed.
 
       if (validationResult.isEmpty) {
+        // Empty result means SDK is well formed.
+        // The SDK also requires a valid Java JDK installation.
         const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
-
         String javaVersion;
 
         try {
@@ -82,27 +81,20 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         } catch (error) {
         }
 
-        if (javaVersion != null) {
-          messages.add(new ValidationMessage(javaVersion));
-
-          if (os.which('jarsigner') == null) {
-            messages.add(new ValidationMessage.error(
-              'The jarsigner utility was not found; this is used to build Android APKs. You may need to install\n'
-              'or re-install the Java JDK: $_kJdkDownload.'
-            ));
-          } else {
-            type = ValidationType.installed;
-          }
-        } else {
+        if (javaVersion == null) {
           messages.add(new ValidationMessage.error(
-            'No Java Development Kit (JDK) found; you can download the JDK from $_kJdkDownload.'
+              'No Java Development Kit (JDK) found; you can download the JDK from $_kJdkDownload.'
           ));
+        } else {
+          type = ValidationType.installed;
         }
       } else {
         messages.addAll(validationResult.map((String message) {
           return new ValidationMessage.error(message);
         }));
-        messages.add(new ValidationMessage('Try re-installing or updating your Android SDK.'));
+        messages.add(new ValidationMessage(
+          'Try re-installing or updating your Android SDK,\n'
+          'visit https://flutter.io/setup/#android-setup for detailed instructions.'));
       }
     }
 
