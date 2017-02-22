@@ -519,7 +519,67 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
   @override
   void performResize() {
-    assert(constraints.hasBoundedHeight && constraints.hasBoundedWidth);
+    assert(() {
+      if (!constraints.hasBoundedHeight || !constraints.hasBoundedWidth) {
+        switch (axis) {
+          case Axis.vertical:
+            if (!constraints.hasBoundedHeight) {
+              throw new FlutterError(
+                'Vertical viewport was given unbounded height.\n'
+                'Viewports expand in the scrolling direction to fill their container.'
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'vertical space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.\n'
+                '\n'
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'vertical space for the children. In this case, consider using a '
+                'Column instead. Otherwise, consider using the "shrinkWrap" propery '
+                '(or a ShrinkWrappingViewport) to size the height of the viewport '
+                'to the sum of the heights of its children.'
+              );
+            }
+            if (!constraints.hasBoundedWidth) {
+              throw new FlutterError(
+                'Vertical viewport was given unbounded width.\n'
+                'Viewports expand in the cross axis to fill their container and '
+                'constrain their children to match their extent in the cross axis. '
+                'In this case, a vertical viewport was given an unlimited amount of '
+                'horizontal space in which to expand.'
+              );
+            }
+            break;
+          case Axis.horizontal:
+            if (!constraints.hasBoundedWidth) {
+              throw new FlutterError(
+                'Horizontal viewport was given unbounded width.\n'
+                'Viewports expand in the scrolling direction to fill their container.'
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'horizontal space in which to expand. This situation typically happens '
+                'when a scrollable widget is nested inside another scrollable widget.\n'
+                '\n'
+                'If this widget is always nested in a scrollable widget there '
+                'is no need to use a viewport because there will always be enough '
+                'horizontal space for the children. In this case, consider using a '
+                'Row instead. Otherwise, consider using the "shrinkWrap" propery '
+                '(or a ShrinkWrappingViewport) to size the width of the viewport '
+                'to the sum of the widths of its children.'
+              );
+            }
+            if (!constraints.hasBoundedHeight) {
+              throw new FlutterError(
+                'Horizontal viewport was given unbounded height.\n'
+                'Viewports expand in the cross axis to fill their container and '
+                'constrain their children to match their extent in the cross axis. '
+                'In this case, a horizontal viewport was given an unlimited amount of '
+                'vertical space in which to expand.'
+              );
+            }
+            break;
+        }
+      }
+      return true;
+    });
     size = constraints.biggest;
     // We ignore the return value of applyViewportDimension below because we are
     // going to go through performLayout next regardless.
