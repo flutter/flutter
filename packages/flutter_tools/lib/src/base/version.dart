@@ -24,7 +24,7 @@ class Version implements Comparable<Version> {
   /// Creates a new [Version] object.
   factory Version(int major, int minor, int patch, {String text}) {
     if (text == null) {
-      text = major ?? '0';
+      text = major == null ? '0' : '$major';
       if (minor != null) text = '$text.$minor';
       if (patch != null) text = '$text.$patch';
     }
@@ -60,9 +60,12 @@ class Version implements Comparable<Version> {
 
   static Version get unknown => new Version(0, 0, 0, text: 'unknown');
 
+  /// Two [Version]s are equal if their version numbers are. The version text
+  /// is ignored.
   @override
   bool operator ==(dynamic other) {
-    if (other is! Version) return false;
+    if (other is! Version)
+      return false;
     return major == other.major && minor == other.minor && patch == other.patch;
   }
 

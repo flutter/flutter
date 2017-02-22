@@ -84,6 +84,7 @@ baz=qux
   group('Version', () {
     test('can parse and compare', () {
       expect(Version.unknown.toString(), equals('unknown'));
+      expect(new Version(null, null, null).toString(), equals('0'));
 
       Version v1 = new Version.parse('1');
       expect(v1.major, equals(1));
