@@ -51,6 +51,17 @@ abstract class ScrollPhysics {
     return parent.applyPhysicsToUserOffset(position, offset);
   }
 
+  /// Whether the scrollable should let the user adjust the scroll offset, for
+  /// example by dragging.
+  ///
+  /// By default, the user can manipulate the scroll offset if, and only if,
+  /// there is actually content outside the viewport to reveal.
+  bool shouldAcceptUserOffset(ScrollPosition position) {
+    if (parent == null)
+      return position.minScrollExtent != position.maxScrollExtent;
+    return parent.shouldAcceptUserOffset(position);
+  }
+
   /// Determines the overscroll by applying the boundary conditions.
   ///
   /// Called by [ScrollPosition.setPixels] just before the [pixels] value is
@@ -329,7 +340,6 @@ class ScrollPosition extends ViewportOffset {
       // soon afterwards in the same layout phase. So we put all the logic that
       // relies on both values being computed into applyContentDimensions.
     }
-    state.setCanDrag(canDrag);
     return true;
   }
 
@@ -343,7 +353,7 @@ class ScrollPosition extends ViewportOffset {
       activity.applyNewDimensions();
       _didChangeViewportDimension = false;
     }
-    state.setCanDrag(canDrag);
+    state.setCanDrag(physics.shouldAcceptUserOffset(this));
     return true;
   }
 
@@ -391,8 +401,6 @@ class ScrollPosition extends ViewportOffset {
     if (other.runtimeType != runtimeType)
       activity.resetActivity();
   }
-
-  bool get canDrag => true;
 
   bool get shouldIgnorePointer => activity?.shouldIgnorePointer;
 

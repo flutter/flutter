@@ -145,6 +145,28 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 }
 
+/// Scroll physics that always lets the user scroll.
+///
+/// On Android, overscrolls will be clamped by default and result in an
+/// overscroll glow. On iOS, overscrolls will load a spring that will return
+/// the scroll view to its normal range when released.
+///
+/// See also:
+///
+/// * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
+///   found on iOS.
+/// * [ClampingScrollPhysics], which provides the clamping overscroll behavior
+///   found on Android.
+class AlwaysScrollableScrollPhysics extends ScrollPhysics {
+  const AlwaysScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent);
+
+  @override
+  AlwaysScrollableScrollPhysics applyTo(ScrollPhysics parent) => new AlwaysScrollableScrollPhysics(parent: parent);
+
+  @override
+  bool shouldAcceptUserOffset(ScrollPosition position) => true;
+}
+
 class PageScrollPhysics extends ScrollPhysics {
   const PageScrollPhysics({ ScrollPhysics parent }) : super(parent);
 

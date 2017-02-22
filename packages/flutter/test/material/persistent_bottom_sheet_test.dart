@@ -35,4 +35,36 @@ void main() {
     expect(buildCount, equals(2));
   });
 
+  testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        key: scaffoldKey,
+        body: new Center(child: new Text('body'))
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
+      return new ListView(
+        shrinkWrap: true,
+        children: <Widget>[
+          new Container(height: 100.0, child: new Text('One')),
+          new Container(height: 100.0, child: new Text('Two')),
+          new Container(height: 100.0, child: new Text('Three')),
+        ],
+      );
+    });
+
+    await tester.pumpUntilNoTransientCallbacks();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.scroll(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pump();
+    await tester.pumpUntilNoTransientCallbacks();
+
+    expect(find.text('Two'), findsNothing);
+  });
+
 }
