@@ -103,7 +103,7 @@ baz=qux
       expect(v3.patch, equals(3));
 
       Version v4 = new Version.parse('1.12');
-      expect(v3, greaterThan(v2));
+      expect(v4, greaterThan(v2));
 
       expect(v3, greaterThan(v2));
       expect(v2, greaterThan(v1));
