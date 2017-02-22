@@ -2,7 +2,8 @@ Flutter
 =======
 
 [![Join Gitter Chat Channel -](https://badges.gitter.im/flutter/flutter.svg)](https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status -](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter)
+[![Build Status - Travis](https://travis-ci.org/flutter/flutter.svg?branch=master)](https://travis-ci.org/flutter/flutter)
+[![Build Status - AppVeyor](https://ci.appveyor.com/api/projects/status/meyi9evcny64a2mg/branch/master?svg=true)](https://ci.appveyor.com/project/flutter/flutter/branch/master)
 [![Coverage Status -](https://coveralls.io/repos/github/flutter/flutter/badge.svg?branch=master)](https://coveralls.io/github/flutter/flutter?branch=master)
 
 Flutter is a new way to build high-performance, cross-platform mobile apps.
