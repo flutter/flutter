@@ -591,8 +591,6 @@ class _DatePickerDialog extends StatefulWidget {
 }
 
 class _DatePickerDialogState extends State<_DatePickerDialog> {
-  bool _vibrate = false;
-
   @override
   void initState() {
     super.initState();
@@ -603,17 +601,26 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   _DatePickerMode _mode = _DatePickerMode.day;
   GlobalKey _pickerKey = new GlobalKey();
 
+  void _vibrate() {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        HapticFeedback.vibrate();
+        break;
+      case TargetPlatform.iOS:
+        break;
+    }
+  }
+
   void _handleModeChanged(_DatePickerMode mode) {
-    if (_vibrate)
-      HapticFeedback.vibrate();
+    _vibrate();
     setState(() {
       _mode = mode;
     });
   }
 
   void _handleYearChanged(DateTime value) {
-    if (_vibrate)
-      HapticFeedback.vibrate();
+    _vibrate();
     setState(() {
       _mode = _DatePickerMode.day;
       _selectedDate = value;
@@ -621,8 +628,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   }
 
   void _handleDayChanged(DateTime value) {
-    if (_vibrate)
-      HapticFeedback.vibrate();
+    _vibrate();
     setState(() {
       _selectedDate = value;
     });
@@ -662,15 +668,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    switch (Theme.of(context).platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        _vibrate = true;
-        break;
-      case TargetPlatform.iOS:
-        _vibrate = false;
-        break;
-    }
     Widget picker = new Flexible(
       child: new SizedBox(
         height: _kMaxDayPickerHeight,
