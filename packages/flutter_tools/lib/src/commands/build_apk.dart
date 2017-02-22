@@ -583,7 +583,7 @@ Future<Null> buildAndroidWithGradle(
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
-  List<String> validationResult = androidSdk.validateSdkWellFormed();
+  List<String> validationResult = androidSdk.validateSdkWellFormed(requireApkSigner: false);
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
     throwToolExit('Try re-installing or updating your Android SDK.');

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/utils.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -77,6 +78,38 @@ baz=qux
         expect(set, isNot(contains(val)));
         set.add(val);
       }
+    });
+  });
+
+  group('Version', () {
+    test('can parse and compare', () {
+      expect(Version.unknown.toString(), equals('unknown'));
+
+      Version v1 = new Version.parse('1');
+      expect(v1.major, equals(1));
+      expect(v1.minor, equals(0));
+      expect(v1.patch, equals(0));
+
+      expect(v1, greaterThan(Version.unknown));
+
+      Version v2 = new Version.parse('1.2');
+      expect(v2.major, equals(1));
+      expect(v2.minor, equals(2));
+      expect(v2.patch, equals(0));
+
+      Version v3 = new Version.parse('1.2.3');
+      expect(v3.major, equals(1));
+      expect(v3.minor, equals(2));
+      expect(v3.patch, equals(3));
+
+      Version v4 = new Version.parse('1.12');
+      expect(v3, greaterThan(v2));
+
+      expect(v3, greaterThan(v2));
+      expect(v2, greaterThan(v1));
+
+      Version v5 = new Version(1, 2, 0, text: 'foo');
+      expect(v5, equals(v2));
     });
   });
 }

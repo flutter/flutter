@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
-import 'package:pub_semver/pub_semver.dart';
-
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
@@ -39,9 +38,7 @@ class AndroidStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
-    String studioVersionText = _studio.version == '0.0'
-        ? 'unknown version'
-        : 'version ${_studio.version}';
+    String studioVersionText = 'version ${_studio.version}';
     messages
         .add(new ValidationMessage('Android Studio at ${_studio.directory}'));
     if (_studio.isValid) {

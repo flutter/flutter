@@ -120,14 +120,14 @@ class AndroidSdk {
 
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
-  List<String> validateSdkWellFormed() {
+  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
-    return latestVersion.validateSdkWellFormed();
+    return latestVersion.validateSdkWellFormed(requireApkSigner: requireApkSigner);
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -228,7 +228,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get apksignerPath => getBuildToolsPath('apksigner');
 
-  List<String> validateSdkWellFormed() {
+  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 
@@ -241,7 +241,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     if (_canRun(zipalignPath) != null)
       return <String>[_canRun(zipalignPath)];
 
-    if (_canRun(apksignerPath) != null)
+    if (requireApkSigner && _canRun(apksignerPath) != null)
       return <String>[_canRun(apksignerPath) + '\napksigner requires Android SDK Build Tools 24.0.3 or newer.'];
 
     return <String>[];

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pub_semver/pub_semver.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import '../globals.dart';
 import '../ios/plist_utils.dart';
 
@@ -42,12 +41,13 @@ String get gradleExecutable {
 }
 
 class AndroidStudio implements Comparable<AndroidStudio> {
-  AndroidStudio(this.directory, {this.version = '0.0', this.configured}) {
+  AndroidStudio(this.directory, {Version version, this.configured})
+      : this.version = version ?? Version.unknown {
     _init();
   }
 
   final String directory;
-  final String version;
+  final Version version;
   final String configured;
 
   String _gradlePath;
@@ -57,13 +57,17 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     String studioPath = fs.path.join(bundlePath, 'Contents');
     String plistFile = fs.path.join(studioPath, 'Info.plist');
-    String version =
+    String versionString =
         getValueFromFile(plistFile, kCFBundleShortVersionStringKey);
+    Version version;
+    if (versionString != null)
+      version = new Version.parse(versionString);
     return new AndroidStudio(studioPath, version: version);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
-    String version = homeDotDir.basename.substring('.AndroidStudio'.length);
+    Version version = new Version.parse(
+        homeDotDir.basename.substring('.AndroidStudio'.length));
     String installPath;
     try {
       installPath = fs
@@ -162,7 +166,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, {String newerThan}) {
+    bool _hasStudioAt(String path, {Version newerThan}) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path) return false;
         if (newerThan != null) {
@@ -254,6 +258,5 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   @override
-  String toString() =>
-      version == '0.0' ? 'Android Studio (unknown)' : 'Android Studio $version';
+  String toString() => 'Android Studio ($version)';
 }
