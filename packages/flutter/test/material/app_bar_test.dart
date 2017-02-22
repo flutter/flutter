@@ -223,10 +223,7 @@ void main() {
     );
 
     // The vertical center of the widget with key, in global coordinates.
-    double yCenter(Key key) {
-      RenderBox box = tester.renderObject(find.byKey(appBarKey));
-      return box.localToGlobal(new Point(0.0, box.size.height / 2.0)).y;
-    }
+    double yCenter(Key key) => tester.getCenter(find.byKey(key)).y;
 
     expect(yCenter(appBarKey), equals(yCenter(leadingKey)));
     expect(yCenter(appBarKey), equals(yCenter(titleKey)));
