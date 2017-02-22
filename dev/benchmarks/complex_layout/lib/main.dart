@@ -73,7 +73,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Expanded(
             child: new ListView.builder(
-              key: new Key('main-scroll'), // this key is used by the driver test
+              key: const Key('main-scroll'), // this key is used by the driver test
               itemBuilder: (BuildContext context, int index) {
                 if (index % 2 == 0)
                   return new FancyImageItem(index, key: new ValueKey<int>(index));
@@ -154,7 +154,7 @@ class MenuItemWithIcon extends StatelessWidget {
       children: <Widget>[
         new Icon(icon),
         new Padding(
-          padding: new EdgeInsets.only(left: 8.0, right: 8.0),
+          padding: const EdgeInsets.only(left: 8.0, right: 8.0),
           child: new Text(title)
         ),
         new Text(subtitle, style: Theme.of(context).textTheme.caption)
@@ -177,7 +177,7 @@ class FancyImageItem extends StatelessWidget {
         new ItemImageBox(),
         new InfoBar(),
         new Padding(
-          padding: new EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: new Divider()
         ),
         new IconBar(),
@@ -199,7 +199,7 @@ class FancyGalleryItem extends StatelessWidget {
         new ItemGalleryBox(index),
         new InfoBar(),
         new Padding(
-          padding: new EdgeInsets.symmetric(horizontal: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: new Divider()
         ),
         new IconBar(),
@@ -213,7 +213,7 @@ class InfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -229,7 +229,7 @@ class IconBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.only(left: 16.0, right: 16.0),
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0),
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -275,7 +275,7 @@ class MiniIconWithText extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         new Padding(
-          padding: new EdgeInsets.only(right: 8.0),
+          padding: const EdgeInsets.only(right: 8.0),
           child: new Container(
             width: 16.0,
             height: 16.0,
@@ -312,12 +312,12 @@ class UserHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Padding(
-            padding: new EdgeInsets.only(right: 8.0),
+            padding: const EdgeInsets.only(right: 8.0),
             child: new Image(
               image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
@@ -332,9 +332,9 @@ class UserHeader extends StatelessWidget {
                 new RichText(text: new TextSpan(
                   style: Theme.of(context).textTheme.body1,
                   children: <TextSpan>[
-                    new TextSpan(text: userName, style: new TextStyle(fontWeight: FontWeight.bold)),
-                    new TextSpan(text: ' shared a new '),
-                    new TextSpan(text: 'photo', style: new TextStyle(fontWeight: FontWeight.bold))
+                    new TextSpan(text: userName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    const TextSpan(text: ' shared a new '),
+                    const TextSpan(text: 'photo', style: const TextStyle(fontWeight: FontWeight.bold))
                   ]
                 )),
                 new Row(
@@ -357,7 +357,7 @@ class ItemDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
@@ -367,7 +367,7 @@ class ItemImageBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Card(
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -404,16 +404,16 @@ class ItemImageBox extends StatelessWidget {
                       backgroundColor: Colors.black54,
                       borderRadius: new BorderRadius.circular(2.0)
                     ),
-                    padding: new EdgeInsets.all(4.0),
+                    padding: const EdgeInsets.all(4.0),
                     child: new RichText(
                       text: new TextSpan(
-                        style: new TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white),
                         children: <TextSpan>[
-                          new TextSpan(
+                          const TextSpan(
                             text: 'Photo by '
                           ),
-                          new TextSpan(
-                            style: new TextStyle(fontWeight: FontWeight.bold),
+                          const TextSpan(
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                             text: 'Magic Mike'
                           )
                         ]
@@ -425,7 +425,7 @@ class ItemImageBox extends StatelessWidget {
             )
             ,
             new Padding(
-              padding: new EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0),
               child: new Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
@@ -465,7 +465,7 @@ class ItemGalleryBox extends StatelessWidget {
                   return new Container(
                     key: new Key(tabName),
                     child: new Padding(
-                      padding: new EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: new Card(
                         child: new Column(
                           children: <Widget>[
@@ -491,7 +491,7 @@ class ItemGalleryBox extends StatelessWidget {
                                 ),
                                 new Expanded(
                                   child: new Padding(
-                                    padding: new EdgeInsets.only(left: 8.0),
+                                    padding: const EdgeInsets.only(left: 8.0),
                                     child: new Text('This is item $tabName'),
                                   )
                                 )
@@ -550,7 +550,7 @@ class BottomBarButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: new EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(8.0),
       child: new Column(
         children: <Widget>[
           new IconButton(

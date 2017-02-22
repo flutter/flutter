@@ -37,8 +37,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       maxExtent: itemExtent,
     );
 
-    final int firstIndex = math.max(0, scrollOffset ~/ itemExtent);
-    final int targetLastIndex = math.max(0, (targetEndScrollOffset / itemExtent).ceil() - 1);
+    final int firstIndex = itemExtent > 0.0 ? math.max(0, scrollOffset ~/ itemExtent) : 0;
+    final int targetLastIndex = itemExtent > 0.0 ? math.max(0, (targetEndScrollOffset / itemExtent).ceil() - 1) : 0;
 
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild);

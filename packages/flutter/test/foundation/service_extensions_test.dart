@@ -65,8 +65,23 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 }
 
+TestServiceExtensionsBinding binding;
+
+Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingResult) async {
+  bool completed = false;
+  pendingResult.whenComplete(() { completed = true; });
+  expect(binding.frameScheduled, isFalse);
+  await binding.flushMicrotasks();
+  expect(binding.frameScheduled, isTrue);
+  expect(completed, isFalse);
+  binding.doFrame();
+  await binding.flushMicrotasks();
+  expect(completed, isTrue);
+  expect(binding.frameScheduled, isFalse);
+  return pendingResult;
+}
+
 void main() {
-  TestServiceExtensionsBinding binding;
   List<String> console = <String>[];
 
   test('Service extensions - pretest', () async {
@@ -216,6 +231,41 @@ void main() {
     expect(result, <String, String>{});
   });
 
+  test('Service extensions - platformOverride', () async {
+    Map<String, String> result;
+
+    expect(binding.reassembled, 0);
+    expect(defaultTargetPlatform, TargetPlatform.android);
+    result = await binding.testExtension('platformOverride', <String, String>{});
+    expect(result, <String, String>{'value': 'android'});
+    expect(defaultTargetPlatform, TargetPlatform.android);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'iOS'}));
+    expect(result, <String, String>{'value': 'iOS'});
+    expect(binding.reassembled, 1);
+    expect(defaultTargetPlatform, TargetPlatform.iOS);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'android'}));
+    expect(result, <String, String>{'value': 'android'});
+    expect(binding.reassembled, 2);
+    expect(defaultTargetPlatform, TargetPlatform.android);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'fuchsia'}));
+    expect(result, <String, String>{'value': 'fuchsia'});
+    expect(binding.reassembled, 3);
+    expect(defaultTargetPlatform, TargetPlatform.fuchsia);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'default'}));
+    expect(result, <String, String>{'value': 'android'});
+    expect(binding.reassembled, 4);
+    expect(defaultTargetPlatform, TargetPlatform.android);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'iOS'}));
+    expect(result, <String, String>{'value': 'iOS'});
+    expect(binding.reassembled, 5);
+    expect(defaultTargetPlatform, TargetPlatform.iOS);
+    result = await hasReassemble(binding.testExtension('platformOverride', <String, String>{'value': 'bogus'}));
+    expect(result, <String, String>{'value': 'android'});
+    expect(binding.reassembled, 6);
+    expect(defaultTargetPlatform, TargetPlatform.android);
+    binding.reassembled = 0;
+  });
+
   test('Service extensions - repaintRainbow', () async {
     Map<String, String> result;
     Future<Map<String, String>> pendingResult;
@@ -329,7 +379,7 @@ void main() {
   test('Service extensions - posttest', () async {
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 11);
+    expect(binding.extensions.length, 12);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;

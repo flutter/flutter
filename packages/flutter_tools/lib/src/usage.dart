@@ -96,7 +96,7 @@ class Usage {
     // TODO(devoncarew): This may delay tool exit and could cause some analytics
     // events to not be reported. Perhaps we could send the analytics pings
     // out-of-process from flutter_tools?
-    await _analytics.waitForLastPing(timeout: new Duration(milliseconds: 250));
+    await _analytics.waitForLastPing(timeout: const Duration(milliseconds: 250));
   }
 
   void printUsage() {

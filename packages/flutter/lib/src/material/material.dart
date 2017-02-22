@@ -357,6 +357,10 @@ abstract class InkFeature {
     assert(referenceBox != null);
   }
 
+  /// The [MaterialInkController] associated with this [InkFeature].
+  ///
+  /// Typically used by subclasses to call
+  /// [MaterialInkController.markNeedsPaint] when they need to repaint.
   MaterialInkController get controller => _controller;
   _RenderInkFeatures _controller;
 

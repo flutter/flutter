@@ -145,7 +145,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
                     onSaved: (InputValue val) { person.password = val.text; }
                   )
                 ),
-                new SizedBox(width: 16.0),
+                const SizedBox(width: 16.0),
                 new Expanded(
                   child: new TextField(
                     hintText: 'How do you log in?',

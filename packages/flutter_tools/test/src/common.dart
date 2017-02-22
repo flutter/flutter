@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -23,22 +22,14 @@ void updateFileModificationTime(String path,
                                 DateTime baseTime,
                                 int seconds) {
   DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
-  String argument =
-      '${modificationTime.year}'
-      '${modificationTime.month.toString().padLeft(2, "0")}'
-      '${modificationTime.day.toString().padLeft(2, "0")}'
-      '${modificationTime.hour.toString().padLeft(2, "0")}'
-      '${modificationTime.minute.toString().padLeft(2, "0")}'
-      '.${modificationTime.second.toString().padLeft(2, "0")}';
-  ProcessManager processManager = context[ProcessManager];
-  processManager.runSync(<String>['touch', '-t', argument, path]);
+  fs.file(path).setLastModifiedSync(modificationTime);
 }
 
 /// Matcher for functions that throw ToolExit.
 Matcher throwsToolExit([int exitCode]) {
   return exitCode == null
-    ? const Throws(isToolExit)
-    : new Throws(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
+    ? throwsA(isToolExit)
+    : throwsA(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
 }
 
 /// Matcher for [ToolExit]s.

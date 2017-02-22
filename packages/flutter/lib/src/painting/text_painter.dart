@@ -112,6 +112,7 @@ class TextPainter {
   }
 
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  ///
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
   ///
@@ -127,6 +128,12 @@ class TextPainter {
   }
 
   ui.Paragraph _layoutTemplate;
+
+  /// The height of a zero-width space in [style] in logical pixels.
+  ///
+  /// Not every line of text in [style] will have this height, but this height
+  /// is "typical" for text in [style] and useful for sizing other objects
+  /// relative a typical line of text.
   double get preferredLineHeight {
     assert(text != null);
     if (_layoutTemplate == null) {
@@ -206,6 +213,10 @@ class TextPainter {
     return null;
   }
 
+  /// Whether the previous call to [layout] attempted to produce more than
+  /// [maxLines] lines.
+  ///
+  /// If [didExceedMaxLines] is true, then any overflow effect is operative.
   bool get didExceedMaxLines {
     assert(!_needsLayout);
     return _paragraph.didExceedMaxLines;

@@ -72,7 +72,7 @@ void main() {
       ),
     ));
 
-    Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position, const isInstanceOf<TestScrollPosition>());
   });
 

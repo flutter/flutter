@@ -179,6 +179,10 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
 
+  /// The rate of change of [value] per second.
+  ///
+  /// If [isAnimating] is false, then [value] is not changing and the rate of
+  /// change is zero.
   double get velocity {
     if (!isAnimating)
       return 0.0;

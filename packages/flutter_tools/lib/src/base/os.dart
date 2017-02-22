@@ -27,13 +27,6 @@ abstract class OperatingSystemUtils {
 
   OperatingSystemUtils._private();
 
-
-  // TODO(tvolkert): Remove these and migrate callers to Platform
-  String get operatingSystem => platform.operatingSystem;
-  bool get isMacOS => operatingSystem == 'macos';
-  bool get isWindows => operatingSystem == 'windows';
-  bool get isLinux => operatingSystem == 'linux';
-
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
 

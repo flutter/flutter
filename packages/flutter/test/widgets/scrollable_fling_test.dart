@@ -27,7 +27,7 @@ const double dragOffset = 213.82;
 void main() {
   testWidgets('Flings on different platforms', (WidgetTester tester) async {
     double getCurrentOffset() {
-      return tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels;
+      return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
     }
 
     await pumpTest(tester, TargetPlatform.android);
@@ -58,16 +58,16 @@ void main() {
     await tester.pumpWidget(new ListView(children: textWidgets));
 
     expect(log, equals(<String>[]));
-    await tester.tap(find.byType(Scrollable2));
+    await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.fling(find.byType(Scrollable2), const Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.tap(find.byType(Scrollable2));
+    await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.tap(find.byType(Scrollable2));
+    await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18', 'tap 31']));
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
@@ -81,15 +81,15 @@ void main() {
     await tester.pumpWidget(new ListView(children: textWidgets));
 
     expect(log, equals(<String>[]));
-    await tester.tap(find.byType(Scrollable2));
+    await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.fling(find.byType(Scrollable2), const Offset(0.0, -200.0), 1000.0);
+    await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18']));
     await tester.pump(const Duration(seconds: 50));
     expect(log, equals(<String>['tap 18']));
-    await tester.tap(find.byType(Scrollable2));
+    await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
     expect(log, equals(<String>['tap 18', 'tap 43']));
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961

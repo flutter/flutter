@@ -19,12 +19,12 @@ class RenderLayoutWatcher extends RenderProxyBox {
 }
 
 void main() {
-  test('RenderViewport2 basic test - impact of layout', () {
+  test('RenderViewport basic test - impact of layout', () {
     RenderSliverToBoxAdapter sliver;
-    RenderViewport2 viewport;
+    RenderViewport viewport;
     RenderBox box;
     RenderObject root = new RenderLayoutWatcher(
-      viewport = new RenderViewport2(
+      viewport = new RenderViewport(
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           sliver = new RenderSliverToBoxAdapter(child: box = new RenderSizedBox(const Size(100.0, 400.0))),

@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -748,7 +746,7 @@ abstract class SingleChildLayoutDelegate {
   /// It's also possible that the layout method will get called
   /// without [shouldRelayout] being called at all (e.g. if the parent changes
   /// size).
-  bool shouldRelayout(@checked SingleChildLayoutDelegate oldDelegate);
+  bool shouldRelayout(covariant SingleChildLayoutDelegate oldDelegate);
 }
 
 /// Defers the layout of its single child to a delegate.

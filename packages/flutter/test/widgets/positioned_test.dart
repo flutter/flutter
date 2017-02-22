@@ -40,7 +40,7 @@ void main() {
     expect(b.width, 100.0);
     expect(b.height, 200.0);
     Positioned c = new Positioned.fromRelativeRect(
-      rect: new RelativeRect.fromLTRB(
+      rect: const RelativeRect.fromLTRB(
         103.0,
         303.0,
         203.0,

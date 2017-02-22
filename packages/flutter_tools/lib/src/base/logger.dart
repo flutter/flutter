@@ -295,7 +295,7 @@ class _AnsiStatus extends Status {
     stdout.write('${message.padRight(52)}     ');
     stdout.write('${_progress[0]}');
 
-    timer = new Timer.periodic(new Duration(milliseconds: 100), _callback);
+    timer = new Timer.periodic(const Duration(milliseconds: 100), _callback);
   }
 
   static final List<String> _progress = <String>['-', r'\', '|', r'/', '-', r'\', '|', '/'];

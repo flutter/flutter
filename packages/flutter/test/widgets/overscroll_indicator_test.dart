@@ -35,7 +35,7 @@ void main() {
     expect(painter, doesNotOverscroll);
 
     // the scroll gesture from tester.scroll happens in zero time, so nothing should appear:
-    await tester.scroll(find.byType(Scrollable2), const Offset(0.0, 100.0));
+    await tester.scroll(find.byType(Scrollable), const Offset(0.0, 100.0));
     expect(painter, doesNotOverscroll);
     await tester.pump(); // allow the ticker to register itself
     expect(painter, doesNotOverscroll);
@@ -187,11 +187,11 @@ void main() {
     );
     RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle()..scale(y: -1.0));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(-5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle()
-                          ..rotate(angle: -math.PI / 2.0)..scale(y: -1.0)..circle());
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()
+                          ..rotate(angle: math.PI / 2.0)..circle());
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
@@ -224,7 +224,7 @@ void main() {
     RenderObject painter;
 
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior1(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -237,12 +237,12 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..scale(y: -1.0)..rotate(angle: -math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
     await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
     await tester.pumpWidget(
-      new ScrollConfiguration2(
+      new ScrollConfiguration(
         behavior: new TestScrollBehavior2(),
         child: new CustomScrollView(
           scrollDirection: Axis.horizontal,
@@ -254,19 +254,19 @@ void main() {
     );
     painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
-    expect(painter, paints..rotate(angle: -math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..scale(y: -1.0));
+    expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
   });
 }
 
-class TestScrollBehavior1 extends ScrollBehavior2 {
+class TestScrollBehavior1 extends ScrollBehavior {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF00FF00);
   }
 }
 
-class TestScrollBehavior2 extends ScrollBehavior2 {
+class TestScrollBehavior2 extends ScrollBehavior {
   @override
   Color getGlowColor(BuildContext context) {
     return const Color(0xFF0000FF);

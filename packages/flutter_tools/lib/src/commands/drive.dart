@@ -8,7 +8,7 @@ import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/common.dart';
-import '../base/os.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -199,7 +199,7 @@ Future<Device> findTargetDevice() async {
   }
 
 
-  if (os.isMacOS) {
+  if (platform.isMacOS) {
     // On Mac we look for the iOS Simulator. If available, we use that. Then
     // we look for an Android device. If there's one, we use that. Otherwise,
     // we launch a new iOS Simulator.
@@ -225,7 +225,7 @@ Future<Device> findTargetDevice() async {
       printError('Failed to start iOS Simulator.');
       return null;
     }
-  } else if (os.isLinux || os.isWindows) {
+  } else if (platform.isLinux || platform.isWindows) {
     // On Linux and Windows, for now, we just grab the first connected device we can find.
     if (devices.isEmpty) {
       printError('No devices found.');

@@ -161,7 +161,7 @@ void main() {
 
   testWidgets('Tapping the status bar scrolls to top on iOS', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.iOS));
-    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
@@ -172,7 +172,7 @@ void main() {
 
   testWidgets('Tapping the status bar does not scroll to top on Android', (WidgetTester tester) async {
     await tester.pumpWidget(_buildStatusBarTestApp(TargetPlatform.android));
-    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));

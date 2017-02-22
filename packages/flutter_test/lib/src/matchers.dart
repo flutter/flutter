@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:test/test.dart';
-import 'package:meta/meta.dart';
 
 import 'finders.dart';
 
@@ -67,10 +66,16 @@ const Matcher isNotInCard = const _IsNotInCard();
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// A matcher for functions that throw [FlutterError].
-const Matcher throwsFlutterError = const Throws(isFlutterError);
+Matcher throwsFlutterError = throwsA(isFlutterError);
+
+/// A matcher for functions that throw [AssertionError].
+Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
+
+/// A matcher for [AssertionError].
+const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
@@ -90,7 +95,7 @@ class _FindsWidgetMatcher extends Matcher {
   final int max;
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     assert(min != null || max != null);
     assert(min == null || max == null || min <= max);
     matchState[Finder] = finder;
@@ -184,7 +189,7 @@ class _IsOffstage extends Matcher {
   const _IsOffstage();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     return _hasAncestorMatching(finder, (Widget widget) {
       if (widget is Offstage)
         return widget.offstage;
@@ -200,7 +205,7 @@ class _IsOnstage extends Matcher {
   const _IsOnstage();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) {
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
     Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return false;
@@ -224,7 +229,7 @@ class _IsInCard extends Matcher {
   const _IsInCard();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => _hasAncestorOfType(finder, Card);
 
   @override
   Description describe(Description description) => description.add('in card');
@@ -234,7 +239,7 @@ class _IsNotInCard extends Matcher {
   const _IsNotInCard();
 
   @override
-  bool matches(@checked Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) => !_hasAncestorOfType(finder, Card);
 
   @override
   Description describe(Description description) => description.add('not in card');

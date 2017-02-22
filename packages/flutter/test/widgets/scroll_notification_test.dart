@@ -7,10 +7,10 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Scroll notification basics', (WidgetTester tester) async {
-    ScrollNotification2 notification;
+    ScrollNotification notification;
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification2>(
-      onNotification: (ScrollNotification2 value) {
+    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification value) {
         if (value is ScrollStartNotification || value is ScrollUpdateNotification || value is ScrollEndNotification)
           notification = value;
         return false;
@@ -52,8 +52,8 @@ void main() {
     final List<int> depth0Values = <int>[];
     final List<int> depth1Values = <int>[];
 
-    await tester.pumpWidget(new NotificationListener<ScrollNotification2>(
-      onNotification: (ScrollNotification2 value) {
+    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification value) {
         depth1Types.add(value.runtimeType);
         depth1Values.add(value.depth);
         return false;
@@ -61,8 +61,8 @@ void main() {
       child: new SingleChildScrollView(
         child: new SizedBox(
           height: 1200.0,
-          child: new NotificationListener<ScrollNotification2>(
-            onNotification: (ScrollNotification2 value) {
+          child: new NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification value) {
               depth0Types.add(value.runtimeType);
               depth0Values.add(value.depth);
               return false;

@@ -10,15 +10,32 @@ import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+/// A material design scrollbar.
+///
+/// A scrollbar indicates which portion of a [Scrollable] widget is actually
+/// visible.
+///
+/// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
+/// a [Scrollbar] widget.
+///
+/// See also:
+///
+///  * [ListView], which display a linear, scrollable list of children.
+///  * [GridView], which display a 2 dimensional, scrollable array of children.
 class Scrollbar extends StatefulWidget {
+  /// Creates a material design scrollbar that wraps the given [child].
+  ///
+  /// The [child] should be a source of [ScrollNotification] notifications,
+  /// typically a [Scrollable] widget.
   Scrollbar({
     Key key,
-    this.child,
+    @required this.child,
   }) : super(key: key);
 
-  /// The subtree to place inside the [Scrollbar]. This should include
-  /// a source of [ScrollNotification2] notifications, typically a [Scrollable2]
-  /// widget.
+  /// The subtree to place inside the [Scrollbar].
+  ///
+  /// This should include a source of [ScrollNotification] notifications,
+  /// typically a [Scrollable] widget.
   final Widget child;
 
   @override
@@ -35,7 +52,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     _controller.color = Theme.of(context).highlightColor;
   }
 
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification)
       _controller.update(notification.metrics, notification.axisDirection);
@@ -50,7 +67,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification2>(
+    return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       // TODO(ianh): Maybe we should try to collapse out these repaint
       // boundaries when the scroll bars are invisible.

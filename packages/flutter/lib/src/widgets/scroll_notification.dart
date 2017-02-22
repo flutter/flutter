@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 import 'framework.dart';
 import 'basic.dart';
 import 'notification_listener.dart';
-import 'scrollable.dart' show Scrollable2, Scrollable2State;
+import 'scrollable.dart' show Scrollable, ScrollableState;
 
-/// A description of a [Scrollable2]'s contents, useful for modelling the state
+/// A description of a [Scrollable]'s contents, useful for modelling the state
 /// of the viewport, for example by a [Scrollbar].
 ///
 /// The units used by the [extentBefore], [extentInside], and [extentAfter] are
@@ -19,7 +19,7 @@ import 'scrollable.dart' show Scrollable2, Scrollable2State;
 /// or in percentages, or in units of the [extentInside] (in the latter case,
 /// [extentInside] would always be 1.0).
 class ScrollMetrics {
-  /// Create a description of the metrics of a [Scrollable2]'s contents.
+  /// Create a description of the metrics of a [Scrollable]'s contents.
   ///
   /// The three arguments must be present, non-null, finite, and non-negative.
   const ScrollMetrics({
@@ -57,7 +57,7 @@ class ScrollMetrics {
 /// Mixin for [Notification]s that track how many [RenderAbstractViewport] they
 /// have bubbled through.
 ///
-/// This is used by [ScrollNotification2] and [OverscrollIndicatorNotification].
+/// This is used by [ScrollNotification] and [OverscrollIndicatorNotification].
 abstract class ViewportNotificationMixin extends Notification {
   /// The number of viewports that this notification has bubbled through.
   ///
@@ -83,10 +83,10 @@ abstract class ViewportNotificationMixin extends Notification {
   }
 }
 
-abstract class ScrollNotification2 extends LayoutChangedNotification with ViewportNotificationMixin {
+abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Creates a notification about scrolling.
-  ScrollNotification2({
-    @required Scrollable2State scrollable,
+  ScrollNotification({
+    @required ScrollableState scrollable,
   }) : axisDirection = scrollable.config.axisDirection,
        metrics = scrollable.position.getMetrics(),
        context = scrollable.context;
@@ -98,7 +98,7 @@ abstract class ScrollNotification2 extends LayoutChangedNotification with Viewpo
 
   final ScrollMetrics metrics;
 
-  /// The build context of the [Scrollable2] that fired this notification.
+  /// The build context of the [Scrollable] that fired this notification.
   ///
   /// This can be used to find the scrollable's render objects to determine the
   /// size of the viewport, for instance.
@@ -112,9 +112,9 @@ abstract class ScrollNotification2 extends LayoutChangedNotification with Viewpo
   }
 }
 
-class ScrollStartNotification extends ScrollNotification2 {
+class ScrollStartNotification extends ScrollNotification {
   ScrollStartNotification({
-    @required Scrollable2State scrollable,
+    @required ScrollableState scrollable,
     this.dragDetails,
   }) : super(scrollable: scrollable);
 
@@ -128,16 +128,16 @@ class ScrollStartNotification extends ScrollNotification2 {
   }
 }
 
-class ScrollUpdateNotification extends ScrollNotification2 {
+class ScrollUpdateNotification extends ScrollNotification {
   ScrollUpdateNotification({
-    @required Scrollable2State scrollable,
+    @required ScrollableState scrollable,
     this.dragDetails,
     this.scrollDelta,
   }) : super(scrollable: scrollable);
 
   final DragUpdateDetails dragDetails;
 
-  /// The distance by which the [Scrollable2] was scrolled, in logical pixels.
+  /// The distance by which the [Scrollable] was scrolled, in logical pixels.
   final double scrollDelta;
 
   @override
@@ -149,9 +149,9 @@ class ScrollUpdateNotification extends ScrollNotification2 {
   }
 }
 
-class OverscrollNotification extends ScrollNotification2 {
+class OverscrollNotification extends ScrollNotification {
   OverscrollNotification({
-    @required Scrollable2State scrollable,
+    @required ScrollableState scrollable,
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
@@ -164,7 +164,7 @@ class OverscrollNotification extends ScrollNotification2 {
 
   final DragUpdateDetails dragDetails;
 
-  /// The number of logical pixels that the [Scrollable2] avoided scrolling.
+  /// The number of logical pixels that the [Scrollable] avoided scrolling.
   ///
   /// This will be negative for overscroll on the "start" side and positive for
   /// overscroll on the "end" side.
@@ -188,9 +188,9 @@ class OverscrollNotification extends ScrollNotification2 {
   }
 }
 
-class ScrollEndNotification extends ScrollNotification2 {
+class ScrollEndNotification extends ScrollNotification {
   ScrollEndNotification({
-    @required Scrollable2State scrollable,
+    @required ScrollableState scrollable,
     this.dragDetails,
   }) : super(scrollable: scrollable);
 
@@ -204,9 +204,9 @@ class ScrollEndNotification extends ScrollNotification2 {
   }
 }
 
-class UserScrollNotification extends ScrollNotification2 {
+class UserScrollNotification extends ScrollNotification {
   UserScrollNotification({
-    @required Scrollable2State scrollable,
+    @required ScrollableState scrollable,
     this.direction,
   }) : super(scrollable: scrollable);
 

@@ -48,11 +48,11 @@ abstract class ViewportOffset extends ChangeNotifier {
 
   /// Called when the viewport's extents are established.
   ///
-  /// The argument is the dimension of the [RenderViewport2] in the main axis
+  /// The argument is the dimension of the [RenderViewport] in the main axis
   /// (e.g. the height, for a vertical viewport).
   ///
   /// This may be called redundantly, with the same value, each frame. This is
-  /// called during layout for the [RenderViewport2]. If the viewport is
+  /// called during layout for the [RenderViewport]. If the viewport is
   /// configured to shrink-wrap its contents, it may be called several times,
   /// since the layout is repeated each time the scroll offset is corrected.
   ///
@@ -63,7 +63,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// size (i.e. when its parent lays out), and not during normal scrolling.
   ///
   /// If applying the viewport dimentions changes the scroll offset, return
-  /// false. Otherwise, return true. If you return false, the [RenderViewport2]
+  /// false. Otherwise, return true. If you return false, the [RenderViewport]
   /// will be laid out again with the new scroll offset. This is expensive. (The
   /// return value is answering the question "did you accept these viewport
   /// dimensions unconditionally?"; if the new dimensions change the
@@ -84,14 +84,14 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// because there's only 20.0 pixels of actual scroll slack.
   ///
   /// If applying the content dimensions changes the scroll offset, return
-  /// false. Otherwise, return true. If you return false, the [RenderViewport2]
+  /// false. Otherwise, return true. If you return false, the [RenderViewport]
   /// will be laid out again with the new scroll offset. This is expensive. (The
   /// return value is answering the question "did you accept these content
   /// dimensions unconditionally?"; if the new dimensions change the
   /// [ViewportOffset]'s actual [pixels] value, then the viewport will need to
   /// be laid out again.)
   ///
-  /// This is called at least once each time the [RenderViewport2] is laid out,
+  /// This is called at least once each time the [RenderViewport] is laid out,
   /// even if the values have not changed. It may be called many times if the
   /// scroll offset is corrected (if this returns false). This is always called
   /// after [applyViewportDimension], if that method is called.
@@ -101,13 +101,13 @@ abstract class ViewportOffset extends ChangeNotifier {
   ///
   /// This method should change the [pixels] value by `correction`, but without
   /// calling [notifyListeners]. It is called during layout by the
-  /// [RenderViewport2], before [applyContentDimensions]. After this method is
+  /// [RenderViewport], before [applyContentDimensions]. After this method is
   /// called, the layout will be recomputed and that may result in this method
   /// being called again, though this should be very rare.
   void correctBy(double correction);
 
   /// The direction in which the user is trying to change [pixels], relative to
-  /// the viewport's [RenderViewport2.axisDirection].
+  /// the viewport's [RenderViewport.axisDirection].
   ///
   /// This is used by some slivers to determine how to react to a change in
   /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will

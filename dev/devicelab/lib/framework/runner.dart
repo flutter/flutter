@@ -42,8 +42,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
   });
 
   StreamSubscription<String> stdoutSub = runner.stdout
-      .transform(new Utf8Decoder())
-      .transform(new LineSplitter())
+      .transform(const Utf8Decoder())
+      .transform(const LineSplitter())
       .listen((String line) {
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -51,8 +51,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
   });
 
   StreamSubscription<String> stderrSub = runner.stderr
-      .transform(new Utf8Decoder())
-      .transform(new LineSplitter())
+      .transform(const Utf8Decoder())
+      .transform(const LineSplitter())
       .listen((String line) {
     stderr.writeln('[$taskName] [STDERR] $line');
   });

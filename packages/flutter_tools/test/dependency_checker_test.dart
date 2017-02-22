@@ -19,7 +19,7 @@ void main()  {
   group('DependencyChecker', () {
     final String basePath = fs.path.dirname(fs.path.fromUri(platform.script));
     final String dataPath = fs.path.join(basePath, 'data', 'dart_dependencies_test');
-    MemoryFileSystem testFileSystem;
+    FileSystem testFileSystem;
 
     setUp(() {
       Cache.disableLocking();
@@ -56,7 +56,8 @@ void main()  {
       // Set 'package:self/bar.dart' file modification time to be in the future.
       updateFileModificationTime(barPath, baseTime, 10);
       expect(dependencyChecker.check(baseTime), isTrue);
-    });
+    }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_snapshot is ready on Windows
+
     testUsingContext('syntax error', () {
       final String testPath = fs.path.join(dataPath, 'syntax_error');
       final String mainPath = fs.path.join(testPath, 'main.dart');
@@ -85,11 +86,11 @@ void main()  {
     /// Tests that the flutter tool doesn't crash and displays a warning when its own location
     /// changed since it was last referenced to in a package's .packages file.
     testUsingContext('moved flutter sdk', () async {
-      String destinationPath = '/some/test/location';
+      Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
-      copyDirectorySync(
-        new LocalFileSystem().directory(fs.path.join(dataPath, 'changed_sdk_location')),
-        fs.directory(destinationPath));
+      LocalFileSystem localFileSystem = const LocalFileSystem();
+      Directory sourcePath =  localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
+      copyDirectorySync(sourcePath, destinationPath);
       fs.currentDirectory = destinationPath;
 
       // Doesn't matter what commands we run. Arbitrarily list devices here.
@@ -98,5 +99,5 @@ void main()  {
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
-  }, skip: io.Platform.isWindows); // TODO(goderbauer): Migrate test away from 'touch' bash command.
+  });
 }

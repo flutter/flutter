@@ -54,6 +54,7 @@ export 'src/rendering/table.dart';
 export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport_offset.dart';
+export 'src/rendering/viewport.dart';
 
 export 'package:flutter/foundation.dart' show
   VoidCallback,

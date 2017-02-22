@@ -276,7 +276,7 @@ void main() {
       )
     );
 
-    Scrollable2State scrollableState = tester.firstState(find.byType(Scrollable2));
+    ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
     expect(scrollableState.position.pixels, 0.0);
 
     await tester.tap(find.text('Step 3'));

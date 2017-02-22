@@ -312,14 +312,27 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
   double get value => _indexChangeProgress(controller);
 }
 
-/// A material design widget that displays a horizontal row of tabs. Typically
-/// created as part of an [AppBar] and in conjuction with a [TabBarView].
+/// A material design widget that displays a horizontal row of tabs.
 ///
-/// If a [TabController] is not provided, then there must be a [DefaultTabController]
-/// ancestor.
+/// Typically created as part of an [AppBar] and in conjuction with a
+/// [TabBarView].
 ///
-/// Requires one of its ancestors to be a [Material] widget
+/// If a [TabController] is not provided, then there must be a
+/// [DefaultTabController] ancestor.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+///  * [TabBarView], which displays the contents that the tab bar is selecting
+///    between.
 class TabBar extends StatefulWidget implements AppBarBottomWidget {
+  /// Creates a material design tab bar.
+  ///
+  /// The [tabs] argument must not be nuull and must have more than one widget.
+  ///
+  /// If a [TabController] is not provided, then there must be a
+  /// [DefaultTabController] ancestor.
   TabBar({
     Key key,
     @required this.tabs,
@@ -626,8 +639,6 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
-  double _offsetAnchor;
-  double _offsetBias = 0.0;
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
@@ -722,37 +733,18 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   // Called when the PageView scrolls
-  bool _handleScrollNotification(ScrollNotification2 notification) {
+  bool _handleScrollNotification(ScrollNotification notification) {
     if (_warpUnderwayCount > 0)
       return false;
 
     if (notification.depth != 0)
       return false;
 
-    if (notification is ScrollStartNotification) {
-      _offsetAnchor = null;
-    } else if (notification is ScrollUpdateNotification) {
-      if (!_controller.indexIsChanging) {
-        _offsetAnchor ??= _pageController.page;
-        _controller.offset = (_offsetBias + _pageController.page - _offsetAnchor).clamp(-1.0, 1.0);
-      }
-    } else if (notification is ScrollEndNotification) {
-      // Either the the animation that follows a fling has completed and we've landed
-      // on a new tab view, or a new pointer gesture has interrupted the fling
-      // animation before it has completed.
-      final double integralScrollOffset = _pageController.page.floorToDouble();
-      if (integralScrollOffset == _pageController.page) {
-        _offsetBias = 0.0;
-        // The animation duration is short since the tab indicator and this
-        // page view have already moved.
-        _controller.animateTo(
-          integralScrollOffset.floor(),
-          duration: const Duration(milliseconds: 30)
-        );
-      } else {
-        // The fling scroll animation was interrupted.
-        _offsetBias = _controller.offset;
-      }
+    if (notification is ScrollUpdateNotification && !_controller.indexIsChanging) {
+      _currentIndex = _pageController.page.round();
+      if (_currentIndex != _controller.index)
+        _controller.index = _currentIndex;
+      _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     }
 
     return false;
@@ -760,7 +752,7 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification2>(
+    return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: new PageView(
         controller: _pageController,

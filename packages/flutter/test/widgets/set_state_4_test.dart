@@ -23,8 +23,8 @@ void main() {
   testWidgets('setState() catches being used with an async callback', (WidgetTester tester) async {
     await tester.pumpWidget(new Changer());
     ChangerState s = tester.state(find.byType(Changer));
-    expect(s.test0, isNot(throws));
-    expect(s.test1, isNot(throws));
-    expect(s.test2, throws);
+    expect(s.test0, isNot(throwsFlutterError));
+    expect(s.test1, isNot(throwsFlutterError));
+    expect(s.test2, throwsFlutterError);
   });
 }

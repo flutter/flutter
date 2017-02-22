@@ -165,7 +165,7 @@ class _GestureDemoState extends State<GestureDemo> {
           left: 0.0,
           child: new Card(
             child: new Container(
-              padding: new EdgeInsets.all(4.0),
+              padding: const EdgeInsets.all(4.0),
               child: new Column(
                 children: <Widget>[
                   new Row(

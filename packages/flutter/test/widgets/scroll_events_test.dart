@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
 Widget _buildScroller({ List<String> log }) {
-  return new NotificationListener<ScrollNotification2>(
-    onNotification: (ScrollNotification2 notification) {
+  return new NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification notification) {
       if (notification is ScrollStartNotification) {
         log.add('scroll-start');
       } else if (notification is ScrollUpdateNotification) {
@@ -29,13 +29,13 @@ Widget _buildScroller({ List<String> log }) {
 void main() {
   Completer<Null> animateTo(WidgetTester tester, double newScrollOffset, { @required Duration duration }) {
     Completer<Null> completer = new Completer<Null>();
-    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.animateTo(newScrollOffset, duration: duration, curve: Curves.linear).whenComplete(completer.complete);
     return completer;
   }
 
   void jumpTo(WidgetTester tester, double newScrollOffset) {
-    final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(newScrollOffset);
   }
 
@@ -166,6 +166,6 @@ void main() {
     expect(log.last, equals('scroll-end'));
     log.removeWhere((String value) => value == 'scroll-update');
     expect(log.length, equals(2));
-    expect(tester.state<Scrollable2State>(find.byType(Scrollable2)).position.pixels, equals(0.0));
+    expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, equals(0.0));
   });
 }

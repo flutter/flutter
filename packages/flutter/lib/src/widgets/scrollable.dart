@@ -24,8 +24,8 @@ export 'package:flutter/physics.dart' show Tolerance;
 
 typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 
-class Scrollable2 extends StatefulWidget {
-  Scrollable2({
+class Scrollable extends StatefulWidget {
+  Scrollable({
     Key key,
     this.axisDirection: AxisDirection.down,
     this.controller,
@@ -47,7 +47,7 @@ class Scrollable2 extends StatefulWidget {
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   @override
-  Scrollable2State createState() => new Scrollable2State();
+  ScrollableState createState() => new ScrollableState();
 
   @override
   void debugFillDescription(List<String> description) {
@@ -62,10 +62,10 @@ class Scrollable2 extends StatefulWidget {
   /// Typical usage is as follows:
   ///
   /// ```dart
-  /// Scrollable2State scrollable = Scrollable2.of(context);
+  /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
-  static Scrollable2State of(BuildContext context) {
-    return context.ancestorStateOfType(const TypeMatcher<Scrollable2State>());
+  static ScrollableState of(BuildContext context) {
+    return context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
   }
 
   /// Scrolls the closest enclosing scrollable to make the given context visible.
@@ -76,7 +76,7 @@ class Scrollable2 extends StatefulWidget {
   }) {
     final List<Future<Null>> futures = <Future<Null>>[];
 
-    Scrollable2State scrollable = Scrollable2.of(context);
+    ScrollableState scrollable = Scrollable.of(context);
     while (scrollable != null) {
       futures.add(scrollable.position.ensureVisible(
         context.findRenderObject(),
@@ -85,7 +85,7 @@ class Scrollable2 extends StatefulWidget {
         curve: curve,
       ));
       context = scrollable.context;
-      scrollable = Scrollable2.of(context);
+      scrollable = Scrollable.of(context);
     }
 
     if (futures.isEmpty || duration == Duration.ZERO)
@@ -96,32 +96,32 @@ class Scrollable2 extends StatefulWidget {
   }
 }
 
-/// State object for a [Scrollable2] widget.
+/// State object for a [Scrollable] widget.
 ///
-/// To manipulate a [Scrollable2] widget's scroll position, use the object
+/// To manipulate a [Scrollable] widget's scroll position, use the object
 /// obtained from the [position] property.
 ///
-/// To be informed of when a [Scrollable2] widget is scrolling, use a
-/// [NotificationListener] to listen for [ScrollNotification2] notifications.
+/// To be informed of when a [Scrollable] widget is scrolling, use a
+/// [NotificationListener] to listen for [ScrollNotification] notifications.
 ///
 /// This class is not intended to be subclassed. To specialize the behavior of a
-/// [Scrollable2], provide it with a [ScrollPhysics].
-class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
+/// [Scrollable], provide it with a [ScrollPhysics].
+class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     implements AbstractScrollState {
-  /// The controller for this [Scrollable2] widget's viewport position.
+  /// The controller for this [Scrollable] widget's viewport position.
   ///
-  /// To control what kind of [ScrollPosition] is created for a [Scrollable2],
+  /// To control what kind of [ScrollPosition] is created for a [Scrollable],
   /// provide it with custom [ScrollPhysics] that creates the appropriate
   /// [ScrollPosition] controller in its [ScrollPhysics.createScrollPosition]
   /// method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
 
-  ScrollBehavior2 _configuration;
+  ScrollBehavior _configuration;
 
   // only call this from places that will definitely trigger a rebuild
   void _updatePosition() {
-    _configuration = ScrollConfiguration2.of(context);
+    _configuration = ScrollConfiguration.of(context);
     ScrollPhysics physics = _configuration.getScrollPhysics(context);
     if (config.physics != null)
       physics = config.physics.applyTo(physics);
@@ -147,13 +147,13 @@ class Scrollable2State extends State<Scrollable2> with TickerProviderStateMixin
     _updatePosition();
   }
 
-  bool _shouldUpdatePosition(Scrollable2 oldConfig) {
+  bool _shouldUpdatePosition(Scrollable oldConfig) {
     return config.physics?.runtimeType != oldConfig.physics?.runtimeType
         || config.controller?.runtimeType != oldConfig.controller?.runtimeType;
   }
 
   @override
-  void didUpdateConfig(Scrollable2 oldConfig) {
+  void didUpdateConfig(Scrollable oldConfig) {
     super.didUpdateConfig(oldConfig);
 
     if (config.controller != oldConfig.controller) {

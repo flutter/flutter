@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -115,7 +114,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 6);
-    }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when updateFileModificationTime is ported to Windows
+    });
     testUsingContext('delete a file from the local file system', () async {
       File file = fs.file(fs.path.join(basePath, filePath));
       await file.delete();
@@ -236,7 +235,7 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 31);
-    }, timeout: new Timeout(new Duration(seconds: 5)));
+    }, timeout: const Timeout(const Duration(seconds: 5)));
 
     testUsingContext('delete dev file system', () async {
       await devFS.destroy();

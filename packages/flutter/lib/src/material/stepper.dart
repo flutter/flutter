@@ -525,7 +525,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               onTap: config.steps[i].state != StepState.disabled ? () {
                 // In the vertical case we need to scroll to the newly tapped
                 // step.
-                Scrollable2.ensureVisible(
+                Scrollable.ensureVisible(
                   _keys[i].currentContext,
                   curve: Curves.fastOutSlowIn,
                   duration: kThemeAnimationDuration,

@@ -3,31 +3,31 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('debugAssertAllSchedulerVarsUnset control test', () {
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, isNot(throws));
+    }, isNot(throwsFlutterError));
 
     debugPrintBeginFrameBanner = true;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, throws);
+    }, throwsFlutterError);
 
     debugPrintBeginFrameBanner = false;
     debugPrintEndFrameBanner = true;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, throws);
+    }, throwsFlutterError);
 
     debugPrintEndFrameBanner = false;
 
     expect(() {
       debugAssertAllSchedulerVarsUnset('Example test');
-    }, isNot(throws));
+    }, isNot(throwsFlutterError));
   });
 }

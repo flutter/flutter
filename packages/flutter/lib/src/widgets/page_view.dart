@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/rendering.dart';
 import 'package:meta/meta.dart';
 
 import 'basic.dart';
@@ -14,7 +15,9 @@ import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_view.dart';
+import 'scrollable.dart';
 import 'sliver.dart';
+import 'viewport.dart';
 
 class PageController extends ScrollController {
   PageController({
@@ -86,7 +89,7 @@ class _PagePosition extends ScrollPosition {
     final double oldViewportDimensions = this.viewportDimension;
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = oldPixels == null ? initialPage.toDouble() : oldPixels / oldViewportDimensions;
+    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? initialPage.toDouble() : oldPixels / oldViewportDimensions;
     final double newPixels = page * viewportDimension;
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
@@ -110,91 +113,119 @@ final PageController _defaultPageController = new PageController();
 /// * [SingleChildScrollView], when you need to make a single child scrollable.
 /// * [ListView], for a scrollable list of boxes.
 /// * [GridView], for a scrollable grid of boxes.
-class PageView extends BoxScrollView {
+class PageView extends StatefulWidget {
   PageView({
     Key key,
-    Axis scrollDirection: Axis.horizontal,
-    bool reverse: false,
+    this.scrollDirection: Axis.horizontal,
+    this.reverse: false,
     PageController controller,
-    ScrollPhysics physics: const PageScrollPhysics(),
-    bool shrinkWrap: false,
-    EdgeInsets padding,
+    this.physics: const PageScrollPhysics(),
     this.onPageChanged,
     List<Widget> children: const <Widget>[],
-  }) : childrenDelegate = new SliverChildListDelegate(children), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller ?? _defaultPageController,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  );
+  }) : controller = controller ?? _defaultPageController,
+       childrenDelegate = new SliverChildListDelegate(children),
+       super(key: key);
 
   PageView.builder({
     Key key,
-    Axis scrollDirection: Axis.horizontal,
-    bool reverse: false,
+    this.scrollDirection: Axis.horizontal,
+    this.reverse: false,
     PageController controller,
-    ScrollPhysics physics: const PageScrollPhysics(),
-    bool shrinkWrap: false,
-    EdgeInsets padding,
+    this.physics: const PageScrollPhysics(),
     this.onPageChanged,
     IndexedWidgetBuilder itemBuilder,
     int itemCount,
-  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller ?? _defaultPageController,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  );
+  }) : controller = controller ?? _defaultPageController,
+       childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
+       super(key: key);
 
   PageView.custom({
     Key key,
-    Axis scrollDirection: Axis.horizontal,
-    bool reverse: false,
+    this.scrollDirection: Axis.horizontal,
+    this.reverse: false,
     PageController controller,
-    ScrollPhysics physics: const PageScrollPhysics(),
-    bool shrinkWrap: false,
-    EdgeInsets padding,
+    this.physics: const PageScrollPhysics(),
     this.onPageChanged,
     @required this.childrenDelegate,
-  }) : super(
-    key: key,
-    scrollDirection: scrollDirection,
-    reverse: reverse,
-    controller: controller ?? _defaultPageController,
-    physics: physics,
-    shrinkWrap: shrinkWrap,
-    padding: padding,
-  ) {
+  }) : controller = controller ?? _defaultPageController, super(key: key) {
     assert(childrenDelegate != null);
   }
+
+  final Axis scrollDirection;
+
+  final bool reverse;
+
+  final PageController controller;
+
+  final ScrollPhysics physics;
 
   final ValueChanged<int> onPageChanged;
 
   final SliverChildDelegate childrenDelegate;
 
   @override
-  Widget buildChildLayout(BuildContext context) {
-    return new SliverFill(delegate: childrenDelegate);
+  _PageViewState createState() => new _PageViewState();
+}
+
+class _PageViewState extends State<PageView> {
+  int _lastReportedPage = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastReportedPage = config.controller.initialPage;
+  }
+
+  AxisDirection _getDirection(BuildContext context) {
+    // TODO(abarth): Consider reading direction.
+    switch (config.scrollDirection) {
+      case Axis.horizontal:
+        return config.reverse ? AxisDirection.left : AxisDirection.right;
+      case Axis.vertical:
+        return config.reverse ? AxisDirection.up : AxisDirection.down;
+    }
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final Widget scrollable = super.build(context);
-    return new NotificationListener<ScrollNotification2>(
-      onNotification: (ScrollNotification2 notification) {
-        if (notification.depth == 0 && onPageChanged != null && notification is ScrollEndNotification) {
+    AxisDirection axisDirection = _getDirection(context);
+    return new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        if (notification.depth == 0 && config.onPageChanged != null && notification is ScrollUpdateNotification) {
           final ScrollMetrics metrics = notification.metrics;
-          onPageChanged(metrics.extentBefore ~/ metrics.viewportDimension);
+          final int currentPage = (metrics.extentBefore / metrics.viewportDimension).round();
+          if (currentPage != _lastReportedPage) {
+            _lastReportedPage = currentPage;
+            config.onPageChanged(currentPage);
+          }
         }
         return false;
       },
-      child: scrollable,
+      child: new Scrollable(
+        axisDirection: axisDirection,
+        controller: config.controller,
+        physics: config.physics,
+        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+          return new Viewport(
+            axisDirection: axisDirection,
+            offset: offset,
+            slivers: <Widget>[
+              new SliverFill(delegate: config.childrenDelegate),
+            ],
+          );
+        },
+      ),
     );
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('${config.scrollDirection}');
+    if (config.reverse)
+      description.add('reversed');
+    description.add('${config.controller}');
+    description.add('${config.physics}');
   }
 }

@@ -618,4 +618,46 @@ void main() {
     expect(secondColor, equals(Colors.blue[500]));
   });
 
+  testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
+    TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new TabBarView(
+          controller: controller,
+          children: <Widget>[ new Text('First'), new Text('Second') ],
+        ),
+      ),
+    );
+
+    expect(controller.index, equals(0));
+
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+
+    expect(controller.index, equals(0));
+
+    await gesture.moveBy(const Offset(-380.0, 0.0));
+
+    expect(controller.index, equals(0));
+
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+
+    expect(controller.index, equals(1));
+
+    await gesture.moveBy(const Offset(-40.0, 0.0));
+    await tester.pump();
+
+    expect(controller.index, equals(1));
+
+    await gesture.up();
+    await tester.pumpUntilNoTransientCallbacks();
+    expect(controller.index, equals(1));
+
+    expect(find.text('First'), findsNothing);
+    expect(find.text('Second'), findsOneWidget);
+  });
+
 }

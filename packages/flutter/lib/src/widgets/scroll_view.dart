@@ -64,7 +64,7 @@ abstract class ScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> slivers = buildSlivers(context);
     AxisDirection axisDirection = getDirection(context);
-    return new Scrollable2(
+    return new Scrollable(
       axisDirection: axisDirection,
       controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
       physics: physics,
@@ -76,7 +76,7 @@ abstract class ScrollView extends StatelessWidget {
             slivers: slivers,
           );
         } else {
-          return new Viewport2(
+          return new Viewport(
             axisDirection: axisDirection,
             offset: offset,
             slivers: slivers,

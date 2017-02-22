@@ -35,17 +35,18 @@ typedef dynamic Generator();
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
-  bool skip: false,
+  bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   test(description, () async {
     AppContext testContext = new AppContext();
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
-    testContext.putIfAbsent(Platform, () => new LocalPlatform());
-    testContext.putIfAbsent(FileSystem, () => new LocalFileSystem());
-    testContext.putIfAbsent(ProcessManager, () => new LocalProcessManager());
+    testContext.putIfAbsent(Platform, () => new _FakePlatform());
+    testContext.putIfAbsent(FileSystem, () => const LocalFileSystem());
+    testContext.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
+    testContext.putIfAbsent(Config, () => new Config());
 
     // Order-independent context entries
     testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
@@ -54,12 +55,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     testContext.putIfAbsent(Cache, () => new Cache());
     testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    testContext.putIfAbsent(Config, () => new Config());
-    testContext.putIfAbsent(OperatingSystemUtils, () {
-      MockOperatingSystemUtils os = new MockOperatingSystemUtils();
-      when(os.isWindows).thenReturn(false);
-      return os;
-    });
+    testContext.putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils());
     testContext.putIfAbsent(Xcode, () => new Xcode());
     testContext.putIfAbsent(IOSSimulatorUtils, () {
       MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
@@ -142,6 +138,13 @@ class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
     when(this.getConnectedDevices()).thenReturn(<SimDevice>[]);
   }
+}
+
+class _FakePlatform extends FakePlatform {
+  _FakePlatform() : super.fromPlatform(const LocalPlatform());
+
+  @override
+  bool get isWindows => false;
 }
 
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}

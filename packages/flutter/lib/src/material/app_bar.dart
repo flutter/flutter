@@ -255,8 +255,22 @@ class AppBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// How opaque the toolbar part of the app bar is.
+  ///
+  /// A value of 1.0 is fully opaque, and a value of 0.0 is fully transparent.
+  ///
+  /// Typically, this value is not changed from its default value (1.0). It is
+  /// used by [SliverAppBar] to animate the opacity of the toolbar when the app
+  /// bar is scrolled.
   final double toolbarOpacity;
 
+  /// How opaque the bottom part of the app bar is.
+  ///
+  /// A value of 1.0 is fully opaque, and a value of 0.0 is fully transparent.
+  ///
+  /// Typically, this value is not changed from its default value (1.0). It is
+  /// used by [SliverAppBar] to animate the opacity of the toolbar when the app
+  /// bar is scrolled.
   final double bottomOpacity;
 
   final double _bottomHeight;
@@ -286,10 +300,10 @@ class AppBar extends StatefulWidget {
   }
 
   @override
-  AppBarState createState() => new AppBarState();
+  _AppBarState createState() => new _AppBarState();
 }
 
-class AppBarState extends State<AppBar> {
+class _AppBarState extends State<AppBar> {
   bool _hasDrawer = false;
   bool _canPop = false;
 
@@ -298,7 +312,7 @@ class AppBarState extends State<AppBar> {
     super.dependenciesChanged();
     ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
-    _canPop = ModalRoute.of(context)?.canPop() ?? false;
+    _canPop = ModalRoute.of(context)?.canPop ?? false;
   }
 
   void _handleDrawerButton() {
@@ -539,7 +553,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  bool shouldRebuild(@checked _SliverAppBarDelegate oldDelegate) {
+  bool shouldRebuild(covariant _SliverAppBarDelegate oldDelegate) {
     return leading != oldDelegate.leading
         || title != oldDelegate.title
         || actions != oldDelegate.actions
@@ -563,6 +577,35 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
+/// A material design app bar that integrates with a [CustomScrollView].
+///
+/// An app bar consists of a toolbar and potentially other widgets, such as a
+/// [TabBar] and a [FlexibleSpaceBar]. App bars typically expose one or more
+/// common actions with [IconButton]s which are optionally followed by a
+/// [PopupMenuButton] for less common operations.
+///
+/// Sliver app bars are typically used as the first child of a
+/// [CustomScrollView], which lets the app bar integrate with the scroll view so
+/// that it can vary in height according to the scroll offset or float above the
+/// other content in the scroll view. For a fixed-height app bar at the top of
+/// the screen see [AppBar], which is used in the [Scaffold.appBar] slot.
+///
+/// The AppBar displays the toolbar widgets, [leading], [title], and
+/// [actions], above the [bottom] (if any). If a [flexibleSpace] widget is
+/// specified then it is stacked behind the toolbar and the bottom widget.
+///
+/// See also:
+///
+///  * [CustomScrollView], which integrates the [SliverAppBar] into its
+///    scrolling.
+///  * [AppBar], which is a fixed-height app bar for use in [Scaffold.appBar].
+///  * [TabBar], which is typically placed in the [bottom] slot of the [AppBar]
+///    if the screen has multiple pages arranged in tabs.
+///  * [IconButton], which is used with [actions] to show buttons on the app bar.
+///  * [PopupMenuButton], to show a popup menu on the app bar, via [actions].
+///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
+///    can expand and collapse.
+///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class SliverAppBar extends StatelessWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   SliverAppBar({
@@ -586,6 +629,7 @@ class SliverAppBar extends StatelessWidget {
     assert(primary != null);
     assert(floating != null);
     assert(pinned != null);
+    assert(!floating || !pinned);
   }
 
   /// A widget to display before the [title].
@@ -703,8 +747,17 @@ class SliverAppBar extends StatelessWidget {
   /// See also [AppBar.getExpandedHeightFor].
   final double expandedHeight;
 
+  /// Whether the app bar should become visible as soon as the user scrolls
+  /// towards the app bar.
+  ///
+  /// Otherwise, the user will need to scroll near the top of the scroll view to
+  /// reveal the app bar.
   final bool floating;
 
+  /// Whether the app bar should remain visible at the start of the scroll view.
+  ///
+  /// The app bar can still expand an contract as the user scrolls, but it will
+  /// remain visible rather than being scrolled out of view.
   final bool pinned;
 
   @override

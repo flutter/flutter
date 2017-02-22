@@ -52,6 +52,10 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// Wraps a widget that contains an [AppBar] to convey sizing information down
+  /// to the [FlexibleSpaceBar].
+  ///
+  /// Used by [Scaffold] and [SliverAppBar].
   static Widget createSettings({
     double toolbarOpacity,
     double minExtent,

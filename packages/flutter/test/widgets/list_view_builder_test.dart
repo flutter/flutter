@@ -79,7 +79,7 @@ void main() {
     }
 
     void jumpTo(double newScrollOffset) {
-      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
       scrollable.position.jumpTo(newScrollOffset);
     }
 
@@ -140,7 +140,7 @@ void main() {
     }
 
     void jumpTo(double newScrollOffset) {
-      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
       scrollable.position.jumpTo(newScrollOffset);
     }
 
@@ -191,7 +191,7 @@ void main() {
     );
 
     void jumpTo(double newScrollOffset) {
-      final Scrollable2State scrollable = tester.state(find.byType(Scrollable2));
+      final ScrollableState scrollable = tester.state(find.byType(Scrollable));
       scrollable.position.jumpTo(newScrollOffset);
     }
 
