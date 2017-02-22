@@ -88,7 +88,6 @@ Future<Null> build({
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
-  snapshotterPath ??= artifacts.getArtifactPath(Artifact.skySnapshot);
   outputPath ??= defaultFlxOutputPath;
   kernelPath ??= defaultKernelPath;
   snapshotPath ??= defaultSnapshotPath;
@@ -111,7 +110,7 @@ Future<Null> build({
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
     int result = await createSnapshot(
-      snapshotterPath: snapshotterPath,
+      snapshotterPath: snapshotterPath ?? artifacts.getArtifactPath(Artifact.skySnapshot),
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
