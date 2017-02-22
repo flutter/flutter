@@ -353,7 +353,6 @@ class _AppBarState extends State<AppBar> {
       if (_hasDrawer) {
         leading = new IconButton(
           icon: new Icon(Icons.menu),
-          alignment: FractionalOffset.center,
           onPressed: _handleDrawerButton,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
@@ -372,7 +371,6 @@ class _AppBarState extends State<AppBar> {
           assert(backIcon != null);
           leading = new IconButton(
             icon: new Icon(backIcon),
-            alignment: FractionalOffset.center,
             onPressed: _handleBackButton,
             tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
           );

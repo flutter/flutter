@@ -17,6 +17,9 @@ import 'material.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Minimum logical pixel size of the IconButton.
+const double kMinButtonSize = 48.0;
+
 /// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
@@ -140,13 +143,12 @@ class IconButton extends StatelessWidget {
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
     Widget result = new ConstrainedBox(
-      constraints: new BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+      constraints: new BoxConstraints(minWidth: kMinButtonSize, minHeight: kMinButtonSize),
       child: new Padding(
         padding: padding,
-        child: new ConstrainedBox(
-          constraints: new BoxConstraints.loose(
-            new Size.square(iconSize)
-          ),
+        child: new SizedBox(
+          height: iconSize,
+          width: iconSize,
           child: new Align(
             alignment: alignment,
             child: new IconTheme.merge(
@@ -156,9 +158,9 @@ class IconButton extends StatelessWidget {
                 color: currentColor
               ),
               child: icon
-            )
-          )
-        )
+            ),
+          ),
+        ),
       ),
     );
 
@@ -171,7 +173,7 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
-      radius: math.max(48.0, iconSize + math.min(padding.horizontal, padding.vertical))
+      radius: math.max(kMinButtonSize, iconSize + math.min(padding.horizontal, padding.vertical))
           * 0.55, // x 0.5 for diameter -> radius and + 10% overflow so it doesn't look too square.
     );
   }

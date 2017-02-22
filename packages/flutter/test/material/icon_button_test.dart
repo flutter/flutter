@@ -27,9 +27,9 @@ void main() {
           child: new IconButton(
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     RenderBox iconButton = tester.renderObject(find.byType(IconButton));
@@ -47,9 +47,9 @@ void main() {
             iconSize: 10.0,
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     RenderBox iconButton = tester.renderObject(find.byType(IconButton));
@@ -65,9 +65,9 @@ void main() {
             padding: new EdgeInsets.all(30.0),
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     RenderBox iconButton = tester.renderObject(find.byType(IconButton));
@@ -83,9 +83,9 @@ void main() {
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.ac_unit),
             iconSize: 80.0,
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byType(IconButton));
@@ -121,9 +121,9 @@ void main() {
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.ac_unit),
             iconSize: 80.0,
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byType(IconButton));
@@ -138,10 +138,10 @@ void main() {
             child: new IconButton(
               onPressed: mockOnPressedFunction,
               icon: new Icon(Icons.ac_unit),
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(find.byType(Tooltip), findsNothing);
@@ -157,10 +157,10 @@ void main() {
               onPressed: mockOnPressedFunction,
               icon: new Icon(Icons.ac_unit),
               tooltip: 'Test tooltip',
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(find.byType(Tooltip), findsOneWidget);
@@ -179,10 +179,10 @@ void main() {
               padding: EdgeInsets.zero,
               onPressed: mockOnPressedFunction,
               icon: new Icon(Icons.ac_unit),
-            )
-          ]
-        )
-      )
+            ),
+          ],
+        ),
+      ),
     );
 
     RenderBox barBox = tester.renderObject(find.byType(AppBar));
