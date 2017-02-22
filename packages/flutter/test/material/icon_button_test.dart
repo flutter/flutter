@@ -5,13 +5,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class MockOnPressedFunction implements Function {
+  int called = 0;
+
+  void call() {
+    called++;
+  }
+}
+
 void main() {
+  MockOnPressedFunction mockOnPressedFunction;
+
+  setUp(() {
+    mockOnPressedFunction = new MockOnPressedFunction();
+  });
+
   testWidgets('test default icon buttons are sized up to 48', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Material(
         child: new Center(
           child: new IconButton(
-            onPressed: () {},
+            onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
           )
         )
@@ -20,6 +34,9 @@ void main() {
 
     RenderBox iconButton = tester.renderObject(find.byType(IconButton));
     expect(iconButton.size, new Size(48.0, 48.0));
+
+    await tester.tap(find.byType(IconButton));
+    expect(mockOnPressedFunction.called, 1);
   });
 
   testWidgets('test small icons are sized up to 48dp', (WidgetTester tester) async {
@@ -28,7 +45,7 @@ void main() {
         child: new Center(
           child: new IconButton(
             iconSize: 10.0,
-            onPressed: () {},
+            onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
           )
         )
@@ -46,7 +63,7 @@ void main() {
           child: new IconButton(
             iconSize: 10.0,
             padding: new EdgeInsets.all(30.0),
-            onPressed: () {},
+            onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
           )
         )
@@ -63,7 +80,7 @@ void main() {
         child: new Center(
           child: new IconButton(
             padding: EdgeInsets.zero,
-            onPressed: () {},
+            onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.ac_unit),
             iconSize: 80.0,
           )
@@ -84,7 +101,7 @@ void main() {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget> [
             new IconButton(
-              onPressed: () {},
+              onPressed: mockOnPressedFunction,
               icon: new Icon(Icons.ac_unit),
             ),
           ],
@@ -101,7 +118,7 @@ void main() {
       new Material(
         child: new Center(
           child: new IconButton(
-            onPressed: () {},
+            onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.ac_unit),
             iconSize: 80.0,
           )
@@ -113,6 +130,46 @@ void main() {
     expect(box.size, new Size(96.0, 96.0));
   });
 
+  testWidgets('test tooltip', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new IconButton(
+              onPressed: mockOnPressedFunction,
+              icon: new Icon(Icons.ac_unit),
+            )
+          )
+        )
+      )
+    );
+
+    expect(find.byType(Tooltip), findsNothing);
+
+    // Clear the widget tree.
+    await tester.pumpWidget(new Container(key: new UniqueKey()));
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new IconButton(
+              onPressed: mockOnPressedFunction,
+              icon: new Icon(Icons.ac_unit),
+              tooltip: 'Test tooltip',
+            )
+          )
+        )
+      )
+    );
+
+    expect(find.byType(Tooltip), findsOneWidget);
+    expect(find.byTooltip('Test tooltip'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Test tooltip'));
+    expect(mockOnPressedFunction.called, 1);
+  });
+
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Scaffold(
@@ -120,7 +177,7 @@ void main() {
           actions: <Widget>[
             new IconButton(
               padding: EdgeInsets.zero,
-              onPressed: () {},
+              onPressed: mockOnPressedFunction,
               icon: new Icon(Icons.ac_unit),
             )
           ]
