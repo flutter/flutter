@@ -131,6 +131,27 @@ AxisDirection applyGrowthDirectionToAxisDirection(AxisDirection axisDirection, G
   return null;
 }
 
+/// Flips the [ScrollDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
+///
+/// Specifically, returns `scrollDirection` if `scrollDirection` is
+/// [GrowthDirection.forward], otherwise returns [flipScrollDirection] applied to
+/// `scrollDirection`.
+///
+/// This function is useful in [RenderSliver] subclasses that are given both an
+/// [ScrollDirection] and a [GrowthDirection] and wish to compute the
+/// [ScrollDirection] in which growth will occur.
+ScrollDirection applyGrowthDirecitonToScrollDirection(ScrollDirection scrollDirection, GrowthDirection growthDirection) {
+  assert(scrollDirection != null);
+  assert(growthDirection != null);
+  switch (growthDirection) {
+    case GrowthDirection.forward:
+      return scrollDirection;
+    case GrowthDirection.reverse:
+      return flipScrollDirection(scrollDirection);
+  }
+  return null;
+}
+
 /// Immutable layout constraints for [RenderSliver] layout.
 ///
 /// The [SliverConstraints] describe the current scroll state of the viewport
@@ -524,7 +545,7 @@ class SliverGeometry {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.write('SliverGeometry(');
       buffer.write('scrollExtent: ${scrollExtent.toStringAsFixed(1)}, ');
       if (paintExtent > 0.0) {

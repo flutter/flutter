@@ -33,6 +33,23 @@ enum ScrollDirection {
   reverse,
 }
 
+/// Returns the opposite of the given [ScrollDirection].
+///
+/// Specifically, returns [AxisDirection.reverse] for [AxisDirection.forward]
+/// (and vice versa) and returns [ScrollDirection.idle] for
+/// [ScrollDirection.idle].
+ScrollDirection flipScrollDirection(ScrollDirection direction) {
+  switch (direction) {
+    case ScrollDirection.idle:
+      return ScrollDirection.idle;
+    case ScrollDirection.forward:
+      return ScrollDirection.reverse;
+    case ScrollDirection.reverse:
+      return ScrollDirection.forward;
+  }
+  return null;
+}
+
 abstract class ViewportOffset extends ChangeNotifier {
   ViewportOffset();
   factory ViewportOffset.fixed(double value) = _FixedViewportOffset;

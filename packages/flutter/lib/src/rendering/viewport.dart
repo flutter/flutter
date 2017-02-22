@@ -129,28 +129,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ) {
     assert(scrollOffset.isFinite);
     assert(scrollOffset >= 0.0);
-    ScrollDirection adjustedUserScrollDirection;
-    switch (growthDirection) {
-      case GrowthDirection.forward:
-        adjustedUserScrollDirection = offset.userScrollDirection;
-        break;
-      case GrowthDirection.reverse:
-        switch (offset.userScrollDirection) {
-          case ScrollDirection.forward:
-            adjustedUserScrollDirection = ScrollDirection.reverse;
-            break;
-          case ScrollDirection.reverse:
-            adjustedUserScrollDirection = ScrollDirection.forward;
-            break;
-          case ScrollDirection.idle:
-            adjustedUserScrollDirection = ScrollDirection.idle;
-            break;
-        }
-        break;
-    }
+    final ScrollDirection adjustedUserScrollDirection =
+        applyGrowthDirecitonToScrollDirection(offset.userScrollDirection, growthDirection);
     assert(adjustedUserScrollDirection != null);
     double maxPaintOffset = layoutOffset;
-    double initialLayoutOffset = layoutOffset;
+    final double initialLayoutOffset = layoutOffset;
     while (child != null) {
       assert(scrollOffset >= 0.0);
       child.layout(new SliverConstraints(
