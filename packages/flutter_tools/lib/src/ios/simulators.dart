@@ -341,6 +341,9 @@ class IOSSimulator extends Device {
   }
 
   @override
+  bool isLatestBuildInstalled(ApplicationPackage app) => false;
+
+  @override
   bool installApp(ApplicationPackage app) {
     try {
       IOSApp iosApp = app;

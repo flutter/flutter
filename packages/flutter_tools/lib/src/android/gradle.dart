@@ -175,5 +175,10 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName) async {
   File apkFile = fs.file('$gradleAppOutDir/$apkFilename');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
   apkFile.copySync('$gradleAppOutDir/app.apk');
+
+  printTrace('calculateSha: $gradleAppOutDir/app.apk');
+  File apkShaFile = fs.file('$gradleAppOutDir/app.apk.sha1');
+  apkShaFile.writeAsStringSync(calculateSha(apkFile));
+
   printStatus('Built $apkFilename (${getSizeAsMB(apkFile.lengthSync())}).');
 }

@@ -151,6 +151,9 @@ abstract class Device {
   /// Check if a version of the given app is already installed
   bool isAppInstalled(ApplicationPackage app);
 
+  /// Check if the latest build of the [app] is already installed.
+  bool isLatestBuildInstalled(ApplicationPackage app);
+
   /// Install an app package on the current device
   bool installApp(ApplicationPackage app);
 
