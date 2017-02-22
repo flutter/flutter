@@ -17,7 +17,8 @@ namespace shell {
 /// rendering API. A frame may only be sumitted once.
 class SurfaceFrame {
  public:
-  using SubmitCallback = std::function<bool(SkCanvas* canvas)>;
+  using SubmitCallback =
+      std::function<bool(const SurfaceFrame& surface_frame, SkCanvas* canvas)>;
 
   SurfaceFrame(sk_sp<SkSurface> surface, SubmitCallback submit_callback);
 
@@ -26,6 +27,8 @@ class SurfaceFrame {
   bool Submit();
 
   SkCanvas* SkiaCanvas();
+
+  sk_sp<SkSurface> SkiaSurface() const;
 
  private:
   bool submitted_;

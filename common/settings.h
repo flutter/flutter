@@ -25,6 +25,7 @@ struct Settings {
   bool enable_dart_profiling = false;
   bool use_test_fonts = false;
   bool dart_non_checked_mode = false;
+  bool force_software_rendering = false;
   std::string aot_snapshot_path;
   std::string aot_vm_snapshot_data_filename;
   std::string aot_vm_snapshot_instr_filename;

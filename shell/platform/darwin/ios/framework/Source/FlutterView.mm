@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
+
+#include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/shell/common/rasterizer.h"
@@ -17,19 +19,25 @@
 @implementation FlutterView
 
 - (void)layoutSubviews {
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  CAEAGLLayer* layer = reinterpret_cast<CAEAGLLayer*>(self.layer);
-
-  layer.allowsGroupOpacity = YES;
-  layer.opaque = YES;
-  layer.contentsScale = screenScale;
-  layer.rasterizationScale = screenScale;
+  if ([self.layer isKindOfClass:[CAEAGLLayer class]]) {
+    CAEAGLLayer* layer = reinterpret_cast<CAEAGLLayer*>(self.layer);
+    layer.allowsGroupOpacity = YES;
+    layer.opaque = YES;
+    CGFloat screenScale = [UIScreen mainScreen].scale;
+    layer.contentsScale = screenScale;
+    layer.rasterizationScale = screenScale;
+  }
 
   [super layoutSubviews];
 }
 
 + (Class)layerClass {
+#if TARGET_IPHONE_SIMULATOR
+  return blink::Settings::Get().force_software_rendering ? [CALayer class]
+                                                         : [CAEAGLLayer class];
+#else   // TARGET_IPHONE_SIMULATOR
   return [CAEAGLLayer class];
+#endif  // TARGET_IPHONE_SIMULATOR
 }
 
 - (BOOL)enableInputClicksWhenVisible {

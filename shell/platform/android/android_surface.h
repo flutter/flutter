@@ -6,6 +6,7 @@
 #define FLUTTER_SHELL_PLATFORM_ANDROID_ANDROID_SURFACE_H_
 
 #include <memory>
+
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/shell/platform/android/android_native_window.h"
