@@ -645,8 +645,19 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   _TimePickerMode _mode = _TimePickerMode.hour;
   TimeOfDay _selectedTime;
 
+  void _vibrate() {
+    switch (Theme.of(context).platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        HapticFeedback.vibrate();
+        break;
+      case TargetPlatform.iOS:
+        break;
+    }
+  }
+
   void _handleModeChanged(_TimePickerMode mode) {
-    HapticFeedback.vibrate();
+    _vibrate();
     setState(() {
       _mode = mode;
     });
