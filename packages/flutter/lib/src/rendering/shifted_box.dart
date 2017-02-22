@@ -700,6 +700,10 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 
 /// A delegate for computing the layout of a render object with a single child.
 abstract class SingleChildLayoutDelegate {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const SingleChildLayoutDelegate();
+
   // TODO(abarth): This class should take a Listenable to drive relayout.
 
   /// The size of this object given the incoming constraints.

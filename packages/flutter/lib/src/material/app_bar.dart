@@ -95,19 +95,16 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
 class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
+  const _ToolbarContainerLayout();
+
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return new BoxConstraints(
-      minWidth: constraints.minWidth,
-      maxWidth: constraints.maxWidth,
-      minHeight: kToolbarHeight,
-      maxHeight: kToolbarHeight,
-    );
+    return constraints.tighten(height: kToolbarHeight);
   }
 
   @override
   Size getSize(BoxConstraints constraints) {
-    return constraints.tighten(height: kToolbarHeight).biggest;
+    return new Size(constraints.maxWidth, kToolbarHeight);
   }
 
   @override
@@ -452,7 +449,7 @@ class _AppBarState extends State<AppBar> {
     // appear to scroll upwards within its shrinking container.
     Widget appBar = new ClipRect(
       child: new CustomSingleChildLayout(
-        delegate: new _ToolbarContainerLayout(),
+        delegate: const _ToolbarContainerLayout(),
         child: new IconTheme.merge(
           context: context,
           data: appBarIconTheme,
