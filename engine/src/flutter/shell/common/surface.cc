@@ -17,7 +17,7 @@ SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
 SurfaceFrame::~SurfaceFrame() {
   if (submit_callback_) {
     // Dropping without a Submit.
-    submit_callback_(nullptr);
+    submit_callback_(*this, nullptr);
   }
 }
 
@@ -35,12 +35,16 @@ SkCanvas* SurfaceFrame::SkiaCanvas() {
   return surface_ != nullptr ? surface_->getCanvas() : nullptr;
 }
 
+sk_sp<SkSurface> SurfaceFrame::SkiaSurface() const {
+  return surface_;
+}
+
 bool SurfaceFrame::PerformSubmit() {
   if (submit_callback_ == nullptr) {
     return false;
   }
 
-  if (submit_callback_(SkiaCanvas())) {
+  if (submit_callback_(*this, SkiaCanvas())) {
     return true;
   }
 

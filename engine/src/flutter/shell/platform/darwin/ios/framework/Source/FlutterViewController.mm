@@ -10,8 +10,6 @@
 #include "base/mac/scoped_nsobject.h"
 #include "base/strings/sys_string_conversions.h"
 #include "flutter/common/threads.h"
-#include "flutter/shell/gpu/gpu_rasterizer.h"
-#include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/common/string_conversions.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
@@ -473,8 +471,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   CHECK(_platformView != nullptr);
 
   if (appeared) {
-    _platformView->NotifyCreated(
-        std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
+    _platformView->NotifyCreated();
   } else {
     _platformView->NotifyDestroyed();
   }

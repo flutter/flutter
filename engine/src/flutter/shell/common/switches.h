@@ -93,6 +93,10 @@ DEF_SWITCH(DartNonCheckedMode,
            "precompiled and checked mode is unsupported. However, this flag "
            "may be specified if the user wishes to run in the debug product "
            "mode (i.e. with JIT or DBC) with checked mode off.")
+DEF_SWITCH(ForceSoftwareRendering,
+           "force-software-rendering",
+           "On platforms where it is supported (only iOS simulator currently), "
+           "the shell will attempt to use the software backend for rendering.")
 DEF_SWITCHES_END
 
 void PrintUsage(const std::string& executable_name);

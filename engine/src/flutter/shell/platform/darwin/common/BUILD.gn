@@ -22,6 +22,7 @@ source_set("common") {
     "//dart/runtime:libdart",
     "//flutter/common",
     "//flutter/flow",
+    "//flutter/fml",
     "//flutter/runtime",
     "//flutter/shell/common",
     "//flutter/shell/gpu",

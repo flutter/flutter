@@ -84,7 +84,8 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
 
   auto weak_this = weak_factory_.GetWeakPtr();
 
-  SurfaceFrame::SubmitCallback submit_callback = [weak_this](SkCanvas* canvas) {
+  SurfaceFrame::SubmitCallback submit_callback = [weak_this](
+      const SurfaceFrame& surface_frame, SkCanvas* canvas) {
     return weak_this ? weak_this->PresentSurface(canvas) : false;
   };
 
