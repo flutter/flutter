@@ -13,10 +13,10 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X')
-          )
-        )
-      )
+            title: new Text('X'),
+          ),
+        ),
+      ),
     );
 
     Finder title = find.text('X');
@@ -32,10 +32,10 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X')
-          )
-        )
-      )
+            title: new Text('X'),
+          ),
+        ),
+      ),
     );
 
     center = tester.getCenter(title);
@@ -51,7 +51,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: true,
-            title: new Text('X')
+            title: new Text('X'),
           )
         )
       )
@@ -65,16 +65,35 @@ void main() {
     expect(center.x, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:false title left edge is 72.0 ', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title left edge is 16.0 ', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: new Text('X')
-          )
-        )
-      )
+            title: new Text('X'),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('X')).x, 16.0);
+  });
+
+  testWidgets(
+    'AppBar centerTitle:false leading button title left edge is 72.0 ',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            centerTitle: false,
+            title: new Text('X'),
+          ),
+          // A drawer causes a leading hamburger.
+          drawer: new Drawer(),
+        ),
+      ),
     );
 
     expect(tester.getTopLeft(find.text('X')).x, 72.0);
@@ -85,7 +104,7 @@ void main() {
     // between the leading and actions widgets.
 
     Key titleKey = new UniqueKey();
-    Widget leading;
+    Widget leading = new Container();
     List<Widget> actions;
 
     Widget buildApp() {
@@ -96,11 +115,11 @@ void main() {
             centerTitle: false,
             title: new Container(
               key: titleKey,
-              constraints: new BoxConstraints.loose(const Size(1000.0, 1000.0))
+              constraints: new BoxConstraints.loose(const Size(1000.0, 1000.0)),
             ),
-            actions: actions
-          )
-        )
+            actions: actions,
+          ),
+        ),
       );
     }
 
@@ -146,11 +165,11 @@ void main() {
             centerTitle: true,
             title: new Container(
               key: titleKey,
-              constraints: new BoxConstraints.loose(new Size(titleWidth, 1000.0))
+              constraints: new BoxConstraints.loose(new Size(titleWidth, 1000.0)),
             ),
-            actions: actions
-          )
-        )
+            actions: actions,
+          ),
+        ),
       );
     }
 
@@ -188,11 +207,11 @@ void main() {
           width: 0.0,
           child: new Scaffold(
             appBar: new AppBar(
-              title: new Text('X')
-            )
-          )
-        )
-      )
+              title: new Text('X'),
+            ),
+          ),
+        ),
+      ),
     );
 
     Finder title = find.text('X');
@@ -219,7 +238,7 @@ void main() {
             ],
           ),
         ),
-      )
+      ),
     );
 
     // The vertical center of the widget with key, in global coordinates.
@@ -240,8 +259,8 @@ void main() {
             title: new Text('X'),
           ),
           drawer: new Column(), // Doesn't really matter. Triggers a hamburger regardless.
-        )
-      )
+        ),
+      ),
     );
 
     Finder hamburger = find.byTooltip('Open navigation menu');
@@ -271,8 +290,8 @@ void main() {
               ),
             ],
           ),
-        )
-      )
+        ),
+      ),
     );
 
     Finder addButton = find.byTooltip('Add');

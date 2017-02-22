@@ -47,7 +47,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   final bool centerTitle;
 
   static const double kLeadingWidth = 56.0; // So it's square with kToolbarHeight.
-  static const double kTitleLeft = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
+  static const double kTitleLeftWithLeading = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
+  static const double kTitleLeftWithoutLeading = 16.0;
 
   @override
   void performLayout(Size size) {
@@ -69,11 +70,13 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.title)) {
-      final double maxWidth = math.max(size.width - kTitleLeft - actionsWidth, 0.0);
+      final double titleLeftMargin =
+          hasChild(_ToolbarSlot.leading) ? kTitleLeftWithLeading : kTitleLeftWithoutLeading;
+      final double maxWidth = math.max(size.width - titleLeftMargin - actionsWidth, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
       final double titleY = (size.height - titleSize.height) / 2.0;
-      double titleX = kTitleLeft;
+      double titleX = titleLeftMargin;
 
       // If the centered title will not fit between the leading and actions
       // widgets, then align its left or right edge with the adjacent boundary.
@@ -81,8 +84,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
         titleX = (size.width - titleSize.width) / 2.0;
         if (titleX + titleSize.width > size.width - actionsWidth)
           titleX = size.width - actionsWidth - titleSize.width;
-        else if (titleX < kTitleLeft)
-          titleX = kTitleLeft;
+        else if (titleX < titleLeftMargin)
+          titleX = titleLeftMargin;
       }
 
       positionChild(_ToolbarSlot.title, new Offset(titleX, titleY));
