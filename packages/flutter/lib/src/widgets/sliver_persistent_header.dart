@@ -31,7 +31,6 @@ class SliverPersistentHeader extends StatelessWidget {
     assert(delegate != null);
     assert(pinned != null);
     assert(floating != null);
-    assert(!pinned || !floating);
   }
 
   final SliverPersistentHeaderDelegate delegate;
@@ -42,6 +41,8 @@ class SliverPersistentHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (floating && pinned)
+      return new _SliverFloatingPinnedPersistentHeader(delegate: delegate);
     if (pinned)
       return new _SliverPinnedPersistentHeader(delegate: delegate);
     if (floating)
@@ -224,6 +225,23 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
     return new _RenderSliverFloatingPersistentHeaderForWidgets();
+  }
+}
+
+// This class exists to work around https://github.com/dart-lang/sdk/issues/15101
+abstract class _RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPinnedPersistentHeader { }
+
+class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends _RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
+
+class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
+  _SliverFloatingPinnedPersistentHeader({
+    Key key,
+    @required SliverPersistentHeaderDelegate delegate,
+  }) : super(key: key, delegate: delegate);
+
+  @override
+  _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    return new _RenderSliverFloatingPinnedPersistentHeaderForWidgets();
   }
 }
 

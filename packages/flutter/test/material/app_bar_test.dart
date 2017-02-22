@@ -4,7 +4,54 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight }) {
+  return new Scaffold(
+    body: new CustomScrollView(
+      primary: true,
+      slivers: <Widget>[
+        new SliverAppBar(
+          title: new Text('AppBar Title'),
+          floating: floating,
+          pinned: pinned,
+          expandedHeight: expandedHeight,
+          bottom: new TabBar(
+            tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+          ),
+        ),
+        new SliverToBoxAdapter(
+          child: new Container(
+            height: 1200.0,
+            decoration: new BoxDecoration(backgroundColor: Colors.orange[400]),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+ScrollController primaryScrollController(WidgetTester tester) {
+  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+}
+
+bool appBarIsVisible(WidgetTester tester) {
+  final RenderSliver sliver = tester.element(find.byType(SliverAppBar)).findRenderObject();
+  return sliver.geometry.visible;
+}
+
+double appBarHeight(WidgetTester tester) {
+  final Element element = tester.element(find.byType(AppBar));
+  final RenderBox box = element.findRenderObject();
+  return box.size.height;
+}
+
+double tabBarHeight(WidgetTester tester) {
+  final Element element = tester.element(find.byType(TabBar));
+  final RenderBox box = element.findRenderObject();
+  return box.size.height;
+}
 
 void main() {
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
@@ -286,4 +333,105 @@ void main() {
     expect(tester.getSize(shareButton), new Size(48.0, 56.0));
   });
 
+  testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: false,
+      expandedHeight: null,
+    ));
+
+    ScrollController controller = primaryScrollController(tester);
+    expect(controller.offset, 0.0);
+    expect(appBarIsVisible(tester), true);
+
+    final double initialAppBarHeight = appBarHeight(tester);
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar partially out of view
+    controller.jumpTo(50.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the not-pinned appbar out of view
+    controller.jumpTo(600.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), false);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the not-pinned appbar back into view
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: false,
+      pinned: true,
+      expandedHeight: 128.0,
+    ));
+
+    ScrollController controller = primaryScrollController(tester);
+    expect(controller.offset, 0.0);
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), 128.0);
+
+    final double initialAppBarHeight = 128.0;
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar, collapsing the expanded height. At this
+    // point both the toolbar and the tabbar are visible.
+    controller.jumpTo(600.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+    expect(appBarHeight(tester), lessThan(initialAppBarHeight));
+    expect(appBarHeight(tester), greaterThan(initialTabBarHeight));
+
+    // Scroll the not-pinned appbar back into view
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, pinned and floating', (WidgetTester tester) async {
+
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: true,
+      expandedHeight: 128.0,
+    ));
+
+    ScrollController controller = primaryScrollController(tester);
+    expect(controller.offset, 0.0);
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), 128.0);
+
+    final double initialAppBarHeight = 128.0;
+    final double initialTabBarHeight = tabBarHeight(tester);
+
+    // Scroll the not-pinned appbar, collapsing the expanded height. At this
+    // point only the tabBar is visible.
+    controller.jumpTo(600.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+    expect(appBarHeight(tester), lessThan(initialAppBarHeight));
+    expect(appBarHeight(tester), initialTabBarHeight);
+
+    // Scroll the not-pinned appbar back into view
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarHeight(tester), initialAppBarHeight);
+    expect(tabBarHeight(tester), initialTabBarHeight);
+  });
 }

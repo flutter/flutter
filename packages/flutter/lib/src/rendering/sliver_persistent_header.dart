@@ -265,6 +265,22 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   // direction. Negative if we're scrolled off the top.
   double _childPosition;
 
+  @protected
+  void _updateGeometry() {
+    final double maxExtent = this.maxExtent;
+    final double paintExtent = maxExtent - _effectiveScrollOffset;
+    final double layoutExtent = maxExtent - constraints.scrollOffset;
+    geometry = new SliverGeometry(
+      scrollExtent: maxExtent,
+      paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
+      layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
+      maxPaintExtent: maxExtent,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
+    );
+    _childPosition = math.min(0.0, paintExtent - childExtent);
+  }
+
+
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
@@ -285,16 +301,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       _effectiveScrollOffset = constraints.scrollOffset;
     }
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: _effectiveScrollOffset < constraints.scrollOffset);
-    final double paintExtent = maxExtent - _effectiveScrollOffset;
-    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
-    geometry = new SliverGeometry(
-      scrollExtent: maxExtent,
-      paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
-      layoutExtent: layoutExtent,
-      maxPaintExtent: maxExtent,
-      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
-    );
-    _childPosition = math.min(0.0, paintExtent - childExtent);
+    _updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
   }
 
@@ -308,5 +315,27 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('effective scroll offset: ${_effectiveScrollOffset?.toStringAsFixed(1)}');
+  }
+}
+
+abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPersistentHeader {
+  RenderSliverFloatingPinnedPersistentHeader({
+    RenderBox child,
+  }) : super(child: child);
+
+  @override
+  void _updateGeometry() {
+    final double minExtent = this.maxExtent;
+    final double maxExtent = this.maxExtent;
+    final double paintExtent = (maxExtent - _effectiveScrollOffset);
+    final double layoutExtent = (maxExtent - constraints.scrollOffset);
+    geometry = new SliverGeometry(
+      scrollExtent: maxExtent,
+      paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
+      layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
+      maxPaintExtent: maxExtent,
+      hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
+    );
+    _childPosition = 0.0;
   }
 }
