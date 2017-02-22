@@ -70,14 +70,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         String javaVersion;
 
         try {
-          printTrace('java -version');
+          printTrace('javac -version');
 
-          ProcessResult result = processManager.runSync(<String>['java', '-version']);
-          if (result.exitCode == 0) {
-            javaVersion = result.stderr;
-            List<String> versionLines = javaVersion.split('\n');
-            javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-          }
+          ProcessResult result = processManager.runSync(<String>['javac', '-version']);
+          if (result.exitCode == 0)
+            javaVersion = result.stderr.split('\n')[0];
         } catch (error) {
         }
 
@@ -86,6 +83,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
               'No Java Development Kit (JDK) found; you can download the JDK from $_kJdkDownload.'
           ));
         } else {
+          messages.add(new ValidationMessage('Java Development Kit (JDK) found: $javaVersion'));
           type = ValidationType.installed;
         }
       } else {
