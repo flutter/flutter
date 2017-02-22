@@ -153,6 +153,9 @@ class IOSDevice extends Device {
   }
 
   @override
+  bool isLatestBuildInstalled(ApplicationPackage app) => false;
+
+  @override
   bool installApp(ApplicationPackage app) {
     IOSApp iosApp = app;
     Directory bundle = fs.directory(iosApp.deviceBundlePath);

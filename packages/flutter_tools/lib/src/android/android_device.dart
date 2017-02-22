@@ -196,6 +196,10 @@ class AndroidDevice extends Device {
     return '/data/local/tmp/sky.${app.id}.sha1';
   }
 
+  String _getDeviceApkSha1(ApplicationPackage app) {
+    return runSync(adbCommandForDevice(<String>['shell', 'cat', _getDeviceSha1Path(app)]));
+  }
+
   String _getSourceSha1(ApplicationPackage app) {
     AndroidApk apk = app;
     File shaFile = fs.file('${apk.apkPath}.sha1');
@@ -210,6 +214,12 @@ class AndroidDevice extends Device {
     // This call takes 400ms - 600ms.
     String listOut = runCheckedSync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
     return LineSplitter.split(listOut).contains("package:${app.id}");
+  }
+
+  @override
+  bool isLatestBuildInstalled(ApplicationPackage app) {
+    String installedSha1 = _getDeviceApkSha1(app);
+    return installedSha1.isNotEmpty && installedSha1 == _getSourceSha1(app);
   }
 
   @override
@@ -286,16 +296,20 @@ class AndroidDevice extends Device {
       );
     }
 
-    if (isAppInstalled(package)) {
-      printStatus('Uninstalling old version...');
-      if (!uninstallApp(package))
-        printError('Warning: uninstalling old version failed');
-    }
+    if (isLatestBuildInstalled(package)) {
+      printStatus('Latest build already installed.');
+    } else {
+      if (isAppInstalled(package)) {
+        printStatus('Uninstalling old version...');
+        if (!uninstallApp(package))
+          printError('Warning: uninstalling old version failed');
+      }
 
-    printTrace('Installing APK.');
-    if (!installApp(package)) {
-      printTrace('Error: Failed to install APK.');
-      return new LaunchResult.failed();
+      printTrace('Installing APK.');
+      if (!installApp(package)) {
+        printTrace('Error: Failed to install APK.');
+        return new LaunchResult.failed();
+      }
     }
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
