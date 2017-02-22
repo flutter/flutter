@@ -17,6 +17,9 @@ import 'material.dart';
 import 'theme.dart';
 import 'tooltip.dart';
 
+// Minimum logical pixel size of the IconButton.
+const double kMinButtonSize = 48.0;
+
 /// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
@@ -30,6 +33,8 @@ import 'tooltip.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// Will be automatically sized up to the recommended 48 logical pixels if smaller.
+///
 /// See also:
 ///
 ///  * [Icons]
@@ -42,14 +47,14 @@ class IconButton extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   ///
-  /// The [size], [padding], and [alignment] arguments must not be null (though
+  /// The [iconSize], [padding], and [alignment] arguments must not be null (though
   /// they each have default values).
   ///
   /// The [icon] argument must be specified, and is typically either an [Icon]
   /// or an [ImageIcon].
   const IconButton({
     Key key,
-    this.size: 24.0,
+    this.iconSize: 24.0,
     this.padding: const EdgeInsets.all(8.0),
     this.alignment: FractionalOffset.center,
     @required this.icon,
@@ -69,7 +74,7 @@ class IconButton extends StatelessWidget {
   /// fit the [Icon]. If you were to set the size of the [Icon] using
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
-  final double size;
+  final double iconSize;
 
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
@@ -136,29 +141,29 @@ class IconButton extends StatelessWidget {
       currentColor = color;
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
-    Widget result = new Padding(
-      padding: padding,
-      child: new LimitedBox(
-        maxWidth: size,
-        maxHeight: size,
-        child: new ConstrainedBox(
-          constraints: new BoxConstraints.loose(
-            new Size.square(math.max(size, Material.defaultSplashRadius * 2.0))
-          ),
+
+    Widget result = new ConstrainedBox(
+      constraints: new BoxConstraints(minWidth: kMinButtonSize, minHeight: kMinButtonSize),
+      child: new Padding(
+        padding: padding,
+        child: new SizedBox(
+          height: iconSize,
+          width: iconSize,
           child: new Align(
             alignment: alignment,
             child: new IconTheme.merge(
               context: context,
               data: new IconThemeData(
-                size: size,
+                size: iconSize,
                 color: currentColor
               ),
               child: icon
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
+
     if (tooltip != null) {
       result = new Tooltip(
         message: tooltip,
@@ -168,7 +173,11 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
-      radius: math.max(size, Material.defaultSplashRadius),
+      radius: math.max(
+        Material.defaultSplashRadius,
+        (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+        // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
+      ),
     );
   }
 

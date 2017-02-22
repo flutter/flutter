@@ -42,6 +42,69 @@ class TestDataSource extends DataTableSource {
 }
 
 void main() {
+  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
+    TestDataSource source = new TestDataSource();
+
+    List<String> log = <String>[];
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new PaginatedDataTable(
+        header: new Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: <int>[
+          2, 4, 8, 16,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {
+          log.add('rows-per-page-changed: $rowsPerPage');
+        },
+        onPageChanged: (int rowIndex) {
+          log.add('page-changed: $rowIndex');
+        },
+        columns: <DataColumn>[
+          new DataColumn(label: new Text('Name')),
+          new DataColumn(label: new Text('Calories'), numeric: true),
+          new DataColumn(label: new Text('Generation')),
+        ],
+      )
+    ));
+
+    await tester.tap(find.byTooltip('Next page'));
+
+    expect(log, <String>['page-changed: 2']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsNothing);
+    expect(find.text('Eclair (0)'), findsOneWidget);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    await tester.tap(find.icon(Icons.chevron_left));
+
+    expect(log, <String>['page-changed: 0']);
+    log.clear();
+
+    await tester.pump();
+
+    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
+    expect(find.text('Eclair (0)'), findsNothing);
+    expect(find.text('Gingerbread (0)'), findsNothing);
+
+    await tester.tap(find.icon(Icons.chevron_left));
+
+    expect(log, isEmpty);
+
+    await tester.tap(find.text('2'));
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+
+    await tester.tap(find.text('8').last);
+    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+
+    expect(log, <String>['rows-per-page-changed: 8']);
+    log.clear();
+  });
+
   testWidgets('PaginatedDataTable control test', (WidgetTester tester) async {
     TestDataSource source = new TestDataSource()
       ..generation = 42;
@@ -124,69 +187,6 @@ void main() {
 
     await tester.tap(find.icon(Icons.adjust));
     expect(log, <String>['action: adjust']);
-    log.clear();
-  });
-
-  testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
-    TestDataSource source = new TestDataSource();
-
-    List<String> log = <String>[];
-
-    await tester.pumpWidget(new MaterialApp(
-      home: new PaginatedDataTable(
-        header: new Text('Test table'),
-        source: source,
-        rowsPerPage: 2,
-        availableRowsPerPage: <int>[
-          2, 4, 8, 16,
-        ],
-        onRowsPerPageChanged: (int rowsPerPage) {
-          log.add('rows-per-page-changed: $rowsPerPage');
-        },
-        onPageChanged: (int rowIndex) {
-          log.add('page-changed: $rowIndex');
-        },
-        columns: <DataColumn>[
-          new DataColumn(label: new Text('Name')),
-          new DataColumn(label: new Text('Calories'), numeric: true),
-          new DataColumn(label: new Text('Generation')),
-        ],
-      )
-    ));
-
-    await tester.tap(find.byTooltip('Next page'));
-
-    expect(log, <String>['page-changed: 2']);
-    log.clear();
-
-    await tester.pump();
-
-    expect(find.text('Frozen yogurt (0)'), findsNothing);
-    expect(find.text('Eclair (0)'), findsOneWidget);
-    expect(find.text('Gingerbread (0)'), findsNothing);
-
-    await tester.tap(find.icon(Icons.chevron_left));
-
-    expect(log, <String>['page-changed: 0']);
-    log.clear();
-
-    await tester.pump();
-
-    expect(find.text('Frozen yogurt (0)'), findsOneWidget);
-    expect(find.text('Eclair (0)'), findsNothing);
-    expect(find.text('Gingerbread (0)'), findsNothing);
-
-    await tester.tap(find.icon(Icons.chevron_left));
-
-    expect(log, isEmpty);
-
-    await tester.tap(find.text('2'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
-
-    await tester.tap(find.text('8').last);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
-
-    expect(log, <String>['rows-per-page-changed: 8']);
     log.clear();
   });
 }

@@ -108,8 +108,8 @@ void main() {
 
     Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).x, 72.0);
-    // The toolbar's contents are padded on the right by 8.0
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0));
+    // The toolbar's contents are padded on the right by 4.0
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -119,13 +119,13 @@ void main() {
 
     expect(tester.getTopLeft(title).x, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).x, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 8.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
   });
 
   testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {
@@ -165,18 +165,18 @@ void main() {
 
     // Centering a title with width 620 within the 800 pixel wide test widget
     // would mean that its left edge would have to be 90. We reserve 72
-    // on the left and the padded actions occupy 90 + 8 on the right. That
-    // leaves 630, so the title is right justified but its width isn't changed.
+    // on the left and the padded actions occupy 96 + 4 on the right. That
+    // leaves 628, so the title is right justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
     titleWidth = 620.0;
     actions = <Widget>[
-      const SizedBox(width: 45.0),
-      const SizedBox(width: 45.0)
+      const SizedBox(width: 48.0),
+      const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 800 - 620 - 45 - 45 - 8);
+    expect(tester.getTopLeft(title).x, 800 - 620 - 48 - 48 - 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -229,6 +229,61 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(titleKey)));
     expect(yCenter(appBarKey), equals(yCenter(action0Key)));
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
+  });
+
+  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('X'),
+          ),
+          drawer: new Column(), // Doesn't really matter. Triggers a hamburger regardless.
+        )
+      )
+    );
+
+    Finder hamburger = find.byTooltip('Open navigation menu');
+    expect(tester.getTopLeft(hamburger), new Point(0.0, 0.0));
+    expect(tester.getSize(hamburger), new Size(56.0, 56.0));
+  });
+
+  testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: new Text('X'),
+            actions: <Widget> [
+              new IconButton(
+                icon: new Icon(Icons.share),
+                onPressed: null,
+                tooltip: 'Share',
+                iconSize: 20.0,
+              ),
+              new IconButton(
+                icon: new Icon(Icons.add),
+                onPressed: null,
+                tooltip: 'Add',
+                iconSize: 60.0,
+              ),
+            ],
+          ),
+        )
+      )
+    );
+
+    Finder addButton = find.byTooltip('Add');
+    // Right padding is 4dp.
+    expect(tester.getTopRight(addButton), new Point(800.0 - 4.0, 0.0));
+    // It's still the size it was plus the 2 * 8dp padding from IconButton.
+    expect(tester.getSize(addButton), new Size(60.0 + 2 * 8.0, 56.0));
+
+    Finder shareButton = find.byTooltip('Share');
+    // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
+    expect(tester.getSize(shareButton), new Size(48.0, 56.0));
   });
 
 }
