@@ -265,8 +265,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   // direction. Negative if we're scrolled off the top.
   double _childPosition;
 
+  // Update [geometry] and return the new value for [childMainAxisPosition].
   @protected
-  void _updateGeometry() {
+  double updateGeometry() {
     final double maxExtent = this.maxExtent;
     final double paintExtent = maxExtent - _effectiveScrollOffset;
     final double layoutExtent = maxExtent - constraints.scrollOffset;
@@ -277,7 +278,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       maxPaintExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    _childPosition = math.min(0.0, paintExtent - childExtent);
+    return math.min(0.0, paintExtent - childExtent);
   }
 
 
@@ -301,7 +302,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       _effectiveScrollOffset = constraints.scrollOffset;
     }
     layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: _effectiveScrollOffset < constraints.scrollOffset);
-    _updateGeometry();
+    _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
   }
 
@@ -324,7 +325,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
   }) : super(child: child);
 
   @override
-  void _updateGeometry() {
+  double updateGeometry() {
     final double minExtent = this.maxExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = (maxExtent - _effectiveScrollOffset);
@@ -336,6 +337,6 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       maxPaintExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
-    _childPosition = 0.0;
+    return 0.0;
   }
 }
