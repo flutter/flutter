@@ -61,6 +61,7 @@ String getEnumName(dynamic enumItem) {
 }
 
 File getUniqueFile(Directory dir, String baseName, String ext) {
+  FileSystem fs = dir.fileSystem;
   int i = 1;
 
   while (true) {
