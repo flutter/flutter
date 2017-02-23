@@ -82,7 +82,7 @@ Future<Null> _testFile(String testName, int wantedExitCode, String workingDirect
       expect(haveSeenStdErrMarker, isFalse);
       haveSeenStdErrMarker = true;
     }
-    expect(outputLine, matches(expectationLine), verbose: true, reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
+    expect(outputLine, matches(expectationLine), reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
     expectationLineNumber += 1;
     outputLineNumber += 1;
   }
