@@ -41,26 +41,28 @@ constexpr int kMaxPipelineDepth = 3;
 // to recover before acknowleding the invalidation and scheduling more frames.
 constexpr int kRecoveryPipelineDepth = 1;
 
-blink::PointerData::Change GetChangeFromEventType(mozart::EventType type) {
-  switch (type) {
-    case mozart::EventType::POINTER_CANCEL:
+blink::PointerData::Change GetChangeFromPointerEventPhase(
+    mozart::PointerEvent::Phase phase) {
+  switch (phase) {
+    case mozart::PointerEvent::Phase::CANCEL:
       return blink::PointerData::Change::kCancel;
-    case mozart::EventType::POINTER_DOWN:
+    case mozart::PointerEvent::Phase::DOWN:
       return blink::PointerData::Change::kDown;
-    case mozart::EventType::POINTER_MOVE:
+    case mozart::PointerEvent::Phase::MOVE:
       return blink::PointerData::Change::kMove;
-    case mozart::EventType::POINTER_UP:
+    case mozart::PointerEvent::Phase::UP:
       return blink::PointerData::Change::kUp;
     default:
       return blink::PointerData::Change::kCancel;
   }
 }
 
-blink::PointerData::DeviceKind GetKindFromEventKind(mozart::PointerKind kind) {
-  switch (kind) {
-    case mozart::PointerKind::TOUCH:
+blink::PointerData::DeviceKind GetKindFromPointerType(
+    mozart::PointerEvent::Type type) {
+  switch (type) {
+    case mozart::PointerEvent::Type::TOUCH:
       return blink::PointerData::DeviceKind::kTouch;
-    case mozart::PointerKind::MOUSE:
+    case mozart::PointerEvent::Type::MOUSE:
       return blink::PointerData::DeviceKind::kMouse;
     default:
       return blink::PointerData::DeviceKind::kTouch;
@@ -268,17 +270,18 @@ blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
   };
 }
 
-void RuntimeHolder::OnEvent(mozart::EventPtr event,
+void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
                             const OnEventCallback& callback) {
   bool handled = false;
-  if (event->pointer_data) {
+  if (event->is_pointer()) {
+    const mozart::PointerEventPtr& pointer = event->get_pointer();
     blink::PointerData pointer_data;
-    pointer_data.time_stamp = event->time_stamp;
-    pointer_data.change = GetChangeFromEventType(event->action);
-    pointer_data.kind = GetKindFromEventKind(event->pointer_data->kind);
-    pointer_data.device = event->pointer_data->pointer_id;
-    pointer_data.physical_x = event->pointer_data->x;
-    pointer_data.physical_y = event->pointer_data->y;
+    pointer_data.time_stamp = pointer->event_time;
+    pointer_data.change = GetChangeFromPointerEventPhase(pointer->phase);
+    pointer_data.kind = GetKindFromPointerType(pointer->type);
+    pointer_data.device = pointer->pointer_id;
+    pointer_data.physical_x = pointer->x;
+    pointer_data.physical_y = pointer->y;
 
     switch (pointer_data.change) {
       case blink::PointerData::Change::kDown:
@@ -304,11 +307,14 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
     runtime_->DispatchPointerDataPacket(packet);
 
     handled = true;
-  } else if (event->key_data) {
+  } else if (event->is_keyboard()) {
+    const mozart::KeyboardEventPtr& keyboard = event->get_keyboard();
     const char* type = nullptr;
-    if (event->action == mozart::EventType::KEY_PRESSED)
+    if (keyboard->phase == mozart::KeyboardEvent::Phase::PRESSED)
       type = "keydown";
-    else if (event->action == mozart::EventType::KEY_RELEASED)
+    else if (keyboard->phase == mozart::KeyboardEvent::Phase::REPEAT)
+      type = "keydown";  // TODO change this to keyrepeat
+    else if (keyboard->phase == mozart::KeyboardEvent::Phase::RELEASED)
       type = "keyup";
 
     if (type) {
@@ -318,9 +324,9 @@ void RuntimeHolder::OnEvent(mozart::EventPtr event,
       document.AddMember("type", rapidjson::Value(type, strlen(type)),
                          allocator);
       document.AddMember("keymap", rapidjson::Value("fuchsia"), allocator);
-      document.AddMember("hidUsage", event->key_data->hid_usage, allocator);
-      document.AddMember("codePoint", event->key_data->code_point, allocator);
-      document.AddMember("modifiers", event->key_data->modifiers, allocator);
+      document.AddMember("hidUsage", keyboard->hid_usage, allocator);
+      document.AddMember("codePoint", keyboard->code_point, allocator);
+      document.AddMember("modifiers", keyboard->modifiers, allocator);
       rapidjson::StringBuffer buffer;
       rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
       document.Accept(writer);

@@ -55,7 +55,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
 
   // |mozart::InputListener| implementation:
-  void OnEvent(mozart::EventPtr event,
+  void OnEvent(mozart::InputEventPtr event,
                const OnEventCallback& callback) override;
 
   // |mozart::ViewListener| implementation:
