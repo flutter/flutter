@@ -18,10 +18,12 @@ FOR %%i IN ("%~dp0..") DO SET FLUTTER_ROOT=%%~fi
 
 SET flutter_tools_dir=%FLUTTER_ROOT%\packages\flutter_tools
 SET cache_dir=%FLUTTER_ROOT%\bin\cache
-SET snapshot_path=%FLUTTER_ROOT%\bin\cache\flutter_tools.snapshot
-SET stamp_path=%FLUTTER_ROOT%\bin\cache\flutter_tools.stamp
+SET snapshot_path=%cache_dir%\flutter_tools.snapshot
+SET stamp_path=%cache_dir%\flutter_tools.stamp
 SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
-SET dart_sdk_path=%FLUTTER_ROOT%\bin\cache\dart-sdk
+SET dart_sdk_path=%cache_dir%\dart-sdk
+SET dart_stamp_path=%cache_dir%\dart-sdk.stamp
+SET dart_version_path=%FLUTTER_ROOT%\bin\internal\dart-sdk.version
 
 SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
@@ -54,6 +56,11 @@ GOTO :after_subroutine
 
   REM The following IF conditions are all linked with a logical OR. However,
   REM there is no OR operator in batch and a GOTO construct is used as replacement.
+
+  IF NOT EXIST "%dart_stamp_path%" GOTO do_sdk_update_and_snapshot
+  SET /P dart_required_version=<"%dart_version_path%"
+  SET /P dart_installed_version=<"%dart_stamp_path%"
+  IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
   SET /p stamp_value=<"%stamp_path%"
@@ -66,13 +73,12 @@ GOTO :after_subroutine
   REM Everything is uptodate - exit subroutine
   EXIT /B
 
-  :do_snapshot
-    MKDIR "%FLUTTER_ROOT%\bin\cache" 2> NUL
-    ECHO: > "%FLUTTER_ROOT%\bin\cache\.dartignore"
-
+  :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
     CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
 
+  :do_snapshot
+    ECHO: > "%cache_dir%\.dartignore"
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
     CALL "%pub%" upgrade --verbosity=error --no-packages-dir

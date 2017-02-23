@@ -13,8 +13,8 @@
 
 $ErrorActionPreference = "Stop"
 
-$progName = split-path -parent $MyInvocation.MyCommand.Definition
-$flutterRoot = (get-item $progName ).parent.parent.FullName
+$progName = Split-Path -parent $MyInvocation.MyCommand.Definition
+$flutterRoot = (Get-Item $progName ).parent.parent.FullName
 
 $dartSdkPath = "$flutterRoot\bin\cache\dart-sdk"
 $dartSdkStampPath = "$flutterRoot\bin\cache\dart-sdk.stamp"
@@ -37,4 +37,4 @@ Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 Add-Type -assembly "system.io.compression.filesystem"
 [io.compression.zipfile]::ExtractToDirectory($dartSdkZip, "$flutterRoot\bin\cache")
 Remove-Item $dartSdkZip
-$dartSdkVersion | out-file $dartSdkStampPath
+$dartSdkVersion | Out-File $dartSdkStampPath -Encoding ASCII
