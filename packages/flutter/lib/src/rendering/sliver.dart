@@ -435,6 +435,7 @@ class SliverGeometry {
   const SliverGeometry({
     this.scrollExtent: 0.0,
     this.paintExtent: 0.0,
+    this.paintOrigin: 0.0,
     double layoutExtent,
     this.maxPaintExtent: 0.0,
     double hitTestExtent,
@@ -455,6 +456,23 @@ class SliverGeometry {
   /// This value must be accurate if the [paintExtent] is less than the
   /// [SliverConstraints.remainingPaintExtent] provided during layout.
   final double scrollExtent;
+
+  /// The visual location of the first visible part of this sliver relative to
+  /// its layout position.
+  ///
+  /// For example, if the sliver wishes to paint visually before its layout
+  /// position, the [paintOrigin] is negative. The coordinate system this sliver
+  /// uses for painting is relative to this [paintOrigin].
+  ///
+  /// This value does not affect the layout of subsequent slivers. The next
+  /// sliver is still placed at [layoutExtent] after this sliver's layout
+  /// position. This value does affect where the [paintExtent] extent is
+  /// measured from when computing the [SliverConstraints.overlap] for the next
+  /// sliver.
+  ///
+  /// Defaults to 0.0, which means slivers start painting at their layout
+  /// position by default.
+  final double paintOrigin;
 
   /// The amount of visual space that was taken by the sliver to render the
   /// subset of the sliver that covers all or part of the
@@ -513,6 +531,7 @@ class SliverGeometry {
     assert(scrollExtent >= 0.0);
     assert(paintExtent != null);
     assert(paintExtent >= 0.0);
+    assert(paintOrigin != null);
     assert(layoutExtent != null);
     assert(layoutExtent >= 0.0);
     assert(() {
@@ -563,6 +582,8 @@ class SliverGeometry {
       } else {
         buffer.write('paintExtent: ${paintExtent.toStringAsFixed(1)} (!), ');
       }
+      if (paintOrigin != 0.0)
+        buffer.write('paintOrigin: ${paintOrigin.toStringAsFixed(1)}, ');
       if (layoutExtent != paintExtent)
         buffer.write('layoutExtent: ${layoutExtent.toStringAsFixed(1)}, ');
       buffer.write('maxPaintExtent: ${maxPaintExtent.toStringAsFixed(1)}, ');

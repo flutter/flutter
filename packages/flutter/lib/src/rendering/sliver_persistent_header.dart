@@ -236,21 +236,19 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
-    layoutChild(constraints.scrollOffset + constraints.overlap, maxExtent, overlapsContent: constraints.overlap > 0.0);
+    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: constraints.overlap > 0.0);
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
-      paintExtent: math.min(constraints.overlap + childExtent, constraints.remainingPaintExtent),
+      paintOrigin: constraints.overlap,
+      paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
       layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
-      maxPaintExtent: constraints.overlap + maxExtent,
+      maxPaintExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
 
   @override
-  double childMainAxisPosition(RenderBox child) {
-    assert(child == this.child);
-    return constraints?.overlap;
-  }
+  double childMainAxisPosition(RenderBox child) => 0.0;
 }
 
 abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
