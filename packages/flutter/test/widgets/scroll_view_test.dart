@@ -115,4 +115,57 @@ void main() {
     expect(log, equals(<String>['Massachusetts']));
     log.clear();
   });
+
+  testWidgets('Can jumpTo during drag', (WidgetTester tester) async {
+    final List<Type> log = <Type>[];
+    final ScrollController controller = new ScrollController();
+
+    await tester.pumpWidget(new NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification notification) {
+        log.add(notification.runtimeType);
+        return false;
+      },
+      child: new ListView(
+        controller: controller,
+        children: kStates.map<Widget>((String state) {
+          return new Container(
+            height: 200.0,
+            child: new Text(state),
+          );
+        }).toList(),
+      ),
+    ));
+
+    expect(log, isEmpty);
+
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, -100.0));
+
+    expect(log, equals(<Type>[
+      ScrollStartNotification,
+      UserScrollNotification,
+      ScrollUpdateNotification,
+    ]));
+    log.clear();
+
+    await tester.pump();
+
+    controller.jumpTo(550.0);
+
+    expect(controller.offset, equals(550.0));
+    expect(log, equals(<Type>[
+      ScrollEndNotification,
+      UserScrollNotification,
+      ScrollStartNotification,
+      ScrollUpdateNotification,
+      ScrollEndNotification,
+    ]));
+    log.clear();
+
+    await tester.pump();
+    await gesture.moveBy(const Offset(0.0, -100.0));
+
+    expect(controller.offset, equals(550.0));
+    expect(log, isEmpty);
+  });
 }
