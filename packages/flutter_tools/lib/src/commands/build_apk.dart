@@ -589,7 +589,7 @@ Future<Null> buildAndroidWithGradle(
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  return buildGradleProject(buildMode);
+  return buildGradleProject(buildMode, target);
 }
 
 Future<Null> buildApk(
