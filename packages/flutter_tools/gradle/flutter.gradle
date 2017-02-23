@@ -144,10 +144,6 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('target')) {
             target = project.property('target')
         }
-        File targetFile = project.file(Paths.get(project.flutter.source, target).toString())
-        if (!targetFile.exists()) {
-            throw new GradleException("Target file $targetFile not found")
-        }
 
         if (project.tasks.findByName('flutterBuildX86Jar')) {
             project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
