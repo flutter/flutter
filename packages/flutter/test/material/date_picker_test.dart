@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 
@@ -266,6 +267,65 @@ void main() {
       await tester.tap(find.text('17')); // Odd, doesn't work.
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2017, DateTime.JANUARY, 10)));
+    });
+  });
+
+  group('haptic feedback', () {
+    const Duration kHapticFeedbackInterval = const Duration(milliseconds: 10);
+    int hapticFeedbackCount;
+
+    setUpAll(() {
+      PlatformMessages.setMockJSONMessageHandler('flutter/platform', (dynamic message) {
+        if (message['method'] == "HapticFeedback.vibrate")
+          hapticFeedbackCount++;
+      });
+    });
+
+    setUp(() {
+      hapticFeedbackCount = 0;
+      initialDate = new DateTime(2017, DateTime.JANUARY, 16);
+      firstDate = new DateTime(2017, DateTime.JANUARY, 10);
+      lastDate = new DateTime(2018, DateTime.JANUARY, 20);
+      selectableDayPredicate = (DateTime date) => date.day.isEven;
+    });
+
+    testWidgets('tap-select date vibrates', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTime> date) async {
+        await tester.tap(find.text('10'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 1);
+        await tester.tap(find.text('12'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 2);
+        await tester.tap(find.text('14'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 3);
+      });
+    });
+
+    testWidgets('tap-select unselectable date does not vibrate', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTime> date) async {
+        await tester.tap(find.text('11'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 0);
+        await tester.tap(find.text('13'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 0);
+        await tester.tap(find.text('15'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 0);
+      });
+    });
+
+    testWidgets('mode, year change vibrates', (WidgetTester tester) async {
+      await preparePicker(tester, (Future<DateTime> date) async {
+        await tester.tap(find.text('2017'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 1);
+        await tester.tap(find.text('2018'));
+        await tester.pump(kHapticFeedbackInterval);
+        expect(hapticFeedbackCount, 2);
+      });
     });
   });
 }
