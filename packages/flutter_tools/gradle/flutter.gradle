@@ -31,6 +31,7 @@ class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
     private File flutterExecutable
     private String localEngine
+    private String localEngineSrcPath
     private Properties localProperties
 
     private String resolveProperty(Project project, String name, String defaultValue) {
@@ -41,7 +42,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localProperties.load(localPropertiesFile.newDataInputStream())
             }
         }
-        String result;
+        String result
         if (project.hasProperty(name)) {
             result = project.property(name)
         }
@@ -75,12 +76,20 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        String flutterJarPath = localProperties.getProperty("flutter.jar")
-        if (flutterJarPath != null) {
-            File flutterJar = project.file(flutterJarPath)
-            if (!flutterJar.isFile()) {
-                throw new GradleException("flutter.jar must point to a Flutter engine JAR")
+        if (project.hasProperty('localEngineOut')) {
+            String engineOutPath = project.property('localEngineOut')
+            File engineOut = project.file(engineOutPath)
+            if (!engineOut.isDirectory()) {
+                throw new GradleException('localEngineOut must point to a local engine build')
             }
+            File flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
+            if (!flutterJar.isFile()) {
+                throw new GradleException('Local engine build does not contain flutter.jar')
+            }
+
+            localEngine = engineOut.name
+            localEngineSrcPath = engineOut.parentFile.parent
+
             project.dependencies {
                 compile project.files(flutterJar)
             }
@@ -119,8 +128,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        localEngine = localProperties.getProperty("flutter.localEngine")
-
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
     }
@@ -135,7 +142,9 @@ class FlutterPlugin implements Plugin<Project> {
             target = 'lib/main.dart'
         }
 
-        project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
+        if (project.tasks.findByName('flutterBuildX86Jar')) {
+            project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
+        }
 
         project.android.applicationVariants.all { variant ->
             if (!["debug", "profile", "release"].contains(variant.name)) {
@@ -147,6 +156,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterExecutable this.flutterExecutable
                 buildMode variant.name
                 localEngine this.localEngine
+                localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
@@ -173,6 +183,7 @@ class FlutterTask extends DefaultTask {
     File flutterExecutable
     String buildMode
     String localEngine
+    String localEngineSrcPath
     String targetPath
 
     File sourceDir
@@ -211,6 +222,7 @@ class FlutterTask extends DefaultTask {
                 workingDir sourceDir
                 if (localEngine != null) {
                     args "--local-engine", localEngine
+                    args "--local-engine-src-path", localEngineSrcPath
                 }
                 args "build", "aot"
                 args "--target", targetPath
@@ -225,6 +237,7 @@ class FlutterTask extends DefaultTask {
             workingDir sourceDir
             if (localEngine != null) {
                 args "--local-engine", localEngine
+                args "--local-engine-src-path", localEngineSrcPath
             }
             args "build", "flx"
             args "--target", targetPath

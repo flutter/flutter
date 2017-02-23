@@ -11,6 +11,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
+import '../artifacts.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
@@ -158,9 +159,16 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName) async {
   // Run 'gradle assemble<BuildMode>'.
   Status status = logger.startProgress('Running \'gradle $assembleTask\'...', expectSlowOperation: true);
   String gradlePath = fs.file(gradle).absolute.path;
-  List<String> command = logger.isVerbose
-      ? <String>[gradlePath, assembleTask]
-      : <String>[gradlePath, '-q', assembleTask];
+  List<String> command = <String>[gradlePath];
+  if (!logger.isVerbose) {
+    command.add('-q');
+  }
+  if (artifacts is LocalEngineArtifacts) {
+    LocalEngineArtifacts localEngineArtifacts = artifacts;
+    printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
+    command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
+  }
+  command.add(assembleTask);
   int exitcode = await runCommandAndStreamOutput(
       command,
       workingDirectory: 'android',
