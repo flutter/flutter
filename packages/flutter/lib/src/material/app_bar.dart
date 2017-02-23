@@ -96,6 +96,29 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(_ToolbarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
 }
 
+// Bottom justify the kToolbarHeight child which may overflow the top.
+class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
+  const _ToolbarContainerLayout();
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.tighten(height: kToolbarHeight);
+  }
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    return new Size(constraints.maxWidth, kToolbarHeight);
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return new Offset(0.0, size.height - childSize.height);
+  }
+
+  @override
+  bool shouldRelayout(_ToolbarContainerLayout oldDelegate) => false;
+}
+
 // TODO(eseidel) Toolbar needs to change size based on orientation:
 // http://material.google.com/layout/structure.html#structure-app-bar
 // Mobile Landscape: 48dp
@@ -425,24 +448,32 @@ class _AppBarState extends State<AppBar> {
       ),
     );
 
-    Widget appBar = new SizedBox(
-      height: kToolbarHeight,
-      child: new IconTheme.merge(
-        context: context,
-        data: appBarIconTheme,
-        child: new DefaultTextStyle(
-          style: sideStyle,
-          child: toolbar,
+    // If the toolbar is allocated less than kToolbarHeight make it
+    // appear to scroll upwards within its shrinking container.
+    Widget appBar = new ClipRect(
+      child: new CustomSingleChildLayout(
+        delegate: const _ToolbarContainerLayout(),
+        child: new IconTheme.merge(
+          context: context,
+          data: appBarIconTheme,
+          child: new DefaultTextStyle(
+            style: sideStyle,
+            child: toolbar,
+          ),
         ),
       ),
     );
-
 
     if (config.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          appBar,
+          new Flexible(
+            child: new ConstrainedBox(
+              constraints: new BoxConstraints(maxHeight: kToolbarHeight),
+              child: appBar,
+            ),
+          ),
           config.bottomOpacity == 1.0 ? config.bottom : new Opacity(
             opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(config.bottomOpacity),
             child: config.bottom,
@@ -494,7 +525,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.primary,
     @required this.centerTitle,
     @required this.expandedHeight,
+    @required this.collapsedHeight,
     @required this.topPadding,
+    @required this.floating,
     @required this.pinned,
   }) : bottom = bottom,
       _bottomHeight = bottom?.bottomHeight ?? 0.0 {
@@ -514,21 +547,24 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool primary;
   final bool centerTitle;
   final double expandedHeight;
+  final double collapsedHeight;
   final double topPadding;
+  final bool floating;
   final bool pinned;
 
   final double _bottomHeight;
 
   @override
-  double get minExtent => topPadding + kToolbarHeight + _bottomHeight;
+  double get minExtent => collapsedHeight ?? (topPadding + kToolbarHeight + _bottomHeight);
 
   @override
-  double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight), minExtent);
+  double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    double toolbarOpacity = pinned ? 1.0 : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
+    final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
+    final double toolbarOpacity = pinned && !floating ? 1.0
+      : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
     return FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -569,7 +605,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
         || expandedHeight != oldDelegate.expandedHeight
-        || topPadding != oldDelegate.topPadding;
+        || topPadding != oldDelegate.topPadding
+        || pinned != oldDelegate.pinned
+        || floating != oldDelegate.floating;
   }
 
   @override
@@ -630,7 +668,7 @@ class SliverAppBar extends StatelessWidget {
     assert(primary != null);
     assert(floating != null);
     assert(pinned != null);
-    assert(!floating || !pinned);
+    assert(pinned && floating ? bottom != null : true);
   }
 
   /// A widget to display before the [title].
@@ -763,6 +801,10 @@ class SliverAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double topPadding = primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double collapsedHeight = (pinned && floating && bottom != null)
+      ? bottom.bottomHeight + topPadding : null;
+
     return new SliverPersistentHeader(
       floating: floating,
       pinned: pinned,
@@ -780,7 +822,9 @@ class SliverAppBar extends StatelessWidget {
         primary: primary,
         centerTitle: centerTitle,
         expandedHeight: expandedHeight,
-        topPadding: primary ? MediaQuery.of(context).padding.top : 0.0,
+        collapsedHeight: collapsedHeight,
+        topPadding: topPadding,
+        floating: floating,
         pinned: pinned,
       ),
     );
