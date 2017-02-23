@@ -46,6 +46,13 @@ class VMService {
     });
   }
 
+  /// Enables recording of VMService JSON-rpc activity to the specified base
+  /// recording [location].
+  ///
+  /// Activity will be recorded in a subdirectory of [location] named
+  /// `"vmservice"`. It is permissible for [location] to represent an existing
+  /// non-empty directory as long as there is no collision with the
+  /// `"vmservice"` subdirectory.
   static void enableRecordingConnection(String location) {
     Directory dir = getRecordingSink(location, _kRecordingType);
     _openChannel = (Uri uri) {
@@ -54,6 +61,11 @@ class VMService {
     };
   }
 
+  /// Enables VMService JSON-rpc replay mode.
+  ///
+  /// [location] must represent a directory to which VMService JSON-rpc
+  /// activity has been recorded (i.e. the result of having been previously
+  /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
     Directory dir = getReplaySource(location, _kRecordingType);
     _openChannel = (Uri uri) => new ReplayVMServiceChannel(dir);
