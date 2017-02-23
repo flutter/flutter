@@ -10,6 +10,7 @@ import 'package:stream_channel/stream_channel.dart';
 
 import 'base/io.dart';
 import 'base/process.dart';
+import 'globals.dart';
 
 const String _kManifest = 'MANIFEST.txt';
 const String _kRequest = 'request';
@@ -74,6 +75,12 @@ abstract class _Message {
   final Map<String, dynamic> data;
 
   _Message(this.type, this.data);
+
+  factory _Message.fromRecording(Map<String, dynamic> recordingData) {
+    return recordingData[_kType] == _kRequest
+        ? new _Request(recordingData[_kData])
+        : new _Response(recordingData[_kData]);
+  }
 
   int get id => data[_kId];
 
@@ -221,9 +228,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   static _Message _toMessage(Map<String, dynamic> jsonData) {
-    return jsonData[_kType] == _kRequest
-        ? new _Request(jsonData[_kData])
-        : new _Response(jsonData[_kData]);
+    return new _Message.fromRecording(jsonData);
   }
 
   void send(_Request request) {
@@ -235,6 +240,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       // This signals that when we were recording, the VM shut down before
       // we received the response. This is typically due to the user quitting
       // the app runner. We follow suit here and exit.
+      printStatus('Exiting due to dangling request');
       exit(0);
     } else {
       _controller.add(JSON.encoder.convert(transaction.response.data));
