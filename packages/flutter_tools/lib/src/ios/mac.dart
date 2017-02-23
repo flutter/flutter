@@ -223,7 +223,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       printError('');
     }
     printError("Try launching Xcode and selecting 'Product > Build' to fix the problem:");
-    printError("  open ios/Runner.xcodeproj");
+    printError("  open ios/Runner.xcworkspace");
     return;
   }
   if (result.xcodeBuildExecution != null) {
@@ -247,7 +247,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 Building an iOS app requires a selected Development Team with a Provisioning Profile
 Please ensure that a Development Team is selected by:
   1- Opening the Flutter project's Xcode target with
-       open ios/Runner.xcodeproj
+       open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
   3- In the 'General' tab, make sure a 'Development Team' is selected\n
