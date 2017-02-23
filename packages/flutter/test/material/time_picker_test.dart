@@ -118,8 +118,8 @@ void main() {
     int hapticFeedbackCount;
 
     setUpAll(() {
-      PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
-        if (message == '{"method":"HapticFeedback.vibrate","args":[]}')
+      PlatformMessages.setMockJSONMessageHandler('flutter/platform', (dynamic message) {
+        if (message['method'] == "HapticFeedback.vibrate")
           hapticFeedbackCount++;
       });
     });
