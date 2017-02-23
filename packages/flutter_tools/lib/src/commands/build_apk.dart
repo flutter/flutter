@@ -527,8 +527,7 @@ Future<Null> buildAndroid(
     flxPath = await flx.buildFlx(
       mainPath: findMainDartFile(target),
       kernelContent: kernelContent,
-      precompiledSnapshot: isAotBuildMode(buildMode),
-      includeRobotoFonts: false);
+      precompiledSnapshot: isAotBuildMode(buildMode));
 
     if (flxPath == null)
       throwToolExit(null);

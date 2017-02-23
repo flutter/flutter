@@ -229,7 +229,6 @@ class FlutterTask extends DefaultTask {
             args "build", "flx"
             args "--target", targetPath
             args "--output-file", "${intermediateDir}/app.flx"
-            args "--no-include-roboto-fonts"
             if (buildMode != "debug") {
                 args "--precompiled"
             } else {

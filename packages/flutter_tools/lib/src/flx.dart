@@ -59,7 +59,6 @@ Future<String> buildFlx({
   String mainPath: defaultMainPath,
   DevFSContent kernelContent,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true
 }) async {
   await build(
     snapshotPath: defaultSnapshotPath,
@@ -67,7 +66,6 @@ Future<String> buildFlx({
     mainPath: mainPath,
     kernelContent: kernelContent,
     precompiledSnapshot: precompiledSnapshot,
-    includeRobotoFonts: includeRobotoFonts
   );
   return defaultFlxOutputPath;
 }
@@ -85,7 +83,6 @@ Future<Null> build({
   String kernelPath,
   DevFSContent kernelContent,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
@@ -130,7 +127,6 @@ Future<Null> build({
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
-    includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
 }
@@ -144,7 +140,6 @@ Future<Null> assemble({
   String workingDirPath,
   String packagesPath,
   bool includeDefaultFonts: true,
-  bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
@@ -159,7 +154,6 @@ Future<Null> assemble({
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)
