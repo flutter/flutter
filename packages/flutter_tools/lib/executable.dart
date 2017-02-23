@@ -168,8 +168,14 @@ Future<Null> main(List<String> args) async {
 
           _createCrashReport(args, error, chain).then<Null>((File file) {
             stderr.writeln(
-                'Crash report written to ${file.path};\n'
-                    'please let us know at https://github.com/flutter/flutter/issues.'
+              'Crash report written to ${file.path};\n'
+              'please let us know at https://github.com/flutter/flutter/issues.',
+            );
+            _exit(1);
+          }).catchError((dynamic error) {
+            stderr.writeln(
+              'Unable to generate crash report due to secondary error: $error\n'
+              'please let us know at https://github.com/flutter/flutter/issues.',
             );
             _exit(1);
           });
@@ -180,6 +186,7 @@ Future<Null> main(List<String> args) async {
 }
 
 Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
+  FileSystem fs = const LocalFileSystem();
   File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
@@ -197,12 +204,12 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
   buffer.writeln('```\n${await _doctorText()}```');
 
   try {
-    crashFile.writeAsStringSync(buffer.toString());
+    await crashFile.writeAsString(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
     crashFile = getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
     try {
-      crashFile.writeAsStringSync(buffer.toString());
+      await crashFile.writeAsString(buffer.toString());
     } on FileSystemException catch (e) {
       printError('Could not write crash report to disk: $e');
       printError(buffer.toString());

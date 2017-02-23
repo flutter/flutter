@@ -22,6 +22,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../usage.dart';
 import '../version.dart';
+import '../vmservice.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -169,6 +170,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       enableRecordingProcessManager(recordTo);
       enableRecordingFileSystem(recordTo);
       await enableRecordingPlatform(recordTo);
+      VMService.enableRecordingConnection(recordTo);
     }
 
     if (globalResults['replay-from'] != null) {
@@ -178,6 +180,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       await enableReplayProcessManager(replayFrom);
       enableReplayFileSystem(replayFrom);
       await enableReplayPlatform(replayFrom);
+      VMService.enableReplayConnection(replayFrom);
     }
 
     logger.quiet = globalResults['quiet'];

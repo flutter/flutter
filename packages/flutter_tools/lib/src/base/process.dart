@@ -27,8 +27,10 @@ Future<Null> runShutdownHooks() async {
   _shutdownHooks.clear();
   _shutdownHooksRunning = true;
   try {
+    List<Future<dynamic>> futures = <Future<dynamic>>[];
     for (ShutdownHook shutdownHook in hooks)
-      await shutdownHook();
+      futures.add(shutdownHook());
+    await Future.wait<dynamic>(futures);
   } finally {
     _shutdownHooksRunning = false;
   }
