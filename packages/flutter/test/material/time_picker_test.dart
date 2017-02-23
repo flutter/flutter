@@ -113,8 +113,8 @@ void main() {
   });
 
   group('haptic feedback', () {
-    const Duration kFastFeedbackInteral = const Duration(milliseconds: 10);
-    const Duration kSlowFeedbackInteral = const Duration(milliseconds: 200);
+    const Duration kFastFeedbackInterval = const Duration(milliseconds: 10);
+    const Duration kSlowFeedbackInterval = const Duration(milliseconds: 200);
     int hapticFeedbackCount;
 
     setUpAll(() {
@@ -138,7 +138,7 @@ void main() {
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
       Point center = await startPicker(tester, (TimeOfDay time) { });
       await tester.tapAt(new Point(center.x, center.y - 50.0));
-      await tester.pump(kFastFeedbackInteral);
+      await tester.pump(kFastFeedbackInterval);
       await tester.tapAt(new Point(center.x, center.y + 50.0));
       await finishPicker(tester);
       expect(hapticFeedbackCount, 1);
@@ -147,9 +147,9 @@ void main() {
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
       Point center = await startPicker(tester, (TimeOfDay time) { });
       await tester.tapAt(new Point(center.x, center.y - 50.0));
-      await tester.pump(kSlowFeedbackInteral);
+      await tester.pump(kSlowFeedbackInterval);
       await tester.tapAt(new Point(center.x, center.y + 50.0));
-      await tester.pump(kSlowFeedbackInteral);
+      await tester.pump(kSlowFeedbackInterval);
       await tester.tapAt(new Point(center.x, center.y - 50.0));
       await finishPicker(tester);
       expect(hapticFeedbackCount, 3);
@@ -174,9 +174,9 @@ void main() {
 
       TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
-      await tester.pump(kFastFeedbackInteral);
+      await tester.pump(kFastFeedbackInterval);
       await gesture.moveBy(hour3 - hour0);
-      await tester.pump(kFastFeedbackInteral);
+      await tester.pump(kFastFeedbackInterval);
       await gesture.moveBy(hour0 - hour3);
       await gesture.up();
       await finishPicker(tester);
@@ -190,9 +190,9 @@ void main() {
 
       TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
-      await tester.pump(kSlowFeedbackInteral);
+      await tester.pump(kSlowFeedbackInterval);
       await gesture.moveBy(hour3 - hour0);
-      await tester.pump(kSlowFeedbackInteral);
+      await tester.pump(kSlowFeedbackInterval);
       await gesture.moveBy(hour0 - hour3);
       await gesture.up();
       await finishPicker(tester);
