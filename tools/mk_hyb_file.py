@@ -539,6 +539,12 @@ def verify_hyb_file(hyb_fn, pat_fn, chr_fn, hyp_fn):
     patterns = []
     exceptions = []
     traverse_trie(0, '', trie_data, ch_map, pattern_data, patterns, exceptions)
+
+    # EXCEPTION for Bulgarian (bg), which contains an ineffectual line of <0, U+044C, 0>
+    if u'\u044c' in patterns:
+        patterns.remove(u'\u044c')
+        patterns.append(u'0\u044c0')
+
     assert verify_file_sorted(patterns, pat_fn), 'pattern table not verified'
     assert verify_file_sorted(exceptions, hyp_fn), 'exception table not verified'
 
