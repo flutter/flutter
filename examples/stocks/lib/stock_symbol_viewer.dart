@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'stock_data.dart';
 import 'stock_arrow.dart';
+import 'stock_data.dart';
 
 class _StockSymbolView extends StatelessWidget {
   _StockSymbolView({ this.stock, this.arrow });

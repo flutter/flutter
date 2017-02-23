@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'data/velocity_tracker_data.dart';
 
 import '../common.dart';
+import 'data/velocity_tracker_data.dart';
 
 const int _kNumIters = 10000;
 

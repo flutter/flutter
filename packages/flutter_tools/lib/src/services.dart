@@ -7,9 +7,9 @@ import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
+import 'android/android_sdk.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
-import 'android/android_sdk.dart';
 import 'globals.dart';
 
 const String _kFlutterManifestPath = 'pubspec.yaml';

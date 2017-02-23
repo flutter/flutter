@@ -13,15 +13,13 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-
 import 'dart/dependencies.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
-
-import 'vmservice.dart';
 import 'usage.dart';
+import 'vmservice.dart';
 
 class HotRunnerConfig {
   /// Should the hot runner compute the minimal Dart dependencies?

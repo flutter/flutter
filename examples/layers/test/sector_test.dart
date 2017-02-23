@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../rendering/src/sector_layout.dart';
 import 'package:test/test.dart';
+
+import '../rendering/src/sector_layout.dart';
 
 void main() {
   test('SectorConstraints', () {

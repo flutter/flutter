@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'message.dart';
 import 'find.dart';
+import 'message.dart';
 
 /// Sets [text] in a text input widget.
 class SetInputText extends CommandWithTarget {

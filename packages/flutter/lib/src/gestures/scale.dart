@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'arena.dart';
-import 'recognizer.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// The possible states of a [ScaleGestureRecognizer].

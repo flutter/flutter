@@ -7,8 +7,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
 import 'progress_indicator.dart';
+import 'theme.dart';
 
 // The over-scroll distance that moves the indicator to its maximum
 // displacement, as a percentage of the scrollable's container extent.

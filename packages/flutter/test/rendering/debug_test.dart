@@ -6,8 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'rendering_tester.dart';
 import 'mock_canvas.dart';
+import 'rendering_tester.dart';
 
 void main() {
   test('Describe transform control test', () {

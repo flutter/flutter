@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
-import 'asset.dart';
 import 'globals.dart';
 import 'vmservice.dart';
 

@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';

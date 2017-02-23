@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'globals.dart';
-
+import 'asset.dart';
 import 'base/file_system.dart';
 import 'dart/dependencies.dart';
 import 'dart/package_map.dart';
-import 'asset.dart';
+import 'globals.dart';
 
 class DependencyChecker {
   final DartDependencySetBuilder builder;

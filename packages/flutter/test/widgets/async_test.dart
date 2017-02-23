@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 void main() {
-  Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) { 
+  Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) {
     return new Text(snapshot.toString());
   }
   group('Async smoke tests', () {

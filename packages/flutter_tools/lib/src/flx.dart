@@ -9,9 +9,9 @@ import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
+import 'build_info.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'build_info.dart';
 import 'globals.dart';
 import 'zip.dart';
 

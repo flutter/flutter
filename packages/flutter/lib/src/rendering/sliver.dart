@@ -9,8 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'box.dart';
 import 'binding.dart';
+import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
 import 'viewport_offset.dart';

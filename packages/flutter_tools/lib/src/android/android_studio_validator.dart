@@ -6,11 +6,11 @@ import 'dart:async';
 
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../doctor.dart';
-import '../globals.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../base/version.dart';
+import '../doctor.dart';
+import '../globals.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {

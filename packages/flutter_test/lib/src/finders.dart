@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
-
-import 'package:meta/meta.dart';
 
 /// Signature for [CommonFinders.byPredicate].
 typedef bool WidgetPredicate(Widget widget);

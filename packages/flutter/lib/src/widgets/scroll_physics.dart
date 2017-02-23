@@ -7,8 +7,8 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 
 import 'overscroll_indicator.dart';
-import 'scroll_simulation.dart';
 import 'scroll_position.dart';
+import 'scroll_simulation.dart';
 
 // The ScrollPhysics base class is defined in scroll_position.dart because it
 // has as circular dependency with ScrollPosition.

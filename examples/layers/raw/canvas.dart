@@ -5,9 +5,9 @@
 // This example shows how to use the ui.Canvas interface to draw various shapes
 // with gradients and transforms.
 
-import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to

@@ -5,8 +5,8 @@
 // This example shows how to draw some bi-directional text using the raw
 // interface to the engine.
 
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 // A paragraph represents a rectangular region that contains some text.
 ui.Paragraph paragraph;

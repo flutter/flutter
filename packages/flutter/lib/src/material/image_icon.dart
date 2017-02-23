@@ -5,10 +5,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 
 /// An icon that comes from an [ImageProvider], e.g. an [AssetImage].
 ///

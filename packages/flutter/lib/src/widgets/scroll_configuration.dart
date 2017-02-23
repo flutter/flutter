@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'framework.dart';
-import 'scroll_physics.dart';
 import 'overscroll_indicator.dart';
+import 'scroll_physics.dart';
 
 class ScrollBehavior {
   const ScrollBehavior();

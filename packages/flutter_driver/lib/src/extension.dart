@@ -13,12 +13,12 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'error.dart';
 import 'find.dart';
+import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
 import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
-import 'frame_sync.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';

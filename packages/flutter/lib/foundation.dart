@@ -9,6 +9,12 @@
 /// framework.
 library foundation;
 
+export 'package:meta/meta.dart' show
+  mustCallSuper,
+  optionalTypeArgs,
+  protected,
+  required;
+
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
@@ -19,9 +25,3 @@ export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/synchronous_future.dart';
-
-export 'package:meta/meta.dart' show
-  mustCallSuper,
-  optionalTypeArgs,
-  protected,
-  required;

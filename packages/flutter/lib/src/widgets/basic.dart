@@ -11,8 +11,8 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 
-export 'package:flutter/foundation.dart' show TargetPlatform;
 export 'package:flutter/animation.dart';
+export 'package:flutter/foundation.dart' show TargetPlatform;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
   Axis,

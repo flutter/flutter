@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
@@ -11,7 +12,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
-import '../artifacts.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';

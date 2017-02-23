@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../artifacts.dart';
 import '../cache.dart';
 import '../globals.dart';
 
