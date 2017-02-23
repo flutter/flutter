@@ -22,6 +22,7 @@ const double _kTwoPi = 2 * math.PI;
 const int _kHoursPerDay = 24;
 const int _kHoursPerPeriod = 12;
 const int _kMinutesPerHour = 60;
+const Duration _kVibrateCommitDelay = const Duration(milliseconds: 100);
 
 /// Whether the [TimeOfDay] is before or after noon.
 enum DayPeriod {
@@ -644,12 +645,17 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   _TimePickerMode _mode = _TimePickerMode.hour;
   TimeOfDay _selectedTime;
+  Timer _vibrateTimer;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-        HapticFeedback.vibrate();
+        _vibrateTimer?.cancel();
+        _vibrateTimer = new Timer(_kVibrateCommitDelay, () {
+          HapticFeedback.vibrate();
+          _vibrateTimer = null;
+        });
         break;
       case TargetPlatform.iOS:
         break;
@@ -664,6 +670,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   }
 
   void _handleTimeChanged(TimeOfDay value) {
+    _vibrate();
     setState(() {
       _selectedTime = value;
     });
@@ -758,6 +765,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         }
       )
     );
+  }
+
+  @override
+  void dispose() {
+    _vibrateTimer?.cancel();
+    _vibrateTimer = null;
+    super.dispose();
   }
 }
 
