@@ -102,7 +102,7 @@ Future<String> ensureGradle() async {
   return gradle;
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode) async {
+Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
   // Create android/local.properties.
   File localProperties = fs.file('android/local.properties');
   if (!localProperties.existsSync()) {
@@ -130,7 +130,7 @@ Future<Null> buildGradleProject(BuildMode buildMode) async {
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return buildGradleProjectV2(gradle, buildModeName);
+      return buildGradleProjectV2(gradle, buildModeName, target);
   }
 }
 
@@ -153,7 +153,7 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-Future<Null> buildGradleProjectV2(String gradle, String buildModeName) async {
+Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target) async {
   String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradle assemble<BuildMode>'.
@@ -167,6 +167,9 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName) async {
     LocalEngineArtifacts localEngineArtifacts = artifacts;
     printTrace('Using local engine: ${localEngineArtifacts.engineOutPath}');
     command.add('-PlocalEngineOut=${localEngineArtifacts.engineOutPath}');
+  }
+  if (target != null) {
+    command.add('-Ptarget=$target');
   }
   command.add(assembleTask);
   int exitcode = await runCommandAndStreamOutput(
