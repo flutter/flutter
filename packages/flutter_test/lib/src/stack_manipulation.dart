@@ -28,7 +28,7 @@ int reportExpectCall(StackTrace stack, StringBuffer information) {
     assert(expectMatch.groupCount == 2);
     information.writeln('This was caught by the test expectation on the following line:');
     information.writeln('  ${expectMatch.group(1)} line ${expectMatch.group(2)}');
-    return 3;
+    return 4;
   }
   return 0;
 }

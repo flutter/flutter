@@ -11,7 +11,7 @@ void main() {
       throw 'unexpectedly did not throw';
     } catch (e, stack) {
       StringBuffer information = new StringBuffer();
-      expect(reportExpectCall(stack, information), 3);
+      expect(reportExpectCall(stack, information), 4);
       List<String> lines = information.toString().split('\n');
       expect(lines[0], 'This was caught by the test expectation on the following line:');
       expect(lines[1], matches(r'^  .*stack_manipulation_test.dart line [0-9]+$'));
