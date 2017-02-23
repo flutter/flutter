@@ -660,9 +660,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   static final RegExp _flutterRunnerRegex = new RegExp(r' FlutterRunner\[\d+\] ');
 
-  /// List of log categories to always show in the logs, even if this is an
-  /// app-secific [DeviceLogReader]. Add to this list to make the log output
-  /// more verbose.
+  /// List of log categories to always show in the logs, even if this is an app-specific
+  /// [DeviceLogReader]. Add to this list to make the log output more verbose.
   static final List<String> _whitelistedLogCategories = <String>[
     'CoreSimulatorBridge',
   ];
@@ -693,6 +692,12 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
           && content.startsWith('assertion failed: ')
           && content.endsWith(']: 0x1'))
          return null;
+
+      // assertion failed: 15G1212 13E230: libxpc.dylib + 57882 [66C28065-C9DB-3C8E-926F-5A40210A6D1B]: 0x7d
+      if (category == 'Runner'
+          && content.startsWith('assertion failed: ')
+          && content.contains(' libxpc.dylib '))
+        return null;
 
       if (_appName == null || _whitelistedLogCategories.contains(category))
         return '$category: $content';
