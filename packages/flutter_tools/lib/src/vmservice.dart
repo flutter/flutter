@@ -5,9 +5,9 @@
 import 'dart:async';
 import 'dart:convert' show BASE64;
 
+import 'package:file/file.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -15,14 +15,17 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'globals.dart';
+import 'vmservice_record_replay.dart';
 
 /// A function that opens a two-way communication channel to the specified [uri].
-typedef StreamChannel<dynamic> OpenChannel(Uri uri);
+typedef StreamChannel<String> _OpenChannel(Uri uri);
 
-OpenChannel _openChannel = _defaultOpenChannel;
+_OpenChannel _openChannel = _defaultOpenChannel;
 
-StreamChannel<dynamic> _defaultOpenChannel(Uri uri) =>
-    new IOWebSocketChannel.connect(uri.toString());
+const String _kRecordingType = 'vmservice';
+
+StreamChannel<String> _defaultOpenChannel(Uri uri) =>
+    new IOWebSocketChannel.connect(uri.toString()).cast();
 
 /// The default VM service request timeout.
 const Duration kDefaultRequestTimeout = const Duration(seconds: 10);
@@ -43,9 +46,17 @@ class VMService {
     });
   }
 
-  @visibleForTesting
-  static void setOpenChannelForTesting(OpenChannel openChannel) {
-    _openChannel = openChannel;
+  static void enableRecordingConnection(String location) {
+    Directory dir = getRecordingSink(location, _kRecordingType);
+    _openChannel = (Uri uri) {
+      StreamChannel<String> delegate = _defaultOpenChannel(uri);
+      return new RecordingVMServiceChannel(delegate, dir);
+    };
+  }
+
+  static void enableReplayConnection(String location) {
+    Directory dir = getReplaySource(location, _kRecordingType);
+    _openChannel = (Uri uri) => new ReplayVMServiceChannel(dir);
   }
 
   /// Connect to a Dart VM Service at [httpUri].
@@ -57,8 +68,8 @@ class VMService {
     Duration requestTimeout: kDefaultRequestTimeout,
   }) {
     Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    StreamChannel<dynamic> channel = _openChannel(wsUri);
-    rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel.cast()));
+    StreamChannel<String> channel = _openChannel(wsUri);
+    rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
     return new VMService._(peer, httpUri, wsUri, requestTimeout);
   }
 
