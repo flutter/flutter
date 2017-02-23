@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:file/file.dart';
 import 'package:stream_channel/stream_channel.dart';
 
+import 'base/io.dart';
 import 'base/process.dart';
 
 const String _kManifest = 'MANIFEST.txt';
@@ -214,10 +215,11 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       throw new ArgumentError('No matching invocation found');
     _Transaction transaction = _transactions.remove(event.id);
     // TODO(tvolkert): validate `transaction.sendEvent` matches `event`
-    print('Sending event ${event.id}');
     if (transaction.receiveEvent == null) {
-      _controller.addError(new ArgumentError('Dangling event...'));
-      _controller.close();
+      // This signals that when we were recording, the VM shut down before
+      // we received the response. This is typically due to the user quitting
+      // the app runner. We follow suit here and exit.
+      exit(0);
     } else {
       _controller.add(JSON.encoder.convert(transaction.receiveEvent.data));
       if (_transactions.isEmpty)
