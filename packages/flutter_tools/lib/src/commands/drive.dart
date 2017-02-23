@@ -6,8 +6,8 @@ import 'dart:async';
 
 import '../android/android_device.dart' show AndroidDevice;
 import '../application_package.dart';
-import '../base/file_system.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';

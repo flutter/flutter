@@ -4,10 +4,10 @@
 
 import 'dart:io';
 
+import 'package:flutter_devicelab/framework/adb.dart';
+
 import '../framework/framework.dart';
 import '../framework/utils.dart';
-
-import 'package:flutter_devicelab/framework/adb.dart';
 
 TaskFunction createBasicMaterialAppSizeTest() {
   return () async {

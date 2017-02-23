@@ -5,8 +5,8 @@
 // This example shows how to put some pixels on the screen using the raw
 // interface to the engine.
 
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 ui.Color color;
 

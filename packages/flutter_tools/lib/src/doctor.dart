@@ -7,8 +7,8 @@ import 'dart:convert' show UTF8;
 
 import 'package:archive/archive.dart';
 
-import 'android/android_workflow.dart';
 import 'android/android_studio_validator.dart';
+import 'android/android_workflow.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';

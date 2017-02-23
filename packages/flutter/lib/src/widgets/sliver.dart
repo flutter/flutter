@@ -7,8 +7,8 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'framework.dart';
 import 'basic.dart';
+import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,

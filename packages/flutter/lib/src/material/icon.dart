@@ -4,10 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 /// A material design icon.

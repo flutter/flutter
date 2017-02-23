@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:archive/archive.dart';
 
-import 'devfs.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
+import 'devfs.dart';
 
 abstract class ZipBuilder {
   factory ZipBuilder() {

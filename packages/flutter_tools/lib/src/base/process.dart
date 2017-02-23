@@ -5,10 +5,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
-import '../globals.dart';
 
 typedef String StringConverter(String string);
 typedef Future<dynamic> ShutdownHook();

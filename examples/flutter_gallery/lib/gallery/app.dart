@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 
-import 'item.dart';
 import 'home.dart';
+import 'item.dart';
 import 'updates.dart';
 
 final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(

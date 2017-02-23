@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'box.dart';
-import 'object.dart';
 import 'layer.dart';
+import 'object.dart';
 
 /// The options that control whether the performance overlay displays certain
 /// aspects of the compositor.

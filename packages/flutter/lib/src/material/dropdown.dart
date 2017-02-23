@@ -13,10 +13,10 @@ import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
-import 'material.dart';
 
 const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;

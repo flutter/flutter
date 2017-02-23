@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'button_bar.dart';
 import 'button.dart';
+import 'button_bar.dart';
 import 'colors.dart';
 import 'dialog.dart';
 import 'flat_button.dart';

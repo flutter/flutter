@@ -9,8 +9,8 @@ import 'button.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'scaffold.dart';
-import 'theme_data.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;

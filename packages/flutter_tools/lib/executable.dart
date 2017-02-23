@@ -5,10 +5,11 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:intl/intl_standalone.dart' as intl;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
-import 'package:intl/intl_standalone.dart' as intl;
 
+import 'src/artifacts.dart';
 import 'src/base/common.dart';
 import 'src/base/config.dart';
 import 'src/base/context.dart';
@@ -41,7 +42,6 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/artifacts.dart';
 import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';

@@ -20,8 +20,8 @@ import '../flx.dart' as flx;
 import '../globals.dart';
 import '../resident_runner.dart';
 import '../services.dart';
-import 'build_aot.dart';
 import 'build.dart';
+import 'build_aot.dart';
 
 export '../android/android_device.dart' show AndroidDevice;
 

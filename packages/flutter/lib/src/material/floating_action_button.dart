@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'icon_theme_data.dart';
 import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';

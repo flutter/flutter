@@ -7,6 +7,8 @@
 /// To use, import `package:flutter/widgets.dart`.
 library widgets;
 
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_size.dart';
 export 'src/widgets/app.dart';
@@ -67,5 +69,3 @@ export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';
 export 'src/widgets/viewport.dart';
 export 'src/widgets/will_pop_scope.dart';
-
-export 'package:vector_math/vector_math_64.dart' show Matrix4;

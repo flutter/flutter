@@ -8,11 +8,11 @@ import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'binding.dart';
 
 /// The layout constraints for the root render object.
 class ViewConfiguration {

@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';

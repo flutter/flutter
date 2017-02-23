@@ -4,9 +4,9 @@
 
 import 'dart:ui' show hashValues, TextAffinity, TextPosition;
 
-export 'dart:ui' show TextAffinity, TextPosition;
-
 import 'package:meta/meta.dart';
+
+export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
 class TextRange {

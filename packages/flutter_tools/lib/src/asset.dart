@@ -11,8 +11,8 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'cache.dart';
-import 'devfs.dart';
 import 'dart/package_map.dart';
+import 'devfs.dart';
 import 'globals.dart';
 
 /// A bundle of assets.

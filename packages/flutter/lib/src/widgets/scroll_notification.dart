@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
-import 'framework.dart';
 import 'basic.dart';
+import 'framework.dart';
 import 'notification_listener.dart';
 import 'scrollable.dart' show Scrollable, ScrollableState;
 

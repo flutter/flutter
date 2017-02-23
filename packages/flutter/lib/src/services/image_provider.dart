@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-import 'dart:ui' show Size, Locale, hashValues;
-import 'dart:ui' as ui show Image;
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
+import 'dart:ui' show Size, Locale, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;

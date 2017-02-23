@@ -9,14 +9,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
-
 import 'package:vector_math/vector_math_64.dart';
 
+import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 import 'node.dart';
 import 'semantics.dart';
-import 'binding.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;

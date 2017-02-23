@@ -11,8 +11,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../vmservice.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 // Names of some of the Timeline events we care about.
 const String kFlutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
