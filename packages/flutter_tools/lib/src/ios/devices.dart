@@ -308,7 +308,7 @@ class IOSDevice extends Device {
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
       printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-      printError('  open ios/Runner.xcodeproj');
+      printError('  open ios/Runner.xcworkspace');
       printError('');
       return new LaunchResult.failed();
     }
