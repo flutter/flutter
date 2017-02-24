@@ -6,6 +6,11 @@
 
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
+#if defined(OS_FUCHSIA)
+#include "apps/mozart/lib/skia/type_converters.h"
+#include "apps/mozart/services/composition/nodes.fidl.h"
+#endif  // defined(OS_FUCHSIA)
+
 namespace flow {
 
 PhysicalModelLayer::PhysicalModelLayer()
@@ -26,10 +31,20 @@ void PhysicalModelLayer::Preroll(PrerollContext* context, const SkMatrix& matrix
   set_paint_bounds(bounds);
 }
 
+#if defined(OS_FUCHSIA)
+
+void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context,
+                                     mozart::Node* container) {
+  context.AddLayerToCurrentPaintTask(this);
+  auto node = mozart::Node::New();
+  node->content_clip = mozart::RectF::From(rrect_.getBounds());
+  UpdateSceneChildrenInsideNode(context, container, std::move(node));
+}
+
+#endif  // defined(OS_FUCHSIA)
+
 void PhysicalModelLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
-  // TODO: need to support this layer on Fuchsia
-  FTL_DCHECK(!needs_system_composite());
 
   SkPath path;
   path.addRRect(rrect_);
@@ -42,6 +57,9 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
                               0.25f, 0.25f,
                               SK_ColorBLACK);
   }
+
+  if (needs_system_composite())
+    return;
 
   SkPaint paint;
   paint.setColor(SkColorSetA(color_, 0xFF));
