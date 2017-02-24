@@ -45,7 +45,7 @@ class Version implements Comparable<Version> {
   factory Version.parse(String text) {
     Match match = versionPattern.firstMatch(text);
     if (match == null) {
-      throw new FormatException('Could not parse "$text".');
+      return null;
     }
 
     try {
@@ -54,7 +54,7 @@ class Version implements Comparable<Version> {
       int patch = int.parse(match[5] ?? '0');
       return new Version._(major, minor, patch, text);
     } on FormatException {
-      throw new FormatException('Could not parse "$text".');
+      return null;
     }
   }
 

@@ -111,6 +111,8 @@ baz=qux
 
       Version v5 = new Version(1, 2, 0, text: 'foo');
       expect(v5, equals(v2));
+
+      expect(new Version.parse('Preview2.2'), isNull);
     });
   });
 }
