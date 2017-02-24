@@ -629,8 +629,11 @@ class DragScrollActivity extends ScrollActivity {
 
   @override
   Notification createScrollEndNotification(AbstractScrollState scrollable) {
-    assert(_lastDetails is DragEndDetails);
-    return new ScrollEndNotification(scrollable: scrollable, dragDetails: _lastDetails);
+    // We might not have DragEndDetails yet if we're being called from beginActivity.
+    return new ScrollEndNotification(
+      scrollable: scrollable,
+      dragDetails: _lastDetails is DragEndDetails ? _lastDetails : null
+    );
   }
 
   @override
