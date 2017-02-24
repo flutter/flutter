@@ -82,8 +82,9 @@ class AndroidApk extends ApplicationPackage {
     String apkPath;
 
     if (isProjectUsingGradle()) {
-      manifestPath = gradleManifestPath;
-      apkPath = gradleAppOut;
+      // Grab information from the .apk. The gradle build script might alter the
+      // application Id, so we need to look at what was actually built.
+      return new AndroidApk.fromApk(gradleAppOut);
     } else {
       manifestPath = fs.path.join('android', 'AndroidManifest.xml');
       apkPath = fs.path.join(getAndroidBuildDirectory(), 'app.apk');
