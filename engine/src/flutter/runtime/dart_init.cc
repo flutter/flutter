@@ -261,8 +261,11 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   std::vector<uint8_t> snapshot_data;
   std::string entry_path;
   if (!IsRunningPrecompiledCode()) {
-    // Assert that entry script URI starts with file://
-    FTL_CHECK(entry_uri.find(kFileUriPrefix) == 0u);
+    // Check that the entry script URI starts with file://
+    if (entry_uri.find(kFileUriPrefix) != 0u) {
+      *error = strdup("Isolates must use file:// URIs");
+      return nullptr;
+    }
     // Entry script path (file:// is stripped).
     entry_path = std::string(script_uri + strlen(kFileUriPrefix));
     if (!running_from_source) {
