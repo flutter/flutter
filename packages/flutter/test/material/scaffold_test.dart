@@ -189,7 +189,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('Title')
+            title: new Text('Title'),
           ),
           body: new Builder(
             builder: (BuildContext context) {
@@ -198,16 +198,16 @@ void main() {
                   Scaffold.of(context).showBottomSheet<Null>((BuildContext context) {
                     return new Container(
                       key: sheetKey,
-                      decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
+                      color: Colors.blue[500],
                     );
                   });
                 },
-                child: new Text('X')
+                child: new Text('X'),
               );
-            }
-          )
-        )
-      )
+            },
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.text('X'));

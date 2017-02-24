@@ -58,7 +58,7 @@ class ColorItem extends StatelessWidget {
     return new Container(
       height: kColorItemHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: new BoxDecoration(backgroundColor: color),
+      color: color,
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
