@@ -347,29 +347,13 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   });
 }
 
-- (bool)isWindowFullscreen {
-  UIWindow* window = self.view.window;
-  return CGRectEqualToRect(window.frame, window.screen.bounds);
-}
-
 - (CGFloat)statusBarPadding {
-  // If we're a child of a containing view, let the container apply padding.
-  if (self.parentViewController != nil) {
-    return 0.0;
-  }
-
-  // If not fullscreen, assume we don't want padding.
-  if (![self isWindowFullscreen]) {
-    return 0.0;
-  }
-
   UIScreen* screen = self.view.window.screen;
   CGRect statusFrame = [UIApplication sharedApplication].statusBarFrame;
   CGRect viewFrame = [self.view convertRect:self.view.bounds
                           toCoordinateSpace:screen.coordinateSpace];
-  CGFloat padding =
-      statusFrame.origin.y + statusFrame.size.height - viewFrame.origin.y;
-  return MAX(padding, 0.0);
+  CGRect intersection = CGRectIntersection(statusFrame, viewFrame);
+  return CGRectIsNull(intersection) ? 0.0 : intersection.size.height;
 }
 
 - (void)viewDidLayoutSubviews {
