@@ -100,22 +100,23 @@ class ConfiguredGradleValidator extends DoctorValidator {
       gradleExecutable = fs.path.join(
           cfgGradleDir, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle');
     }
-    String version;
+    String versionString;
     if (processManager.canRun(gradleExecutable)) {
       type = ValidationType.partial;
       ProcessResult result =
           processManager.runSync(<String>[gradleExecutable, '--version']);
       if (result.exitCode == 0) {
-        version = result.stdout
+        versionString = result.stdout
             .toString()
             .split('\n')
             .firstWhere((String s) => s.startsWith('Gradle '))
             .substring('Gradle '.length);
-        if (new Version.parse(version) >= minGradleVersion) {
+        Version version = new Version.parse(versionString) ?? Version.unknown;
+        if (version >= minGradleVersion) {
           type = ValidationType.installed;
         } else {
           messages.add(new ValidationMessage.error(
-              'Gradle version $minGradleVersion required. Found version $version.'));
+              'Gradle version $minGradleVersion required. Found version $versionString.'));
         }
       } else {
         messages
@@ -128,6 +129,6 @@ class ConfiguredGradleValidator extends DoctorValidator {
 
     messages.add(new ValidationMessage(
         'Consider removing the gradle-dir setting to use Gradle from Android Studio.'));
-    return new ValidationResult(type, messages, statusInfo: version);
+    return new ValidationResult(type, messages, statusInfo: versionString);
   }
 }

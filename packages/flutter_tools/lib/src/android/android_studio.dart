@@ -28,6 +28,9 @@ AndroidStudio get androidStudio =>
 
 final Version minGradleVersion = new Version(2, 14, 1);
 
+final RegExp _dotHomeStudioVersionMatcher =
+    new RegExp(r'^\.AndroidStudio([^\d]*)([\d.]+)');
+
 /// Locate Gradle.
 String get gradleExecutable {
   // See if the user has explicitly configured gradle-dir.
@@ -66,15 +69,22 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
-    Version version = new Version.parse(
-        homeDotDir.basename.substring('.AndroidStudio'.length));
+    Match versionMatch =
+        _dotHomeStudioVersionMatcher.firstMatch(homeDotDir.basename);
+    if (versionMatch?.groupCount != 2) {
+      return null;
+    }
+    Version version = new Version.parse(versionMatch[2]);
+    if (version == null) {
+      return null;
+    }
     String installPath;
     try {
       installPath = fs
           .file(fs.path.join(homeDotDir.path, 'system', '.home'))
           .readAsStringSync();
     } catch (e) {
-      // ignored
+      // ignored, installPath will be null, which is handled below
     }
     if (installPath != null && fs.isDirectorySync(installPath)) {
       return new AndroidStudio(installPath, version: version);
@@ -176,7 +186,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       });
     }
 
-    // Read all $HOME/AndroidStudio*/system/.home files. There may be several
+    // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
     for (FileSystemEntity entity in fs.directory(homeDirPath).listSync()) {
       if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
@@ -231,7 +241,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       for (FileSystemEntity entry in gradlePaths.where((FileSystemEntity e) =>
           e.basename.startsWith('gradle-') && e is Directory)) {
         Version version =
-            new Version.parse(entry.basename.substring('gradle-'.length));
+            new Version.parse(entry.basename.substring('gradle-'.length)) ??
+                Version.unknown;
         if (latestGradleVersion == null || version > latestGradleVersion) {
           latestGradleVersion = version;
           if (version >= minGradleVersion) {
