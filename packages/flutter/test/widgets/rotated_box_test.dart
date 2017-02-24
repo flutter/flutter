@@ -23,21 +23,21 @@ void main() {
                 child: new Container(
                   width: 100.0,
                   height: 40.0,
-                  decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
-                )
+                  color: Colors.blue[500],
+                ),
               ),
               new GestureDetector(
                 onTap: () { log.add('right'); },
                 child: new Container(
                   width: 75.0,
                   height: 65.0,
-                  decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
-                )
+                  color: Colors.blue[500],
+                ),
               ),
-            ]
-          )
-        )
-      )
+            ],
+          ),
+        ),
+      ),
     );
 
     RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));

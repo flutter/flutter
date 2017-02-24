@@ -80,11 +80,18 @@ class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
   /// The `height` and `width` values include the padding.
+  ///
+  /// The `color` argument is a shorthand for
+  /// `decoration: new BoxDecoration(backgroundColor: color)`, which means you
+  /// cannot supply both a `color` and a `decoration` argument. If you want to
+  /// have both a `color` and a `decoration`, you can pass the color as the
+  /// `backgroundColor` argument to the `BoxDecoration`.
   Container({
     Key key,
     this.alignment,
     this.padding,
-    this.decoration,
+    Color color,
+    Decoration decoration,
     this.foregroundDecoration,
     double width,
     double height,
@@ -92,7 +99,8 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : constraints =
+  }) : decoration = decoration ?? (color != null ? new BoxDecoration(backgroundColor: color) : null),
+       constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
@@ -102,6 +110,10 @@ class Container extends StatelessWidget {
     assert(padding == null || padding.isNonNegative);
     assert(decoration == null || decoration.debugAssertIsValid());
     assert(constraints == null || constraints.debugAssertIsValid());
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
   }
 
   /// The [child] contained by the container.

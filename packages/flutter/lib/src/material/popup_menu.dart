@@ -275,7 +275,7 @@ class _PopupMenu<T> extends StatelessWidget {
       Widget item = route.items[i];
       if (route.initialValue != null && route.initialValue == route.items[i].value) {
         item = new Container(
-          decoration: new BoxDecoration(backgroundColor: Theme.of(context).highlightColor),
+          color: Theme.of(context).highlightColor,
           child: item
         );
       }

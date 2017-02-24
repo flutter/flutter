@@ -24,7 +24,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight 
         new SliverToBoxAdapter(
           child: new Container(
             height: 1200.0,
-            decoration: new BoxDecoration(backgroundColor: Colors.orange[400]),
+            color: Colors.orange[400],
           ),
         ),
       ],
