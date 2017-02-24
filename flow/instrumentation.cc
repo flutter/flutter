@@ -151,9 +151,11 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   double sample_x =
       x + width * (static_cast<double>(current_sample_) / kMaxSamples) -
       sample_margin_width;
-  canvas.drawRectCoords(sample_x, y, sample_x + width * sample_unit_width +
-                                         sample_margin_width * 2,
-                        bottom, paint);
+
+  const auto marker_rect = SkRect::MakeLTRB(
+      sample_x, y,
+      sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
+  canvas.drawRect(marker_rect, paint);
 }
 
 CounterValues::CounterValues() : current_sample_(kMaxSamples - 1) {
@@ -220,9 +222,10 @@ void CounterValues::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   double sample_x =
       x + width * (static_cast<double>(current_sample_) / kMaxSamples) -
       sample_margin_width;
-  canvas.drawRectCoords(sample_x, y, sample_x + width * sample_unit_width +
-                                         sample_margin_width * 2,
-                        bottom, paint);
+  const auto marker_rect = SkRect::MakeLTRB(
+      sample_x, y,
+      sample_x + width * sample_unit_width + sample_margin_width * 2, bottom);
+  canvas.drawRect(marker_rect, paint);
 }
 
 int64_t CounterValues::GetCurrentValue() const {
