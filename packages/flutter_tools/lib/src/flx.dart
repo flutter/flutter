@@ -8,6 +8,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/platform.dart';
 import 'base/process.dart';
 import 'build_info.dart';
 import 'dart/package_map.dart';
@@ -28,16 +29,37 @@ const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
 Future<int> createSnapshot({
-  String snapshotterPath,
   String mainPath,
   String snapshotPath,
   String depfilePath,
   String packages
 }) {
-  assert(snapshotterPath != null);
+  if (platform.isWindows) {
+    return _creteScriptSnapshotWithGenSnapshot(
+        mainPath: mainPath,
+        snapshotPath: snapshotPath,
+        depfilePath: depfilePath,
+        packages: packages
+    );
+  }
+  return _createScriptSnapshotWithSkySnapshot(
+      mainPath: mainPath,
+      snapshotPath: snapshotPath,
+      depfilePath: depfilePath,
+      packages: packages
+  );
+}
+
+Future<int> _createScriptSnapshotWithSkySnapshot({
+  String mainPath,
+  String snapshotPath,
+  String depfilePath,
+  String packages
+}) {
   assert(mainPath != null);
   assert(snapshotPath != null);
   assert(packages != null);
+  String snapshotterPath = artifacts.getArtifactPath(Artifact.skySnapshot);
 
   final List<String> args = <String>[
     snapshotterPath,
@@ -47,6 +69,34 @@ Future<int> createSnapshot({
   if (depfilePath != null) {
     args.add('--depfile=$depfilePath');
     args.add('--build-output=$snapshotPath');
+  }
+  args.add(mainPath);
+  return runCommandAndStreamOutput(args);
+}
+
+Future<int> _creteScriptSnapshotWithGenSnapshot({
+  String mainPath,
+  String snapshotPath,
+  String depfilePath,
+  String packages
+}) {
+  assert(mainPath != null);
+  assert(snapshotPath != null);
+  assert(packages != null);
+  String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot);
+  String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+  String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+
+  final List<String> args = <String>[
+    snapshotterPath,
+    '--snapshot_kind=script',
+    '--vm_snapshot_data=$vmSnapshotData',
+    '--isolate_snapshot_data=$isolateSnapshotData',
+    '--packages=$packages',
+    '--script_snapshot=$snapshotPath'
+  ];
+  if (depfilePath != null) {
+    args.add('--dependencies=$depfilePath');
   }
   args.add(mainPath);
   return runCommandAndStreamOutput(args);
@@ -73,7 +123,6 @@ Future<String> buildFlx({
 }
 
 Future<Null> build({
-  String snapshotterPath,
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
   String outputPath,
@@ -110,7 +159,6 @@ Future<Null> build({
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
     int result = await createSnapshot(
-      snapshotterPath: snapshotterPath ?? artifacts.getArtifactPath(Artifact.skySnapshot),
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,

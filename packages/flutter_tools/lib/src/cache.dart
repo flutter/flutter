@@ -289,6 +289,7 @@ class FlutterEngine {
   ];
 
   List<List<String>> get _windowsBinaryDirs => <List<String>>[
+    <String>['windows-x64', 'windows-x64/artifacts.zip'],
     <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
     <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
   ];

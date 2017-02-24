@@ -250,6 +250,7 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
           : new IOSApp.fromIpa(applicationBinary);
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
   assert(platform != null);
@@ -274,6 +275,7 @@ class ApplicationPackageStore {
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
         return null;
     }
     return null;

@@ -5,12 +5,20 @@
 import 'dart:convert';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 
 class DartDependencySetBuilder {
-  DartDependencySetBuilder(this.mainScriptPath,
-                           this.projectRootPath,
-                           this.packagesFilePath);
+
+  factory DartDependencySetBuilder(
+      String mainScriptPath, String projectRootPath, String packagesFilePath) {
+    if (platform.isWindows)
+      return new _GenSnapshotDartDependencySetBuilder(mainScriptPath, projectRootPath, packagesFilePath);
+    return new DartDependencySetBuilder._(mainScriptPath, projectRootPath, packagesFilePath);
+  }
+
+  DartDependencySetBuilder._(this.mainScriptPath, this.projectRootPath, this.packagesFilePath);
 
   final String mainScriptPath;
   final String projectRootPath;
@@ -30,5 +38,56 @@ class DartDependencySetBuilder {
     String output = runSyncAndThrowStdErrOnError(args);
 
     return new Set<String>.from(LineSplitter.split(output));
+  }
+}
+
+/// A [DartDependencySetBuilder] that is backed by gen_snapshot.
+class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
+  _GenSnapshotDartDependencySetBuilder(this.mainScriptPath,
+                                       this.projectRootPath,
+                                       this.packagesFilePath);
+
+  @override
+  final String mainScriptPath;
+  @override
+  final String projectRootPath;
+  @override
+  final String packagesFilePath;
+
+  @override
+  Set<String> build() {
+    final String snapshotterPath =
+        Artifacts.instance.getArtifactPath(Artifact.genSnapshot);
+    final String vmSnapshotData =
+        Artifacts.instance.getArtifactPath(Artifact.vmSnapshotData);
+    final String isolateSnapshotData =
+        Artifacts.instance.getArtifactPath(Artifact.isolateSnapshotData);
+    assert(fs.path.isAbsolute(this.projectRootPath));
+
+    // TODO(goderbauer): Implement --print-deps in gen_snapshot so we don't have to parse the Makefile
+    Directory tempDir = fs.systemTempDirectory.createTempSync('dart_dependency_set_builder_');
+    String depfilePath = fs.path.join(tempDir.path, 'snapshot_blob.bin.d');
+
+    final List<String> args = <String>[
+      snapshotterPath,
+      '--snapshot_kind=script',
+      '--dependencies-only',
+      '--vm_snapshot_data=$vmSnapshotData',
+      '--isolate_snapshot_data=$isolateSnapshotData',
+      '--packages=$packagesFilePath',
+      '--dependencies=$depfilePath',
+      '--script_snapshot=snapshot_blob.bin',
+      mainScriptPath
+    ];
+
+    runSyncAndThrowStdErrOnError(args);
+    String output = fs.file(depfilePath).readAsStringSync();
+    tempDir.deleteSync(recursive: true);
+
+    output = output.substring(output.indexOf(':'));
+    // Note: next line means we cannot process anything with spaces in the path
+    //       because Makefiles don't support spaces in paths :(
+    List<String> depsList = output.trim().split(' ');
+    return new Set<String>.from(depsList);
   }
 }
