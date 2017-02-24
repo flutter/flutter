@@ -137,4 +137,61 @@ void main() {
 
     expect(await result, equals(42));
   });
+
+  testWidgets('Barrier dismissable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new RaisedButton(
+              onPressed: null,
+              child: new Text('Go'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    BuildContext context = tester.element(find.text('Go'));
+
+    showDialog<Null>(
+      context: context,
+      child: new Container(
+        width: 100.0,
+        height: 100.0,
+        alignment: FractionalOffset.center,
+        child: new Text('Dialog1'),
+      ),
+    );
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsOneWidget);
+
+    // Tap on the barrier.
+    await tester.tapAt(const Point(10.0, 10.0));
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    expect(find.text('Dialog1'), findsNothing);
+
+    showDialog<Null>(
+      context: context,
+      barrierDismissable: false,
+      child: new Container(
+        width: 100.0,
+        height: 100.0,
+        alignment: FractionalOffset.center,
+        child: new Text('Dialog2'),
+      ),
+    );
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
+
+    // Tap on the barrier, which shouldn't do anything this time.
+    await tester.tapAt(const Point(10.0, 10.0));
+
+    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    expect(find.text('Dialog2'), findsOneWidget);
+
+  });
 }
