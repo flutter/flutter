@@ -4,7 +4,6 @@
 
 #include "gpu_surface_gl.h"
 
-#include "flutter/flow/gl_connection.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
@@ -50,9 +49,7 @@ bool GPUSurfaceGL::Setup() {
       sk_sp<GrContext>(GrContext::Create(kOpenGL_GrBackend, backend_context));
 
   if (context_ == nullptr) {
-    flow::GLConnection connection;
-    FTL_LOG(INFO) << "Failed to setup GL context. Aborting.";
-    FTL_LOG(INFO) << connection.Description();
+    FTL_LOG(INFO) << "Failed to setup Skia Gr context.";
     return false;
   }
 

@@ -61,11 +61,5 @@ source_set("flow") {
       "//apps/mozart/lib/skia",
       "//apps/mozart/services/composition",
     ]
-  } else {
-    sources += [
-      "gl_connection.cc",
-      "gl_connection.h",
-      "open_gl.h",
-    ]
   }
 }
