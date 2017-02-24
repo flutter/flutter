@@ -44,14 +44,20 @@ constexpr int kRecoveryPipelineDepth = 1;
 blink::PointerData::Change GetChangeFromPointerEventPhase(
     mozart::PointerEvent::Phase phase) {
   switch (phase) {
-    case mozart::PointerEvent::Phase::CANCEL:
-      return blink::PointerData::Change::kCancel;
+    case mozart::PointerEvent::Phase::ADD:
+      return blink::PointerData::Change::kAdd;
+    case mozart::PointerEvent::Phase::HOVER:
+      return blink::PointerData::Change::kHover;
     case mozart::PointerEvent::Phase::DOWN:
       return blink::PointerData::Change::kDown;
     case mozart::PointerEvent::Phase::MOVE:
       return blink::PointerData::Change::kMove;
     case mozart::PointerEvent::Phase::UP:
       return blink::PointerData::Change::kUp;
+    case mozart::PointerEvent::Phase::REMOVE:
+      return blink::PointerData::Change::kRemove;
+    case mozart::PointerEvent::Phase::CANCEL:
+      return blink::PointerData::Change::kCancel;
     default:
       return blink::PointerData::Change::kCancel;
   }
@@ -156,8 +162,7 @@ void RuntimeHolder::CreateView(
   direct_input_->SetViewportMetrics(viewport_metrics_);
 #endif  // FLUTTER_ENABLE_VULKAN
   if (!kernel.empty()) {
-    runtime_->dart_controller()->RunFromKernel(kernel.data(),
-                                               kernel.size());
+    runtime_->dart_controller()->RunFromKernel(kernel.data(), kernel.size());
   } else {
     runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
                                                  snapshot.size());
