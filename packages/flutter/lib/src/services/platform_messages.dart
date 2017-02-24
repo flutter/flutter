@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
+import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 
 ByteData _encodeUTF8(String message) {
   if (message == null)
@@ -449,7 +450,7 @@ abstract class MessageCodec {
   /// * [bool]s
   /// * [num]s
   /// * [String]s
-  /// * [ByteData]s
+  /// * [Uint8List]s, [Int32List]s, [Int64List]s, [Float64List]s
   /// * [List]s of supported values
   /// * [Map]s from supported values to supported values
   static const MessageCodec standard = const _StandardCodec();
@@ -516,13 +517,14 @@ class _StandardCodec implements MessageCodec {
   static const int _kInt32 = 3;
   static const int _kInt64 = 4;
   static const int _kLargeInt = 5;
-  // static const int _kFloat32 = 6; // Not currently used.
-  static const int _kFloat64 = 7;
-  static const int _kString = 8;
-  // static const int _kRepeatedString = 9; // Not currently used.
-  static const int _kByteData = 10;
-  static const int _kList = 11;
-  static const int _kMap = 12;
+  static const int _kFloat64 = 6;
+  static const int _kString = 7;
+  static const int _kUint8List = 8;
+  static const int _kInt32List = 9;
+  static const int _kInt64List = 10;
+  static const int _kFloat64List = 11;
+  static const int _kList = 12;
+  static const int _kMap = 13;
 
   const _StandardCodec();
 
@@ -548,7 +550,7 @@ class _StandardCodec implements MessageCodec {
     return result;
   }
 
-  void writeSize(_WriteBuffer buffer, int value) {
+  void _writeSize(_WriteBuffer buffer, int value) {
     assert(0 <= value && value < 0xffffffff);
     if (value < 254) {
       buffer.putUint8(value);
@@ -582,7 +584,7 @@ class _StandardCodec implements MessageCodec {
       else {
         buffer.putUint8(_kLargeInt);
         final List<int> hex = UTF8.encoder.convert(value.toRadixString(16));
-        writeSize(buffer, hex.length);
+        _writeSize(buffer, hex.length);
         buffer.putUint8List(hex);
       }
     } else if (value is double) {
@@ -591,21 +593,33 @@ class _StandardCodec implements MessageCodec {
     } else if (value is String) {
       buffer.putUint8(_kString);
       final List<int> bytes = UTF8.encoder.convert(value);
-      writeSize(buffer, bytes.length);
+      _writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
-    } else if (value is ByteData) {
-      buffer.putUint8(_kByteData);
-      writeSize(buffer, value.lengthInBytes);
-      buffer.putUint8List(value.buffer.asUint8List());
+    } else if (value is Uint8List) {
+      buffer.putUint8(_kUint8List);
+      _writeSize(buffer, value.length);
+      buffer.putUint8List(value);
+    } else if (value is Int32List) {
+      buffer.putUint8(_kInt32List);
+      _writeSize(buffer, value.length);
+      buffer.putInt32List(value);
+    } else if (value is Int64List) {
+      buffer.putUint8(_kInt64List);
+      _writeSize(buffer, value.length);
+      buffer.putInt64List(value);
+    } else if (value is Float64List) {
+      buffer.putUint8(_kFloat64List);
+      _writeSize(buffer, value.length);
+      buffer.putFloat64List(value);
     } else if (value is List) {
       buffer.putUint8(_kList);
-      writeSize(buffer, value.length);
+      _writeSize(buffer, value.length);
       for (final dynamic item in value) {
         _writeValue(buffer, item);
       }
     } else if (value is Map) {
       buffer.putUint8(_kMap);
-      writeSize(buffer, value.length);
+      _writeSize(buffer, value.length);
       value.forEach((dynamic key, dynamic value) {
         _writeValue(buffer, key);
         _writeValue(buffer, value);
@@ -662,9 +676,21 @@ class _StandardCodec implements MessageCodec {
         final int length = _readSize(buffer);
         result = UTF8.decoder.convert(buffer.getUint8List(length));
         break;
-      case _kByteData:
+      case _kUint8List:
         final int length = _readSize(buffer);
-        result = buffer.getView(length);
+        result = buffer.getUint8List(length);
+        break;
+      case _kInt32List:
+        final int length = _readSize(buffer);
+        result = buffer.getInt32List(length);
+        break;
+      case _kInt64List:
+        final int length = _readSize(buffer);
+        result = buffer.getInt64List(length);
+        break;
+      case _kFloat64List:
+        final int length = _readSize(buffer);
+        result = buffer.getFloat64List(length);
         break;
       case _kList:
         final int length = _readSize(buffer);
@@ -713,11 +739,12 @@ class _StandardCodec implements MessageCodec {
 }
 
 class _WriteBuffer {
-  final List<int> list = <int>[];
+  final Uint8Buffer buffer = new Uint8Buffer();
+
   ByteData _fourBytes;
-  List<int> _fourBytesAsList;
+  Uint8List _fourBytesAsList;
   ByteData _eightBytes;
-  List<int> _eightBytesAsList;
+  Uint8List _eightBytesAsList;
 
   _WriteBuffer() {
     _fourBytes = new ByteData(4);
@@ -727,29 +754,53 @@ class _WriteBuffer {
   }
 
   void putUint8(int byte) {
-    list.add(byte);
-  }
-
-  void putUint8List(List<int> bytes) {
-    list.addAll(bytes);
+    buffer.add(byte);
   }
 
   void putInt32(int value) {
     _fourBytes.setInt32(0, value);
-    list.addAll(_fourBytesAsList);
+    buffer.addAll(_fourBytesAsList);
   }
 
   void putInt64(int value) {
     _eightBytes.setInt64(0, value);
-    list.addAll(_eightBytesAsList);
+    buffer.addAll(_eightBytesAsList);
   }
 
   void putFloat64(double value) {
     _eightBytes.setFloat64(0, value);
-    list.addAll(_eightBytesAsList);
+    buffer.addAll(_eightBytesAsList);
   }
 
-  ByteData get byteData => new Uint8List.fromList(list).buffer.asByteData();
+  void putUint8List(Uint8List list) {
+    buffer.addAll(list);
+  }
+
+  void putInt32List(Int32List list) {
+    _alignTo(4);
+    buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
+  }
+
+  void putInt64List(Int64List list) {
+    _alignTo(8);
+    buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+  }
+
+  void putFloat64List(Float64List list) {
+    _alignTo(8);
+    buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
+  }
+
+  void _alignTo(int alignment) {
+    final int mod = buffer.length % alignment;
+    if (mod != 0) {
+      for (int i = 0; i < alignment - mod; i++) {
+        buffer.add(0);
+      }
+    }
+  }
+
+  ByteData get byteData => buffer.buffer.asByteData();
 }
 
 class _ReadBuffer {
@@ -780,16 +831,38 @@ class _ReadBuffer {
     return value;
   }
 
-  List<int> getUint8List(int length) {
-    final List<int> list = data.buffer.asUint8List(data.offsetInBytes + position, length);
+  Uint8List getUint8List(int length) {
+    final Uint8List list = data.buffer.asUint8List(data.offsetInBytes + position, length);
     position += length;
     return list;
   }
 
-  ByteData getView(int length) {
-    final ByteData view = new ByteData.view(data.buffer, data.offsetInBytes + position, length);
-    position += length;
-    return view;
+  Int32List getInt32List(int length) {
+    _alignTo(4);
+    final Int32List list = data.buffer.asInt32List(data.offsetInBytes + position, length);
+    position += 4 * length;
+    return list;
+  }
+
+  Int64List getInt64List(int length) {
+    _alignTo(8);
+    final Int64List list = data.buffer.asInt64List(data.offsetInBytes + position, length);
+    position += 8 * length;
+    return list;
+  }
+
+  Float64List getFloat64List(int length) {
+    _alignTo(8);
+    final Float64List list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
+    position += 8 * length;
+    return list;
+  }
+
+  void _alignTo(int alignment) {
+    final int mod = position % alignment;
+    if (mod != 0) {
+      position += alignment - mod;
+    }
   }
 
   bool get hasRemaining => position < data.lengthInBytes;

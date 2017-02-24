@@ -13,40 +13,47 @@ class PlatformServices extends StatefulWidget {
 }
 
 class _PlatformServicesState extends State<PlatformServices> {
-  double _latitude;
-  double _longitude;
+  Future<dynamic> _locationRequest;
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            new Text('Hello from Flutter!'),
-            new RaisedButton(
-              child: new Text('Get Location'),
-              onPressed: _getLocation
-            ),
-            new Text('Latitude: $_latitude, Longitude: $_longitude'),
-          ]
-        )
-      )
-    );
+    return new Material(child: new Center(child: new Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        new Text('Hello from Flutter!'),
+        new RaisedButton(
+          child: new Text('Get Location'),
+          onPressed: _requestLocation,
+        ),
+        new FutureBuilder<dynamic>(
+          future: _locationRequest,
+          builder: _buildLocation,
+        ),
+      ]
+    )));
   }
 
-  Future<Null> _getLocation() async {
-    final Map<String, String> message = <String, String>{'provider': 'network'};
-    final Map<String, dynamic> reply = await PlatformMessages.sendJSON('getLocation', message);
-    // If the widget was removed from the tree while the message was in flight,
-    // we want to discard the reply rather than calling setState to update our
-    // non-existent appearance.
-    if (!mounted)
-      return;
+  void _requestLocation() {
     setState(() {
-      _latitude = reply['latitude'].toDouble();
-      _longitude = reply['longitude'].toDouble();
+      _locationRequest =
+        new PlatformChannel('geo').invokeMethod('getLocation', 'network');
     });
+  }
+
+  Widget _buildLocation(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+    switch (snapshot.connectionState) {
+      case ConnectionState.none:
+        return new Text('Press button to request location');
+      case ConnectionState.waiting:
+        return new Text('Awaiting response...');
+      default:
+        try {
+          final List<double> location = snapshot.requireData;
+          return new Text('Lat. ${location[0]}, Long. ${location[1]}');
+        } on PlatformException catch (e) {
+          return new Text('Request failed: ${e.message}');
+        }
+    }
   }
 }
 
