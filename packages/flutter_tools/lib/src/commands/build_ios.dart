@@ -16,6 +16,7 @@ import 'build.dart';
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
     usesTargetOption();
+    usesPubOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app (default mode for iOS simulator builds).');
