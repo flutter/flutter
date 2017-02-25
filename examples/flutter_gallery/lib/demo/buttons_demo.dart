@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../gallery/demo.dart';
@@ -36,6 +37,10 @@ const String _actionText =
     "distinguished by a circled icon floating above the UI and can have motion "
     "behaviors that include morphing, launching, and a transferring anchor "
     "point.";
+
+const String _iosText =
+    "iOS themed buttons are flat. They can have borders or backgrounds but only "
+    "when necessary.";
 
 const String _actionCode = 'buttons_action';
 
@@ -78,6 +83,12 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         tabName: 'ACTION',
         description: _actionText,
         widget: buildActionButton(),
+        exampleCodeTag: _actionCode,
+      ),
+      new ComponentDemoTabData(
+        tabName: 'iOS',
+        description: _iosText,
+        widget: buildIosButton(),
         exampleCodeTag: _actionCode,
       ),
     ];
@@ -243,6 +254,23 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         onPressed: () {
           // Perform some action
         },
+      ),
+    );
+  }
+
+  Widget buildIosButton() {
+    return new Align(
+      alignment: const FractionalOffset(0.5, 0.4),
+      child: new ButtonBar(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new CupertinoButton(
+            text: 'iOS Button',
+            onPressed: () {
+              // Perform some action
+            }
+          ),
+        ],
       ),
     );
   }

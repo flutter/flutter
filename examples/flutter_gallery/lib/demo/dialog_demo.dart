@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'full_screen_dialog_demo.dart';
@@ -195,7 +196,51 @@ class DialogDemoState extends State<DialogDemo> {
                 builder: (BuildContext context) => new FullScreenDialogDemo()
               ));
             }
-          )
+          ),
+          new RaisedButton(
+            child: new Text('iOS ALERT'),
+            onPressed: () {
+              showDemoDialog<DialogDemoAction>(
+                context: context,
+                child: new CupertinoAlertDialog(
+                  content: new Text(_alertWithoutTitleText),
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: new Text('Discard'),
+                      isDestructive: true,
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.discard); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: new Text('Cancel', style: new TextStyle(fontWeight: FontWeight.w600)),
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); }
+                    ),
+                  ]
+                ),
+            );
+            },
+          ),
+          new RaisedButton(
+            child: new Text('iOS ALERT WITH TITLE'),
+            onPressed: () {
+              showDemoDialog<DialogDemoAction>(
+                context: context,
+                child: new CupertinoAlertDialog(
+                  title: new Text('Use Google\'s location service?'),
+                  content: new Text(_alertWithTitleText),
+                  actions: <Widget>[
+                    new CupertinoDialogAction(
+                      child: new Text('Later'),
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); }
+                    ),
+                    new CupertinoDialogAction(
+                      child: new Text('OK', style: new TextStyle(fontWeight: FontWeight.w600)),
+                      onPressed: () { Navigator.pop(context, DialogDemoAction.agree); }
+                    ),
+                  ]
+                ),
+              );
+            },
+          ),
         ]
         // Add a little space between the buttons
         .map((Widget button) {

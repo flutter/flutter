@@ -127,7 +127,7 @@ class CupertinoAlertDialog extends StatelessWidget {
 
     if (title != null) {
       children.add(new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
         child: new DefaultTextStyle(
           style: _kCupertinoDialogTitleStyle,
           textAlign: TextAlign.center,

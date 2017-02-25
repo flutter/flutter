@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class SliderDemo extends StatefulWidget {
@@ -43,6 +44,22 @@ class _SliderDemoState extends State<SliderDemo> {
             new Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget> [
+                new CupertinoSlider(
+                  value: _value,
+                  min: 0.0,
+                  max: 100.0,
+                  onChanged: (double value) {
+                    setState(() {
+                      _value = value;
+                    });
+                  }
+                ),
+                new Text('iOS'),
+              ]
+            ),
+            new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget> [
                 new Slider(value: 0.25, thumbOpenAtMin: true, onChanged: null),
                 new Text('Disabled'),
               ]
@@ -65,6 +82,23 @@ class _SliderDemoState extends State<SliderDemo> {
                 ),
                 new Text('Discrete'),
               ],
+            ),
+            new Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget> [
+                new CupertinoSlider(
+                  value: _discreteValue,
+                  min: 0.0,
+                  max: 100.0,
+                  divisions: 5,
+                  onChanged: (double value) {
+                    setState(() {
+                      _discreteValue = value;
+                    });
+                  }
+                ),
+                new Text('iOS Discrete'),
+              ]
             ),
           ],
         ),
