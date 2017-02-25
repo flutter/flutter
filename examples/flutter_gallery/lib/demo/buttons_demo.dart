@@ -270,6 +270,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               // Perform some action
             }
           ),
+          new CupertinoButton(
+            text: 'Disabled',
+            onPressed: null,
+          ),
         ],
       ),
     );

@@ -14,6 +14,10 @@ const TextStyle _kCupertinoButtonStyle = const TextStyle(
   textBaseline: TextBaseline.alphabetic,
 );
 
+final TextStyle _kCupertinoDisabledButtonStyle = _kCupertinoButtonStyle.copyWith(
+  color: const Color(0xFFC4C4C4),
+);
+
 /// An iOS style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have an
@@ -25,7 +29,7 @@ const TextStyle _kCupertinoButtonStyle = const TextStyle(
 class CupertinoButton extends StatefulWidget {
   CupertinoButton({
     this.text,
-    this.padding = 16.0,
+    this.padding: 16.0,
     @required this.onPressed,
   });
 
@@ -72,24 +76,21 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     return new GestureDetector(
       onTapDown: config.enabled ? _handleTapDown : null,
       onTapUp: config.enabled ? _handleTapUp : null,
-      onTap: config.enabled ? _handleTap : null,
       onTapCancel: config.enabled ? _handleTapCancel : null,
+      onTap: config.onPressed,
 
       child: new ConstrainedBox(
         constraints: new BoxConstraints(minWidth: 48.0, minHeight: 48.0),
         child: new Padding(
           padding: new EdgeInsets.all(config.padding),
-          child: new AnimatedDefaultTextStyle(
-            style: _kCupertinoButtonStyle,
-            duration: const Duration(milliseconds: 200),
-            child: new FadeTransition(
-              opacity: new CurvedAnimation(
-                parent: _animationController,
-                curve: Curves.decelerate,
-              ),
-              child: new Text(
-                config.text,
-              )
+          child: new FadeTransition(
+            opacity: new CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.decelerate,
+            ),
+            child: new Text(
+              config.text,
+              style: config.enabled ? _kCupertinoButtonStyle : _kCupertinoDisabledButtonStyle,
             ),
           ),
         ),
@@ -107,10 +108,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   void _handleTapCancel() {
     _animationController.animateTo(1.0);
-  }
-
-  void _handleTap() {
-    config.onPressed();
   }
 
 }
