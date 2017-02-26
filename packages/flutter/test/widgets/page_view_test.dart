@@ -264,4 +264,108 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('PageView viewportFraction', (WidgetTester tester) async {
+    PageController controller = new PageController(viewportFraction: 7/8);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Point(750.0, 0.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(-650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(750.0, 0.0));
+
+    controller = new PageController(viewportFraction: 39/40);
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(-770.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(10.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(790.0, 0.0));
+  });
+
+  testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
+    PageController controller = new PageController(viewportFraction: 1/8);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Point(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arizona')), const Point(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arkansas')), const Point(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('California')), const Point(750.0, 0.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Delaware')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Florida')), const Point(150.0, 0.0));
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(250.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Illinois')), const Point(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Indiana')), const Point(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Iowa')), const Point(750.0, 0.0));
+  });
+
+  testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
+    PageController controller = new PageController(viewportFraction: 5/4);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(-100.0, 0.0));
+    expect(tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(-100.0, 0.0));
+  });
 }

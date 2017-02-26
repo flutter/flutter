@@ -247,12 +247,23 @@ class SliverFill extends SliverMultiBoxAdaptorWidget {
   SliverFill({
     Key key,
     @required SliverChildDelegate delegate,
-  }) : super(key: key, delegate: delegate);
+    this.viewportFraction: 1.0,
+  }) : super(key: key, delegate: delegate) {
+    assert(viewportFraction != null);
+    assert(viewportFraction > 0.0);
+  }
+
+  final double viewportFraction;
 
   @override
   RenderSliverFill createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFill(childManager: element);
+    return new RenderSliverFill(childManager: element, viewportFraction: viewportFraction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFill renderObject) {
+    renderObject.viewportFraction = viewportFraction;
   }
 }
 

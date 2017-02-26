@@ -166,36 +166,3 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   @override
   bool shouldAcceptUserOffset(ScrollPosition position) => true;
 }
-
-class PageScrollPhysics extends ScrollPhysics {
-  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent);
-
-  @override
-  PageScrollPhysics applyTo(ScrollPhysics parent) => new PageScrollPhysics(parent: parent);
-
-  double _roundToPage(ScrollPosition position, double pixels, double pageSize) {
-    final int index = (pixels + pageSize / 2.0) ~/ pageSize;
-    return (pageSize * index).clamp(position.minScrollExtent, position.maxScrollExtent);
-  }
-
-  double _getTargetPixels(ScrollPosition position, Tolerance tolerance, double velocity) {
-    final double pageSize = position.viewportDimension;
-    if (velocity < -tolerance.velocity)
-      return _roundToPage(position, position.pixels - pageSize / 2.0, pageSize);
-    if (velocity > tolerance.velocity)
-      return _roundToPage(position, position.pixels + pageSize / 2.0, pageSize);
-    return _roundToPage(position, position.pixels, pageSize);
-  }
-
-  @override
-  Simulation createBallisticSimulation(ScrollPosition position, double velocity) {
-    // If we're out of range and not headed back in range, defer to the parent
-    // ballistics, which should put us back in range at a page boundary.
-    if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
-        (velocity >= 0.0 && position.pixels >= position.maxScrollExtent))
-      return super.createBallisticSimulation(position, velocity);
-    final Tolerance tolerance = this.tolerance;
-    final double target = _getTargetPixels(position, tolerance, velocity);
-    return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
-  }
-}
