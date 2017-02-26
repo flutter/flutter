@@ -124,7 +124,7 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle defaultStyle = labelStyle ?? unselectedLabelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
     final TextStyle textStyle = selected
       ? defaultStyle
@@ -391,7 +391,9 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// [labelColor] rendered at 70% opacity.
   final Color unselectedLabelColor;
 
-  /// The text style of the selected tab labels
+  /// The text style of the selected tab labels. If [unselectedLabelStyle] is
+  /// null then this text style will be used for both selected and unselected
+  /// label styles.
   ///
   /// If this property is null then the text style of the theme's body2
   /// definition is used.
@@ -399,8 +401,8 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
 
   /// The text style of the unselected tab labels
   ///
-  /// If this property is null then the text style of the theme's body2
-  /// definition is used.
+  /// If this property is null then the [labelStyle] value is used. If [labelStyle]
+  /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
   @override
