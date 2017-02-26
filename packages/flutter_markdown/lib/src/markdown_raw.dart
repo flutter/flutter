@@ -219,13 +219,16 @@ class _Renderer implements md.NodeVisitor {
 
   @override
   void visitText(md.Text text) {
-    _MarkdownNodeList topList = _currentBlock.stack.last;
-    List<_MarkdownNode> top = topList.list;
+    if (_currentBlock != null) { // ignore if no corresponding block
+      _MarkdownNodeList topList = _currentBlock.stack.last;
+      List<_MarkdownNode> top = topList.list;
 
-    if (_currentBlock.tag == 'pre')
-      top.add(new _MarkdownNodeTextSpan(_syntaxHighlighter.format(text.text)));
-    else
-      top.add(new _MarkdownNodeString(text.text));
+      if (_currentBlock.tag == 'pre')
+        top.add(
+            new _MarkdownNodeTextSpan(_syntaxHighlighter.format(text.text)));
+      else
+        top.add(new _MarkdownNodeString(text.text));
+    }
   }
 
   @override
