@@ -41,6 +41,46 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
+  testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
+    Key bodyKey = new UniqueKey();
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(
+        padding: const EdgeInsets.only(bottom: 700.0),
+      ),
+      child: new Scaffold(
+        body: new Container(key: bodyKey),
+      ),
+    ));
+
+    RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(const Size(800.0, 0.0)));
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(
+        padding: const EdgeInsets.only(bottom: 500.0),
+      ),
+      child: new Scaffold(
+        body: new Container(key: bodyKey),
+      ),
+    ));
+
+    expect(bodyBox.size, equals(const Size(800.0, 100.0)));
+
+    await tester.pumpWidget(new MediaQuery(
+      data: new MediaQueryData(
+        padding: const EdgeInsets.only(bottom: 580.0),
+      ),
+      child: new Scaffold(
+        appBar: new AppBar(
+          title: new Text('Title'),
+        ),
+        body: new Container(key: bodyKey),
+      ),
+    ));
+
+    expect(bodyBox.size, equals(const Size(800.0, 0.0)));
+  });
+
   testWidgets('Floating action animation', (WidgetTester tester) async {
     await tester.pumpWidget(new Scaffold(
       floatingActionButton: new FloatingActionButton(

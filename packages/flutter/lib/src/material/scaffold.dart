@@ -48,7 +48,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    BoxConstraints looseConstraints = new BoxConstraints.loose(size);
+    final BoxConstraints looseConstraints = new BoxConstraints.loose(size);
 
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
@@ -56,8 +56,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
+    final double bottom = math.max(0.0, size.height - padding.bottom);
     double contentTop = 0.0;
-    double bottom = size.height - padding.bottom;
     double contentBottom = bottom;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
@@ -78,10 +78,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.body)) {
-      final double bodyHeight = contentBottom - contentTop;
       final BoxConstraints bodyConstraints = new BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: bodyHeight,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, new Offset(0.0, contentTop));
