@@ -6,9 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final BoxDecoration kBoxDecorationA = new BoxDecoration(); // ignore: prefer_const_constructors
-final BoxDecoration kBoxDecorationB = new BoxDecoration(); // ignore: prefer_const_constructors
-final BoxDecoration kBoxDecorationC = new BoxDecoration(); // ignore: prefer_const_constructors
+final Border nullBorder = null; // workaround to avoid prefer_const_constructors
+final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nullBorder);
+final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nullBorder);
+final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nullBorder);
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
