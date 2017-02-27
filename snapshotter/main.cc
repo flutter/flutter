@@ -57,24 +57,30 @@ const char* kDartArgs[] = {
 
 void Usage() {
   std::cerr
-      << "Usage: sky_snapshot --" << kPackages << "=PACKAGES" << std::endl
-      << "                  [ --" << kSnapshot << "=OUTPUT_SNAPSHOT ]"
+      << "Usage: sky_snapshot [<options>] <dart-script-file>" << std::endl
       << std::endl
-      << "                  [ --" << kDepfile << "=DEPFILE ]" << std::endl
-      << "                  [ --" << kBuildOutput << "=BUILD_OUTPUT ]"
+      << "Global options:" << std::endl
+      << "  --packages=<package-file>     Where to find a .package spec" << std::endl
+      << "                                file."   << std::endl
       << std::endl
+      << "To create a script snapshot of <dart-script-file>:" << std::endl
+      << "  --snapshot=<output-file>      Where to write the snapshot to." << std::endl
+      << "  --depfile=<output-file>       (optional) Where to write the" << std::endl
+      << "                                dependecy file to, which lists" << std::endl
+      << "                                all transitive imports of the" << std::endl
+      << "                                generated snapshot as sources" << std::endl
+      << "                                in the style of a Makefile." << std::endl
+      << "  --build-output=<target_name>  (required with --depfile)" << std::endl
+      << "                                Determines target name used in" << std::endl
+      << "                                dependency file." << std::endl
+      << "  --compile-all                 Compile all code loaded" << std::endl
+      << "                                into the isolate to eagerly" << std::endl
+      << "                                detect syntax errors." << std::endl
       << std::endl
-      << "                        MAIN_DART" << std::endl
-      << " * PACKAGES is the '.packages' file that defines where to find Dart "
-         "packages."
-      << std::endl
-      << " * OUTPUT_SNAPSHOT is the file to write the snapshot into."
-      << std::endl
-      << " * DEPFILE is the file into which to write the '.d' depedendency "
-         "information into."
-      << std::endl
-      << " * BUILD_OUTPUT determines the target name used in the " << std::endl
-      << "   DEPFILE. (Required if DEPFILE is provided.) " << std::endl;
+      << "To print dependencies of <dart-script-file> to stdout:" << std::endl
+      << "  --print-deps                  Prints all transitive imports" << std::endl
+      << "                                as sources to stdout (no" << std::endl
+      << "                                snapshot will be created)." << std::endl;
 }
 
 class DartScope {
