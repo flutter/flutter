@@ -24,7 +24,7 @@ class MinikinFont;
 
 void purgeHbFontCacheLocked();
 void purgeHbFontLocked(const MinikinFont* minikinFont);
-hb_font_t* getHbFontLocked(MinikinFont* minikinFont);
+hb_font_t* getHbFontLocked(const MinikinFont* minikinFont);
 
 }  // namespace minikin
 #endif  // MINIKIN_HBFONT_CACHE_H

@@ -17,14 +17,15 @@
 #ifndef MINIKIN_FONT_FAMILY_H
 #define MINIKIN_FONT_FAMILY_H
 
-#include <vector>
+#include <memory>
 #include <string>
 #include <unordered_set>
+#include <vector>
+
 #include <hb.h>
 
 #include <utils/TypeHelpers.h>
 
-#include <minikin/MinikinRefCounted.h>
 #include <minikin/SparseBitSet.h>
 
 namespace minikin {
@@ -102,19 +103,17 @@ struct FakedFont {
 typedef uint32_t AxisTag;
 
 struct Font {
-    Font(MinikinFont* typeface, FontStyle style);
+    Font(const std::shared_ptr<MinikinFont>& typeface, FontStyle style);
+    Font(std::shared_ptr<MinikinFont>&& typeface, FontStyle style);
     Font(Font&& o);
     Font(const Font& o);
-    ~Font();
 
-    MinikinFont* typeface;
+    std::shared_ptr<MinikinFont> typeface;
     FontStyle style;
     std::unordered_set<AxisTag> supportedAxes;
 
-    // TODO: remove this weird function. http://b/28119474
-    // MinikinFont requres mutex lock for destruction, but the mutex lock is not
-    // visible from outside of minikin library.
-    static void clearElementsWithLock(std::vector<minikin::Font>* fonts);
+private:
+    void loadAxes();
 };
 
 struct FontVariation {
@@ -123,7 +122,7 @@ struct FontVariation {
     float value;
 };
 
-class FontFamily : public MinikinRefCounted {
+class FontFamily {
 public:
     explicit FontFamily(std::vector<Font>&& fonts);
     FontFamily(int variant, std::vector<Font>&& fonts);
@@ -132,8 +131,8 @@ public:
     ~FontFamily();
 
     // TODO: Good to expose FontUtil.h.
-    static bool analyzeStyle(MinikinFont* typeface, int* weight, bool* italic);
-
+    static bool analyzeStyle(const std::shared_ptr<MinikinFont>& typeface, int* weight,
+            bool* italic);
     FakedFont getClosestMatch(FontStyle style) const;
 
     uint32_t langId() const { return mLangId; }
@@ -141,7 +140,9 @@ public:
 
     // API's for enumerating the fonts in a family. These don't guarantee any particular order
     size_t getNumFonts() const { return mFonts.size(); }
-    MinikinFont* getFont(size_t index) const { return mFonts[index].typeface; }
+    const std::shared_ptr<MinikinFont>& getFont(size_t index) const {
+        return mFonts[index].typeface;
+    }
     FontStyle getStyle(size_t index) const { return mFonts[index].style; }
     bool isColorEmojiFamily() const;
     const std::unordered_set<AxisTag>& supportedAxes() const { return mSupportedAxes; }
@@ -158,7 +159,8 @@ public:
 
     // Creates new FontFamily based on this family while applying font variations. Returns nullptr
     // if none of variations apply to this family.
-    FontFamily* createFamilyWithVariation(const std::vector<FontVariation>& variations) const;
+    std::shared_ptr<FontFamily> createFamilyWithVariation(
+            const std::vector<FontVariation>& variations) const;
 
 private:
     void computeCoverage();

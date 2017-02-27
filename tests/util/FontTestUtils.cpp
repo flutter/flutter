@@ -32,7 +32,7 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
     xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
     xmlNode* familySet = xmlDocGetRootElement(doc);
 
-    std::vector<FontFamily*> families;
+    std::vector<std::shared_ptr<FontFamily>> families;
     for (xmlNode* familyNode = familySet->children; familyNode; familyNode = familyNode->next) {
         if (xmlStrcmp(familyNode->name, (const xmlChar*)"family") != 0) {
             continue;
@@ -69,34 +69,29 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             }
 
             if (index == nullptr) {
-                MinikinAutoUnref<MinikinFontForTest>
-                        minikinFont(new MinikinFontForTest(fontPath));
-                fonts.push_back(Font(minikinFont.get(), FontStyle(weight, italic)));
+                std::shared_ptr<MinikinFont> minikinFont(new MinikinFontForTest(fontPath));
+                fonts.push_back(Font(minikinFont, FontStyle(weight, italic)));
             } else {
-                MinikinAutoUnref<MinikinFontForTest>
-                        minikinFont(new MinikinFontForTest(fontPath, atoi((const char*)index)));
-                fonts.push_back(Font(minikinFont.get(), FontStyle(weight, italic)));
+                std::shared_ptr<MinikinFont> minikinFont(
+                        new MinikinFontForTest(fontPath, atoi((const char*)index)));
+                fonts.push_back(Font(minikinFont, FontStyle(weight, italic)));
             }
         }
 
         xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
-        FontFamily* family;
+        std::shared_ptr<FontFamily> family;
         if (lang == nullptr) {
-            family = new FontFamily(variant, std::move(fonts));
+            family.reset(new FontFamily(variant, std::move(fonts)));
         } else {
             uint32_t langId = FontStyle::registerLanguageList(
                     std::string((const char*)lang, xmlStrlen(lang)));
-            family = new FontFamily(langId, variant, std::move(fonts));
+            family.reset(new FontFamily(langId, variant, std::move(fonts)));
         }
         families.push_back(family);
     }
     xmlFreeDoc(doc);
 
-    FontCollection* collection = new FontCollection(families);
-    for (size_t i = 0; i < families.size(); ++i) {
-        families[i]->Unref();
-    }
-    return collection;
+    return new FontCollection(families);
 }
 
 }  // namespace minikin

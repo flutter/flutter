@@ -57,11 +57,11 @@ void expectVSGlyphs(const FontCollection* fc, uint32_t codepoint, const std::set
 }
 
 TEST(FontCollectionTest, hasVariationSelectorTest) {
-  MinikinAutoUnref<MinikinFont> font(new MinikinFontForTest(kVsTestFont));
-  MinikinAutoUnref<FontFamily> family(new FontFamily(
-          std::vector<Font>({ Font(font.get(), FontStyle()) })));
-  std::vector<FontFamily*> families({family.get()});
-  MinikinAutoUnref<FontCollection> fc(new FontCollection(families));
+  std::shared_ptr<MinikinFont> font(new MinikinFontForTest(kVsTestFont));
+  std::shared_ptr<FontFamily> family(new FontFamily(
+          std::vector<Font>({ Font(font, FontStyle()) })));
+  std::vector<std::shared_ptr<FontFamily>> families({ family });
+  std::shared_ptr<FontCollection> fc(new FontCollection(families));
 
   EXPECT_FALSE(fc->hasVariationSelector(0x82A6, 0));
   expectVSGlyphs(fc.get(), 0x82A6, std::set<uint32_t>({0xFE00, 0xE0100, 0xE0101, 0xE0102}));
@@ -79,7 +79,7 @@ TEST(FontCollectionTest, hasVariationSelectorTest) {
 const char kEmojiXmlFile[] = kTestFontDir "emoji.xml";
 
 TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
-    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
+    std::shared_ptr<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
 
     // Both text/color font have cmap format 14 subtable entry for VS15/VS16 respectively.
     EXPECT_TRUE(collection->hasVariationSelector(0x2623, 0xFE0E));
@@ -109,7 +109,7 @@ TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
 }
 
 TEST(FontCollectionTest, newEmojiTest) {
-    MinikinAutoUnref<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
+    std::shared_ptr<FontCollection> collection(getFontCollection(kTestFontDir, kEmojiXmlFile));
 
     // U+2695, U+2640, U+2642 are not in emoji catrgory in Unicode 9 but they are now in emoji
     // category. Should return true even if U+FE0E was appended.
@@ -126,17 +126,17 @@ TEST(FontCollectionTest, createWithVariations) {
     const char kMultiAxisFont[] = kTestFontDir "/MultiAxis.ttf";
     const char kNoAxisFont[] = kTestFontDir "/Regular.ttf";
 
-    MinikinAutoUnref<MinikinFont> multiAxisFont(new MinikinFontForTest(kMultiAxisFont));
-    MinikinAutoUnref<FontFamily> multiAxisFamily(new FontFamily(
-            std::vector<Font>({ Font(multiAxisFont.get(), FontStyle()) })));
-    std::vector<FontFamily*> multiAxisFamilies({multiAxisFamily.get()});
-    MinikinAutoUnref<FontCollection> multiAxisFc(new FontCollection(multiAxisFamilies));
+    std::shared_ptr<MinikinFont> multiAxisFont(new MinikinFontForTest(kMultiAxisFont));
+    std::shared_ptr<FontFamily> multiAxisFamily(new FontFamily(
+            std::vector<Font>({ Font(multiAxisFont, FontStyle()) })));
+    std::vector<std::shared_ptr<FontFamily>> multiAxisFamilies({multiAxisFamily});
+    std::shared_ptr<FontCollection> multiAxisFc(new FontCollection(multiAxisFamilies));
 
-    MinikinAutoUnref<MinikinFont> noAxisFont(new MinikinFontForTest(kNoAxisFont));
-    MinikinAutoUnref<FontFamily> noAxisFamily(new FontFamily(
-            std::vector<Font>({ Font(noAxisFont.get(), FontStyle()) })));
-    std::vector<FontFamily*> noAxisFamilies({noAxisFamily.get()});
-    MinikinAutoUnref<FontCollection> noAxisFc(new FontCollection(noAxisFamilies));
+    std::shared_ptr<MinikinFont> noAxisFont(new MinikinFontForTest(kNoAxisFont));
+    std::shared_ptr<FontFamily> noAxisFamily(new FontFamily(
+            std::vector<Font>({ Font(noAxisFont, FontStyle()) })));
+    std::vector<std::shared_ptr<FontFamily>> noAxisFamilies({noAxisFamily});
+    std::shared_ptr<FontCollection> noAxisFc(new FontCollection(noAxisFamilies));
 
     {
         // Do not ceate new instance if none of variations are specified.
@@ -150,7 +150,7 @@ TEST(FontCollectionTest, createWithVariations) {
         std::vector<FontVariation> variations = {
                 { MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f }
         };
-        MinikinAutoUnref<FontCollection> newFc(
+        std::shared_ptr<FontCollection> newFc(
                 multiAxisFc->createCollectionWithVariation(variations));
         EXPECT_NE(nullptr, newFc.get());
         EXPECT_NE(multiAxisFc.get(), newFc.get());
@@ -163,7 +163,7 @@ TEST(FontCollectionTest, createWithVariations) {
                 { MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f },
                 { MinikinFont::MakeTag('w', 'g', 'h', 't'), 1.0f }
         };
-        MinikinAutoUnref<FontCollection> newFc(
+        std::shared_ptr<FontCollection> newFc(
                 multiAxisFc->createCollectionWithVariation(variations));
         EXPECT_NE(nullptr, newFc.get());
         EXPECT_NE(multiAxisFc.get(), newFc.get());
@@ -184,7 +184,7 @@ TEST(FontCollectionTest, createWithVariations) {
                 { MinikinFont::MakeTag('w', 'd', 't', 'h'), 1.0f },
                 { MinikinFont::MakeTag('Z', 'Z', 'Z', 'Z'), 1.0f }
         };
-        MinikinAutoUnref<FontCollection> newFc(
+        std::shared_ptr<FontCollection> newFc(
                 multiAxisFc->createCollectionWithVariation(variations));
         EXPECT_NE(nullptr, newFc.get());
         EXPECT_NE(multiAxisFc.get(), newFc.get());

@@ -88,6 +88,17 @@ void ParseUnicode(uint16_t* buf, size_t buf_size, const char* src, size_t* resul
     LOG_ALWAYS_FATAL_IF(!seen_offset && offset != nullptr);
 }
 
+std::vector<uint16_t> parseUnicodeStringWithOffset(const std::string& in, size_t* offset) {
+    std::unique_ptr<uint16_t[]> buffer(new uint16_t[in.size()]);
+    size_t result_size = 0;
+    ParseUnicode(buffer.get(), in.size(), in.c_str(), &result_size, offset);
+    return std::vector<uint16_t>(buffer.get(), buffer.get() + result_size);
+}
+
+std::vector<uint16_t> parseUnicodeString(const std::string& in) {
+    return parseUnicodeStringWithOffset(in, nullptr);
+}
+
 std::vector<uint16_t> utf8ToUtf16(const std::string& text) {
     std::vector<uint16_t> result;
     int32_t i = 0;

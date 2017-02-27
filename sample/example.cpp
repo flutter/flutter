@@ -33,7 +33,7 @@ using namespace minikin;
 FT_Library library;  // TODO: this should not be a global
 
 FontCollection *makeFontCollection() {
-    vector<FontFamily *>typefaces;
+    vector<std::shared_ptr<FontFamily>>typefaces;
     const char *fns[] = {
         "/system/fonts/Roboto-Regular.ttf",
         "/system/fonts/Roboto-Italic.ttf",
@@ -55,17 +55,17 @@ FontCollection *makeFontCollection() {
         if (error != 0) {
             printf("error loading %s, %d\n", fn, error);
         }
-        MinikinFont *font = new MinikinFontFreeType(face);
+        std::shared_ptr<MinikinFont> font(new MinikinFontFreeType(face));
         fonts.push_back(Font(font, FontStyle()));
     }
-    FontFamily *family = new FontFamily(std::move(fonts));
+    std::shared_ptr<FontFamily> family(new FontFamily(std::move(fonts)));
     typefaces.push_back(family);
 
 #if 1
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
     error = FT_New_Face(library, fn, 0, &face);
-    MinikinFont *font = new MinikinFontFreeType(face);
-    family = new FontFamily(std::vector<Font>({ Font(font, FontStyle()) }));
+    std::shared_ptr<MinikinFont> font(new MinikinFontFreeType(face));
+    family.reset(new FontFamily(std::vector<Font>({ Font(font, FontStyle()) })));
     typefaces.push_back(family);
 #endif
 
@@ -77,11 +77,8 @@ int runMinikinTest() {
     if (error) {
         return -1;
     }
-    Layout::init();
-
-    FontCollection *collection = makeFontCollection();
-    Layout layout;
-    layout.setFontCollection(collection);
+    std::shared_ptr<FontCollection> collection(makeFontCollection());
+    Layout layout(collection);
     const char *text = "fine world \xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5\x87";
     int bidiFlags = 0;
     FontStyle fontStyle;

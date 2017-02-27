@@ -25,12 +25,12 @@ public:
     void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint& paint) const;
 
-    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy);
     const std::vector<minikin::FontVariation>& GetAxes() const {
         return mAxes;
     }
+    const void* GetTable(uint32_t tag, size_t* size, MinikinDestroyFunc* destroy) const;
 
-    SkTypeface *GetSkTypeface();
+    SkTypeface *GetSkTypeface() const;
 
 private:
     sk_sp<SkTypeface> mTypeface;
