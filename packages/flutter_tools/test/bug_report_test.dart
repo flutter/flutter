@@ -22,9 +22,9 @@ void main() {
 
   group('--bug-report', () {
     testUsingContext('generates valid zip file', () async {
-      await tools.main(<String>['help', '--bug-report']);
+      await tools.main(<String>['devices', '--bug-report']);
       expect(exitCode, 0);
-      verify(os.zip(any, argThat(hasPath(matches(r'/bugreport_[0-9]+\.zip')))));
+      verify(os.zip(any, argThat(hasPath(matches(r'/bugreport_01\.zip')))));
     });
   });
 }
