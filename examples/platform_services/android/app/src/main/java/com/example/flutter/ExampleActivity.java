@@ -11,7 +11,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 
 import io.flutter.app.FlutterActivity;
-import io.flutter.plugin.common.FlutterChannel;
+import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterView;
 
@@ -23,9 +25,9 @@ public class ExampleActivity extends FlutterActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        createFlutterChannel("geo").setMethodCallHandler(new FlutterChannel.MethodCallHandler() {
+        new FlutterMethodChannel(getFlutterView(), "geo").setMethodCallHandler(new MethodCallHandler() {
             @Override
-            public void onMethodCall(MethodCall call, FlutterChannel.Response response) {
+            public void onMethodCall(MethodCall call, Response response) {
                 if (call.method.equals("getLocation")) {
                     if (!(call.arguments instanceof String)) {
                         throw new IllegalArgumentException("Invalid argument type, String expected");
@@ -38,7 +40,7 @@ public class ExampleActivity extends FlutterActivity {
         });
     }
 
-    private void getLocation(String provider, FlutterChannel.Response response) {
+    private void getLocation(String provider, Response response) {
         String locationProvider;
         if (provider.equals("network")) {
             locationProvider = LocationManager.NETWORK_PROVIDER;
