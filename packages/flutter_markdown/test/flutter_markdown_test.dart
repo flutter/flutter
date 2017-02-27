@@ -85,7 +85,7 @@ void main() {
   });
 
   testWidgets('HTML tag ignored ', (WidgetTester tester) async {
-    final List<String> mdData = [
+    final List<String> mdData = <String>[
       'Line 1\n<p>HTML content</p>\nLine 2',
       'Line 1\n<!-- HTML\n comment\n ignored --><\nLine 2'
     ];
