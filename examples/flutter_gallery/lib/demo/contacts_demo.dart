@@ -106,6 +106,7 @@ class ContactsDemoState extends State<ContactsDemo> {
       child: new Scaffold(
         key: _scaffoldKey,
         body: new CustomScrollView(
+          primary: true,
           slivers: <Widget>[
             new SliverAppBar(
               expandedHeight: _appBarHeight,

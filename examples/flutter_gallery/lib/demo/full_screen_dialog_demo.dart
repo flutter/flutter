@@ -158,6 +158,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ]
       ),
       body: new ListView(
+        primary: true,
         padding: const EdgeInsets.all(16.0),
         children: <Widget>[
           new Container(

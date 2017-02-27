@@ -130,6 +130,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
       appBar: new AppBar(title: new Text('Date and time pickers')),
       body: new DropdownButtonHideUnderline(
         child: new ListView(
+          primary: true,
           padding: const EdgeInsets.all(16.0),
           children: <Widget>[
             new TextField(

@@ -60,6 +60,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         key: _refreshIndicatorKey,
         onRefresh: _handleRefresh,
         child: new ListView.builder(
+          primary: true,
           padding: const EdgeInsets.all(8.0),
           itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) {

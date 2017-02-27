@@ -23,6 +23,7 @@ class TooltipDemo extends StatelessWidget {
       body: new Builder(
         builder: (BuildContext context) {
           return new ListView(
+            primary: true,
             children: <Widget>[
               new Text(_introText, style: theme.textTheme.subhead),
               new Row(

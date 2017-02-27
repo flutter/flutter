@@ -90,6 +90,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
           },
         ),
         body: new CustomScrollView(
+          primary: true,
           slivers: <Widget>[
             _buildAppBar(context, statusBarHeight),
             _buildBody(context, statusBarHeight),
@@ -330,6 +331,7 @@ class _RecipePageState extends State<RecipePage> {
             ),
           ),
           new CustomScrollView(
+            primary: true,
             slivers: <Widget>[
               new SliverAppBar(
                 expandedHeight: appBarHeight - _kFabHalfSize,

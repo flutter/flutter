@@ -178,6 +178,7 @@ class _OrderPageState extends State<OrderPage> {
         ),
       ),
       body: new CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           new SliverList(
             delegate: new SliverChildListDelegate(<Widget>[

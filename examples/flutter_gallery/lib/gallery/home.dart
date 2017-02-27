@@ -164,6 +164,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onSendFeedback: config.onSendFeedback,
       ),
       body: new CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           new SliverAppBar(
             pinned: true,

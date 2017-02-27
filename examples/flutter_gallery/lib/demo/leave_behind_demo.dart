@@ -162,6 +162,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         ]
       ),
       body: new ListView(
+        primary: true,
         children: leaveBehindItems.map(buildItem).toList()
       )
     );

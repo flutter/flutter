@@ -42,6 +42,7 @@ class _ChipDemoState extends State<ChipDemo> {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Chips')),
       body: new ListView(
+        primary: true,
         children: chips.map((Widget widget) {
           return new Container(
             height: 100.0,

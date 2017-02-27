@@ -66,7 +66,7 @@ class TypographyDemo extends StatelessWidget {
 
     return new Scaffold(
       appBar: new AppBar(title: new Text('Typography')),
-      body: new ListView(children: styleItems)
+      body: new ListView(primary: true, children: styleItems)
     );
   }
 }
