@@ -37,6 +37,8 @@ abstract class OperatingSystemUtils {
   /// Return the File representing a new pipe.
   File makePipe(String path);
 
+  void zip(Directory data, File zipFile);
+
   void unzip(File file, Directory targetDirectory);
 }
 
@@ -57,6 +59,11 @@ class _PosixUtils extends OperatingSystemUtils {
       return null;
     String path = result.stdout.trim().split('\n').first.trim();
     return fs.file(path);
+  }
+
+  @override
+  void zip(Directory data, File zipFile) {
+    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
   }
 
   // unzip -o -q zipfile -d dest
@@ -87,6 +94,21 @@ class _WindowsUtils extends OperatingSystemUtils {
     if (result.exitCode != 0)
       return null;
     return fs.file(result.stdout.trim().split('\n').first.trim());
+  }
+
+  @override
+  void zip(Directory data, File zipFile) {
+    Archive archive = new Archive();
+    for (FileSystemEntity entity in data.listSync(recursive: true)) {
+      if (entity is! File) {
+        continue;
+      }
+      File file = entity;
+      String path = file.fileSystem.path.relative(file.path, from: data.path);
+      List<int> bytes = file.readAsBytesSync();
+      archive.addFile(new ArchiveFile(path, bytes.length, bytes));
+    }
+    zipFile.writeAsBytesSync(new ZipEncoder().encode(archive), flush: true);
   }
 
   @override

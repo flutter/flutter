@@ -34,10 +34,14 @@ FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
 void enableRecordingFileSystem(String location) {
+  FileSystem originalFileSystem = fs;
   Directory dir = getRecordingSink(location, _kRecordingType);
   RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
-  addShutdownHook(() => fileSystem.recording.flush());
+  addShutdownHook(() async {
+    await fileSystem.recording.flush();
+    context.setVariable(FileSystem, originalFileSystem);
+  }, ShutdownStage.SERIALIZE_RECORDING);
   context.setVariable(FileSystem, fileSystem);
 }
 
