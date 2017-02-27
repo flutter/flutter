@@ -87,15 +87,18 @@ class JSONCodec implements MethodCodec {
   @override
   dynamic decodeEnvelope(ByteData envelope) {
     final dynamic decoded = decodeMessage(envelope);
-    if (decoded is! Map)
-      throw new FormatException('Expected envelope Map, got $decoded');
-    final String status = decoded['status'];
-    final dynamic data = decoded['data'];
-    if (status == 'ok')
-      return data;
-    final String message = decoded['message'];
-    if (status is String && message is String)
-      throw new PlatformException(code: status, message: message, details: data);
+    if (decoded is! List)
+      throw new FormatException('Expected envelope List, got $decoded');
+    if (decoded.length == 1)
+      return decoded[0];
+    if (decoded.length == 3
+        && decoded[0] is String
+        && (decoded[1] == null || decoded[1] is String))
+      throw new PlatformException(
+        code: decoded[0],
+        message: decoded[1],
+        details: decoded[2],
+      );
     throw new FormatException('Invalid envelope $decoded');
   }
 }
