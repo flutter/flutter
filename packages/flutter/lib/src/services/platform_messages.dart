@@ -103,6 +103,8 @@ class PlatformMessages {
   ///
   /// Returns a [Future] which completes to the received response, decoded as a
   /// UTF-8 string, or to an error, if the decoding fails.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.send] instead.
   @deprecated
   static Future<String> sendString(String channel, String message) async {
     return _decodeUTF8(await sendBinary(channel, _encodeUTF8(message)));
@@ -161,6 +163,9 @@ class PlatformMessages {
   ///
   /// The handler's return value, if non-null, is sent as a response, encoded as
   /// a UTF-8 string.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
+  @deprecated
   static void setStringMessageHandler(String channel, Future<String> handler(String message)) {
     setBinaryMessageHandler(channel, (ByteData message) async {
       return _encodeUTF8(await handler(_decodeUTF8(message)));
@@ -214,6 +219,9 @@ class PlatformMessages {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
+  @deprecated
   static void setMockStringMessageHandler(String channel, Future<String> handler(String message)) {
     if (handler == null) {
       setMockBinaryMessageHandler(channel, null);
