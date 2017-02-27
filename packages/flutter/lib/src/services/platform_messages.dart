@@ -116,7 +116,7 @@ class PlatformMessages {
   /// UTF-8-encoded JSON representation of a JSON value (a [String], [bool],
   /// [double], [List], or [Map]), or to an error, if the decoding fails.
   ///
-  /// Deprecated, use [PlatformChannel.send] instead.
+  /// Deprecated, use [PlatformMessageChannel.send] instead.
   @deprecated
   static Future<dynamic> sendJSON(String channel, dynamic json) async {
     return _decodeJSON(await sendString(channel, _encodeJSON(json)));
@@ -133,7 +133,7 @@ class PlatformMessages {
   /// decoded as JSON. The returned [Future] completes to this fully decoded
   /// response, or to an error, if the decoding fails.
   ///
-  /// Deprecated, use [PlatformChannel.invokeMethod] instead.
+  /// Deprecated, use [PlatformMethodChannel.invokeMethod] instead.
   @deprecated
   static Future<dynamic> invokeMethod(String channel, String method, [ List<dynamic> args = const <Null>[] ]) {
     return sendJSON(channel, <String, dynamic>{
@@ -176,7 +176,7 @@ class PlatformMessages {
   /// The handler's return value, if non-null, is sent as a response, encoded as
   /// JSON and then as a UTF-8 string.
   ///
-  /// Deprecated, use [PlatformChannel.setMessageHandler] instead.
+  /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
   @deprecated
   static void setJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     setStringMessageHandler(channel, (String message) async {
@@ -237,7 +237,7 @@ class PlatformMessages {
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
   ///
-  /// Deprecated, use [PlatformChannel.setMockMessageHandler] instead.
+  /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
   @deprecated
   static void setMockJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     if (handler == null) {

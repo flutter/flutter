@@ -7,9 +7,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'codec.dart';
+import 'message_codec.dart';
+import 'message_codecs.dart';
 import 'platform_messages.dart';
-import 'standard_codec.dart';
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
@@ -18,25 +18,18 @@ import 'standard_codec.dart';
 /// received are decoded into Dart values. The [MessageCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
 /// by creating a FlutterMessageChannel counterpart of this channel on the
-/// platform side. The Dart type of messages sent and received is `dynamic`,
-/// but only values supported by the specified [MessageCodec] can be used.
-///
-/// The channel supports basic message send/receive operations, method
-/// invocations, and receipt of event streams. All communication is
-/// asynchronous.
+/// platform side. The Dart type of messages sent and received is [T],
+/// but only the values supported by the specified [MessageCodec] can be used.
 ///
 /// The identity of the channel is given by its name, so other uses of that name
-/// with may interfere with this channel's  communication. Specifically, at most
+/// with may interfere with this channel's communication. Specifically, at most
 /// one message handler can be registered with the channel name at any given
 /// time.
-class PlatformMessageChannel {
-  /// Creates a [PlatformMessageChannel] with the specified [name].
-  ///
-  /// The [codec] used will be [MessageCodec.standard], unless otherwise
-  /// specified.
+class PlatformMessageChannel<T> {
+  /// Creates a [PlatformMessageChannel] with the specified [name] and [codec].
   ///
   /// Neither [name] nor [codec] may be `null`.
-  PlatformMessageChannel(this.name, [this.codec = const StandardCodec()]) {
+  PlatformMessageChannel(this.name, this.codec) {
     assert(name != null);
     assert(codec != null);
   }
@@ -45,13 +38,13 @@ class PlatformMessageChannel {
   final String name;
 
   /// The message codec used by this channel, not `null`.
-  final MessageCodec codec;
+  final MessageCodec<T> codec;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received and decoded response,
   /// or to a [FormatException], if encoding or decoding fails.
-  Future<dynamic> send(dynamic message) async {
+  Future<T> send(T message) async {
     return codec.decodeMessage(
       await PlatformMessages.sendBinary(name, codec.encodeMessage(message))
     );
@@ -65,7 +58,7 @@ class PlatformMessageChannel {
   ///
   /// The handler's return value, if non-null, is sent back to the platform
   /// plugins as a response.
-  void setMessageHandler(Future<dynamic> handler(dynamic message)) {
+  void setMessageHandler(Future<T> handler(T message)) {
     PlatformMessages.setBinaryMessageHandler(name, (ByteData message) async {
       return codec.encodeMessage(await handler(codec.decodeMessage(message)));
     });
@@ -81,7 +74,7 @@ class PlatformMessageChannel {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  void setMockMessageHandler(Future<dynamic> handler(dynamic message)) {
+  void setMockMessageHandler(Future<T> handler(T message)) {
     if (handler == null) {
       PlatformMessages.setMockBinaryMessageHandler(name, null);
     } else {
@@ -107,9 +100,7 @@ class PlatformMessageChannel {
 /// asynchronous.
 ///
 /// The identity of the channel is given by its name, so other uses of that name
-/// with may interfere with this channel's  communication. Specifically, at most
-/// one message handler can be registered with the channel name at any given
-/// time.
+/// with may interfere with this channel's communication.
 class PlatformMethodChannel {
   /// Creates a [PlatformMethodChannel] with the specified [name].
   ///

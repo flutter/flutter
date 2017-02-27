@@ -9,16 +9,16 @@ import 'package:meta/meta.dart';
 /// A message encoding/decoding mechanism.
 ///
 /// Both operations throw [FormatException], if conversion fails.
-abstract class MessageCodec {
+abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
   /// Returns `null` if the message is `null`.
-  ByteData encodeMessage(dynamic message);
+  ByteData encodeMessage(T message);
 
   /// Decodes the specified [message] from binary.
   ///
   /// Returns `null` if the message is `null`.
-  dynamic decodeMessage(ByteData message);
+  T decodeMessage(ByteData message);
 }
 
 /// A message codec that supports method calls and enveloped replies.
@@ -32,7 +32,7 @@ abstract class MessageCodec {
 /// populate a [PlatformException].
 ///
 /// All operations throw [FormatException], if conversion fails.
-abstract class MethodCodec extends MessageCodec {
+abstract class MethodCodec extends MessageCodec<dynamic> {
   /// Encodes the specified method call in binary.
   ///
   /// The [name] of the method must be non-null. The [arguments] may be `null`.

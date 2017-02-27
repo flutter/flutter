@@ -7,7 +7,98 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
 
-import 'codec.dart';
+import 'message_codec.dart';
+
+/// [MessageCodec] with unencoded binary messages represented using [ByteData].
+class BinaryCodec implements MessageCodec<ByteData> {
+  const BinaryCodec();
+
+  @override
+  ByteData decodeMessage(ByteData message) => message;
+
+  @override
+  ByteData encodeMessage(ByteData message) => message;
+}
+
+/// [MessageCodec] with UTF-8 encoded String messages.
+class StringCodec implements MessageCodec<String> {
+  const StringCodec();
+
+  @override
+  String decodeMessage(ByteData message) {
+    if (message == null)
+      return null;
+    return UTF8.decoder.convert(message.buffer.asUint8List());
+  }
+
+  @override
+  ByteData encodeMessage(String message) {
+    if (message == null)
+      return null;
+    final Uint8List encoded = UTF8.encoder.convert(message);
+    return encoded.buffer.asByteData();
+  }
+}
+
+/// [MethodCodec] with UTF-8 encoded JSON messages.
+///
+/// Supported messages are acyclic values of these forms:
+///
+/// * `null`
+/// * [bool]s
+/// * [num]s
+/// * [String]s
+/// * [List]s of supported values
+/// * [Map]s from strings to supported values
+class JSONCodec implements MethodCodec {
+  // The codec serializes supported values, method calls, and result envelopes
+  // as outlined below. This format must match the Android and iOS counterparts.
+  //
+  // * Values are serialized as defined by the JSON codec.
+  // * Method calls are serialized as two-element lists with the method name
+  //   string as first element and the method call arguments as the second.
+  // * Reply envelopes are serialized as either:
+  //   * one-element lists containing the successful result as its single
+  //     element, or
+  //   * three-element lists containing, in order, an error code String, an
+  //     error message String, and an error details value.
+  const JSONCodec();
+
+  @override
+  ByteData encodeMessage(dynamic message) {
+    if (message == null)
+      return null;
+    return const StringCodec().encodeMessage(JSON.encode(message));
+  }
+
+  @override
+  dynamic decodeMessage(ByteData message) {
+    if (message == null)
+      return message;
+    return JSON.decode(const StringCodec().decodeMessage(message));
+  }
+
+  @override
+  ByteData encodeMethodCall(String name, dynamic arguments) {
+    assert(name != null);
+    return encodeMessage(<dynamic>[name, arguments]);
+  }
+
+  @override
+  dynamic decodeEnvelope(ByteData envelope) {
+    final dynamic decoded = decodeMessage(envelope);
+    if (decoded is! Map)
+      throw new FormatException('Expected envelope Map, got $decoded');
+    final String status = decoded['status'];
+    final dynamic data = decoded['data'];
+    if (status == 'ok')
+      return data;
+    final String message = decoded['message'];
+    if (status is String && message is String)
+      throw new PlatformException(code: status, message: message, details: data);
+    throw new FormatException('Invalid envelope $decoded');
+  }
+}
 
 /// [MethodCodec] using the Flutter standard binary message encoding.
 ///
