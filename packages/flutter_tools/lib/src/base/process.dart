@@ -11,26 +11,70 @@ import 'io.dart';
 import 'process_manager.dart';
 
 typedef String StringConverter(String string);
+
+/// A function that will be run before the VM exits.
 typedef Future<dynamic> ShutdownHook();
 
 // TODO(ianh): We have way too many ways to run subprocesses in this project.
 
-List<ShutdownHook> _shutdownHooks = <ShutdownHook>[];
-bool _shutdownHooksRunning = false;
-void addShutdownHook(ShutdownHook shutdownHook) {
-  assert(!_shutdownHooksRunning);
-  _shutdownHooks.add(shutdownHook);
+/// The stage in which a [ShutdownHook] will be run. All shutdown hooks within
+/// a given stage will be started in parallel and will be guaranteed to run to
+/// completion before shutdown hooks in the next stage are started.
+class ShutdownStage implements Comparable<ShutdownStage> {
+  const ShutdownStage._(this._priority);
+
+  /// The stage priority. Smaller values will be run before larger values.
+  final int _priority;
+
+  /// The stage during which the invocation recording (if one exists) will be
+  /// serialized to disk. Invocations performed after this stage will not be
+  /// recorded.
+  static const ShutdownStage SERIALIZE_RECORDING = const ShutdownStage._(1);
+
+  /// The stage during which a serialized recording will be refined (e.g.
+  /// cleansed for tests, zipped up for bug reporting purposes, etc.).
+  static const ShutdownStage POST_PROCESS_RECORDING = const ShutdownStage._(2);
+
+  /// The stage during which temporary files and directories will be deleted.
+  static const ShutdownStage CLEANUP = const ShutdownStage._(3);
+
+  @override
+  int compareTo(ShutdownStage other) => _priority.compareTo(other._priority);
 }
 
+Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
+bool _shutdownHooksRunning = false;
+
+/// Registers a [ShutdownHook] to be executed before the VM exits.
+///
+/// If [stage] is specified, the shutdown hook will be run during the specified
+/// stage. By default, the shutdown hook will be run during the
+/// [ShutdownStage.CLEANUP] stage.
+void addShutdownHook(
+  ShutdownHook shutdownHook, [
+  ShutdownStage stage = ShutdownStage.CLEANUP,
+]) {
+  assert(!_shutdownHooksRunning);
+  _shutdownHooks.putIfAbsent(stage, () => <ShutdownHook>[]).add(shutdownHook);
+}
+
+/// Runs all registered shutdown hooks and returns a future that completes when
+/// all such hooks have finished.
+///
+/// Shutdown hooks will be run in groups by their [ShutdownStage]. All shutdown
+/// hooks within a given stage will be started in parallel and will be
+/// guaranteed to run to completion before shutdown hooks in the next stage are
+/// started.
 Future<Null> runShutdownHooks() async {
-  List<ShutdownHook> hooks = new List<ShutdownHook>.from(_shutdownHooks);
-  _shutdownHooks.clear();
   _shutdownHooksRunning = true;
   try {
-    List<Future<dynamic>> futures = <Future<dynamic>>[];
-    for (ShutdownHook shutdownHook in hooks)
-      futures.add(shutdownHook());
-    await Future.wait<dynamic>(futures);
+    for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
+      List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
+      List<Future<dynamic>> futures = <Future<dynamic>>[];
+      for (ShutdownHook shutdownHook in hooks)
+        futures.add(shutdownHook());
+      await Future.wait<dynamic>(futures);
+    }
   } finally {
     _shutdownHooksRunning = false;
   }

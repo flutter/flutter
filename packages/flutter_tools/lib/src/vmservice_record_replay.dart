@@ -32,24 +32,13 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
     addShutdownHook(() async {
       // Sort the messages such that they are ordered
       // `[request1, response1, request2, response2, ...]`. This serves no
-      // other purpose than to make the serialized format more human-readable.
-      _messages.sort((_Message message1, _Message message2) {
-        int id1 = message1.id;
-        int id2 = message2.id;
-        int result = id1.compareTo(id2);
-        if (result != 0) {
-          return result;
-        } else if (message1.type == _kRequest) {
-          return -1;
-        } else {
-          return 1;
-        }
-      });
+      // purpose other than to make the serialized format more human-readable.
+      _messages.sort();
 
       File file = _getManifest(location);
       String json = new JsonEncoder.withIndent('  ').convert(_messages);
       await file.writeAsString(json, flush: true);
-    });
+    }, ShutdownStage.SERIALIZE_RECORDING);
   }
 
   @override
@@ -70,7 +59,7 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
 }
 
 /// Base class for request and response JSON-rpc messages.
-abstract class _Message {
+abstract class _Message implements Comparable<_Message> {
   final String type;
   final Map<String, dynamic> data;
 
@@ -90,6 +79,18 @@ abstract class _Message {
       _kType: type,
       _kData: data,
     };
+  }
+
+  @override
+  int compareTo(_Message other) {
+    int result = id.compareTo(other.id);
+    if (result != 0) {
+      return result;
+    } else if (type == _kRequest) {
+      return -1;
+    } else {
+      return 1;
+    }
   }
 }
 

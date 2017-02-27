@@ -28,10 +28,14 @@ ProcessManager get processManager => context[ProcessManager];
 /// directory as long as there is no collision with the `"process"`
 /// subdirectory.
 void enableRecordingProcessManager(String location) {
+  ProcessManager originalProcessManager = processManager;
   Directory dir = getRecordingSink(location, _kRecordingType);
   ProcessManager delegate = const LocalProcessManager();
   RecordingProcessManager manager = new RecordingProcessManager(delegate, dir);
-  addShutdownHook(() => manager.flush(finishRunningProcesses: true));
+  addShutdownHook(() async {
+    await manager.flush(finishRunningProcesses: true);
+    context.setVariable(ProcessManager, originalProcessManager);
+  }, ShutdownStage.SERIALIZE_RECORDING);
   context.setVariable(ProcessManager, manager);
 }
 
