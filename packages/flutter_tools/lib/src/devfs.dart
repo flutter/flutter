@@ -531,15 +531,22 @@ class DevFS {
 
     for (String packageName in packageMap.map.keys) {
       Uri packageUri = packageMap.map[packageName];
-      if (fs.path.isWithin(rootDirectory.path, fs.path.fromUri(packageUri)))
-        continue;
-      final String directoryNameOnDevice = fs.path.join('packages', packageName);
-      Directory directory = fs.directory(packageUri);
-      bool packageExists =
-          await _scanDirectory(directory,
-                               directoryNameOnDevice: directoryNameOnDevice,
-                               recursive: true,
-                               fileFilter: fileFilter);
+      String packagePath = fs.path.fromUri(packageUri);
+      Directory packageDirectory = fs.directory(packageUri);
+      String directoryNameOnDevice = fs.path.join('packages', packageName);
+      bool packageExists;
+
+      if (fs.path.isWithin(rootDirectory.path, packagePath)) {
+        // We already scanned everything under the root directory.
+        packageExists = packageDirectory.existsSync();
+        directoryNameOnDevice = fs.path.relative(packagePath, from: rootDirectory.path);
+      } else {
+        packageExists =
+            await _scanDirectory(packageDirectory,
+                                 directoryNameOnDevice: directoryNameOnDevice,
+                                 recursive: true,
+                                 fileFilter: fileFilter);
+      }
       if (packageExists) {
         sb ??= new StringBuffer();
         sb.writeln('$packageName:$directoryNameOnDevice');
