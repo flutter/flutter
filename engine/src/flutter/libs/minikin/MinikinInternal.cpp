@@ -85,7 +85,7 @@ bool isEmojiBase(uint32_t c) {
     }
 }
 
-hb_blob_t* getFontTable(MinikinFont* minikinFont, uint32_t tag) {
+hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag) {
     assertMinikinLocked();
     hb_font_t* font = getHbFontLocked(minikinFont);
     hb_face_t* face = hb_font_get_face(font);

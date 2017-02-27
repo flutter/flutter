@@ -84,7 +84,7 @@ void purgeHbFontLocked(const MinikinFont* minikinFont) {
 
 // Returns a new reference to a hb_font_t object, caller is
 // responsible for calling hb_font_destroy() on it.
-hb_font_t* getHbFontLocked(MinikinFont* minikinFont) {
+hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
     assertMinikinLocked();
     // TODO: get rid of nullFaceFont
     static hb_font_t* nullFaceFont = nullptr;

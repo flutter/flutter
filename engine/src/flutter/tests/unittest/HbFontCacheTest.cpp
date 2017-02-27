@@ -20,6 +20,8 @@
 #include <gtest/gtest.h>
 #include <utils/Mutex.h>
 
+#include <memory>
+
 #include <hb.h>
 
 #include "MinikinInternal.h"
@@ -37,13 +39,13 @@ public:
 };
 
 TEST_F(HbFontCacheTest, getHbFontLockedTest) {
-    MinikinAutoUnref<MinikinFontForTest> fontA(
+    std::shared_ptr<MinikinFontForTest> fontA(
             new MinikinFontForTest(kTestFontDir "Regular.ttf"));
 
-    MinikinAutoUnref<MinikinFontForTest> fontB(
+    std::shared_ptr<MinikinFontForTest> fontB(
             new MinikinFontForTest(kTestFontDir "Bold.ttf"));
 
-    MinikinAutoUnref<MinikinFontForTest> fontC(
+    std::shared_ptr<MinikinFontForTest> fontC(
             new MinikinFontForTest(kTestFontDir "BoldItalic.ttf"));
 
     android::AutoMutex _l(gMinikinLock);
@@ -65,7 +67,7 @@ TEST_F(HbFontCacheTest, getHbFontLockedTest) {
 }
 
 TEST_F(HbFontCacheTest, purgeCacheTest) {
-    MinikinAutoUnref<MinikinFontForTest> minikinFont(
+    std::shared_ptr<MinikinFontForTest> minikinFont(
             new MinikinFontForTest(kTestFontDir "Regular.ttf"));
 
     android::AutoMutex _l(gMinikinLock);

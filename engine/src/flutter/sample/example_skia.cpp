@@ -42,7 +42,7 @@ namespace minikin {
 FT_Library library;  // TODO: this should not be a global
 
 FontCollection *makeFontCollection() {
-    vector<FontFamily *>typefaces;
+    vector<std::shared_ptr<FontFamily>> typefaces;
     const char *fns[] = {
         "/system/fonts/Roboto-Regular.ttf",
         "/system/fonts/Roboto-Italic.ttf",
@@ -58,20 +58,19 @@ FontCollection *makeFontCollection() {
     for (size_t i = 0; i < sizeof(fns)/sizeof(fns[0]); i++) {
         const char *fn = fns[i];
         sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
-        MinikinFont *font = new MinikinFontSkia(std::move(skFace));
+        std::shared_ptr<MinikinFont> font(new MinikinFontSkia(std::move(skFace)));
         fonts.push_back(Font(font, FontStyle()));
     }
-    FontFamily *family = new FontFamily(std::move(fonts));
+    std::shared_ptr<FontFamily> family(new FontFamily(std::move(fonts)));
     typefaces.push_back(family);
 
 #if 1
     const char *fn = "/system/fonts/DroidSansDevanagari-Regular.ttf";
     sk_sp<SkTypeface> skFace = SkTypeface::MakeFromFile(fn);
-    MinikinFont *font = new MinikinFontSkia(std::move(skFace));
-    family = new FontFamily(std::vector<Font>({ Font(font, FontStyle()) }));
+    std::shared_ptr<MinikinFont> font(new MinikinFontSkia(std::move(skFace)));
+    family.reset(new FontFamily(std::vector<Font>({ Font(font, FontStyle()) })));
     typefaces.push_back(family);
 #endif
-
     return new FontCollection(typefaces);
 }
 
@@ -87,7 +86,7 @@ void drawToSkia(SkCanvas *canvas, SkPaint *paint, Layout *layout, float x, float
 
     paint->setTextEncoding(SkPaint::kGlyphID_TextEncoding);
     for (size_t i = 0; i < nGlyphs; i++) {
-        MinikinFontSkia *mfs = static_cast<MinikinFontSkia *>(layout->getFont(i));
+        const MinikinFontSkia *mfs = static_cast<const MinikinFontSkia *>(layout->getFont(i));
         skFace = mfs->GetSkTypeface();
         glyphs[i] = layout->getGlyphId(i);
         pos[i].fX = x + layout->getX(i);
@@ -110,11 +109,9 @@ int runMinikinTest() {
     if (error) {
         return -1;
     }
-    Layout::init();
 
-    FontCollection *collection = makeFontCollection();
-    Layout layout;
-    layout.setFontCollection(collection);
+    std::shared_ptr<FontCollection> collection(makeFontCollection());
+    Layout layout(collection);
     const char *text = "fine world \xe0\xa4\xa8\xe0\xa4\xae\xe0\xa4\xb8\xe0\xa5\x8d\xe0\xa4\xa4\xe0\xa5\x87";
     int bidiFlags = 0;
     FontStyle fontStyle(7);

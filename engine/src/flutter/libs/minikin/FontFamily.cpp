@@ -65,13 +65,20 @@ uint32_t FontStyle::pack(int variant, int weight, bool italic) {
     return (weight & kWeightMask) | (italic ? kItalicMask : 0) | (variant << kVariantShift);
 }
 
-Font::Font(MinikinFont* typeface, FontStyle style)
+Font::Font(const std::shared_ptr<MinikinFont>& typeface, FontStyle style)
     : typeface(typeface), style(style) {
-    android::AutoMutex _l(gMinikinLock);
-    typeface->RefLocked();
+    loadAxes();
+}
 
+Font::Font(std::shared_ptr<MinikinFont>&& typeface, FontStyle style)
+    : typeface(typeface), style(style) {
+    loadAxes();
+}
+
+void Font::loadAxes() {
+    android::AutoMutex _l(gMinikinLock);
     const uint32_t fvarTag = MinikinFont::MakeTag('f', 'v', 'a', 'r');
-    HbBlob fvarTable(getFontTable(typeface, fvarTag));
+    HbBlob fvarTable(getFontTable(typeface.get(), fvarTag));
     if (fvarTable.size() == 0) {
         return;
     }
@@ -80,7 +87,7 @@ Font::Font(MinikinFont* typeface, FontStyle style)
 }
 
 Font::Font(Font&& o) {
-    typeface = o.typeface;
+    typeface = std::move(o.typeface);
     style = o.style;
     o.typeface = nullptr;
     supportedAxes = std::move(o.supportedAxes);
@@ -88,23 +95,11 @@ Font::Font(Font&& o) {
 
 Font::Font(const Font& o) {
     typeface = o.typeface;
-    typeface->Ref();
     style = o.style;
     supportedAxes = o.supportedAxes;
 }
 
-Font::~Font() {
-    if (typeface == nullptr) {
-        return;
-    }
-    typeface->UnrefLocked();
-}
-
-void Font::clearElementsWithLock(std::vector<minikin::Font>* fonts) {
-    android::AutoMutex _l(gMinikinLock);
-    fonts->clear();
-}
-
+// static
 FontFamily::FontFamily(std::vector<Font>&& fonts) : FontFamily(0 /* variant */, std::move(fonts)) {
 }
 
@@ -120,10 +115,11 @@ FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
 FontFamily::~FontFamily() {
 }
 
-bool FontFamily::analyzeStyle(MinikinFont* typeface, int* weight, bool* italic) {
+bool FontFamily::analyzeStyle(const std::shared_ptr<MinikinFont>& typeface, int* weight,
+        bool* italic) {
     android::AutoMutex _l(gMinikinLock);
     const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
-    HbBlob os2Table(getFontTable(typeface, os2Tag));
+    HbBlob os2Table(getFontTable(typeface.get(), os2Tag));
     if (os2Table.get() == nullptr) return false;
     return ::minikin::analyzeStyle(os2Table.get(), os2Table.size(), weight, italic);
 }
@@ -149,7 +145,7 @@ static FontFakery computeFakery(FontStyle wanted, FontStyle actual) {
 }
 
 FakedFont FontFamily::getClosestMatch(FontStyle style) const {
-    const Font* bestFont = NULL;
+    const Font* bestFont = nullptr;
     int bestMatch = 0;
     for (size_t i = 0; i < mFonts.size(); i++) {
         const Font& font = mFonts[i];
@@ -159,14 +155,10 @@ FakedFont FontFamily::getClosestMatch(FontStyle style) const {
             bestMatch = match;
         }
     }
-    FakedFont result;
-    if (bestFont == NULL) {
-        result.font = NULL;
-    } else {
-        result.font = bestFont->typeface;
-        result.fakery = computeFakery(style, bestFont->style);
+    if (bestFont != nullptr) {
+        return FakedFont{ bestFont->typeface.get(), computeFakery(style, bestFont->style) };
     }
-    return result;
+    return FakedFont{ nullptr, FontFakery() };
 }
 
 bool FontFamily::isColorEmojiFamily() const {
@@ -182,7 +174,7 @@ bool FontFamily::isColorEmojiFamily() const {
 void FontFamily::computeCoverage() {
     android::AutoMutex _l(gMinikinLock);
     const FontStyle defaultStyle;
-    MinikinFont* typeface = getClosestMatch(defaultStyle).font;
+    const MinikinFont* typeface = getClosestMatch(defaultStyle).font;
     const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
     HbBlob cmapTable(getFontTable(typeface, cmapTag));
     if (cmapTable.get() == nullptr) {
@@ -206,15 +198,14 @@ bool FontFamily::hasGlyph(uint32_t codepoint, uint32_t variationSelector) const 
     }
 
     const FontStyle defaultStyle;
-    MinikinFont* minikinFont = getClosestMatch(defaultStyle).font;
-    hb_font_t* font = getHbFontLocked(minikinFont);
+    hb_font_t* font = getHbFontLocked(getClosestMatch(defaultStyle).font);
     uint32_t unusedGlyph;
     bool result = hb_font_get_glyph(font, codepoint, variationSelector, &unusedGlyph);
     hb_font_destroy(font);
     return result;
 }
 
-FontFamily* FontFamily::createFamilyWithVariation(
+std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
         const std::vector<FontVariation>& variations) const {
     if (variations.empty() || mSupportedAxes.empty()) {
         return nullptr;
@@ -243,19 +234,17 @@ FontFamily* FontFamily::createFamilyWithVariation(
                 }
             }
         }
-        MinikinFont* minikinFont = nullptr;
+        std::shared_ptr<MinikinFont> minikinFont;
         if (supportedVariations) {
             minikinFont = font.typeface->createFontWithVariation(variations);
         }
         if (minikinFont == nullptr) {
             minikinFont = font.typeface;
-            minikinFont->Ref();
         }
-        fonts.push_back(Font(minikinFont, font.style));
-        minikinFont->Unref();
+        fonts.push_back(Font(std::move(minikinFont), font.style));
     }
 
-    return new FontFamily(mLangId, mVariant, std::move(fonts));
+    return std::shared_ptr<FontFamily>(new FontFamily(mLangId, mVariant, std::move(fonts)));
 }
 
 }  // namespace minikin

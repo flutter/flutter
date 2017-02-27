@@ -43,7 +43,8 @@ public:
     size_t GetFontSize() const { return mFontSize; }
     int GetFontIndex() const { return mFontIndex; }
     const std::vector<minikin::FontVariation>& GetAxes() const { return mVariations; }
-    MinikinFont* createFontWithVariation(const std::vector<FontVariation>& variations) const;
+    std::shared_ptr<MinikinFont> createFontWithVariation(
+            const std::vector<FontVariation>& variations) const;
 private:
     MinikinFontForTest() = delete;
     MinikinFontForTest(const MinikinFontForTest&) = delete;

@@ -18,8 +18,8 @@
 #define MINIKIN_FONT_H
 
 #include <string>
+#include <memory>
 
-#include <minikin/MinikinRefCounted.h>
 #include <minikin/FontFamily.h>
 
 // An abstraction for platform fonts, allowing Minikin to be used with
@@ -45,7 +45,7 @@ class MinikinFont;
 // Possibly move into own .h file?
 // Note: if you add a field here, either add it to LayoutCacheKey or to skipCache()
 struct MinikinPaint {
-    MinikinPaint() : font(0), size(0), scaleX(0), skewX(0), letterSpacing(0), wordSpacing(0),
+    MinikinPaint() : font(nullptr), size(0), scaleX(0), skewX(0), letterSpacing(0), wordSpacing(0),
             paintFlags(0), fakery(), hyphenEdit(), fontFeatureSettings() { }
 
     bool skipCache() const {
@@ -98,7 +98,7 @@ class MinikinFontFreeType;
 // Callback for freeing data
 typedef void (*MinikinDestroyFunc) (void* data);
 
-class MinikinFont : public MinikinRefCounted {
+class MinikinFont {
 public:
     explicit MinikinFont(int32_t uniqueId) : mUniqueId(uniqueId) {}
 
@@ -128,7 +128,8 @@ public:
 
     virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
 
-    virtual MinikinFont* createFontWithVariation(const std::vector<FontVariation>&) const {
+    virtual std::shared_ptr<MinikinFont> createFontWithVariation(
+            const std::vector<FontVariation>&) const {
         return nullptr;
     }
 
