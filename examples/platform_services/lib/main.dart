@@ -17,26 +17,32 @@ class _PlatformServicesState extends State<PlatformServices> {
 
   @override
   Widget build(BuildContext context) {
-    return new Material(child: new Center(child: new Column(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        new Text('Hello from Flutter!'),
-        new RaisedButton(
-          child: new Text('Get Location'),
-          onPressed: _requestLocation,
+    return new Material(
+      child: new Center(
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            new Text('Hello from Flutter!'),
+            new RaisedButton(
+              child: new Text('Get Location'),
+              onPressed: _requestLocation,
+            ),
+            new FutureBuilder<dynamic>(
+              future: _locationRequest,
+              builder: _buildLocation,
+            ),
+          ],
         ),
-        new FutureBuilder<dynamic>(
-          future: _locationRequest,
-          builder: _buildLocation,
-        ),
-      ]
-    )));
+      ),
+    );
   }
 
   void _requestLocation() {
     setState(() {
-      _locationRequest =
-        new PlatformChannel('geo').invokeMethod('getLocation', 'network');
+      _locationRequest = new PlatformMethodChannel('geo').invokeMethod(
+        'getLocation',
+        'network',
+      );
     });
   }
 
