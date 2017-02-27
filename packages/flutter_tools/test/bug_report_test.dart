@@ -24,7 +24,7 @@ void main() {
     testUsingContext('generates valid zip file', () async {
       await tools.main(<String>['devices', '--bug-report']);
       expect(exitCode, 0);
-      verify(os.zip(any, argThat(hasPath(matches(r'/bugreport_01\.zip')))));
+      verify(os.zip(any, argThat(hasPath(matches(r'bugreport_01\.zip')))));
     });
   });
 }
