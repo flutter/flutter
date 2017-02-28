@@ -89,15 +89,11 @@ class PlatformMessageChannel<T> {
 /// method calls and event streams.
 ///
 /// Method calls are encoded into binary before being sent, and binary results
-/// received are decoded into Dart values . The [MethodCodec] used must be
+/// received are decoded into Dart values. The [MethodCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
 /// by creating a FlutterMethodChannel counterpart of this channel on the
 /// platform side. The Dart type of messages sent and received is `dynamic`,
 /// but only values supported by the specified [MethodCodec] can be used.
-///
-/// The channel supports basic message send/receive operations, method
-/// invocations, and receipt of event streams. All communication is
-/// asynchronous.
 ///
 /// The identity of the channel is given by its name, so other uses of that name
 /// with may interfere with this channel's communication.
