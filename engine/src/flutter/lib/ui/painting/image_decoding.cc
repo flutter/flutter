@@ -15,6 +15,10 @@
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/core/SkImageGenerator.h"
 
+#ifdef OS_ANDROID
+#include <GLES2/gl2.h>
+#endif
+
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
 using tonic::ToDart;
@@ -39,6 +43,9 @@ sk_sp<SkImage> DecodeImage(sk_sp<SkData> buffer) {
     auto colorspace = SkColorSpace::MakeSRGB();
     if (auto texture_image =
             raster_image->makeTextureImage(context, colorspace.get())) {
+#ifdef OS_ANDROID
+      glFlush();
+#endif
       return texture_image;
     }
   }
