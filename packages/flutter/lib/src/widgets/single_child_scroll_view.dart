@@ -8,6 +8,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
@@ -42,11 +43,17 @@ class SingleChildScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
+    this.primary: false,
     this.physics,
     this.controller,
     this.child,
   }) : super(key: key) {
     assert(scrollDirection != null);
+    assert(primary != null);
+    assert(controller == null || !primary,
+       'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+       'You cannot both set primary to true and pass an explicit controller.'
+    );
   }
 
   final Axis scrollDirection;
@@ -56,6 +63,8 @@ class SingleChildScrollView extends StatelessWidget {
   final EdgeInsets padding;
 
   final ScrollController controller;
+
+  final bool primary;
 
   final ScrollPhysics physics;
 
@@ -80,7 +89,7 @@ class SingleChildScrollView extends StatelessWidget {
       contents = new Padding(padding: padding, child: contents);
     return new Scrollable(
       axisDirection: axisDirection,
-      controller: controller,
+      controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(

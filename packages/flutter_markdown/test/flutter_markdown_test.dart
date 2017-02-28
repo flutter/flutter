@@ -84,6 +84,28 @@ void main() {
       expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
   });
 
+  testWidgets('HTML tag ignored ', (WidgetTester tester) async {
+    final List<String> mdData = <String>[
+      'Line 1\n<p>HTML content</p>\nLine 2',
+      'Line 1\n<!-- HTML\n comment\n ignored --><\nLine 2'
+    ];
+
+    for (String mdLine in mdData) {
+      await tester.pumpWidget(new MarkdownBody(data: mdLine));
+
+          Iterable<Widget> widgets = tester.allWidgets;
+          _expectTextStrings(widgets, <String>['Line 1', 'Line 2']);
+    }
+  });
+
+  testWidgets('Less than', (WidgetTester tester) async {
+      final String mdLine = 'Line 1 <\n\nc < c c\n\n< Line 2';
+      await tester.pumpWidget(new MarkdownBody(data: mdLine));
+
+      Iterable<Widget> widgets = tester.allWidgets;
+      _expectTextStrings(widgets, <String>['Line 1 &lt;','c &lt; c c','&lt; Line 2']);
+  });
+
   testWidgets('Changing config - data', (WidgetTester tester) async {
       await tester.pumpWidget(new Markdown(data: 'Data1'));
       _expectTextStrings(tester.allWidgets, <String>['Data1']);

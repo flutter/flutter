@@ -334,7 +334,7 @@ class _TimePickerHeader extends StatelessWidget {
       width: width,
       height: height,
       padding: padding,
-      decoration: new BoxDecoration(backgroundColor: backgroundColor),
+      color: backgroundColor,
       child: new CustomMultiChildLayout(
         delegate: new _TimePickerHeaderLayout(orientation),
         children: <Widget>[

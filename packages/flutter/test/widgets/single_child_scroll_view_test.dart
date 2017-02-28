@@ -76,6 +76,26 @@ void main() {
     expect(scrollable.position, const isInstanceOf<TestScrollPosition>());
   });
 
+  testWidgets('Sets PrimaryScrollController when primary', (WidgetTester tester) async {
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new SingleChildScrollView(
+        primary: true,
+        child: new Container(
+          height: 2000.0,
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFF00FF00),
+          ),
+        ),
+      ),
+    ));
+
+    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    expect(scrollable.controller, primaryScrollController);
+  });
+
+
   testWidgets('Changing scroll controller inside dirty layout builder does not assert', (WidgetTester tester) async {
     ScrollController controller = new ScrollController();
 

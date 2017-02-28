@@ -165,8 +165,7 @@ void main() {
             new Container(
               key: childKey,
               height: 5000.0,
-              decoration:
-                new BoxDecoration(backgroundColor: Colors.green[500]),
+              color: Colors.green[500],
             ),
           ],
         ),

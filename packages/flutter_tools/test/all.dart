@@ -19,6 +19,7 @@ import 'application_package_test.dart' as application_package_test;
 import 'artifacts_test.dart' as artifacts_test;
 import 'asset_bundle_test.dart' as asset_bundle_test;
 import 'base_utils_test.dart' as base_utils_test;
+import 'bug_report_test.dart' as bug_report_test;
 import 'channel_test.dart' as channel_test;
 import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
@@ -45,6 +46,7 @@ import 'test_test.dart' as test_test;
 import 'trace_test.dart' as trace_test;
 import 'upgrade_test.dart' as upgrade_test;
 import 'utils_test.dart' as utils_test;
+import 'src/base/process_test.dart' as process_test;
 
 void main() {
   Cache.disableLocking();
@@ -58,6 +60,7 @@ void main() {
   artifacts_test.main();
   asset_bundle_test.main();
   base_utils_test.main();
+  bug_report_test.main();
   channel_test.main();
   config_test.main();
   context_test.main();
@@ -77,6 +80,7 @@ void main() {
   logs_test.main();
   os_utils_test.main();
   packages_test.main();
+  process_test.main();
   protocol_discovery_test.main();
   run_test.main();
   stop_test.main();

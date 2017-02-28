@@ -102,13 +102,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         ));
       },
       background: new Container(
-        decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+        color: theme.primaryColor,
         child: new ListItem(
           leading: new Icon(Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
-        decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+        color: theme.primaryColor,
         child: new ListItem(
           trailing: new Icon(Icons.archive, color: Colors.white, size: 36.0)
         )

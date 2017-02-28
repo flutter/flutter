@@ -126,7 +126,7 @@ Future<Null> main(List<String> args) async {
 
     return Chain.capture<Future<Null>>(() async {
       await runner.run(args);
-      _exit(0);
+      await _exit(0);
     }, onError: (dynamic error, Chain chain) {
       if (error is UsageException) {
         stderr.writeln(error.message);
@@ -249,9 +249,14 @@ Future<Null> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
+  Completer<Null> completer = new Completer<Null>();
+
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     printTrace('exiting with code $code');
     exit(code);
+    completer.complete();
   });
+
+  await completer.future;
 }

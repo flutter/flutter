@@ -20,6 +20,7 @@ export 'package:flutter/rendering.dart' show
   CrossAxisAlignment,
   CustomClipper,
   CustomPainter,
+  DecorationPosition,
   FlexFit,
   FlowDelegate,
   FlowPaintingContext,

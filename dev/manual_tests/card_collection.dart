@@ -324,7 +324,7 @@ class CardCollectionState extends State<CardCollection> {
         child: new SingleChildScrollView(
           child: new Container(
             height: cardModel.height,
-            decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+            color: theme.primaryColor,
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,
@@ -378,7 +378,7 @@ class CardCollectionState extends State<CardCollection> {
 
     Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
+      color: _primaryColor[50],
       child: cardCollection,
     );
 
