@@ -132,13 +132,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         brewStatus = ValidationType.partial;
         if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
-            'ios-deploy out of date: $iosDeployMinimumVersion is required.\n'
-            'Upgrade via \'brew upgrade ios-deploy\'.'
+            'ios-deploy out of date ($iosDeployMinimumVersion is required): '
+            'upgrade via \'brew upgrade ios-deploy\'.'
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'ios-deploy not installed: $iosDeployMinimumVersion is required.\n'
-            'Install via \'brew install ios-deploy\'.'
+            'ios-deploy not installed: install via \'brew install ios-deploy\'.'
           ));
         }
       } else {

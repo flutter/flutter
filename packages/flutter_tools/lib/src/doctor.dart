@@ -275,8 +275,13 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     int installCount = 0;
 
-    if (_validateHasPackage(messages, 'Dart', 'Dart'))
+    if (isWebStorm) {
+      // Dart is bundled with WebStorm.
       installCount++;
+    } else {
+      if (_validateHasPackage(messages, 'Dart', 'Dart'))
+        installCount++;
+    }
 
     if (_validateHasPackage(messages, 'flutter-intellij.jar', 'Flutter'))
       installCount++;
@@ -294,6 +299,8 @@ abstract class IntelliJValidator extends DoctorValidator {
         statusInfo: 'version $version'
     );
   }
+
+  bool get isWebStorm => id == 'WebStorm';
 
   bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String title) {
     if (!hasPackage(packageName)) {
