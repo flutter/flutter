@@ -63,5 +63,18 @@ void main() {
       read.getUint8();
       expect(read.getInt64List(3), equals(integers));
     });
+    test('of double list when unaligned', () {
+      final Float64List doubles = new Float64List.fromList(<double>[3.14, double.NAN]);
+      final WriteBuffer write = new WriteBuffer();
+      write.putUint8(9);
+      write.putFloat64List(doubles);
+      final ByteData written = write.done();
+      expect(written.lengthInBytes, equals(24));
+      final ReadBuffer read = new ReadBuffer(written);
+      read.getUint8();
+      final Float64List readDoubles = read.getFloat64List(2);
+      expect(readDoubles[0], equals(3.14));
+      expect(readDoubles[1], isNaN);
+    });
   });
 }

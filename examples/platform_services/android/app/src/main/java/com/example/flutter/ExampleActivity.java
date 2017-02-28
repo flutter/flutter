@@ -17,8 +17,6 @@ import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterView;
 
-import java.util.Arrays;
-
 public class ExampleActivity extends FlutterActivity {
     private FlutterView flutterView;
 
