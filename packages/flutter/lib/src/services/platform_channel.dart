@@ -104,11 +104,11 @@ class PlatformMessageChannel<T> {
 class PlatformMethodChannel {
   /// Creates a [PlatformMethodChannel] with the specified [name].
   ///
-  /// The [codec] used will be [MessageCodec.standard], unless otherwise
+  /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
   /// Neither [name] nor [codec] may be `null`.
-  PlatformMethodChannel(this.name, [this.codec = const StandardCodec()]) {
+  PlatformMethodChannel(this.name, [this.codec = const StandardMethodCodec()]) {
     assert(name != null);
     assert(codec != null);
   }

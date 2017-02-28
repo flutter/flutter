@@ -21,18 +21,18 @@ abstract class MessageCodec<T> {
   T decodeMessage(ByteData message);
 }
 
-/// A message codec that supports method calls and enveloped replies.
+/// A codec for method calls and enveloped results.
 ///
-/// Reply envelopes are binary messages with enough structure that the codec can
-/// distinguish between a successful reply and an error. In the former case,
-/// the codec must be able to extract the result, possibly `null`. In
+/// Result envelopes are binary messages with enough structure that the codec can
+/// distinguish between a successful result and an error. In the former case,
+/// the codec must be able to extract the result payload, possibly `null`. In
 /// the latter case, the codec must be able to extract an error code string,
 /// a (human-readable) error message string, and a value providing any
 /// additional error details, possibly `null`. These data items are used to
 /// populate a [PlatformException].
 ///
 /// All operations throw [FormatException], if conversion fails.
-abstract class MethodCodec extends MessageCodec<dynamic> {
+abstract class MethodCodec {
   /// Encodes the specified method call in binary.
   ///
   /// The [name] of the method must be non-null. The [arguments] may be `null`.
@@ -47,19 +47,18 @@ abstract class MethodCodec extends MessageCodec<dynamic> {
 
 /// Thrown to indicate that a platform interaction resulted in an error.
 class PlatformException implements Exception {
-  /// Creates a [PlatformException] with the specified error [code] and
-  /// [message], and with the optional
-  /// error [details] which must be a valid value for the [MessageCodec]
-  /// involved in the interaction.
+  /// Creates a [PlatformException] with the specified error [code] and optional
+  /// [message], and with the optional error [details] which must be a valid
+  /// value for the [MethodCodec] involved in the interaction.
   PlatformException({
     @required this.code,
-    @required this.message,
+    this.message,
     this.details,
   }) {
     assert(code != null);
   }
 
-  /// A non-`null` error code.
+  /// An error code.
   final String code;
 
   /// A human-readable error message, possibly `null`.

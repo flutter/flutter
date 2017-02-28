@@ -40,7 +40,7 @@ class StringCodec implements MessageCodec<String> {
   }
 }
 
-/// [MethodCodec] with UTF-8 encoded JSON messages.
+/// [MessageCodec] with UTF-8 encoded JSON messages.
 ///
 /// Supported messages are acyclic values of these forms:
 ///
@@ -50,19 +50,11 @@ class StringCodec implements MessageCodec<String> {
 /// * [String]s
 /// * [List]s of supported values
 /// * [Map]s from strings to supported values
-class JSONCodec implements MethodCodec {
-  // The codec serializes supported values, method calls, and result envelopes
-  // as outlined below. This format must match the Android and iOS counterparts.
-  //
-  // * Values are serialized as defined by the JSON codec.
-  // * Method calls are serialized as two-element lists with the method name
-  //   string as first element and the method call arguments as the second.
-  // * Reply envelopes are serialized as either:
-  //   * one-element lists containing the successful result as its single
-  //     element, or
-  //   * three-element lists containing, in order, an error code String, an
-  //     error message String, and an error details value.
-  const JSONCodec();
+class JSONMessageCodec implements MessageCodec<dynamic> {
+  // The codec serializes messages as defined by the JSON codec of the
+  // dart:convert package. The format used must match the Android and
+  // iOS counterparts.
+  const JSONMessageCodec();
 
   @override
   ByteData encodeMessage(dynamic message) {
@@ -77,16 +69,35 @@ class JSONCodec implements MethodCodec {
       return message;
     return JSON.decode(const StringCodec().decodeMessage(message));
   }
+}
+
+/// [MethodCodec] with UTF-8 encoded JSON method calls and result envelopes.
+/// Values supported as method arguments and result payloads are those supported
+/// by [JSONMessageCodec].
+class JSONMethodCodec implements MethodCodec {
+  // The codec serializes method calls, and result envelopes as outlined below.
+  // This format must match the Android and iOS counterparts.
+  //
+  // * Individual values are serialized as defined by the JSON codec of the
+  //   dart:convert package.
+  // * Method calls are serialized as two-element lists with the method name
+  //   string as first element and the method call arguments as the second.
+  // * Reply envelopes are serialized as either:
+  //   * one-element lists containing the successful result as its single
+  //     element, or
+  //   * three-element lists containing, in order, an error code String, an
+  //     error message String, and an error details value.
+  const JSONMethodCodec();
 
   @override
   ByteData encodeMethodCall(String name, dynamic arguments) {
     assert(name != null);
-    return encodeMessage(<dynamic>[name, arguments]);
+    return const JSONMessageCodec().encodeMessage(<dynamic>[name, arguments]);
   }
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
-    final dynamic decoded = decodeMessage(envelope);
+    final dynamic decoded = const JSONMessageCodec().decodeMessage(envelope);
     if (decoded is! List)
       throw new FormatException('Expected envelope List, got $decoded');
     if (decoded.length == 1)
@@ -103,11 +114,11 @@ class JSONCodec implements MethodCodec {
   }
 }
 
-/// [MethodCodec] using the Flutter standard binary message encoding.
+/// [MessageCodec] using the Flutter standard binary encoding.
 ///
-/// The standard codec is guaranteed to be compatible with the corresponding
-/// standard codec for Flutter channels on the host platform. These parts of the
-/// Flutter SDK are evolved synchronously.
+/// The standard encoding is guaranteed to be compatible with the corresponding
+/// standard codec for FlutterMessageChannels on the host platform. These parts
+/// of the Flutter SDK are evolved synchronously.
 ///
 /// Supported messages are acyclic values of these forms:
 ///
@@ -118,11 +129,9 @@ class JSONCodec implements MethodCodec {
 /// * [Uint8List]s, [Int32List]s, [Int64List]s, [Float64List]s
 /// * [List]s of supported values
 /// * [Map]s from supported values to supported values
-class StandardCodec implements MethodCodec {
-  // The codec serializes supported values, method calls, and result envelopes
-  // as outlined below. This format must match the Android and iOS counterparts.
-  //
-  // Values
+class StandardMessageCodec implements MessageCodec<dynamic> {
+  // The codec serializes messages as outlined below. This format must
+  // match the Android and iOS counterparts.
   //
   // * A single byte with one of the constant values below determines the
   //   type of the value.
@@ -159,19 +168,6 @@ class StandardCodec implements MethodCodec {
   // * Maps are encoded by first encoding their length in the expanding format,
   //   then follows the recursive encoding of each key/value pair, including the
   //   type byte for both (Maps are assumed to be heterogeneous).
-  //
-  // Method calls
-  //
-  // Method calls are encoded using the concatenation of the standard encoding
-  // of the method name String and the arguments value.
-  //
-  // Reply envelopes
-  //
-  // Reply envelopes are encoded using first a single byte to distinguish the
-  // success case (0) from the error case (1). Then follows:
-  // * In the success case, the standard encoding of the result value.
-  // * In the error case, the concatenation of the standard encoding of the
-  //   error code string, the error message string, and the error details value.
   static const int _kNull = 0;
   static const int _kTrue = 1;
   static const int _kFalse = 2;
@@ -187,7 +183,7 @@ class StandardCodec implements MethodCodec {
   static const int _kList = 12;
   static const int _kMap = 13;
 
-  const StandardCodec();
+  const StandardMessageCodec();
 
   @override
   ByteData encodeMessage(dynamic message) {
@@ -211,7 +207,7 @@ class StandardCodec implements MethodCodec {
     return result;
   }
 
-  void _writeSize(WriteBuffer buffer, int value) {
+  static void _writeSize(WriteBuffer buffer, int value) {
     assert(0 <= value && value < 0xffffffff);
     if (value < 254) {
       buffer.putUint8(value);
@@ -228,7 +224,7 @@ class StandardCodec implements MethodCodec {
     }
   }
 
-  void _writeValue(WriteBuffer buffer, dynamic value) {
+  static void _writeValue(WriteBuffer buffer, dynamic value) {
     if (value == null) {
       buffer.putUint8(_kNull);
     } else if (value is bool) {
@@ -290,7 +286,7 @@ class StandardCodec implements MethodCodec {
     }
   }
 
-  int _readSize(ReadBuffer buffer) {
+  static int _readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
     if (value < 254) {
       return value;
@@ -305,7 +301,7 @@ class StandardCodec implements MethodCodec {
     }
   }
 
-  dynamic _readValue(ReadBuffer buffer) {
+  static dynamic _readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
       throw throw new FormatException('Message corrupted');
     dynamic result;
@@ -371,13 +367,37 @@ class StandardCodec implements MethodCodec {
     }
     return result;
   }
+}
+
+/// [MethodCodec] using the Flutter standard binary encoding.
+///
+/// The standard codec is guaranteed to be compatible with the corresponding
+/// standard codec for FlutterMethodChannels on the host platform. These parts
+/// of the Flutter SDK are evolved synchronously.
+///
+/// Values supported as method arguments and result payloads are those supported
+/// by [StandardMessageCodec].
+class StandardMethodCodec implements MethodCodec {
+  // The codec method calls, and result envelopes as outlined below. This format
+  // must match the Android and iOS counterparts.
+  //
+  // * Individual values are encoded using [StandardMessageCodec].
+  // * Method calls are encoded using the concatenation of the encoding
+  //   of the method name String and the arguments value.
+  // * Reply envelopes are encoded using first a single byte to distinguish the
+  //   success case (0) from the error case (1). Then follows:
+  //   * In the success case, the encoding of the result value.
+  //   * In the error case, the concatenation of the encoding of the error code
+  //     string, the error message string, and the error details value.
+
+  const StandardMethodCodec();
 
   @override
   ByteData encodeMethodCall(String name, dynamic arguments) {
     assert(name != null);
     final WriteBuffer buffer = new WriteBuffer();
-    _writeValue(buffer, name);
-    _writeValue(buffer, arguments);
+    StandardMessageCodec._writeValue(buffer, name);
+    StandardMessageCodec._writeValue(buffer, arguments);
     return buffer.done();
   }
 
@@ -388,13 +408,14 @@ class StandardCodec implements MethodCodec {
       throw new FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = new ReadBuffer(envelope);
     if (buffer.getUint8() == 0)
-      return _readValue(buffer);
-    final dynamic errorCode = _readValue(buffer);
-    final dynamic errorMessage = _readValue(buffer);
-    final dynamic errorDetails = _readValue(buffer);
+      return StandardMessageCodec._readValue(buffer);
+    final dynamic errorCode = StandardMessageCodec._readValue(buffer);
+    final dynamic errorMessage = StandardMessageCodec._readValue(buffer);
+    final dynamic errorDetails = StandardMessageCodec._readValue(buffer);
     if (errorCode is String && (errorMessage == null || errorMessage is String))
       throw new PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
     else
       throw new FormatException('Invalid envelope');
   }
 }
+
