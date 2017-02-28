@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding;
@@ -27,7 +29,7 @@ class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so 
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    _FlutterDriverExtension extension = new _FlutterDriverExtension._();
+    FlutterDriverExtension extension = new FlutterDriverExtension();
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call
@@ -57,10 +59,11 @@ typedef Command CommandDeserializerCallback(Map<String, String> params);
 /// Runs the finder and returns the [Element] found, or `null`.
 typedef Finder FinderConstructor(SerializableFinder finder);
 
-class _FlutterDriverExtension {
+@visibleForTesting
+class FlutterDriverExtension {
   static final Logger _log = new Logger('FlutterDriverExtension');
 
-  _FlutterDriverExtension._() {
+  FlutterDriverExtension() {
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
@@ -72,6 +75,7 @@ class _FlutterDriverExtension {
       'setInputText': _setInputText,
       'submitInputText': _submitInputText,
       'waitFor': _waitFor,
+      'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -85,6 +89,7 @@ class _FlutterDriverExtension {
       'setInputText': (Map<String, String> params) => new SetInputText.deserialize(params),
       'submitInputText': (Map<String, String> params) => new SubmitInputText.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
+      'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -123,7 +128,7 @@ class _FlutterDriverExtension {
         throw 'Extension $_extensionMethod does not support command $commandKind';
       Command command = commandDeserializer(params);
       Result response = await commandHandler(command).timeout(command.timeout);
-      return _makeResponse(response.toJson());
+      return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
       String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log.error(msg);
@@ -219,6 +224,11 @@ class _FlutterDriverExtension {
       return new WaitForResult();
     else
       return null;
+  }
+
+  Future<Null> _waitUntilNoTransientCallbacks(Command command) async {
+    if (SchedulerBinding.instance.transientCallbackCount != 0)
+      await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
   }
 
   Future<ScrollResult> _scroll(Command command) async {
