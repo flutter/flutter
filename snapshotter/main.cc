@@ -277,7 +277,7 @@ int CreateSnapshot(const ftl::CommandLine& command_line) {
       return 1;
     }
     // The script has been loaded, print out the minimal dependencies to run.
-    for (const auto& dep : loader.dependencies()) {
+    for (const auto& dep : loader.url_dependencies()) {
       std::string file = dep;
       FTL_DCHECK(!file.empty());
       std::cout << file << "\n";
