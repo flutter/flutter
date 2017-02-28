@@ -108,9 +108,11 @@ struct Header {
     }
 };
 
-Hyphenator* Hyphenator::loadBinary(const uint8_t* patternData) {
+Hyphenator* Hyphenator::loadBinary(const uint8_t* patternData, size_t minPrefix, size_t minSuffix) {
     Hyphenator* result = new Hyphenator;
     result->patternData = patternData;
+    result->minPrefix = minPrefix;
+    result->minSuffix = minSuffix;
     return result;
 }
 
@@ -120,7 +122,7 @@ void Hyphenator::hyphenate(vector<HyphenationType>* result, const uint16_t* word
     result->resize(len);
     const size_t paddedLen = len + 2;  // start and stop code each count for 1
     if (patternData != nullptr &&
-            (int)len >= MIN_PREFIX + MIN_SUFFIX && paddedLen <= MAX_HYPHENATED_SIZE) {
+            len >= minPrefix + minSuffix && paddedLen <= MAX_HYPHENATED_SIZE) {
         uint16_t alpha_codes[MAX_HYPHENATED_SIZE];
         const HyphenationType hyphenValue = alphabetLookup(alpha_codes, word, len);
         if (hyphenValue != HyphenationType::DONT_BREAK) {
@@ -307,7 +309,7 @@ void Hyphenator::hyphenateWithNoPatterns(HyphenationType* result, const uint16_t
                 result[i] = hyphenationTypeBasedOnScript(word[i]);
             }
         } else if (prevChar == CHAR_MIDDLE_DOT
-                && MIN_PREFIX < i && i <= len - MIN_SUFFIX
+                && minPrefix < i && i <= len - minSuffix
                 && ((word[i - 2] == 'l' && word[i] == 'l')
                         || (word[i - 2] == 'L' && word[i] == 'L'))
                 && strcmp(locale.getLanguage(), "ca") == 0) {
@@ -392,7 +394,7 @@ void Hyphenator::hyphenateFromCodes(HyphenationType* result, const uint16_t* cod
     uint32_t link_shift = trie->link_shift;
     uint32_t link_mask = trie->link_mask;
     uint32_t pattern_shift = trie->pattern_shift;
-    size_t maxOffset = len - MIN_SUFFIX - 1;
+    size_t maxOffset = len - minSuffix - 1;
     for (size_t i = 0; i < len - 1; i++) {
         uint32_t node = 0;  // index into Trie table
         for (size_t j = i; j < len; j++) {
@@ -414,7 +416,7 @@ void Hyphenator::hyphenateFromCodes(HyphenationType* result, const uint16_t* cod
                 const uint8_t* pat_buf = pattern->buf(pat_entry);
                 int offset = j + 1 - (pat_len + pat_shift);
                 // offset is the index within buffer that lines up with the start of pat_buf
-                int start = std::max(MIN_PREFIX - offset, 0);
+                int start = std::max((int)minPrefix - offset, 0);
                 int end = std::min(pat_len, (int)maxOffset - offset);
                 for (int k = start; k < end; k++) {
                     buffer[offset + k] = std::max(buffer[offset + k], pat_buf[k]);
@@ -423,8 +425,8 @@ void Hyphenator::hyphenateFromCodes(HyphenationType* result, const uint16_t* cod
         }
     }
     // Since the above calculation does not modify values outside
-    // [MIN_PREFIX, len - MIN_SUFFIX], they are left as 0 = DONT_BREAK.
-    for (size_t i = MIN_PREFIX; i < maxOffset; i++) {
+    // [minPrefix, len - minSuffix], they are left as 0 = DONT_BREAK.
+    for (size_t i = minPrefix; i < maxOffset; i++) {
         // Hyphenation opportunities happen when the hyphenation numbers are odd.
         result[i] = (buffer[i] & 1u) ? hyphenValue : HyphenationType::DONT_BREAK;
     }
