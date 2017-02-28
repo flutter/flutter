@@ -300,7 +300,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     );
   }
 
-  bool get isWebStorm => id == 'WebStorm';
+  bool get isWebStorm => title == 'WebStorm';
 
   bool _validateHasPackage(List<ValidationMessage> messages, String packageName, String title) {
     if (!hasPackage(packageName)) {
