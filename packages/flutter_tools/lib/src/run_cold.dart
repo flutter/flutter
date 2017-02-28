@@ -54,7 +54,8 @@ class ColdRunner extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
-      printError('Exception from flutter run: $error', stackTrace);
+      printError('Exception from flutter run: $error',
+          logger.isVerbose ? stackTrace : null);
     });
   }
 
