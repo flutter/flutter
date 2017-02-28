@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final Border nullBorder = null; // workaround to avoid prefer_const_constructors
+final Border nullBorder = null; // we want these instances to be separate instances so that we're not just checking with a single object
 final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nullBorder);
 final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nullBorder);
 final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nullBorder);

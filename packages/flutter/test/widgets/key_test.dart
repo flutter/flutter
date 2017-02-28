@@ -19,14 +19,14 @@ class NotEquals {
 
 void main() {
   testWidgets('Keys', (WidgetTester tester) async {
-    int int3 = 3; // workaround to avoid prefer_const_constructors
+    int int3 = 3; // we want these instances to be separate instances so that we're not just checking with a single object
     expect(new ValueKey<int>(int3) == new ValueKey<int>(int3), isTrue);
     expect(new ValueKey<num>(int3) == new ValueKey<int>(int3), isFalse);
-    int int2 = 2; // workaround to avoid prefer_const_constructors
+    int int2 = 2; // we want these instances to be separate instances so that we're not just checking with a single object
     expect(new ValueKey<int>(int3) == new ValueKey<int>(int2), isFalse);
     expect(const ValueKey<double>(double.NAN) == const ValueKey<double>(double.NAN), isFalse);
 
-    String empty = ''; // workaround to avoid prefer_const_constructors
+    String empty = ''; // we want these instances to be separate instances so that we're not just checking with a single object
     expect(new Key(empty) == new ValueKey<String>(empty), isTrue);
     expect(new ValueKey<String>(empty) == new ValueKey<String>(empty), isTrue);
     expect(new TestValueKey<String>(empty) == new ValueKey<String>(empty), isFalse);
@@ -44,11 +44,11 @@ void main() {
     expect(new ValueKey<LocalKey>(k) == new ValueKey<UniqueKey>(k), isFalse);
     expect(new ObjectKey(k) == new ObjectKey(k), isTrue);
 
-    NotEquals constNotEquals = const NotEquals(); // workaround to avoid prefer_const_constructors
+    NotEquals constNotEquals = const NotEquals(); // we want these instances to be separate instances so that we're not just checking with a single object
     expect(new ValueKey<NotEquals>(constNotEquals) == new ValueKey<NotEquals>(constNotEquals), isFalse);
     expect(new ObjectKey(constNotEquals) == new ObjectKey(constNotEquals), isTrue);
 
-    Object constObject = const Object(); // workaround to avoid prefer_const_constructors
+    Object constObject = const Object(); // we want these instances to be separate instances so that we're not just checking with a single object
     expect(new ObjectKey(constObject) == new ObjectKey(constObject), isTrue);
     expect(new ObjectKey(new Object()) == new ObjectKey(new Object()), isFalse);
 
