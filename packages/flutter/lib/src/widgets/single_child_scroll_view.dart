@@ -43,14 +43,15 @@ class SingleChildScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
-    this.primary: false,
+    bool primary,
     this.physics,
     this.controller,
     this.child,
-  }) : super(key: key) {
-    assert(scrollDirection != null);
-    assert(primary != null);
-    assert(controller == null || !primary,
+  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       super(key: key) {
+    assert(this.scrollDirection != null);
+    assert(this.primary != null);
+    assert(this.controller == null || !this.primary,
        'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
        'You cannot both set primary to true and pass an explicit controller.'
     );

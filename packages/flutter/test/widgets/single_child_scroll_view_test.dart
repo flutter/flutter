@@ -136,4 +136,23 @@ void main() {
       ),
     ));
   });
+
+  testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
+    SingleChildScrollView view = new SingleChildScrollView(scrollDirection: Axis.vertical);
+    expect(view.primary, isTrue);
+  });
+
+  testWidgets('Horizontal SingleChildScrollViews are non-primary by default', (WidgetTester tester) async {
+    SingleChildScrollView view = new SingleChildScrollView(scrollDirection: Axis.horizontal);
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('SingleChildScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+    SingleChildScrollView view = new SingleChildScrollView(
+      controller: new ScrollController(),
+      scrollDirection: Axis.vertical,
+    );
+    expect(view.primary, isFalse);
+  });
+
 }
