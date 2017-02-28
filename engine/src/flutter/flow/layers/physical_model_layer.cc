@@ -50,19 +50,23 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
   path.addRRect(rrect_);
 
   if (elevation_ != 0) {
+    SkShadowFlags flags = SkColorGetA(color_) == 0xff ?
+        SkShadowFlags::kNone_ShadowFlag :
+        SkShadowFlags::kTransparentOccluder_ShadowFlag;
     SkShadowUtils::DrawShadow(&context.canvas, path,
                               elevation_ * 4,
                               SkPoint3::Make(0.0f, -700.0f, 2800.0f),
                               2800.0f,
                               0.25f, 0.25f,
-                              SK_ColorBLACK);
+                              SK_ColorBLACK,
+                              flags);
   }
 
   if (needs_system_composite())
     return;
 
   SkPaint paint;
-  paint.setColor(SkColorSetA(color_, 0xFF));
+  paint.setColor(color_);
   context.canvas.drawPath(path, paint);
 
   SkAutoCanvasRestore save(&context.canvas, false);
