@@ -58,6 +58,20 @@ class Version implements Comparable<Version> {
     }
   }
 
+  /// Returns the primary version out of a list of candidates.
+  ///
+  /// This is the highest-numbered stable version.
+  static Version primary(List<Version> versions) {
+    Version primary;
+    for (Version version in versions) {
+      if (primary == null || (version > primary)) {
+        primary = version;
+      }
+    }
+    return primary;
+  }
+
+
   static Version get unknown => new Version(0, 0, 0, text: 'unknown');
 
   /// Two [Version]s are equal if their version numbers are. The version text

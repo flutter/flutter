@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/version.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -37,14 +38,14 @@ void main() {
     testUsingContext('parse normal', () {
       AndroidSdk sdk = new AndroidSdk('.');
       AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
-        platformVersionName: 'android-23', buildToolsVersionName: '23.0.0');
+        platformVersionName: 'android-23', buildToolsVersion: new Version.parse('23.0.0'));
       expect(ver.sdkLevel, 23);
     });
 
     testUsingContext('parse android n', () {
       AndroidSdk sdk = new AndroidSdk('.');
       AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
-        platformVersionName: 'android-N', buildToolsVersionName: '24.0.0');
+        platformVersionName: 'android-N', buildToolsVersion: new Version.parse('24.0.0'));
       expect(ver.sdkLevel, 24);
     });
   });
