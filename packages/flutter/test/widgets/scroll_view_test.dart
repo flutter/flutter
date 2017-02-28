@@ -168,4 +168,34 @@ void main() {
     expect(controller.offset, equals(550.0));
     expect(log, isEmpty);
   });
+
+  testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new CustomScrollView(primary: true),
+    ));
+    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    expect(scrollable.controller, primaryScrollController);
+  });
+
+  testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new ListView(primary: true),
+    ));
+    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    expect(scrollable.controller, primaryScrollController);
+  });
+
+  testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new GridView.count(primary: true, crossAxisCount: 1),
+    ));
+    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    expect(scrollable.controller, primaryScrollController);
+  });
 }
