@@ -16,6 +16,11 @@ class PrimaryScrollController extends InheritedWidget {
     assert(controller != null);
   }
 
+  PrimaryScrollController.none({
+    Key key,
+    @required Widget child
+  }) : super(key: key, child: child);
+
   final ScrollController controller;
 
   static ScrollController of(BuildContext context) {
@@ -29,6 +34,6 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$controller');
+    description.add('${controller ?? 'null controller'}');
   }
 }
