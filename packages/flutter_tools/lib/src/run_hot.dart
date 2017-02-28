@@ -98,7 +98,18 @@ class HotRunner extends ResidentRunner {
         new DartDependencySetBuilder(
               mainPath, projectRootPath, packagesFilePath);
     try {
-      _dartDependencies = new Set<String>.from(dartDependencySetBuilder.build());
+      Set<String> dependencies = dartDependencySetBuilder.build();
+      _dartDependencies = new Set<String>();
+      for (String path in dependencies) {
+        // We need to tweak package: uris so that they reflect their devFS
+        // location.
+        if (path.startsWith('package:')) {
+          // Swap out package: for packages/ because we place all package
+          // sources under packages/.
+          path = path.replaceFirst('package:', 'packages/');
+        }
+        _dartDependencies.add(path);
+      }
     } catch (error) {
       printStatus('Error detected in application source code:', emphasis: true);
       printError('$error');

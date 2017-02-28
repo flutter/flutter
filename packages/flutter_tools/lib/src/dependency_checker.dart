@@ -5,6 +5,7 @@
 import 'asset.dart';
 import 'base/file_system.dart';
 import 'dart/dependencies.dart';
+import 'dart/package_map.dart';
 import 'globals.dart';
 
 class DependencyChecker {
@@ -17,7 +18,10 @@ class DependencyChecker {
   /// if it cannot be determined.
   bool check(DateTime threshold) {
     _dependencies.clear();
+    PackageMap packageMap;
+    // Parse the package map.
     try {
+      packageMap = new PackageMap(builder.packagesFilePath)..load();
       _dependencies.add(builder.packagesFilePath);
     } catch (e, st) {
       printTrace('DependencyChecker: could not parse .packages file:\n$e\n$st');
@@ -25,7 +29,16 @@ class DependencyChecker {
     }
     // Build the set of Dart dependencies.
     try {
-      _dependencies.addAll(builder.build());
+      Set<String> dependencies = builder.build();
+      for (String path in dependencies) {
+        // Ensure all paths are absolute.
+        if (path.startsWith('package:')) {
+          path = packageMap.pathForPackage(Uri.parse(path));
+        } else {
+          path = fs.path.join(builder.projectRootPath, path);
+        }
+        _dependencies.add(path);
+      }
     } catch (e, st) {
       printTrace('DependencyChecker: error determining .dart dependencies:\n$e\n$st');
       return true;
