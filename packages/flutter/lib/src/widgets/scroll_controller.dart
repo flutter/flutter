@@ -68,7 +68,14 @@ class ScrollController {
   Future<Null> animateTo(double offset, {
     @required Duration duration,
     @required Curve curve,
-  }) => position.animateTo(offset, duration: duration, curve: curve);
+  }) {
+    assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
+    List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
+    for (int i = 0; i < _positions.length; i++) {
+      animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
+    }
+    return Future.wait(animations).then((List<Null> _) => null);
+  }
 
   /// Jumps the scroll position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
@@ -82,7 +89,12 @@ class ScrollController {
   ///
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
-  void jumpTo(double value) => position.jumpTo(value);
+  void jumpTo(double value) {
+    assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
+    for (ScrollPosition p in _positions) {
+      p.jumpTo(value);
+    }
+  }
 
   /// Register the given position with this controller.
   ///

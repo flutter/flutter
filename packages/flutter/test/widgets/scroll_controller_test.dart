@@ -201,7 +201,7 @@ void main() {
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
-  testWidgets('Write operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
+  testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
     ScrollController controller = new ScrollController();
     await tester.pumpWidget(new ListView(
       children: <Widget>[
@@ -226,7 +226,8 @@ void main() {
       ],
     ));
 
-    expect(() => controller.jumpTo(1.0), throwsAssertionError);
-    expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
+    controller.jumpTo(1.0);
+    controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+    await tester.pumpUntilNoTransientCallbacks();
   });
 }
