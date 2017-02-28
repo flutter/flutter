@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/process.dart';
 
 class DartDependencySetBuilder {
@@ -29,6 +30,16 @@ class DartDependencySetBuilder {
 
     String output = runSyncAndThrowStdErrOnError(args);
 
-    return new Set<String>.from(LineSplitter.split(output));
+    final List<String> lines = LineSplitter.split(output).toList();
+    final Set<String> minimalDependencies = new Set<String>();
+    for (String line in lines) {
+      if (!line.startsWith('package:')) {
+        // We convert the uris so that they are relative to the project
+        // root.
+        line = fs.path.relative(line, from: projectRootPath);
+      }
+      minimalDependencies.add(line);
+    }
+    return minimalDependencies;
   }
 }

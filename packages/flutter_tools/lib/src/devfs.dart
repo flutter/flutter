@@ -461,10 +461,10 @@ class DevFS {
   }
 
   bool _shouldIgnore(String devicePath) {
-    List<String> ignoredPrefixes = <String>['android' + fs.path.separator,
+    List<String> ignoredPrefixes = <String>['android/',
                                             getBuildDirectory(),
-                                            'ios' + fs.path.separator,
-                                            '.pub' + fs.path.separator];
+                                            'ios/',
+                                            '.pub/'];
     for (String ignoredPrefix in ignoredPrefixes) {
       if (devicePath.startsWith(ignoredPrefix))
         return true;
@@ -473,14 +473,16 @@ class DevFS {
   }
 
   Future<bool> _scanDirectory(Directory directory,
-                              {String directoryNameOnDevice,
+                              {String directoryName,
                                bool recursive: false,
                                bool ignoreDotFiles: true,
+                               String packagesDirectoryName,
                                Set<String> fileFilter}) async {
-    if (directoryNameOnDevice == null) {
-      directoryNameOnDevice = fs.path.relative(directory.path, from: rootDirectory.path);
-      if (directoryNameOnDevice == '.')
-        directoryNameOnDevice = '';
+    String prefix = directoryName;
+    if (prefix == null) {
+      prefix = fs.path.relative(directory.path, from: rootDirectory.path);
+      if (prefix == '.')
+        prefix = '';
     }
     try {
       Stream<FileSystemEntity> files =
@@ -506,8 +508,24 @@ class DevFS {
         }
         final String relativePath =
             fs.path.relative(file.path, from: directory.path);
-        final String devicePath = fs.path.join(directoryNameOnDevice, relativePath);
-        if ((fileFilter != null) && !fileFilter.contains(file.absolute.path)) {
+        final String devicePath = fs.path.join(prefix, relativePath);
+        bool filtered = false;
+        if ((fileFilter != null) &&
+            !fileFilter.contains(devicePath)) {
+          if (packagesDirectoryName != null) {
+            // Double check the filter for packages/packagename/
+            final String packagesDevicePath =
+                fs.path.join(packagesDirectoryName, relativePath);
+            if (!fileFilter.contains(packagesDevicePath)) {
+              // File was not in the filter set.
+              filtered = true;
+            }
+          } else {
+            // File was not in the filter set.
+            filtered = true;
+          }
+        }
+        if (filtered) {
           // Skip files that are not included in the filter.
           continue;
         }
@@ -530,26 +548,27 @@ class DevFS {
     PackageMap packageMap = new PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
-      Uri packageUri = packageMap.map[packageName];
-      String packagePath = fs.path.fromUri(packageUri);
-      Directory packageDirectory = fs.directory(packageUri);
-      String directoryNameOnDevice = fs.path.join('packages', packageName);
-      bool packageExists;
-
-      if (fs.path.isWithin(rootDirectory.path, packagePath)) {
-        // We already scanned everything under the root directory.
-        packageExists = packageDirectory.existsSync();
-        directoryNameOnDevice = fs.path.relative(packagePath, from: rootDirectory.path);
-      } else {
-        packageExists =
-            await _scanDirectory(packageDirectory,
-                                 directoryNameOnDevice: directoryNameOnDevice,
-                                 recursive: true,
-                                 fileFilter: fileFilter);
-      }
+      Uri uri = packageMap.map[packageName];
+      // This project's own package.
+      final bool isProjectPackage = uri.toString() == 'lib/';
+      final String directoryName =
+          isProjectPackage ? 'lib' : fs.path.join('packages', packageName);
+      // If this is the project's package, we need to pass both
+      // package:<package_name> and lib/ as paths to be checked against
+      // the filter because we must support both package: imports and relative
+      // path imports within the project's own code.
+      final String packagesDirectoryName =
+          isProjectPackage ? fs.path.join('packages', packageName) : null;
+      Directory directory = fs.directory(uri);
+      bool packageExists =
+          await _scanDirectory(directory,
+                               directoryName: directoryName,
+                               recursive: true,
+                               packagesDirectoryName: packagesDirectoryName,
+                               fileFilter: fileFilter);
       if (packageExists) {
         sb ??= new StringBuffer();
-        sb.writeln('$packageName:$directoryNameOnDevice');
+        sb.writeln('$packageName:$directoryName');
       }
     }
     if (sb != null) {

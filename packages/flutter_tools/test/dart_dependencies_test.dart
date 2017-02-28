@@ -21,8 +21,8 @@ void main()  {
       DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
       Set<String> dependencies = builder.build();
-      expect(dependencies.contains(mainPath), isTrue);
-      expect(dependencies.contains(fs.path.join(testPath, 'foo.dart')), isTrue);
+      expect(dependencies.contains('main.dart'), isTrue);
+      expect(dependencies.contains('foo.dart'), isTrue);
     });
     testUsingContext('syntax_error', () {
       final String testPath = fs.path.join(dataPath, 'syntax_error');
