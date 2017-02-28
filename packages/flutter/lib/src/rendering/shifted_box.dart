@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -699,12 +701,37 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 }
 
 /// A delegate for computing the layout of a render object with a single child.
+///
+/// Used by [CustomSingleChildLayout] (in the widgets library) and
+/// [RenderCustomSingleChildLayoutBox] (in the rendering library).
+///
+/// When asked to layout, [CustomSingleChildLayout] first calls [getSize] with
+/// its incoming constraints to determine its size. It then calls
+/// [getConstraintsForChild] to determine the constraints to apply to the child.
+/// After the child completes its layout, [RenderCustomSingleChildLayoutBox]
+/// calls [getPositionForChild] to determine the child's position.
+///
+/// The [shouldRelayout] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The most efficient way to trigger a relayout is to supply a relayout
+/// argument to the constructor of the [SingleChildLayoutDelegate]. The custom
+/// object will listen to this value and relayout whenever the animation
+/// ticks, avoiding both the build phase of the pipeline.
+///
+/// See also:
+///
+///  * [CustomSingleChildLayout], the widget that uses this delegate.
+///  * [RenderCustomSingleChildLayoutBox], render object that uses this
+///    delegate.
 abstract class SingleChildLayoutDelegate {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const SingleChildLayoutDelegate();
+  /// Creates a layout delegate.
+  ///
+  /// The layout will update whenever [relayout] notifies its listeners.
+  const SingleChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
 
-  // TODO(abarth): This class should take a Listenable to drive relayout.
+  final Listenable _relayout;
 
   /// The size of this object given the incoming constraints.
   ///
@@ -777,9 +804,26 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    final SingleChildLayoutDelegate oldDelegate = _delegate;
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
       markNeedsLayout();
     _delegate = newDelegate;
+    if (attached) {
+      oldDelegate?._relayout?.removeListener(markNeedsLayout);
+      newDelegate?._relayout?.addListener(markNeedsLayout);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _delegate?._relayout?.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _delegate?._relayout?.removeListener(markNeedsLayout);
+    super.detach();
   }
 
   Size _getSize(BoxConstraints constraints) {
