@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -66,10 +67,12 @@ class LogsCommand extends FlutterCommand {
       printStatus('');
       exitCompleter.complete(0);
     });
-    ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
-      subscription.cancel();
-      exitCompleter.complete(0);
-    });
+    if (!platform.isWindows) { // https://github.com/dart-lang/sdk/issues/28603
+      ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {
+        subscription.cancel();
+        exitCompleter.complete(0);
+      });
+    }
 
     // Wait for the log reader to be finished.
     int result = await exitCompleter.future;
