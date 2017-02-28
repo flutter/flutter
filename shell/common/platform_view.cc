@@ -177,6 +177,11 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface()),
       options));
 
+  // Do not cache textures created by the image decoder.  These textures should
+  // be deleted when they are no longer referenced by an SkImage.
+  if (blink::ResourceContext::Get())
+    blink::ResourceContext::Get()->setResourceCacheLimits(0, 0);
+
   latch->Signal();
 }
 
