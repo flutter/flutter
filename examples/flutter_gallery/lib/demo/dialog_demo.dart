@@ -66,10 +66,11 @@ class DialogDemoState extends State<DialogDemo> {
     _selectedTime = new TimeOfDay(hour: now.hour, minute: now.minute);
   }
 
-  void showDemoDialog<T>({ BuildContext context, Widget child }) {
+  void showDemoDialog<T>({ BuildContext context, Widget child, bool barrierDismissable }) {
     showDialog<T>(
       context: context,
-      child: child
+      child: child,
+      barrierDismissable: barrierDismissable,
     )
     .then<Null>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
@@ -202,6 +203,7 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
+                barrierDismissable: false,
                 child: new CupertinoAlertDialog(
                   content: new Text(_alertWithoutTitleText),
                   actions: <Widget>[
@@ -224,6 +226,7 @@ class DialogDemoState extends State<DialogDemo> {
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
+                barrierDismissable: false,
                 child: new CupertinoAlertDialog(
                   title: new Text('Use Google\'s location service?'),
                   content: new Text(_alertWithTitleText),

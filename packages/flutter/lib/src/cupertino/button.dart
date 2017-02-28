@@ -29,13 +29,13 @@ final TextStyle _kCupertinoDisabledButtonStyle = _kCupertinoButtonStyle.copyWith
 class CupertinoButton extends StatefulWidget {
   CupertinoButton({
     this.text,
-    this.padding: 16.0,
+    this.padding: const EdgeInsets.all(16.0),
     @required this.onPressed,
   });
 
   final String text;
 
-  final double padding;
+  final EdgeInsets padding;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -71,33 +71,6 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTapDown: config.enabled ? _handleTapDown : null,
-      onTapUp: config.enabled ? _handleTapUp : null,
-      onTapCancel: config.enabled ? _handleTapCancel : null,
-      onTap: config.onPressed,
-
-      child: new ConstrainedBox(
-        constraints: new BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-        child: new Padding(
-          padding: new EdgeInsets.all(config.padding),
-          child: new FadeTransition(
-            opacity: new CurvedAnimation(
-              parent: _animationController,
-              curve: Curves.decelerate,
-            ),
-            child: new Text(
-              config.text,
-              style: config.enabled ? _kCupertinoButtonStyle : _kCupertinoDisabledButtonStyle,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   void _handleTapDown(TapDownDetails details) {
     _animationController.animateTo(0.2);
   }
@@ -108,6 +81,34 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   void _handleTapCancel() {
     _animationController.animateTo(1.0);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool enabled = config.enabled;
+    return new GestureDetector(
+      onTapDown: enabled ? _handleTapDown : null,
+      onTapUp: enabled ? _handleTapUp : null,
+      onTapCancel: enabled ? _handleTapCancel : null,
+      onTap: config.onPressed,
+
+      child: new ConstrainedBox(
+        constraints: new BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+        child: new Padding(
+          padding: config.padding,
+          child: new FadeTransition(
+            opacity: new CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.decelerate,
+            ),
+            child: new Text(
+              config.text,
+              style: enabled ? _kCupertinoButtonStyle : _kCupertinoDisabledButtonStyle,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
 }
