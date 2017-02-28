@@ -160,8 +160,8 @@ class DevFSStringContent extends DevFSByteContent {
 abstract class DevFSOperations {
   Future<Uri> create(String fsName);
   Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, Uri devicePath, DevFSContent content);
-  Future<dynamic> deleteFile(String fsName, Uri devicePath);
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri);
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
@@ -199,7 +199,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         '_writeDevFSFile',
         params: <String, dynamic> {
           'fsName': fsName,
-          'path': deviceUri.path,
+          'path': deviceUri.path, // TODO(goderbauer): transfer full Uri when remote end supports it
           'fileContents': fileContents
         },
       );
@@ -250,15 +250,15 @@ class _DevFSHttpWriter {
         // Finished.
         break;
       }
-      Uri devicePath = _outstanding.keys.first;
-      DevFSContent content = _outstanding.remove(devicePath);
-      _scheduleWrite(devicePath, content, progressReporter);
+      Uri deviceUri = _outstanding.keys.first;
+      DevFSContent content = _outstanding.remove(deviceUri);
+      _scheduleWrite(deviceUri, content, progressReporter);
       _inFlight++;
     }
   }
 
   Future<Null> _scheduleWrite(
-    Uri devicePath,
+    Uri deviceUri,
     DevFSContent content,
     DevFSProgressReporter progressReporter, [
     int retry = 0,
@@ -267,19 +267,20 @@ class _DevFSHttpWriter {
       HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
+      // TODO(goderbauer): transfer full Uri when remote end supports it
       request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(devicePath.path)));
+                          BASE64.encode(UTF8.encode(deviceUri.path)));
       Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
       await response.drain<Null>();
     } catch (e) {
       if (retry < kMaxRetries) {
-        printTrace('Retrying writing "$devicePath" to DevFS due to error: $e');
-        _scheduleWrite(devicePath, content, progressReporter, retry + 1);
+        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
+        _scheduleWrite(deviceUri, content, progressReporter, retry + 1);
         return;
       } else {
-        printError('Error writing "$devicePath" to DevFS: $e');
+        printError('Error writing "$deviceUri" to DevFS: $e');
       }
     }
     if (progressReporter != null) {
@@ -454,9 +455,9 @@ class DevFS {
   void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
-    final Uri devicePath = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
+    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
 
-    _entries[devicePath] = content;
+    _entries[deviceUri] = content;
     content._exists = true;
   }
 
