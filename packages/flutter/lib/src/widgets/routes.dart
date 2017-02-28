@@ -775,7 +775,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [removeScopedWillPopCallback], which removes a callback.
   @protected
   bool get hasScopedWillPopCallback {
-    return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.length > 0;
+    return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.isNotEmpty;
   }
 
   @override

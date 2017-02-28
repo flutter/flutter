@@ -399,7 +399,7 @@ class FlutterDriver {
 
   /// Starts recording performance traces.
   Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
-    assert(streams != null && streams.length > 0);
+    assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)

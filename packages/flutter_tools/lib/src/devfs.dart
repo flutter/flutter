@@ -246,7 +246,7 @@ class _DevFSHttpWriter {
 
   void _scheduleWrites(DevFSProgressReporter progressReporter) {
     while (_inFlight < kMaxInFlight) {
-      if (_outstanding.length == 0) {
+      if (_outstanding.isEmpty) {
         // Finished.
         break;
       }
@@ -287,7 +287,7 @@ class _DevFSHttpWriter {
       progressReporter(_done, _max);
     }
     _inFlight--;
-    if ((_outstanding.length == 0) && (_inFlight == 0)) {
+    if ((_outstanding.isEmpty) && (_inFlight == 0)) {
       _completer.complete(null);
     } else {
       _scheduleWrites(progressReporter);
@@ -409,7 +409,7 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (dirtyEntries.length > 0) {
+    if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
       if (_httpWriter != null) {
         try {

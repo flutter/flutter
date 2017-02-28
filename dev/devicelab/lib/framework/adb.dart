@@ -299,7 +299,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       .map((String id) => new IosDevice(deviceId: id))
       .toList();
 
-    if (allDevices.length == 0)
+    if (allDevices.isEmpty)
       throw 'No iOS devices detected';
 
     // TODO(yjbanov): filter out and warn about those with low battery level

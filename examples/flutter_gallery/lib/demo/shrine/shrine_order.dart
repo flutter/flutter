@@ -118,7 +118,7 @@ class OrderItem extends StatelessWidget {
 class OrderPage extends StatefulWidget {
   OrderPage({ Key key, this.order, this.products, this.shoppingCart }) : super(key: key) {
     assert(order != null);
-    assert(products != null && products.length > 0);
+    assert(products != null && products.isNotEmpty);
     assert(shoppingCart != null);
   }
 
