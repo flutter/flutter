@@ -838,17 +838,17 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> reloadSources(
       { bool pause: false,
-        String rootLibPath,
-        String packagesPath}) async {
+        Uri rootLibUri,
+        Uri packagesUri}) async {
     try {
       Map<String, dynamic> arguments = <String, dynamic>{
         'pause': pause
       };
-      if (rootLibPath != null) {
-        arguments['rootLibUri'] = rootLibPath;
+      if (rootLibUri != null) {
+        arguments['rootLibUri'] = rootLibUri.path;
       }
-      if (packagesPath != null) {
-        arguments['packagesUri'] = packagesPath;
+      if (packagesUri != null) {
+        arguments['packagesUri'] = packagesUri.path;
       }
       Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;

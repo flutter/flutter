@@ -430,17 +430,15 @@ class HotRunner extends ResidentRunner {
     String reloadMessage;
     try {
       String entryPath = fs.path.relative(mainPath, from: projectRootPath);
-      String deviceEntryPath =
-          _devFS.baseUri.resolve(entryPath).toFilePath();
-      String devicePackagesPath =
-          _devFS.baseUri.resolve('.packages').toFilePath();
+      Uri deviceEntryUri = _devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
+      Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
       if (benchmarkMode)
         vmReloadTimer.start();
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(
               pause: pause,
-              rootLibPath: deviceEntryPath,
-              packagesPath: devicePackagesPath);
+              rootLibUri: deviceEntryUri,
+              packagesUri: devicePackagesUri);
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');

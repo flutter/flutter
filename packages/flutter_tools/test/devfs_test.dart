@@ -89,7 +89,7 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
 
       List<String> packageSpecOnDevice = LineSplitter.split(UTF8.decode(
-          await devFSOperations.devicePathToContent['.packages'].contentsAsBytes()
+          await devFSOperations.devicePathToContent[fs.path.toUri('.packages')].contentsAsBytes()
       )).toList();
       expect(packageSpecOnDevice,
           unorderedEquals(<String>['my_project:lib', 'somepkg:packages/somepkg'])
