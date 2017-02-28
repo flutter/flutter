@@ -38,7 +38,7 @@ const String _actionText =
     'behaviors that include morphing, launching, and a transferring anchor '
     'point.';
 
-const String _iosText =
+const String _cupertinoText =
     'iOS themed buttons are flat. They can have borders or backgrounds but only '
     'when necessary.';
 
@@ -86,8 +86,8 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         exampleCodeTag: _actionCode,
       ),
       new ComponentDemoTabData(
-        tabName: 'iOS',
-        description: _iosText,
+        tabName: 'CUPERTINO',
+        description: _cupertinoText,
         widget: buildIosButton(),
         exampleCodeTag: _actionCode,
       ),
@@ -258,14 +258,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     );
   }
 
-  Widget buildIosButton() {
+  Widget buildCupertinoButton() {
     return new Align(
       alignment: const FractionalOffset(0.5, 0.4),
       child: new ButtonBar(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new CupertinoButton(
-            text: 'iOS Button',
+            text: 'Cupertino Button',
             onPressed: () {
               // Perform some action
             }

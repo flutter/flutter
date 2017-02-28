@@ -54,7 +54,7 @@ class _SliderDemoState extends State<SliderDemo> {
                     });
                   }
                 ),
-                new Text('iOS'),
+                new Text('Cupertino'),
               ]
             ),
             new Column(
@@ -97,7 +97,7 @@ class _SliderDemoState extends State<SliderDemo> {
                     });
                   }
                 ),
-                new Text('iOS Discrete'),
+                new Text('Cupertino Discrete'),
               ]
             ),
           ],

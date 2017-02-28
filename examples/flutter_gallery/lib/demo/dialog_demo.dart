@@ -199,7 +199,7 @@ class DialogDemoState extends State<DialogDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('iOS ALERT'),
+            child: new Text('CUPERTINO ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
@@ -222,7 +222,7 @@ class DialogDemoState extends State<DialogDemo> {
             },
           ),
           new RaisedButton(
-            child: new Text('iOS ALERT WITH TITLE'),
+            child: new Text('CUPERTINO ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
