@@ -283,9 +283,6 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    printTrace("Stopping app '${package.name}' on $name.");
-    await stopApp(package);
-
     if (!prebuiltApplication) {
       printTrace('Building APK');
       await buildApk(platform,
@@ -294,7 +291,13 @@ class AndroidDevice extends Device {
           kernelContent: kernelContent,
           applicationNeedsRebuild: applicationNeedsRebuild
       );
+      // Package has been built, so we can get the updated application ID and
+      // activity name from the .apk.
+      package = new AndroidApk.fromCurrentDirectory();
     }
+
+    printTrace("Stopping app '${package.name}' on $name.");
+    await stopApp(package);
 
     if (isLatestBuildInstalled(package)) {
       printStatus('Latest build already installed.');
