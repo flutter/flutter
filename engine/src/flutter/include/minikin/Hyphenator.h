@@ -136,7 +136,7 @@ public:
     // at least as long as the Hyphenator object.
 
     // Note: nullptr is valid input, in which case the hyphenator only processes soft hyphens.
-    static Hyphenator* loadBinary(const uint8_t* patternData);
+    static Hyphenator* loadBinary(const uint8_t* patternData, size_t minPrefix, size_t minSuffix);
 
 private:
     // apply various hyphenation rules including hard and soft hyphens, ignoring patterns
@@ -153,17 +153,13 @@ private:
     void hyphenateFromCodes(HyphenationType* result, const uint16_t* codes, size_t len,
             HyphenationType hyphenValue);
 
-    // TODO: these should become parameters, as they might vary by locale, screen size, and
-    // possibly explicit user control.
-    static const int MIN_PREFIX = 2;
-    static const int MIN_SUFFIX = 3;
-
     // See also LONGEST_HYPHENATED_WORD in LineBreaker.cpp. Here the constant is used so
     // that temporary buffers can be stack-allocated without waste, which is a slightly
     // different use case. It measures UTF-16 code units.
     static const size_t MAX_HYPHENATED_SIZE = 64;
 
     const uint8_t* patternData;
+    size_t minPrefix, minSuffix;
 
     // accessors for binary data
     const Header* getHeader() const {

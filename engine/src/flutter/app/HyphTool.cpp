@@ -11,7 +11,7 @@
 using minikin::HyphenationType;
 using minikin::Hyphenator;
 
-Hyphenator* loadHybFile(const char* fn) {
+Hyphenator* loadHybFile(const char* fn, int minPrefix, int minSuffix) {
     struct stat statbuf;
     int status = stat(fn, &statbuf);
     if (status < 0) {
@@ -32,11 +32,11 @@ Hyphenator* loadHybFile(const char* fn) {
         delete[] buf;
         return nullptr;
     }
-    return Hyphenator::loadBinary(buf);
+    return Hyphenator::loadBinary(buf, minPrefix, minSuffix);
 }
 
 int main(int argc, char** argv) {
-    Hyphenator* hyph = loadHybFile("/tmp/en.hyb");  // should also be configurable
+    Hyphenator* hyph = loadHybFile("/tmp/en.hyb", 2, 3);  // should also be configurable
     std::vector<HyphenationType> result;
     std::vector<uint16_t> word;
     if (argc < 2) {
