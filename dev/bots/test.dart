@@ -75,7 +75,7 @@ Future<Null> main() async {
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter'),
       options: coverageFlags,
     );
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_driver'));
+    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
     await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_tools'),
