@@ -139,16 +139,20 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     void _checkForStudio(String path) {
       if (!fs.isDirectorySync(path))
         return;
-      Iterable<Directory> directories = fs
-          .directory(path)
-          .listSync()
-          .where((FileSystemEntity e) => e is Directory);
-      for (Directory directory in directories) {
-        if (directory.basename == 'Android Studio.app') {
-          candidatePaths.add(directory);
-        } else if (!directory.path.endsWith('.app')) {
-          _checkForStudio(directory.path);
+      try {
+        Iterable<Directory> directories = fs
+            .directory(path)
+            .listSync()
+            .where((FileSystemEntity e) => e is Directory);
+        for (Directory directory in directories) {
+          if (directory.basename == 'Android Studio.app') {
+            candidatePaths.add(directory);
+          } else if (!directory.path.endsWith('.app')) {
+            _checkForStudio(directory.path);
+          }
         }
+      } catch (e) {
+        printTrace('Exception while looking for Android Studio: $e');
       }
     }
 
