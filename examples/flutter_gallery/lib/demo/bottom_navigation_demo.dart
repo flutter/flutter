@@ -154,8 +154,10 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
     // We want to have the newly animating (fading in) views on top.
     transitions.sort((FadeTransition a, FadeTransition b) {
-      double aValue = a.animation.value;
-      double bValue = b.animation.value;
+      final Animation<double> aAnimation = a.listenable;
+      final Animation<double> bAnimation = b.listenable;
+      final double aValue = aAnimation.value;
+      final double bValue = bAnimation.value;
       return aValue.compareTo(bValue);
     });
 

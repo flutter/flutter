@@ -112,7 +112,7 @@ class _TabStyle extends AnimatedWidget {
     this.labelStyle,
     this.unselectedLabelStyle,
     @required this.child,
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
   final TextStyle labelStyle;
   final TextStyle unselectedLabelStyle;
@@ -131,6 +131,7 @@ class _TabStyle extends AnimatedWidget {
       : defaultUnselectedStyle;
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Animation<double> animation = listenable;
     final Color color = selected
       ? Color.lerp(unselectedColor, selectedColor, animation.value)
       : Color.lerp(selectedColor, unselectedColor, animation.value);
