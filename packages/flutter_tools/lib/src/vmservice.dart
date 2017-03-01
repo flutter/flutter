@@ -838,17 +838,19 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> reloadSources(
       { bool pause: false,
-        String rootLibPath,
-        String packagesPath}) async {
+        Uri rootLibUri,
+        Uri packagesUri}) async {
     try {
       Map<String, dynamic> arguments = <String, dynamic>{
         'pause': pause
       };
-      if (rootLibPath != null) {
-        arguments['rootLibUri'] = rootLibPath;
+      // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
+      //     Note: Despite the name, `rootLibUri` and `packagesUri` expect file paths.
+      if (rootLibUri != null) {
+        arguments['rootLibUri'] = rootLibUri.toFilePath(windows: false);
       }
-      if (packagesPath != null) {
-        arguments['packagesUri'] = packagesPath;
+      if (packagesUri != null) {
+        arguments['packagesUri'] = packagesUri.toFilePath(windows: false);
       }
       Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;

@@ -95,7 +95,7 @@ class BasicMock {
 }
 
 class MockDevFSOperations extends BasicMock implements DevFSOperations {
-  Map<String, DevFSContent> devicePathToContent = <String, DevFSContent>{};
+  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
 
   @override
   Future<Uri> create(String fsName) async {
@@ -109,14 +109,14 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
-    messages.add('writeFile $fsName $devicePath');
-    devicePathToContent[devicePath] = content;
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
+    messages.add('writeFile $fsName $deviceUri');
+    devicePathToContent[deviceUri] = content;
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, String devicePath) async {
-    messages.add('deleteFile $fsName $devicePath');
-    devicePathToContent.remove(devicePath);
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
+    messages.add('deleteFile $fsName $deviceUri');
+    devicePathToContent.remove(deviceUri);
   }
 }
