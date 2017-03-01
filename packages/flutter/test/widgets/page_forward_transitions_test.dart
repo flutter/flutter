@@ -12,14 +12,14 @@ class TestTransition extends AnimatedWidget {
     this.childFirstHalf,
     this.childSecondHalf,
     Animation<double> animation
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation;
+    final Animation<double> animation = this.listenable;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
