@@ -235,12 +235,10 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_kInt32);
         buffer.putInt32(value);
-      }
-      else if (-0x7fffffffffffffff - 1 <= value && value <= 0x7fffffffffffffff) {
+      } else if (-0x7fffffffffffffff - 1 <= value && value <= 0x7fffffffffffffff) {
         buffer.putUint8(_kInt64);
         buffer.putInt64(value);
-      }
-      else {
+      } else {
         buffer.putUint8(_kLargeInt);
         final List<int> hex = UTF8.encoder.convert(value.toRadixString(16));
         _writeSize(buffer, hex.length);
