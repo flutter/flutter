@@ -161,7 +161,7 @@ Future<String> read(dynamic url, {Map<String, String> headers}) =>
 Future<Uint8List> readBytes(dynamic url, {Map<String, String> headers}) =>
   _withClient((Client client) => client.readBytes(url, headers: headers));
 
-Future/*<T>*/ _withClient/*<T>*/(Future/*<T>*/ fn(Client client)) async {
+Future<T> _withClient<T>(Future<T> fn(Client client)) async {
   Client client = new Client();
   try {
     return await fn(client);
