@@ -375,7 +375,7 @@ class DevFS {
 
     // Handle deletions.
     printTrace('Scanning for deleted files');
-    String assetBuildDirPrefix = fs.path.toUri(getAssetBuildDirectory()).path + '/';
+    String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final List<Uri> toRemove = new List<Uri>();
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
@@ -464,9 +464,9 @@ class DevFS {
 
   bool _shouldIgnore(Uri deviceUri) {
     List<String> ignoredUriPrefixes = <String>['android/',
-                                            fs.path.toUri(getBuildDirectory()).path + '/',
-                                            'ios/',
-                                            '.pub/'];
+                                               _asUriPath(getBuildDirectory()),
+                                               'ios/',
+                                               '.pub/'];
     for (String ignoredUriPrefix in ignoredUriPrefixes) {
       if (deviceUri.path.startsWith(ignoredUriPrefix))
         return true;
@@ -569,3 +569,5 @@ class DevFS {
     }
   }
 }
+/// Converts a platform-specific file path to a platform-independent Uri path.
+String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';

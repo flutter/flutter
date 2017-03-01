@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io;
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
