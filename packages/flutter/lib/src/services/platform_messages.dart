@@ -105,7 +105,6 @@ class PlatformMessages {
   /// UTF-8 string, or to an error, if the decoding fails.
   ///
   /// Deprecated, use [PlatformMessageChannel.send] instead.
-  @deprecated
   static Future<String> sendString(String channel, String message) async {
     return _decodeUTF8(await sendBinary(channel, _encodeUTF8(message)));
   }
@@ -119,7 +118,6 @@ class PlatformMessages {
   /// [double], [List], or [Map]), or to an error, if the decoding fails.
   ///
   /// Deprecated, use [PlatformMessageChannel.send] instead.
-  @deprecated
   static Future<dynamic> sendJSON(String channel, dynamic json) async {
     return _decodeJSON(await sendString(channel, _encodeJSON(json)));
   }
@@ -136,7 +134,6 @@ class PlatformMessages {
   /// response, or to an error, if the decoding fails.
   ///
   /// Deprecated, use [PlatformMethodChannel.invokeMethod] instead.
-  @deprecated
   static Future<dynamic> invokeMethod(String channel, String method, [ List<dynamic> args = const <Null>[] ]) {
     return sendJSON(channel, <String, dynamic>{
       'method': method,
@@ -165,7 +162,6 @@ class PlatformMessages {
   /// a UTF-8 string.
   ///
   /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
-  @deprecated
   static void setStringMessageHandler(String channel, Future<String> handler(String message)) {
     setBinaryMessageHandler(channel, (ByteData message) async {
       return _encodeUTF8(await handler(_decodeUTF8(message)));
@@ -182,7 +178,6 @@ class PlatformMessages {
   /// JSON and then as a UTF-8 string.
   ///
   /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
-  @deprecated
   static void setJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     setStringMessageHandler(channel, (String message) async {
       return _encodeJSON(await handler(_decodeJSON(message)));
@@ -221,7 +216,6 @@ class PlatformMessages {
   /// sent to platform plugins.
   ///
   /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
-  @deprecated
   static void setMockStringMessageHandler(String channel, Future<String> handler(String message)) {
     if (handler == null) {
       setMockBinaryMessageHandler(channel, null);
@@ -246,7 +240,6 @@ class PlatformMessages {
   /// sent to platform plugins.
   ///
   /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
-  @deprecated
   static void setMockJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     if (handler == null) {
       setMockStringMessageHandler(channel, null);
