@@ -83,7 +83,7 @@ void main() {
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
   });
 }
