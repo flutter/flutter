@@ -10,8 +10,8 @@ import 'package:meta/meta.dart';
 const TextStyle _kCupertinoDialogTitleStyle = const TextStyle(
   fontFamily: '.SF UI Display',
   inherit: false,
-  fontSize:  16.0,
-  fontWeight: FontWeight.bold,
+  fontSize:  17.0,
+  fontWeight: FontWeight.w600,
   color: const Color(0xFF000000),
   height: 1.35,
   textBaseline: TextBaseline.alphabetic,
@@ -127,7 +127,7 @@ class CupertinoAlertDialog extends StatelessWidget {
 
     if (title != null) {
       children.add(new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 12.0),
         child: new DefaultTextStyle(
           style: _kCupertinoDialogTitleStyle,
           textAlign: TextAlign.center,

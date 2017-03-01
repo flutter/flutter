@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../gallery/demo.dart';
@@ -163,38 +162,20 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   Widget buildSwitch() {
     return new Align(
       alignment: const FractionalOffset(0.5, 0.4),
-      child: new Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget> [
-          new Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              new Switch(
-                value: switchValue,
-                onChanged: (bool value) {
-                  setState(() {
-                    switchValue = value;
-                  });
-                }
-              ),
-              // Disabled switches
-              new Switch(value: true, onChanged: null),
-              new Switch(value: false, onChanged: null)
-            ],
+      child: new Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          new Switch(
+            value: switchValue,
+            onChanged: (bool value) {
+              setState(() {
+                switchValue = value;
+              });
+            }
           ),
-          new Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget> [
-              new CupertinoSwitch(
-                value: switchValue,
-                onChanged: (bool value) {
-                  setState(() {
-                    switchValue = value;
-                  });
-                }
-              ),
-            ],
-          )
+          // Disabled switches
+          new Switch(value: true, onChanged: null),
+          new Switch(value: false, onChanged: null)
         ],
       ),
     );

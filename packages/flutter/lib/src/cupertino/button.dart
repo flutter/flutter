@@ -5,37 +5,60 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-const TextStyle _kCupertinoButtonStyle = const TextStyle(
-  fontFamily: '.SF UI Text',
-  inherit: false,
-  fontSize: 14.0,
-  fontWeight: FontWeight.normal,
-  color: const Color(0xFF007AFF),
-  textBaseline: TextBaseline.alphabetic,
-);
-
-final TextStyle _kCupertinoDisabledButtonStyle = _kCupertinoButtonStyle.copyWith(
-  color: const Color(0xFFC4C4C4),
-);
-
 /// An iOS style button.
 ///
-/// Takes in a text or an icon that fades out and in on touch. May optionally have an
-/// invariant border.
+/// Takes in a text or an icon that fades out and in on touch. May optionally have a
+/// background.
 ///
 /// See also:
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
 class CupertinoButton extends StatefulWidget {
+  // TODO(xster): move this to a common Cupertino color palatte with the next yak.
+  static const Color kCupertinoBlue = const Color(0xFF007AFF);
+  static const Color kCupertinoWhite = const Color(0xFFFFFFFF);
+  static const Color kCupertinoDisabledBackground = const Color(0xFFA9A9A9);
+  static const Color kCupertinoDisabledForeground = const Color(0xFFC4C4C4);
+
+  static const TextStyle _kCupertinoButtonStyle = const TextStyle(
+    fontFamily: '.SF UI Text',
+    inherit: false,
+    fontSize: 15.0,
+    fontWeight: FontWeight.normal,
+    color: kCupertinoBlue,
+    textBaseline: TextBaseline.alphabetic,
+  );
+
+  static final TextStyle _kCupertinoDisabledButtonStyle = _kCupertinoButtonStyle.copyWith(
+    color: kCupertinoDisabledForeground,
+  );
+
+  static final TextStyle _kCupertinoBackgroundButtonStyle = _kCupertinoButtonStyle.copyWith(
+    color: kCupertinoWhite,
+  );
+
+  static const EdgeInsets _kCupertinoButtonPadding = const EdgeInsets.all(16.0);
+  static const EdgeInsets _kCupertinoBackgroundButtonPadding =
+      const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
+
   CupertinoButton({
-    this.text,
-    this.padding: const EdgeInsets.all(16.0),
+    @required this.child,
+    this.padding,
+    this.color,
     @required this.onPressed,
   });
 
-  final String text;
+  final Widget child;
 
+  /// The amount of space to surround the child inside the bounds of the button.
+  ///
+  /// Defaults to 16.0 pixels.
   final EdgeInsets padding;
+
+  /// The color of the button's background.
+  ///
+  /// Defaults to null which produces a button with no background or border.
+  final Color color;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
@@ -58,8 +81,7 @@ class CupertinoButton extends StatefulWidget {
 }
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
-
-  static const Duration kFadeOutDuration = const Duration(milliseconds: 30);
+  static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
   static const Duration kFadeInDuration = const Duration(milliseconds: 350);
 
   AnimationController _animationController;
@@ -96,31 +118,50 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     final bool enabled = config.enabled;
+    final Color backgroundColor = config.color;
+
     return new Listener(
       onPointerDown: enabled ? _handleTapDown : null,
       onPointerUp: enabled ? _handleTapUp : null,
       onPointerCancel: enabled ? _handleTapCancel : null,
 
       child: new GestureDetector(
-          onTap: config.onPressed,
-          child: new ConstrainedBox(
-              constraints: new BoxConstraints(minWidth: 48.0, minHeight: 48.0),
-              child: new Padding(
-                  padding: config.padding,
-                  child: new FadeTransition(
-                      opacity: new CurvedAnimation(
-                          parent: _animationController,
-                          curve: Curves.decelerate,
-                      ),
-                      child: new Text(
-                          config.text,
-                          style: enabled ? _kCupertinoButtonStyle : _kCupertinoDisabledButtonStyle,
-                      ),
-                  ),
+        onTap: config.onPressed,
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          child: new FadeTransition(
+            opacity: new CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.decelerate,
+            ),
+            child: new DecoratedBox(
+              decoration: new BoxDecoration(
+                borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
+                backgroundColor: backgroundColor != null && !enabled
+                    ? CupertinoButton.kCupertinoDisabledBackground
+                    : backgroundColor,
               ),
+              child: new Padding(
+                padding: config.padding
+                    ?? backgroundColor != null
+                        ? CupertinoButton._kCupertinoBackgroundButtonPadding
+                        : CupertinoButton._kCupertinoButtonPadding,
+                child: new Center(
+                  widthFactor: 1.0,
+                  child: new DefaultTextStyle(
+                    style: backgroundColor != null
+                        ? CupertinoButton._kCupertinoBackgroundButtonStyle
+                        : enabled
+                            ? CupertinoButton._kCupertinoButtonStyle
+                            : CupertinoButton._kCupertinoDisabledButtonStyle,
+                    child: config.child,
+                  ),
+                ),
+              ),
+            ),
           ),
+        ),
       ),
     );
   }
-
 }

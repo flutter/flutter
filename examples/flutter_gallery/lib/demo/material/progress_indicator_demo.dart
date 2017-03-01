@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
@@ -74,7 +73,6 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          new CupertinoActivityIndicator(),
           new CircularProgressIndicator(),
           new SizedBox(
               width: 20.0,
