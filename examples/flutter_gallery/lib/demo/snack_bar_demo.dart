@@ -30,6 +30,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
 
   Widget buildBody(BuildContext context) {
     return new ListView(
+      primary: true,
       padding: const EdgeInsets.all(24.0),
       children: <Widget>[
         new Text(_text1),

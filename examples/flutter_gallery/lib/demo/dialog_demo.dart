@@ -90,6 +90,7 @@ class DialogDemoState extends State<DialogDemo> {
         title: new Text('Dialogs')
       ),
       body: new ListView(
+        primary: true,
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           new RaisedButton(

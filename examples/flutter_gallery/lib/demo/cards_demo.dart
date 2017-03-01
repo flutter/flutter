@@ -135,6 +135,7 @@ class CardsDemo extends StatelessWidget {
         title: new Text('Travel stream')
       ),
       body: new ListView(
+        primary: true,
         itemExtent: TravelDestinationItem.height,
         padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
         children: destinations.map((TravelDestination destination) {

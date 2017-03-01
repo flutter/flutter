@@ -335,6 +335,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     return new Scaffold(
       appBar: new AppBar(title: new Text('Expansion panels')),
       body: new SingleChildScrollView(
+        primary: true,
         child: new Container(
           margin: const EdgeInsets.all(24.0),
           child: new ExpansionPanelList(

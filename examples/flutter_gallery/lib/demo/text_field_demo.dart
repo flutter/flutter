@@ -111,6 +111,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         autovalidate: _autovalidate,
         onWillPop: _warnUserAboutInvalidData,
         child: new ListView(
+          primary: true,
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
             new TextField(

@@ -375,6 +375,7 @@ class _ShrineHomeState extends State<ShrineHome> {
       products: _products,
       shoppingCart: _shoppingCart,
       body: new CustomScrollView(
+        primary: true,
         slivers: <Widget>[
           new SliverToBoxAdapter(
             child: new FeatureItem(product: featured),

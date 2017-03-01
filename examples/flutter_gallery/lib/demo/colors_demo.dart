@@ -99,6 +99,7 @@ class ColorSwatchTabView extends StatelessWidget {
     }
 
     return new ListView(
+      primary: true,
       itemExtent: kColorItemHeight,
       children: colorItems,
     );
