@@ -44,7 +44,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
         children: <Widget> [
           new CupertinoButton(
             child: new Text('Alert'),
-            color: CupertinoButton.kCupertinoBlue,
+            color: CupertinoButton.kBlue,
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
@@ -68,7 +68,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
           new Padding(padding: const EdgeInsets.all(8.0)),
           new CupertinoButton(
             child: new Text('Alert with Title'),
-            color: CupertinoButton.kCupertinoBlue,
+            color: CupertinoButton.kBlue,
             onPressed: () {
               showDemoDialog<String>(
                 context: context,

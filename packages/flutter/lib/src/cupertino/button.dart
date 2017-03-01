@@ -48,6 +48,9 @@ class CupertinoButton extends StatefulWidget {
     @required this.onPressed,
   });
 
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Text] widget.
   final Widget child;
 
   /// The amount of space to surround the child inside the bounds of the button.
@@ -81,6 +84,7 @@ class CupertinoButton extends StatefulWidget {
 }
 
 class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProviderStateMixin {
+  // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
   static const Duration kFadeInDuration = const Duration(milliseconds: 350);
 
@@ -142,12 +146,14 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                     : backgroundColor,
               ),
               child: new Padding(
-                padding: config.padding
-                    ?? backgroundColor != null
+                padding: config.padding != null
+                    ? config.padding
+                    : backgroundColor != null
                         ? CupertinoButton._kBackgroundButtonPadding
                         : CupertinoButton._kButtonPadding,
                 child: new Center(
                   widthFactor: 1.0,
+                  heightFactor: 1.0,
                   child: new DefaultTextStyle(
                     style: backgroundColor != null
                         ? CupertinoButton._kBackgroundButtonTextStyle

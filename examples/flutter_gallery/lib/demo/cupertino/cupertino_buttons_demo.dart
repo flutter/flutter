@@ -5,8 +5,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-class CupertinoButtonsDemo extends StatelessWidget {
+class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
+
+  @override
+  _CupertinoButtonDemoState createState() => new _CupertinoButtonDemoState();
+}
+
+class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
+  int _pressedCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +32,8 @@ class CupertinoButtonsDemo extends StatelessWidget {
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
+                new Text(_pressedCount > 0 ? "Button pressed $_pressedCount times" : " "),
+                new Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
                   alignment: const FractionalOffset(0.5, 0.4),
                   child: new Row(
@@ -33,7 +42,7 @@ class CupertinoButtonsDemo extends StatelessWidget {
                       new CupertinoButton(
                         child: new Text('Cupertino Button'),
                         onPressed: () {
-                          // Perform some action
+                          setState(() {_pressedCount++;});
                         }
                       ),
                       new CupertinoButton(
@@ -46,15 +55,15 @@ class CupertinoButtonsDemo extends StatelessWidget {
                 new Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: new Text('With Background'),
-                  color: CupertinoButton.kCupertinoBlue,
+                  color: CupertinoButton.kBlue,
                   onPressed: () {
-                    // Perform some action
+                    setState(() {_pressedCount++;});
                   }
                 ),
                 new Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: new Text('Disabled'),
-                  color: CupertinoButton.kCupertinoBlue,
+                  color: CupertinoButton.kBlue,
                   onPressed: null,
                 ),
               ],
