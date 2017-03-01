@@ -13,7 +13,16 @@ class PlatformServices extends StatefulWidget {
 }
 
 class _PlatformServicesState extends State<PlatformServices> {
-  Future<dynamic> _locationRequest;
+  static const PlatformMethodChannel platform = const PlatformMethodChannel('geo');
+  String _location = 'Unknown location.';
+
+  Future<Null> _getLocation() async {
+    List<double> result = await platform.invokeMethod('getLocation', 'network');
+
+    setState(() {
+      _location = 'Latitude ${result[0]}, Longitude ${result[1]}.';
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,44 +31,15 @@ class _PlatformServicesState extends State<PlatformServices> {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            new Text('Hello from Flutter!'),
             new RaisedButton(
               child: new Text('Get Location'),
-              onPressed: _requestLocation,
+              onPressed: _getLocation,
             ),
-            new FutureBuilder<dynamic>(
-              future: _locationRequest,
-              builder: _buildLocation,
-            ),
+            new Text(_location)
           ],
         ),
       ),
     );
-  }
-
-  void _requestLocation() {
-    setState(() {
-      _locationRequest = const PlatformMethodChannel('geo').invokeMethod(
-        'getLocation',
-        'network',
-      );
-    });
-  }
-
-  Widget _buildLocation(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-    switch (snapshot.connectionState) {
-      case ConnectionState.none:
-        return new Text('Press button to request location');
-      case ConnectionState.waiting:
-        return new Text('Awaiting response...');
-      default:
-        try {
-          final List<double> location = snapshot.requireData;
-          return new Text('Lat. ${location[0]}, Long. ${location[1]}');
-        } on PlatformException catch (e) {
-          return new Text('Request failed: ${e.message}');
-        }
-    }
   }
 }
 
