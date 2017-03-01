@@ -116,18 +116,19 @@ class StdoutLogger extends Logger {
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
 /// the Windows console with alternative symbols.
 ///
-/// This exists because of https://github.com/dart-lang/sdk/issues/28571.
+/// By default, Windows uses either "Consolas" or "Lucida Console" as fonts to
+/// render text in the console. Both fonts only have a limited character set.
+/// Unicode characters, that are not available in either of the two default
+/// fonts, should be replaced by this class with printable symbols. Otherwise,
+/// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
     stdout.write(message
         .replaceAll('✗', 'X')
-        .replaceAll('✓', '+')
-        .replaceAll('•', '*')
+        .replaceAll('✓', '√')
     );
-    // TODO(goderbauer): find a way to replace all other non-printable characters
-    //     with the unrepresentable character symbol '�'
   }
 }
 
