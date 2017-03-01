@@ -70,7 +70,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         help: 'Suppress analytics reporting when this command runs.');
     argParser.addFlag('bug-report',
         negatable: false,
-        help: 'Captures a bug report file to submit to the Flutter team.');
+        help:
+            'Captures a bug report file to submit to the Flutter team '
+            '(contains local paths, device identifiers, and log snippets).');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
@@ -188,7 +190,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       addShutdownHook(() async {
         File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
         os.zip(tmp, zipFile);
-        printStatus('Bug report written to ${zipFile.basename}');
+        printStatus(
+            'Bug report written to ${zipFile.basename}.\n'
+            'Note that this bug report contains local paths, device '
+            'identifiers, and log snippets.');
       }, ShutdownStage.POST_PROCESS_RECORDING);
       addShutdownHook(() => tmp.delete(recursive: true), ShutdownStage.CLEANUP);
     }

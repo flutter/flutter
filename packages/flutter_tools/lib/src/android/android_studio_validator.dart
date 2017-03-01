@@ -53,7 +53,7 @@ class AndroidStudioValidator extends DoctorValidator {
           'Try updating or re-installing Android Studio.'));
       if (_studio.configured != null) {
         messages.add(new ValidationMessage(
-            'Consider removing the android-studio-dir setting.'));
+            'Consider removing your android-studio-dir setting by running:\nflutter config --android-studio-dir='));
       }
     }
 
@@ -128,7 +128,8 @@ class ConfiguredGradleValidator extends DoctorValidator {
     }
 
     messages.add(new ValidationMessage(
-        'Consider removing the gradle-dir setting to use Gradle from Android Studio.'));
+        'Flutter supports building with Gradle from Android Studio.\n'
+        'Consider removing your gradle-dir setting by running:\nflutter config --gradle-dir='));
     return new ValidationResult(type, messages, statusInfo: versionString);
   }
 }

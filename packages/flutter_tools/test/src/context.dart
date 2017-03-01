@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
 
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 

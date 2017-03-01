@@ -429,6 +429,33 @@ class PaintingContext {
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
+
+  /// Clip using a physical model layer.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
+  ///   to use to clip the painting done by `painter`.
+  /// * `elevation` is the z-coordinate at which to place this material.
+  /// * `color` is the background color.
+  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushPhysicalModel(Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    _stopRecordingIfNeeded();
+    final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+      clipRRect: offsetClipRRect,
+      elevation: elevation,
+      color: color,
+    );
+    _appendLayer(physicalModel);
+    final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
 }
 
 /// An abstract set of layout constraints.

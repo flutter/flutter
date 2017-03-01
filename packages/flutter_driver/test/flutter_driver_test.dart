@@ -9,7 +9,7 @@ import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
 import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
@@ -196,6 +196,19 @@ void main() {
           return makeMockResponse(<String, dynamic>{});
         });
         await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(seconds: 1));
+      });
+    });
+
+    group('waitUntilNoTransientCallbacks', () {
+      test('sends the waitUntilNoTransientCallbacks command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'waitUntilNoTransientCallbacks',
+            'timeout': '1000',
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.waitUntilNoTransientCallbacks(timeout: const Duration(seconds: 1));
       });
     });
 

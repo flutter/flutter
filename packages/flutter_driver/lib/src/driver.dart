@@ -339,6 +339,15 @@ class FlutterDriver {
     return null;
   }
 
+  /// Waits until there are no more transient callbacks in the queue.
+  ///
+  /// Use this method when you need to wait for the moment when the application
+  /// becomes "stable", for example, prior to taking a [screenshot].
+  Future<Null> waitUntilNoTransientCallbacks({Duration timeout}) async {
+    await _sendCommand(new WaitUntilNoTransientCallbacks(timeout: timeout));
+    return null;
+  }
+
   /// Tell the driver to perform a scrolling action.
   ///
   /// A scrolling action begins with a "pointer down" event, which commonly maps
