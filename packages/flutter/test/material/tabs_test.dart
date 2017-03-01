@@ -152,17 +152,17 @@ void main() {
 
     await tester.tap(find.text('C'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 2);
 
     await tester.tap(find.text('B'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 1);
 
     await tester.tap(find.text('A'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 0);
   });
 
@@ -180,7 +180,7 @@ void main() {
 
     await tester.tap(find.text('FFFFFF'));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    await tester.pumpUntilNoTransientCallbacks();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
     expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));

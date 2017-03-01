@@ -206,7 +206,7 @@ void main() {
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpUntilNoTransientCallbacks();
     expect(scrollable.position.pixels, equals(0.0));
   });
 
