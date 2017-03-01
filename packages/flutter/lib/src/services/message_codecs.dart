@@ -159,6 +159,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   //   UTF-8 encoding itself.
   // * Uint8Lists, Int32Lists, Int64Lists, and Float64Lists are encoded by first
   //   encoding the list's element count in the expanding format, then the
+  //   smallest number of zero bytes needed to align the position in the full
+  //   message with a multiple of the number of bytes per element, then the
   //   encoding of the list elements themselves, end-to-end with no additional
   //   type information, using big-endian two's complement or IEEE 754 as
   //   applicable.

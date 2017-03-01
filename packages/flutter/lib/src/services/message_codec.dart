@@ -9,6 +9,11 @@ import 'package:meta/meta.dart';
 /// A message encoding/decoding mechanism.
 ///
 /// Both operations throw [FormatException], if conversion fails.
+///
+/// See also:
+///
+/// * [PlatformMessageChannel], which use [MessageCodec]s for communication
+///   between Flutter and platform plugins.
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
@@ -32,13 +37,18 @@ abstract class MessageCodec<T> {
 /// populate a [PlatformException].
 ///
 /// All operations throw [FormatException], if conversion fails.
+///
+/// See also:
+///
+/// * [PlatformMethodChannel], which use [MethodCodec]s for communication
+///   between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified method call in binary.
   ///
   /// The [name] of the method must be non-null. The [arguments] may be `null`.
   ByteData encodeMethodCall(String name, dynamic arguments);
 
-  /// Decodes the specified reply [envelope] from binary.
+  /// Decodes the specified result [envelope] from binary.
   ///
   /// Throws [PlatformException], if [envelope] represents an error.
   dynamic decodeEnvelope(ByteData envelope);
@@ -47,6 +57,17 @@ abstract class MethodCodec {
 
 /// Thrown to indicate that a platform interaction failed in the platform
 /// plugin.
+///
+/// See also:
+///
+/// * [MethodCodec], which throws a [PlatformException], if a received result
+///   envelope represents an error.
+/// * [PlatformMethodChannel.invokeMethod], which completes the returned future
+///   with a [PlatformException], if invoking the platform plugin method
+///   results in an error envelope.
+/// * [PlatformMethodChannel.receiveBroadcastStream], which emits
+///   [PlatformException]s as error events, whenever an event received from the
+///   platform plugin is wrapped in an error envelope.
 class PlatformException implements Exception {
   /// Creates a [PlatformException] with the specified error [code] and optional
   /// [message], and with the optional error [details] which must be a valid
