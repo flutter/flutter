@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'back_button.dart';
 import 'constants.dart';
 import 'flexible_space_bar.dart';
 import 'icon.dart';
@@ -188,7 +189,7 @@ class AppBar extends StatefulWidget {
   /// example, if the [AppBar] is in a [Scaffold] that also has a [Drawer], the
   /// [Scaffold] will fill this widget with an [IconButton] that opens the
   /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
-  /// [AppBar] will use an [IconButton] that calls [Navigator.pop].
+  /// [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
 
   /// The primary widget displayed in the appbar.
@@ -345,10 +346,6 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openDrawer();
   }
 
-  void _handleBackButton() {
-    Navigator.of(context).maybePop();
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
@@ -383,24 +380,8 @@ class _AppBarState extends State<AppBar> {
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
       } else {
-        if (_canPop) {
-          IconData backIcon;
-          switch (Theme.of(context).platform) {
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-              backIcon = Icons.arrow_back;
-              break;
-            case TargetPlatform.iOS:
-              backIcon = Icons.arrow_back_ios;
-              break;
-          }
-          assert(backIcon != null);
-          leading = new IconButton(
-            icon: new Icon(backIcon),
-            onPressed: _handleBackButton,
-            tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
-          );
-        }
+        if (_canPop)
+          leading = const BackButton();
       }
     }
     if (leading != null) {
