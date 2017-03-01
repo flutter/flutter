@@ -7,7 +7,7 @@ import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
