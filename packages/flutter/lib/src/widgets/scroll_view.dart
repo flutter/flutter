@@ -41,6 +41,14 @@ abstract class ScrollView extends StatelessWidget {
 
   final ScrollController controller;
 
+  /// Whether this is the primary scroll view associated with the parent
+  /// [PrimaryScrollController].
+  ///
+  /// On iOS, this identifies the scroll view that will scroll to top in
+  /// response to a tap in the status bar.
+  ///
+  /// Defaults to true when `scrollDirection` is vertical and `controller` is
+  /// not specified.
   final bool primary;
 
   final ScrollPhysics physics;
