@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.flutter"
+    package="com.example.view"
     android:versionCode="1"
     android:versionName="0.0.1">
 
@@ -16,7 +16,7 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application android:name="io.flutter.app.FlutterApplication" android:label="flutter_view" android:icon="@mipmap/ic_launcher">
-        <activity android:name="com.example.flutter.MainActivity"
+        <activity android:name=".MainActivity"
                   android:launchMode="singleTop"
                   android:theme="@style/Theme.AppCompat"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"

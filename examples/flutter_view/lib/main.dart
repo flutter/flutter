@@ -2,9 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-final String _CHANNEL = "increment";
-final String _EMPTY_MESSAGE = "";
-
 void main() {
   runApp(new FlutterView());
 }
@@ -33,11 +30,14 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  static const String _channel = "increment";
+  static const String _emptyMessage = "";
+
   int _counter = 0;
 
-  Future<String> handleAndroidIncrement(String message) async {
+  Future<String> handlePlatformIncrement(String message) async {
     _incrementCounter();
-    return _EMPTY_MESSAGE;
+    return _emptyMessage;
   }
 
   void _incrementCounter() {
@@ -47,28 +47,28 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _sendFlutterIncrement() {
-    PlatformMessages.sendString(_CHANNEL, _EMPTY_MESSAGE);
+    PlatformMessages.sendString(_channel, _emptyMessage);
   }
 
   @override
   Widget build(BuildContext context) {
-    PlatformMessages.setStringMessageHandler(_CHANNEL,
-                                             handleAndroidIncrement);
+    PlatformMessages.setStringMessageHandler(_channel,
+                                             handlePlatformIncrement);
     return new Scaffold(
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           new Expanded(
             child: new Center(
               child: new Text(
-                  'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                  style: new TextStyle(fontSize: 17.0))
+                'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
+                style: new TextStyle(fontSize: 17.0))
             ),
           ),
           new Container(
             padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
             child: new Row(
-              children: [
+              children: <Widget>[
                 new Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
                 new Text('Flutter', style: new TextStyle(fontSize: 30.0)),
               ],

@@ -1,5 +1,6 @@
-package com.example.flutter;
+package com.example.view;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.view.View;
 import android.widget.TextView;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private FlutterView flutterView;
@@ -14,11 +16,35 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL = "increment";
     private static final String EMPTY_MESSAGE = "";
 
+    private String[] getArgsFromIntent(Intent intent) {
+        // Before adding more entries to this list, consider that arbitrary
+        // Android applications can generate intents with extra data and that
+        // there are many security-sensitive args in the binary.
+        ArrayList<String> args = new ArrayList<String>();
+        if (intent.getBooleanExtra("trace-startup", false)) {
+            args.add("--trace-startup");
+        }
+        if (intent.getBooleanExtra("start-paused", false)) {
+            args.add("--start-paused");
+        }
+        if (intent.getBooleanExtra("enable-dart-profiling", false)) {
+            args.add("--enable-dart-profiling");
+        }
+        if (!args.isEmpty()) {
+            String[] argsArray = new String[args.size()];
+            return args.toArray(argsArray);
+        }
+        return null;
+    }
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        FlutterMain.ensureInitializationComplete(getApplicationContext(), null);
+        String[] args = getArgsFromIntent(getIntent());
+        FlutterMain.ensureInitializationComplete(getApplicationContext(), args);
         setContentView(R.layout.flutter_view_layout);
         getSupportActionBar().hide();
 
@@ -43,11 +69,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendAndroidIncrement() {
-        flutterView.sendToFlutter(CHANNEL, EMPTY_MESSAGE,
-            new FlutterView.MessageReplyCallback() {
-                @Override
-                public void onReply(String reply) {}
-            });
+        flutterView.sendToFlutter(CHANNEL, EMPTY_MESSAGE, null);
     }
 
     private String onFlutterIncrement() {
