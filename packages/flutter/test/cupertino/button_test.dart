@@ -12,7 +12,7 @@ void main() {
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(child: new Text(' '), onPressed: null))
     );
-    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton)) as RenderBox;
+    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
       greaterThanOrEqualTo(const Size.square(48.0)),
@@ -27,8 +27,9 @@ void main() {
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(child: new Text('blah blah blah'), onPressed: null))
     );
+    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
-      (tester.renderObject(find.byType(CupertinoButton)) as RenderBox).size.width,
+      buttonBox.size.width,
       greaterThan(48.0),
     );
   });
@@ -39,8 +40,9 @@ void main() {
       onPressed: null,
       color: new Color(0xFFFFFFFF),
     )));
+    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
-      (tester.renderObject(find.byType(CupertinoButton)) as RenderBox).size.width,
+      buttonBox.size.width,
       greaterThan(120.0),
     );
   });
@@ -51,8 +53,9 @@ void main() {
       onPressed: null,
       padding: new EdgeInsets.all(100.0),
     )));
+    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
-      (tester.renderObject(find.byType(CupertinoButton)) as RenderBox).size,
+      buttonBox.size,
       greaterThan(const Size.square(100.0)),
     );
   });
