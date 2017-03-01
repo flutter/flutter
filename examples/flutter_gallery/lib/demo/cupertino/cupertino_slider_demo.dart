@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CupertinoSliderDemo extends StatefulWidget {
-  static const String routeName = '/cupertino_slider';
+  static const String routeName = '/cupertino/slider';
 
   @override
   _CupertinoSliderDemoState createState() => new _CupertinoSliderDemoState();

@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CupertinoButtonsDemo extends StatelessWidget {
-  static const String routeName = '/cupertino_buttons';
+  static const String routeName = '/cupertino/buttons';
 
   @override
   Widget build(BuildContext context) {

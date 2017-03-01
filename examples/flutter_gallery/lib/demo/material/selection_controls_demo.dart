@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../gallery/demo.dart';
+import '../../gallery/demo.dart';
 
 const String _checkboxText =
   "Checkboxes allow the user to select multiple options from a set.";
@@ -26,7 +26,7 @@ const String _switchText =
 const String _switchCode = 'selectioncontrols_switch';
 
 class SelectionControlsDemo extends StatefulWidget {
-  static const String routeName = '/selection-controls';
+  static const String routeName = '/material/selection-controls';
 
   @override
   _SelectionControlsDemoState createState() => new _SelectionControlsDemoState();

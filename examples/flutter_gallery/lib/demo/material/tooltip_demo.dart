@@ -11,7 +11,7 @@ const String _introText =
 
 class TooltipDemo extends StatelessWidget {
 
-  static const String routeName = '/tooltips';
+  static const String routeName = '/material/tooltips';
 
   @override
   Widget build(BuildContext context) {

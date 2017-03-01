@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class IconsDemo extends StatefulWidget {
-  static const String routeName = '/icons';
+  static const String routeName = '/material/icons';
 
   @override
   IconsDemoState createState() => new IconsDemoState();

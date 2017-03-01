@@ -126,7 +126,7 @@ class TravelDestinationItem extends StatelessWidget {
 }
 
 class CardsDemo extends StatelessWidget {
-  static const String routeName = '/cards';
+  static const String routeName = '/material/cards';
 
   @override
   Widget build(BuildContext context) {

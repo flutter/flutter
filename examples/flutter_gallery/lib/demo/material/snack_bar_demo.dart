@@ -19,7 +19,7 @@ const String _text3 =
 class SnackBarDemo extends StatefulWidget {
   SnackBarDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/snack-bar';
+  static const String routeName = '/material/snack-bar';
 
   @override
   _SnackBarDemoState createState() => new _SnackBarDemoState();

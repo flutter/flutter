@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CupertinoSwitchDemo extends StatefulWidget {
-  static const String routeName = '/cupertino_switch';
+  static const String routeName = '/cupertino/switch';
 
   @override
   _CupertinoSwitchDemoState createState() => new _CupertinoSwitchDemoState();

@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CupertinoProgressIndicatorDemo extends StatelessWidget {
-  static const String routeName = '/cupertino_progress_indicator';
+  static const String routeName = '/cupertino/progress_indicator';
 
   @override
   Widget build(BuildContext context) {

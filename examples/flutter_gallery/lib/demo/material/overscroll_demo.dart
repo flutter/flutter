@@ -11,7 +11,7 @@ enum IndicatorType { overscroll, refresh }
 class OverscrollDemo extends StatefulWidget {
   OverscrollDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/overscroll';
+  static const String routeName = '/material/overscroll';
 
   @override
   OverscrollDemoState createState() => new OverscrollDemoState();

@@ -9,7 +9,7 @@ const String _kAsset1 = 'packages/flutter_gallery_assets/shrine/vendors/16c477b.
 const String _kAsset2 = 'packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg';
 
 class DrawerDemo extends StatefulWidget {
-  static const String routeName = '/drawer';
+  static const String routeName = '/material/drawer';
 
   @override
   _DrawerDemoState createState() => new _DrawerDemoState();

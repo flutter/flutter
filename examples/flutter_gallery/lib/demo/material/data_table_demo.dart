@@ -141,7 +141,7 @@ class DessertDataSource extends DataTableSource {
 }
 
 class DataTableDemo extends StatefulWidget {
-  static const String routeName = '/data-table';
+  static const String routeName = '/material/data-table';
 
   @override
   _DataTableDemoState createState() => new _DataTableDemoState();

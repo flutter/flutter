@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ModalBottomSheetDemo extends StatelessWidget {
-  static const String routeName = '/modal-bottom-sheet';
+  static const String routeName = '/material/modal-bottom-sheet';
 
   @override
   Widget build(BuildContext context) {

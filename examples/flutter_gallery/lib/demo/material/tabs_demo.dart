@@ -112,7 +112,7 @@ class _CardDataItem extends StatelessWidget {
 }
 
 class TabsDemo extends StatelessWidget {
-  static const String routeName = '/tabs';
+  static const String routeName = '/material/tabs';
 
   @override
   Widget build(BuildContext context) {

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ProgressIndicatorDemo extends StatefulWidget {
-  static const String routeName = '/progress-indicator';
+  static const String routeName = '/material/progress-indicator';
 
   @override
   _ProgressIndicatorDemoState createState() => new _ProgressIndicatorDemoState();

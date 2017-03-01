@@ -79,7 +79,7 @@ class CustomIcon extends StatelessWidget {
 }
 
 class BottomNavigationDemo extends StatefulWidget {
-  static const String routeName = '/bottom_navigation';
+  static const String routeName = '/material/bottom_navigation';
 
   @override
   _BottomNavigationDemoState createState() => new _BottomNavigationDemoState();

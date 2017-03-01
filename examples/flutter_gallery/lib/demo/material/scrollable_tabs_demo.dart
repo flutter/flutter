@@ -26,7 +26,7 @@ final List<_Page> _allPages = <_Page>[
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
-  static const String routeName = '/scrollable-tabs';
+  static const String routeName = '/material/scrollable-tabs';
 
   @override
   ScrollableTabsDemoState createState() => new ScrollableTabsDemoState();

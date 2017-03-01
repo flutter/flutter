@@ -6,7 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class CupertinoDialogDemo extends StatefulWidget {
-  static const String routeName = '/cupertino_dialog';
+  static const String routeName = '/cupertino/dialog';
 
   @override
   _CupertinoDialogDemoState createState() => new _CupertinoDialogDemoState();

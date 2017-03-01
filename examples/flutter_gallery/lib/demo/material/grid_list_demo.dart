@@ -232,7 +232,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 class GridListDemo extends StatefulWidget {
   GridListDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/grid-list';
+  static const String routeName = '/material/grid-list';
 
   @override
   GridListDemoState createState() => new GridListDemoState();

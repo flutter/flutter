@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class PersistentBottomSheetDemo extends StatefulWidget {
-  static const String routeName = '/persistent-bottom-sheet';
+  static const String routeName = '/material/persistent-bottom-sheet';
 
   @override
   _PersistentBottomSheetDemoState createState() => new _PersistentBottomSheetDemoState();

@@ -63,7 +63,7 @@ class _PageSelector extends StatelessWidget {
 }
 
 class PageSelectorDemo extends StatelessWidget {
-  static const String routeName = '/page-selector';
+  static const String routeName = '/material/page-selector';
   static final List<IconData> icons = <IconData>[
     Icons.event,
     Icons.home,

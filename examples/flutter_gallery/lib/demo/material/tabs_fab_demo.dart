@@ -33,7 +33,7 @@ final List<_Page> _allPages = <_Page>[
 ];
 
 class TabsFabDemo extends StatefulWidget {
-  static const String routeName = '/tabs-fab';
+  static const String routeName = '/material/tabs-fab';
 
   @override
   _TabsFabDemoState createState() => new _TabsFabDemoState();

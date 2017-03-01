@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class TwoLevelListDemo extends StatelessWidget {
-  static const String routeName = '/two-level-list';
+  static const String routeName = '/material/two-level-list';
 
   @override
   Widget build(BuildContext context) {

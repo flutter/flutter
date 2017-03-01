@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../gallery/demo.dart';
+import '../../gallery/demo.dart';
 
 const String _raisedText =
     'Raised buttons add dimension to mostly flat layouts. They emphasize '
@@ -40,7 +40,7 @@ const String _actionText =
 const String _actionCode = 'buttons_action';
 
 class ButtonsDemo extends StatefulWidget {
-  static const String routeName = '/buttons';
+  static const String routeName = '/material//buttons';
 
   @override
   _ButtonsDemoState createState() => new _ButtonsDemoState();

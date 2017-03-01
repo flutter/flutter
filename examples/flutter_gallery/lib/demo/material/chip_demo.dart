@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ChipDemo extends StatefulWidget {
-  static const String routeName = '/chip';
+  static const String routeName = '/material/chip';
 
   @override
   _ChipDemoState createState() => new _ChipDemoState();
