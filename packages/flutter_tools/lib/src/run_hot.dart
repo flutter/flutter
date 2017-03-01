@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -81,8 +82,10 @@ class HotRunner extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
-      printError('Exception from flutter run: $error',
-          logger.isVerbose ? stackTrace : null);
+      // Actually exit on ToolExit.
+      if (error is ToolExit)
+        throw error;
+      printError('Exception from flutter run: $error', stackTrace);
     });
   }
 
