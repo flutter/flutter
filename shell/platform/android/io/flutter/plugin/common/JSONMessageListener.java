@@ -11,6 +11,8 @@ import org.json.JSONObject;
 
 import io.flutter.view.FlutterView;
 
+/** @deprecated Use {@link FlutterMessageChannel} and {@link JSONMessageCodec} instead. */
+@Deprecated
 public abstract class JSONMessageListener implements FlutterView.OnMessageListener {
     static final String TAG = "FlutterView";
 
