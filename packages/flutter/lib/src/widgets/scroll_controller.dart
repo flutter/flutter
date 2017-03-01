@@ -71,9 +71,8 @@ class ScrollController {
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
-    for (int i = 0; i < _positions.length; i++) {
+    for (int i = 0; i < _positions.length; i++)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    }
     return Future.wait(animations).then((List<Null> _) => null);
   }
 
@@ -91,9 +90,8 @@ class ScrollController {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition p in _positions) {
+    for (ScrollPosition p in _positions)
       p.jumpTo(value);
-    }
   }
 
   /// Register the given position with this controller.

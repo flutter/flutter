@@ -16,7 +16,7 @@ class PrimaryScrollController extends InheritedWidget {
     assert(controller != null);
   }
 
-  PrimaryScrollController.none({
+  const PrimaryScrollController.none({
     Key key,
     @required Widget child
   }) : super(key: key, child: child);
@@ -34,6 +34,6 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${controller ?? 'null controller'}');
+    description.add('${controller ?? 'no controller'}');
   }
 }
