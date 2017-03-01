@@ -228,6 +228,7 @@ void main() {
 
     controller.jumpTo(1.0);
     controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+    await tester.pump();
     await tester.pumpUntilNoTransientCallbacks();
   });
 }
