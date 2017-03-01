@@ -33,6 +33,8 @@ export 'snack_bar_demo.dart';
 export 'tabs_demo.dart';
 export 'tabs_fab_demo.dart';
 export 'text_field_demo.dart';
-export 'tooltip_demo.dart';
 export 'two_level_list_demo.dart';
 export 'typography_demo.dart';
+
+// Intentionally use a self-package URL to make sure we don't break these.
+export 'package:flutter_gallery/demo/tooltip_demo.dart';
