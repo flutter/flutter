@@ -199,7 +199,8 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         '_writeDevFSFile',
         params: <String, dynamic> {
           'fsName': fsName,
-          'path': deviceUri.path, // TODO(goderbauer): transfer full Uri when remote end supports it
+          // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
+          'path': deviceUri.toFilePath(windows: false),
           'fileContents': fileContents
         },
       );
@@ -267,9 +268,9 @@ class _DevFSHttpWriter {
       HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
-      // TODO(goderbauer): transfer full Uri when remote end supports it
+      // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
       request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(deviceUri.path)));
+                          BASE64.encode(UTF8.encode(deviceUri.toFilePath(windows: false))));
       Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       HttpClientResponse response = await request.close();
