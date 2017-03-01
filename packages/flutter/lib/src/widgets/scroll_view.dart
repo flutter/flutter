@@ -66,9 +66,11 @@ abstract class ScrollView extends StatelessWidget {
   Widget build(BuildContext context) {
     List<Widget> slivers = buildSlivers(context);
     AxisDirection axisDirection = getDirection(context);
-    return new Scrollable(
+
+    ScrollController primaryScrollController = PrimaryScrollController.of(context);
+    Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
-      controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
+      controller: primary ? primaryScrollController : controller,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         if (shrinkWrap) {
@@ -86,6 +88,9 @@ abstract class ScrollView extends StatelessWidget {
         }
       }
     );
+    return primary && primaryScrollController != null
+      ? new PrimaryScrollController.none(child: scrollable)
+      : scrollable;
   }
 
   @override

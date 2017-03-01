@@ -155,4 +155,26 @@ void main() {
     expect(view.primary, isFalse);
   });
 
+  testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
+    const Key innerKey = const Key('inner');
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new SingleChildScrollView(
+        primary: true,
+        child: new Container(
+          constraints: new BoxConstraints(maxHeight: 200.0),
+          child: new ListView(key: innerKey, primary: true),
+        ),
+      ),
+    ));
+
+    Scrollable innerScrollable = tester.widget(
+      find.descendant(
+        of: find.byKey(innerKey),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(innerScrollable.controller, isNull);
+  });
 }

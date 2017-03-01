@@ -88,9 +88,10 @@ class SingleChildScrollView extends StatelessWidget {
     Widget contents = child;
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
-    return new Scrollable(
+    ScrollController primaryScrollController = PrimaryScrollController.of(context);
+    Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
-      controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
+      controller: primary ? primaryScrollController : controller,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
@@ -100,6 +101,9 @@ class SingleChildScrollView extends StatelessWidget {
         );
       },
     );
+    return primary && primaryScrollController != null
+      ? new PrimaryScrollController.none(child: scrollable)
+      : scrollable;
   }
 }
 
