@@ -160,4 +160,73 @@ void main() {
     await tester.pumpWidget(new Container(), const Duration(seconds: 2));
   });
 
+  testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+    expect(() => controller.offset, throwsAssertionError);
+    expect(() => controller.position, throwsAssertionError);
+  });
+
+  testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+    await tester.pumpWidget(new ListView(
+      children: <Widget>[
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+      ],
+    ));
+
+    expect(() => controller.offset, throwsAssertionError);
+    expect(() => controller.position, throwsAssertionError);
+  });
+
+  testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+    expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
+    expect(() => controller.jumpTo(1.0), throwsAssertionError);
+  });
+
+  testWidgets('Write operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
+    ScrollController controller = new ScrollController();
+    await tester.pumpWidget(new ListView(
+      children: <Widget>[
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+      ],
+    ));
+
+    expect(() => controller.jumpTo(1.0), throwsAssertionError);
+    expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
+  });
 }

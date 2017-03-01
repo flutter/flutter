@@ -483,7 +483,6 @@ class FlutterDriver {
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  // TODO(yjbanov): cleanup object references
   Future<Null> close() async {
     // Don't leak vm_service_client-specific objects, if any
     await _serviceClient.close();

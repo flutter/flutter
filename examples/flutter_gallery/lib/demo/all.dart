@@ -10,6 +10,3 @@ export 'shrine_demo.dart';
 export 'typography_demo.dart';
 export 'cupertino/cupertino.dart';
 export 'material/material.dart';
-
-// Intentionally use a self-package URL to make sure we don't break these.
-export 'package:flutter_gallery/demo/material/tooltip_demo.dart';

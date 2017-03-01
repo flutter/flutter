@@ -4,85 +4,60 @@
 
 package com.example.flutter;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import io.flutter.app.FlutterActivity;
-import io.flutter.view.FlutterMain;
+import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.FlutterMethodChannel.Response;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterView;
 
-import java.io.File;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 public class ExampleActivity extends FlutterActivity {
-    private static final String TAG = "ExampleActivity";
     private FlutterView flutterView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        flutterView = getFlutterView();
-        flutterView.addOnMessageListener("getLocation",
-            new FlutterView.OnMessageListener() {
-                @Override
-                public String onMessage(FlutterView view, String message) {
-                    return onGetLocation(message);
+        new FlutterMethodChannel(getFlutterView(), "geo").setMethodCallHandler(new MethodCallHandler() {
+            @Override
+            public void onMethodCall(MethodCall call, Response response) {
+                if (call.method.equals("getLocation")) {
+                    if (!(call.arguments instanceof String)) {
+                        throw new IllegalArgumentException("Invalid argument type, String expected");
+                    }
+                    getLocation((String) call.arguments, response);
+                } else {
+                    throw new IllegalArgumentException("Unknown method " + call.method);
                 }
-            });
+            }
+        });
     }
 
-    private String onGetLocation(String json) {
-        String provider;
-        try {
-            JSONObject message = new JSONObject(json);
-            provider = message.getString("provider");
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
-        }
-
+    private void getLocation(String provider, Response response) {
         String locationProvider;
         if (provider.equals("network")) {
             locationProvider = LocationManager.NETWORK_PROVIDER;
         } else if (provider.equals("gps")) {
             locationProvider = LocationManager.GPS_PROVIDER;
         } else {
-            return null;
+            throw new IllegalArgumentException("Unknown provider " + provider);
         }
-
         String permission = "android.permission.ACCESS_FINE_LOCATION";
-        Location location = null;
         if (checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            location = locationManager.getLastKnownLocation(locationProvider);
-        }
-
-        JSONObject reply = new JSONObject();
-        try {
+            Location location = locationManager.getLastKnownLocation(locationProvider);
             if (location != null) {
-              reply.put("latitude", location.getLatitude());
-              reply.put("longitude", location.getLongitude());
+                response.success(new double[] { location.getLatitude(), location.getLongitude() });
             } else {
-              reply.put("latitude", 0);
-              reply.put("longitude", 0);
+                response.error("unknown", "Location unknown", null);
             }
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
+        } else {
+            response.error("permission", "Access denied", null);
         }
-
-        return reply.toString();
     }
 }

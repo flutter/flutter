@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -81,6 +82,9 @@ class HotRunner extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
+      // Actually exit on ToolExit.
+      if (error is ToolExit)
+        throw error;
       printError('Exception from flutter run: $error', stackTrace);
     });
   }
@@ -430,17 +434,15 @@ class HotRunner extends ResidentRunner {
     String reloadMessage;
     try {
       String entryPath = fs.path.relative(mainPath, from: projectRootPath);
-      String deviceEntryPath =
-          _devFS.baseUri.resolve(entryPath).toFilePath();
-      String devicePackagesPath =
-          _devFS.baseUri.resolve('.packages').toFilePath();
+      Uri deviceEntryUri = _devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
+      Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
       if (benchmarkMode)
         vmReloadTimer.start();
       Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(
               pause: pause,
-              rootLibPath: deviceEntryPath,
-              packagesPath: devicePackagesPath);
+              rootLibUri: deviceEntryUri,
+              packagesUri: devicePackagesUri);
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
