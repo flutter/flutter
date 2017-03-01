@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,7 +45,8 @@ abstract class MethodCodec {
 }
 
 
-/// Thrown to indicate that a platform interaction resulted in an error.
+/// Thrown to indicate that a platform interaction failed in the platform
+/// plugin.
 class PlatformException implements Exception {
   /// Creates a [PlatformException] with the specified error [code] and optional
   /// [message], and with the optional error [details] which must be a valid

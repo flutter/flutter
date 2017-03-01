@@ -39,7 +39,7 @@ class _PlatformServicesState extends State<PlatformServices> {
 
   void _requestLocation() {
     setState(() {
-      _locationRequest = new PlatformMethodChannel('geo').invokeMethod(
+      _locationRequest = const PlatformMethodChannel('geo').invokeMethod(
         'getLocation',
         'network',
       );

@@ -187,9 +187,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   @override
   ByteData encodeMessage(dynamic message) {
-    if (message == null) {
+    if (message == null)
       return null;
-    }
     final WriteBuffer buffer = new WriteBuffer();
     _writeValue(buffer, message);
     return buffer.done();
@@ -197,9 +196,8 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   @override
   dynamic decodeMessage(ByteData message) {
-    if (message == null) {
+    if (message == null)
       return null;
-    }
     final ReadBuffer buffer = new ReadBuffer(message);
     final dynamic result = _readValue(buffer);
     if (buffer.hasRemaining)

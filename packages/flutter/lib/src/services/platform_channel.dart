@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,10 +29,7 @@ class PlatformMessageChannel<T> {
   /// Creates a [PlatformMessageChannel] with the specified [name] and [codec].
   ///
   /// Neither [name] nor [codec] may be `null`.
-  PlatformMessageChannel(this.name, this.codec) {
-    assert(name != null);
-    assert(codec != null);
-  }
+  const PlatformMessageChannel(this.name, this.codec);
 
   /// The logical channel on which communication happens, not `null`.
   final String name;
@@ -104,10 +101,7 @@ class PlatformMethodChannel {
   /// specified.
   ///
   /// Neither [name] nor [codec] may be `null`.
-  PlatformMethodChannel(this.name, [this.codec = const StandardMethodCodec()]) {
-    assert(name != null);
-    assert(codec != null);
-  }
+  const PlatformMethodChannel(this.name, [this.codec = const StandardMethodCodec()]);
 
   /// The logical channel on which communication happens, not `null`.
   final String name;
@@ -125,8 +119,8 @@ class PlatformMethodChannel {
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
     return codec.decodeEnvelope(await PlatformMessages.sendBinary(
-        name,
-        codec.encodeMethodCall(method, arguments),
+      name,
+      codec.encodeMethodCall(method, arguments),
     ));
   }
 
@@ -158,40 +152,39 @@ class PlatformMethodChannel {
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
     StreamController<dynamic> controller;
     controller = new StreamController<dynamic>.broadcast(
-        onListen: () async {
-          PlatformMessages.setBinaryMessageHandler(
-              name,
-                  (ByteData reply) async {
-                if (reply == null) {
-                  controller.close();
-                } else {
-                  try {
-                    controller.add(codec.decodeEnvelope(reply));
-                  } catch (e) {
-                    controller.addError(e);
-                  }
-                }
+      onListen: () async {
+        PlatformMessages.setBinaryMessageHandler(
+          name, (ByteData reply) async {
+            if (reply == null) {
+              controller.close();
+            } else {
+              try {
+                controller.add(codec.decodeEnvelope(reply));
+              } catch (e) {
+                controller.addError(e);
               }
-          );
-          try {
-            await invokeMethod('listen', arguments);
-          } catch (e) {
-            PlatformMessages.setBinaryMessageHandler(name, null);
-            controller.addError(e);
+            }
           }
-        }, onCancel: () async {
-      PlatformMessages.setBinaryMessageHandler(name, null);
-      try {
-        await invokeMethod('cancel', arguments);
-      } catch (exception, stack) {
-        FlutterError.reportError(new FlutterErrorDetails(
+        );
+        try {
+          await invokeMethod('listen', arguments);
+        } catch (e) {
+          PlatformMessages.setBinaryMessageHandler(name, null);
+          controller.addError(e);
+        }
+      }, onCancel: () async {
+        PlatformMessages.setBinaryMessageHandler(name, null);
+        try {
+          await invokeMethod('cancel', arguments);
+        } catch (exception, stack) {
+          FlutterError.reportError(new FlutterErrorDetails(
             exception: exception,
             stack: stack,
             library: 'services library',
             context: 'while de-activating platform stream on channel $name',
-        ));
+          ));
+        }
       }
-    }
     );
     return controller.stream;
   }

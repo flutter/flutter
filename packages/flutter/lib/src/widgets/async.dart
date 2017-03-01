@@ -211,10 +211,9 @@ class AsyncSnapshot<T> {
   T get requireData {
     if (hasData)
       return data;
-    else if (hasError)
+    if (hasError)
       throw error;
-    else
-      throw new StateError('Snapshot has neither data nor error');
+    throw new StateError('Snapshot has neither data nor error');
   }
 
   /// Latest error object received. Is `null`, if [data] is not.
