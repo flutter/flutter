@@ -4,10 +4,15 @@
 
 // See README in this directory for information on how this code is organised.
 
+import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as system;
 import 'dart:math' as math;
+
+import 'package:args/args.dart';
+import 'package:crypto/crypto.dart' as crypto;
+import 'package:path/path.dart' as path;
 
 import 'filesystem.dart' as fs;
 import 'licenses.dart';
@@ -919,6 +924,8 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
   final List<RepositoryLicensedFile> _files = <RepositoryLicensedFile>[];
   final List<RepositoryLicenseFile> _licenses = <RepositoryLicenseFile>[];
 
+  List<RepositoryDirectory> get subdirectories => _subdirectories;
+
   final Map<String, RepositoryEntry> _childrenByName = <String, RepositoryEntry>{};
 
   // the bit at the beginning excludes files like "license.py".
@@ -1234,6 +1241,33 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
     for (RepositoryDirectory directory in _subdirectories)
       result += directory.fileCount;
     return result;
+  }
+
+  Iterable<RepositoryLicensedFile> get _allFiles sync* {
+    for (RepositoryLicensedFile file in _files) {
+      if (file.isIncludedInBuildProducts)
+        yield file;
+    }
+    for (RepositoryDirectory directory in _subdirectories) {
+      yield* directory._allFiles;
+    }
+  }
+
+  Stream<List<int>> _signatureStream(List files) async* {
+    for (RepositoryLicensedFile file in files) {
+      yield file.io.fullName.codeUnits;
+      yield file.io.readBytes();
+    }
+  }
+
+  /// Compute a signature representing a hash of all the licensed files within
+  /// this directory tree.
+  Future<String> get signature async {
+    List allFiles = _allFiles.toList();
+    allFiles.sort((RepositoryLicensedFile a, RepositoryLicensedFile b) =>
+        a.io.fullName.compareTo(b.io.fullName));
+    crypto.Digest digest = await crypto.md5.bind(_signatureStream(allFiles)).single;
+    return digest.bytes.map((int e) => e.toRadixString(16).padLeft(2, '0')).join();
   }
 }
 
@@ -2237,53 +2271,115 @@ class Progress {
 
 // MAIN
 
-void main(List<String> arguments) {
-  if (arguments.length != 1) {
-    print('Usage: dart lib/main.dart path/to/engine/root/src');
+Future<Null> main(List<String> arguments) async {
+  final ArgParser parser = new ArgParser()
+    ..addOption('src', help: 'The root of the engine source')
+    ..addOption('out', help: 'The directory where output is written')
+    ..addOption('golden', help: 'The directory containing golden results')
+    ..addFlag('release', help: 'Print output in the format used for product releases');
+
+  ArgResults argResults = parser.parse(arguments);
+  bool releaseMode = argResults['release'];
+  if (argResults['src'] == null) {
+    print('Flutter license script: Must provide --src directory');
+    print(parser.usage);
     system.exit(1);
+  }
+  if (!releaseMode) {
+    if (argResults['out'] == null || argResults['golden'] == null) {
+      print('Flutter license script: Must provide --out and --golden directories in non-release mode');
+      print(parser.usage);
+      system.exit(1);
+    }
+    if (!system.FileSystemEntity.isDirectorySync(argResults['golden'])) {
+      print('Flutter license script: Golden directory does not exist');
+      print(parser.usage);
+      system.exit(1);
+    }
+    system.Directory out = new system.Directory(argResults['out']);
+    if (!out.existsSync())
+      out.createSync(recursive: true);
   }
 
   try {
     system.stderr.writeln('Finding files...');
-    final RepositoryDirectory root = new RepositoryRoot(new fs.FileSystemDirectory.fromPath(arguments.single));
-    system.stderr.writeln('Collecting licenses...');
-    Progress progress = new Progress(root.fileCount);
-    List<License> licenses = new Set<License>.from(root.getLicenses(progress).toList()).toList();
-    progress.label = 'Dumping results...';
-    bool done = false;
-    List<License> usedLicenses = licenses.where((License license) => license.isUsed).toList();
-    assert(() {
-      print('UNUSED LICENSES:\n');
-      List<String> unusedLicenses = licenses
-        .where((License license) => !license.isUsed)
-        .map((License license) => license.toString())
-        .toList();
-      unusedLicenses.sort();
-      print(unusedLicenses.join('\n\n'));
-      print('~' * 80);
-      print('USED LICENSES:\n');
-      List<String> output = usedLicenses.map((License license) => license.toString()).toList();
-      output.sort();
-      print(output.join('\n\n'));
-      done = true;
-      return true;
-    });
-    if (!done) {
+    final RepositoryDirectory root = new RepositoryRoot(new fs.FileSystemDirectory.fromPath(argResults['src']));
+
+    if (releaseMode) {
+      system.stderr.writeln('Collecting licenses...');
+      Progress progress = new Progress(root.fileCount);
+      List<License> licenses = new Set<License>.from(root.getLicenses(progress).toList()).toList();
       if (progress.hadErrors)
         throw 'Had failures while collecting licenses.';
-      List<String> output = usedLicenses
+      progress.label = 'Dumping results...';
+      List<String> output = licenses
+        .where((License license) => license.isUsed)
         .map((License license) => license.toStringFormal())
         .where((String text) => text != null)
         .toList();
       output.sort();
       print(output.join('\n${"-" * 80}\n'));
+    } else {
+      RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
+
+      for (RepositoryDirectory component in root.subdirectories) {
+        system.stderr.writeln('Collecting licenses for ${component.io.name}');
+
+        String signature;
+        if (component.io.name == 'flutter') {
+          // Always run the full license check on the flutter tree.  This tree is
+          // relatively small but changes frequently in ways that do not affect
+          // the license output, and we don't want to require updates to the golden
+          // signature for those changes.
+          signature = null;
+        } else {
+          signature = await component.signature;
+        }
+
+        // Check whether the golden file matches the signature of the current contents
+        // of this directory.
+        system.File goldenFile = new system.File(
+            path.join(argResults['golden'], 'licenses_${component.io.name}'));
+        String goldenSignature = await goldenFile.openRead()
+            .transform(UTF8.decoder).transform(new LineSplitter()).first;
+        Match goldenMatch = signaturePattern.matchAsPrefix(goldenSignature);
+        if (goldenMatch != null && goldenMatch.group(1) == signature) {
+          system.stderr.writeln('    Skipping this component - no change in signature');
+          continue;
+        }
+
+        Progress progress = new Progress(component.fileCount);
+
+        system.File outFile = new system.File(
+            path.join(argResults['out'], 'licenses_${component.io.name}'));
+        system.IOSink sink = outFile.openWrite();
+        if (signature != null)
+          sink.writeln('Signature: $signature\n');
+
+        List<License> licenses = new Set<License>.from(
+            component.getLicenses(progress).toList()).toList();
+
+        sink.writeln('UNUSED LICENSES:\n');
+        List<String> unusedLicenses = licenses
+          .where((License license) => !license.isUsed)
+          .map((License license) => license.toString())
+          .toList();
+        unusedLicenses.sort();
+        sink.writeln(unusedLicenses.join('\n\n'));
+        sink.writeln('~' * 80);
+
+        sink.writeln('USED LICENSES:\n');
+        List<License> usedLicenses = licenses.where((License license) => license.isUsed).toList();
+        List<String> output = usedLicenses.map((License license) => license.toString()).toList();
+        output.sort();
+        sink.writeln(output.join('\n\n'));
+        sink.writeln('Total license count: ${licenses.length}');
+
+        await sink.close();
+        progress.label = 'Done.';
+        system.stderr.writeln('');
+      }
     }
-    assert(() {
-      print('Total license count: ${licenses.length}');
-      progress.label = 'Done.';
-      print('$progress');
-      return true;
-    });
   } catch (e, stack) {
     system.stderr.writeln('failure: $e\n$stack');
     system.stderr.writeln('aborted.');
