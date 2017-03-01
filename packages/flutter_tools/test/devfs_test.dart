@@ -70,7 +70,7 @@ void main() {
       File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
-      _packages['my_project'] = 'lib';
+      _packages['my_project'] = fs.path.toUri('lib');
 
       // simulate package
       await _createPackage('somepkg', 'somefile.txt');
@@ -82,9 +82,9 @@ void main() {
 
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${fs.path.join('lib', 'foo.txt')}',
-        'writeFile test ${fs.path.join('packages', 'somepkg', 'somefile.txt')}',
         'writeFile test .packages',
+        'writeFile test lib/foo.txt',
+        'writeFile test packages/somepkg/somefile.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
 
@@ -92,10 +92,10 @@ void main() {
           await devFSOperations.devicePathToContent[fs.path.toUri('.packages')].contentsAsBytes()
       )).toList();
       expect(packageSpecOnDevice,
-          unorderedEquals(<String>['my_project:lib', 'somepkg:packages/somepkg'])
+          unorderedEquals(<String>['my_project:lib/', 'somepkg:packages/somepkg/'])
       );
 
-      expect(bytes, 46);
+      expect(bytes, 48);
     });
     testUsingContext('add new file to local file system', () async {
       File file = fs.file(fs.path.join(basePath, filePath2));
@@ -103,7 +103,7 @@ void main() {
       file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${fs.path.join('foo', 'bar.txt')}',
+        'writeFile test foo/bar.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 7);
@@ -120,7 +120,7 @@ void main() {
       await file.writeAsBytes(<int>[1, 2, 3, 4, 5, 6]);
       bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${fs.path.join('lib', 'foo.txt')}',
+        'writeFile test lib/foo.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 6);
@@ -130,7 +130,7 @@ void main() {
       await file.delete();
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${fs.path.join('lib', 'foo.txt')}',
+        'deleteFile test lib/foo.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 0);
@@ -140,10 +140,10 @@ void main() {
       int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test ${fs.path.join('packages', 'newpkg', 'anotherfile.txt')}',
+        'writeFile test packages/newpkg/anotherfile.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 66);
+      expect(bytes, 69);
     });
     testUsingContext('add an asset bundle', () async {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
@@ -207,7 +207,7 @@ void main() {
       devFSOperations.expectMessages(<String>['destroy test']);
       expect(devFS.assetPathsToEvict, isEmpty);
     });
-  }, skip: io.Platform.isWindows);
+  });
 
   group('devfs remote', () {
     MockVMService vmService;
@@ -240,11 +240,11 @@ void main() {
       int bytes = await devFS.update();
       vmService.expectMessages(<String>[
         'writeFile test .packages',
-        'writeFile test ${fs.path.join('lib', 'foo.txt')}',
-        'writeFile test ${fs.path.join('packages', 'somepkg', 'somefile.txt')}',
+        'writeFile test lib/foo.txt',
+        'writeFile test packages/somepkg/somefile.txt',
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
-      expect(bytes, 46);
+      expect(bytes, 48);
     }, timeout: const Timeout(const Duration(seconds: 5)));
 
     testUsingContext('delete dev file system', () async {
@@ -252,7 +252,7 @@ void main() {
       vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
       expect(devFS.assetPathsToEvict, isEmpty);
     });
-  }, skip: io.Platform.isWindows);
+  });
 }
 
 class MockVMService extends BasicMock implements VMService {
@@ -321,7 +321,7 @@ class MockVM implements VM {
 
 
 final List<Directory> _tempDirs = <Directory>[];
-final Map <String, String> _packages = <String, String>{};
+final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir() {
   Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
@@ -340,12 +340,14 @@ Future<Null> _createPackage(String pkgName, String pkgFileName) async {
   File pkgFile = fs.file(fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName));
   await pkgFile.parent.create(recursive: true);
   pkgFile.writeAsBytesSync(<int>[11, 12, 13]);
-  _packages[pkgName] = pkgFile.parent.path;
+  _packages[pkgName] = fs.path.toUri(pkgFile.parent.path);
   StringBuffer sb = new StringBuffer();
-  _packages.forEach((String pkgName, String pkgPath) {
-    sb.writeln('$pkgName:$pkgPath');
+  _packages.forEach((String pkgName, Uri pkgUri) {
+    sb.writeln('$pkgName:$pkgUri');
   });
   fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
 
-String _inAssetBuildDirectory(String filename) => fs.path.join(getAssetBuildDirectory(), filename);
+String _inAssetBuildDirectory(String filename) {
+  return '${fs.path.toUri(getAssetBuildDirectory()).path}/$filename';
+}
