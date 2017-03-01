@@ -204,6 +204,18 @@ class AsyncSnapshot<T> {
   /// Latest data received. Is `null`, if [error] is not.
   final T data;
 
+  /// Returns latest data received, failing if there is no data.
+  ///
+  /// Throws [error], if [hasError]. Throws [StateError], if neither [hasData]
+  /// nor [hasError].
+  T get requireData {
+    if (hasData)
+      return data;
+    if (hasError)
+      throw error;
+    throw new StateError('Snapshot has neither data nor error');
+  }
+
   /// Latest error object received. Is `null`, if [data] is not.
   final Object error;
 
