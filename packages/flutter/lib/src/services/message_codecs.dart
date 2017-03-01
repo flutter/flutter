@@ -138,11 +138,13 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   // * The serialization of the value itself follows the type byte.
   // * Lengths and sizes of serialized parts are encoded using an expanding
   //   format optimized for the common case of small non-negative integers:
-  //   * values 0..<254 using one byte with that value;
-  //   * values 254..<2^16 using three bytes, the first of which is 254, the
-  //     next two the usual big-endian unsigned representation of the value;
-  //   * values 2^16..<2^32 using five bytes, the first of which is 255, the
-  //     next four the usual big-endian unsigned representation of the value.
+  //   * values 0..253 inclusive using one byte with that value;
+  //   * values 254..2^16 inclusive using three bytes, the first of which is
+  //     254, the next two the usual big-endian unsigned representation of the
+  //     value;
+  //   * values 2^16+1..2^32 inclusive using five bytes, the first of which is
+  //     255, the next four the usual big-endian unsigned representation of the
+  //     value.
   // * null, true, and false have empty serialization; they are encoded directly
   //   in the type byte (using _kNull, _kTrue, _kFalse)
   // * Integers representable in 32 bits are encoded using 4 bytes big-endian,
@@ -208,19 +210,19 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   }
 
   static void _writeSize(WriteBuffer buffer, int value) {
-    assert(0 <= value && value < 0xffffffff);
+    assert(0 <= value && value <= 0xffffffff);
     if (value < 254) {
       buffer.putUint8(value);
-    } else if (value < 0xffff) {
+    } else if (value <= 0xffff) {
       buffer.putUint8(254);
       buffer.putUint8(value >> 8);
-      buffer.putUint8(value & 0xff);
+      buffer.putUint8(value);
     } else {
       buffer.putUint8(255);
       buffer.putUint8(value >> 24);
-      buffer.putUint8((value >> 16) & 0xff);
-      buffer.putUint8((value >> 8) & 0xff);
-      buffer.putUint8(value & 0xff);
+      buffer.putUint8(value >> 16);
+      buffer.putUint8(value >> 8);
+      buffer.putUint8(value);
     }
   }
 
@@ -230,11 +232,11 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     } else if (value is bool) {
       buffer.putUint8(value ? _kTrue : _kFalse);
     } else if (value is int) {
-      if (-0x7fffffff <= value && value < 0x7fffffff) {
+      if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_kInt32);
         buffer.putInt32(value);
       }
-      else if (-0x7fffffffffffffff <= value && value < 0x7fffffffffffffff) {
+      else if (-0x7fffffffffffffff - 1 <= value && value <= 0x7fffffffffffffff) {
         buffer.putUint8(_kInt64);
         buffer.putInt64(value);
       }
@@ -292,12 +294,12 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       return value;
     } else if (value == 254) {
       return (buffer.getUint8() << 8)
-      |  buffer.getUint8();
+           |  buffer.getUint8();
     } else {
       return (buffer.getUint8() << 24)
-      | (buffer.getUint8() << 16)
-      | (buffer.getUint8() << 8)
-      |  buffer.getUint8();
+           | (buffer.getUint8() << 16)
+           | (buffer.getUint8() << 8)
+           |  buffer.getUint8();
     }
   }
 
