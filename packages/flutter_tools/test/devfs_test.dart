@@ -92,7 +92,7 @@ void main() {
           await devFSOperations.devicePathToContent['.packages'].contentsAsBytes()
       )).toList();
       expect(packageSpecOnDevice,
-          unorderedEquals(['my_project:lib', 'somepkg:packages/somepkg'])
+          unorderedEquals(<String>['my_project:lib', 'somepkg:packages/somepkg'])
       );
 
       expect(bytes, 46);
