@@ -15,30 +15,30 @@ import 'package:flutter/widgets.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
 class CupertinoButton extends StatefulWidget {
   // TODO(xster): move this to a common Cupertino color palatte with the next yak.
-  static const Color kCupertinoBlue = const Color(0xFF007AFF);
-  static const Color kCupertinoWhite = const Color(0xFFFFFFFF);
-  static const Color kCupertinoDisabledBackground = const Color(0xFFA9A9A9);
-  static const Color kCupertinoDisabledForeground = const Color(0xFFC4C4C4);
+  static const Color kBlue = const Color(0xFF007AFF);
+  static const Color kWhite = const Color(0xFFFFFFFF);
+  static const Color kDisabledBackground = const Color(0xFFA9A9A9);
+  static const Color kDisabledForeground = const Color(0xFFC4C4C4);
 
-  static const TextStyle _kCupertinoButtonStyle = const TextStyle(
+  static const TextStyle _kButtonTextStyle = const TextStyle(
     fontFamily: '.SF UI Text',
     inherit: false,
     fontSize: 15.0,
     fontWeight: FontWeight.normal,
-    color: kCupertinoBlue,
+    color: kBlue,
     textBaseline: TextBaseline.alphabetic,
   );
 
-  static final TextStyle _kCupertinoDisabledButtonStyle = _kCupertinoButtonStyle.copyWith(
-    color: kCupertinoDisabledForeground,
+  static final TextStyle _kDisabledButtonTextStyle = _kButtonTextStyle.copyWith(
+    color: kDisabledForeground,
   );
 
-  static final TextStyle _kCupertinoBackgroundButtonStyle = _kCupertinoButtonStyle.copyWith(
-    color: kCupertinoWhite,
+  static final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
+    color: kWhite,
   );
 
-  static const EdgeInsets _kCupertinoButtonPadding = const EdgeInsets.all(16.0);
-  static const EdgeInsets _kCupertinoBackgroundButtonPadding =
+  static const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
+  static const EdgeInsets _kBackgroundButtonPadding =
       const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
 
   CupertinoButton({
@@ -138,22 +138,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: new BoxDecoration(
                 borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
                 backgroundColor: backgroundColor != null && !enabled
-                    ? CupertinoButton.kCupertinoDisabledBackground
+                    ? CupertinoButton.kDisabledBackground
                     : backgroundColor,
               ),
               child: new Padding(
                 padding: config.padding
                     ?? backgroundColor != null
-                        ? CupertinoButton._kCupertinoBackgroundButtonPadding
-                        : CupertinoButton._kCupertinoButtonPadding,
+                        ? CupertinoButton._kBackgroundButtonPadding
+                        : CupertinoButton._kButtonPadding,
                 child: new Center(
                   widthFactor: 1.0,
                   child: new DefaultTextStyle(
                     style: backgroundColor != null
-                        ? CupertinoButton._kCupertinoBackgroundButtonStyle
+                        ? CupertinoButton._kBackgroundButtonTextStyle
                         : enabled
-                            ? CupertinoButton._kCupertinoButtonStyle
-                            : CupertinoButton._kCupertinoDisabledButtonStyle,
+                            ? CupertinoButton._kButtonTextStyle
+                            : CupertinoButton._kDisabledButtonTextStyle,
                     child: config.child,
                   ),
                 ),
