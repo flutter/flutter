@@ -63,7 +63,8 @@ class PlatformViewAndroid : public PlatformView {
   void DispatchPlatformMessage(JNIEnv* env,
                                jobject obj,
                                jstring name,
-                               jstring message,
+                               jobject message_data,
+                               jint message_position,
                                jint response_id);
 
   void DispatchPointerDataPacket(JNIEnv* env,
@@ -74,7 +75,8 @@ class PlatformViewAndroid : public PlatformView {
   void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                              jobject obj,
                                              jint response_id,
-                                             jstring response);
+                                             jobject response_data,
+                                             jint response_position);
 
   void DispatchSemanticsAction(JNIEnv* env, jobject obj, jint id, jint action);
 
