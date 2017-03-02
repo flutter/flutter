@@ -329,7 +329,7 @@ Directory _newTempDir() {
 }
 
 void _cleanupTempDirs() {
-  while (_tempDirs.length > 0) {
+  while (_tempDirs.isNotEmpty) {
     _tempDirs.removeLast().deleteSync(recursive: true);
   }
 }

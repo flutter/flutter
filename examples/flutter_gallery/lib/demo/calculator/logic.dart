@@ -287,7 +287,7 @@ class CalcExpression {
     // where a "term" is defined to be a sequence of numbers separated by
     // multiplcation or division symbols.
     num currentTermValue = removeNextTerm(list);
-    while (list.length > 0) {
+    while (list.isNotEmpty) {
       OperationToken opToken = list.removeAt(0);
       num nextTermValue = removeNextTerm(list);
       switch (opToken.operation) {
@@ -312,10 +312,10 @@ class CalcExpression {
   /// A "term" is a sequence of number tokens separated by multiplication
   /// and division symbols.
   static num removeNextTerm(List<ExpressionToken> list) {
-    assert(list != null && list.length >= 1);
+    assert(list != null && list.isNotEmpty);
     final NumberToken firstNumToken = list.removeAt(0);
     num currentValue = firstNumToken.number;
-    while (list.length > 0) {
+    while (list.isNotEmpty) {
       bool isDivision = false;
       OperationToken nextOpToken = list.first;
       switch (nextOpToken.operation) {

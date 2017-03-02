@@ -264,7 +264,7 @@ class _Renderer implements md.NodeVisitor {
       _listIndents.removeLast();
 
     if (_isBlockTag(element.tag)) {
-      if (_currentBlock.stack.length > 0) {
+      if (_currentBlock.stack.isNotEmpty) {
         _MarkdownNodeList stackList = _currentBlock.stack.first;
         _currentBlock.stack = stackList.list;
         _currentBlock.open = false;
@@ -358,7 +358,7 @@ class _Block {
   bool get open => _open;
   set open(bool open) {
     _open = open;
-    if (!open && subBlocks.length > 0)
+    if (!open && subBlocks.isNotEmpty)
       subBlocks.last.isLast = true;
   }
 
@@ -376,7 +376,7 @@ class _Block {
 
     Widget contents;
 
-    if (subBlocks.length > 0) {
+    if (subBlocks.isNotEmpty) {
       List<Widget> subWidgets = <Widget>[];
       for (_Block subBlock in subBlocks) {
         subWidgets.add(subBlock.build(context));
@@ -390,7 +390,7 @@ class _Block {
       TextSpan span = _stackToTextSpan(new _MarkdownNodeList(stack));
       contents = new RichText(text: span);
 
-      if (listIndents.length > 0) {
+      if (listIndents.isNotEmpty) {
         Widget bullet;
         if (listIndents.last == 'ul') {
           bullet = new Text(
@@ -479,7 +479,7 @@ class _Block {
 
   Widget _buildImage(BuildContext context, String src) {
     List<String> parts = src.split('#');
-    if (parts.length == 0) return new Container();
+    if (parts.isEmpty) return new Container();
 
     String path = parts.first;
     double width;

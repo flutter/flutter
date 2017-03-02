@@ -309,7 +309,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   }
 
   bool _firstLetterIsUpperCase(String str) {
-    if (str.length > 0) {
+    if (str.isNotEmpty) {
       String first = str.substring(0, 1);
       return first == first.toUpperCase();
     }

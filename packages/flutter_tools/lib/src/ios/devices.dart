@@ -251,7 +251,7 @@ class IOSDevice extends Device {
       '--justlaunch',
     ];
 
-    if (launchArguments.length > 0) {
+    if (launchArguments.isNotEmpty) {
       launchCommand.add('--args');
       launchCommand.add('${launchArguments.join(" ")}');
     }
