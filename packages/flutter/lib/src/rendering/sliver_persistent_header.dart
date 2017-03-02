@@ -209,7 +209,7 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
     final double paintExtent = maxExtent - constraints.scrollOffset;
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
-      paintOrigin: constraints.overlap,
+      paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
@@ -272,7 +272,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
-      paintOrigin: constraints.overlap,
+      paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
