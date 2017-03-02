@@ -96,10 +96,10 @@ class SingleChildScrollView extends StatelessWidget {
     Widget contents = child;
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
-    ScrollController scrollController = primary
+    final ScrollController scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    Scrollable scrollable = new Scrollable(
+    final Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
