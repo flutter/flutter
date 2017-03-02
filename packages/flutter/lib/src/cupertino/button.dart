@@ -5,6 +5,27 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+const TextStyle _kButtonTextStyle = const TextStyle(
+  fontFamily: '.SF UI Text',
+  inherit: false,
+  fontSize: 15.0,
+  fontWeight: FontWeight.normal,
+  color: CupertinoButton.kBlue,
+  textBaseline: TextBaseline.alphabetic,
+);
+
+final TextStyle _kDisabledButtonTextStyle = _kButtonTextStyle.copyWith(
+  color: CupertinoButton.kDisabledForeground,
+);
+
+final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
+  color: CupertinoButton.kWhite,
+);
+
+const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
+const EdgeInsets _kBackgroundButtonPadding =
+const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
+
 /// An iOS style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
@@ -20,26 +41,6 @@ class CupertinoButton extends StatefulWidget {
   static const Color kDisabledBackground = const Color(0xFFA9A9A9);
   static const Color kDisabledForeground = const Color(0xFFC4C4C4);
 
-  static const TextStyle _kButtonTextStyle = const TextStyle(
-    fontFamily: '.SF UI Text',
-    inherit: false,
-    fontSize: 15.0,
-    fontWeight: FontWeight.normal,
-    color: kBlue,
-    textBaseline: TextBaseline.alphabetic,
-  );
-
-  static final TextStyle _kDisabledButtonTextStyle = _kButtonTextStyle.copyWith(
-    color: kDisabledForeground,
-  );
-
-  static final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
-    color: kWhite,
-  );
-
-  static const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
-  static const EdgeInsets _kBackgroundButtonPadding =
-      const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
 
   CupertinoButton({
     @required this.child,
@@ -149,17 +150,17 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                 padding: config.padding != null
                     ? config.padding
                     : backgroundColor != null
-                        ? CupertinoButton._kBackgroundButtonPadding
-                        : CupertinoButton._kButtonPadding,
+                        ? _kBackgroundButtonPadding
+                        : _kButtonPadding,
                 child: new Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
                   child: new DefaultTextStyle(
                     style: backgroundColor != null
-                        ? CupertinoButton._kBackgroundButtonTextStyle
+                        ? _kBackgroundButtonTextStyle
                         : enabled
-                            ? CupertinoButton._kButtonTextStyle
-                            : CupertinoButton._kDisabledButtonTextStyle,
+                            ? _kButtonTextStyle
+                            : _kDisabledButtonTextStyle,
                     child: config.child,
                   ),
                 ),
