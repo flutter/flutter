@@ -161,8 +161,10 @@ abstract class ResidentRunner {
       ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    if (!platform.isWindows) {
+      ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+      ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    }
   }
 
   Future<Null> _cleanUpAndExit(ProcessSignal signal) async {

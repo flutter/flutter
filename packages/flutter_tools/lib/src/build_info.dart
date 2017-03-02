@@ -66,7 +66,8 @@ enum TargetPlatform {
   android_x86,
   ios,
   darwin_x64,
-  linux_x64
+  linux_x64,
+  windows_x64
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
@@ -83,6 +84,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
+    case TargetPlatform.windows_x64:
+      return 'windows-x64';
   }
   assert(false);
   return null;
