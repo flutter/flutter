@@ -107,52 +107,41 @@ class BouncingScrollSimulation extends SimulationGroup {
 // simplifications have been made.
 class ClampingScrollSimulation extends Simulation {
   /// Creates a scroll physics simulation that matches Android scrolling.
-  //
-  // TODO(ianh): The incoming `velocity` is used to determine the starting speed
-  // and duration, but does not represent the exact velocity of the simulation
-  // at t=0 as it should. This causes crazy scrolling irregularities when the
-  // scroll dimensions change during a fling.
   ClampingScrollSimulation({
     @required this.position,
     @required this.velocity,
     this.friction: 0.015,
     Tolerance tolerance: Tolerance.defaultTolerance,
   }) : super(tolerance: tolerance) {
-    _scaledFriction = friction * _decelerationForFriction(0.84); // See mPhysicalCoeff
+    assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration);
     _duration = _flingDuration(velocity);
-    _distance = _flingDistance(velocity);
+    _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
   }
 
   final double position;
   final double velocity;
   final double friction;
 
-  double _scaledFriction;
   double _duration;
   double _distance;
 
   // See DECELERATION_RATE.
-  static final double _decelerationRate = math.log(0.78) / math.log(0.9);
+  static final double _kDecelerationRate = math.log(0.78) / math.log(0.9);
 
   // See computeDeceleration().
-  double _decelerationForFriction(double friction) {
+  static double _decelerationForFriction(double friction) {
     return friction * 61774.04968;
-  }
-
-  // See getSplineDeceleration().
-  double _flingDeceleration(double velocity) {
-    return math.log(0.35 * velocity.abs() / _scaledFriction);
   }
 
   // See getSplineFlingDuration(). Returns a value in seconds.
   double _flingDuration(double velocity) {
-    return math.exp(_flingDeceleration(velocity) / (_decelerationRate - 1.0));
-  }
+    // See mPhysicalCoeff
+    final double scaledFriction = friction * _decelerationForFriction(0.84);
 
-  // See getSplineFlingDistance().
-  double _flingDistance(double velocity) {
-    final double rate = _decelerationRate / (_decelerationRate - 1.0) * _flingDeceleration(velocity);
-    return _scaledFriction * math.exp(rate);
+    // See getSplineDeceleration().
+    final double deceleration = math.log(0.35 * velocity.abs() / scaledFriction);
+
+    return math.exp(deceleration / (_kDecelerationRate - 1.0));
   }
 
   // Based on a cubic curve fit to the Scroller.computeScrollOffset() values
@@ -170,13 +159,14 @@ class ClampingScrollSimulation extends Simulation {
   // Scale f(t) so that 0.0 <= f(t) <= 1.0
   // f(t) = (1165.03 t^3 - 3143.62 t^2 + 2945.87 t) / 961.0
   //      = 1.2 t^3 - 3.27 t^2 + 3.065 t
-  double _flingDistancePenetration(double t) {
-    return (1.2 * t * t * t) - (3.27 * t * t) + (3.065 * t);
+  static const double _kInitialVelocityPenetration = 3.065;
+  static double _flingDistancePenetration(double t) {
+    return (1.2 * t * t * t) - (3.27 * t * t) + (_kInitialVelocityPenetration * t);
   }
 
   // The derivative of the _flingDistancePenetration() function.
-  double _flingVelocityPenetration(double t) {
-    return (3.63693 * t * t) - (6.5424 * t) + 3.06542;
+  static double _flingVelocityPenetration(double t) {
+    return (3.6 * t * t) - (6.54 * t) + _kInitialVelocityPenetration;
   }
 
   @override
@@ -188,7 +178,7 @@ class ClampingScrollSimulation extends Simulation {
   @override
   double dx(double time) {
     final double t = (time / _duration).clamp(0.0, 1.0);
-    return _distance * _flingVelocityPenetration(t) * velocity.sign;
+    return _distance * _flingVelocityPenetration(t) * velocity.sign / _duration;
   }
 
   @override

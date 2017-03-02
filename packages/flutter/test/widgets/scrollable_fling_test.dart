@@ -91,6 +91,6 @@ void main() {
     expect(log, equals(<String>['tap 18']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18', 'tap 43']));
+    expect(log, equals(<String>['tap 18', 'tap 42']));
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
 }
