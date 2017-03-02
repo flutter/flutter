@@ -245,8 +245,8 @@ class AnsiTerminal {
   AnsiTerminal() {
     String term = platform.environment['TERM'];
     // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
-    String flutterAnsiTerm =  platform.environment['FLUTTER_ANSI_TERMINAL'];
-    supportsColor = (term != null && term != 'dumb') || (flutterAnsiTerm != null);
+    bool flutterAnsiTerm = platform.environment['FLUTTER_ANSI_TERMINAL'] == 'True';
+    supportsColor = (term != null && term != 'dumb') || flutterAnsiTerm;
   }
 
   static const String KEY_F1  = '\u001BOP';
