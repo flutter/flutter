@@ -14,15 +14,15 @@ import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 /// The byte order of serialized data is [Endianness.BIG_ENDIAN].
 /// The byte order of deserialized data is [Endianness.HOST_ENDIAN].
 class WriteBuffer {
-  Uint8Buffer _buffer;
-  ByteData _eightBytes;
-  Uint8List _eightBytesAsList;
-
   WriteBuffer() {
     _buffer = new Uint8Buffer();
     _eightBytes = new ByteData(8);
     _eightBytesAsList = _eightBytes.buffer.asUint8List();
   }
+
+  Uint8Buffer _buffer;
+  ByteData _eightBytes;
+  Uint8List _eightBytesAsList;
 
   void putUint8(int byte) {
     _buffer.add(byte);
@@ -60,9 +60,8 @@ class WriteBuffer {
     if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
       _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
     } else {
-      for (final int value in list) {
+      for (final int value in list)
         putInt32(value);
-      }
     }
   }
 
@@ -71,9 +70,8 @@ class WriteBuffer {
     if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
       _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
     } else {
-      for (final int value in list) {
+      for (final int value in list)
         putInt64(value);
-      }
     }
   }
 
@@ -82,18 +80,16 @@ class WriteBuffer {
     if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
       _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
     } else {
-      for (final double value in list) {
+      for (final double value in list)
         putFloat64(value);
-      }
     }
   }
 
   void _alignTo(int alignment) {
     final int mod = _buffer.length % alignment;
     if (mod != 0) {
-      for (int i = 0; i < alignment - mod; i++) {
+      for (int i = 0; i < alignment - mod; i++)
         _buffer.add(0);
-      }
     }
   }
 
@@ -152,9 +148,8 @@ class ReadBuffer {
       list = data.buffer.asInt32List(data.offsetInBytes + position, length);
     } else {
       final ByteData invertedData = new ByteData(4 * length);
-      for (int i = 0; i < length; i++) {
+      for (int i = 0; i < length; i++)
         invertedData.setInt32(i * 4, data.getInt32(position + i * 4, Endianness.HOST_ENDIAN));
-      }
       list = new Int32List.view(invertedData.buffer);
     }
     position += 4 * length;
@@ -168,9 +163,8 @@ class ReadBuffer {
       list = data.buffer.asInt64List(data.offsetInBytes + position, length);
     } else {
       final ByteData invertedData = new ByteData(8 * length);
-      for (int i = 0; i < length; i++) {
+      for (int i = 0; i < length; i++)
         invertedData.setInt64(i * 8, data.getInt64(position + i * 8, Endianness.HOST_ENDIAN));
-      }
       list = new Int64List.view(invertedData.buffer);
     }
     position += 8 * length;
@@ -184,9 +178,8 @@ class ReadBuffer {
       list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
     } else {
       final ByteData invertedData = new ByteData(8 * length);
-      for (int i = 0; i < length; i++) {
+      for (int i = 0; i < length; i++)
         invertedData.setFloat64(i * 8, data.getFloat64(position + i * 8, Endianness.HOST_ENDIAN));
-      }
       list = new Float64List.view(invertedData.buffer);
     }
     position += 8 * length;
@@ -195,9 +188,8 @@ class ReadBuffer {
 
   void _alignTo(int alignment) {
     final int mod = position % alignment;
-    if (mod != 0) {
+    if (mod != 0)
       position += alignment - mod;
-    }
   }
 
   bool get hasRemaining => position < data.lengthInBytes;
