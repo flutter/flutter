@@ -22,7 +22,8 @@ import 'viewport.dart';
 class PageController extends ScrollController {
   PageController({
     this.initialPage: 0,
-  }) {
+    ScrollLeader leader,
+  }) : super(leader: leader) {
     assert(initialPage != null);
   }
 
@@ -61,6 +62,7 @@ class PageController extends ScrollController {
       state: state,
       initialPage: initialPage,
       oldPosition: oldPosition,
+      leader: leader,
     );
   }
 }
@@ -71,11 +73,13 @@ class _PagePosition extends ScrollPosition {
     AbstractScrollState state,
     this.initialPage: 0,
     ScrollPosition oldPosition,
+    ScrollLeader leader,
   }) : super(
     physics: physics,
     state: state,
     initialPixels: null,
     oldPosition: oldPosition,
+    leader: leader,
   ) {
     assert(initialPage != null);
   }

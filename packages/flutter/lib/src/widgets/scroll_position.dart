@@ -114,12 +114,31 @@ abstract class ScrollPhysics {
   }
 }
 
+class ScrollLeader {
+  List<ScrollPosition> _followers = <ScrollPosition>[];
+
+  void _setPixels(ScrollPosition initiator, double value) {
+    for(ScrollPosition follower in _followers) {
+      if (follower != initiator)
+        follower._setPixels(value, initiator.activity);
+    }
+  }
+
+  void _jumpTo(ScrollPosition initiator, double value) {
+    for(ScrollPosition follower in _followers) {
+      if (follower != initiator)
+        follower._jumpTo(value);
+    }
+  }
+}
+
 class ScrollPosition extends ViewportOffset {
   ScrollPosition({
     @required this.physics,
     @required this.state,
     double initialPixels: 0.0,
     ScrollPosition oldPosition,
+    this.leader,
   }) : _pixels = initialPixels {
     assert(physics != null);
     assert(state != null);
@@ -130,11 +149,15 @@ class ScrollPosition extends ViewportOffset {
       beginIdleActivity();
     assert(activity != null);
     assert(activity.position == this);
+    if (leader != null)
+      leader._followers.add(this);
   }
 
   final ScrollPhysics physics;
 
   final AbstractScrollState state;
+
+  final ScrollLeader leader;
 
   @override
   double get pixels => _pixels;
@@ -218,6 +241,11 @@ class ScrollPosition extends ViewportOffset {
   /// Immediately after the jump, a ballistic activity is started, in case the
   /// value was out of range.
   void jumpTo(double value) {
+    _jumpTo(value);
+    leader?._jumpTo(this, value);
+  }
+
+  void _jumpTo(double value) {
     beginIdleActivity();
     if (_pixels != value) {
       final double oldPixels = _pixels;
@@ -270,33 +298,44 @@ class ScrollPosition extends ViewportOffset {
   double setPixels(double value) {
     assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
     assert(activity.isScrolling);
-    if (value != pixels) {
-      final double overScroll = physics.applyBoundaryConditions(this, value);
-      assert(() {
-        double delta = value - pixels;
-        if (overScroll.abs() > delta.abs()) {
-          throw new FlutterError(
-            '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
-            'setPixels() was called to change the scroll offset from $pixels to $value.\n'
-            'That is a delta of $delta units.\n'
-            '${physics.runtimeType}.applyBoundaryConditions reported an overscroll of $overScroll units.\n'
-            'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
-            'viewport dimension is $viewportDimension.'
-          );
-        }
-        return true;
-      });
-      final double oldPixels = _pixels;
-      _pixels = value - overScroll;
-      if (_pixels != oldPixels) {
-        notifyListeners();
-        state.dispatchNotification(activity.createScrollUpdateNotification(state, _pixels - oldPixels));
+    if (value == _pixels)
+      return 0.0;
+
+    double overscroll = _setPixels(value, activity);
+    leader?._setPixels(this, value);
+    return overscroll;
+  }
+
+  double _setPixels(double value, ScrollActivity forActivity) {
+    if (value == _pixels)
+      return 0.0;
+
+    final double overScroll = physics.applyBoundaryConditions(this, value);
+    assert(() {
+      double delta = value - pixels;
+      if (overScroll.abs() > delta.abs()) {
+        throw new FlutterError(
+          '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'
+          'setPixels() was called to change the scroll offset from $pixels to $value.\n'
+          'That is a delta of $delta units.\n'
+          '${physics.runtimeType}.applyBoundaryConditions reported an overscroll of $overScroll units.\n'
+          'The scroll extents are $minScrollExtent .. $maxScrollExtent, and the '
+          'viewport dimension is $viewportDimension.'
+        );
       }
-      if (overScroll != 0.0) {
-        reportOverscroll(overScroll);
-        return overScroll;
-      }
+      return true;
+    });
+    final double oldPixels = _pixels;
+    _pixels = value - overScroll;
+    if (_pixels != oldPixels) {
+      notifyListeners();
+      state.dispatchNotification(forActivity.createScrollUpdateNotification(state, _pixels - oldPixels));
     }
+    if (overScroll != 0.0) {
+      reportOverscroll(overScroll, forActivity);
+      return overScroll;
+    }
+
     return 0.0;
   }
 
@@ -307,13 +346,13 @@ class ScrollPosition extends ViewportOffset {
 
   @override
   void correctBy(double correction) {
-    _pixels += correction;
+    correctPixels(_pixels + correction);
   }
 
   @protected
-  void reportOverscroll(double value) {
-    assert(activity.isScrolling);
-    state.dispatchNotification(activity.createOverscrollNotification(state, value));
+  void reportOverscroll(double value, ScrollActivity forActivity) {
+    assert(forActivity.isScrolling);
+    state.dispatchNotification(forActivity.createOverscrollNotification(state, value));
   }
 
   double get viewportDimension => _viewportDimension;
@@ -430,6 +469,8 @@ class ScrollPosition extends ViewportOffset {
   void dispose() {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
+    if (leader != null)
+      leader._followers.remove(this);
     super.dispose();
   }
 
