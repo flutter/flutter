@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' as io;
-
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -56,7 +54,7 @@ void main()  {
       // Set 'package:self/bar.dart' file modification time to be in the future.
       updateFileModificationTime(barPath, baseTime, 10);
       expect(dependencyChecker.check(baseTime), isTrue);
-    }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_snapshot is ready on Windows
+    });
 
     testUsingContext('syntax error', () {
       final String testPath = fs.path.join(dataPath, 'syntax_error');

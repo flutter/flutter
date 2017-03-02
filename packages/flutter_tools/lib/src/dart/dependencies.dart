@@ -84,7 +84,11 @@ class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
     String output = fs.file(depfilePath).readAsStringSync();
     tempDir.deleteSync(recursive: true);
 
-    output = output.substring(output.indexOf(':'));
+    int splitIndex = output.indexOf(':');
+    if (splitIndex == -1)
+      throw new Exception('Unexpected output $output');
+
+    output = output.substring(splitIndex + 1);
     // Note: next line means we cannot process anything with spaces in the path
     //       because Makefiles don't support spaces in paths :(
     List<String> depsList = output.trim().split(' ');
