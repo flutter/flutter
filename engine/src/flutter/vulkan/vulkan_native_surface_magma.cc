@@ -8,6 +8,11 @@ namespace vulkan {
 
 VulkanNativeSurfaceMagma::VulkanNativeSurfaceMagma() = default;
 
+VulkanNativeSurfaceMagma::VulkanNativeSurfaceMagma(int32_t width,
+                                                   int32_t height) {
+  size_ = SkISize::Make(width, height);
+}
+
 VulkanNativeSurfaceMagma::~VulkanNativeSurfaceMagma() = default;
 
 const char* VulkanNativeSurfaceMagma::GetExtensionName() const {
@@ -50,7 +55,12 @@ bool VulkanNativeSurfaceMagma::IsValid() const {
 }
 
 SkISize VulkanNativeSurfaceMagma::GetSize() const {
-  return SkISize::Make(2160, 1440);
+  if (size_.width() != 0 && size_.height() != 0) {
+    return size_;
+  } else {
+    // TODO: Don't hardcode this after we get a proper Fuchsia Display API.
+    return SkISize::Make(2160, 1440);
+  }
 }
 
 }  // namespace vulkan
