@@ -169,6 +169,67 @@ void main() {
     expect(log, isEmpty);
   });
 
+  testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
+    CustomScrollView view = new CustomScrollView(scrollDirection: Axis.vertical);
+    expect(view.primary, isTrue);
+  });
+
+  testWidgets('Vertical ListViews are primary by default', (WidgetTester tester) async {
+    ListView view = new ListView(scrollDirection: Axis.vertical);
+    expect(view.primary, isTrue);
+  });
+
+  testWidgets('Vertical GridViews are primary by default', (WidgetTester tester) async {
+    GridView view = new GridView.count(
+      scrollDirection: Axis.vertical,
+      crossAxisCount: 1,
+    );
+    expect(view.primary, isTrue);
+  });
+
+  testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
+    CustomScrollView view = new CustomScrollView(scrollDirection: Axis.horizontal);
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
+    ListView view = new ListView(scrollDirection: Axis.horizontal);
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
+    GridView view = new GridView.count(
+      scrollDirection: Axis.horizontal,
+      crossAxisCount: 1,
+    );
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+    CustomScrollView view = new CustomScrollView(
+      controller: new ScrollController(),
+      scrollDirection: Axis.vertical,
+    );
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
+    ListView view = new ListView(
+      controller: new ScrollController(),
+      scrollDirection: Axis.vertical,
+    );
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
+    GridView view = new GridView.count(
+      controller: new ScrollController(),
+      scrollDirection: Axis.vertical,
+      crossAxisCount: 1,
+    );
+    expect(view.primary, isFalse);
+  });
+
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
     ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(new PrimaryScrollController(
@@ -197,5 +258,30 @@ void main() {
     ));
     Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
+  });
+
+  testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
+    const Key innerKey = const Key('inner');
+    ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new ListView(
+        primary: true,
+        children: <Widget>[
+          new Container(
+            constraints: new BoxConstraints(maxHeight: 200.0),
+            child: new ListView(key: innerKey, primary: true),
+          ),
+        ],
+      ),
+    ));
+
+    Scrollable innerScrollable = tester.widget(
+      find.descendant(
+        of: find.byKey(innerKey),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(innerScrollable.controller, isNull);
   });
 }
