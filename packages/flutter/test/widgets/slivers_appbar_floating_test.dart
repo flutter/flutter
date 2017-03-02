@@ -182,6 +182,35 @@ void main() {
     verifyActualBoxPosition(tester, find.byType(Container), 0, new Rect.fromLTWH(0.0, -delegate.maxExtent * 0.4, 800.0, delegate.maxExtent * 0.5));
     verifyPaintPosition(key3, const Offset(0.0, 0.0), true);
   });
+
+  testWidgets('Sliver appbars - floating - overscroll gap is below header', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: <Widget>[
+          new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
+          new SliverList(
+            delegate: new SliverChildListDelegate(<Widget>[
+              new SizedBox(
+                height: 300.0,
+                child: new Text('X'),
+              ),
+            ]),
+          ),
+        ],
+      ),
+    );
+
+    expect(tester.getTopLeft(find.byType(Container)), Point.origin);
+    expect(tester.getTopLeft(find.text('X')), const Point(0.0, 200.0));
+
+    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(-50.0);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.byType(Container)), Point.origin);
+    expect(tester.getTopLeft(find.text('X')), const Point(0.0, 250.0));
+  });
 }
 
 class TestDelegate extends SliverPersistentHeaderDelegate {
