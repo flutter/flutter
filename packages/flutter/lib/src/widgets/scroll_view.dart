@@ -72,13 +72,13 @@ abstract class ScrollView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> slivers = buildSlivers(context);
-    AxisDirection axisDirection = getDirection(context);
+    final List<Widget> slivers = buildSlivers(context);
+    final AxisDirection axisDirection = getDirection(context);
 
-    ScrollController scrollController = primary
+    final ScrollController scrollController = primary
         ? PrimaryScrollController.of(context)
         : controller;
-    Scrollable scrollable = new Scrollable(
+    final Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
       controller: scrollController,
       physics: physics,
