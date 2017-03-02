@@ -19,7 +19,8 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController.none({
     Key key,
     @required Widget child
-  }) : super(key: key, child: child);
+  }) : controller = null,
+       super(key: key, child: child);
 
   final ScrollController controller;
 

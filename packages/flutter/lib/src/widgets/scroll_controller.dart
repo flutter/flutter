@@ -73,7 +73,7 @@ class ScrollController {
     List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
     for (int i = 0; i < _positions.length; i++)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
-    return Future.wait(animations).then((List<Null> _) => null);
+    return Future.wait<Null>(animations).then((List<Null> _) => null);
   }
 
   /// Jumps the scroll position from its current value to the given value,
