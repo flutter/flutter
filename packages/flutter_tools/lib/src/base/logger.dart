@@ -243,9 +243,10 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    // TODO(devoncarew): This detection does not work for Windows (https://github.com/dart-lang/sdk/issues/28614).
     String term = platform.environment['TERM'];
-    supportsColor = term != null && term != 'dumb';
+    // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
+    String flutterAnsiTerm =  platform.environment['FLUTTER_ANSI_TERMINAL'];
+    supportsColor = (term != null && term != 'dumb') || (flutterAnsiTerm != null);
   }
 
   static const String KEY_F1  = '\u001BOP';
