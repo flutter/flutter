@@ -42,6 +42,7 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
+import 'src/crash_reporting.dart';
 import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
@@ -49,9 +50,9 @@ import 'src/globals.dart';
 import 'src/ios/mac.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
+import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
-
 
 /// Main entry point for commands.
 ///
@@ -62,34 +63,40 @@ Future<Null> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   bool verboseHelp = help && verbose;
 
+  await run(args, <FlutterCommand>[
+    new AnalyzeCommand(verboseHelp: verboseHelp),
+    new BuildCommand(verboseHelp: verboseHelp),
+    new ChannelCommand(),
+    new ConfigCommand(),
+    new CreateCommand(),
+    new DaemonCommand(hidden: !verboseHelp),
+    new DevicesCommand(),
+    new DoctorCommand(),
+    new DriveCommand(),
+    new FormatCommand(),
+    new InstallCommand(),
+    new LogsCommand(),
+    new PackagesCommand(),
+    new PrecacheCommand(),
+    new RunCommand(verboseHelp: verboseHelp),
+    new ScreenshotCommand(),
+    new StopCommand(),
+    new TestCommand(),
+    new TraceCommand(),
+    new UpdatePackagesCommand(hidden: !verboseHelp),
+    new UpgradeCommand(),
+  ], verbose: verbose, verboseHelp: verboseHelp);
+}
+
+Future<Null> run(List<String> args, List<FlutterCommand> subCommands, {bool verbose: false, bool verboseHelp: false}) async {
   if (verboseHelp) {
     // Remove the verbose option; for help, users don't need to see verbose logs.
     args = new List<String>.from(args);
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
-    ..addCommand(new AnalyzeCommand(verboseHelp: verboseHelp))
-    ..addCommand(new BuildCommand(verboseHelp: verboseHelp))
-    ..addCommand(new ChannelCommand())
-    ..addCommand(new ConfigCommand())
-    ..addCommand(new CreateCommand())
-    ..addCommand(new DaemonCommand(hidden: !verboseHelp))
-    ..addCommand(new DevicesCommand())
-    ..addCommand(new DoctorCommand())
-    ..addCommand(new DriveCommand())
-    ..addCommand(new FormatCommand())
-    ..addCommand(new InstallCommand())
-    ..addCommand(new LogsCommand())
-    ..addCommand(new PackagesCommand())
-    ..addCommand(new PrecacheCommand())
-    ..addCommand(new RunCommand(verboseHelp: verboseHelp))
-    ..addCommand(new ScreenshotCommand())
-    ..addCommand(new StopCommand())
-    ..addCommand(new TestCommand())
-    ..addCommand(new TraceCommand())
-    ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
-    ..addCommand(new UpgradeCommand());
+  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
+  subCommands.forEach(runner.addCommand);
 
   // Construct a context.
   AppContext _executableContext = new AppContext();
@@ -166,18 +173,20 @@ Future<Null> main(List<String> args) async {
           else
             stderr.writeln('Oops; flutter has exited unexpectedly.');
 
-          _createCrashReport(args, error, chain).then<Null>((File file) {
-            stderr.writeln(
-              'Crash report written to ${file.path};\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-            );
-            _exit(1);
-          }).catchError((dynamic error) {
-            stderr.writeln(
-              'Unable to generate crash report due to secondary error: $error\n'
-              'please let us know at https://github.com/flutter/flutter/issues.',
-            );
-            _exit(1);
+          new CrashReportSender().sendReport(error: error, stackTrace: chain).whenComplete(() {
+            _createCrashReport(args, error, chain).then<Null>((File file) {
+              stderr.writeln(
+                  'Crash report written to ${file.path};\n'
+                      'please let us know at https://github.com/flutter/flutter/issues.',
+              );
+              _exit(1);
+            }).catchError((dynamic error) {
+              stderr.writeln(
+                  'Unable to generate crash report due to secondary error: $error\n'
+                      'please let us know at https://github.com/flutter/flutter/issues.',
+              );
+              _exit(1);
+            });
           });
         }
       }
@@ -186,7 +195,12 @@ Future<Null> main(List<String> args) async {
 }
 
 Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
-  FileSystem fs = const LocalFileSystem();
+  FileSystem fs = context?.getVariable(FileSystem);
+  if (fs == null) {
+    // If things are crashing we may not even have initialized the context
+    // successfully. Default to local FS then.
+    fs = new LocalFileSystem();
+  }
   File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
