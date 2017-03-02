@@ -17,10 +17,16 @@ class _PlatformServicesState extends State<PlatformServices> {
   String _location = 'Unknown location.';
 
   Future<Null> _getLocation() async {
-    List<double> result = await platform.invokeMethod('getLocation', 'network');
+    String location;
+    try {
+      List<double> result = await platform.invokeMethod('getLocation', 'network');
+      location = 'Latitude ${result[0]}, Longitude ${result[1]}.';
+    } on PlatformException catch (e) {
+      location = "Failed to get location: '${e.message}'.";
+    }
 
     setState(() {
-      _location = 'Latitude ${result[0]}, Longitude ${result[1]}.';
+      _location = location;
     });
   }
 
