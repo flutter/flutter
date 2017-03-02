@@ -69,6 +69,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
           new CupertinoButton(
             child: new Text('Alert with Title'),
             color: CupertinoButton.kBlue,
+            padding: new EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,

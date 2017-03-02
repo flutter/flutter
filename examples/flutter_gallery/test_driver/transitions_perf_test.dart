@@ -18,7 +18,7 @@ final List<String> demoTitles = <String>[
   'Pesto',
   'Shrine',
   'Contact profile',
-  // Components
+  // Material Components
   'Bottom navigation',
   'Buttons',
   'Cards',
@@ -46,6 +46,12 @@ final List<String> demoTitles = <String>[
   'Tabs',
   'Text fields',
   'Tooltips',
+  // Cupertino Components
+  'Activity Indicator',
+  'Buttons',
+  'Dialogs',
+  'Sliders',
+  'Switches',
   // Style
   'Colors',
   'Typography'
@@ -54,6 +60,7 @@ final List<String> demoTitles = <String>[
 // Subset of [demoTitles] that needs frameSync turned off.
 final List<String> unsynchedDemoTitles = <String>[
   'Progress indicators',
+  'Activity Indicator',
 ];
 
 final FileSystem _fs = const LocalFileSystem();
