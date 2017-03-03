@@ -88,7 +88,9 @@ Future<Null> main(List<String> args) async {
   ], verbose: verbose, verboseHelp: verboseHelp);
 }
 
-Future<Null> run(List<String> args, List<FlutterCommand> subCommands, {bool verbose: false, bool verboseHelp: false}) async {
+Future<int> run(List<String> args, List<FlutterCommand> subCommands, {bool verbose: false, bool verboseHelp: false, bool reportCrashes}) async {
+  reportCrashes ??= !isRunningOnBot;
+
   if (verboseHelp) {
     // Remove the verbose option; for help, users don't need to see verbose logs.
     args = new List<String>.from(args);
@@ -102,7 +104,7 @@ Future<Null> run(List<String> args, List<FlutterCommand> subCommands, {bool verb
   AppContext _executableContext = new AppContext();
 
   // Make the context current.
-  await _executableContext.runInZone(() async {
+  return await _executableContext.runInZone(() async {
     // Initialize the context with some defaults.
     // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
     // `test/src/context.dart`. If you update this list of defaults, look
@@ -131,19 +133,20 @@ Future<Null> run(List<String> args, List<FlutterCommand> subCommands, {bool verb
     // Initialize the system locale.
     await intl.findSystemLocale();
 
-    Completer<Null> runCompleter = new Completer<Null>();
+    Completer<int> runCompleter = new Completer<int>();
     Chain.capture<Future<Null>>(() async {
       await runner.run(args);
       await _exit(0);
-      runCompleter.complete();
+      runCompleter.complete(0);
     }, onError: (dynamic error, Chain chain) {
-      _handleToolError(error, chain, verbose, args).whenComplete(runCompleter.complete);
+      _handleToolError(error, chain, verbose, args, reportCrashes)
+          .then(runCompleter.complete, onError: runCompleter.completeError);
     });
     return runCompleter.future;
   });
 }
 
-Future<Null> _handleToolError(dynamic error, Chain chain, bool verbose, List<String> args) async {
+Future<int> _handleToolError(dynamic error, Chain chain, bool verbose, List<String> args, bool reportCrashes) async {
   if (error is UsageException) {
     stderr.writeln(error.message);
     stderr.writeln();
@@ -152,7 +155,7 @@ Future<Null> _handleToolError(dynamic error, Chain chain, bool verbose, List<Str
             "flutter commands and options."
     );
     // Argument error exit code.
-    await _exit(64);
+    return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
       stderr.writeln(error.message);
@@ -161,21 +164,21 @@ Future<Null> _handleToolError(dynamic error, Chain chain, bool verbose, List<Str
       stderr.writeln(chain.terse.toString());
       stderr.writeln();
     }
-    await _exit(error.exitCode ?? 1);
+    return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
-    await _exit(error.exitCode);
+    return _exit(error.exitCode);
   } else {
     // We've crashed; emit a log report.
     stderr.writeln();
 
     flutterUsage.sendException(error, chain);
 
-    if (isRunningOnBot) {
+    if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       stderr.writeln('$error');
       stderr.writeln(chain.terse.toString());
-      await _exit(1);
+      return _exit(1);
     } else {
       if (error is String)
         stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
@@ -189,13 +192,13 @@ Future<Null> _handleToolError(dynamic error, Chain chain, bool verbose, List<Str
             'Crash report written to ${file.path};\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
         );
-        await _exit(1);
+        return _exit(1);
       } catch (error) {
         stderr.writeln(
             'Unable to generate crash report due to secondary error: $error\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
         );
-        await _exit(1);
+        return _exit(1);
       }
     }
   }
@@ -256,7 +259,7 @@ Future<String> _doctorText() async {
   }
 }
 
-Future<Null> _exit(int code) async {
+Future<int> _exit(int code) async {
   if (flutterUsage.isFirstRun)
     flutterUsage.printUsage();
 
@@ -281,4 +284,5 @@ Future<Null> _exit(int code) async {
   });
 
   await completer.future;
+  return code;
 }

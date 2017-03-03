@@ -9,6 +9,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:test/test.dart';
 
@@ -19,23 +20,19 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'src/context.dart';
 
 void main() {
+  Cache.disableLocking();
   group('crash reporting', () {
     int testPort;
     MemoryFileSystem fs;
-    int exitCode;
 
     setUp(() async {
-      exitCode = null;
       fs = new MemoryFileSystem();
-      setExitFunctionForTests((int code) {
-        exitCode = code;
-      });
+      setExitFunctionForTests((_) { });
       testPort = await os.findAvailablePort();
       overrideBaseCrashUrlForTesting(Uri.parse('http://localhost:$testPort/test-path'));
     });
 
     tearDown(() {
-      exitCode = null;
       fs = null;
       restoreExitFunction();
       resetBaseCrashUrlForTesting();
@@ -59,7 +56,7 @@ void main() {
         reportReceived.complete();
       }));
 
-      Future<Null> whenFinished = tools.run(<String>['crash'], <FlutterCommand>[new _CrashCommand()]);
+      Future<int> exitCode = tools.run(<String>['crash'], <FlutterCommand>[new _CrashCommand()], reportCrashes: true);
 
       await reportReceived.future;
       expect(method, 'POST');
@@ -74,8 +71,7 @@ void main() {
       BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
-      await whenFinished;
-      expect(exitCode, 1);
+      expect(await exitCode, 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
