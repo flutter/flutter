@@ -122,7 +122,21 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new SizedBox.expand(child: child);
+    return new SizedBox.expand(
+      child: new Stack(
+        children: <Widget>[
+          child,
+          new Positioned(
+            top: 0.0,
+            left: 0.0,
+            child: new IconTheme(
+              data: new IconThemeData(color: Colors.white),
+              child: new BackButton(),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -131,6 +145,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || minHeight != oldDelegate.minHeight
         || child != oldDelegate.child;
   }
+
+  @override
+  String toString() => '_SliverAppBarDelegate';
 }
 
 // Arrange the section titles, indicators, and cards. The cards are only included when
