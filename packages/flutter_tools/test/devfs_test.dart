@@ -144,6 +144,31 @@ void main() {
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 69);
     });
+    testUsingContext('add new package with double slashes in URI', () async {
+      String packageName = 'doubleslashpkg';
+      await _createPackage(packageName, 'somefile.txt', doubleSlash: true);
+
+      Set<String> fileFilter = new Set<String>();
+      List<Uri> pkgUris = <Uri>[fs.path.toUri(basePath)]..addAll(_packages.values);
+      for (Uri pkgUri in pkgUris) {
+        if (!pkgUri.isAbsolute) {
+          pkgUri = fs.path.toUri(fs.path.join(basePath, pkgUri.path));
+        }
+        fileFilter.addAll(fs.directory(pkgUri)
+            .listSync(recursive: true)
+            .where((FileSystemEntity file) => file is File)
+            .map((FileSystemEntity file) => fs.path.canonicalize(file.path))
+            .toList());
+      }
+
+      int bytes = await devFS.update(fileFilter: fileFilter);
+      devFSOperations.expectMessages(<String>[
+        'writeFile test .packages',
+        'writeFile test packages/doubleslashpkg/somefile.txt',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 109);
+    });
     testUsingContext('add an asset bundle', () async {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
@@ -334,9 +359,15 @@ void _cleanupTempDirs() {
   }
 }
 
-Future<Null> _createPackage(String pkgName, String pkgFileName) async {
+Future<Null> _createPackage(String pkgName, String pkgFileName, { bool doubleSlash: false }) async {
   final Directory pkgTempDir = _newTempDir();
-  File pkgFile = fs.file(fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName));
+  String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
+  if (doubleSlash) {
+    // Force two separators into the path.
+    String doubleSlash = fs.path.separator + fs.path.separator;
+    pkgFilePath = pkgTempDir.path + doubleSlash  + fs.path.join(pkgName, 'lib', pkgFileName);
+  }
+  File pkgFile = fs.file(pkgFilePath);
   await pkgFile.parent.create(recursive: true);
   pkgFile.writeAsBytesSync(<int>[11, 12, 13]);
   _packages[pkgName] = fs.path.toUri(pkgFile.parent.path);
