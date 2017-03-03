@@ -67,6 +67,13 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     routeName: ContactsDemo.routeName,
     buildRoute: (BuildContext context) => new ContactsDemo(),
   ),
+  new GalleryItem(
+    title: 'Animation',
+    subtitle: 'Section organizer',
+    category: 'Demos',
+    routeName: AnimationDemo.routeName,
+    buildRoute: (BuildContext context) => new AnimationDemo(),
+  ),
   // Material Components
   new GalleryItem(
     title: 'Bottom navigation',

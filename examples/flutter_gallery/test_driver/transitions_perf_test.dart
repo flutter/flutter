@@ -18,6 +18,7 @@ final List<String> demoTitles = <String>[
   'Pesto',
   'Shrine',
   'Contact profile',
+  'Animation',
   // Material Components
   'Bottom navigation',
   'Buttons',
