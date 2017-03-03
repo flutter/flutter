@@ -5,7 +5,9 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:intl/intl_standalone.dart' as intl;
+import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
@@ -88,7 +90,12 @@ Future<Null> main(List<String> args) async {
   ], verbose: verbose, verboseHelp: verboseHelp);
 }
 
-Future<int> run(List<String> args, List<FlutterCommand> subCommands, {bool verbose: false, bool verboseHelp: false, bool reportCrashes}) async {
+Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
+  bool verbose: false,
+  bool verboseHelp: false,
+  bool reportCrashes,
+  String flutterVersion,
+}) async {
   reportCrashes ??= !isRunningOnBot;
 
   if (verboseHelp) {
@@ -139,14 +146,22 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {bool verbo
       await _exit(0);
       runCompleter.complete(0);
     }, onError: (dynamic error, Chain chain) {
-      _handleToolError(error, chain, verbose, args, reportCrashes)
+      flutterVersion ??= FlutterVersion.getVersionString();
+      _handleToolError(error, chain, verbose, args, reportCrashes, flutterVersion)
           .then(runCompleter.complete, onError: runCompleter.completeError);
     });
     return runCompleter.future;
   });
 }
 
-Future<int> _handleToolError(dynamic error, Chain chain, bool verbose, List<String> args, bool reportCrashes) async {
+Future<int> _handleToolError(
+    dynamic error,
+    Chain chain,
+    bool verbose,
+    List<String> args,
+    bool reportCrashes,
+    String flutterVersion,
+) async {
   if (error is UsageException) {
     stderr.writeln(error.message);
     stderr.writeln();
@@ -185,7 +200,11 @@ Future<int> _handleToolError(dynamic error, Chain chain, bool verbose, List<Stri
       else
         stderr.writeln('Oops; flutter has exited unexpectedly.');
 
-      await new CrashReportSender().sendReport(error: error, stackTrace: chain);
+      await CrashReportSender.instance.sendReport(
+        error: error,
+        stackTrace: chain,
+        flutterVersion: flutterVersion,
+      );
       try {
         File file = await _createLocalCrashReport(args, error, chain);
         stderr.writeln(
@@ -204,14 +223,16 @@ Future<int> _handleToolError(dynamic error, Chain chain, bool verbose, List<Stri
   }
 }
 
+/// File system used by the outer executable logic.
+///
+/// We do not want to use the file system stored in the context because it may
+/// be recording. Additionally, in the case of a crash we do not trust the
+/// integrity of the [AppContext].
+@visibleForTesting
+FileSystem fs = new LocalFileSystem();
+
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {
-  FileSystem fs = context?.getVariable(FileSystem);
-  if (fs == null) {
-    // If things are crashing we may not even have initialized the context
-    // successfully. Default to local FS then.
-    fs = new LocalFileSystem();
-  }
   File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();

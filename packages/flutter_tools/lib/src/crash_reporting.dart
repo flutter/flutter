@@ -13,7 +13,6 @@ import 'package:stack_trace/stack_trace.dart';
 import 'base/io.dart';
 import 'globals.dart';
 import 'usage.dart';
-import 'version.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
 String _kProductId = 'Flutter_Tools';
@@ -50,12 +49,30 @@ class CrashReportSender {
   );
 
   static Uri _baseUri = _defaultBaseUri;
+
+  static CrashReportSender _instance;
+
+  CrashReportSender._(this._client);
+
+  static CrashReportSender get instance => _instance ?? new CrashReportSender._(new http.Client());
+
+  /// Overrides the default [http.Client] with [client] for testing purposes.
+  @visibleForTesting
+  static void initializeWith(http.Client client) {
+    _instance = new CrashReportSender._(client);
+  }
+
+  final http.Client _client;
   final Usage _usage = Usage.instance;
 
   /// Sends one crash report.
   ///
   /// The report is populated from data in [error] and [stackTrace].
-  Future<Null> sendReport({@required dynamic error, @required dynamic stackTrace}) async {
+  Future<Null> sendReport({
+    @required dynamic error,
+    @required dynamic stackTrace,
+    @required String flutterVersion,
+  }) async {
     try {
       // TODO(yjbanov): we only actually send crash reports in tests. When we
       // iron out the process, we will remove this guard and report crashes
@@ -68,18 +85,16 @@ class CrashReportSender {
 
       printStatus('Sending crash report to Google.');
 
-      String version = FlutterVersion.getVersionString();
-
       Uri uri = _baseUri.replace(
         queryParameters: <String, String>{
           'product': _kProductId,
-          'version': '$version',
+          'version': flutterVersion,
         },
       );
 
       _MultipartRequest req = new _MultipartRequest('POST', uri);
       req.fields['product'] = _kProductId;
-      req.fields['version'] = version;
+      req.fields['version'] = flutterVersion;
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 
@@ -92,7 +107,8 @@ class CrashReportSender {
         '${chain.terse}',
         filename: _kStackTraceFilename,
       ));
-      http.StreamedResponse resp = await req.send();
+
+      http.StreamedResponse resp = await _client.send(req);
 
       if (resp.statusCode == 200) {
         String reportId = await new http.ByteStream(resp.stream)
