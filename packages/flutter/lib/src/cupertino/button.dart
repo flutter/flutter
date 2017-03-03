@@ -24,7 +24,7 @@ final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
 
 const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
 const EdgeInsets _kBackgroundButtonPadding =
-const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
+    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
 
 /// An iOS style button.
 ///
