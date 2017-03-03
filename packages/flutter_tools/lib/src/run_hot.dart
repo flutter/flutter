@@ -313,25 +313,23 @@ class HotRunner extends ResidentRunner {
     _devFS = null;
   }
 
-  Future<Null> _launchInView(String entryPath,
-                             String packagesPath,
-                             String assetsDirectoryPath) async {
+  Future<Null> _launchInView(Uri entryUri,
+                             Uri packagesUri,
+                             Uri assetsDirectoryUri) async {
     FlutterView view = vmService.vm.mainView;
-    return view.runFromSource(entryPath, packagesPath, assetsDirectoryPath);
+    return view.runFromSource(entryUri, packagesUri, assetsDirectoryUri);
   }
 
   Future<Null> _launchFromDevFS(ApplicationPackage package,
                                 String mainScript) async {
-    String entryPath = fs.path.relative(mainScript, from: projectRootPath);
-    String deviceEntryPath =
-        _devFS.baseUri.resolve(entryPath).toFilePath();
-    String devicePackagesPath =
-        _devFS.baseUri.resolve('.packages').toFilePath();
-    String deviceAssetsDirectoryPath =
-        _devFS.baseUri.resolve(getAssetBuildDirectory()).toFilePath();
-    await _launchInView(deviceEntryPath,
-                        devicePackagesPath,
-                        deviceAssetsDirectoryPath);
+    String entryUri = fs.path.relative(mainScript, from: projectRootPath);
+    Uri deviceEntryUri = _devFS.baseUri.resolveUri(fs.path.toUri(entryUri));
+    Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
+    Uri deviceAssetsDirectoryUri =
+        _devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
+    await _launchInView(deviceEntryUri,
+                        devicePackagesUri,
+                        deviceAssetsDirectoryUri);
   }
 
   Future<OperationResult> _restartFromSources() async {
