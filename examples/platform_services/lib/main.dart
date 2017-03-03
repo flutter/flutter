@@ -13,20 +13,19 @@ class PlatformServices extends StatefulWidget {
 }
 
 class _PlatformServicesState extends State<PlatformServices> {
-  static const PlatformMethodChannel platform = const PlatformMethodChannel('geo');
-  String _location = 'Unknown location.';
+  static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
+  String _batteryLevel = 'Unknown battery level.';
 
-  Future<Null> _getLocation() async {
-    String location;
+  Future<Null> _getBatteryLevel() async {
+    String batteryLevel;
     try {
-      List<double> result = await platform.invokeMethod('getLocation', 'network');
-      location = 'Latitude ${result[0]}, Longitude ${result[1]}.';
+      int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at ${result} %';
     } on PlatformException catch (e) {
-      location = "Failed to get location: '${e.message}'.";
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
     }
-
     setState(() {
-      _location = location;
+      _batteryLevel = batteryLevel;
     });
   }
 
@@ -38,11 +37,11 @@ class _PlatformServicesState extends State<PlatformServices> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new RaisedButton(
-              child: new Text('Get Location'),
-              onPressed: _getLocation,
+              child: new Text('Get Battery Level'),
+              onPressed: _getBatteryLevel,
             ),
-            new Text(_location)
-          ],
+            new Text(_batteryLevel)
+              ],
         ),
       ),
     );
