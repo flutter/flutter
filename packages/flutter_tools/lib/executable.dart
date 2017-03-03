@@ -131,70 +131,78 @@ Future<Null> run(List<String> args, List<FlutterCommand> subCommands, {bool verb
     // Initialize the system locale.
     await intl.findSystemLocale();
 
-    return Chain.capture<Future<Null>>(() async {
+    Completer<Null> runCompleter = new Completer<Null>();
+    Chain.capture<Future<Null>>(() async {
       await runner.run(args);
       await _exit(0);
+      runCompleter.complete();
     }, onError: (dynamic error, Chain chain) {
-      if (error is UsageException) {
-        stderr.writeln(error.message);
-        stderr.writeln();
-        stderr.writeln(
-            "Run 'flutter -h' (or 'flutter <command> -h') for available "
-                "flutter commands and options."
-        );
-        // Argument error exit code.
-        _exit(64);
-      } else if (error is ToolExit) {
-        if (error.message != null)
-          stderr.writeln(error.message);
-        if (verbose) {
-          stderr.writeln();
-          stderr.writeln(chain.terse.toString());
-          stderr.writeln();
-        }
-        _exit(error.exitCode ?? 1);
-      } else if (error is ProcessExit) {
-        // We've caught an exit code.
-        _exit(error.exitCode);
-      } else {
-        // We've crashed; emit a log report.
-        stderr.writeln();
-
-        flutterUsage.sendException(error, chain);
-
-        if (isRunningOnBot) {
-          // Print the stack trace on the bots - don't write a crash report.
-          stderr.writeln('$error');
-          stderr.writeln(chain.terse.toString());
-          _exit(1);
-        } else {
-          if (error is String)
-            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-          else
-            stderr.writeln('Oops; flutter has exited unexpectedly.');
-
-          new CrashReportSender().sendReport(error: error, stackTrace: chain).whenComplete(() {
-            _createCrashReport(args, error, chain).then<Null>((File file) {
-              stderr.writeln(
-                  'Crash report written to ${file.path};\n'
-                      'please let us know at https://github.com/flutter/flutter/issues.',
-              );
-              _exit(1);
-            }).catchError((dynamic error) {
-              stderr.writeln(
-                  'Unable to generate crash report due to secondary error: $error\n'
-                      'please let us know at https://github.com/flutter/flutter/issues.',
-              );
-              _exit(1);
-            });
-          });
-        }
-      }
+      _handleToolError(error, chain, verbose, args).whenComplete(runCompleter.complete);
     });
+    return runCompleter.future;
   });
 }
 
-Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
+Future<Null> _handleToolError(dynamic error, Chain chain, bool verbose, List<String> args) async {
+  if (error is UsageException) {
+    stderr.writeln(error.message);
+    stderr.writeln();
+    stderr.writeln(
+        "Run 'flutter -h' (or 'flutter <command> -h') for available "
+            "flutter commands and options."
+    );
+    // Argument error exit code.
+    await _exit(64);
+  } else if (error is ToolExit) {
+    if (error.message != null)
+      stderr.writeln(error.message);
+    if (verbose) {
+      stderr.writeln();
+      stderr.writeln(chain.terse.toString());
+      stderr.writeln();
+    }
+    await _exit(error.exitCode ?? 1);
+  } else if (error is ProcessExit) {
+    // We've caught an exit code.
+    await _exit(error.exitCode);
+  } else {
+    // We've crashed; emit a log report.
+    stderr.writeln();
+
+    flutterUsage.sendException(error, chain);
+
+    if (isRunningOnBot) {
+      // Print the stack trace on the bots - don't write a crash report.
+      stderr.writeln('$error');
+      stderr.writeln(chain.terse.toString());
+      await _exit(1);
+    } else {
+      if (error is String)
+        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+      else
+        stderr.writeln('Oops; flutter has exited unexpectedly.');
+
+      await new CrashReportSender().sendReport(error: error, stackTrace: chain);
+      try {
+        File file = await _createLocalCrashReport(args, error, chain);
+        stderr.writeln(
+            'Crash report written to ${file.path};\n'
+                'please let us know at https://github.com/flutter/flutter/issues.',
+        );
+        await _exit(1);
+      } catch (error) {
+        stderr.writeln(
+            'Unable to generate crash report due to secondary error: $error\n'
+                'please let us know at https://github.com/flutter/flutter/issues.',
+        );
+        await _exit(1);
+      }
+    }
+  }
+}
+
+/// Saves the crash report to a local file.
+Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {
   FileSystem fs = context?.getVariable(FileSystem);
   if (fs == null) {
     // If things are crashing we may not even have initialized the context

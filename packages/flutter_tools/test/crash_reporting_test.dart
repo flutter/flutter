@@ -21,13 +21,23 @@ import 'src/context.dart';
 void main() {
   group('crash reporting', () {
     int testPort;
+    MemoryFileSystem fs;
+    int exitCode;
 
     setUp(() async {
+      exitCode = null;
+      fs = new MemoryFileSystem();
+      setExitFunctionForTests((int code) {
+        exitCode = code;
+      });
       testPort = await os.findAvailablePort();
       overrideBaseCrashUrlForTesting(Uri.parse('http://localhost:$testPort/test-path'));
     });
 
     tearDown(() {
+      exitCode = null;
+      fs = null;
+      restoreExitFunction();
       resetBaseCrashUrlForTesting();
     });
 
@@ -49,7 +59,7 @@ void main() {
         reportReceived.complete();
       }));
 
-      tools.run(<String>['crash'], <FlutterCommand>[new _CrashCommand()]);
+      Future<Null> whenFinished = tools.run(<String>['crash'], <FlutterCommand>[new _CrashCommand()]);
 
       await reportReceived.future;
       expect(method, 'POST');
@@ -64,8 +74,10 @@ void main() {
       BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
+      await whenFinished;
+      expect(exitCode, 1);
     }, overrides: <Type, Generator>{
-      FileSystem: () => new MemoryFileSystem(),
+      FileSystem: () => fs,
     });
   });
 }
