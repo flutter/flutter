@@ -710,15 +710,16 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<ServiceMap> runInView(String viewId,
-                               String main,
-                               String packages,
-                               String assetsDirectory) {
+                               Uri main,
+                               Uri packages,
+                               Uri assetsDirectory) {
+    // TODO(goderbauer): Transfer Uri (instead of file path) when remote end supports it.
     return invokeRpc('_flutter.runInView',
                     params: <String, dynamic> {
                       'viewId': viewId,
-                      'mainScript': main,
-                      'packagesFile': packages,
-                      'assetDirectory': assetsDirectory
+                      'mainScript': main.toFilePath(windows: false),
+                      'packagesFile': packages.toFilePath(windows: false),
+                      'assetDirectory': assetsDirectory.toFilePath(windows: false)
                     });
   }
 
@@ -1024,9 +1025,9 @@ class FlutterView extends ServiceObject {
   }
 
   // TODO(johnmccutchan): Report errors when running failed.
-  Future<Null> runFromSource(String entryPath,
-                             String packagesPath,
-                             String assetsDirectoryPath) async {
+  Future<Null> runFromSource(Uri entryUri,
+                             Uri packagesUri,
+                             Uri assetsDirectoryUri) async {
     final String viewId = id;
     // When this completer completes the isolate is running.
     final Completer<Null> completer = new Completer<Null>();
@@ -1040,9 +1041,9 @@ class FlutterView extends ServiceObject {
       }
     });
     await owner.vm.runInView(viewId,
-                             entryPath,
-                             packagesPath,
-                             assetsDirectoryPath);
+                             entryUri,
+                             packagesUri,
+                             assetsDirectoryUri);
     await completer.future;
     await owner.vm.refreshViews();
     await subscription.cancel();
