@@ -47,12 +47,9 @@ class _PlatformServicesState extends State<PlatformServices> {
             ),
             new Text(_batteryLevel)
           ],
-        ),
-      ),
-    );
   }
 }
-
+  
 void main() {
   runApp(new PlatformServices());
 }
