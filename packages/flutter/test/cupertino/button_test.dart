@@ -23,7 +23,7 @@ void main() {
     RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10dp character + 16dp * 2 is smaller than the 48dp minimum.
+      // 1 10px character + 16px * 2 is smaller than the 48px minimum.
       const Size.square(48.0),
     );
   });
@@ -38,7 +38,7 @@ void main() {
     RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
-      // 4 10dp character + 16dp * 2 = 72.
+      // 4 10px character + 16px * 2 = 72.
       72.0,
     );
   });
@@ -52,7 +52,7 @@ void main() {
     RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
-      // 1 10dp character + 64 * 2 = 138 for buttons with background.
+      // 1 10px character + 64 * 2 = 138 for buttons with background.
       138.0,
     );
   });
