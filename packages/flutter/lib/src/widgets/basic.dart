@@ -252,6 +252,39 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// By default, [ClipRect] prevents its child from painting outside its
 /// bounds, but the size and location of the clip rect can be customized using a
 /// custom [clipper].
+///
+/// [ClipRect] is commonly used with these widgets, which commonly paint outside
+/// their bounds.
+///
+///  * [CustomPaint]
+///  * [CustomSingleChildLayout]
+///  * [CustomMultiChildLayout]
+///  * [Align] and [Center] (e.g., if [Align.widthFactor] or
+///    [Align.heightFactor] is less than 1.0).
+///  * [OverflowBox]
+///  * [SizedOverflowBox]
+///
+/// ## Example
+///
+/// For example, use a clip to show the top half of an [Image], you can use a
+/// [ClipRect] combined with an [Align]:
+///
+/// ```dart
+/// new ClipRect(
+///   child: new Align(
+///     alignment: FractionalOffset.topCenter,
+///     heightFactor: 0.5,
+///     child: new Image(...),
+///   ),
+/// ),
+/// ```
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRRect], for a clip with rounded corners.
+///  * [ClipOval], for an elliptical clip.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipRect extends SingleChildRenderObjectWidget {
   /// Creates a rectangular clip.
   ///
@@ -281,6 +314,13 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// By default, [ClipRRect] uses its own bounds as the base rectangle for the
 /// clip, but the size and location of the clip can be customized using a custom
 /// [clipper].
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipOval], for an elliptical clip.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a rounded-rectangular clip.
   ///
@@ -324,6 +364,14 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
+/// See also:
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipRRect], for a clip with rounded corners.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipOval extends SingleChildRenderObjectWidget {
   /// Creates an oval-shaped clip.
   ///
