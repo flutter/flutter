@@ -164,7 +164,7 @@ class Ticker {
     // We take the _completer into a local variable so that isTicking is false
     // when we actually complete the future (isTicking uses _completer to
     // determine its state).
-    Completer<Null> localCompleter = _completer;
+    final Completer<Null> localCompleter = _completer;
     _completer = null;
     _startTime = null;
     assert(!isActive);
