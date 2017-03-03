@@ -22,8 +22,8 @@ const Color _kAppBackgroundColor = const Color(0xFF353662);
 // reduced to _kAppBarMidHeight, its layout is horizontal, only one section
 // heading is visible, and the section's list of details is visible below the
 // heading. The appbar's height can be reduced to no more than _kAppBarMinHeight.
-final double _kAppBarMinHeight = 90.0;
-final double _kAppBarMidHeight = 256.0;
+const double _kAppBarMinHeight = 90.0;
+const double _kAppBarMidHeight = 256.0;
 // The AppBar's max height depends on the screen, see _AnimationDemoHomeState._buildBody()
 
 // Initially occupies the same space as the status bar and gets smaller as
