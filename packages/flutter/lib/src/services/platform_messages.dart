@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 ByteData _encodeUTF8(String message) {
   if (message == null)
     return null;
-  Uint8List encoded = UTF8.encoder.convert(message);
+  final Uint8List encoded = UTF8.encoder.convert(message);
   return encoded.buffer.asByteData();
 }
 
@@ -71,7 +71,7 @@ class PlatformMessages {
         String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
     ByteData response;
     try {
-      _PlatformMessageHandler handler = _handlers[channel];
+      final _PlatformMessageHandler handler = _handlers[channel];
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
