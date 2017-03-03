@@ -308,7 +308,7 @@ class ScrollPosition extends ViewportOffset {
 
   @override
   void correctBy(double correction) {
-    correctPixels(_pixels + correction);
+    _pixels += correction;
   }
 
   @protected
