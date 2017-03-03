@@ -12,6 +12,7 @@ import 'scroll_position.dart';
 class ScrollController {
   ScrollController({
     this.initialScrollOffset: 0.0,
+    this.leader,
   }) {
     assert(initialScrollOffset != null);
   }
@@ -21,6 +22,10 @@ class ScrollController {
   /// New [ScrollPosition] objects that are created and attached to this
   /// controller will have their offset initialized to this value.
   final double initialScrollOffset;
+
+  /// Synchronizes the [offset]s of any other ScrollControllers that were
+  /// created with the same leader.
+  final ScrollLeader leader;
 
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
@@ -126,6 +131,7 @@ class ScrollController {
       state: state,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
+      leader: leader,
     );
   }
 
