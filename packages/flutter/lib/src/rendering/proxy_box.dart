@@ -881,6 +881,13 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// supply a reclip argument to the constructor of the [CustomClipper]. The
 /// custom object will listen to this animation and update the clip whenever the
 /// animation ticks, avoiding both the build and layout phases of the pipeline.
+///
+/// See also:
+///
+///  * [ClipRect], which can be customized with a [CustomClipper].
+///  * [ClipRRect], which can be customized with a [CustomClipper].
+///  * [ClipOval], which can be customized with a [CustomClipper].
+///  * [ClipPath], which can be customized with a [CustomClipper].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
