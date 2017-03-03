@@ -18,10 +18,11 @@ If (Test-Path Env:\FLUTTER_ANSI_TERMINAL) { Remove-Item Env:\FLUTTER_ANSI_TERMIN
 $stdout = [Win32.NativeMethods]::GetStdHandle(-11) # STD_OUTPUT_HANDLE
 If ($stdout -ne -1) {
     $mode = 0
-    $result = [Win32.NativeMethods]::GetConsoleMode($stdout, [ref]$mode)
-    If ($result) {
+    If ([Win32.NativeMethods]::GetConsoleMode($stdout, [ref]$mode)) {
         $mode = $mode -bor 4 # ENABLE_VIRTUAL_TERMINAL_PROCESSING
-        $env:FLUTTER_ANSI_TERMINAL = [Win32.NativeMethods]::SetConsoleMode($stdout, $mode)
+        If ([Win32.NativeMethods]::SetConsoleMode($stdout, $mode)) {
+            $env:FLUTTER_ANSI_TERMINAL = "true"
+        }
     }
 }
 
