@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,11 +19,15 @@ class _PlatformServicesState extends State<PlatformServices> {
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
-    try {
-      int result = await platform.invokeMethod('getBatteryLevel');
-      batteryLevel = 'Battery level at ${result} %';
-    } on PlatformException catch (e) {
-      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    if (Platform.isIOS) {
+      batteryLevel = "iOS is not supported yet.";
+    } else {
+      try {
+        int result = await platform.invokeMethod('getBatteryLevel');
+        batteryLevel = 'Battery level at ${result} %';
+      } on PlatformException catch (e) {
+        batteryLevel = "Failed to get battery level: '${e.message}'.";
+      }
     }
     setState(() {
       _batteryLevel = batteryLevel;
