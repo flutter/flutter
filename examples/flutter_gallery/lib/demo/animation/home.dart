@@ -24,10 +24,11 @@ const Color _kAppBackgroundColor = const Color(0xFF353662);
 // heading. The appbar's height can be reduced to no more than _kAppBarMinHeight.
 final double _kAppBarMinHeight = 90.0;
 final double _kAppBarMidHeight = 256.0;
-// The AppBar's max height depends on the screen, see AnimationDemoHomeState._buildBody()
+// The AppBar's max height depends on the screen, see _AnimationDemoHomeState._buildBody()
 
 // Initially occupies the same space as the status bar and gets smaller as
 // the primary scrollable scrolls upwards.
+// TODO(hansmuller): it would be worth adding something like this to the framework.
 class _RenderStatusBarPaddingSliver extends RenderSliver {
   _RenderStatusBarPaddingSliver({
     double maxHeight,
@@ -94,8 +95,9 @@ class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderStatusBarPaddingSliver renderObject) {
-    renderObject.maxHeight = maxHeight;
-    renderObject.scrollFactor = scrollFactor;
+    renderObject
+      ..maxHeight = maxHeight
+      ..scrollFactor = scrollFactor;
   }
 
   @override
@@ -122,21 +124,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return new SizedBox.expand(
-      child: new Stack(
-        children: <Widget>[
-          child,
-          new Positioned(
-            top: 0.0,
-            left: 0.0,
-            child: new IconTheme(
-              data: new IconThemeData(color: Colors.white),
-              child: new BackButton(),
-            ),
-          ),
-        ],
-      ),
-    );
+    return new SizedBox.expand(child: child);
   }
 
   @override
@@ -216,7 +204,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     // Compute the size and origin of each card, title, and indicator for the maxHeight
     // "column" layout, and the midHeight "row" layout. The actual layout is just the
     // interpolated value between the column and row layouts for t.
-    for(int index = 0; index < cardCount; index++) {
+    for (int index = 0; index < cardCount; index++) {
 
       // Layout the card for index.
       final Rect columnCardRect = new Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
@@ -331,7 +319,7 @@ class _AllSectionsView extends StatelessWidget {
 
     final List<Widget> children = new List<Widget>.from(sectionCards);
 
-    for(int index = 0; index < sections.length; index++) {
+    for (int index = 0; index < sections.length; index++) {
       final Section section = sections[index];
       children.add(new LayoutId(
         id: 'title$index',
@@ -343,7 +331,7 @@ class _AllSectionsView extends StatelessWidget {
       ));
     }
 
-    for(int index = 0; index < sections.length; index++) {
+    for (int index = 0; index < sections.length; index++) {
       children.add(new LayoutId(
         id: 'indicator$index',
         child: new SectionIndicator(
@@ -375,14 +363,14 @@ class AnimationDemoHome extends StatefulWidget {
   static const String routeName = '/animation';
 
   @override
-  AnimationDemoHomeState createState() => new AnimationDemoHomeState();
+  _AnimationDemoHomeState createState() => new _AnimationDemoHomeState();
 }
 
-class AnimationDemoHomeState extends State<AnimationDemoHome> {
+class _AnimationDemoHomeState extends State<AnimationDemoHome> {
+  final ScrollController _scrollController = new ScrollController();
+  final PageController _headingPageController = new PageController();
+  final PageController _detailsPageController = new PageController();
   double _selectedIndex = 0.0;
-  ScrollController _scrollController = new ScrollController();
-  PageController _headingPageController = new PageController();
-  PageController _detailsPageController = new PageController();
 
   @override
   Widget build(BuildContext context) {
@@ -433,7 +421,7 @@ class AnimationDemoHomeState extends State<AnimationDemoHome> {
 
   Iterable<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
     final List<Widget> sectionCards = <Widget>[];
-    for(int index = 0; index < allSections.length; index++) {
+    for (int index = 0; index < allSections.length; index++) {
       sectionCards.add(new LayoutId(
         id: 'card$index',
         child: new GestureDetector(
@@ -450,7 +438,7 @@ class AnimationDemoHomeState extends State<AnimationDemoHome> {
     }
 
     final List<Widget> headings = <Widget>[];
-    for(int index = 0; index < allSections.length; index++) {
+    for (int index = 0; index < allSections.length; index++) {
       headings.add(new Container(
           decoration: new BoxDecoration(backgroundColor: _kAppBackgroundColor),
           child: new FractionalTranslation(
@@ -482,48 +470,60 @@ class AnimationDemoHomeState extends State<AnimationDemoHome> {
     final double appBarMidScrollOffset = statusBarHeight + appBarMaxHeight - _kAppBarMidHeight;
 
     return new SizedBox.expand(
-      child: new CustomScrollView(
-        controller: _scrollController,
-        slivers: <Widget>[
-          // Start out below the status bar, gradually move to the top of the screen.
-          new _StatusBarPaddingSliver(
-            maxHeight: statusBarHeight,
-            scrollFactor: 7.0,
-          ),
-          // Section Headings
-          new SliverPersistentHeader(
-            pinned: true,
-            delegate: new _SliverAppBarDelegate(
-              minHeight: _kAppBarMinHeight,
-              maxHeight: appBarMaxHeight,
-              child: new NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification notification) {
-                  return _handlePageNotification(notification, _headingPageController, _detailsPageController);
-                },
-                child: new PageView(
-                  controller: _headingPageController,
-                  children: _allHeadingItems(appBarMaxHeight, appBarMidScrollOffset),
+      child: new Stack(
+        children: <Widget>[
+          new CustomScrollView(
+            controller: _scrollController,
+            slivers: <Widget>[
+              // Start out below the status bar, gradually move to the top of the screen.
+              new _StatusBarPaddingSliver(
+                maxHeight: statusBarHeight,
+                scrollFactor: 7.0,
+              ),
+              // Section Headings
+              new SliverPersistentHeader(
+                pinned: true,
+                delegate: new _SliverAppBarDelegate(
+                  minHeight: _kAppBarMinHeight,
+                  maxHeight: appBarMaxHeight,
+                  child: new NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      return _handlePageNotification(notification, _headingPageController, _detailsPageController);
+                    },
+                    child: new PageView(
+                      controller: _headingPageController,
+                      children: _allHeadingItems(appBarMaxHeight, appBarMidScrollOffset),
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ),
-          // Details
-          new SliverToBoxAdapter(
-            child: new SizedBox(
-              height: 610.0,
-              child: new NotificationListener<ScrollNotification>(
-                onNotification: (ScrollNotification notification) {
-                  return _handlePageNotification(notification, _detailsPageController, _headingPageController);
-                },
-                child: new PageView(
-                  controller: _detailsPageController,
-                  children: allSections.map((Section section) {
-                    return new CustomScrollView(
-                      slivers: _detailItemsFor(section).toList(),
-                    );
-                  }).toList(),
+              // Details
+              new SliverToBoxAdapter(
+                child: new SizedBox(
+                  height: 610.0,
+                  child: new NotificationListener<ScrollNotification>(
+                    onNotification: (ScrollNotification notification) {
+                      return _handlePageNotification(notification, _detailsPageController, _headingPageController);
+                    },
+                    child: new PageView(
+                      controller: _detailsPageController,
+                      children: allSections.map((Section section) {
+                        return new CustomScrollView(
+                          slivers: _detailItemsFor(section).toList(),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                 ),
               ),
+            ],
+          ),
+          new Positioned(
+            top: statusBarHeight,
+            left: 0.0,
+            child: new IconTheme(
+              data: new IconThemeData(color: Colors.white),
+              child: new BackButton(),
             ),
           ),
         ],
