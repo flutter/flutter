@@ -206,7 +206,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(event.pointer != null);
     assert(event.position != null);
     assert(!_pointers.containsKey(event.pointer));
-    T state = createNewPointerState(event);
+    final T state = createNewPointerState(event);
     _pointers[event.pointer] = state;
     GestureBinding.instance.pointerRouter.addRoute(event.pointer, _handleEvent);
     state._setArenaEntry(GestureBinding.instance.gestureArena.add(event.pointer, this));
@@ -223,7 +223,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     assert(event.timeStamp != null);
     assert(event.position != null);
     assert(_pointers.containsKey(event.pointer));
-    T state = _pointers[event.pointer];
+    final T state = _pointers[event.pointer];
     if (event is PointerMoveEvent) {
       state._move(event);
       // We might be disposed here.
@@ -248,7 +248,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   @override
   void acceptGesture(int pointer) {
     assert(_pointers != null);
-    T state = _pointers[pointer];
+    final T state = _pointers[pointer];
     if (state == null)
       return; // We might already have canceled this drag if the up comes before the accept.
     state.accepted((Point initialPosition) => _startDrag(initialPosition, pointer));
@@ -256,7 +256,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 
   Drag _startDrag(Point initialPosition, int pointer) {
     assert(_pointers != null);
-    T state = _pointers[pointer];
+    final T state = _pointers[pointer];
     assert(state != null);
     assert(state._pendingDelta != null);
     Drag drag;
@@ -274,7 +274,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   void rejectGesture(int pointer) {
     assert(_pointers != null);
     if (_pointers.containsKey(pointer)) {
-      T state = _pointers[pointer];
+      final T state = _pointers[pointer];
       assert(state != null);
       state.rejected();
       _removeState(pointer);
