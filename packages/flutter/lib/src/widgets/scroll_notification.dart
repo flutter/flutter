@@ -29,6 +29,14 @@ class ScrollMetrics {
     @required this.viewportDimension,
   });
 
+  /// Creates a [ScrollMetrics] that has the same properties as the given
+  /// [ScrollMetrics].
+  ScrollMetrics.clone(ScrollMetrics other)
+    : extentBefore = other.extentBefore,
+      extentInside = other.extentInside,
+      extentAfter = other.extentAfter,
+      viewportDimension = other.viewportDimension;
+
   /// The quantity of content conceptually "above" the currently visible content
   /// of the viewport in the scrollable. This is the content above the content
   /// described by [extentInside].
