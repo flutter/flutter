@@ -35,10 +35,10 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
 }
 
 double _getSplashRadiusForPoistionInSize(Size bounds, Point position) {
-  double d1 = (position - bounds.topLeft(Point.origin)).distance;
-  double d2 = (position - bounds.topRight(Point.origin)).distance;
-  double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
-  double d4 = (position - bounds.bottomRight(Point.origin)).distance;
+  final double d1 = (position - bounds.topLeft(Point.origin)).distance;
+  final double d2 = (position - bounds.topRight(Point.origin)).distance;
+  final double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
+  final double d4 = (position - bounds.bottomRight(Point.origin)).distance;
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 

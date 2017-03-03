@@ -460,7 +460,7 @@ class _LicensePageState extends State<LicensePage> {
 }
 
 String _defaultApplicationName(BuildContext context) {
-  Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

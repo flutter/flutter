@@ -209,7 +209,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = config.theme ?? new ThemeData.fallback();
+    final ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
       isMaterialAppTheme: true,
