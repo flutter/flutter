@@ -156,6 +156,13 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
+    if (platform.isWindows) {
+      throwToolExit(
+          'The test command is currently not supported on Windows: '
+          'https://github.com/flutter/flutter/issues/8516'
+      );
+    }
+
     List<String> testArgs = <String>[];
 
     commandValidator();

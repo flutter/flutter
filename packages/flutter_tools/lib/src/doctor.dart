@@ -224,15 +224,6 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
 
-    if (platform.isWindows) {
-      valid = ValidationType.missing;
-
-      messages.add(new ValidationMessage.error(
-        'Flutter tools are not (yet) supported on Windows: '
-        'https://github.com/flutter/flutter/issues/138.'
-      ));
-    }
-
     return new ValidationResult(valid, messages,
       statusInfo: 'on ${osName()}, channel ${version.channel}');
   }
