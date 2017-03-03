@@ -302,7 +302,7 @@ class RenderEditable extends RenderBox {
     final Point globalPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
       onSelectionChanged(new TextSelection.fromPosition(position), this, false);
     }
   }
