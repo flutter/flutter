@@ -402,7 +402,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
     );
 
     if (background != null) {
-      List<Widget> children = <Widget>[];
+      final List<Widget> children = <Widget>[];
 
       if (!_moveAnimation.isDismissed) {
         children.add(new Positioned.fill(

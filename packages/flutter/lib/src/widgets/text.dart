@@ -60,7 +60,7 @@ class DefaultTextStyle extends InheritedWidget {
   }) {
     assert(context != null);
     assert(child != null);
-    DefaultTextStyle parent = DefaultTextStyle.of(context);
+    final DefaultTextStyle parent = DefaultTextStyle.of(context);
     return new DefaultTextStyle(
       key: key,
       style: parent.style.merge(style),
@@ -188,7 +188,7 @@ class Text extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
     TextStyle effectiveTextStyle = style;
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);

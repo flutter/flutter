@@ -166,7 +166,7 @@ class ScaleTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double scaleValue = scale.value;
-    Matrix4 transform = new Matrix4.identity()
+    final Matrix4 transform = new Matrix4.identity()
       ..scale(scaleValue, scaleValue, 1.0);
     return new Transform(
       transform: transform,
@@ -198,8 +198,8 @@ class RotationTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    double turnsValue = turns.value;
-    Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
+    final double turnsValue = turns.value;
+    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
       alignment: FractionalOffset.center,

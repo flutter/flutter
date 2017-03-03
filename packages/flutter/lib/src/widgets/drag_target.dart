@@ -235,7 +235,7 @@ class LongPressDraggable<T> extends Draggable<T> {
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
       ..onStart = (Point position) {
-        Drag result = onStart(position);
+        final Drag result = onStart(position);
         if (result != null)
           HapticFeedback.vibrate();
         return result;
@@ -486,15 +486,15 @@ class _DragAvatar<T> extends Drag {
   void updateDrag(Point globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     WidgetsBinding.instance.hitTest(result, globalPosition + feedbackOffset);
 
-    List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
+    final List<_DragTargetState<T>> targets = _getDragTargets(result.path).toList();
 
     bool listsMatch = false;
     if (targets.length >= _enteredTargets.length && _enteredTargets.isNotEmpty) {
       listsMatch = true;
-      Iterator<_DragTargetState<T>> iterator = targets.iterator;
+      final Iterator<_DragTargetState<T>> iterator = targets.iterator;
       for (int i = 0; i < _enteredTargets.length; i += 1) {
         iterator.moveNext();
         if (iterator.current != _enteredTargets[i]) {
@@ -512,7 +512,7 @@ class _DragAvatar<T> extends Drag {
     _leaveAllEntered();
 
     // Enter new targets.
-    _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
+    final _DragTargetState<T> newTarget = targets.firstWhere((_DragTargetState<T> target) {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
@@ -527,7 +527,7 @@ class _DragAvatar<T> extends Drag {
     // widgets build RenderMetaData boxes for us for this purpose).
     for (HitTestEntry entry in path) {
       if (entry.target is RenderMetaData) {
-        RenderMetaData renderMetaData = entry.target;
+        final RenderMetaData renderMetaData = entry.target;
         if (renderMetaData.metaData is _DragTargetState<T>)
           yield renderMetaData.metaData;
       }
@@ -557,8 +557,8 @@ class _DragAvatar<T> extends Drag {
   }
 
   Widget _build(BuildContext context) {
-    RenderBox box = overlayState.context.findRenderObject();
-    Point overlayTopLeft = box.localToGlobal(Point.origin);
+    final RenderBox box = overlayState.context.findRenderObject();
+    final Point overlayTopLeft = box.localToGlobal(Point.origin);
     return new Positioned(
       left: _lastOffset.dx - overlayTopLeft.x,
       top: _lastOffset.dy - overlayTopLeft.y,

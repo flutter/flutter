@@ -121,7 +121,7 @@ class Hero extends StatefulWidget {
           }
           return true;
         });
-        _HeroState heroState = hero.state;
+        final _HeroState heroState = hero.state;
         result[tag] = heroState;
       }
       element.visitChildren(visitor);

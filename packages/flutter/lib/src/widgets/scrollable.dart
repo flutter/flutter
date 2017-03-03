@@ -234,7 +234,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -298,7 +298,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    Widget result = new RawGestureDetector(
+    final Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,

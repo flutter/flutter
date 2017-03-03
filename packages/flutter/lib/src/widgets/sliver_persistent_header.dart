@@ -54,7 +54,7 @@ class SliverPersistentHeader extends StatelessWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('delegate: $delegate');
-    List<String> flags = <String>[];
+    final List<String> flags = <String>[];
     if (pinned)
       flags.add('pinned');
     if (floating)

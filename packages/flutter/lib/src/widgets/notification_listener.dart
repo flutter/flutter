@@ -28,7 +28,7 @@ abstract class Notification {
   @mustCallSuper
   bool visitAncestor(Element element) {
     if (element is StatelessElement) {
-      StatelessWidget widget = element.widget;
+      final StatelessWidget widget = element.widget;
       if (widget is NotificationListener<Notification>) {
         if (widget._dispatch(this, element)) // that function checks the type dynamically
           return false;
@@ -47,7 +47,7 @@ abstract class Notification {
 
   @override
   String toString() {
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     return '$runtimeType(${description.join(", ")})';
   }
@@ -92,7 +92,7 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 
   bool _dispatch(Notification notification, Element element) {
     if (onNotification != null && notification is T) {
-      bool result = onNotification(notification);
+      final bool result = onNotification(notification);
       assert(() {
         if (result == null)
           throw new FlutterError(
