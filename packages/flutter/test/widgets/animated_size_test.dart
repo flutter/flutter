@@ -206,7 +206,7 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 100));
 
-    RenderBox box = tester.renderObject(find.byType(AnimatedSize));
+    final RenderBox box = tester.renderObject(find.byType(AnimatedSize));
     expect(box.size.width, equals(150.0));
   });
 }

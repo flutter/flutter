@@ -22,9 +22,9 @@ void main() {
       )
     );
 
-    Point middleOfContainer = tester.getCenter(find.text('Hello'));
-    Point target = tester.getCenter(find.byKey(blockKey));
-    TestGesture gesture = await tester.startGesture(target);
+    final Point middleOfContainer = tester.getCenter(find.text('Hello'));
+    final Point target = tester.getCenter(find.byKey(blockKey));
+    final TestGesture gesture = await tester.startGesture(target);
     await gesture.moveBy(const Offset(0.0, -10.0));
 
     await tester.pump(const Duration(milliseconds: 1));
@@ -47,12 +47,12 @@ void main() {
       )
     );
 
-    Point middleOfContainer = tester.getCenter(find.text('Hello'));
+    final Point middleOfContainer = tester.getCenter(find.text('Hello'));
     expect(middleOfContainer.x, equals(400.0));
     expect(middleOfContainer.y, equals(1000.0));
 
-    Point target = tester.getCenter(find.byKey(blockKey));
-    TestGesture gesture = await tester.startGesture(target);
+    final Point target = tester.getCenter(find.byKey(blockKey));
+    final TestGesture gesture = await tester.startGesture(target);
     await gesture.moveBy(const Offset(0.0, -10.0));
 
     await tester.pump(); // redo layout
@@ -95,7 +95,7 @@ void main() {
 
     await tester.pumpWidget(buildBlock(reverse: true));
 
-    Point target = const Point(200.0, 200.0);
+    final Point target = const Point(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));
@@ -108,7 +108,7 @@ void main() {
   });
 
   testWidgets('ListView controller', (WidgetTester tester) async {
-    ScrollController controller = new ScrollController();
+    final ScrollController controller = new ScrollController();
 
     Widget buildBlock() {
       return new ListView(
@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('SliverBlockChildListDelegate.estimateMaxScrollOffset hits end', (WidgetTester tester) async {
-    SliverChildListDelegate delegate = new SliverChildListDelegate(<Widget>[
+    final SliverChildListDelegate delegate = new SliverChildListDelegate(<Widget>[
       new Container(),
       new Container(),
       new Container(),

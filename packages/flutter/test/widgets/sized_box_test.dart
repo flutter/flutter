@@ -33,7 +33,7 @@ void main() {
   });
 
   testWidgets('SizedBox - no child', (WidgetTester tester) async {
-    GlobalKey patient = new GlobalKey();
+    final GlobalKey patient = new GlobalKey();
 
     await tester.pumpWidget(
       new Center(
@@ -98,7 +98,7 @@ void main() {
   });
 
   testWidgets('SizedBox - container child', (WidgetTester tester) async {
-    GlobalKey patient = new GlobalKey();
+    final GlobalKey patient = new GlobalKey();
 
     await tester.pumpWidget(
       new Center(

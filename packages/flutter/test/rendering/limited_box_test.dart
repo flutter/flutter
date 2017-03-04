@@ -10,10 +10,10 @@ import 'rendering_tester.dart';
 
 void main() {
   test('LimitedBox: parent max size is unconstrained', () {
-    RenderBox child = new RenderConstrainedBox(
+    final RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
+    final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
       maxWidth: double.INFINITY,
       minHeight: 0.0,
@@ -30,10 +30,10 @@ void main() {
   });
 
   test('LimitedBox: parent maxWidth is unconstrained', () {
-    RenderBox child = new RenderConstrainedBox(
+    final RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
+    final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 0.0,
       maxWidth: double.INFINITY,
       minHeight: 500.0,
@@ -50,10 +50,10 @@ void main() {
   });
 
   test('LimitedBox: parent maxHeight is unconstrained', () {
-    RenderBox child = new RenderConstrainedBox(
+    final RenderBox child = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(width: 300.0, height: 400.0)
     );
-    RenderBox parent = new RenderConstrainedOverflowBox(
+    final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 500.0,
       maxWidth: 500.0,
       minHeight: 0.0,
@@ -72,7 +72,7 @@ void main() {
 
   test('LimitedBox: no child', () {
     RenderBox box;
-    RenderBox parent = new RenderConstrainedOverflowBox(
+    final RenderBox parent = new RenderConstrainedOverflowBox(
       minWidth: 10.0,
       maxWidth: 500.0,
       minHeight: 0.0,

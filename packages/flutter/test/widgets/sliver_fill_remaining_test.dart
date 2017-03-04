@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
-    List<Widget> children = new List<Widget>.generate(20, (int i) {
+    final List<Widget> children = new List<Widget>.generate(20, (int i) {
       return new Container(child: new Text('$i'));
     });
 
@@ -21,7 +21,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
     expect(box.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);

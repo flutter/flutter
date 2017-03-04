@@ -121,7 +121,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(Stepper));
+    final RenderBox box = tester.renderObject(find.byType(Stepper));
     expect(box.size.height, 600.0);
   });
 
@@ -276,7 +276,7 @@ void main() {
       )
     );
 
-    ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
+    final ScrollableState scrollableState = tester.firstState(find.byType(Scrollable));
     expect(scrollableState.position.pixels, 0.0);
 
     await tester.tap(find.text('Step 3'));

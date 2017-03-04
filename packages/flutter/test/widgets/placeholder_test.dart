@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Placeholder control test', (WidgetTester tester) async {
-    GlobalKey<PlaceholderState> key = new GlobalKey<PlaceholderState>();
+    final GlobalKey<PlaceholderState> key = new GlobalKey<PlaceholderState>();
 
     await tester.pumpWidget(new Placeholder(key: key));
 

@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:ui' show VoidCallback;
 
 List<String> captureOutput(VoidCallback fn) {
-  List<String> log = <String>[];
+  final List<String> log = <String>[];
 
   runZoned<Null>(fn, zoneSpecification: new ZoneSpecification(
     print: (Zone self,

@@ -58,12 +58,12 @@ void main() {
     expect(box.size.width, equals(40.0));
     expect(box.size.height, equals(40.0));
 
-    Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
-    Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
+    final Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
+    final Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
 
-    Point avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
-    Point avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
-    Point avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
+    final Point avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
+    final Point avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
+    final Point avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
 
     expect(avatarATopLeft.x - topLeft.x, equals(16.0));
     expect(avatarATopLeft.y - topLeft.y, equals(16.0));

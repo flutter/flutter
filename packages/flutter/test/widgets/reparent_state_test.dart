@@ -50,10 +50,10 @@ class DeactivateLoggerState extends State<DeactivateLogger> {
 
 void main() {
   testWidgets('can reparent state', (WidgetTester tester) async {
-    GlobalKey left = new GlobalKey();
-    GlobalKey right = new GlobalKey();
+    final GlobalKey left = new GlobalKey();
+    final GlobalKey right = new GlobalKey();
 
-    StateMarker grandchild = new StateMarker();
+    final StateMarker grandchild = new StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -70,16 +70,16 @@ void main() {
       )
     );
 
-    StateMarkerState leftState = left.currentState;
+    final StateMarkerState leftState = left.currentState;
     leftState.marker = "left";
-    StateMarkerState rightState = right.currentState;
+    final StateMarkerState rightState = right.currentState;
     rightState.marker = "right";
 
-    StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
-    StateMarker newGrandchild = new StateMarker();
+    final StateMarker newGrandchild = new StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -101,7 +101,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals("right"));
 
-    StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));
@@ -123,10 +123,10 @@ void main() {
   });
 
   testWidgets('can reparent state with multichild widgets', (WidgetTester tester) async {
-    GlobalKey left = new GlobalKey();
-    GlobalKey right = new GlobalKey();
+    final GlobalKey left = new GlobalKey();
+    final GlobalKey right = new GlobalKey();
 
-    StateMarker grandchild = new StateMarker();
+    final StateMarker grandchild = new StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -139,16 +139,16 @@ void main() {
       )
     );
 
-    StateMarkerState leftState = left.currentState;
+    final StateMarkerState leftState = left.currentState;
     leftState.marker = "left";
-    StateMarkerState rightState = right.currentState;
+    final StateMarkerState rightState = right.currentState;
     rightState.marker = "right";
 
-    StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
-    StateMarker newGrandchild = new StateMarker();
+    final StateMarker newGrandchild = new StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -166,7 +166,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals("right"));
 
-    StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));
@@ -188,11 +188,11 @@ void main() {
   });
 
   testWidgets('can with scrollable list', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new StateMarker(key: key));
 
-    StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
     await tester.pumpWidget(new ListView(
@@ -216,7 +216,7 @@ void main() {
   });
 
   testWidgets('Reparent during update children', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Stack(
       children: <Widget>[
@@ -225,7 +225,7 @@ void main() {
       ]
     ));
 
-    StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
     await tester.pumpWidget(new Stack(
@@ -250,7 +250,7 @@ void main() {
   });
 
   testWidgets('Reparent to child during update children', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Stack(
       children: <Widget>[
@@ -260,7 +260,7 @@ void main() {
       ]
     ));
 
-    StateMarkerState keyState = key.currentState;
+    final StateMarkerState keyState = key.currentState;
     keyState.marker = "marked";
 
     await tester.pumpWidget(new Stack(
@@ -307,9 +307,9 @@ void main() {
   });
 
   testWidgets('Deactivate implies build', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
-    List<String> log = <String>[];
-    DeactivateLogger logger = new DeactivateLogger(key: key, log: log);
+    final GlobalKey key = new GlobalKey();
+    final List<String> log = <String>[];
+    final DeactivateLogger logger = new DeactivateLogger(key: key, log: log);
 
     await tester.pumpWidget(
       new Container(key: new UniqueKey(), child: logger)

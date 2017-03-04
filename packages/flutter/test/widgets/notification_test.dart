@@ -13,8 +13,8 @@ void main() {
   });
 
   testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
-    List<dynamic> log = <dynamic>[];
-    GlobalKey key = new GlobalKey();
+    final List<dynamic> log = <dynamic>[];
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add('a');
@@ -37,8 +37,8 @@ void main() {
   });
 
   testWidgets('Notification basics - cancel', (WidgetTester tester) async {
-    List<dynamic> log = <dynamic>[];
-    GlobalKey key = new GlobalKey();
+    final List<dynamic> log = <dynamic>[];
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add('a - error');
@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new NotificationListener<MyNotification>(
       onNotification: (MyNotification value) { },
       child: new Container(key: key),

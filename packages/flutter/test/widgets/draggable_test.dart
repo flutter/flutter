@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
     int dragStartedCount = 0;
 
     await tester.pumpWidget(new MaterialApp(
@@ -39,8 +39,8 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 0);
 
-    Point firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final Point firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -49,7 +49,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(dragStartedCount, 1);
 
-    Point secondLocation = tester.getCenter(find.text('Target'));
+    final Point secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
@@ -70,7 +70,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - dragging over button', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -160,7 +160,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - tapping button', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -199,7 +199,7 @@ void main() {
     events.clear();
 
     firstLocation = tester.getCenter(find.text('Button'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     secondLocation = tester.getCenter(find.text('Target'));
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - long press draggable, short press', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -246,7 +246,7 @@ void main() {
     expect(events, isEmpty);
 
     firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     secondLocation = tester.getCenter(find.text('Target'));
@@ -260,7 +260,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - long press draggable, long press', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -292,7 +292,7 @@ void main() {
     expect(events, isEmpty);
 
     firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     await tester.pump(const Duration(seconds: 20));
@@ -308,7 +308,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - horizontal and vertical draggables in vertical block', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -414,7 +414,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - horizontal and vertical draggables in horizontal block', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation, thirdLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -521,7 +521,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onDraggableDropped not called if dropped on accepting target', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
     bool onDraggableCanceledCalled = false;
 
     await tester.pumpWidget(new MaterialApp(
@@ -553,8 +553,8 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isFalse);
 
-    Point firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final Point firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -563,7 +563,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isFalse);
 
-    Point secondLocation = tester.getCenter(find.text('Target'));
+    final Point secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
@@ -584,7 +584,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onDraggableDropped called if dropped on non-accepting target', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
     bool onDraggableCanceledCalled = false;
     Velocity onDraggableCanceledVelocity;
     Offset onDraggableCanceledOffset;
@@ -621,8 +621,8 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isFalse);
 
-    Point firstLocation = tester.getTopLeft(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final Point firstLocation = tester.getTopLeft(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -631,7 +631,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isFalse);
 
-    Point secondLocation = tester.getCenter(find.text('Target'));
+    final Point secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
@@ -654,7 +654,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - onDraggableDropped called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
     bool onDraggableCanceledCalled = false;
     Velocity onDraggableCanceledVelocity;
     Offset onDraggableCanceledOffset;
@@ -689,7 +689,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isFalse);
 
-    Point flingStart = tester.getTopLeft(find.text('Source'));
+    final Point flingStart = tester.getTopLeft(find.text('Source'));
     await tester.flingFrom(flingStart, const Offset(0.0, 100.0), 1000.0);
     await tester.pump();
 
@@ -704,8 +704,8 @@ void main() {
   });
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) async {
-    List<int> acceptedInts = <int>[];
-    List<double> acceptedDoubles = <double>[];
+    final List<int> acceptedInts = <int>[];
+    final List<double> acceptedDoubles = <double>[];
 
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
@@ -763,12 +763,12 @@ void main() {
     expect(find.text('Target1'), findsOneWidget);
     expect(find.text('Target2'), findsOneWidget);
 
-    Point intLocation = tester.getCenter(find.text('IntSource'));
-    Point doubleLocation = tester.getCenter(find.text('DoubleSource'));
-    Point targetLocation = tester.getCenter(find.text('Target1'));
+    final Point intLocation = tester.getCenter(find.text('IntSource'));
+    final Point doubleLocation = tester.getCenter(find.text('DoubleSource'));
+    final Point targetLocation = tester.getCenter(find.text('Target1'));
 
     // Drag the double draggable.
-    TestGesture doubleGesture = await tester.startGesture(doubleLocation, pointer: 7);
+    final TestGesture doubleGesture = await tester.startGesture(doubleLocation, pointer: 7);
     await tester.pump();
 
     expect(acceptedInts, isEmpty);
@@ -795,7 +795,7 @@ void main() {
     acceptedDoubles.clear();
 
     // Drag the int draggable.
-    TestGesture intGesture = await tester.startGesture(intLocation, pointer: 7);
+    final TestGesture intGesture = await tester.startGesture(intLocation, pointer: 7);
     await tester.pump();
 
     expect(acceptedInts, isEmpty);
@@ -821,9 +821,9 @@ void main() {
   });
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data twice test', (WidgetTester tester) async {
-    List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
-    List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
-    DragTargetData dragTargetData = new DragTargetData();
+    final List<DragTargetData> acceptedDragTargetDatas = <DragTargetData>[];
+    final List<ExtendedDragTargetData> acceptedExtendedDragTargetDatas = <ExtendedDragTargetData>[];
+    final DragTargetData dragTargetData = new DragTargetData();
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
@@ -865,11 +865,11 @@ void main() {
       )
     ));
 
-    Point dragTargetLocation = tester.getCenter(find.text('Source'));
-    Point targetLocation = tester.getCenter(find.text('Target1'));
+    final Point dragTargetLocation = tester.getCenter(find.text('Source'));
+    final Point targetLocation = tester.getCenter(find.text('Target1'));
 
     for (int i = 0; i < 2; i += 1) {
-      TestGesture gesture = await tester.startGesture(dragTargetLocation);
+      final TestGesture gesture = await tester.startGesture(dragTargetLocation);
       await tester.pump();
       await gesture.moveTo(targetLocation);
       await tester.pump();
@@ -885,7 +885,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - maxSimultaneousDrags', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
 
     Widget build(int maxSimultaneousDrags) {
       return new MaterialApp(
@@ -912,15 +912,15 @@ void main() {
 
     await tester.pumpWidget(build(0));
 
-    Point firstLocation = tester.getCenter(find.text('Source'));
-    Point secondLocation = tester.getCenter(find.text('Target'));
+    final Point firstLocation = tester.getCenter(find.text('Source'));
+    final Point secondLocation = tester.getCenter(find.text('Target'));
 
     expect(accepted, isEmpty);
     expect(find.text('Source'), findsOneWidget);
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
 
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -937,7 +937,7 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
 
-    TestGesture gesture1 = await tester.startGesture(firstLocation, pointer: 8);
+    final TestGesture gesture1 = await tester.startGesture(firstLocation, pointer: 8);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -945,7 +945,7 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
 
-    TestGesture gesture2 = await tester.startGesture(firstLocation, pointer: 9);
+    final TestGesture gesture2 = await tester.startGesture(firstLocation, pointer: 9);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -953,7 +953,7 @@ void main() {
     expect(find.text('Dragging'), findsNWidgets(2));
     expect(find.text('Target'), findsOneWidget);
 
-    TestGesture gesture3 = await tester.startGesture(firstLocation, pointer: 10);
+    final TestGesture gesture3 = await tester.startGesture(firstLocation, pointer: 10);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -1059,15 +1059,15 @@ void main() {
       ]
     ));
 
-    TestGesture firstGesture = await tester.startGesture(const Point(10.0, 10.0), pointer: 24);
-    TestGesture secondGesture = await tester.startGesture(const Point(10.0, 20.0), pointer: 25);
+    final TestGesture firstGesture = await tester.startGesture(const Point(10.0, 10.0), pointer: 24);
+    final TestGesture secondGesture = await tester.startGesture(const Point(10.0, 20.0), pointer: 25);
 
     await firstGesture.moveBy(const Offset(100.0, 0.0));
     await secondGesture.up();
   });
 
   testWidgets('DragTarget does not set state when remove from the tree', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
     Point firstLocation, secondLocation;
 
     await tester.pumpWidget(new MaterialApp(
@@ -1099,7 +1099,7 @@ void main() {
     expect(events, isEmpty);
 
     firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     await tester.pump(const Duration(seconds: 20));
@@ -1126,7 +1126,7 @@ void main() {
   });
 
   testWidgets('Drag and drop - remove draggable', (WidgetTester tester) async {
-    List<int> accepted = <int>[];
+    final List<int> accepted = <int>[];
 
     await tester.pumpWidget(new MaterialApp(
         home: new Column(
@@ -1153,8 +1153,8 @@ void main() {
     expect(find.text('Dragging'), findsNothing);
     expect(find.text('Target'), findsOneWidget);
 
-    Point firstLocation = tester.getCenter(find.text('Source'));
-    TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    final Point firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
     await tester.pump();
 
     expect(accepted, isEmpty);
@@ -1182,7 +1182,7 @@ void main() {
     expect(find.text('Dragging'), findsOneWidget);
     expect(find.text('Target'), findsOneWidget);
 
-    Point secondLocation = tester.getCenter(find.text('Target'));
+    final Point secondLocation = tester.getCenter(find.text('Target'));
     await gesture.moveTo(secondLocation);
     await tester.pump();
 
@@ -1201,7 +1201,7 @@ void main() {
   });
 
   testWidgets('Tap above long-press draggable works', (WidgetTester tester) async {
-    List<String> events = <String>[];
+    final List<String> events = <String>[];
 
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
@@ -1234,7 +1234,7 @@ void main() {
 }
 
 Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 0.0, double left: 0.0}) async {
-  List<int> accepted = <int>[];
+  final List<int> accepted = <int>[];
   int dragStartedCount = 0;
 
   await tester.pumpWidget(new Stack(children: <Widget>[
@@ -1274,8 +1274,8 @@ Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 
   expect(find.text('Target'), findsOneWidget);
   expect(dragStartedCount, 0);
 
-  Point firstLocation = tester.getCenter(find.text('Source'));
-  TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+  final Point firstLocation = tester.getCenter(find.text('Source'));
+  final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
   await tester.pump();
 
   expect(accepted, isEmpty);
@@ -1285,7 +1285,7 @@ Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 
   expect(dragStartedCount, 1);
 
 
-  Point secondLocation = tester.getBottomRight(find.text('Target'));
+  final Point secondLocation = tester.getBottomRight(find.text('Target'));
   await gesture.moveTo(secondLocation);
   await tester.pump();
 
@@ -1295,9 +1295,9 @@ Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 
   expect(find.text('Target'), findsOneWidget);
   expect(dragStartedCount, 1);
 
-  Point feedbackTopLeft = tester.getTopLeft(find.text('Dragging'));
-  Point sourceTopLeft = tester.getTopLeft(find.text('Source'));
-  Offset dragOffset = secondLocation - firstLocation;
+  final Point feedbackTopLeft = tester.getTopLeft(find.text('Dragging'));
+  final Point sourceTopLeft = tester.getTopLeft(find.text('Source'));
+  final Offset dragOffset = secondLocation - firstLocation;
   expect(feedbackTopLeft, equals(sourceTopLeft + dragOffset));
 }
 

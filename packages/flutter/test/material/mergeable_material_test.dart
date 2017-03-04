@@ -52,11 +52,11 @@ void matches(BorderRadius borderRadius, RadiusType top, RadiusType bottom) {
 }
 
 BorderRadius getBorderRadius(WidgetTester tester, int index) {
-  List<Element> containers = tester.elementList(find.byType(Container))
+  final List<Element> containers = tester.elementList(find.byType(Container))
                                    .toList();
 
-  Container container = containers[index + 2].widget;
-  BoxDecoration boxDecoration = container.decoration;
+  final Container container = containers[index + 2].widget;
+  final BoxDecoration boxDecoration = container.decoration;
 
   return boxDecoration.borderRadius;
 }
@@ -71,7 +71,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(0));
   });
 
@@ -242,7 +242,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(216));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -312,7 +312,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -384,7 +384,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -533,7 +533,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -608,7 +608,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(300));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -670,7 +670,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(200));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -767,7 +767,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(332));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -841,7 +841,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(216));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);
@@ -939,7 +939,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
+    final RenderBox box = tester.renderObject(find.byType(MergeableMaterial));
     expect(box.size.height, equals(332));
 
     matches(getBorderRadius(tester, 0), RadiusType.Round, RadiusType.Round);

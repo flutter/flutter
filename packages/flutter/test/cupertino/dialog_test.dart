@@ -69,7 +69,7 @@ void main() {
       child: new Text('Ok'),
     ));
 
-    DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
     expect(widget.style.color.alpha, lessThan(255));

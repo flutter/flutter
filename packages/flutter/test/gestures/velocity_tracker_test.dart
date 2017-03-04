@@ -8,7 +8,7 @@ import 'velocity_tracker_data.dart';
 
 bool _withinTolerance(double actual, double expected) {
   const double kTolerance = 0.001; // Within .1% of expected value
-  double diff = (actual - expected)/expected;
+  final double diff = (actual - expected)/expected;
   return diff.abs() < kTolerance;
 }
 
@@ -19,7 +19,7 @@ bool _checkVelocity(Velocity actual, Offset expected) {
 }
 
 void main() {
-  List<Offset> expected = const <Offset>[
+  final List<Offset> expected = const <Offset>[
     const Offset(219.5762939453125, 1304.6705322265625),
     const Offset(355.6900939941406, 967.1700439453125),
     const Offset(12.651158332824707, -36.9227180480957),
@@ -36,7 +36,7 @@ void main() {
   ];
 
   test('Velocity tracker gives expected results', () {
-    VelocityTracker tracker = new VelocityTracker();
+    final VelocityTracker tracker = new VelocityTracker();
     int i = 0;
     for (PointerEvent event in velocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
@@ -49,8 +49,8 @@ void main() {
   });
 
   test('Velocity control test', () {
-    Velocity velocity1 = const Velocity(pixelsPerSecond: const Offset(7.0, 0.0));
-    Velocity velocity2 = const Velocity(pixelsPerSecond: const Offset(12.0, 0.0));
+    final Velocity velocity1 = const Velocity(pixelsPerSecond: const Offset(7.0, 0.0));
+    final Velocity velocity2 = const Velocity(pixelsPerSecond: const Offset(12.0, 0.0));
     expect(velocity1, equals(const Velocity(pixelsPerSecond: const Offset(7.0, 0.0))));
     expect(velocity1, isNot(equals(velocity2)));
     expect(velocity2 - velocity1, equals(const Velocity(pixelsPerSecond: const Offset(5.0, 0.0))));
@@ -62,7 +62,7 @@ void main() {
 
   test('Interrupted velocity estimation', () {
     // Regression test for https://github.com/flutter/flutter/pull/7510
-    VelocityTracker tracker = new VelocityTracker();
+    final VelocityTracker tracker = new VelocityTracker();
     for (PointerEvent event in interruptedVelocityEventData) {
       if (event is PointerDownEvent || event is PointerMoveEvent)
         tracker.addPosition(event.timeStamp, event.position);

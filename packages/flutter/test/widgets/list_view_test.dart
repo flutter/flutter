@@ -22,7 +22,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
     expect(box.size.height, equals(200.0));
 
     expect(find.text('0'), findsOneWidget);
@@ -54,7 +54,7 @@ void main() {
   });
 
   testWidgets('ListView large scroll jump', (WidgetTester tester) async {
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(
       new ListView(
@@ -75,8 +75,8 @@ void main() {
     expect(log, equals(<int>[0, 1, 2]));
     log.clear();
 
-    ScrollableState state = tester.state(find.byType(Scrollable));
-    ScrollPosition position = state.position;
+    final ScrollableState state = tester.state(find.byType(Scrollable));
+    final ScrollPosition position = state.position;
     position.jumpTo(2025.0);
 
     expect(log, isEmpty);

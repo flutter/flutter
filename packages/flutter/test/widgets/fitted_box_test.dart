@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Can size according to aspect ratio', (WidgetTester tester) async {
-    Key outside = new UniqueKey();
-    Key inside = new UniqueKey();
+    final Key outside = new UniqueKey();
+    final Key inside = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -27,24 +27,24 @@ void main() {
       )
     );
 
-    RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+    final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
     expect(outsideBox.size.width, 200.0);
     expect(outsideBox.size.height, 100.0);
 
-    RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+    final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(const Point(100.0, 50.0));
-    Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 100.0));
+    final Point insidePoint = insideBox.localToGlobal(const Point(100.0, 50.0));
+    final Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 100.0));
 
     expect(outsidePoint, equals(const Point(500.0, 350.0)));
     expect(insidePoint, equals(outsidePoint));
   });
 
   testWidgets('Can contain child', (WidgetTester tester) async {
-    Key outside = new UniqueKey();
-    Key inside = new UniqueKey();
+    final Key outside = new UniqueKey();
+    final Key inside = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -63,23 +63,23 @@ void main() {
       )
     );
 
-    RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+    final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
     expect(outsideBox.size.width, 200.0);
     expect(outsideBox.size.height, 200.0);
 
-    RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+    final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(const Point(100.0, 0.0));
-    Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 50.0));
+    final Point insidePoint = insideBox.localToGlobal(const Point(100.0, 0.0));
+    final Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 50.0));
 
     expect(insidePoint, equals(outsidePoint));
   });
 
   testWidgets('Child can conver', (WidgetTester tester) async {
-    Key outside = new UniqueKey();
-    Key inside = new UniqueKey();
+    final Key outside = new UniqueKey();
+    final Key inside = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -99,16 +99,16 @@ void main() {
       )
     );
 
-    RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+    final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
     expect(outsideBox.size.width, 200.0);
     expect(outsideBox.size.height, 200.0);
 
-    RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+    final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    Point insidePoint = insideBox.localToGlobal(const Point(50.0, 25.0));
-    Point outsidePoint = outsideBox.localToGlobal(const Point(100.0, 100.0));
+    final Point insidePoint = insideBox.localToGlobal(const Point(50.0, 25.0));
+    final Point outsidePoint = outsideBox.localToGlobal(const Point(100.0, 100.0));
 
     expect(insidePoint, equals(outsidePoint));
   });

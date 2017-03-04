@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Divider control test', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new Divider()));
-    RenderBox box = tester.firstRenderObject(find.byType(Divider));
+    final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 15.0);
   });
 }

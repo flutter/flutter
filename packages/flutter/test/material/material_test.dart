@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('ListView scroll does not repaint', (WidgetTester tester) async {
-    List<Size> log = <Size>[];
+    final List<Size> log = <Size>[];
 
     await tester.pumpWidget(
       new Column(
