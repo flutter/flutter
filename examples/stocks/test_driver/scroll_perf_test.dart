@@ -21,9 +21,9 @@ void main() {
     });
 
     test('measure', () async {
-      Timeline timeline = await driver.traceAction(() async {
+      final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        SerializableFinder stockList = find.byValueKey('stock-list');
+        final SerializableFinder stockList = find.byValueKey('stock-list');
         expect(stockList, isNotNull);
 
         // Scroll down
@@ -39,7 +39,7 @@ void main() {
         }
       });
 
-      TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
       summary.writeSummaryToFile('stocks_scroll_perf', pretty: true);
       summary.writeTimelineToFile('stocks_scroll_perf', pretty: true);
     });
