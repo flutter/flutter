@@ -145,11 +145,11 @@ void main() {
       expect(bytes, 69);
     });
     testUsingContext('add new package with double slashes in URI', () async {
-      String packageName = 'doubleslashpkg';
+      final String packageName = 'doubleslashpkg';
       await _createPackage(packageName, 'somefile.txt', doubleSlash: true);
 
-      Set<String> fileFilter = new Set<String>();
-      List<Uri> pkgUris = <Uri>[fs.path.toUri(basePath)]..addAll(_packages.values);
+      final Set<String> fileFilter = new Set<String>();
+      final List<Uri> pkgUris = <Uri>[fs.path.toUri(basePath)]..addAll(_packages.values);
       for (Uri pkgUri in pkgUris) {
         if (!pkgUri.isAbsolute) {
           pkgUri = fs.path.toUri(fs.path.join(basePath, pkgUri.path));
@@ -161,7 +161,7 @@ void main() {
             .toList());
       }
 
-      int bytes = await devFS.update(fileFilter: fileFilter);
+      final int bytes = await devFS.update(fileFilter: fileFilter);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
         'writeFile test packages/doubleslashpkg/somefile.txt',
@@ -364,7 +364,7 @@ Future<Null> _createPackage(String pkgName, String pkgFileName, { bool doubleSla
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
     // Force two separators into the path.
-    String doubleSlash = fs.path.separator + fs.path.separator;
+    final String doubleSlash = fs.path.separator + fs.path.separator;
     pkgFilePath = pkgTempDir.path + doubleSlash  + fs.path.join(pkgName, 'lib', pkgFileName);
   }
   final File pkgFile = fs.file(pkgFilePath);
