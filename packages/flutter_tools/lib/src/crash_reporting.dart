@@ -144,11 +144,11 @@ void resetBaseCrashUrlForTesting() {
   _testing = false;
 }
 
-// TODO(b/35811443): switch to plain package:http
+
 // Below is a patched version of the MultipartRequest class from package:http
-// made to conform to Flutter's style guide and comply with the crash reporting
-// backend. Specifically, the backend does not correctly handle quoted boundary
-// values. The implementation below:
+// made to conform to Flutter's style guide and to comply with the crash
+// reporting backend. Specifically, the backend does not correctly handle quoted
+// boundary values. The implementation below:
 //   - reduces boundary character set to those that do not need quotes
 //   - compensates for the smaller set by generating a longer boundary value
 
