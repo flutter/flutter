@@ -30,14 +30,14 @@ MessageLookupByLibrary _findExact(localeName) {
 /// User programs should call this before using [localeName] for messages.
 Future initializeMessages(String localeName) {
   initializeInternalMessageLookup(() => new CompositeMessageLookup());
-  final var lib = _deferredLibraries[Intl.canonicalizedLocale(localeName)];
-  final var load = lib == null ? new Future.value(false) : lib();
+  var lib = _deferredLibraries[Intl.canonicalizedLocale(localeName)];
+  var load = lib == null ? new Future.value(false) : lib();
   return load.then((_) =>
       messageLookup.addLocale(localeName, _findGeneratedMessagesFor));
 }
 
 MessageLookupByLibrary _findGeneratedMessagesFor(locale) {
-  final var actualLocale = Intl.verifiedLocale(locale, (x) => _findExact(x) != null,
+  var actualLocale = Intl.verifiedLocale(locale, (x) => _findExact(x) != null,
       onFailure: (_) => null);
   if (actualLocale == null) return null;
   return _findExact(actualLocale);
