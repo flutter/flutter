@@ -29,7 +29,7 @@ class _DriverBinding extends WidgetsFlutterBinding { // TODO(ianh): refactor so 
   @override
   void initServiceExtensions() {
     super.initServiceExtensions();
-    FlutterDriverExtension extension = new FlutterDriverExtension();
+    final FlutterDriverExtension extension = new FlutterDriverExtension();
     registerServiceExtension(
       name: _extensionMethodName,
       callback: extension.call
@@ -119,22 +119,22 @@ class FlutterDriverExtension {
   /// The returned JSON is command specific. Generally the caller deserializes
   /// the result into a subclass of [Result], but that's not strictly required.
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
-    String commandKind = params['command'];
+    final String commandKind = params['command'];
     try {
-      CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
-      CommandDeserializerCallback commandDeserializer =
+      final CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
+      final CommandDeserializerCallback commandDeserializer =
           _commandDeserializers[commandKind];
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
-      Command command = commandDeserializer(params);
-      Result response = await commandHandler(command).timeout(command.timeout);
+      final Command command = commandDeserializer(params);
+      final Result response = await commandHandler(command).timeout(command.timeout);
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
-      String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
+      final String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
       _log.error(msg);
       return _makeResponse(msg, isError: true);
     } catch (error, stackTrace) {
-      String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
+      final String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
       _log.error(msg);
       return _makeResponse(msg, isError: true);
     }
@@ -185,7 +185,7 @@ class FlutterDriverExtension {
 
   Finder _createByTooltipMessageFinder(ByTooltipMessage arguments) {
     return find.byElementPredicate((Element element) {
-      Widget widget = element.widget;
+      final Widget widget = element.widget;
       if (widget is Tooltip)
         return widget.message == arguments.text;
       return false;
@@ -204,7 +204,7 @@ class FlutterDriverExtension {
   }
 
   Finder _createFinder(SerializableFinder finder) {
-    FinderConstructor constructor = _finders[finder.finderType];
+    final FinderConstructor constructor = _finders[finder.finderType];
 
     if (constructor == null)
       throw 'Unsupported finder type: ${finder.finderType}';
@@ -213,13 +213,13 @@ class FlutterDriverExtension {
   }
 
   Future<TapResult> _tap(Command command) async {
-    Tap tapCommand = command;
+    final Tap tapCommand = command;
     await _prober.tap(await _waitForElement(_createFinder(tapCommand.finder)));
     return new TapResult();
   }
 
   Future<WaitForResult> _waitFor(Command command) async {
-    WaitFor waitForCommand = command;
+    final WaitFor waitForCommand = command;
     if ((await _waitForElement(_createFinder(waitForCommand.finder))).evaluate().isNotEmpty)
       return new WaitForResult();
     else
@@ -232,15 +232,15 @@ class FlutterDriverExtension {
   }
 
   Future<ScrollResult> _scroll(Command command) async {
-    Scroll scrollCommand = command;
-    Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
+    final Scroll scrollCommand = command;
+    final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
-    Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
-    Duration pause = scrollCommand.duration ~/ totalMoves;
-    Point startLocation = _prober.getCenter(target);
+    final Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
+    final Duration pause = scrollCommand.duration ~/ totalMoves;
+    final Point startLocation = _prober.getCenter(target);
     Point currentLocation = startLocation;
-    TestPointer pointer = new TestPointer(1);
-    HitTestResult hitTest = new HitTestResult();
+    final TestPointer pointer = new TestPointer(1);
+    final HitTestResult hitTest = new HitTestResult();
 
     _prober.binding.hitTest(hitTest, startLocation);
     _prober.binding.dispatchEvent(pointer.down(startLocation), hitTest);
@@ -256,38 +256,38 @@ class FlutterDriverExtension {
   }
 
   Future<ScrollResult> _scrollIntoView(Command command) async {
-    ScrollIntoView scrollIntoViewCommand = command;
-    Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
+    final ScrollIntoView scrollIntoViewCommand = command;
+    final Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
     return new ScrollResult();
   }
 
   Future<SetInputTextResult> _setInputText(Command command) async {
-    SetInputText setInputTextCommand = command;
-    Finder target = await _waitForElement(_createFinder(setInputTextCommand.finder));
-    Input input = target.evaluate().single.widget;
+    final SetInputText setInputTextCommand = command;
+    final Finder target = await _waitForElement(_createFinder(setInputTextCommand.finder));
+    final Input input = target.evaluate().single.widget;
     input.onChanged(new InputValue(text: setInputTextCommand.text));
     return new SetInputTextResult();
   }
 
   Future<SubmitInputTextResult> _submitInputText(Command command) async {
-    SubmitInputText submitInputTextCommand = command;
-    Finder target = await _waitForElement(_createFinder(submitInputTextCommand.finder));
-    Input input = target.evaluate().single.widget;
+    final SubmitInputText submitInputTextCommand = command;
+    final Finder target = await _waitForElement(_createFinder(submitInputTextCommand.finder));
+    final Input input = target.evaluate().single.widget;
     input.onSubmitted(input.value);
     return new SubmitInputTextResult(input.value.text);
   }
 
   Future<GetTextResult> _getText(Command command) async {
-    GetText getTextCommand = command;
-    Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
+    final GetText getTextCommand = command;
+    final Finder target = await _waitForElement(_createFinder(getTextCommand.finder));
     // TODO(yjbanov): support more ways to read text
-    Text text = target.evaluate().single.widget;
+    final Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
   }
 
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
-    SetFrameSync setFrameSyncCommand = command;
+    final SetFrameSync setFrameSyncCommand = command;
     _frameSync = setFrameSyncCommand.enabled;
     return new SetFrameSyncResult();
   }

@@ -8,8 +8,8 @@ import 'package:flutter_driver/src/matcher_util.dart';
 void main() {
   group('match', () {
     test('matches', () {
-      _TestMatcher matcher = new _TestMatcher(1);
-      MatchResult ok = match(1, matcher);
+      final _TestMatcher matcher = new _TestMatcher(1);
+      final MatchResult ok = match(1, matcher);
       expect(ok.hasMatched, isTrue);
       expect(ok.mismatchDescription, isNull);
       expect(matcher.matchState1 is Map<dynamic, dynamic>, isTrue);
@@ -17,8 +17,8 @@ void main() {
     });
 
     test('mismatches', () {
-      _TestMatcher matcher = new _TestMatcher(2);
-      MatchResult fail = match(1, matcher);
+      final _TestMatcher matcher = new _TestMatcher(2);
+      final MatchResult fail = match(1, matcher);
       expect(fail.hasMatched, isFalse);
       expect(fail.mismatchDescription, 'mismatch!');
       expect(matcher.matchState1, matcher.matchState2);

@@ -93,7 +93,7 @@ class TimelineSummary {
       {String destinationDirectory, bool pretty: false}) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
-    File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
+    final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline.json'));
     await file.writeAsString(_encodeJson(_timeline.json, pretty));
   }
 
@@ -102,7 +102,7 @@ class TimelineSummary {
       {String destinationDirectory, bool pretty: false}) async {
     destinationDirectory ??= testOutputsDirectory;
     await fs.directory(destinationDirectory).create(recursive: true);
-    File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
+    final File file = fs.file(path.join(destinationDirectory, '$traceName.timeline_summary.json'));
     await file.writeAsString(_encodeJson(summaryJson, pretty));
   }
 
@@ -127,15 +127,15 @@ class TimelineSummary {
   ///
   /// See: https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU
   List<TimedEvent> _extractBeginEndEvents(String name) {
-    List<TimedEvent> result = <TimedEvent>[];
+    final List<TimedEvent> result = <TimedEvent>[];
 
     // Timeline does not guarantee that the first event is the "begin" event.
-    Iterator<TimelineEvent> events = _extractNamedEvents(name)
+    final Iterator<TimelineEvent> events = _extractNamedEvents(name)
         .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
     while(events.moveNext()) {
-      TimelineEvent beginEvent = events.current;
+      final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
-        TimelineEvent endEvent = events.current;
+        final TimelineEvent endEvent = events.current;
         result.add(new TimedEvent(
             beginEvent.timestampMicros,
             endEvent.timestampMicros
@@ -150,7 +150,7 @@ class TimelineSummary {
     if (durations.isEmpty)
       return null;
 
-    int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
+    final int total = durations.fold<int>(0, (int t, Duration duration) => t + duration.inMilliseconds);
     return total / durations.length;
   }
 
