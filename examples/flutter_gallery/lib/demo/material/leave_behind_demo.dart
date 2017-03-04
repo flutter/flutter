@@ -77,7 +77,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   void handleUndo(LeaveBehindItem item) {
-    int insertionIndex = lowerBound(leaveBehindItems, item);
+    final int insertionIndex = lowerBound(leaveBehindItems, item);
     setState(() {
       leaveBehindItems.insert(insertionIndex, item);
     });

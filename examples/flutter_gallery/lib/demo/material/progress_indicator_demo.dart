@@ -62,7 +62,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   }
 
   Widget _buildIndicators(BuildContext context, Widget child) {
-    List<Widget> indicators = <Widget>[
+    final List<Widget> indicators = <Widget>[
       new SizedBox(
         width: 200.0,
         child: new LinearProgressIndicator()

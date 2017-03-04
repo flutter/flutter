@@ -18,9 +18,9 @@ void main() {
     });
 
     test('navigation', () async {
-      Completer<Null> completer = new Completer<Null>();
+      final Completer<Null> completer = new Completer<Null>();
       bool scroll = true;
-      SerializableFinder menuItem = find.text('Text fields');
+      final SerializableFinder menuItem = find.text('Text fields');
       driver.waitFor(menuItem).then<Null>((Null value) async {
         scroll = false;
         await new Future<Null>.delayed(kWaitBetweenActions);

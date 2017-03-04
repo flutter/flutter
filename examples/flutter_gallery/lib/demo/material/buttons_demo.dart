@@ -49,7 +49,7 @@ class ButtonsDemo extends StatefulWidget {
 class _ButtonsDemoState extends State<ButtonsDemo> {
   @override
   Widget build(BuildContext context) {
-    List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+    final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
         tabName: 'RAISED',
         description: _raisedText,
