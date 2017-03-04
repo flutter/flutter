@@ -28,13 +28,13 @@ class AnalyzeOnce extends AnalyzeBase {
 
   @override
   Future<Null> analyze() async {
-    Stopwatch stopwatch = new Stopwatch()..start();
-    Set<Directory> pubSpecDirectories = new HashSet<Directory>();
-    List<File> dartFiles = <File>[];
+    final Stopwatch stopwatch = new Stopwatch()..start();
+    final Set<Directory> pubSpecDirectories = new HashSet<Directory>();
+    final List<File> dartFiles = <File>[];
 
     for (String file in argResults.rest.toList()) {
       file = fs.path.normalize(fs.path.absolute(file));
-      String root = fs.path.rootPrefix(file);
+      final String root = fs.path.rootPrefix(file);
       dartFiles.add(fs.file(file));
       while (file != root) {
         file = fs.path.dirname(file);
@@ -45,15 +45,15 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
-    bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
-    bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
+    final bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
+    final bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
+    final bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
     //TODO (pq): revisit package and directory defaults
 
     if (currentDirectory  && !flutterRepo) {
       // ./*.dart
-      Directory currentDirectory = fs.directory('.');
+      final Directory currentDirectory = fs.directory('.');
       bool foundOne = false;
       for (FileSystemEntity entry in currentDirectory.listSync()) {
         if (isDartFile(entry)) {
@@ -67,7 +67,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (currentPackage && !flutterRepo) {
       // **/.*dart
-      Directory currentDirectory = fs.directory('.');
+      final Directory currentDirectory = fs.directory('.');
       _collectDartFiles(currentDirectory, dartFiles);
       pubSpecDirectories.add(currentDirectory);
     }
@@ -80,21 +80,21 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     // determine what all the various .packages files depend on
-    PackageDependencyTracker dependencies = new PackageDependencyTracker();
+    final PackageDependencyTracker dependencies = new PackageDependencyTracker();
     for (Directory directory in pubSpecDirectories) {
-      String pubSpecYamlPath = fs.path.join(directory.path, 'pubspec.yaml');
-      File pubSpecYamlFile = fs.file(pubSpecYamlPath);
+      final String pubSpecYamlPath = fs.path.join(directory.path, 'pubspec.yaml');
+      final File pubSpecYamlFile = fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
         // we are analyzing the actual canonical source for this package;
         // make sure we remember that, in case all the packages are actually
         // pointing elsewhere somehow.
-        yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
-        String packageName = pubSpecYaml['name'];
-        String packagePath = fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
+        final yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
+        final String packageName = pubSpecYaml['name'];
+        final String packagePath = fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
         dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }
-      String dotPackagesPath = fs.path.join(directory.path, '.packages');
-      File dotPackages = fs.file(dotPackagesPath);
+      final String dotPackagesPath = fs.path.join(directory.path, '.packages');
+      final File dotPackages = fs.file(dotPackagesPath);
       if (dotPackages.existsSync()) {
         // this directory has opinions about what we should be using
         dotPackages
@@ -102,10 +102,10 @@ class AnalyzeOnce extends AnalyzeBase {
           .split('\n')
           .where((String line) => !line.startsWith(new RegExp(r'^ *#')))
           .forEach((String line) {
-            int colon = line.indexOf(':');
+            final int colon = line.indexOf(':');
             if (colon > 0) {
-              String packageName = line.substring(0, colon);
-              String packagePath = fs.path.fromUri(line.substring(colon+1));
+              final String packageName = line.substring(0, colon);
+              final String packagePath = fs.path.fromUri(line.substring(colon+1));
               // Ensure that we only add the `analyzer` package defined in the vended SDK (and referred to with a local fs.path. directive).
               // Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored since they would produce
               // spurious conflicts.
@@ -118,7 +118,7 @@ class AnalyzeOnce extends AnalyzeBase {
 
     // prepare a union of all the .packages files
     if (dependencies.hasConflicts) {
-      StringBuffer message = new StringBuffer();
+      final StringBuffer message = new StringBuffer();
       message.writeln(dependencies.generateConflictReport());
       message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo) {
@@ -131,7 +131,7 @@ class AnalyzeOnce extends AnalyzeBase {
           '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
       throwToolExit(message.toString());
     }
-    Map<String, String> packages = dependencies.asPackageMap();
+    final Map<String, String> packages = dependencies.asPackageMap();
 
     Cache.releaseLockEarly();
 
@@ -142,16 +142,16 @@ class AnalyzeOnce extends AnalyzeBase {
         logger.printStatus('Analyzing ${dartFiles.length} files...');
       }
     }
-    DriverOptions options = new DriverOptions();
+    final DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
     options.analysisOptionsFile = flutterRepo
         ? fs.path.join(Cache.flutterRoot, '.analysis_options_repo')
         : fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'lib', 'analysis_options_user.yaml');
-    AnalysisDriver analyzer = new AnalysisDriver(options);
+    final AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
-    List<AnalysisErrorDescription> errors = analyzer.analyze(dartFiles);
+    final List<AnalysisErrorDescription> errors = analyzer.analyze(dartFiles);
 
     int errorCount = 0;
     int membersMissingDocumentation = 0;
@@ -176,7 +176,7 @@ class AnalyzeOnce extends AnalyzeBase {
     dumpErrors(errors.map<String>((AnalysisErrorDescription error) => error.asString()));
 
     stopwatch.stop();
-    String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+    final String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
     if (isBenchmarking)
       writeBenchmark(stopwatch, errorCount, membersMissingDocumentation);
@@ -200,7 +200,7 @@ class AnalyzeOnce extends AnalyzeBase {
   List<String> flutterRootComponents;
   bool isFlutterLibrary(String filename) {
     flutterRootComponents ??= fs.path.normalize(fs.path.absolute(Cache.flutterRoot)).split(fs.path.separator);
-    List<String> filenameComponents = fs.path.normalize(fs.path.absolute(filename)).split(fs.path.separator);
+    final List<String> filenameComponents = fs.path.normalize(fs.path.absolute(filename)).split(fs.path.separator);
     if (filenameComponents.length < flutterRootComponents.length + 4) // the 4: 'packages', package_name, 'lib', file_name
       return false;
     for (int index = 0; index < flutterRootComponents.length; index += 1) {
@@ -225,7 +225,7 @@ class AnalyzeOnce extends AnalyzeBase {
       if (isDartFile(entity))
         collected.add(entity);
       if (entity is Directory) {
-        String name = fs.path.basename(entity.path);
+        final String name = fs.path.basename(entity.path);
         if (!name.startsWith('.') && name != 'packages')
           _collectDartFiles(entity, collected);
       }
@@ -262,10 +262,10 @@ class PackageDependency {
   }
   void describeConflict(StringBuffer result) {
     assert(hasConflict);
-    List<String> targets = values.keys.toList();
+    final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b].length.compareTo(values[a].length));
     for (String target in targets) {
-      int count = values[target].length;
+      final int count = values[target].length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
       bool canonical = false;
       for (String source in values[target]) {
@@ -308,7 +308,7 @@ class PackageDependencyTracker {
 
   String generateConflictReport() {
     assert(hasConflicts);
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     for (String package in packages.keys.where((String package) => packages[package].hasConflict)) {
       result.writeln('Package "$package" has conflicts:');
       packages[package].describeConflict(result);
@@ -317,7 +317,7 @@ class PackageDependencyTracker {
   }
 
   Map<String, String> asPackageMap() {
-    Map<String, String> result = <String, String>{};
+    final Map<String, String> result = <String, String>{};
     for (String package in packages.keys)
       result[package] = packages[package].target;
     return result;

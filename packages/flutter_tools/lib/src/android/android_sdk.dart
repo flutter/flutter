@@ -44,7 +44,7 @@ String getAdbPath([AndroidSdk existingSdk]) {
   if (existingSdk?.adbPath != null)
     return existingSdk.adbPath;
 
-  AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {
     return os.which('adb')?.path;
@@ -89,7 +89,7 @@ class AndroidSdk {
     if (aaptBin != null) {
       // Make sure we're using the aapt from the SDK.
       aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
-      String dir = aaptBin.parent.parent.parent.path;
+      final String dir = aaptBin.parent.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
@@ -98,7 +98,7 @@ class AndroidSdk {
     if (adbBin != null) {
       // Make sure we're using the adb from the SDK.
       adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
-      String dir = adbBin.parent.parent.path;
+      final String dir = adbBin.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
@@ -137,7 +137,7 @@ class AndroidSdk {
   void _init() {
     List<String> platforms = <String>[]; // android-22, ...
 
-    Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
+    final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
@@ -148,7 +148,7 @@ class AndroidSdk {
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
-    Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
+    final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()

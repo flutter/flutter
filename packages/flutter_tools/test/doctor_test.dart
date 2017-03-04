@@ -11,7 +11,7 @@ import 'src/context.dart';
 void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
-      ValidationResult result = await new IntelliJValidatorTestTarget('Test').validate();
+      final ValidationResult result = await new IntelliJValidatorTestTarget('Test').validate();
       expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(2));

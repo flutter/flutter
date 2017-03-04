@@ -92,7 +92,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> runSkia(File outputFile) async {
-    Uri skpUri = new Uri(scheme: 'http', host: '127.0.0.1',
+    final Uri skpUri = new Uri(scheme: 'http', host: '127.0.0.1',
         port: int.parse(argResults[_kSkia]),
         path: '/skp');
 
@@ -108,28 +108,28 @@ class ScreenshotCommand extends FlutterCommand {
       throwToolExit('Skia screenshot failed: $skpUri\n$e\n\n$errorHelpText');
     }
     if (skpResponse.statusCode != HttpStatus.OK) {
-      String error = await skpResponse.stream.toStringStream().join();
+      final String error = await skpResponse.stream.toStringStream().join();
       throwToolExit('Error: $error\n\n$errorHelpText');
     }
 
     if (argResults[_kSkiaServe] != null) {
-      Uri skiaserveUri = Uri.parse(argResults[_kSkiaServe]);
-      Uri postUri = new Uri.http(skiaserveUri.authority, '/new');
-      http.MultipartRequest postRequest = new http.MultipartRequest('POST', postUri);
+      final Uri skiaserveUri = Uri.parse(argResults[_kSkiaServe]);
+      final Uri postUri = new Uri.http(skiaserveUri.authority, '/new');
+      final http.MultipartRequest postRequest = new http.MultipartRequest('POST', postUri);
       postRequest.files.add(new http.MultipartFile(
           'file', skpResponse.stream, skpResponse.contentLength));
 
-      http.StreamedResponse postResponse = await postRequest.send();
+      final http.StreamedResponse postResponse = await postRequest.send();
       if (postResponse.statusCode != HttpStatus.OK)
         throwToolExit('Failed to post Skia picture to skiaserve.\n\n$errorHelpText');
     } else {
       outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
-      IOSink sink = outputFile.openWrite();
+      final IOSink sink = outputFile.openWrite();
       await sink.addStream(skpResponse.stream);
       await sink.close();
       await showOutputFileInfo(outputFile);
       if (await outputFile.length() < 1000) {
-        String content = await outputFile.readAsString();
+        final String content = await outputFile.readAsString();
         if (content.startsWith('{"jsonrpc":"2.0", "error"'))
           throwToolExit('\nIt appears the output file contains an error message, not valid skia output.\n\n$errorHelpText');
       }
@@ -137,7 +137,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> showOutputFileInfo(File outputFile) async {
-    int sizeKB = (await outputFile.length()) ~/ 1024;
+    final int sizeKB = (await outputFile.length()) ~/ 1024;
     printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
   }
 }

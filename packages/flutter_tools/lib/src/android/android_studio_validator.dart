@@ -19,15 +19,15 @@ class AndroidStudioValidator extends DoctorValidator {
   AndroidStudioValidator(this._studio) : super('Android Studio');
 
   static List<DoctorValidator> get allValidators {
-    List<DoctorValidator> validators = <DoctorValidator>[];
-    List<AndroidStudio> studios = AndroidStudio.allInstalled();
+    final List<DoctorValidator> validators = <DoctorValidator>[];
+    final List<AndroidStudio> studios = AndroidStudio.allInstalled();
     if (studios.isEmpty) {
       validators.add(new NoAndroidStudioValidator());
     } else {
       validators.addAll(studios
           .map((AndroidStudio studio) => new AndroidStudioValidator(studio)));
     }
-    String cfgGradleDir = config.getValue('gradle-dir');
+    final String cfgGradleDir = config.getValue('gradle-dir');
     if (cfgGradleDir != null) {
       validators.add(new ConfiguredGradleValidator(cfgGradleDir));
     }
@@ -36,9 +36,9 @@ class AndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
-    String studioVersionText = 'version ${_studio.version}';
+    final String studioVersionText = 'version ${_studio.version}';
     messages
         .add(new ValidationMessage('Android Studio at ${_studio.directory}'));
     if (_studio.isValid) {
@@ -66,9 +66,9 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    String cfgAndroidStudio = config.getValue('android-studio-dir');
+    final String cfgAndroidStudio = config.getValue('android-studio-dir');
     if (cfgAndroidStudio != null) {
       messages.add(
           new ValidationMessage.error('android-studio-dir = $cfgAndroidStudio\n'
@@ -91,7 +91,7 @@ class ConfiguredGradleValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     ValidationType type = ValidationType.missing;
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
     messages.add(new ValidationMessage('gradle-dir = $cfgGradleDir'));
 
@@ -103,7 +103,7 @@ class ConfiguredGradleValidator extends DoctorValidator {
     String versionString;
     if (processManager.canRun(gradleExecutable)) {
       type = ValidationType.partial;
-      ProcessResult result =
+      final ProcessResult result =
           processManager.runSync(<String>[gradleExecutable, '--version']);
       if (result.exitCode == 0) {
         versionString = result.stdout
@@ -111,7 +111,7 @@ class ConfiguredGradleValidator extends DoctorValidator {
             .split('\n')
             .firstWhere((String s) => s.startsWith('Gradle '))
             .substring('Gradle '.length);
-        Version version = new Version.parse(versionString) ?? Version.unknown;
+        final Version version = new Version.parse(versionString) ?? Version.unknown;
         if (version >= minGradleVersion) {
           type = ValidationType.installed;
         } else {

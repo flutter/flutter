@@ -148,7 +148,7 @@ class RunCommand extends RunCommandBase {
 
   @override
   String get usagePath {
-    String command = shouldUseHotMode() ? 'hotrun' : name;
+    final String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
       return command;
@@ -180,7 +180,7 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = argResults['hot'] ?? false;
     final bool shouldUseHotMode = hotArg;
     return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
   }
@@ -209,7 +209,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     if (argResults['machine']) {
-      Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
+      final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
@@ -223,7 +223,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      int result = await app.runner.waitForAppToFinish();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
       return null;
@@ -250,7 +250,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
     }
 
-    String pidFile = argResults['pid-file'];
+    final String pidFile = argResults['pid-file'];
     if (pidFile != null) {
       // Write our pid to the file.
       fs.file(pidFile).writeAsStringSync(pid.toString());
@@ -281,7 +281,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    int result = await runner.run(
+    final int result = await runner.run(
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );

@@ -13,7 +13,7 @@ import 'src/mocks.dart';
 void main() {
   group('trace', () {
     testUsingContext('returns 1 when no Android device is connected', () async {
-      TraceCommand command = new TraceCommand();
+      final TraceCommand command = new TraceCommand();
       applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['trace']);

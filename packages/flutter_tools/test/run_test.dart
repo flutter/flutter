@@ -13,7 +13,7 @@ import 'src/mocks.dart';
 void main() {
   group('run', () {
     testUsingContext('fails when target not found', () async {
-      RunCommand command = new RunCommand();
+      final RunCommand command = new RunCommand();
       applyMocksToCommand(command);
       try {
         await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']);
