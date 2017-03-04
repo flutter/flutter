@@ -43,7 +43,7 @@ Future<TaskResult> task(TaskFunction task) {
     print('${rec.level.name}: ${rec.time}: ${rec.message}');
   });
 
-  _TaskRunner runner = new _TaskRunner(task);
+  final _TaskRunner runner = new _TaskRunner(task);
   runner.keepVmAliveUntilTaskRunRequested();
   return runner.whenDone;
 }
@@ -63,7 +63,7 @@ class _TaskRunner {
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
-      TaskResult result = await run();
+      final TaskResult result = await run();
       return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -78,7 +78,7 @@ class _TaskRunner {
   Future<TaskResult> run() async {
     try {
       _taskStarted = true;
-      TaskResult result = await _performTask().timeout(taskTimeout);
+      final TaskResult result = await _performTask().timeout(taskTimeout);
       _completer.complete(result);
       return result;
     } on TimeoutException catch (_) {
@@ -117,11 +117,11 @@ class _TaskRunner {
   }
 
   Future<TaskResult> _performTask() {
-    Completer<TaskResult> completer = new Completer<TaskResult>();
+    final Completer<TaskResult> completer = new Completer<TaskResult>();
     Chain.capture(() async {
       completer.complete(await task());
     }, onError: (dynamic taskError, Chain taskErrorStack) {
-      String message = 'Task failed: $taskError';
+      final String message = 'Task failed: $taskError';
       stderr
         ..writeln(message)
         ..writeln('\nStack trace:')
@@ -210,7 +210,7 @@ class TaskResult {
   ///       "reason": failure reason string valid only for unsuccessful results
   ///     }
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> json = <String, dynamic>{
+    final Map<String, dynamic> json = <String, dynamic>{
       'success': succeeded,
     };
 
