@@ -45,9 +45,9 @@ class TravelDestinationItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
-    TextStyle descriptionStyle = theme.textTheme.subhead;
+    final ThemeData theme = Theme.of(context);
+    final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
+    final TextStyle descriptionStyle = theme.textTheme.subhead;
 
     return new SizedBox(
       height: height,

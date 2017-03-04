@@ -147,7 +147,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         ),
         delegate: new SliverChildBuilderDelegate(
           (BuildContext context, int index) {
-            Recipe recipe = config.recipes[index];
+            final Recipe recipe = config.recipes[index];
             return new RecipeCard(
               recipe: recipe,
               onTap: () { showRecipePage(context, recipe); },
