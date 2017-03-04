@@ -20,7 +20,7 @@ void main() {
         onPressed: null,
       ))
     );
-    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
       // 1 10px character + 16px * 2 is smaller than the 48px minimum.
@@ -35,7 +35,7 @@ void main() {
         onPressed: null,
       ))
     );
-    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
       // 4 10px character + 16px * 2 = 72.
@@ -49,7 +49,7 @@ void main() {
       onPressed: null,
       color: new Color(0xFFFFFFFF),
     )));
-    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
       // 1 10px character + 64 * 2 = 138 for buttons with background.
@@ -63,7 +63,7 @@ void main() {
       onPressed: null,
       padding: new EdgeInsets.all(100.0),
     )));
-    RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
       const Size.square(210.0),

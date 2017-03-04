@@ -105,7 +105,7 @@ class RelativeRect {
     if (a == null)
       return new RelativeRect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
     if (b == null) {
-      double k = 1.0 - t;
+      final double k = 1.0 - t;
       return new RelativeRect.fromLTRB(b.left * k, b.top * k, b.right * k, b.bottom * k);
     }
     return new RelativeRect.fromLTRB(
@@ -179,7 +179,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
   @override
   String toString() {
-    List<String> values = <String>[];
+    final List<String> values = <String>[];
     if (top != null)
       values.add('top=$top');
     if (right != null)
@@ -493,9 +493,9 @@ class RenderIndexedStack extends RenderStack {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);
-    RenderBox child = _childAtIndex();
+    final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    Point transformed = new Point(position.x - childParentData.offset.dx,
+    final Point transformed = new Point(position.x - childParentData.offset.dx,
                                   position.y - childParentData.offset.dy);
     return child.hitTest(result, position: transformed);
   }
@@ -504,7 +504,7 @@ class RenderIndexedStack extends RenderStack {
   void paintStack(PaintingContext context, Offset offset) {
     if (firstChild == null || index == null)
       return;
-    RenderBox child = _childAtIndex();
+    final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
     context.paintChild(child, childParentData.offset + offset);
   }

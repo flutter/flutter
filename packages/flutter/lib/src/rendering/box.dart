@@ -245,7 +245,7 @@ class BoxConstraints extends Constraints {
     double height = size.height;
     assert(width > 0.0);
     assert(height > 0.0);
-    double aspectRatio = width / height;
+    final double aspectRatio = width / height;
 
     if (width > maxWidth) {
       width = maxWidth;
@@ -387,13 +387,13 @@ class BoxConstraints extends Constraints {
   }) {
     assert(() {
       void throwError(String message) {
-        StringBuffer information = new StringBuffer();
+        final StringBuffer information = new StringBuffer();
         if (informationCollector != null)
           informationCollector(information);
         throw new FlutterError('$message\n${information}The offending constraints were:\n  $this');
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
-        List<String> affectedFieldsList = <String>[];
+        final List<String> affectedFieldsList = <String>[];
         if (minWidth.isNaN)
           affectedFieldsList.add('minWidth');
         if (maxWidth.isNaN)
@@ -481,7 +481,7 @@ class BoxConstraints extends Constraints {
 
   @override
   String toString() {
-    String annotation = isNormalized ? '' : '; NOT NORMALIZED';
+    final String annotation = isNormalized ? '' : '; NOT NORMALIZED';
     if (minWidth == double.INFINITY && minHeight == double.INFINITY)
       return 'BoxConstraints(biggest$annotation)';
     if (minWidth == 0 && maxWidth == double.INFINITY &&
@@ -1466,7 +1466,7 @@ abstract class RenderBox extends RenderObject {
       return false;
     });
     assert(_debugSetDoingBaseline(true));
-    double result = getDistanceToActualBaseline(baseline);
+    final double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
     if (result == null && !onlyReal)
       return size.height;
@@ -1534,14 +1534,14 @@ abstract class RenderBox extends RenderObject {
       }
       // verify that the size is not infinite
       if (_size.isInfinite) {
-        StringBuffer information = new StringBuffer();
+        final StringBuffer information = new StringBuffer();
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
           information.writeln('  $node');
-          List<String> description = <String>[];
+          final List<String> description = <String>[];
           node.debugFillDescription(description);
           for (String line in description)
             information.writeln('  $line');
@@ -1552,7 +1552,7 @@ abstract class RenderBox extends RenderObject {
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded height constraint is:');
           information.writeln('  $node');
-          List<String> description = <String>[];
+          final List<String> description = <String>[];
           node.debugFillDescription(description);
           for (String line in description)
             information.writeln('  $line');
@@ -1584,7 +1584,7 @@ abstract class RenderBox extends RenderObject {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        StringBuffer failures = new StringBuffer();
+        final StringBuffer failures = new StringBuffer();
         int failureCount = 0;
 
         double testIntrinsic(double function(double extent), String name, double constraint) {
@@ -1813,7 +1813,7 @@ abstract class RenderBox extends RenderObject {
   /// object) instead of from the global coordinate system.
   Point globalToLocal(Point point, { RenderObject ancestor }) {
     final Matrix4 transform = getTransformTo(ancestor);
-    double det = transform.invert();
+    final double det = transform.invert();
     if (det == 0.0)
       return Point.origin;
     return MatrixUtils.transformPoint(transform, point);
@@ -1918,7 +1918,7 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
-      Paint paint = new Paint()
+      final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
        ..color = debugPaintSizeColor;
@@ -1933,12 +1933,12 @@ abstract class RenderBox extends RenderObject {
   @protected
   void debugPaintBaselines(PaintingContext context, Offset offset) {
     assert(() {
-      Paint paint = new Paint()
+      final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 0.25;
       Path path;
       // ideographic baseline
-      double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
+      final double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
       if (baselineI != null) {
         paint.color = debugPaintIdeographicBaselineColor;
         path = new Path();
@@ -1947,7 +1947,7 @@ abstract class RenderBox extends RenderObject {
         context.canvas.drawPath(path, paint);
       }
       // alphabetic baseline
-      double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
+      final double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
       if (baselineA != null) {
         paint.color = debugPaintAlphabeticBaselineColor;
         path = new Path();
@@ -1970,7 +1970,7 @@ abstract class RenderBox extends RenderObject {
   void debugPaintPointers(PaintingContext context, Offset offset) {
     assert(() {
       if (_debugActivePointers > 0) {
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
          ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
         context.canvas.drawRect(offset & size, paint);
       }
@@ -2002,7 +2002,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      double result = child.getDistanceToActualBaseline(baseline);
+      final double result = child.getDistanceToActualBaseline(baseline);
       if (result != null)
         return result + childParentData.offset.dy;
       child = childParentData.nextSibling;
@@ -2042,7 +2042,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      Point transformed = new Point(position.x - childParentData.offset.dx,
+      final Point transformed = new Point(position.x - childParentData.offset.dx,
                                     position.y - childParentData.offset.dy);
       if (child.hitTest(result, position: transformed))
         return true;

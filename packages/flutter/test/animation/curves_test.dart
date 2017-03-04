@@ -17,8 +17,8 @@ void main() {
   });
 
   test('Curve flipped control test', () {
-    Curve ease = Curves.ease;
-    Curve flippedEase = ease.flipped;
+    final Curve ease = Curves.ease;
+    final Curve flippedEase = ease.flipped;
     expect(flippedEase.transform(0.0), lessThan(0.001));
     expect(flippedEase.transform(0.5), lessThan(ease.transform(0.5)));
     expect(flippedEase.transform(1.0), greaterThan(0.999));
@@ -26,7 +26,7 @@ void main() {
   });
 
   test('Threshold has a threshold', () {
-    Curve step = const Threshold(0.25);
+    final Curve step = const Threshold(0.25);
     expect(step.transform(0.0), 0.0);
     expect(step.transform(0.24), 0.0);
     expect(step.transform(0.25), 1.0);
@@ -55,7 +55,7 @@ void main() {
   });
 
   List<double> estimateBounds(Curve curve) {
-    List<double> values = <double>[];
+    final List<double> values = <double>[];
 
     values.add(curve.transform(0.0));
     values.add(curve.transform(0.1));
@@ -95,12 +95,12 @@ void main() {
   test('Decelerate does so', () {
     expect(Curves.decelerate, hasOneLineDescription);
 
-    List<double> bounds = estimateBounds(Curves.decelerate);
+    final List<double> bounds = estimateBounds(Curves.decelerate);
     expect(bounds[0], greaterThanOrEqualTo(0.0));
     expect(bounds[1], lessThanOrEqualTo(1.0));
 
-    double d1 = Curves.decelerate.transform(0.2) - Curves.decelerate.transform(0.0);
-    double d2 = Curves.decelerate.transform(1.0) - Curves.decelerate.transform(0.8);
+    final double d1 = Curves.decelerate.transform(0.2) - Curves.decelerate.transform(0.0);
+    final double d2 = Curves.decelerate.transform(1.0) - Curves.decelerate.transform(0.8);
     expect(d2, lessThan(d1));
   });
 

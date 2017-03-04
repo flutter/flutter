@@ -130,7 +130,7 @@ class RawKeyUpEvent extends RawKeyEvent {
 RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
   RawKeyEventData data;
 
-  String keymap = message['keymap'];
+  final String keymap = message['keymap'];
   switch (keymap) {
     case 'android':
       data = new RawKeyEventDataAndroid(
@@ -154,7 +154,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
       throw new FlutterError('Unknown keymap for key events: $keymap');
   }
 
-  String type = message['type'];
+  final String type = message['type'];
   switch (type) {
     case 'keydown':
       return new RawKeyDownEvent(data: data);
@@ -207,7 +207,7 @@ class RawKeyboard {
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     if (_listeners.isEmpty)
       return;
-    RawKeyEvent event = _toRawKeyEvent(message);
+    final RawKeyEvent event = _toRawKeyEvent(message);
     if (event == null)
       return;
     for (ValueChanged<RawKeyEvent> listener in new List<ValueChanged<RawKeyEvent>>.from(_listeners))

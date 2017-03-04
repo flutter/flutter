@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('GridTile control test', (WidgetTester tester) async {
-    Key headerKey = new UniqueKey();
-    Key footerKey = new UniqueKey();
+    final Key headerKey = new UniqueKey();
+    final Key footerKey = new UniqueKey();
 
     await tester.pumpWidget(new GridTile(
       header: new GridTileBar(

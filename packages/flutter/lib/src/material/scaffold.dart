@@ -469,10 +469,10 @@ class Scaffold extends StatefulWidget {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
-      _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+      final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
       return scaffold?.hasDrawer ?? false;
     } else {
-      ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+      final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
       return scaffold?.hasDrawer ?? false;
     }
   }
@@ -640,12 +640,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
-    Completer<T> completer = new Completer<T>();
-    GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    AnimationController controller = BottomSheet.createAnimationController(this)
+    final Completer<T> completer = new Completer<T>();
+    final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
+    final AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     _PersistentBottomSheet bottomSheet;
-    LocalHistoryEntry entry = new LocalHistoryEntry(
+    final LocalHistoryEntry entry = new LocalHistoryEntry(
       onRemove: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         assert(bottomSheetKey.currentState != null);
@@ -758,7 +758,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (!config.resizeToAvoidBottomPadding)
       padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
@@ -783,9 +783,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (config.appBar != null) {
       assert(config.appBar.primary || padding.top == 0.0, 'A non-primary AppBar was passed to a Scaffold but the MediaQuery in scope has top padding.');
-      double topPadding = config.appBar.primary ? padding.top : 0.0;
+      final double topPadding = config.appBar.primary ? padding.top : 0.0;
       Widget appBar = config.appBar;
-      double extent = config.appBar.minExtent + topPadding;
+      final double extent = config.appBar.minExtent + topPadding;
       if (config.appBar.flexibleSpace != null) {
         appBar = FlexibleSpaceBar.createSettings(
           currentExtent: extent,
@@ -838,7 +838,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         bottomSheets.addAll(_dismissedBottomSheets);
       if (_currentBottomSheet != null)
         bottomSheets.add(_currentBottomSheet._widget);
-      Widget stack = new Stack(
+      final Widget stack = new Stack(
         children: bottomSheets,
         alignment: FractionalOffset.bottomCenter,
       );

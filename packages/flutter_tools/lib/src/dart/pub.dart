@@ -15,10 +15,10 @@ import 'sdk.dart';
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (!dotPackages.existsSync())
     return true;
-  DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
+  final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
-  File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
       flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
@@ -34,8 +34,8 @@ Future<Null> pubGet({
   if (directory == null)
     directory = fs.currentDirectory.path;
 
-  File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
-  File dotPackages = fs.file(fs.path.join(directory, '.packages'));
+  final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
+  final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
@@ -44,10 +44,10 @@ Future<Null> pubGet({
   }
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
-    String command = upgrade ? 'upgrade' : 'get';
-    Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
+    final String command = upgrade ? 'upgrade' : 'get';
+    final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
-    int code = await runCommandAndStreamOutput(
+    final int code = await runCommandAndStreamOutput(
       <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
       workingDirectory: directory,
       mapFunction: _filterOverrideWarnings,

@@ -303,7 +303,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void _show() {
     assert(_mode != _RefreshIndicatorMode.refresh);
     assert(_mode != _RefreshIndicatorMode.snap);
-    Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = new Completer<Null>();
     _pendingRefreshFuture = completer.future;
     _mode = _RefreshIndicatorMode.snap;
     _positionController
@@ -356,7 +356,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
 
   @override
   Widget build(BuildContext context) {
-    Widget child = new NotificationListener<ScrollNotification>(
+    final Widget child = new NotificationListener<ScrollNotification>(
       key: _key,
       onNotification: _handleScrollNotification,
       child: new NotificationListener<OverscrollIndicatorNotification>(

@@ -91,7 +91,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
       value: config.value,
       activeColor: config.activeColor ?? themeData.accentColor,
@@ -174,40 +174,40 @@ class _RenderCheckbox extends RenderToggleable {
 
     paintRadialReaction(canvas, offset, size.center(Point.origin));
 
-    double t = position.value;
+    final double t = position.value;
 
     Color borderColor = inactiveColor;
     if (onChanged != null)
       borderColor = t >= 0.25 ? activeColor : Color.lerp(inactiveColor, activeColor, t * 4.0);
 
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = borderColor;
 
-    double inset = 1.0 - (t - 0.5).abs() * 2.0;
-    double rectSize = _kEdgeSize - inset * _kStrokeWidth;
-    Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
+    final double inset = 1.0 - (t - 0.5).abs() * 2.0;
+    final double rectSize = _kEdgeSize - inset * _kStrokeWidth;
+    final Rect rect = new Rect.fromLTWH(offsetX + inset, offsetY + inset, rectSize, rectSize);
 
-    RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
+    final RRect outer = new RRect.fromRectAndRadius(rect, _kEdgeRadius);
     if (t <= 0.5) {
       // Outline
-      RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
+      final RRect inner = outer.deflate(math.min(rectSize / 2.0, _kStrokeWidth + rectSize * t));
       canvas.drawDRRect(outer, inner, paint);
     } else {
       // Background
       canvas.drawRRect(outer, paint);
 
       // White inner check
-      double value = (t - 0.5) * 2.0;
+      final double value = (t - 0.5) * 2.0;
       paint
         ..color = const Color(0xFFFFFFFF)
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kStrokeWidth;
-      Path path = new Path();
-      Point start = const Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      Point mid = const Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      Point end = const Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-      Point drawStart = Point.lerp(start, mid, 1.0 - value);
-      Point drawEnd = Point.lerp(mid, end, value);
+      final Path path = new Path();
+      final Point start = const Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      final Point mid = const Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      final Point end = const Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+      final Point drawStart = Point.lerp(start, mid, 1.0 - value);
+      final Point drawEnd = Point.lerp(mid, end, value);
       path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
       path.lineTo(offsetX + mid.x, offsetY + mid.y);
       path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);

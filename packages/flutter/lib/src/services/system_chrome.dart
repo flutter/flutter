@@ -90,7 +90,7 @@ enum SystemUiOverlayStyle {
 const String _kChannelName = 'flutter/platform';
 
 List<String> _stringify(List<dynamic> list) {
-  List<String> result = <String>[];
+  final List<String> result = <String>[];
   for (dynamic item in list)
     result.add(item.toString());
   return result;

@@ -32,7 +32,7 @@ class CoverageCollector {
     assert(process != null);
     assert(port != null);
 
-    int pid = process.pid;
+    final int pid = process.pid;
     int exitCode;
     process.exitCode.then<Null>((int code) {
       exitCode = code;
@@ -68,12 +68,12 @@ class CoverageCollector {
     if (_globalHitmap == null)
       return null;
     if (formatter == null) {
-      coverage.Resolver resolver = new coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
-      String packagePath = fs.currentDirectory.path;
-      List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
+      final coverage.Resolver resolver = new coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
+      final String packagePath = fs.currentDirectory.path;
+      final List<String> reportOn = <String>[fs.path.join(packagePath, 'lib')];
       formatter = new coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
-    String result = await formatter.format(_globalHitmap);
+    final String result = await formatter.format(_globalHitmap);
     _globalHitmap = null;
     return result;
   }

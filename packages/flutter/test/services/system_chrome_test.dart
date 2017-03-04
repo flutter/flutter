@@ -21,7 +21,7 @@ void main() {
   });
 
   test('setPreferredOrientations control test', () async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
       log.add(message);
@@ -35,7 +35,7 @@ void main() {
   });
 
   test('setApplicationSwitcherDescription control test', () async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
       log.add(message);
@@ -49,7 +49,7 @@ void main() {
   });
 
   test('setEnabledSystemUIOverlays control test', () async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
       log.add(message);

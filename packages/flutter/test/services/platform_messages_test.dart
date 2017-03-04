@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Mock string message handler control test', () async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     PlatformMessages.setMockStringMessageHandler('test1', (String message) async {
       log.add(message);
@@ -23,7 +23,7 @@ void main() {
   });
 
   test('Mock JSON message handler control test', () async {
-    List<dynamic> log = <dynamic>[];
+    final List<dynamic> log = <dynamic>[];
 
     PlatformMessages.setMockJSONMessageHandler('test2', (dynamic message) async {
       log.add(message);

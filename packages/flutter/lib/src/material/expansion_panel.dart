@@ -114,7 +114,7 @@ class ExpansionPanelList extends StatelessWidget {
       if (_isChildExpanded(i) && i != 0 && !_isChildExpanded(i - 1))
         items.add(new MaterialGap(key: new ValueKey<int>(i * 2 - 1)));
 
-      Row header = new Row(
+      final Row header = new Row(
         children: <Widget>[
           new Expanded(
             child: new AnimatedContainer(

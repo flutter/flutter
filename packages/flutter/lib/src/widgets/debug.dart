@@ -61,7 +61,7 @@ bool debugProfileBuildsEnabled = false;
 bool debugHighlightDeprecatedWidgets = false;
 
 Key _firstNonUniqueKey(Iterable<Widget> widgets) {
-  Set<Key> keySet = new HashSet<Key>();
+  final Set<Key> keySet = new HashSet<Key>();
   for (Widget widget in widgets) {
     assert(widget != null);
     if (widget.key == null)
@@ -138,7 +138,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
     if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
-      Element element = context;
+      final Element element = context;
       throw new FlutterError(
         'No Table widget found.\n'
         '${context.widget.runtimeType} widgets require a Table widget ancestor.\n'

@@ -68,8 +68,8 @@ class _DatePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    TextTheme headerTextTheme = themeData.primaryTextTheme;
+    final ThemeData themeData = Theme.of(context);
+    final TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
     Color yearColor;
     switch(themeData.primaryColorBrightness) {
@@ -82,8 +82,8 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == _DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
-    TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor, height: 1.4);
+    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
+    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor, height: 1.4);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -386,7 +386,7 @@ class _MonthPickerState extends State<MonthPicker> {
 
   void _updateCurrentDate() {
     _todayDate = new DateTime.now();
-    DateTime tomorrow = new DateTime(_todayDate.year, _todayDate.month, _todayDate.day + 1);
+    final DateTime tomorrow = new DateTime(_todayDate.year, _todayDate.month, _todayDate.day + 1);
     Duration timeUntilTomorrow = tomorrow.difference(_todayDate);
     timeUntilTomorrow += const Duration(seconds: 1);  // so we don't miss it by rounding
     if (_timer != null)
@@ -668,13 +668,13 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    Widget picker = new Flexible(
+    final Widget picker = new Flexible(
       child: new SizedBox(
         height: _kMaxDayPickerHeight,
         child: _buildPicker(),
       ),
     );
-    Widget actions = new ButtonTheme.bar(
+    final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
@@ -692,7 +692,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     return new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-          Widget header = new _DatePickerHeader(
+          final Widget header = new _DatePickerHeader(
             selectedDate: _selectedDate,
             mode: _mode,
             onModeChanged: _handleModeChanged,

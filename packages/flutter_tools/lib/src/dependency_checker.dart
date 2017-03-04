@@ -34,8 +34,8 @@ class DependencyChecker {
 
     // Check all dependency modification times.
     for (String path in _dependencies) {
-      File file = fs.file(path);
-      FileStat stat = file.statSync();
+      final File file = fs.file(path);
+      final FileStat stat = file.statSync();
       if (stat.type == FileSystemEntityType.NOT_FOUND) {
         printTrace('DependencyChecker: Error stating $path.');
         return true;

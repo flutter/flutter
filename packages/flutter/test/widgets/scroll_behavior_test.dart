@@ -27,7 +27,7 @@ void main() {
     TestScrollBehavior behavior;
     ScrollPosition position;
 
-    Widget scrollView = new SingleChildScrollView(
+    final Widget scrollView = new SingleChildScrollView(
       key: key,
       child: new Builder(
         builder: (BuildContext context) {

@@ -13,17 +13,17 @@ class TestState extends State<StatefulWidget> {
 
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
-    Key key = new UniqueKey();
+    final Key key = new UniqueKey();
     expect(key, hasOneLineDescription);
     expect(key, isNot(equals(new UniqueKey())));
   });
 
   testWidgets('ObjectKey control test', (WidgetTester tester) async {
-    Object a = new Object();
-    Object b = new Object();
-    Key keyA = new ObjectKey(a);
-    Key keyA2 = new ObjectKey(a);
-    Key keyB = new ObjectKey(b);
+    final Object a = new Object();
+    final Object b = new Object();
+    final Key keyA = new ObjectKey(a);
+    final Key keyA2 = new ObjectKey(a);
+    final Key keyB = new ObjectKey(b);
 
     expect(keyA, hasOneLineDescription);
     expect(keyA, equals(keyA2));
@@ -32,11 +32,11 @@ void main() {
   });
 
   testWidgets('GlobalObjectKey control test', (WidgetTester tester) async {
-    Object a = new Object();
-    Object b = new Object();
-    Key keyA = new GlobalObjectKey(a);
-    Key keyA2 = new GlobalObjectKey(a);
-    Key keyB = new GlobalObjectKey(b);
+    final Object a = new Object();
+    final Object b = new Object();
+    final Key keyA = new GlobalObjectKey(a);
+    final Key keyA2 = new GlobalObjectKey(a);
+    final Key keyB = new GlobalObjectKey(b);
 
     expect(keyA, hasOneLineDescription);
     expect(keyA, equals(keyA2));
@@ -45,7 +45,7 @@ void main() {
   });
 
   testWidgets('GlobalKey duplication', (WidgetTester tester) async {
-    Key key = new GlobalKey(debugLabel: 'problematic');
+    final Key key = new GlobalKey(debugLabel: 'problematic');
 
     await tester.pumpWidget(new Stack(
       children: <Widget>[
@@ -78,7 +78,7 @@ void main() {
   });
 
   testWidgets('GlobalKey notification exception handling', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Container(key: key));
 
@@ -118,7 +118,7 @@ void main() {
   });
 
   testWidgets('State toString', (WidgetTester tester) async {
-    TestState state = new TestState();
+    final TestState state = new TestState();
     expect(state.toString(), contains('no config'));
   });
 
@@ -128,12 +128,12 @@ void main() {
     final DebugPrintCallback oldCallback = debugPrint;
     debugPrintGlobalKeyedWidgetLifecycle = true;
 
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
     debugPrint = (String message, { int wrapWidth }) {
       log.add(message);
     };
 
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new Container(key: key));
     expect(log, isEmpty);
     await tester.pumpWidget(new Placeholder());
@@ -157,7 +157,7 @@ void main() {
         new Container(),
       ],
     ));
-    MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext;
     expect(
       element.children.map((Element element) => element.widget.key), // ignore: INVALID_USE_OF_PROTECTED_MEMBER
       <Key>[null, key1, null, key2, null],

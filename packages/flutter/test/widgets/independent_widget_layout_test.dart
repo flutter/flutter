@@ -97,11 +97,11 @@ class TriggerableState extends State<TriggerableWidget> {
 
 void main() {
   testWidgets('no crosstalk between widget build owners', (WidgetTester tester) async {
-    Trigger trigger1 = new Trigger();
-    Counter counter1 = new Counter();
-    Trigger trigger2 = new Trigger();
-    Counter counter2 = new Counter();
-    OffscreenWidgetTree tree = new OffscreenWidgetTree();
+    final Trigger trigger1 = new Trigger();
+    final Counter counter1 = new Counter();
+    final Trigger trigger2 = new Trigger();
+    final Counter counter2 = new Counter();
+    final OffscreenWidgetTree tree = new OffscreenWidgetTree();
     // Both counts should start at zero
     expect(counter1.count, equals(0));
     expect(counter2.count, equals(0));

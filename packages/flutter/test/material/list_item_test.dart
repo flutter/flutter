@@ -26,7 +26,7 @@ void main() {
   });
 
   testWidgets('ListItem control test', (WidgetTester tester) async {
-    List<String> titles = <String>[ 'first', 'second', 'third' ];
+    final List<String> titles = <String>[ 'first', 'second', 'third' ];
 
     await tester.pumpWidget(new MaterialApp(
       home: new Material(

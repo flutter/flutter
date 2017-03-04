@@ -97,7 +97,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 void main() {
   testWidgets('Control test for CustomSingleChildLayout',
       (WidgetTester tester) async {
-    TestSingleChildLayoutDelegate delegate =
+    final TestSingleChildLayoutDelegate delegate =
         new TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -159,7 +159,7 @@ void main() {
   });
 
   testWidgets('Can use listener for relayout', (WidgetTester tester) async {
-    ValueNotifier<Size> size = new ValueNotifier<Size>(const Size(100.0, 200.0));
+    final ValueNotifier<Size> size = new ValueNotifier<Size>(const Size(100.0, 200.0));
 
     await tester.pumpWidget(buildFrame(new NotifierLayoutDelegate(size)));
 

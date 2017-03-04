@@ -31,7 +31,7 @@ class UpdatePackagesCommand extends FlutterCommand {
   final bool hidden;
 
   Future<Null> _downloadCoverageData() async {
-    Status status = logger.startProgress("Downloading lcov data for package:flutter...", expectSlowOperation: true);
+    final Status status = logger.startProgress("Downloading lcov data for package:flutter...", expectSlowOperation: true);
     final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
     fs.file(fs.path.join(coverageDir, 'lcov.base.info'))

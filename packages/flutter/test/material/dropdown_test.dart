@@ -153,7 +153,7 @@ void main() {
 
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
     int value = 4;
-    List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
+    final List<DropdownMenuItem<int>> items = <DropdownMenuItem<int>>[];
     for (int i = 0; i < 20; ++i)
       items.add(new DropdownMenuItem<int>(value: i, child: new Text('$i')));
 
@@ -161,7 +161,7 @@ void main() {
       value = newValue;
     }
 
-    DropdownButton<int> button = new DropdownButton<int>(
+    final DropdownButton<int> button = new DropdownButton<int>(
       value: value,
       onChanged: handleChanged,
       items: items,
@@ -204,15 +204,15 @@ void main() {
   });
 
   testWidgets('Dropdown button aligns selected menu item', (WidgetTester tester) async {
-    Key buttonKey = new UniqueKey();
-    String value = 'two';
+    final Key buttonKey = new UniqueKey();
+    final String value = 'two';
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value);
 
     await tester.pumpWidget(build());
-    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
-    Point buttonOriginBeforeTap = buttonBox.localToGlobal(Point.origin);
+    final Point buttonOriginBeforeTap = buttonBox.localToGlobal(Point.origin);
 
     await tester.tap(find.text('two'));
     await tester.pump();
@@ -224,7 +224,7 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same origin and height as the dropdown button.
-    List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
@@ -238,13 +238,13 @@ void main() {
   });
 
   testWidgets('Dropdown button with isDense:true aligns selected menu item', (WidgetTester tester) async {
-    Key buttonKey = new UniqueKey();
-    String value = 'two';
+    final Key buttonKey = new UniqueKey();
+    final String value = 'two';
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, isDense: true);
 
     await tester.pumpWidget(build());
-    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     await tester.tap(find.text('two'));
@@ -254,18 +254,18 @@ void main() {
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
     // have the same vertical center as the button.
-    List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
+    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
 
     // When isDense is true, the button's height is reduced. The menu items'
     // heights are not.
-    double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
+    final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
-      Point buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Point.origin));
-      Point itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Point.origin));
+      final Point buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Point.origin));
+      final Point itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Point.origin));
       expect(buttonBoxCenter.y, equals(itemBoxCenter.y));
     }
 
@@ -275,19 +275,19 @@ void main() {
   });
 
   testWidgets('Size of DropdownButton with null value', (WidgetTester tester) async {
-    Key buttonKey = new UniqueKey();
+    final Key buttonKey = new UniqueKey();
     String value;
 
     Widget build() => buildFrame(buttonKey: buttonKey, value: value);
 
     await tester.pumpWidget(build());
-    RenderBox buttonBoxNullValue = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBoxNullValue = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBoxNullValue.attached);
 
 
     value = 'three';
     await tester.pumpWidget(build());
-    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // A Dropdown button with a null value should be the same size as a
@@ -297,7 +297,7 @@ void main() {
   });
 
   testWidgets('Layout of a DropdownButton with null value', (WidgetTester tester) async {
-    Key buttonKey = new UniqueKey();
+    final Key buttonKey = new UniqueKey();
     String value;
 
     void onChanged(String newValue) {
@@ -307,7 +307,7 @@ void main() {
     Widget build() => buildFrame(buttonKey: buttonKey, value: value, onChanged: onChanged);
 
     await tester.pumpWidget(build());
-    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // Show the menu.
@@ -325,7 +325,7 @@ void main() {
   });
 
   testWidgets('Size of DropdownButton with null value and a hint', (WidgetTester tester) async {
-    Key buttonKey = new UniqueKey();
+    final Key buttonKey = new UniqueKey();
     String value;
 
     // The hint will define the dropdown's width
@@ -333,13 +333,13 @@ void main() {
 
     await tester.pumpWidget(build());
     expect(find.text('onetwothree'), findsOneWidget);
-    RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBoxHintValue = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBoxHintValue.attached);
 
 
     value = 'three';
     await tester.pumpWidget(build());
-    RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
+    final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
 
     // A Dropdown button with a null value and a hint should be the same size as a

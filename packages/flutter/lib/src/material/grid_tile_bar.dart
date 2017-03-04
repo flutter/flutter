@@ -73,8 +73,8 @@ class GridTileBar extends StatelessWidget {
     if (leading != null)
       children.add(new Padding(padding: const EdgeInsets.only(right: 8.0), child: leading));
 
-    ThemeData theme = Theme.of(context);
-    ThemeData darkTheme = new ThemeData(
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness

@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('OverflowEntries context contains Overlay',
       (WidgetTester tester) async {
-    Key overlayKey = new UniqueKey();
+    final Key overlayKey = new UniqueKey();
     bool didBuild = false;
     await tester.pumpWidget(new Overlay(
       key: overlayKey,
@@ -16,7 +16,7 @@ void main() {
         new OverlayEntry(
           builder: (BuildContext context) {
             didBuild = true;
-            Overlay overlay = context.ancestorWidgetOfExactType(Overlay);
+            final Overlay overlay = context.ancestorWidgetOfExactType(Overlay);
             expect(overlay, isNotNull);
             expect(overlay.key, equals(overlayKey));
             return new Container();

@@ -146,7 +146,7 @@ class AnimationController extends Animation<double>
 
   /// Recreates the [Ticker] with the new [TickerProvider].
   void resync(TickerProvider vsync) {
-    Ticker oldTicker = _ticker;
+    final Ticker oldTicker = _ticker;
     _ticker = vsync.createTicker(_tick);
     _ticker.absorbTicker(oldTicker);
   }
@@ -279,8 +279,8 @@ class AnimationController extends Animation<double>
         }
         return true;
       });
-      double range = upperBound - lowerBound;
-      double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
+      final double range = upperBound - lowerBound;
+      final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
     }
     stop();
@@ -326,7 +326,7 @@ class AnimationController extends Animation<double>
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
-    Simulation simulation = new SpringSimulation(_kFlingSpringDescription, value, target, velocity)
+    final Simulation simulation = new SpringSimulation(_kFlingSpringDescription, value, target, velocity)
       ..tolerance = _kFlingTolerance;
     return animateWith(simulation);
   }
@@ -343,7 +343,7 @@ class AnimationController extends Animation<double>
     _simulation = simulation;
     _lastElapsedDuration = Duration.ZERO;
     _value = simulation.x(0.0).clamp(lowerBound, upperBound);
-    Future<Null> result = _ticker.start();
+    final Future<Null> result = _ticker.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
       AnimationStatus.reverse;
@@ -381,7 +381,7 @@ class AnimationController extends Animation<double>
 
   AnimationStatus _lastReportedStatus = AnimationStatus.dismissed;
   void _checkStatusChanged() {
-    AnimationStatus newStatus = status;
+    final AnimationStatus newStatus = status;
     if (_lastReportedStatus != newStatus) {
       _lastReportedStatus = newStatus;
       notifyStatusListeners(newStatus);
@@ -390,7 +390,7 @@ class AnimationController extends Animation<double>
 
   void _tick(Duration elapsed) {
     _lastElapsedDuration = elapsed;
-    double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
+    final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND;
     assert(elapsedInSeconds >= 0.0);
     _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
     if (_simulation.isDone(elapsedInSeconds)) {
@@ -405,10 +405,10 @@ class AnimationController extends Animation<double>
 
   @override
   String toStringDetails() {
-    String paused = isAnimating ? '' : '; paused';
-    String ticker = _ticker == null ? '; DISPOSED' : (_ticker.muted ? '; silenced' : '');
-    String label = debugLabel == null ? '' : '; for $debugLabel';
-    String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
+    final String paused = isAnimating ? '' : '; paused';
+    final String ticker = _ticker == null ? '; DISPOSED' : (_ticker.muted ? '; silenced' : '');
+    final String label = debugLabel == null ? '' : '; for $debugLabel';
+    final String more = '${super.toStringDetails()} ${value.toStringAsFixed(3)}';
     return '$more$paused$ticker$label';
   }
 }
@@ -428,7 +428,7 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
+    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
     if (t == 0.0)
       return _begin;
     else if (t == 1.0)
@@ -439,7 +439,7 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double dx(double timeInSeconds) {
-    double epsilon = tolerance.time;
+    final double epsilon = tolerance.time;
     return (x(timeInSeconds + epsilon) - x(timeInSeconds - epsilon)) / (2 * epsilon);
   }
 

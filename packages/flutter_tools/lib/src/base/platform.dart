@@ -24,19 +24,19 @@ Platform get platform => context == null ? _kLocalPlatform : context[Platform];
 /// non-empty directory as long as there is no collision with the `"platform"`
 /// subdirectory.
 Future<Null> enableRecordingPlatform(String location) async {
-  Directory dir = getRecordingSink(location, _kRecordingType);
-  File file = _getPlatformManifest(dir);
+  final Directory dir = getRecordingSink(location, _kRecordingType);
+  final File file = _getPlatformManifest(dir);
   await file.writeAsString(platform.toJson(), flush: true);
 }
 
 Future<Null> enableReplayPlatform(String location) async {
-  Directory dir = getReplaySource(location, _kRecordingType);
-  File file = _getPlatformManifest(dir);
-  String json = await file.readAsString();
+  final Directory dir = getReplaySource(location, _kRecordingType);
+  final File file = _getPlatformManifest(dir);
+  final String json = await file.readAsString();
   context.setVariable(Platform, new FakePlatform.fromJson(json));
 }
 
 File _getPlatformManifest(Directory dir) {
-  String path = dir.fileSystem.path.join(dir.path, 'MANIFEST.txt');
+  final String path = dir.fileSystem.path.join(dir.path, 'MANIFEST.txt');
   return dir.fileSystem.file(path);
 }

@@ -73,7 +73,7 @@ void main() {
   });
 
   testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     Future<Null> licenseFuture;
     LicenseRegistry.addLicense(() {

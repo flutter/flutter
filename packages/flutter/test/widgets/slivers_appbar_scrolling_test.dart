@@ -7,10 +7,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal) {
-  RenderObject target = key.currentContext.findRenderObject();
+  final RenderObject target = key.currentContext.findRenderObject();
   expect(target.parent, const isInstanceOf<RenderViewport>());
-  SliverPhysicalParentData parentData = target.parentData;
-  Offset actual = parentData.paintOffset;
+  final SliverPhysicalParentData parentData = target.parentData;
+  final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
 }
 
@@ -28,7 +28,7 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     final double max = RenderBigSliver.height * 3.0 + new TestDelegate().maxExtent * 2.0 - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1450.0);
@@ -48,8 +48,8 @@ void main() {
   });
 
   testWidgets('Sliver appbars - scrolling off screen', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
-    TestDelegate delegate = new TestDelegate();
+    final GlobalKey key = new GlobalKey();
+    final TestDelegate delegate = new TestDelegate();
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
@@ -60,11 +60,11 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.animateTo(RenderBigSliver.height + delegate.maxExtent - 5.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
-    RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
-    Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
+    final Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
     expect(rect, equals(new Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
   });
 
@@ -89,7 +89,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Point.origin);
     expect(tester.getTopLeft(find.text('X')), const Point(0.0, 200.0));
 
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(-50.0);
     await tester.pump();
 

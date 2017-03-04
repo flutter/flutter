@@ -56,10 +56,10 @@ Widget builder() {
 void main() {
   testWidgets('duplicate key smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(builder());
-    StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
+    final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
     leaf.test();
     await tester.pump();
-    Item lastItem = items[1];
+    final Item lastItem = items[1];
     items.remove(lastItem);
     items.insert(0, lastItem);
     await tester.pumpWidget(builder()); // this marks the app dirty and rebuilds it

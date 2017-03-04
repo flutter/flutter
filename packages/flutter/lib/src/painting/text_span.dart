@@ -128,13 +128,13 @@ class TextSpan {
   /// Returns the text span that contains the given position in the text.
   TextSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
-    TextAffinity affinity = position.affinity;
-    int targetOffset = position.offset;
+    final TextAffinity affinity = position.affinity;
+    final int targetOffset = position.offset;
     int offset = 0;
     TextSpan result;
     visitTextSpan((TextSpan span) {
       assert(result == null);
-      int endOffset = offset + span.text.length;
+      final int endOffset = offset + span.text.length;
       if (targetOffset == offset && affinity == TextAffinity.downstream ||
           targetOffset > offset && targetOffset < endOffset ||
           targetOffset == endOffset && affinity == TextAffinity.upstream) {
@@ -152,7 +152,7 @@ class TextSpan {
   /// Styles are not honored in this process.
   String toPlainText() {
     assert(debugAssertIsValid());
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     visitTextSpan((TextSpan span) {
       buffer.write(span.text);
       return true;
@@ -180,9 +180,9 @@ class TextSpan {
 
   @override
   String toString([String prefix = '']) {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.writeln('$prefix$runtimeType:');
-    String indent = '$prefix  ';
+    final String indent = '$prefix  ';
     if (style != null)
       buffer.writeln(style.toString(indent));
     if (text != null)

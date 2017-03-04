@@ -50,8 +50,8 @@ class AnalysisDriver {
   }
 
   List<AnalysisErrorDescription> analyze(Iterable<File> files) {
-    List<AnalysisErrorInfo> infos = _analyze(files);
-    List<AnalysisErrorDescription> errors = <AnalysisErrorDescription>[];
+    final List<AnalysisErrorInfo> infos = _analyze(files);
+    final List<AnalysisErrorDescription> errors = <AnalysisErrorDescription>[];
     for (AnalysisErrorInfo info in infos) {
       for (AnalysisError error in info.errors) {
         if (!_isFiltered(error))
@@ -65,17 +65,17 @@ class AnalysisDriver {
     context = AnalysisEngine.instance.createAnalysisContext();
     _processAnalysisOptions();
     context.analysisOptions = options;
-    PackageInfo packageInfo = new PackageInfo(options.packageMap);
-    List<UriResolver> resolvers = _getResolvers(context, packageInfo.asMap());
+    final PackageInfo packageInfo = new PackageInfo(options.packageMap);
+    final List<UriResolver> resolvers = _getResolvers(context, packageInfo.asMap());
     context.sourceFactory =
         new SourceFactory(resolvers, packageInfo.asPackages());
 
-    List<Source> sources = <Source>[];
-    ChangeSet changeSet = new ChangeSet();
+    final List<Source> sources = <Source>[];
+    final ChangeSet changeSet = new ChangeSet();
     for (File file in files) {
-      JavaFile sourceFile = new JavaFile(fs.path.normalize(file.absolute.path));
+      final JavaFile sourceFile = new JavaFile(fs.path.normalize(file.absolute.path));
       Source source = new FileBasedSource(sourceFile, sourceFile.toURI());
-      Uri uri = context.sourceFactory.restoreUri(source);
+      final Uri uri = context.sourceFactory.restoreUri(source);
       if (uri != null) {
         source = new FileBasedSource(sourceFile, uri);
       }
@@ -84,7 +84,7 @@ class AnalysisDriver {
     }
     context.applyChanges(changeSet);
 
-    List<AnalysisErrorInfo> infos = <AnalysisErrorInfo>[];
+    final List<AnalysisErrorInfo> infos = <AnalysisErrorInfo>[];
     for (Source source in sources) {
       context.computeErrors(source);
       infos.add(context.getErrors(source));
@@ -98,13 +98,13 @@ class AnalysisDriver {
       Map<String, List<file_system.Folder>> packageMap) {
 
     // Create our list of resolvers.
-    List<UriResolver> resolvers = <UriResolver>[];
+    final List<UriResolver> resolvers = <UriResolver>[];
 
     // Look for an embedder.
-    EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
+    final EmbedderYamlLocator locator = new EmbedderYamlLocator(packageMap);
     if (locator.embedderYamls.isNotEmpty) {
       // Create and configure an embedded SDK.
-      EmbedderSdk sdk = new EmbedderSdk(PhysicalResourceProvider.INSTANCE, locator.embedderYamls);
+      final EmbedderSdk sdk = new EmbedderSdk(PhysicalResourceProvider.INSTANCE, locator.embedderYamls);
       // Fail fast if no URI mappings are found.
       assert(sdk.libraryMap.size() > 0);
       sdk.analysisOptions = context.analysisOptions;
@@ -112,7 +112,7 @@ class AnalysisDriver {
       resolvers.add(new DartUriResolver(sdk));
     } else {
       // Fall back to a standard SDK if no embedder is found.
-      FolderBasedDartSdk sdk = new FolderBasedDartSdk(resourceProvider,
+      final FolderBasedDartSdk sdk = new FolderBasedDartSdk(resourceProvider,
           PhysicalResourceProvider.INSTANCE.getFolder(sdkDir));
       sdk.analysisOptions = context.analysisOptions;
 
@@ -120,11 +120,11 @@ class AnalysisDriver {
     }
 
     if (options.packageRootPath != null) {
-      ContextBuilderOptions builderOptions = new ContextBuilderOptions();
+      final ContextBuilderOptions builderOptions = new ContextBuilderOptions();
       builderOptions.defaultPackagesDirectoryPath = options.packageRootPath;
-      ContextBuilder builder = new ContextBuilder(resourceProvider, null, null,
+      final ContextBuilder builder = new ContextBuilder(resourceProvider, null, null,
           options: builderOptions);
-      PackageMapUriResolver packageUriResolver = new PackageMapUriResolver(resourceProvider,
+      final PackageMapUriResolver packageUriResolver = new PackageMapUriResolver(resourceProvider,
           builder.convertPackagesToMap(builder.createPackageMap('')));
 
       resolvers.add(packageUriResolver);
@@ -135,17 +135,17 @@ class AnalysisDriver {
   }
 
   bool _isFiltered(AnalysisError error) {
-    ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
+    final ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
     // Filtered errors are processed to a severity of `null`.
     return processor != null && processor.severity == null;
   }
 
   void _processAnalysisOptions() {
-    String optionsPath = options.analysisOptionsFile;
+    final String optionsPath = options.analysisOptionsFile;
     if (optionsPath != null) {
-      file_system.File file =
+      final file_system.File file =
            PhysicalResourceProvider.INSTANCE.getFile(optionsPath);
-      Map<Object, Object> optionMap =
+      final Map<Object, Object> optionMap =
           analysisOptionsProvider.getOptionsFromFile(file);
       if (optionMap != null)
         applyToAnalysisOptions(options, optionMap);
@@ -153,9 +153,9 @@ class AnalysisDriver {
   }
 
   void _processPlugins() {
-    List<Plugin> plugins = <Plugin>[];
+    final List<Plugin> plugins = <Plugin>[];
     plugins.addAll(AnalysisEngine.instance.requiredPlugins);
-    ExtensionManager manager = new ExtensionManager();
+    final ExtensionManager manager = new ExtensionManager();
     manager.processPlugins(plugins);
     linter.registerLintRules();
   }
@@ -181,7 +181,7 @@ class AnalysisErrorDescription {
   ErrorCode get errorCode => error.errorCode;
 
   String get errorType {
-    ErrorSeverity severity = errorCode.errorSeverity;
+    final ErrorSeverity severity = errorCode.errorSeverity;
     if (severity == ErrorSeverity.INFO) {
       if (errorCode.type == ErrorType.HINT || errorCode.type == ErrorType.LINT)
         return errorCode.type.displayName;
@@ -231,9 +231,9 @@ class DriverOptions extends AnalysisOptionsImpl {
 
 class PackageInfo {
   PackageInfo(Map<String, String> packageMap) {
-    Map<String, Uri> packages = new HashMap<String, Uri>();
+    final Map<String, Uri> packages = new HashMap<String, Uri>();
     for (String package in packageMap.keys) {
-      String path = packageMap[package];
+      final String path = packageMap[package];
       packages[package] = new Uri.directory(path);
       _map[package] = <file_system.Folder>[
         PhysicalResourceProvider.INSTANCE.getFolder(path)

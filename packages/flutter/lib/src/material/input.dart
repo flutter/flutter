@@ -157,7 +157,7 @@ class _InputFieldState extends State<InputField> {
     ];
 
     if (config.hintText != null && value.text.isEmpty) {
-      TextStyle hintStyle = config.hintStyle ??
+      final TextStyle hintStyle = config.hintStyle ??
         textStyle.copyWith(color: themeData.hintColor);
       stackChildren.add(
         new Positioned(
@@ -255,8 +255,8 @@ class _InputContainerState extends State<InputContainer> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
-    String errorText = config.errorText;
+    final ThemeData themeData = Theme.of(context);
+    final String errorText = config.errorText;
 
     final TextStyle textStyle = config.style ?? themeData.textTheme.subhead;
     Color activeColor = themeData.hintColor;
@@ -272,7 +272,7 @@ class _InputContainerState extends State<InputContainer> {
     }
     double topPadding = config.isDense ? 12.0 : 16.0;
 
-    List<Widget> stackChildren = <Widget>[];
+    final List<Widget> stackChildren = <Widget>[];
 
     // If we're not focused, there's not value, and labelText was provided,
     // then the label appears where the hint would. And we will not show
@@ -308,7 +308,7 @@ class _InputContainerState extends State<InputContainer> {
     }
 
     if (config.hintText != null) {
-      TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
+      final TextStyle hintStyle = textStyle.copyWith(color: themeData.hintColor);
       stackChildren.add(
         new Positioned(
           left: 0.0,
@@ -325,19 +325,19 @@ class _InputContainerState extends State<InputContainer> {
       );
     }
 
-    Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-    double bottomPadding = config.isDense ? 8.0 : 1.0;
-    double bottomBorder = 2.0;
-    double bottomHeight = config.isDense ? 14.0 : 18.0;
+    final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
+    final double bottomPadding = config.isDense ? 8.0 : 1.0;
+    final double bottomBorder = 2.0;
+    final double bottomHeight = config.isDense ? 14.0 : 18.0;
 
-    EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: bottomPadding);
-    Border border = new Border(
+    final EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: bottomPadding);
+    final Border border = new Border(
       bottom: new BorderSide(
         color: borderColor,
         width: bottomBorder,
       )
     );
-    EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
+    final EdgeInsets margin = new EdgeInsets.only(bottom: bottomHeight - (bottomPadding + bottomBorder));
 
     Widget divider;
     if (!config.showDivider) {
@@ -361,7 +361,7 @@ class _InputContainerState extends State<InputContainer> {
     stackChildren.add(divider);
 
     if (!config.isDense) {
-      TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
+      final TextStyle errorStyle = themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
         bottom: 0.0,
@@ -372,8 +372,8 @@ class _InputContainerState extends State<InputContainer> {
     Widget textField = new Stack(children: stackChildren);
 
     if (config.icon != null) {
-      double iconSize = config.isDense ? 18.0 : 24.0;
-      double iconTop = topPadding + (textStyle.fontSize - iconSize) / 2.0;
+      final double iconSize = config.isDense ? 18.0 : 24.0;
+      final double iconTop = topPadding + (textStyle.fontSize - iconSize) / 2.0;
       textField = new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

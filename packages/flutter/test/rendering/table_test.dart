@@ -74,9 +74,9 @@ void main() {
 
   test('Table test: replacing cells', () {
     RenderTable table;
-    RenderBox child1 = new RenderPositionedBox();
-    RenderBox child2 = new RenderPositionedBox();
-    RenderBox child3 = new RenderPositionedBox();
+    final RenderBox child1 = new RenderPositionedBox();
+    final RenderBox child2 = new RenderPositionedBox();
+    final RenderBox child3 = new RenderPositionedBox();
     table = new RenderTable();
     table.setFlatChildren(3, <RenderBox>[child1, new RenderPositionedBox(), child2,
                                          new RenderPositionedBox(), child3, new RenderPositionedBox()]);
