@@ -7,6 +7,7 @@
 #include <thread>
 #include <utility>
 
+#include "apps/icu_data/lib/icu_data.h"
 #include "apps/tracing/lib/trace/provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
@@ -46,6 +47,11 @@ App::App() {
                                      ui_task_runner,   // UI
                                      io_task_runner    // IO
                                      ));
+
+  if (!icu_data::Initialize(context_->environment_services().get())) {
+    FTL_LOG(ERROR) << "Could not initialize ICU data.";
+  }
+
   blink::Settings settings;
   settings.enable_observatory = true;
   blink::Settings::Set(settings);
@@ -61,6 +67,7 @@ App::App() {
 }
 
 App::~App() {
+  icu_data::Release();
   blink::Threads::Gpu()->PostTask(QuitMessageLoop);
   blink::Threads::IO()->PostTask(QuitMessageLoop);
 }
