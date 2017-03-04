@@ -68,10 +68,10 @@ void main() {
     testUsingContext('returns 1 when test file is not found', () async {
       withMockDevice();
 
-      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
-      List<String> args = <String>[
+      final List<String> args = <String>[
         'drive',
         '--target=$testApp}',
       ];
@@ -90,14 +90,14 @@ void main() {
       withMockDevice();
       appStarter = expectAsync1((DriveCommand command) async => null);
 
-      String testApp = fs.path.join(cwd.path, 'test_driver', 'e2e.dart');
-      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(cwd.path, 'test_driver', 'e2e.dart');
+      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
-      MemoryFileSystem memFs = fs;
+      final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() { }');
       await memFs.file(testFile).writeAsString('main() { }');
 
-      List<String> args = <String>[
+      final List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -113,8 +113,8 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
-      String appFile = fs.path.join(cwd.dirname, 'other_app', 'app.dart');
-      List<String> args = <String>[
+      final String appFile = fs.path.join(cwd.dirname, 'other_app', 'app.dart');
+      final List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
@@ -132,8 +132,8 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
-      String appFile = fs.path.join(cwd.path, 'main.dart');
-      List<String> args = <String>[
+      final String appFile = fs.path.join(cwd.path, 'main.dart');
+      final List<String> args = <String>[
         'drive',
         '--target=$appFile',
       ];
@@ -154,8 +154,8 @@ void main() {
     testUsingContext('returns 0 when test ends successfully', () async {
       withMockDevice();
 
-      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
@@ -168,11 +168,11 @@ void main() {
         return true;
       });
 
-      MemoryFileSystem memFs = fs;
+      final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = <String>[
+      final List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -185,8 +185,8 @@ void main() {
     testUsingContext('returns exitCode set by test runner', () async {
       withMockDevice();
 
-      String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
-      String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
+      final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return new LaunchResult.succeeded();
@@ -198,11 +198,11 @@ void main() {
         return true;
       });
 
-      MemoryFileSystem memFs = fs;
+      final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() {}');
       await memFs.file(testFile).writeAsString('main() {}');
 
-      List<String> args = <String>[
+      final List<String> args = <String>[
         'drive',
         '--target=$testApp',
       ];
@@ -224,7 +224,7 @@ void main() {
         when(mockDevice.name).thenReturn('specified-device');
         when(mockDevice.id).thenReturn('123');
 
-        Device device = await findTargetDevice();
+        final Device device = await findTargetDevice();
         expect(device.name, 'specified-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -239,7 +239,7 @@ void main() {
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator).thenReturn(true);
 
-        Device device = await findTargetDevice();
+        final Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -252,7 +252,7 @@ void main() {
         when(mockDevice.isLocalEmulator).thenReturn(false);
         withMockDevice(mockDevice);
 
-        Device device = await findTargetDevice();
+        final Device device = await findTargetDevice();
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -261,12 +261,12 @@ void main() {
 
       testUsingContext('launches emulator', () async {
         when(SimControl.instance.boot()).thenReturn(true);
-        Device emulator = new MockDevice();
+        final Device emulator = new MockDevice();
         when(emulator.name).thenReturn('new-simulator');
         when(IOSSimulatorUtils.instance.getAttachedDevices())
             .thenReturn(<Device>[emulator]);
 
-        Device device = await findTargetDevice();
+        final Device device = await findTargetDevice();
         expect(device.name, 'new-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -291,7 +291,7 @@ void main() {
         when(mockDevice.name).thenReturn('mock-android-device');
         withMockDevice(mockDevice);
 
-        Device device = await findTargetDevice();
+        final Device device = await findTargetDevice();
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

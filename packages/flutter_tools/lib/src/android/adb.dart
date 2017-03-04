@@ -51,7 +51,7 @@ class Adb {
   /// Ask the ADB server for its internal version number.
   Future<String> getServerVersion() {
     return _sendAdbServerCommand('host:version').then((String response) {
-      _AdbServerResponse adbResponse = new _AdbServerResponse(response);
+      final _AdbServerResponse adbResponse = new _AdbServerResponse(response);
       if (adbResponse.isOkay)
         return adbResponse.message;
       throw adbResponse.message;
@@ -60,11 +60,11 @@ class Adb {
 
   /// Queries the adb server for the list of connected adb devices.
   Future<List<AdbDevice>> listDevices() async {
-    String stringResponse = await _sendAdbServerCommand('host:devices-l');
-    _AdbServerResponse response = new _AdbServerResponse(stringResponse);
+    final String stringResponse = await _sendAdbServerCommand('host:devices-l');
+    final _AdbServerResponse response = new _AdbServerResponse(stringResponse);
     if (response.isFail)
       throw response.message;
-    String message = response.message.trim();
+    final String message = response.message.trim();
     if (message.isEmpty)
       return <AdbDevice>[];
     return message.split('\n').map(
@@ -73,16 +73,16 @@ class Adb {
   }
 
   Future<String> _sendAdbServerCommand(String command) async {
-    Socket socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
+    final Socket socket = await Socket.connect(InternetAddress.LOOPBACK_IP_V4, adbServerPort);
 
     try {
       printTrace('--> $command');
       socket.add(_createAdbRequest(command));
-      List<List<int>> result = await socket.toList();
-      List<int> data = result.fold(<int>[], (List<int> previous, List<int> element) {
+      final List<List<int>> result = await socket.toList();
+      final List<int> data = result.fold(<int>[], (List<int> previous, List<int> element) {
         return previous..addAll(element);
       });
-      String stringResult = new String.fromCharCodes(data);
+      final String stringResult = new String.fromCharCodes(data);
       printTrace('<-- ${stringResult.trim()}');
       return stringResult;
     } finally {
@@ -97,7 +97,7 @@ class AdbDevice {
     // 'TA95000FQA             device usb:340787200X product:peregrine_retus model:XT1045 device:peregrine'
     // '015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper'
 
-    Match match = kDeviceRegex.firstMatch(deviceInfo);
+    final Match match = kDeviceRegex.firstMatch(deviceInfo);
     id = match[1];
     status = match[2];
 
@@ -106,7 +106,7 @@ class AdbDevice {
       rest = rest.trim();
       for (String data in rest.split(' ')) {
         if (data.contains(':')) {
-          List<String> fields = data.split(':');
+          final List<String> fields = data.split(':');
           _info[fields[0]] = fields[1];
         }
       }
@@ -183,11 +183,11 @@ String cleanAdbDeviceName(String name) {
 }
 
 List<int> _createAdbRequest(String payload) {
-  List<int> data = payload.codeUnits;
+  final List<int> data = payload.codeUnits;
 
   // A 4-byte hexadecimal string giving the length of the payload.
-  String prefix = data.length.toRadixString(16).padLeft(4, '0');
-  List<int> result = <int>[];
+  final String prefix = data.length.toRadixString(16).padLeft(4, '0');
+  final List<int> result = <int>[];
   result.addAll(prefix.codeUnits);
   result.addAll(data);
   return result;

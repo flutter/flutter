@@ -18,7 +18,7 @@ void main() {
   group('compareIosVersions', () {
     test('compares correctly', () {
       // This list must be sorted in ascending preference order
-      List<String> testList = <String>[
+      final List<String> testList = <String>[
         '8', '8.0', '8.1', '8.2',
         '9', '9.0', '9.1', '9.2',
         '10', '10.0', '10.1',
@@ -40,7 +40,7 @@ void main() {
   group('compareIphoneVersions', () {
     test('compares correctly', () {
       // This list must be sorted in ascending preference order
-      List<String> testList = <String>[
+      final List<String> testList = <String>[
         'com.apple.CoreSimulator.SimDeviceType.iPhone-4s',
         'com.apple.CoreSimulator.SimDeviceType.iPhone-5',
         'com.apple.CoreSimulator.SimDeviceType.iPhone-5s',
@@ -132,7 +132,7 @@ void main() {
         when(mockXcode.xcodeMajorVersion).thenReturn(8);
         when(mockXcode.xcodeMinorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
-        MockFile mockFile = new MockFile();
+        final MockFile mockFile = new MockFile();
         when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
         deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.runSync(

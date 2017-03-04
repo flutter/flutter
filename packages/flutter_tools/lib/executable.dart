@@ -60,10 +60,10 @@ import 'src/usage.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
-  bool verbose = args.contains('-v') || args.contains('--verbose');
-  bool help = args.contains('-h') || args.contains('--help') ||
+  final bool verbose = args.contains('-v') || args.contains('--verbose');
+  final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
-  bool verboseHelp = help && verbose;
+  final bool verboseHelp = help && verbose;
 
   await run(args, <FlutterCommand>[
     new AnalyzeCommand(verboseHelp: verboseHelp),
@@ -104,11 +104,11 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
+  final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
   subCommands.forEach(runner.addCommand);
 
   // Construct a context.
-  AppContext _executableContext = new AppContext();
+  final AppContext _executableContext = new AppContext();
 
   // Make the context current.
   return await _executableContext.runInZone(() async {
@@ -140,7 +140,7 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     // Initialize the system locale.
     await intl.findSystemLocale();
 
-    Completer<int> runCompleter = new Completer<int>();
+    final Completer<int> runCompleter = new Completer<int>();
     Chain.capture<Future<Null>>(() async {
       await runner.run(args);
       await _exit(0);
@@ -206,7 +206,7 @@ Future<int> _handleToolError(
         flutterVersion: flutterVersion,
       );
       try {
-        File file = await _createLocalCrashReport(args, error, chain);
+        final File file = await _createLocalCrashReport(args, error, chain);
         stderr.writeln(
             'Crash report written to ${file.path};\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
@@ -235,7 +235,7 @@ FileSystem crashFileSystem = new LocalFileSystem();
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
-  StringBuffer buffer = new StringBuffer();
+  final StringBuffer buffer = new StringBuffer();
 
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
@@ -267,8 +267,8 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain cha
 
 Future<String> _doctorText() async {
   try {
-    BufferLogger logger = new BufferLogger();
-    AppContext appContext = new AppContext();
+    final BufferLogger logger = new BufferLogger();
+    final AppContext appContext = new AppContext();
 
     appContext.setVariable(Logger, logger);
 
@@ -287,7 +287,7 @@ Future<int> _exit(int code) async {
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {
-    Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = new Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
@@ -295,7 +295,7 @@ Future<int> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
-  Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = new Completer<Null>();
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {

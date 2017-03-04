@@ -50,7 +50,7 @@ void main() {
         );
       }));
 
-      int exitCode = await tools.run(
+      final int exitCode = await tools.run(
         <String>['crash'],
         <FlutterCommand>[new _CrashCommand()],
         reportCrashes: true,
@@ -71,12 +71,12 @@ void main() {
           'version' : 'test-version',
         },
       ));
-      BufferLogger logger = context[Logger];
+      final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
 
       // Verify that we've written the crash report to disk.
-      List<String> writtenFiles =
+      final List<String> writtenFiles =
         (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
             .map((FileSystemEntity e) => e.path).toList();
       expect(writtenFiles, hasLength(1));

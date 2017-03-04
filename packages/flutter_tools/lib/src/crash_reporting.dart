@@ -85,20 +85,20 @@ class CrashReportSender {
 
       printStatus('Sending crash report to Google.');
 
-      Uri uri = _baseUri.replace(
+      final Uri uri = _baseUri.replace(
         queryParameters: <String, String>{
           'product': _kProductId,
           'version': flutterVersion,
         },
       );
 
-      _MultipartRequest req = new _MultipartRequest('POST', uri);
+      final _MultipartRequest req = new _MultipartRequest('POST', uri);
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 
-      Chain chain = stackTrace is StackTrace
+      final Chain chain = stackTrace is StackTrace
           ? new Chain.forTrace(stackTrace)
           : new Chain.parse(stackTrace.toString());
 
@@ -108,10 +108,10 @@ class CrashReportSender {
         filename: _kStackTraceFilename,
       ));
 
-      http.StreamedResponse resp = await _client.send(req);
+      final http.StreamedResponse resp = await _client.send(req);
 
       if (resp.statusCode == 200) {
-        String reportId = await new http.ByteStream(resp.stream)
+        final String reportId = await new http.ByteStream(resp.stream)
             .bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
       } else {
@@ -225,11 +225,11 @@ class _MultipartRequest extends http.BaseRequest {
   /// that will emit the request body.
   @override
   http.ByteStream finalize() {
-    String boundary = _boundaryString();
+    final String boundary = _boundaryString();
     headers['content-type'] = 'multipart/form-data; boundary=$boundary';
     super.finalize();
 
-    StreamController<List<int>> controller = new StreamController<List<int>>(sync: true);
+    final StreamController<List<int>> controller = new StreamController<List<int>>(sync: true);
 
     void writeAscii(String string) {
       controller.add(UTF8.encode(string));
@@ -369,8 +369,8 @@ class _MultipartRequest extends http.BaseRequest {
 
   /// Returns a randomly-generated multipart boundary string
   String _boundaryString() {
-    String prefix = "dart-";
-    List<int> list = new List<int>.generate(_BOUNDARY_LENGTH - prefix.length,
+    final String prefix = "dart-";
+    final List<int> list = new List<int>.generate(_BOUNDARY_LENGTH - prefix.length,
             (int index) =>
         _BOUNDARY_CHARACTERS[_random.nextInt(_BOUNDARY_CHARACTERS.length)],
         growable: false);
@@ -382,7 +382,7 @@ class _MultipartRequest extends http.BaseRequest {
 /// [stream] is done. Unlike [store], [sink] remains open after [stream] is
 /// done.
 Future<Null> writeStreamToSink<O, I extends O>(Stream<I> stream, EventSink<O> sink) {
-  Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = new Completer<Null>();
   stream.listen(sink.add,
       onError: sink.addError,
       onDone: () => completer.complete());

@@ -27,7 +27,7 @@ class DevicesCommand extends FlutterCommand {
         exitCode: 1);
     }
 
-    List<Device> devices = await deviceManager.getAllConnectedDevices();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices();
 
     if (devices.isEmpty) {
       printStatus(

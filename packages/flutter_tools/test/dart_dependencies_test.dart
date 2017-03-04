@@ -16,9 +16,9 @@ void main()  {
       final String testPath = fs.path.join(dataPath, 'good');
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
-      DartDependencySetBuilder builder =
+      final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
-      Set<String> dependencies = builder.build();
+      final Set<String> dependencies = builder.build();
       expect(dependencies.contains(mainPath), isTrue);
       expect(dependencies.contains(fs.path.join(testPath, 'foo.dart')), isTrue);
     });
@@ -26,7 +26,7 @@ void main()  {
       final String testPath = fs.path.join(dataPath, 'syntax_error');
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
-      DartDependencySetBuilder builder =
+      final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
       try {
         builder.build();

@@ -82,7 +82,7 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildMode getBuildMode() {
-    List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
+    final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw new UsageException('Only one of --debug, --profile, or --release can be specified.', null);
     if (argResults['debug'])
@@ -110,14 +110,14 @@ abstract class FlutterCommand extends Command<Null> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<Null> run() {
-    Stopwatch stopwatch = new Stopwatch()..start();
-    UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
+    final Stopwatch stopwatch = new Stopwatch()..start();
+    final UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printUsage();
 
     return verifyThenRunCommand().whenComplete(() {
-      int ms = stopwatch.elapsedMilliseconds;
+      final int ms = stopwatch.elapsedMilliseconds;
       printTrace("'flutter $name' took ${ms}ms.");
       analyticsTimer?.finish();
     });
@@ -141,7 +141,7 @@ abstract class FlutterCommand extends Command<Null> {
 
     setupApplicationPackages();
 
-    String commandPath = usagePath;
+    final String commandPath = usagePath;
     if (commandPath != null)
       flutterUsage.sendCommand(usagePath);
 
@@ -234,14 +234,14 @@ abstract class FlutterCommand extends Command<Null> {
     }
 
     if (_usesTargetOption) {
-      String targetPath = targetFile;
+      final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
     }
 
     // Validate the current package map only if we will not be running "pub get" later.
     if (!(_usesPubOption && argResults['pub'])) {
-      String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
+      final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
       if (error != null)
         throw new ToolExit(error);
     }
