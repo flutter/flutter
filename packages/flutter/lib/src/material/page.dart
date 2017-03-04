@@ -250,7 +250,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    Widget result = builder(context);
+    final Widget result = builder(context);
     assert(() {
       if (result == null) {
         throw new FlutterError(

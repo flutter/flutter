@@ -109,7 +109,7 @@ class _BottomSheetState extends State<BottomSheet> {
     if (_dismissUnderway)
       return;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (config.animationController.value > 0.0)
         config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)

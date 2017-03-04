@@ -75,7 +75,7 @@ class GestureArenaManager {
 
   /// Adds a new member (e.g., gesture recognizer) to the arena.
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
-    _GestureArena state = _arenas.putIfAbsent(pointer, () => new _GestureArena());
+    final _GestureArena state = _arenas.putIfAbsent(pointer, () => new _GestureArena());
     state.add(member);
     return new GestureArenaEntry._(this, pointer, member);
   }
@@ -84,7 +84,7 @@ class GestureArenaManager {
   ///
   /// Called after the framework has finished dispatching the pointer down event.
   void close(int pointer) {
-    _GestureArena state = _arenas[pointer];
+    final _GestureArena state = _arenas[pointer];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isOpen = false;
@@ -105,7 +105,7 @@ class GestureArenaManager {
   ///  * [hold]
   ///  * [release]
   void sweep(int pointer) {
-    _GestureArena state = _arenas[pointer];
+    final _GestureArena state = _arenas[pointer];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     assert(!state.isOpen);
@@ -136,7 +136,7 @@ class GestureArenaManager {
   ///  * [sweep]
   ///  * [release]
   void hold(int pointer) {
-    _GestureArena state = _arenas[pointer];
+    final _GestureArena state = _arenas[pointer];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isHeld = true;
@@ -152,7 +152,7 @@ class GestureArenaManager {
   ///  * [sweep]
   ///  * [hold]
   void release(int pointer) {
-    _GestureArena state = _arenas[pointer];
+    final _GestureArena state = _arenas[pointer];
     if (state == null)
       return;  // This arena either never existed or has been resolved.
     state.isHeld = false;
@@ -184,7 +184,7 @@ class GestureArenaManager {
   }
 
   void _resolve(int pointer, GestureArenaMember member, GestureDisposition disposition) {
-    _GestureArena state = _arenas[pointer];
+    final _GestureArena state = _arenas[pointer];
     if (state == null)
       return;  // This arena has already resolved.
     assert(state.members.contains(member));

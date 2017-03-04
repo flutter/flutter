@@ -431,7 +431,7 @@ class _TabBarState extends State<TabBar> {
   int _currentIndex;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 
@@ -676,7 +676,7 @@ class _TabBarViewState extends State<TabBarView> {
   int _warpUnderwayCount = 0;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 

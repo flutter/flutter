@@ -274,7 +274,7 @@ class ScrollPosition extends ViewportOffset {
     if (value != pixels) {
       final double overScroll = physics.applyBoundaryConditions(this, value);
       assert(() {
-        double delta = value - pixels;
+        final double delta = value - pixels;
         if (overScroll.abs() > delta.abs()) {
           throw new FlutterError(
             '${physics.runtimeType}.applyBoundaryConditions returned invalid overscroll value.\n'

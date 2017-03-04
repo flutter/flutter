@@ -56,12 +56,12 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    IconThemeData iconThemeData = _getInheritedIconThemData(context);
+    final IconThemeData iconThemeData = _getInheritedIconThemData(context);
     return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
   static IconThemeData _getInheritedIconThemData(BuildContext context) {
-    IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
+    final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
     return iconTheme?.data ?? Theme.of(context).iconTheme;
   }
 

@@ -842,7 +842,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
     final MultiChildLayoutParentData parentData = renderObject.parentData;
     if (parentData.id != id) {
       parentData.id = id;
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -960,7 +960,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    String type = (width == double.INFINITY && height == double.INFINITY) ?
+    final String type = (width == double.INFINITY && height == double.INFINITY) ?
                   '$runtimeType.expand' : '$runtimeType';
     return key == null ? '$type' : '$type-$key';
   }
@@ -1820,7 +1820,7 @@ class Positioned extends ParentDataWidget<Stack> {
     }
 
     if (needsLayout) {
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -2183,7 +2183,7 @@ class Flexible extends ParentDataWidget<Flex> {
     }
 
     if (needsLayout) {
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -2551,7 +2551,7 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
+    final DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
     return result?.bundle ?? rootBundle;
   }
 
@@ -2662,7 +2662,7 @@ class Listener extends SingleChildRenderObjectWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    List<String> listeners = <String>[];
+    final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
     if (onPointerMove != null)
@@ -2707,7 +2707,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// (if the child has a non-null key) or from the given `childIndex`.
   factory RepaintBoundary.wrap(Widget child, int childIndex) {
     assert(child != null);
-    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new RepaintBoundary(key: key, child: child);
   }
 
@@ -2717,7 +2717,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// child's key (if the wrapped child has a non-null key) or from the wrapped
   /// child's index in the list.
   static List<RepaintBoundary> wrapAll(List<Widget> widgets) {
-    List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
+    final List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
     for (int i = 0; i < result.length; ++i)
       result[i] = new RepaintBoundary.wrap(widgets[i], i);
     return result;
@@ -3016,7 +3016,7 @@ class KeyedSubtree extends StatelessWidget {
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
   factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new KeyedSubtree(key: key, child: child);
   }
 
@@ -3026,7 +3026,7 @@ class KeyedSubtree extends StatelessWidget {
     if (items == null || items.isEmpty)
       return items;
 
-    List<Widget> itemsWithUniqueKeys = <Widget>[];
+    final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
     for (Widget item in items) {
       itemsWithUniqueKeys.add(new KeyedSubtree.wrap(item, itemIndex));

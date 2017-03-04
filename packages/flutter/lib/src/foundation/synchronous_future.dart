@@ -35,7 +35,7 @@ class SynchronousFuture<T> implements Future<T> {
 
   @override
   Future<E> then<E>(dynamic f(T value), { Function onError }) {
-    dynamic result = f(_value);
+    final dynamic result = f(_value);
     if (result is Future<E>)
       return result;
     return new SynchronousFuture<E>(result);
@@ -49,7 +49,7 @@ class SynchronousFuture<T> implements Future<T> {
   @override
   Future<T> whenComplete(dynamic action()) {
     try {
-      dynamic result = action();
+      final dynamic result = action();
       if (result is Future)
         return result.then<T>((dynamic value) => _value);
       return this;
