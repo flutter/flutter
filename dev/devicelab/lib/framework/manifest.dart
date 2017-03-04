@@ -9,7 +9,7 @@ import 'utils.dart';
 
 /// Loads manifest data from `manifest.yaml` file or from [yaml], if present.
 Manifest loadTaskManifest([ String yaml ]) {
-  dynamic manifestYaml = yaml == null
+  final dynamic manifestYaml = yaml == null
     ? loadYaml(file('manifest.yaml').readAsStringSync())
     : loadYamlNode(yaml);
 
@@ -33,7 +33,7 @@ class ManifestTask {
     @required this.stage,
     @required this.requiredAgentCapabilities,
   }) {
-    String taskName = 'task "$name"';
+    final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
     _checkIsNotBlank(description, 'Task description', taskName);
     _checkIsNotBlank(stage, 'Task stage', taskName);
@@ -84,7 +84,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'required_agent_capabilities',
   ]);
 
-  List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
+  final List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
   return new ManifestTask._(
     name: taskName,
     description: taskYaml['description'],
@@ -96,7 +96,7 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
 List<String> _validateAndParseCapabilities(String taskName, dynamic capabilitiesYaml) {
   _checkType(capabilitiesYaml is List, capabilitiesYaml, 'required_agent_capabilities', 'list');
   for (int i = 0; i < capabilitiesYaml.length; i++) {
-    dynamic capability = capabilitiesYaml[i];
+    final dynamic capability = capabilitiesYaml[i];
     _checkType(capability is String, capability, 'required_agent_capabilities[$i]', 'string');
   }
   return capabilitiesYaml;

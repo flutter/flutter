@@ -24,7 +24,7 @@ void main() {
   }
   watch.stop();
 
-  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
   printer.addResult(
     description: 'Velocity tracker',
     value: watch.elapsedMicroseconds / _kNumIters,

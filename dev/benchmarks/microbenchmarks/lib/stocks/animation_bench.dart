@@ -75,7 +75,7 @@ Future<Null> main() async {
     }
   });
 
-  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock animation',
     value: wallClockWatch.elapsedMicroseconds / (1000 * 1000),

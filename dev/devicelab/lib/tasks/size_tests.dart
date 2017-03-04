@@ -12,7 +12,7 @@ import '../framework/utils.dart';
 TaskFunction createBasicMaterialAppSizeTest() {
   return () async {
     const String sampleAppName = 'sample_flutter_app';
-    Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
     if (await sampleDir.exists())
       rmTree(sampleDir);
