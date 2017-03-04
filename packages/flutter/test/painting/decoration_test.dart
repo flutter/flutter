@@ -91,8 +91,8 @@ class TestImage extends ui.Image {
 
 void main() {
   test("Decoration.lerp()", () {
-    BoxDecoration a = const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF));
-    BoxDecoration b = const BoxDecoration(backgroundColor: const Color(0x00000000));
+    final BoxDecoration a = const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF));
+    final BoxDecoration b = const BoxDecoration(backgroundColor: const Color(0x00000000));
 
     BoxDecoration c = Decoration.lerp(a, b, 0.0);
     expect(c.backgroundColor, equals(a.backgroundColor));
@@ -105,17 +105,17 @@ void main() {
   });
 
   test("BoxDecorationImageListenerSync", () {
-    ImageProvider imageProvider = new SynchronousTestImageProvider();
-    BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+    final ImageProvider imageProvider = new SynchronousTestImageProvider();
+    final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
 
-    BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
+    final BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
     bool onChangedCalled = false;
-    BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+    final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       onChangedCalled = true;
     });
 
-    TestCanvas canvas = new TestCanvas();
-    ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+    final TestCanvas canvas = new TestCanvas();
+    final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
     boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
     // The onChanged callback should not be invoked during the call to boxPainter.paint
@@ -124,17 +124,17 @@ void main() {
 
   test("BoxDecorationImageListenerAsync", () {
     new FakeAsync().run((FakeAsync async) {
-      ImageProvider imageProvider = new AsyncTestImageProvider();
-      BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+      final ImageProvider imageProvider = new AsyncTestImageProvider();
+      final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
 
-      BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
+      final BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
       bool onChangedCalled = false;
-      BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+      final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
         onChangedCalled = true;
       });
 
-      TestCanvas canvas = new TestCanvas();
-      ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
+      final TestCanvas canvas = new TestCanvas();
+      final ImageConfiguration imageConfiguration = const ImageConfiguration(size: Size.zero);
       boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
       // The onChanged callback should be invoked asynchronously.
@@ -149,22 +149,22 @@ void main() {
   test("BoxDecoration backgroundImage clip", () {
     void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
       new FakeAsync().run((FakeAsync async) {
-        BackgroundImageProvider imageProvider = new BackgroundImageProvider();
-        BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+        final BackgroundImageProvider imageProvider = new BackgroundImageProvider();
+        final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
 
-        BoxDecoration boxDecoration = new BoxDecoration(
+        final BoxDecoration boxDecoration = new BoxDecoration(
           shape: shape,
           borderRadius: borderRadius,
           backgroundImage: backgroundImage,
         );
 
-        List<Invocation> invocations = <Invocation>[];
-        TestCanvas canvas = new TestCanvas(invocations);
-        ImageConfiguration imageConfiguration = const ImageConfiguration(
+        final List<Invocation> invocations = <Invocation>[];
+        final TestCanvas canvas = new TestCanvas(invocations);
+        final ImageConfiguration imageConfiguration = const ImageConfiguration(
             size: const Size(100.0, 100.0)
         );
         bool onChangedCalled = false;
-        BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
+        final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
           onChangedCalled = true;
         });
 
@@ -180,7 +180,7 @@ void main() {
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
 
         // We expect a clip to preceed the drawImageRect call.
-        List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
+        final List<Invocation> commands = canvas.invocations.where((Invocation invocation) {
           return invocation.memberName == #clipPath || invocation.memberName == #drawImageRect;
         }).toList();
         if (expectClip) { // We expect a clip to preceed the drawImageRect call.

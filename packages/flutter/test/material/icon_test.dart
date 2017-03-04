@@ -15,7 +15,7 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
@@ -29,7 +29,7 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
@@ -43,7 +43,7 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
@@ -60,7 +60,7 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
@@ -74,7 +74,7 @@ void main() {
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 }

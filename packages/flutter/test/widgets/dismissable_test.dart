@@ -90,7 +90,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
       fail("unsupported gestureDirection");
   }
 
-  TestGesture gesture = await tester.startGesture(downLocation, pointer: 5);
+  final TestGesture gesture = await tester.startGesture(downLocation, pointer: 5);
   await gesture.moveTo(upLocation);
   await gesture.up();
 }
@@ -99,7 +99,7 @@ Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestu
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
-  Finder itemFinder = find.text(item.toString());
+  final Finder itemFinder = find.text(item.toString());
   expect(itemFinder, findsOneWidget);
 
   await dismissElement(tester, itemFinder, gestureDirection: gestureDirection);
@@ -263,9 +263,9 @@ void main() {
     dismissDirection = DismissDirection.down;
 
     await tester.pumpWidget(buildTest());
-    Point location = tester.getTopLeft(find.text('0'));
-    Offset offset = const Offset(0.0, 5.0);
-    TestGesture gesture = await tester.startGesture(location, pointer: 5);
+    final Point location = tester.getTopLeft(find.text('0'));
+    final Offset offset = const Offset(0.0, 5.0);
+    final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);
     await tester.pumpWidget(buildTest());
     await gesture.moveBy(offset);
@@ -318,13 +318,13 @@ void main() {
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);
 
-    Finder itemFinder = find.text('0');
+    final Finder itemFinder = find.text('0');
     expect(itemFinder, findsOneWidget);
     await dismissElement(tester, itemFinder, gestureDirection: DismissDirection.startToEnd);
     await tester.pump();
 
     expect(find.text('background'), findsOneWidget); // The other four have been culled.
-    RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
+    final RenderBox backgroundBox = tester.firstRenderObject(find.text('background'));
     expect(backgroundBox.size.height, equals(100.0));
   });
 }

@@ -66,7 +66,7 @@ void main() {
       ),
     );
 
-    Finder title = find.text('X');
+    final Finder title = find.text('X');
     Point center = tester.getCenter(title);
     Size size = tester.getSize(title);
     expect(center.x, lessThan(400 - size.width / 2.0));
@@ -105,9 +105,9 @@ void main() {
     );
 
 
-    Finder title = find.text('X');
-    Point center = tester.getCenter(title);
-    Size size = tester.getSize(title);
+    final Finder title = find.text('X');
+    final Point center = tester.getCenter(title);
+    final Size size = tester.getSize(title);
     expect(center.x, greaterThan(400 - size.width / 2.0));
     expect(center.x, lessThan(400 + size.width / 2.0));
   });
@@ -150,7 +150,7 @@ void main() {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
-    Key titleKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
     Widget leading = new Container();
     List<Widget> actions;
 
@@ -172,7 +172,7 @@ void main() {
 
     await tester.pumpWidget(buildApp());
 
-    Finder title = find.byKey(titleKey);
+    final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).x, 72.0);
     // The toolbar's contents are padded on the right by 4.0
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
@@ -199,7 +199,7 @@ void main() {
     // between the leading and actions widgets. When it's also centered it may
     // also be left or right justified if it doesn't fit in the overall center.
 
-    Key titleKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
     double titleWidth = 700.0;
     Widget leading = new Container();
     List<Widget> actions;
@@ -225,7 +225,7 @@ void main() {
     // that the left edge of the title must be atleast 72.
     await tester.pumpWidget(buildApp());
 
-    Finder title = find.byKey(titleKey);
+    final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).x, 72.0);
     expect(tester.getSize(title).width, equals(700.0));
 
@@ -261,16 +261,16 @@ void main() {
       ),
     );
 
-    Finder title = find.text('X');
+    final Finder title = find.text('X');
     expect(tester.getSize(title).isEmpty, isTrue);
   });
 
   testWidgets('AppBar actions are vertically centered', (WidgetTester tester) async {
-    UniqueKey appBarKey = new UniqueKey();
-    UniqueKey leadingKey = new UniqueKey();
-    UniqueKey titleKey = new UniqueKey();
-    UniqueKey action0Key = new UniqueKey();
-    UniqueKey action1Key = new UniqueKey();
+    final UniqueKey appBarKey = new UniqueKey();
+    final UniqueKey leadingKey = new UniqueKey();
+    final UniqueKey titleKey = new UniqueKey();
+    final UniqueKey action0Key = new UniqueKey();
+    final UniqueKey action1Key = new UniqueKey();
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -310,7 +310,7 @@ void main() {
       ),
     );
 
-    Finder hamburger = find.byTooltip('Open navigation menu');
+    final Finder hamburger = find.byTooltip('Open navigation menu');
     expect(tester.getTopLeft(hamburger), new Point(0.0, 0.0));
     expect(tester.getSize(hamburger), new Size(56.0, 56.0));
   });
@@ -341,13 +341,13 @@ void main() {
       ),
     );
 
-    Finder addButton = find.byTooltip('Add');
+    final Finder addButton = find.byTooltip('Add');
     // Right padding is 4dp.
     expect(tester.getTopRight(addButton), new Point(800.0 - 4.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), new Size(60.0 + 2 * 8.0, 56.0));
 
-    Finder shareButton = find.byTooltip('Share');
+    final Finder shareButton = find.byTooltip('Share');
     // The 20dp icon is expanded to fill the IconButton's touch target to 48dp.
     expect(tester.getSize(shareButton), new Size(48.0, 56.0));
   });
@@ -359,7 +359,7 @@ void main() {
       expandedHeight: null,
     ));
 
-    ScrollController controller = primaryScrollController(tester);
+    final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
     expect(appBarIsVisible(tester), true);
 
@@ -396,7 +396,7 @@ void main() {
       expandedHeight: 128.0,
     ));
 
-    ScrollController controller = primaryScrollController(tester);
+    final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), 128.0);
@@ -429,7 +429,7 @@ void main() {
       expandedHeight: 128.0,
     ));
 
-    ScrollController controller = primaryScrollController(tester);
+    final ScrollController controller = primaryScrollController(tester);
     expect(controller.offset, 0.0);
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), 128.0);

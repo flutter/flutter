@@ -13,7 +13,7 @@ void main() {
   });
 
   test('BoxConstraints copyWith', () {
-    BoxConstraints constraints = const BoxConstraints(
+    final BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -36,7 +36,7 @@ void main() {
   });
 
   test('BoxConstraints operators', () {
-    BoxConstraints constraints = const BoxConstraints(
+    final BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -62,7 +62,7 @@ void main() {
 
   test('BoxConstraints lerp', () {
     expect(BoxConstraints.lerp(null, null, 0.5), isNull);
-    BoxConstraints constraints = const BoxConstraints(
+    final BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 7.0,
       minHeight: 11.0,
@@ -91,13 +91,13 @@ void main() {
   });
 
   test('BoxConstraints normalize', () {
-    BoxConstraints constraints = const BoxConstraints(
+    final BoxConstraints constraints = const BoxConstraints(
       minWidth: 3.0,
       maxWidth: 2.0,
       minHeight: 11.0,
       maxHeight: 18.0
     );
-    BoxConstraints copy = constraints.normalize();
+    final BoxConstraints copy = constraints.normalize();
     expect(copy.minWidth, 3.0);
     expect(copy.maxWidth, 3.0);
     expect(copy.minHeight, 11.0);

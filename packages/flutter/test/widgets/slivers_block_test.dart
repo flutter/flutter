@@ -26,7 +26,7 @@ Future<Null> test(WidgetTester tester, double offset) {
 }
 
 void verify(WidgetTester tester, List<Point> answerKey, String text) {
-  List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
+  final List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
     (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
   ).toList();
   expect(testAnswers, equals(answerKey));
@@ -72,8 +72,8 @@ void main() {
   });
 
   testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
-    Key key1 = new GlobalKey();
-    ViewportOffset offset = new ViewportOffset.zero();
+    final Key key1 = new GlobalKey();
+    final ViewportOffset offset = new ViewportOffset.zero();
     await tester.pumpWidget(new Viewport(
       offset: offset,
       slivers: <Widget>[

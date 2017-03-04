@@ -19,7 +19,7 @@ void main() {
   testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
-    Widget testWidget = new Align(
+    final Widget testWidget = new Align(
       child: new SizedBox(
         height: 800.0,
         width: 300.0,  // forces the grid children to be 300..300

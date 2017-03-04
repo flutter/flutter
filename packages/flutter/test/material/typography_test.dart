@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('TextTheme control test', () {
-    Typography typography = new Typography(platform: TargetPlatform.android);
+    final Typography typography = new Typography(platform: TargetPlatform.android);
     expect(typography.black, equals(typography.black.copyWith()));
     expect(typography.black, equals(typography.black.apply()));
     expect(typography.black.hashCode, equals(typography.black.copyWith().hashCode));
@@ -16,7 +16,7 @@ void main() {
 
   test('Typography is defined for all target platforms', () {
     for (TargetPlatform platform in TargetPlatform.values) {
-      Typography typography = new Typography(platform: platform);
+      final Typography typography = new Typography(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
@@ -30,11 +30,11 @@ void main() {
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
     // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
-    Matcher hasCorrectFont = predicate((TextStyle s) {
+    final Matcher hasCorrectFont = predicate((TextStyle s) {
       return s.fontFamily == (s.fontSize <= 19.0 ? '.SF UI Text' : '.SF UI Display');
     }, 'Uses SF Display font for font sizes over 19.0, otherwise SF Text font');
 
-    Typography typography = new Typography(platform: TargetPlatform.iOS);
+    final Typography typography = new Typography(platform: TargetPlatform.iOS);
     for (TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
       expect(textTheme.display4, hasCorrectFont);
       expect(textTheme.display3, hasCorrectFont);

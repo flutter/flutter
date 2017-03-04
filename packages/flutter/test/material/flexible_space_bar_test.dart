@@ -20,7 +20,7 @@ void main() {
       )
     );
 
-    Finder title = find.text('X');
+    final Finder title = find.text('X');
     Point center = tester.getCenter(title);
     Size size = tester.getSize(title);
     expect(center.x, lessThan(400 - size.width / 2.0));

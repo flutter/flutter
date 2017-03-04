@@ -39,7 +39,7 @@ void main() {
   });
 
   testWidgets('Focus handling', (WidgetTester tester) async {
-    GlobalKey inputKey = new GlobalKey();
+    final GlobalKey inputKey = new GlobalKey();
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new Center(
@@ -58,7 +58,7 @@ void main() {
       )
     );
 
-    StateMarkerState state1 = tester.state(find.byType(StateMarker));
+    final StateMarkerState state1 = tester.state(find.byType(StateMarker));
     state1.marker = 'original';
 
     await tester.pumpWidget(
@@ -68,7 +68,7 @@ void main() {
       )
     );
 
-    StateMarkerState state2 = tester.state(find.byType(StateMarker));
+    final StateMarkerState state2 = tester.state(find.byType(StateMarker));
     expect(state1, equals(state2));
     expect(state2.marker, equals('original'));
   });
@@ -122,8 +122,8 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
 
-    NavigatorState navigator = tester.state(find.byType(Navigator));
-    bool result = await navigator.maybePop();
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
+    final bool result = await navigator.maybePop();
 
     expect(result, isFalse);
 

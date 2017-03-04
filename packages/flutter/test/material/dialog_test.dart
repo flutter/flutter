@@ -89,8 +89,8 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    StatefulElement widget = tester.element(find.byType(Material).last);
-    Material materialconfig = widget.state.config;
+    final StatefulElement widget = tester.element(find.byType(Material).last);
+    final Material materialconfig = widget.state.config;
     //first and second expect check that the material is the dialog's one
     expect(materialconfig.type, MaterialType.card);
     expect(materialconfig.elevation, 24);
@@ -111,9 +111,9 @@ void main() {
       ),
     );
 
-    BuildContext context = tester.element(find.text('Go'));
+    final BuildContext context = tester.element(find.text('Go'));
 
-    Future<int> result = showDialog(
+    final Future<int> result = showDialog(
       context: context,
       child: new SimpleDialog(
         title: new Text('Title'),
@@ -152,7 +152,7 @@ void main() {
       ),
     );
 
-    BuildContext context = tester.element(find.text('Go'));
+    final BuildContext context = tester.element(find.text('Go'));
 
     showDialog<Null>(
       context: context,

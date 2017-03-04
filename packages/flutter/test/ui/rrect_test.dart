@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 void main() {
   test("RRect.contains()", () {
-    RRect rrect = new RRect.fromRectAndCorners(
+    final RRect rrect = new RRect.fromRectAndCorners(
       new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(0.5),
       topRight: const Radius.circular(0.25),
@@ -27,7 +27,7 @@ void main() {
   });
 
   test("RRect.contains() large radii", () {
-    RRect rrect = new RRect.fromRectAndCorners(
+    final RRect rrect = new RRect.fromRectAndCorners(
       new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(5000.0),
       topRight: const Radius.circular(2500.0),

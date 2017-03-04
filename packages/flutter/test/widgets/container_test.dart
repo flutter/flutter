@@ -9,7 +9,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Container control test', (WidgetTester tester) async {
-    Container container = new Container(
+    final Container container = new Container(
       alignment: FractionalOffset.bottomRight,
       padding: const EdgeInsets.all(7.0),
       decoration: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
@@ -39,7 +39,7 @@ void main() {
       child: container
     ));
 
-    RenderBox box = tester.renderObject(find.byType(Container));
+    final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box, isNotNull);
 
     expect(box, paints

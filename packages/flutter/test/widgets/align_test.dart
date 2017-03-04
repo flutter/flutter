@@ -24,7 +24,7 @@ void main() {
   });
 
   testWidgets('Shrink wraps in finite space', (WidgetTester tester) async {
-    GlobalKey alignKey = new GlobalKey();
+    final GlobalKey alignKey = new GlobalKey();
     await tester.pumpWidget(
       new SingleChildScrollView(
         child: new Align(

@@ -45,8 +45,8 @@ class RenderTestBox extends RenderBox {
 
 void main() {
   test('Shrink-wrapping width', () {
-    RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
-    RenderBox parent = new RenderIntrinsicWidth(child: child);
+    final RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
+    final RenderBox parent = new RenderIntrinsicWidth(child: child);
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -80,7 +80,7 @@ void main() {
   });
 
   test('IntrinsicWidth without a child', () {
-    RenderBox parent = new RenderIntrinsicWidth();
+    final RenderBox parent = new RenderIntrinsicWidth();
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -114,8 +114,8 @@ void main() {
   });
 
   test('Shrink-wrapping width (stepped width)', () {
-    RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
-    RenderBox parent = new RenderIntrinsicWidth(child: child, stepWidth: 47.0);
+    final RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
+    final RenderBox parent = new RenderIntrinsicWidth(child: child, stepWidth: 47.0);
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -149,8 +149,8 @@ void main() {
   });
 
   test('Shrink-wrapping width (stepped height)', () {
-    RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
-    RenderBox parent = new RenderIntrinsicWidth(child: child, stepHeight: 47.0);
+    final RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
+    final RenderBox parent = new RenderIntrinsicWidth(child: child, stepHeight: 47.0);
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -184,8 +184,8 @@ void main() {
   });
 
   test('Shrink-wrapping width (stepped everything)', () {
-    RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
-    RenderBox parent = new RenderIntrinsicWidth(child: child, stepHeight: 47.0, stepWidth: 37.0);
+    final RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
+    final RenderBox parent = new RenderIntrinsicWidth(child: child, stepHeight: 47.0, stepWidth: 37.0);
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -219,8 +219,8 @@ void main() {
   });
 
   test('Shrink-wrapping height', () {
-    RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
-    RenderBox parent = new RenderIntrinsicHeight(child: child);
+    final RenderBox child = new RenderTestBox(const BoxConstraints(minWidth: 10.0, maxWidth: 100.0, minHeight: 20.0, maxHeight: 200.0));
+    final RenderBox parent = new RenderIntrinsicHeight(child: child);
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -254,7 +254,7 @@ void main() {
   });
 
   test('IntrinsicHeight without a child', () {
-    RenderBox parent = new RenderIntrinsicHeight();
+    final RenderBox parent = new RenderIntrinsicHeight();
     layout(parent,
       constraints: const BoxConstraints(
         minWidth: 5.0,
@@ -288,7 +288,7 @@ void main() {
   });
 
   test('Padding and boring intrinsics', () {
-    RenderBox box = new RenderPadding(
+    final RenderBox box = new RenderPadding(
       padding: const EdgeInsets.all(15.0),
       child: new RenderSizedBox(const Size(20.0, 20.0))
     );
@@ -326,7 +326,7 @@ void main() {
   });
 
   test('Padding and interesting intrinsics', () {
-    RenderBox box = new RenderPadding(
+    final RenderBox box = new RenderPadding(
       padding: const EdgeInsets.all(15.0),
       child: new RenderAspectRatio(aspectRatio: 1.0)
     );
@@ -364,7 +364,7 @@ void main() {
   });
 
   test('Padding and boring intrinsics', () {
-    RenderBox box = new RenderPadding(
+    final RenderBox box = new RenderPadding(
       padding: const EdgeInsets.all(15.0),
       child: new RenderSizedBox(const Size(20.0, 20.0))
     );
@@ -402,7 +402,7 @@ void main() {
   });
 
   test('Padding and interesting intrinsics', () {
-    RenderBox box = new RenderPadding(
+    final RenderBox box = new RenderPadding(
       padding: const EdgeInsets.all(15.0),
       child: new RenderAspectRatio(aspectRatio: 1.0)
     );

@@ -7,9 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('ThemeDataTween control test', () {
-    ThemeData light = new ThemeData.light();
-    ThemeData dark = new ThemeData.light();
-    ThemeDataTween tween = new ThemeDataTween(begin: light, end: dark);
+    final ThemeData light = new ThemeData.light();
+    final ThemeData dark = new ThemeData.light();
+    final ThemeDataTween tween = new ThemeDataTween(begin: light, end: dark);
     expect(tween.lerp(0.25), equals(ThemeData.lerp(light, dark, 0.25)));
   });
 
@@ -226,7 +226,7 @@ void main() {
     await tester.tap(find.text('SHOW'));
     await tester.pump(const Duration(seconds: 1));
 
-    List<Material> materials = tester.widgetList(find.byType(Material)).toList();
+    final List<Material> materials = tester.widgetList(find.byType(Material)).toList();
     expect(materials.length, equals(2));
     expect(materials[0].color, green); // app scaffold
     expect(materials[1].color, green); // dialog scaffold

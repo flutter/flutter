@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    Widget widget = new TickerMode(
+    final Widget widget = new TickerMode(
       enabled: false,
       child: new LinearProgressIndicator()
     );
@@ -55,7 +55,7 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    Widget widget = new BoringTickerTest();
+    final Widget widget = new BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);

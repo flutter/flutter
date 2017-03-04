@@ -7,18 +7,18 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
-  RenderSliver target = key.currentContext.findRenderObject();
+  final RenderSliver target = key.currentContext.findRenderObject();
   expect(target.parent, const isInstanceOf<RenderViewport>());
-  SliverPhysicalParentData parentData = target.parentData;
-  Offset actual = parentData.paintOffset;
+  final SliverPhysicalParentData parentData = target.parentData;
+  final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
-  SliverGeometry geometry = target.geometry;
+  final SliverGeometry geometry = target.geometry;
   expect(geometry.visible, visible);
 }
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
-  RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
+  final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
+  final Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
   expect(rect, equals(ideal));
 }
 
@@ -34,7 +34,7 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     final double max = bigHeight * 2.0 + new TestDelegate().maxExtent - 600.0; // 600 is the height of the test viewport
     assert(max < 10000.0);
     expect(max, 1600.0);
@@ -61,7 +61,7 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
@@ -130,7 +130,7 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
@@ -162,7 +162,7 @@ void main() {
         ],
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 600.0), false);
@@ -204,7 +204,7 @@ void main() {
     expect(tester.getTopLeft(find.byType(Container)), Point.origin);
     expect(tester.getTopLeft(find.text('X')), const Point(0.0, 200.0));
 
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(-50.0);
     await tester.pump();
 

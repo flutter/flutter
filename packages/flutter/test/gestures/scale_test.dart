@@ -11,8 +11,8 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize scale gestures', (GestureTester tester) {
-    ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool didStartScale = false;
     Point updatedFocalPoint;
@@ -37,9 +37,9 @@ void main() {
       didTap = true;
     };
 
-    TestPointer pointer1 = new TestPointer(1);
+    final TestPointer pointer1 = new TestPointer(1);
 
-    PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -69,8 +69,8 @@ void main() {
     expect(didTap, isFalse);
 
     // Two-finger scaling
-    TestPointer pointer2 = new TestPointer(2);
-    PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
+    final TestPointer pointer2 = new TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     tester.closeArena(2);
@@ -102,8 +102,8 @@ void main() {
     expect(didTap, isFalse);
 
     // Three-finger scaling
-    TestPointer pointer3 = new TestPointer(3);
-    PointerDownEvent down3 = pointer3.down(const Point(25.0, 35.0));
+    final TestPointer pointer3 = new TestPointer(3);
+    final PointerDownEvent down3 = pointer3.down(const Point(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
     tester.closeArena(3);
