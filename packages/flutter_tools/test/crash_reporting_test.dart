@@ -25,14 +25,14 @@ void main() {
     int testPort;
 
     setUp(() async {
-      tools.fs = new MemoryFileSystem();
+      tools.crashFileSystem = new MemoryFileSystem();
       setExitFunctionForTests((_) { });
       testPort = await os.findAvailablePort();
       overrideBaseCrashUrlForTesting(Uri.parse('http://localhost:$testPort/test-path'));
     });
 
     tearDown(() {
-      tools.fs = new LocalFileSystem();
+      tools.crashFileSystem = new LocalFileSystem();
       restoreExitFunction();
       resetBaseCrashUrlForTesting();
     });
@@ -77,7 +77,7 @@ void main() {
 
       // Verify that we've written the crash report to disk.
       List<String> writtenFiles =
-        (await tools.fs.directory('/').list(recursive: true).toList())
+        (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
             .map((FileSystemEntity e) => e.path).toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));

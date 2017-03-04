@@ -223,17 +223,17 @@ Future<int> _handleToolError(
   }
 }
 
-/// File system used by the outer executable logic.
+/// File system used by the crash reporting logic.
 ///
 /// We do not want to use the file system stored in the context because it may
 /// be recording. Additionally, in the case of a crash we do not trust the
 /// integrity of the [AppContext].
 @visibleForTesting
-FileSystem fs = new LocalFileSystem();
+FileSystem crashFileSystem = new LocalFileSystem();
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {
-  File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
+  File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   StringBuffer buffer = new StringBuffer();
 
@@ -253,7 +253,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain cha
     await crashFile.writeAsString(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
+    crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
       await crashFile.writeAsString(buffer.toString());
     } on FileSystemException catch (e) {
