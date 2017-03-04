@@ -512,7 +512,8 @@ class DevFS {
         final String relativePath =
             fs.path.relative(file.path, from: directory.path);
         final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        if ((fileFilter != null) && !fileFilter.contains(file.absolute.path)) {
+        final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
+        if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
           // Skip files that are not included in the filter.
           continue;
         }
