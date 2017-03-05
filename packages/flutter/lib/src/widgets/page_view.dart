@@ -176,7 +176,7 @@ class _PagePosition extends ScrollPosition {
     return page * viewportDimension * viewportFraction;
   }
 
-  double get page => pixels == null ? null : getPageFromPixels(pixels, viewportDimension);
+  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
 
   @override
   bool applyViewportDimension(double viewportDimension) {
