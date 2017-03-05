@@ -406,7 +406,7 @@ void main() {
         children:
             kStates.map<Widget>((String state) => new Text(state)).toList(),
         controller: controller,
-        onPageChanged: (page) {
+        onPageChanged: (int page) {
           changeIndex = page;
         },
       );
