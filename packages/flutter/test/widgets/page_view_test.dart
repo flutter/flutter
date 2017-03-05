@@ -323,8 +323,7 @@ void main() {
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
-    final PageController controller =
-        new PageController(viewportFraction: 1/8);
+    final PageController controller = new PageController(viewportFraction: 1/8);
 
     Widget build(PageController controller) {
       return new PageView.builder(
