@@ -15,20 +15,20 @@ void main() {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(new PageView(
-            children: kStates.map<Widget>((String state) {
-              return new GestureDetector(
-                onTap: () {
-                  log.add(state);
-                },
-                child: new Container(
-                  height: 200.0,
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF0000FF),
-                  ),
-                  child: new Text(state),
-                ),
-              );
-            }).toList()
+      children: kStates.map<Widget>((String state) {
+        return new GestureDetector(
+          onTap: () {
+            log.add(state);
+          },
+          child: new Container(
+            height: 200.0,
+            decoration: const BoxDecoration(
+              backgroundColor: const Color(0xFF0000FF),
+            ),
+            child: new Text(state),
+          ),
+        );
+      }).toList(),
     ));
 
     await tester.tap(find.text('Alabama'));
@@ -61,7 +61,7 @@ void main() {
     log.clear();
 
     await tester.fling(
-            find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+        find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
     await tester.pumpUntilNoTransientCallbacks(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
@@ -76,8 +76,8 @@ void main() {
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgets('PageView does not squish when overscrolled', (
-          WidgetTester tester) async {
+  testWidgets('PageView does not squish when overscrolled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       theme: new ThemeData(platform: TargetPlatform.iOS),
       home: new PageView(
@@ -94,9 +94,7 @@ void main() {
 
     Size sizeOf(int i) => tester.getSize(find.byKey(new ValueKey<int>(i)));
     double leftOf(int i) =>
-            tester
-                    .getTopLeft(find.byKey(new ValueKey<int>(i)))
-                    .x;
+        tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
 
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
@@ -123,8 +121,8 @@ void main() {
         height: 400.0,
         child: new PageView(
           controller: controller,
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -132,9 +130,9 @@ void main() {
     expect(find.text('California'), findsOneWidget);
 
     controller.nextPage(
-            duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(
-            const Duration(milliseconds: 100));
+        duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester
+        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -144,8 +142,8 @@ void main() {
         height: 400.0,
         child: new PageView(
           controller: controller,
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -153,9 +151,9 @@ void main() {
     expect(find.text('Colorado'), findsOneWidget);
 
     controller.previousPage(
-            duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(
-            const Duration(milliseconds: 100));
+        duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester
+        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -166,8 +164,8 @@ void main() {
         width: 600.0,
         height: 400.0,
         child: new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -175,8 +173,8 @@ void main() {
     expect(find.text('Alabama'), findsOneWidget);
 
     await tester.scroll(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(
-            const Duration(milliseconds: 100));
+    await tester
+        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -185,8 +183,8 @@ void main() {
         width: 250.0,
         height: 100.0,
         child: new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -198,8 +196,8 @@ void main() {
         width: 450.0,
         height: 400.0,
         child: new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -213,8 +211,8 @@ void main() {
         width: 0.0,
         height: 0.0,
         child: new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -226,8 +224,8 @@ void main() {
         width: 200.0,
         height: 200.0,
         child: new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -246,7 +244,8 @@ void main() {
 
     expect(log, isEmpty);
 
-    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Point(100.0, 100.0));
     // The page view is 800.0 wide, so this move is just short of halfway.
     await gesture.moveBy(const Offset(-380.0, 0.0));
 
@@ -288,16 +287,17 @@ void main() {
 
     Widget build(PageController controller) {
       return new PageView.builder(
-              controller: controller,
-              itemCount: kStates.length,
-              itemBuilder: (BuildContext context, int index) {
-                return new Container(
-                  height: 200.0,
-                  color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(
-                          0xFF00FF00),
-                  child: new Text(kStates[index]),
-                );
-              }
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
       );
     }
 
@@ -323,24 +323,22 @@ void main() {
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
-<<<<<<< HEAD
-    PageController controller = new PageController(viewportFraction: 1 / 8);
-=======
-    final PageController controller = new PageController(viewportFraction: 1/8);
->>>>>>> master
+    final PageController controller =
+        new PageController(viewportFraction: 1 / 8);
 
     Widget build(PageController controller) {
       return new PageView.builder(
-              controller: controller,
-              itemCount: kStates.length,
-              itemBuilder: (BuildContext context, int index) {
-                return new Container(
-                  height: 200.0,
-                  color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(
-                          0xFF00FF00),
-                  child: new Text(kStates[index]),
-                );
-              }
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
       );
     }
 
@@ -355,8 +353,8 @@ void main() {
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Connecticut')),
-            const Point(-50.0, 0.0));
+    expect(
+        tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
     expect(tester.getTopLeft(find.text('Delaware')), const Point(50.0, 0.0));
     expect(tester.getTopLeft(find.text('Florida')), const Point(150.0, 0.0));
     expect(tester.getTopLeft(find.text('Georgia')), const Point(250.0, 0.0));
@@ -368,28 +366,30 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    final PageController controller = new PageController(viewportFraction: 5/4);
+    final PageController controller =
+        new PageController(viewportFraction: 5 / 4);
 
     Widget build(PageController controller) {
       return new PageView.builder(
-              controller: controller,
-              itemCount: kStates.length,
-              itemBuilder: (BuildContext context, int index) {
-                return new Container(
-                  height: 200.0,
-                  color: index % 2 == 0 ? const Color(0xFF0000FF) : const Color(
-                          0xFF00FF00),
-                  child: new Text(kStates[index]),
-                );
-              }
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
       );
     }
 
     await tester.pumpWidget(build(controller));
 
     expect(tester.getTopLeft(find.text('Alabama')), const Point(-100.0, 0.0));
-    expect(tester.getBottomRight(find.text('Alabama')),
-            const Point(900.0, 600.0));
+    expect(
+        tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
 
     controller.jumpToPage(10);
     await tester.pump();
@@ -397,24 +397,27 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Point(-100.0, 0.0));
   });
 
-  testWidgets('PageView does not report page changed on overscroll', (
-    WidgetTester tester) async {
-      PageController controller = new PageController(initialPage: kStates.length - 1);
-      int changeIndex = 0;
-      Widget build() {
-        return new PageView(
-          children: kStates.map<Widget>((String state) => new Text(state))
-                  .toList(),
-          controller: controller,
-          onPageChanged: (page) {
-            changeIndex = page;
-          }
-        );
-      }
+  testWidgets('PageView does not report page changed on overscroll',
+      (WidgetTester tester) async {
+    final PageController controller =
+        new PageController(initialPage: kStates.length - 1);
+    int changeIndex = 0;
+    Widget build() {
+      return new PageView(
+        children:
+            kStates.map<Widget>((String state) => new Text(state)).toList(),
+        controller: controller,
+        onPageChanged: (page) {
+          changeIndex = page;
+        },
+      );
+    }
 
-      await tester.pumpWidget(build());
-      controller.jumpToPage(kStates.length * 2);  // try to move beyond max range
-      expect(changeIndex, 0);   // change index should be zero, shouldn't fire onPageChanged
-
+    await tester.pumpWidget(build());
+    controller.jumpToPage(kStates.length * 2); // try to move beyond max range
+    // change index should be zero, shouldn't fire onPageChanged
+    expect(changeIndex, 0);
+    await tester.pump();
+    expect(changeIndex, 0);
   });
 }
