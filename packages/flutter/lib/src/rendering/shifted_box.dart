@@ -158,7 +158,7 @@ class RenderPadding extends RenderShiftedBox {
       ));
       return;
     }
-    BoxConstraints innerConstraints = constraints.deflate(padding);
+    final BoxConstraints innerConstraints = constraints.deflate(padding);
     child.layout(innerConstraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = new Offset(padding.left, padding.top);
@@ -325,7 +325,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         final BoxParentData childParentData = child.parentData;
         if (childParentData.offset.dy > 0.0) {
           // vertical alignment arrows
-          double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
           path
             ..moveTo(offset.dx + size.width / 2.0, offset.dy)
             ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
@@ -343,7 +343,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         }
         if (childParentData.offset.dx > 0.0) {
           // horizontal alignment arrows
-          double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
           path
             ..moveTo(offset.dx, offset.dy + size.height / 2.0)
             ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
@@ -614,14 +614,14 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double minWidth = constraints.minWidth;
     double maxWidth = constraints.maxWidth;
     if (_widthFactor != null) {
-      double width = maxWidth * _widthFactor;
+      final double width = maxWidth * _widthFactor;
       minWidth = width;
       maxWidth = width;
     }
     double minHeight = constraints.minHeight;
     double maxHeight = constraints.maxHeight;
     if (_heightFactor != null) {
-      double height = maxHeight * _heightFactor;
+      final double height = maxHeight * _heightFactor;
       minHeight = height;
       maxHeight = height;
     }
@@ -870,7 +870,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
-      BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+      final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;

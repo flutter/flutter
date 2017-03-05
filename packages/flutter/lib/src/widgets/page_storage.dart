@@ -52,7 +52,7 @@ class _StorageEntryIdentifier {
 /// page to another.
 class PageStorageBucket {
   _StorageEntryIdentifier _computeStorageIdentifier(BuildContext context) {
-    _StorageEntryIdentifier result = new _StorageEntryIdentifier();
+    final _StorageEntryIdentifier result = new _StorageEntryIdentifier();
     result.clientType = context.widget.runtimeType;
     Key lastKey = context.widget.key;
     if (lastKey is! GlobalKey) {
@@ -128,7 +128,7 @@ class PageStorage extends StatelessWidget {
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
   static PageStorageBucket of(BuildContext context) {
-    PageStorage widget = context.ancestorWidgetOfExactType(PageStorage);
+    final PageStorage widget = context.ancestorWidgetOfExactType(PageStorage);
     return widget?.bucket;
   }
 

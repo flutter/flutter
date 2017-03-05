@@ -275,9 +275,9 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   void paintRadialReaction(Canvas canvas, Offset offset, Point origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
-      Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
-      Point center = Point.lerp(_downPosition ?? origin, origin, _reaction.value);
-      double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
+      final Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
+      final Point center = Point.lerp(_downPosition ?? origin, origin, _reaction.value);
+      final double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
       canvas.drawCircle(center + offset, radius, reactionPaint);
     }
   }

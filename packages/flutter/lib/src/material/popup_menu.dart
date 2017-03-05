@@ -262,13 +262,13 @@ class _PopupMenu<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
-    List<Widget> children = <Widget>[];
+    final double unit = 1.0 / (route.items.length + 1.5); // 1.0 for the width and 0.5 for the last item's fade.
+    final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < route.items.length; ++i) {
       final double start = (i + 1) * unit;
       final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
-      CurvedAnimation opacity = new CurvedAnimation(
+      final CurvedAnimation opacity = new CurvedAnimation(
         parent: route.animation,
         curve: new Interval(start, end)
       );
@@ -289,7 +289,7 @@ class _PopupMenu<T> extends StatelessWidget {
     final CurveTween width = new CurveTween(curve: new Interval(0.0, unit));
     final CurveTween height = new CurveTween(curve: new Interval(0.0, unit * route.items.length));
 
-    Widget child = new ConstrainedBox(
+    final Widget child = new ConstrainedBox(
       constraints: const BoxConstraints(
         minWidth: _kMenuMinWidth,
         maxWidth: _kMenuMaxWidth,

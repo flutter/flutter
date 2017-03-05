@@ -44,7 +44,7 @@ class Config {
 }
 
 String _userHomeDir() {
-  String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  String value = platform.environment[envKey];
+  final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
+  final String value = platform.environment[envKey];
   return value == null ? '.' : value;
 }

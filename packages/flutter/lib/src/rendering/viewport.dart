@@ -675,7 +675,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
 
     if (leadingNegativeChild != null) {
       // negative scroll offsets
-      double result = layoutOneSide(
+      final double result = layoutOneSide(
         leadingNegativeChild,
         math.max(mainAxisExtent, centerOffset) - mainAxisExtent,
         0.0,

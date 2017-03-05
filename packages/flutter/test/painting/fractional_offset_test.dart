@@ -18,8 +18,8 @@ void main() {
   });
 
   test('FractionalOffset.lerp()', () {
-    FractionalOffset a = FractionalOffset.topLeft;
-    FractionalOffset b = FractionalOffset.topCenter;
+    final FractionalOffset a = FractionalOffset.topLeft;
+    final FractionalOffset b = FractionalOffset.topCenter;
     expect(FractionalOffset.lerp(a, b, 0.25), equals(const FractionalOffset(0.125, 0.0)));
 
     expect(FractionalOffset.lerp(null, null, 0.25), isNull);

@@ -25,13 +25,13 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
     String sdkVersionText;
 
     if (androidSdk == null) {
       if (platform.environment.containsKey(kAndroidHome)) {
-        String androidHomeDir = platform.environment[kAndroidHome];
+        final String androidHomeDir = platform.environment[kAndroidHome];
         messages.add(new ValidationMessage.error(
           '$kAndroidHome = $androidHomeDir\n'
           'but Android SDK not found at this location.'
@@ -57,11 +57,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       }
 
       if (platform.environment.containsKey(kAndroidHome)) {
-        String androidHomeDir = platform.environment[kAndroidHome];
+        final String androidHomeDir = platform.environment[kAndroidHome];
         messages.add(new ValidationMessage('$kAndroidHome = $androidHomeDir'));
       }
 
-      List<String> validationResult = androidSdk.validateSdkWellFormed();
+      final List<String> validationResult = androidSdk.validateSdkWellFormed();
 
       if (validationResult.isEmpty) {
         // Empty result means SDK is well formed.
@@ -72,10 +72,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         try {
           printTrace('java -version');
 
-          ProcessResult result = processManager.runSync(<String>['java', '-version']);
+          final ProcessResult result = processManager.runSync(<String>['java', '-version']);
           if (result.exitCode == 0) {
             javaVersion = result.stderr;
-            List<String> versionLines = javaVersion.split('\n');
+            final List<String> versionLines = javaVersion.split('\n');
             javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
            }
         } catch (error) {

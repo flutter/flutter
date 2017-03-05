@@ -19,12 +19,12 @@ class NonStopVSync implements TickerProvider {
 
 void main() {
   // We first create a render object that represents a green box.
-  RenderBox green = new RenderDecoratedBox(
+  final RenderBox green = new RenderDecoratedBox(
     decoration: const BoxDecoration(backgroundColor: const Color(0xFF00FF00))
   );
   // Second, we wrap that green box in a render object that forces the green box
   // to have a specific size.
-  RenderBox square = new RenderConstrainedBox(
+  final RenderBox square = new RenderConstrainedBox(
     additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
     child: green
   );
@@ -32,13 +32,13 @@ void main() {
   // transform before painting its child. Each frame of the animation, we'll
   // update the transform of this render object to cause the green square to
   // spin.
-  RenderTransform spin = new RenderTransform(
+  final RenderTransform spin = new RenderTransform(
     transform: new Matrix4.identity(),
     alignment: FractionalOffset.center,
     child: square
   );
   // Finally, we center the spinning green square...
-  RenderBox root = new RenderPositionedBox(
+  final RenderBox root = new RenderPositionedBox(
     alignment: FractionalOffset.center,
     child: spin
   );
@@ -47,14 +47,14 @@ void main() {
 
   // To make the square spin, we use an animation that repeats every 1800
   // milliseconds.
-  AnimationController animation = new AnimationController(
+  final AnimationController animation = new AnimationController(
     duration: const Duration(milliseconds: 1800),
     vsync: const NonStopVSync(),
   )..repeat();
   // The animation will produce a value between 0.0 and 1.0 each frame, but we
   // want to rotate the square using a value between 0.0 and math.PI. To change
   // the range of the animation, we use a Tween.
-  Tween<double> tween = new Tween<double>(begin: 0.0, end: math.PI);
+  final Tween<double> tween = new Tween<double>(begin: 0.0, end: math.PI);
   // We add a listener to the animation, which will be called every time the
   // animation ticks.
   animation.addListener(() {

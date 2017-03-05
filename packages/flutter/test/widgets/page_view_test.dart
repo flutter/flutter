@@ -12,7 +12,7 @@ const Duration _frameDuration = const Duration(milliseconds: 100);
 
 void main() {
   testWidgets('PageView control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new PageView(
             children: kStates.map<Widget>((String state) {
@@ -115,7 +115,7 @@ void main() {
   });
 
   testWidgets('PageController control test', (WidgetTester tester) async {
-    PageController controller = new PageController(initialPage: 4);
+    final PageController controller = new PageController(initialPage: 4);
 
     await tester.pumpWidget(new Center(
       child: new SizedBox(
@@ -246,7 +246,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     // The page view is 800.0 wide, so this move is just short of halfway.
     await gesture.moveBy(const Offset(-380.0, 0.0));
 
@@ -323,7 +323,11 @@ void main() {
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
+<<<<<<< HEAD
     PageController controller = new PageController(viewportFraction: 1 / 8);
+=======
+    final PageController controller = new PageController(viewportFraction: 1/8);
+>>>>>>> master
 
     Widget build(PageController controller) {
       return new PageView.builder(
@@ -364,7 +368,7 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    PageController controller = new PageController(viewportFraction: 5 / 4);
+    final PageController controller = new PageController(viewportFraction: 5/4);
 
     Widget build(PageController controller) {
       return new PageView.builder(

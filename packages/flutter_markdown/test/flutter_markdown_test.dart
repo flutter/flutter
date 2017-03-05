@@ -12,7 +12,7 @@ void main() {
   testWidgets('Simple string', (WidgetTester tester) async {
       await tester.pumpWidget(new MarkdownBody(data: 'Hello'));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
       _expectTextStrings(widgets, <String>['Hello']);
   });
@@ -20,7 +20,7 @@ void main() {
   testWidgets('Header', (WidgetTester tester) async {
       await tester.pumpWidget(new MarkdownBody(data: '# Header'));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, Container, Padding, RichText]);
       _expectTextStrings(widgets, <String>['Header']);
   });
@@ -28,14 +28,14 @@ void main() {
   testWidgets('Empty string', (WidgetTester tester) async {
       await tester.pumpWidget(new MarkdownBody(data: ''));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column]);
   });
 
   testWidgets('Ordered list', (WidgetTester tester) async {
       await tester.pumpWidget(new MarkdownBody(data: '1. Item 1\n1. Item 2\n2. Item 3'));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectTextStrings(widgets, <String>[
         '1.',
         'Item 1',
@@ -49,7 +49,7 @@ void main() {
   testWidgets('Unordered list', (WidgetTester tester) async {
       await tester.pumpWidget(new MarkdownBody(data: '- Item 1\n- Item 2\n- Item 3'));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectTextStrings(widgets, <String>[
         '•',
         'Item 1',
@@ -63,7 +63,7 @@ void main() {
   testWidgets('Scrollable wrapping', (WidgetTester tester) async {
       await tester.pumpWidget(new Markdown(data: ''));
 
-      List<Widget> widgets = tester.allWidgets.toList();
+      final List<Widget> widgets = tester.allWidgets.toList();
       _expectWidgetTypes(widgets.take(2), <Type>[
         Markdown,
         SingleChildScrollView,
@@ -78,8 +78,8 @@ void main() {
   testWidgets('Links', (WidgetTester tester) async {
       await tester.pumpWidget(new Markdown(data: '[Link Text](href)'));
 
-      RichText textWidget = tester.allWidgets.firstWhere((Widget widget) => widget is RichText);
-      TextSpan span = textWidget.text;
+      final RichText textWidget = tester.allWidgets.firstWhere((Widget widget) => widget is RichText);
+      final TextSpan span = textWidget.text;
 
       expect(span.children[0].recognizer.runtimeType, equals(TapGestureRecognizer));
   });
@@ -93,7 +93,7 @@ void main() {
     for (String mdLine in mdData) {
       await tester.pumpWidget(new MarkdownBody(data: mdLine));
 
-          Iterable<Widget> widgets = tester.allWidgets;
+          final Iterable<Widget> widgets = tester.allWidgets;
           _expectTextStrings(widgets, <String>['Line 1', 'Line 2']);
     }
   });
@@ -102,7 +102,7 @@ void main() {
       final String mdLine = 'Line 1 <\n\nc < c c\n\n< Line 2';
       await tester.pumpWidget(new MarkdownBody(data: mdLine));
 
-      Iterable<Widget> widgets = tester.allWidgets;
+      final Iterable<Widget> widgets = tester.allWidgets;
       _expectTextStrings(widgets, <String>['Line 1 &lt;','c &lt; c c','&lt; Line 2']);
   });
 
@@ -110,9 +110,9 @@ void main() {
       await tester.pumpWidget(new Markdown(data: 'Data1'));
       _expectTextStrings(tester.allWidgets, <String>['Data1']);
 
-      String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
+      final String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
       await tester.pumpWidget(new Markdown(data: 'Data1'));
-      String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
+      final String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
       expect(stateBefore, equals(stateAfter));
 
       await tester.pumpWidget(new Markdown(data: 'Data2'));
@@ -120,22 +120,22 @@ void main() {
   });
 
   testWidgets('Changing config - style', (WidgetTester tester) async {
-      ThemeData theme = new ThemeData.light();
+      final ThemeData theme = new ThemeData.light();
 
-      MarkdownStyle style1 = new MarkdownStyle.defaultFromTheme(theme);
-      MarkdownStyle style2 = new MarkdownStyle.largeFromTheme(theme);
+      final MarkdownStyle style1 = new MarkdownStyle.defaultFromTheme(theme);
+      final MarkdownStyle style2 = new MarkdownStyle.largeFromTheme(theme);
 
       await tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style1));
 
-      String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
+      final String stateBefore = WidgetsBinding.instance.renderViewElement.toStringDeep();
       await tester.pumpWidget(new Markdown(data: 'Test', markdownStyle: style2));
-      String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
+      final String stateAfter = WidgetsBinding.instance.renderViewElement.toStringDeep();
       expect(stateBefore, isNot(stateAfter));
   });
 }
 
 void _expectWidgetTypes(Iterable<Widget> widgets, List<Type> expected) {
-  List<Type> actual = widgets.map((Widget w) => w.runtimeType).toList();
+  final List<Type> actual = widgets.map((Widget w) => w.runtimeType).toList();
   expect(actual, expected);
 }
 
@@ -143,8 +143,8 @@ void _expectTextStrings(Iterable<Widget> widgets, List<String> strings) {
   int currentString = 0;
   for (Widget widget in widgets) {
     if (widget is RichText) {
-      TextSpan span = widget.text;
-      String text = _extractTextFromTextSpan(span);
+      final TextSpan span = widget.text;
+      final String text = _extractTextFromTextSpan(span);
       expect(text, equals(strings[currentString]));
       currentString += 1;
     }

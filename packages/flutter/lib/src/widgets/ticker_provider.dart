@@ -50,7 +50,7 @@ class TickerMode extends InheritedWidget {
   /// bool tickingEnabled = TickerMode.of(context);
   /// ```
   static bool of(BuildContext context) {
-    TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
+    final TickerMode widget = context.inheritFromWidgetOfExactType(TickerMode);
     return widget?.enabled ?? true;
   }
 

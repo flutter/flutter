@@ -49,10 +49,10 @@ class _ContactItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
+    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
     columnChildren.add(new Text(lines.last, style: themeData.textTheme.caption));
 
-    List<Widget> rowChildren = <Widget>[
+    final List<Widget> rowChildren = <Widget>[
       new Expanded(
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -57,7 +57,7 @@ void main() {
       ],
     ));
 
-    RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
     expect(list.geometry.scrollExtent, equals(100.0));
 
     await tester.pumpWidget(new ListView(
@@ -125,7 +125,7 @@ void main() {
     expect(find.text('400'), findsOneWidget);
     expect(find.text('100'), findsNothing);
 
-    RenderSliverList list = tester.renderObject(find.byType(SliverList));
+    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
     expect(list.geometry.scrollExtent, equals(700.0));
   });
 
@@ -141,7 +141,7 @@ void main() {
       ],
     ));
 
-    ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position.maxScrollExtent, 0.0);
 
     await tester.pumpWidget(new ListView(

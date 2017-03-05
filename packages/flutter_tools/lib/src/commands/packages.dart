@@ -56,7 +56,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (argResults.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
-    String target = findProjectRoot(
+    final String target = findProjectRoot(
         argResults.rest.length == 1 ? argResults.rest[0] : null);
     if (target == null)
       throwToolExit(

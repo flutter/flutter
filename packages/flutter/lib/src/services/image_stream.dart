@@ -122,7 +122,7 @@ class ImageStream {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('$runtimeType(');
     if (_completer == null) {
       result.write('unresolved; ');
@@ -181,7 +181,7 @@ class ImageStreamCompleter {
     _current = image;
     if (_listeners.isEmpty)
       return;
-    List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
+    final List<ImageListener> localListeners = new List<ImageListener>.from(_listeners);
     for (ImageListener listener in localListeners) {
       try {
         listener(image, false);

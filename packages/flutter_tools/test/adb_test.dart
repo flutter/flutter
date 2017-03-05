@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/android/adb.dart';
 import 'package:test/test.dart';
 
 void main() {
-  Adb adb = new Adb('adb');
+  final Adb adb = new Adb('adb');
 
   // We only test the [Adb] class is we're able to locate the adb binary.
   if (!adb.exists())
@@ -20,14 +20,14 @@ void main() {
     test('getServerVersion', () async {
       adb.startServer();
 
-      String version = await adb.getServerVersion();
+      final String version = await adb.getServerVersion();
       expect(version, isNotEmpty);
     });
 
     test('listDevices', () async {
       adb.startServer();
 
-      List<AdbDevice> devices = await adb.listDevices();
+      final List<AdbDevice> devices = await adb.listDevices();
 
       // Any result is ok.
       expect(devices, isList);

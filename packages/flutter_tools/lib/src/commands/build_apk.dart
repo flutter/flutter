@@ -53,7 +53,7 @@ class _AssetBuilder {
   }
 
   void add(File asset, String relativePath) {
-    String destPath = fs.path.join(_assetDir.path, relativePath);
+    final String destPath = fs.path.join(_assetDir.path, relativePath);
     ensureDirectoryExists(destPath);
     asset.copySync(destPath);
   }
@@ -94,7 +94,7 @@ class _ApkBuilder {
   }
 
   void compileClassesDex(File classesDex, List<File> jars) {
-    List<String> packageArgs = <String>[_dx.path,
+    final List<String> packageArgs = <String>[_dx.path,
       '--dex',
       '--force-jumbo',
       '--output', classesDex.path
@@ -106,7 +106,7 @@ class _ApkBuilder {
   }
 
   void package(File outputApk, File androidManifest, Directory assets, Directory artifacts, Directory resources, BuildMode buildMode) {
-    List<String> packageArgs = <String>[_aapt.path,
+    final List<String> packageArgs = <String>[_aapt.path,
       'package',
       '-M', androidManifest.path,
       '-A', assets.path,
@@ -222,8 +222,8 @@ class BuildApkCommand extends BuildSubCommand {
   Future<Null> runCommand() async {
     await super.runCommand();
 
-    TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
-    BuildMode buildMode = getBuildMode();
+    final TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
+    final BuildMode buildMode = getBuildMode();
     if (targetPlatform != TargetPlatform.android_arm && buildMode != BuildMode.debug)
       throwToolExit('Profile and release builds are only supported on ARM targets.');
 
@@ -277,7 +277,7 @@ Future<_ApkComponents> _findApkComponents(
   String resources,
   Map<String, File> extraFiles
 ) async {
-  _ApkComponents components = new _ApkComponents();
+  final _ApkComponents components = new _ApkComponents();
   components.manifest = fs.file(manifest);
   components.resources = resources == null ? null : fs.directory(resources);
   components.extraFiles = extraFiles != null ? extraFiles : <String, File>{};
@@ -290,7 +290,7 @@ Future<_ApkComponents> _findApkComponents(
 
   await parseServiceConfigs(components.services, jars: components.jars);
 
-  List<File> allFiles = <File>[
+  final List<File> allFiles = <File>[
     components.manifest, components.icuData, components.libSkyShell, components.debugKeystore
   ]..addAll(components.jars)
    ..addAll(components.extraFiles.values);
@@ -316,52 +316,52 @@ int _buildApk(
   assert(platform != null);
   assert(buildMode != null);
 
-  Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
 
   printTrace('Building APK; buildMode: ${getModeName(buildMode)}.');
 
   try {
-    _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
-    String error = builder.checkDependencies();
+    final _ApkBuilder builder = new _ApkBuilder(androidSdk.latestVersion);
+    final String error = builder.checkDependencies();
     if (error != null) {
       printError(error);
       return 1;
     }
 
-    File classesDex = fs.file('${tempDir.path}/classes.dex');
+    final File classesDex = fs.file('${tempDir.path}/classes.dex');
     builder.compileClassesDex(classesDex, components.jars);
 
-    File servicesConfig =
+    final File servicesConfig =
         generateServiceDefinitions(tempDir.path, components.services);
 
-    _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
+    final _AssetBuilder assetBuilder = new _AssetBuilder(tempDir, 'assets');
     assetBuilder.add(components.icuData, 'icudtl.dat');
     assetBuilder.add(fs.file(flxPath), 'app.flx');
     assetBuilder.add(servicesConfig, 'services.json');
 
-    _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
+    final _AssetBuilder artifactBuilder = new _AssetBuilder(tempDir, 'artifacts');
     artifactBuilder.add(classesDex, 'classes.dex');
-    String abiDir = getAbiDirectory(platform);
+    final String abiDir = getAbiDirectory(platform);
     artifactBuilder.add(components.libSkyShell, 'lib/$abiDir/libsky_shell.so');
 
     for (String relativePath in components.extraFiles.keys)
       artifactBuilder.add(components.extraFiles[relativePath], relativePath);
 
-    File unalignedApk = fs.file('${tempDir.path}/app.apk.unaligned');
+    final File unalignedApk = fs.file('${tempDir.path}/app.apk.unaligned');
     builder.package(
       unalignedApk, components.manifest, assetBuilder.directory,
       artifactBuilder.directory, components.resources, buildMode
     );
-    File finalApk = fs.file(outputFile);
+    final File finalApk = fs.file(outputFile);
     ensureDirectoryExists(finalApk.path);
     builder.align(unalignedApk, finalApk);
 
-    int signResult = _signApk(builder, components, finalApk, keystore, buildMode);
+    final int signResult = _signApk(builder, components, finalApk, keystore, buildMode);
     if (signResult != 0)
       return signResult;
 
     printTrace('calculateSha: $outputFile');
-    File apkShaFile = fs.file('$outputFile.sha1');
+    final File apkShaFile = fs.file('$outputFile.sha1');
     apkShaFile.writeAsStringSync(calculateSha(finalApk));
 
     return 0;
@@ -419,17 +419,17 @@ bool _needsRebuild(
   BuildMode buildMode,
   Map<String, File> extraFiles
 ) {
-  FileStat apkStat = fs.statSync(apkPath);
+  final FileStat apkStat = fs.statSync(apkPath);
   // Note: This list of dependencies is imperfect, but will do for now. We
   // purposely don't include the .dart files, because we can load those
   // over the network without needing to rebuild (at least on Android).
-  List<String> dependencies = <String>[
+  final List<String> dependencies = <String>[
     manifest,
     _kFlutterManifestPath,
     _kPackagesStatusPath
   ];
   dependencies.addAll(extraFiles.values.map((File file) => file.path));
-  Iterable<FileStat> dependenciesStat =
+  final Iterable<FileStat> dependenciesStat =
     dependencies.map((String path) => fs.statSync(path));
 
   if (apkStat.type == FileSystemEntityType.NOT_FOUND)
@@ -443,8 +443,8 @@ bool _needsRebuild(
   if (!fs.isFileSync('$apkPath.sha1'))
     return true;
 
-  String lastBuildType = _readBuildMeta(fs.path.dirname(apkPath))['targetBuildType'];
-  String targetBuildType = _getTargetBuildTypeToken(platform, buildMode, fs.file(apkPath));
+  final String lastBuildType = _readBuildMeta(fs.path.dirname(apkPath))['targetBuildType'];
+  final String targetBuildType = _getTargetBuildTypeToken(platform, buildMode, fs.file(apkPath));
   if (lastBuildType != targetBuildType)
     return true;
 
@@ -471,18 +471,18 @@ Future<Null> buildAndroid(
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
-  List<String> validationResult = androidSdk.validateSdkWellFormed();
+  final List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
     throwToolExit('Try re-installing or updating your Android SDK.');
   }
 
-  Map<String, File> extraFiles = <String, File>{};
+  final Map<String, File> extraFiles = <String, File>{};
   if (fs.isDirectorySync(_kDefaultAssetsPath)) {
-    Directory assetsDir = fs.directory(_kDefaultAssetsPath);
+    final Directory assetsDir = fs.directory(_kDefaultAssetsPath);
     for (FileSystemEntity entity in assetsDir.listSync(recursive: true)) {
       if (entity is File) {
-        String targetPath = entity.path.substring(assetsDir.path.length);
+        final String targetPath = entity.path.substring(assetsDir.path.length);
         extraFiles["assets/$targetPath"] = entity;
       }
     }
@@ -508,13 +508,13 @@ Future<Null> buildAndroid(
       resources = _kDefaultResourcesPath;
   }
 
-  _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources, extraFiles);
+  final _ApkComponents components = await _findApkComponents(platform, buildMode, manifest, resources, extraFiles);
 
   if (components == null)
     throwToolExit('Failure building APK: unable to find components.');
 
-  String typeName = artifacts.getEngineType(platform, buildMode);
-  Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode  ($typeName)...',
+  final String typeName = artifacts.getEngineType(platform, buildMode);
+  final Status status = logger.startProgress('Building APK in ${getModeName(buildMode)} mode  ($typeName)...',
       expectSlowOperation: true);
 
   if (flxPath != null && flxPath.isNotEmpty) {
@@ -547,20 +547,20 @@ Future<Null> buildAndroid(
     if (!fs.isDirectorySync(aotPath))
       throwToolExit('AOT snapshot does not exist: $aotPath');
     for (String aotFilename in kAotSnapshotFiles) {
-      String aotFilePath = fs.path.join(aotPath, aotFilename);
+      final String aotFilePath = fs.path.join(aotPath, aotFilename);
       if (!fs.isFileSync(aotFilePath))
         throwToolExit('Missing AOT snapshot file: $aotFilePath');
       components.extraFiles['assets/$aotFilename'] = fs.file(aotFilePath);
     }
   }
 
-  int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
+  final int result = _buildApk(platform, buildMode, components, flxPath, keystore, outputFile);
   status.stop();
 
   if (result != 0)
     throwToolExit('Build APK failed ($result)', exitCode: result);
 
-  File apkFile = fs.file(outputFile);
+  final File apkFile = fs.file(outputFile);
   printTrace('Built $outputFile (${getSizeAsMB(apkFile.lengthSync())}).');
 
   _writeBuildMetaEntry(
@@ -583,7 +583,7 @@ Future<Null> buildAndroidWithGradle(
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
-  List<String> validationResult = androidSdk.validateSdkWellFormed(requireApkSigner: false);
+  final List<String> validationResult = androidSdk.validateSdkWellFormed(requireApkSigner: false);
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
     throwToolExit('Try re-installing or updating your Android SDK.');
@@ -622,23 +622,23 @@ Future<Null> buildApk(
 }
 
 Map<String, dynamic> _readBuildMeta(String buildDirectoryPath) {
-  File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
+  final File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
   if (buildMetaFile.existsSync())
     return JSON.decode(buildMetaFile.readAsStringSync());
   return <String, dynamic>{};
 }
 
 void _writeBuildMetaEntry(String buildDirectoryPath, String key, dynamic value) {
-  Map<String, dynamic> meta = _readBuildMeta(buildDirectoryPath);
+  final Map<String, dynamic> meta = _readBuildMeta(buildDirectoryPath);
   meta[key] = value;
-  File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
+  final File buildMetaFile = fs.file(fs.path.join(buildDirectoryPath, 'build_meta.json'));
   buildMetaFile.writeAsStringSync(toPrettyJson(meta));
 }
 
 String _getTargetBuildTypeToken(TargetPlatform platform, BuildMode buildMode, File outputBinary) {
   String buildType = getNameForTargetPlatform(platform) + '-' + getModeName(buildMode);
   if (artifacts is LocalEngineArtifacts) {
-    LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     buildType += ' [${localEngineArtifacts.engineOutPath}]';
   }
   if (outputBinary.existsSync())

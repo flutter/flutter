@@ -102,20 +102,20 @@ class _FlutterPlatform extends PlatformPlugin {
       if (_testCount > 0)
         throwToolExit('installHook() was called with an observatory port, a diagnostic port, both, or debugger mode enabled, but then more than one test suite was run.');
     }
-    int ourTestCount = _testCount;
+    final int ourTestCount = _testCount;
     _testCount += 1;
-    StreamController<dynamic> localController = new StreamController<dynamic>();
-    StreamController<dynamic> remoteController = new StreamController<dynamic>();
-    Completer<Null> testCompleteCompleter = new Completer<Null>();
-    _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = new _FlutterPlatformStreamSinkWrapper<dynamic>(
+    final StreamController<dynamic> localController = new StreamController<dynamic>();
+    final StreamController<dynamic> remoteController = new StreamController<dynamic>();
+    final Completer<Null> testCompleteCompleter = new Completer<Null>();
+    final _FlutterPlatformStreamSinkWrapper<dynamic> remoteSink = new _FlutterPlatformStreamSinkWrapper<dynamic>(
       remoteController.sink,
       testCompleteCompleter.future,
     );
-    StreamChannel<dynamic> localChannel = new StreamChannel<dynamic>.withGuarantees(
+    final StreamChannel<dynamic> localChannel = new StreamChannel<dynamic>.withGuarantees(
       remoteController.stream,
       localController.sink,
     );
-    StreamChannel<dynamic> remoteChannel = new StreamChannel<dynamic>.withGuarantees(
+    final StreamChannel<dynamic> remoteChannel = new StreamChannel<dynamic>.withGuarantees(
       localController.stream,
       remoteSink,
     );
@@ -135,12 +135,12 @@ class _FlutterPlatform extends PlatformPlugin {
       controller.sink.done.whenComplete(() { controllerSinkClosed = true; });
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      HttpServer server = await HttpServer.bind(_kHost, 0);
+      final HttpServer server = await HttpServer.bind(_kHost, 0);
       finalizers.add(() async {
         printTrace('test $ourTestCount: shutting down test harness socket server');
         await server.close(force: true);
       });
-      Completer<WebSocket> webSocket = new Completer<WebSocket>();
+      final Completer<WebSocket> webSocket = new Completer<WebSocket>();
       server.listen(
         (HttpRequest request) {
           webSocket.complete(WebSocketTransformer.upgrade(request));
@@ -159,14 +159,14 @@ class _FlutterPlatform extends PlatformPlugin {
       );
 
       // Prepare a temporary directory to store the Dart file that will talk to us.
-      Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
+      final Directory temporaryDirectory = fs.systemTempDirectory.createTempSync('dart_test_listener');
       finalizers.add(() async {
         printTrace('test $ourTestCount: deleting temporary directory');
         temporaryDirectory.deleteSync(recursive: true);
       });
 
       // Prepare the Dart file that will talk to us and start the test.
-      File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
+      final File listenerFile = fs.file('${temporaryDirectory.path}/listener.dart');
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
@@ -175,7 +175,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       // Start the engine subprocess.
       printTrace('test $ourTestCount: starting shell process');
-      Process process = await _startProcess(
+      final Process process = await _startProcess(
         shellPath,
         listenerFile.path,
         packages: PackageMap.globalPackagesPath,
@@ -194,13 +194,13 @@ class _FlutterPlatform extends PlatformPlugin {
           if (!controllerSinkClosed && exitCode != -15) { // ProcessSignal.SIGTERM
             // We expect SIGTERM (15) because we tried to terminate it.
             // It's negative because signals are returned as negative exit codes.
-            String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
+            final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'after tests finished'), testPath, shellPath);
             controller.sink.addError(message);
           }
         }
       });
 
-      Completer<Null> timeout = new Completer<Null>();
+      final Completer<Null> timeout = new Completer<Null>();
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
@@ -232,7 +232,7 @@ class _FlutterPlatform extends PlatformPlugin {
       // The local test harness could get bored of us.
 
       printTrace('test $ourTestCount: awaiting initial result for pid ${process.pid}');
-      _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
+      final _InitialResult initialResult = await Future.any(<Future<_InitialResult>>[
         process.exitCode.then<_InitialResult>((int exitCode) => _InitialResult.crashed),
         timeout.future.then<_InitialResult>((Null _) => _InitialResult.timedOut),
         new Future<_InitialResult>.delayed(_kTestProcessTimeout, () => _InitialResult.timedOut),
@@ -242,9 +242,9 @@ class _FlutterPlatform extends PlatformPlugin {
       switch (initialResult) {
         case _InitialResult.crashed:
           printTrace('test $ourTestCount: process with pid ${process.pid} crashed before connecting to test harness');
-          int exitCode = await process.exitCode;
+          final int exitCode = await process.exitCode;
           subprocessActive = false;
-          String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
+          final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
           controller.sink.addError(message);
           controller.sink.close();
           printTrace('test $ourTestCount: waiting for controller sink to close');
@@ -252,7 +252,7 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
         case _InitialResult.timedOut:
           printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
-          String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
+          final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
           controller.sink.close();
           printTrace('test $ourTestCount: waiting for controller sink to close');
@@ -260,10 +260,10 @@ class _FlutterPlatform extends PlatformPlugin {
           break;
         case _InitialResult.connected:
           printTrace('test $ourTestCount: process with pid ${process.pid} connected to test harness');
-          WebSocket testSocket = await webSocket.future;
+          final WebSocket testSocket = await webSocket.future;
 
-          Completer<Null> harnessDone = new Completer<Null>();
-          StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
+          final Completer<Null> harnessDone = new Completer<Null>();
+          final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
             (dynamic event) { testSocket.add(JSON.encode(event)); },
             onDone: () { harnessDone.complete(); },
             onError: (dynamic error, dynamic stack) {
@@ -279,8 +279,8 @@ class _FlutterPlatform extends PlatformPlugin {
             cancelOnError: true,
           );
 
-          Completer<Null> testDone = new Completer<Null>();
-          StreamSubscription<dynamic> testToHarness = testSocket.listen(
+          final Completer<Null> testDone = new Completer<Null>();
+          final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
               assert(encodedEvent is String); // we shouldn't ever get binary messages
               controller.sink.add(JSON.decode(encodedEvent));
@@ -300,7 +300,7 @@ class _FlutterPlatform extends PlatformPlugin {
           );
 
           printTrace('test $ourTestCount: awaiting test result for pid ${process.pid}');
-          _TestResult testResult = await Future.any(<Future<_TestResult>>[
+          final _TestResult testResult = await Future.any(<Future<_TestResult>>[
             process.exitCode.then<_TestResult>((int exitCode) { return _TestResult.crashed; }),
             harnessDone.future.then<_TestResult>((Null _) { return _TestResult.harnessBailed; }),
             testDone.future.then<_TestResult>((Null _) { return _TestResult.testBailed; }),
@@ -312,9 +312,9 @@ class _FlutterPlatform extends PlatformPlugin {
           switch (testResult) {
             case _TestResult.crashed:
               printTrace('test $ourTestCount: process with pid ${process.pid} crashed');
-              int exitCode = await process.exitCode;
+              final int exitCode = await process.exitCode;
               subprocessActive = false;
-              String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
+              final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
               controller.sink.addError(message);
               controller.sink.close();
               printTrace('test $ourTestCount: waiting for controller sink to close');
@@ -414,13 +414,13 @@ void main() {
     if (_cachedFontConfig != null)
       return _cachedFontConfig;
 
-    StringBuffer sb = new StringBuffer();
+    final StringBuffer sb = new StringBuffer();
     sb.writeln('<fontconfig>');
     sb.writeln('  <dir>${cache.getCacheArtifacts().path}</dir>');
     sb.writeln('  <cachedir>/var/cache/fontconfig</cachedir>');
     sb.writeln('</fontconfig>');
 
-    Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
+    final Directory fontsDir = fs.systemTempDirectory.createTempSync('flutter_fonts');
     _cachedFontConfig = fs.file('${fontsDir.path}/fonts.conf');
     _cachedFontConfig.createSync();
     _cachedFontConfig.writeAsStringSync(sb.toString());
@@ -438,7 +438,7 @@ void main() {
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
-    List<String> command = <String>[executable];
+    final List<String> command = <String>[executable];
     if (enableObservatory) {
       // Some systems drive the _FlutterPlatform class in an unusual way, where
       // only one test file is processed at a time, and the operating
@@ -467,7 +467,7 @@ void main() {
       testPath,
     ]);
     printTrace(command.join(' '));
-    Map<String, String> environment = <String, String>{
+    final Map<String, String> environment = <String, String>{
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
     };
@@ -497,7 +497,7 @@ void main() {
             } else if (line.startsWith(observatoryPortString)) {
               printTrace('Shell: $line');
               try {
-                int port = int.parse(line.substring(observatoryPortString.length, line.length - 1)); // last character is a slash
+                final int port = int.parse(line.substring(observatoryPortString.length, line.length - 1)); // last character is a slash
                 if (reportObservatoryPort != null)
                   reportObservatoryPort(port);
               } catch (error) {

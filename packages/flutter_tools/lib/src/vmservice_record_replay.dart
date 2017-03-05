@@ -35,8 +35,8 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
       // purpose other than to make the serialized format more human-readable.
       _messages.sort();
 
-      File file = _getManifest(location);
-      String json = new JsonEncoder.withIndent('  ').convert(_messages);
+      final File file = _getManifest(location);
+      final String json = new JsonEncoder.withIndent('  ').convert(_messages);
       await file.writeAsString(json, flush: true);
     }, ShutdownStage.SERIALIZE_RECORDING);
   }
@@ -83,7 +83,7 @@ abstract class _Message implements Comparable<_Message> {
 
   @override
   int compareTo(_Message other) {
-    int result = id.compareTo(other.id);
+    final int result = id.compareTo(other.id);
     if (result != 0) {
       return result;
     } else if (type == _kRequest) {
@@ -210,12 +210,12 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       : _transactions = _loadTransactions(location);
 
   static Map<int, _Transaction> _loadTransactions(Directory location) {
-    File file = _getManifest(location);
-    String json = file.readAsStringSync();
-    Iterable<_Message> messages = JSON.decoder.convert(json).map<_Message>(_toMessage);
-    Map<int, _Transaction> transactions = <int, _Transaction>{};
+    final File file = _getManifest(location);
+    final String json = file.readAsStringSync();
+    final Iterable<_Message> messages = JSON.decoder.convert(json).map<_Message>(_toMessage);
+    final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
-      _Transaction transaction =
+      final _Transaction transaction =
           transactions.putIfAbsent(message.id, () => new _Transaction());
       if (message.type == _kRequest) {
         assert(transaction.request == null);
@@ -235,7 +235,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   void send(_Request request) {
     if (!_transactions.containsKey(request.id))
       throw new ArgumentError('No matching invocation found');
-    _Transaction transaction = _transactions.remove(request.id);
+    final _Transaction transaction = _transactions.remove(request.id);
     // TODO(tvolkert): validate that `transaction.request` matches `request`
     if (transaction.response == null) {
       // This signals that when we were recording, the VM shut down before
@@ -295,6 +295,6 @@ class _ReplaySink implements StreamSink<String> {
 }
 
 File _getManifest(Directory location) {
-  String path = location.fileSystem.path.join(location.path, _kManifest);
+  final String path = location.fileSystem.path.join(location.path, _kManifest);
   return location.fileSystem.file(path);
 }

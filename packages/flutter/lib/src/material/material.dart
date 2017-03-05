@@ -203,10 +203,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = _getBackgroundColor(context);
+    final Color backgroundColor = _getBackgroundColor(context);
     assert(backgroundColor != null || config.type == MaterialType.transparency);
     Widget contents = config.child;
-    BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
+    final BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: config.textStyle ?? Theme.of(context).textTheme.body1,
@@ -216,7 +216,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
         renderer._didChangeLayout();
         return true;
       },

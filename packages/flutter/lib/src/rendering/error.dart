@@ -43,7 +43,7 @@ class RenderErrorBox extends RenderBox {
         // Generally, the much better way to draw text in a RenderObject is to
         // use the TextPainter class. If you're looking for code to crib from,
         // see the paragraph.dart file and the RenderParagraph class.
-        ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+        final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
         builder.pushStyle(textStyle);
         builder.addText(
           '$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine$message$_kLine'
@@ -105,7 +105,7 @@ class RenderErrorBox extends RenderBox {
         // See the comment in the RenderErrorBox constructor. This is not the
         // code you want to be copying and pasting. :-)
         if (parent is RenderBox) {
-          RenderBox parentBox = parent;
+          final RenderBox parentBox = parent;
           width = parentBox.size.width;
         } else {
           width = size.width;

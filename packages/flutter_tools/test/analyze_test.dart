@@ -31,7 +31,7 @@ void main() {
       expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
       expect(inRepo(<String>[fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
       // Relative paths
-      String oldWorkingDirectory = fs.currentDirectory.path;
+      final String oldWorkingDirectory = fs.currentDirectory.path;
       try {
         fs.currentDirectory = Cache.flutterRoot;
         expect(inRepo(<String>['.']), isTrue);

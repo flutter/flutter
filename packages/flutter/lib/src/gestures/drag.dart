@@ -283,10 +283,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void handleEvent(PointerEvent event) {
     assert(_state != _DragState.ready);
     if (event is PointerMoveEvent) {
-      VelocityTracker tracker = _velocityTrackers[event.pointer];
+      final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.position);
-      Offset delta = event.delta;
+      final Offset delta = event.delta;
       if (_state == _DragState.accepted) {
         if (onUpdate != null) {
           invokeCallback<Null>('onUpdate', () => onUpdate(new DragUpdateDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
@@ -308,7 +308,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   void acceptGesture(int pointer) {
     if (_state != _DragState.accepted) {
       _state = _DragState.accepted;
-      Offset delta = _pendingDragOffset;
+      final Offset delta = _pendingDragOffset;
       _pendingDragOffset = Offset.zero;
       if (onStart != null) {
         invokeCallback<Null>('onStart', () => onStart(new DragStartDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
@@ -339,10 +339,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         invokeCallback<Null>('onCancel', onCancel); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
       return;
     }
-    bool wasAccepted = (_state == _DragState.accepted);
+    final bool wasAccepted = (_state == _DragState.accepted);
     _state = _DragState.ready;
     if (wasAccepted && onEnd != null) {
-      VelocityTracker tracker = _velocityTrackers[pointer];
+      final VelocityTracker tracker = _velocityTrackers[pointer];
       assert(tracker != null);
 
       Velocity velocity = tracker.getVelocity();

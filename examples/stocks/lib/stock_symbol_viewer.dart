@@ -15,12 +15,12 @@ class _StockSymbolView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
+    final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
     String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
     if (stock.percentChange > 0)
       changeInPrice = "+" + changeInPrice;
 
-    TextStyle headings = Theme.of(context).textTheme.body2;
+    final TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(
       padding: const EdgeInsets.all(20.0),
       child: new Column(

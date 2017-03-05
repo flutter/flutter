@@ -20,7 +20,7 @@ class AppContext {
     if (_instances.containsKey(type))
       return true;
 
-    AppContext parent = _calcParent(_zone);
+    final AppContext parent = _calcParent(_zone);
     return parent != null ? parent.isSet(type) : false;
   }
 
@@ -28,7 +28,7 @@ class AppContext {
     if (_instances.containsKey(type))
       return _instances[type];
 
-    AppContext parent = _calcParent(_zone);
+    final AppContext parent = _calcParent(_zone);
     return parent?.getVariable(type);
   }
 
@@ -49,11 +49,11 @@ class AppContext {
   }
 
   AppContext _calcParent(Zone zone) {
-    Zone parentZone = zone.parent;
+    final Zone parentZone = zone.parent;
     if (parentZone == null)
       return null;
 
-    AppContext parentContext = parentZone['context'];
+    final AppContext parentContext = parentZone['context'];
     return parentContext == this
         ? _calcParent(parentZone)
         : parentContext;
@@ -70,7 +70,7 @@ class AppContext {
   }
 
   Future<dynamic> _run(dynamic method()) async {
-    Zone previousZone = _zone;
+    final Zone previousZone = _zone;
     try {
       _zone = Zone.current;
       return await method();

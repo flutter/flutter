@@ -37,15 +37,15 @@ void main() {
   );
 
   test('onscreen layout does not affect offscreen', () {
-    TestLayout onscreen = new TestLayout();
-    TestLayout offscreen = new TestLayout();
+    final TestLayout onscreen = new TestLayout();
+    final TestLayout offscreen = new TestLayout();
     expect(onscreen.child.hasSize, isFalse);
     expect(onscreen.painted, isFalse);
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    RenderView renderView = new RenderView(configuration: testConfiguration);
-    PipelineOwner pipelineOwner = new PipelineOwner();
+    final RenderView renderView = new RenderView(configuration: testConfiguration);
+    final PipelineOwner pipelineOwner = new PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.scheduleInitialFrame();
@@ -66,15 +66,15 @@ void main() {
     expect(offscreen.painted, isTrue);
   });
   test('offscreen layout does not affect onscreen', () {
-    TestLayout onscreen = new TestLayout();
-    TestLayout offscreen = new TestLayout();
+    final TestLayout onscreen = new TestLayout();
+    final TestLayout offscreen = new TestLayout();
     expect(onscreen.child.hasSize, isFalse);
     expect(onscreen.painted, isFalse);
     expect(offscreen.child.hasSize, isFalse);
     expect(offscreen.painted, isFalse);
     // Attach the offscreen to a custom render view and owner
-    RenderView renderView = new RenderView(configuration: testConfiguration);
-    PipelineOwner pipelineOwner = new PipelineOwner();
+    final RenderView renderView = new RenderView(configuration: testConfiguration);
+    final PipelineOwner pipelineOwner = new PipelineOwner();
     renderView.attach(pipelineOwner);
     renderView.child = offscreen.root;
     renderView.scheduleInitialFrame();

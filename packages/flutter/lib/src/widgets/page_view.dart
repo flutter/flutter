@@ -116,7 +116,7 @@ class PageController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    _PagePosition pagePosition = position;
+    final _PagePosition pagePosition = position;
     pagePosition.viewportFraction = viewportFraction;
   }
 }

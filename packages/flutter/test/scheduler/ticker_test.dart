@@ -12,7 +12,7 @@ void main() {
       ++tickCount;
     }
 
-    Ticker ticker = new Ticker(handleTick);
+    final Ticker ticker = new Ticker(handleTick);
 
     expect(ticker.isTicking, isFalse);
     expect(ticker.isActive, isFalse);

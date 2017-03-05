@@ -25,7 +25,7 @@ void main() {
   });
 
   testWidgets('ModalBarrier prevents interactions with widgets behind it', (WidgetTester tester) async {
-    Widget subject = new Stack(
+    final Widget subject = new Stack(
       children: <Widget>[
         tapTarget,
         new ModalBarrier(dismissable: false),
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
-    Widget subject = new Stack(
+    final Widget subject = new Stack(
       children: <Widget>[
         new ModalBarrier(dismissable: false),
         tapTarget,

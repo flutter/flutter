@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
 
 void main() {
-  SchedulerBinding scheduler = new TestSchedulerBinding();
+  final SchedulerBinding scheduler = new TestSchedulerBinding();
 
   test("Check for a time dilation being in effect", () {
     expect(timeDilation, equals(1.0));

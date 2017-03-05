@@ -82,7 +82,7 @@ class TestCompositingBitsTree {
 
 void main() {
   test('objects can be detached and re-attached: layout', () {
-    TestTree testTree = new TestTree();
+    final TestTree testTree = new TestTree();
     // Lay out
     layout(testTree.root, phase: EnginePhase.layout);
     expect(testTree.child.size, equals(const Size(20.0, 20.0)));
@@ -97,7 +97,7 @@ void main() {
     expect(testTree.child.size, equals(const Size(5.0, 5.0)));
   });
   test('objects can be detached and re-attached: compositingBits', () {
-    TestCompositingBitsTree testTree = new TestCompositingBitsTree();
+    final TestCompositingBitsTree testTree = new TestCompositingBitsTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -113,7 +113,7 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: paint', () {
-    TestTree testTree = new TestTree();
+    final TestTree testTree = new TestTree();
     // Lay out, composite, and paint
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
@@ -128,9 +128,9 @@ void main() {
     expect(testTree.painted, isTrue);
   });
   test('objects can be detached and re-attached: semantics', () {
-    TestTree testTree = new TestTree();
+    final TestTree testTree = new TestTree();
     int semanticsUpdateCount = 0;
-    SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
       listener: () {
         ++semanticsUpdateCount;
       }

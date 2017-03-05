@@ -19,7 +19,7 @@ Shader createShader(Rect bounds) {
 
 void main() {
   testWidgets('Can be constructed', (WidgetTester tester) async {
-    Widget child = new Container(width: 100.0, height: 100.0);
+    final Widget child = new Container(width: 100.0, height: 100.0);
     await tester.pumpWidget(new ShaderMask(child: child, shaderCallback: createShader));
   });
 }

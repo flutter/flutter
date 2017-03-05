@@ -149,7 +149,7 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   void updateOrder({ int quantity, bool inCart }) {
-    Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
+    final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
         config.shoppingCart[newOrder.product] = newOrder;

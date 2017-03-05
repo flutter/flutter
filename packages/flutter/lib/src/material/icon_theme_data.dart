@@ -87,7 +87,7 @@ class IconThemeData {
 
   @override
   String toString() {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     if (color != null)
       result.add('color: $color');
     if (_opacity != null)

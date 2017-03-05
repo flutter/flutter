@@ -38,7 +38,7 @@ void testUsingContext(String description, dynamic testMethod(), {
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   test(description, () async {
-    AppContext testContext = new AppContext();
+    final AppContext testContext = new AppContext();
 
     // Initialize the test context with some default mocks.
     // Seed these context entries first since others depend on them
@@ -58,7 +58,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     testContext.putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils());
     testContext.putIfAbsent(Xcode, () => new Xcode());
     testContext.putIfAbsent(IOSSimulatorUtils, () {
-      MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+      final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
       when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
       return mock;
     });
@@ -82,7 +82,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       });
     } catch (error) {
       if (testContext[Logger] is BufferLogger) {
-        BufferLogger bufferLogger = testContext[Logger];
+        final BufferLogger bufferLogger = testContext[Logger];
         if (bufferLogger.errorText.isNotEmpty)
           print(bufferLogger.errorText);
       }

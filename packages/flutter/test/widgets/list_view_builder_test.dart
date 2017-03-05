@@ -9,7 +9,7 @@ import 'test_widgets.dart';
 
 void main() {
   testWidgets('ListView.builder mount/dismount smoke test', (WidgetTester tester) async {
-    List<int> callbackTracker = <int>[];
+    final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
     // so if our widget is 100 pixels tall, it should fit exactly 6 times.
@@ -33,7 +33,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
+    final FlipWidgetState testWidget = tester.state(find.byType(FlipWidget));
 
     expect(callbackTracker, equals(<int>[0, 1, 2, 3, 4, 5]));
 
@@ -51,13 +51,13 @@ void main() {
   });
 
   testWidgets('ListView.builder vertical', (WidgetTester tester) async {
-    List<int> callbackTracker = <int>[];
+    final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
     // so if our widget is 200 pixels tall, it should fit exactly 3 times.
     // but if we are offset by 300 pixels, there will be 4, numbered 1-4.
 
-    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
       return new Container(
         key: new ValueKey<int>(index),
@@ -111,13 +111,13 @@ void main() {
   });
 
   testWidgets('ListView.builder horizontal', (WidgetTester tester) async {
-    List<int> callbackTracker = <int>[];
+    final List<int> callbackTracker = <int>[];
 
     // the root view is 800x600 in the test environment
     // so if our widget is 200 pixels wide, it should fit exactly 4 times.
     // but if we are offset by 300 pixels, there will be 5, numbered 1-5.
 
-    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
       return new Container(
         key: new ValueKey<int>(index),
@@ -173,18 +173,18 @@ void main() {
   });
 
   testWidgets('ListView.builder 10 items, 2-3 items visible', (WidgetTester tester) async {
-    List<int> callbackTracker = <int>[];
+    final List<int> callbackTracker = <int>[];
 
     // The root view is 800x600 in the test environment and our list
     // items are 300 tall. Scrolling should cause two or three items
     // to be built.
 
-    IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
+    final IndexedWidgetBuilder itemBuilder = (BuildContext context, int index) {
       callbackTracker.add(index);
       return new Text('$index', key: new ValueKey<int>(index));
     };
 
-    Widget testWidget = new ListView.builder(
+    final Widget testWidget = new ListView.builder(
       itemBuilder: itemBuilder,
       itemExtent: 300.0,
       itemCount: 10,

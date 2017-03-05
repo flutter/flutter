@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedPositioned.fromRect control test', (WidgetTester tester) async {
-    AnimatedPositioned positioned = new AnimatedPositioned.fromRect(
+    final AnimatedPositioned positioned = new AnimatedPositioned.fromRect(
       rect: new Rect.fromLTWH(7.0, 5.0, 12.0, 16.0),
       duration: const Duration(milliseconds: 200),
     );
@@ -21,7 +21,7 @@ void main() {
   });
 
   testWidgets('AnimatedPositioned - basics', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
@@ -79,7 +79,7 @@ void main() {
   });
 
   testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 
@@ -159,7 +159,7 @@ void main() {
   });
 
   testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     RenderBox box;
 

@@ -16,7 +16,7 @@ Point round(Point value) {
 void main() {
   test('RenderTransform - identity', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.identity(),
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
@@ -34,7 +34,7 @@ void main() {
 
   test('RenderTransform - identity with internal offset', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.identity(),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
@@ -55,7 +55,7 @@ void main() {
 
   test('RenderTransform - translation', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.translationValues(50.0, 200.0, 0.0),
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
@@ -73,7 +73,7 @@ void main() {
 
   test('RenderTransform - translation with internal offset', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.translationValues(50.0, 200.0, 0.0),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
@@ -94,7 +94,7 @@ void main() {
 
   test('RenderTransform - rotation', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.rotationZ(math.PI),
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
@@ -112,7 +112,7 @@ void main() {
 
   test('RenderTransform - rotation with internal offset', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: new Matrix4.rotationZ(math.PI),
       alignment: FractionalOffset.center,
       child: new RenderPadding(
@@ -133,7 +133,7 @@ void main() {
 
   test('RenderTransform - perspective - globalToLocal', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: rotateAroundXAxis(math.PI * 0.25), // at pi/4, we are about 70 pixels high
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
@@ -150,7 +150,7 @@ void main() {
 
   test('RenderTransform - perspective - localToGlobal', () {
     RenderBox inner;
-    RenderBox sizer = new RenderTransform(
+    final RenderBox sizer = new RenderTransform(
       transform: rotateAroundXAxis(math.PI * 0.4999), // at pi/2, we're seeing the box on its edge,
       alignment: FractionalOffset.center,
       child: inner = new RenderSizedBox(const Size(100.0, 100.0)),
@@ -167,11 +167,11 @@ void main() {
 
 Matrix4 rotateAroundXAxis(double a) {
   // 3D rotation transform with alpha=a
-  double x = 1.0;
-  double y = 0.0;
-  double z = 0.0;
-  double sc = math.sin(a / 2.0) * math.cos(a / 2.0);
-  double sq = math.sin(a / 2.0) * math.sin(a / 2.0);
+  final double x = 1.0;
+  final double y = 0.0;
+  final double z = 0.0;
+  final double sc = math.sin(a / 2.0) * math.cos(a / 2.0);
+  final double sq = math.sin(a / 2.0) * math.sin(a / 2.0);
   return new Matrix4.fromList(<double>[
     // col 1
     1.0 - 2.0 * (y * y + z * z) * sq,

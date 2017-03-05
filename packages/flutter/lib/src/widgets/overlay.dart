@@ -131,7 +131,7 @@ class OverlayEntry {
   /// the next frame (i.e. many milliseconds later).
   void remove() {
     assert(_overlay != null);
-    OverlayState overlay = _overlay;
+    final OverlayState overlay = _overlay;
     _overlay = null;
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
@@ -237,10 +237,10 @@ class Overlay extends StatefulWidget {
   /// OverlayState overlay = Overlay.of(context);
   /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+    final OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
     assert(() {
       if (debugRequiredFor != null && result == null) {
-        String additional = context.widget != debugRequiredFor
+        final String additional = context.widget != debugRequiredFor
           ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
           : '';
         throw new FlutterError(
@@ -283,7 +283,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(above == null || (above._overlay == this && _entries.contains(above)));
     entry._overlay = this;
     setState(() {
-      int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
       _entries.insert(index, entry);
     });
   }
@@ -301,7 +301,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       entry._overlay = this;
     }
     setState(() {
-      int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
+      final int index = above == null ? _entries.length : _entries.indexOf(above) + 1;
       _entries.insertAll(index, entries);
     });
   }
@@ -324,7 +324,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     assert(_entries.contains(entry));
     assert(() {
       for (int i = _entries.length - 1; i > 0; i -= 1) {
-        OverlayEntry candidate = _entries[i];
+        final OverlayEntry candidate = _entries[i];
         if (candidate == entry) {
           result = true;
           break;
@@ -353,7 +353,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     final List<Widget> offstageChildren = <Widget>[];
     bool onstage = true;
     for (int i = _entries.length - 1; i >= 0; i -= 1) {
-      OverlayEntry entry = _entries[i];
+      final OverlayEntry entry = _entries[i];
       if (onstage) {
         onstageChildren.add(new _OverlayEntry(entry));
         if (entry.opaque)

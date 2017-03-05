@@ -9,7 +9,7 @@ import 'data_table_test_utils.dart';
 
 void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     Widget buildTable({ int sortColumnIndex, bool sortAscending: true }) {
       return new DataTable(

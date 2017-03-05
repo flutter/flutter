@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
 Future<Null> slowDrag(WidgetTester tester, Point start, Offset offset) async {
-  TestGesture gesture = await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   for (int index = 0; index < 10; index += 1) {
     await gesture.moveBy(offset);
     await tester.pump(const Duration(milliseconds: 20));
@@ -30,7 +30,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
 
     expect(painter, doesNotOverscroll);
 
@@ -42,7 +42,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
 
-    TestGesture gesture = await tester.startGesture(const Point(200.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Point(200.0, 200.0));
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
     await gesture.up();
@@ -63,7 +63,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
 
     await slowDrag(tester, const Point(400.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..circle(x: 400.0));
@@ -98,8 +98,8 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    TestGesture gesture = await tester.startGesture(const Point(300.0, 200.0));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final TestGesture gesture = await tester.startGesture(const Point(300.0, 200.0));
     await gesture.moveBy(const Offset(0.0, 10.0));
     await tester.pump(const Duration(milliseconds: 20));
     double oldX = 0.0;
@@ -132,7 +132,7 @@ void main() {
           ],
         ),
       );
-      RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..circle()..restore()..save()..scale(y: -1.0)..restore()..restore());
 
@@ -150,7 +150,7 @@ void main() {
           ],
         ),
       );
-      RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..scale(y: -1.0)..restore()..save()..circle()..restore()..restore());
 
@@ -168,7 +168,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
     expect(painter, paints..circle());
     expect(painter, isNot(paints..circle()..circle()));
@@ -189,7 +189,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));

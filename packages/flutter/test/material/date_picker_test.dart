@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets('tap-select a day', (WidgetTester tester) async {
-    Key _datePickerKey = new UniqueKey();
+    final Key _datePickerKey = new UniqueKey();
     DateTime _selectedDate = new DateTime(2016, DateTime.JULY, 26);
 
     await tester.pumpWidget(
@@ -136,7 +136,7 @@ void main() {
     await tester.tap(find.text('Go'));
     expect(buttonContext, isNotNull);
 
-    Future<DateTime> date = showDatePicker(
+    final Future<DateTime> date = showDatePicker(
       context: buttonContext,
       initialDate: initialDate,
       firstDate: firstDate,
@@ -196,7 +196,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('2005'));
       await tester.pump();
-      String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2005, DateTime.JANUARY, 15));
+      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2005, DateTime.JANUARY, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));

@@ -366,7 +366,7 @@ class Border {
     assert(bottom != null);
     assert(left != null);
 
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..strokeWidth = 0.0; // used for hairline borders
     Path path;
 
@@ -450,29 +450,29 @@ class Border {
   void _paintBorderWithRadius(Canvas canvas, Rect rect,
                               BorderRadius borderRadius) {
     assert(isUniform);
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = top.color;
-    RRect outer = borderRadius.toRRect(rect);
-    double width = top.width;
+    final RRect outer = borderRadius.toRRect(rect);
+    final double width = top.width;
     if (width == 0.0) {
       paint
         ..style = PaintingStyle.stroke
         ..strokeWidth = 0.0;
       canvas.drawRRect(outer, paint);
     } else {
-      RRect inner = outer.deflate(width);
+      final RRect inner = outer.deflate(width);
       canvas.drawDRRect(outer, inner, paint);
     }
   }
 
   void _paintBorderWithCircle(Canvas canvas, Rect rect) {
     assert(isUniform);
-    double width = top.width;
-    Paint paint = new Paint()
+    final double width = top.width;
+    final Paint paint = new Paint()
       ..color = top.color
       ..strokeWidth = width
       ..style = PaintingStyle.stroke;
-    double radius = (rect.shortestSide - width) / 2.0;
+    final double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(rect.center, radius, paint);
   }
 
@@ -581,8 +581,8 @@ class BoxShadow {
       a = new List<BoxShadow>();
     if (b == null)
       b = new List<BoxShadow>();
-    List<BoxShadow> result = new List<BoxShadow>();
-    int commonLength = math.min(a.length, b.length);
+    final List<BoxShadow> result = new List<BoxShadow>();
+    final int commonLength = math.min(a.length, b.length);
     for (int i = 0; i < commonLength; ++i)
       result.add(BoxShadow.lerp(a[i], b[i], t));
     for (int i = commonLength; i < a.length; ++i)
@@ -838,8 +838,8 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   int startY = 0;
   int stopX = 0;
   int stopY = 0;
-  double strideX = fundamentalRect.width;
-  double strideY = fundamentalRect.height;
+  final double strideX = fundamentalRect.width;
+  final double strideY = fundamentalRect.height;
 
   if (repeat == ImageRepeat.repeat || repeat == ImageRepeat.repeatX) {
     startX = ((outputRect.left - fundamentalRect.left) / strideX).floor();
@@ -929,7 +929,7 @@ void paintImage({
     // output rect with the image.
     repeat = ImageRepeat.noRepeat;
   }
-  Paint paint = new Paint()..isAntiAlias = false;
+  final Paint paint = new Paint()..isAntiAlias = false;
   if (colorFilter != null)
     paint.colorFilter = colorFilter;
   if (sourceSize != destinationSize) {
@@ -938,10 +938,10 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
-  double dx = (outputSize.width - destinationSize.width) * (alignment?.dx ?? 0.5);
-  double dy = (outputSize.height - destinationSize.height) * (alignment?.dy ?? 0.5);
-  Point destinationPosition = rect.topLeft + new Offset(dx, dy);
-  Rect destinationRect = destinationPosition & destinationSize;
+  final double dx = (outputSize.width - destinationSize.width) * (alignment?.dx ?? 0.5);
+  final double dy = (outputSize.height - destinationSize.height) * (alignment?.dy ?? 0.5);
+  final Point destinationPosition = rect.topLeft + new Offset(dx, dy);
+  final Rect destinationRect = destinationPosition & destinationSize;
   if (repeat != ImageRepeat.noRepeat) {
     canvas.save();
     canvas.clipRect(rect);
@@ -1200,7 +1200,7 @@ class BoxDecoration extends Decoration {
   /// span multiple lines, each prefixed by that argument.
   @override
   String toString([String prefix = '', String indentPrefix]) {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     if (backgroundColor != null)
       result.add('${prefix}backgroundColor: $backgroundColor');
     if (backgroundImage != null)
@@ -1236,14 +1236,14 @@ class BoxDecoration extends Decoration {
     switch (shape) {
       case BoxShape.rectangle:
         if (borderRadius != null) {
-          RRect bounds = borderRadius.toRRect(Point.origin & size);
+          final RRect bounds = borderRadius.toRRect(Point.origin & size);
           return bounds.contains(position);
         }
         return true;
       case BoxShape.circle:
         // Circles are inscribed into our smallest dimension.
-        Point center = size.center(Point.origin);
-        double distance = (position - center).distance;
+        final Point center = size.center(Point.origin);
+        final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
     }
     assert(shape != null);
@@ -1272,7 +1272,7 @@ class _BoxDecorationPainter extends BoxPainter {
     if (_cachedBackgroundPaint == null ||
         (_decoration.gradient == null && _rectForCachedBackgroundPaint != null) ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
-      Paint paint = new Paint();
+      final Paint paint = new Paint();
 
       if (_decoration.backgroundColor != null)
         paint.color = _decoration.backgroundColor;
@@ -1294,8 +1294,8 @@ class _BoxDecorationPainter extends BoxPainter {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
-        Point center = rect.center;
-        double radius = rect.shortestSide / 2.0;
+        final Point center = rect.center;
+        final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
         break;
       case BoxShape.rectangle:

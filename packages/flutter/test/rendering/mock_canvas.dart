@@ -355,8 +355,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       description.write('painted nothing.');
       return false;
     }
-    Iterator<_PaintPredicate> predicate = _predicates.iterator;
-    Iterator<Invocation> call = calls.iterator..moveNext();
+    final Iterator<_PaintPredicate> predicate = _predicates.iterator;
+    final Iterator<Invocation> call = calls.iterator..moveNext();
     try {
       while (predicate.moveNext()) {
         if (call.current == null) {
@@ -473,7 +473,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -506,7 +506,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     String result = name;
     if (description.isNotEmpty)
@@ -680,7 +680,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -701,7 +701,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> adjectives = <String>[];
+    final List<String> adjectives = <String>[];
     for (int index = 0; index < arguments.length; index += 1)
       adjectives.add(arguments[index] != null ? _valueName(arguments[index]) : '...');
     return '${_symbolName(symbol)}(${adjectives.join(", ")})';
@@ -712,7 +712,7 @@ class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != #save) {
       others += 1;
       if (!call.moveNext())

@@ -10,11 +10,11 @@ import 'package:test/test.dart';
 void main() {
   group('run.dart script', () {
     Future<int> runScript(List<String> testNames) async {
-      List<String> options = <String>['bin/run.dart'];
+      final List<String> options = <String>['bin/run.dart'];
       for (String testName in testNames) {
         options..addAll(<String>['-t', testName]);
       }
-      ProcessResult scriptProcess = Process.runSync(
+      final ProcessResult scriptProcess = Process.runSync(
         '../../bin/cache/dart-sdk/bin/dart',
         options,
       );

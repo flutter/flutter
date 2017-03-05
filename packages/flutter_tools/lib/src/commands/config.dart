@@ -49,7 +49,7 @@ class ConfigCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     if (argResults.wasParsed('analytics')) {
-      bool value = argResults['analytics'];
+      final bool value = argResults['analytics'];
       flutterUsage.enabled = value;
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }

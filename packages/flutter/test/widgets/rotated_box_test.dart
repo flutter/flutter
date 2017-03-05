@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Rotated box control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
-    Key rotatedBoxKey = new UniqueKey();
+    final List<String> log = <String>[];
+    final Key rotatedBoxKey = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -40,7 +40,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));
+    final RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));
     expect(box.size.width, equals(65.0));
     expect(box.size.height, equals(175.0));
 

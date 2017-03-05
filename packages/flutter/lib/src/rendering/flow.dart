@@ -285,7 +285,7 @@ class RenderFlow extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       _randomAccessChildren.add(child);
-      BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
+      final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
       child.layout(innerConstraints, parentUsesSize: true);
       final FlowParentData childParentData = child.parentData;
       childParentData.offset = Offset.zero;
@@ -314,7 +314,7 @@ class RenderFlow extends RenderBox
   @override
   void paintChild(int i, { Matrix4 transform, double opacity: 1.0 }) {
     transform ??= new Matrix4.identity();
-    RenderBox child = _randomAccessChildren[i];
+    final RenderBox child = _randomAccessChildren[i];
     final FlowParentData childParentData = child.parentData;
     assert(() {
       if (childParentData._transform != null) {

@@ -10,7 +10,7 @@ class _PageSelector extends StatelessWidget {
   final List<IconData> icons;
 
   void _handleArrowButtonPress(BuildContext context, int delta) {
-    TabController controller = DefaultTabController.of(context);
+    final TabController controller = DefaultTabController.of(context);
     if (!controller.indexIsChanging)
       controller.animateTo(controller.index + delta);
   }

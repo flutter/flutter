@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double aspectRatio) async {
-  Key childKey = new UniqueKey();
+  final Key childKey = new UniqueKey();
   await tester.pumpWidget(
     new Center(
       child: new ConstrainedBox(
@@ -21,7 +21,7 @@ Future<Size> _getSize(WidgetTester tester, BoxConstraints constraints, double as
       )
     )
   );
-  RenderBox box = tester.renderObject(find.byKey(childKey));
+  final RenderBox box = tester.renderObject(find.byKey(childKey));
   return box.size;
 }
 
@@ -32,7 +32,7 @@ void main() {
   });
 
   testWidgets('Aspect ratio infinite width', (WidgetTester tester) async {
-    Key childKey = new UniqueKey();
+    final Key childKey = new UniqueKey();
     await tester.pumpWidget(
       new Center(
         child: new SingleChildScrollView(
@@ -46,7 +46,7 @@ void main() {
         )
       )
     );
-    RenderBox box = tester.renderObject(find.byKey(childKey));
+    final RenderBox box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(1200.0, 600.0)));
   });
 }

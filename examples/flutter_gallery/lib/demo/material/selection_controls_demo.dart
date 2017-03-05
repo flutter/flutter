@@ -35,7 +35,7 @@ class SelectionControlsDemo extends StatefulWidget {
 class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   @override
   Widget build(BuildContext context) {
-    List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+    final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
         tabName: "CHECKBOX",
         description: _checkboxText,
