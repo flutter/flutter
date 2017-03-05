@@ -283,7 +283,7 @@ void main() {
   });
 
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
-    PageController controller = new PageController(viewportFraction: 7 / 8);
+    PageController controller = new PageController(viewportFraction: 7/8);
 
     Widget build(PageController controller) {
       return new PageView.builder(
@@ -313,7 +313,7 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Point(50.0, 0.0));
     expect(tester.getTopLeft(find.text('Idaho')), const Point(750.0, 0.0));
 
-    controller = new PageController(viewportFraction: 39 / 40);
+    controller = new PageController(viewportFraction: 39/40);
 
     await tester.pumpWidget(build(controller));
 
@@ -324,7 +324,7 @@ void main() {
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
     final PageController controller =
-        new PageController(viewportFraction: 1 / 8);
+        new PageController(viewportFraction: 1/8);
 
     Widget build(PageController controller) {
       return new PageView.builder(
@@ -367,7 +367,7 @@ void main() {
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
     final PageController controller =
-        new PageController(viewportFraction: 5 / 4);
+        new PageController(viewportFraction: 5/4);
 
     Widget build(PageController controller) {
       return new PageView.builder(
