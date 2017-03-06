@@ -295,8 +295,9 @@ String _runWithLoggingSync(List<String> cmd, {
 }
 
 class ProcessExit implements Exception {
-  ProcessExit(this.exitCode);
+  ProcessExit(this.exitCode, {this.immediate: false});
 
+  final bool immediate;
   final int exitCode;
 
   String get message => 'ProcessExit: $exitCode';
