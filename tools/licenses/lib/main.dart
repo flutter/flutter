@@ -2145,7 +2145,7 @@ class RepositoryDartDirectory extends RepositoryDirectory {
     return entry.name != 'pkg' // packages that don't become part of the binary (e.g. the analyzer)
         && entry.name != 'tests' // only used by tests, obviously
         && entry.name != 'docs' // not shipped in binary
-	&& entry.name != 'build' // not shipped in binary
+        && entry.name != 'build' // not shipped in binary
         && entry.name != 'tools' // not shipped in binary
         && entry.name != 'samples-dev' // not shipped in binary
         && super.shouldRecurse(entry);
