@@ -182,7 +182,12 @@ Future<int> _handleToolError(
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
     // We've caught an exit code.
-    return _exit(error.exitCode);
+    if (error.immediate) {
+      exit(error.exitCode);
+      return error.exitCode;
+    } else {
+      return _exit(error.exitCode);
+    }
   } else {
     // We've crashed; emit a log report.
     stderr.writeln();
@@ -217,7 +222,11 @@ Future<int> _handleToolError(
             'Unable to generate crash report due to secondary error: $error\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
         );
-        return _exit(1);
+        // Any exception throw here (including one thrown by `_exit()`) will
+        // get caught by our zone's `onError` handler. In order to avoid an
+        // infinite error loop, we throw an error that is recognized above
+        // and will trigger an immediate exit.
+        throw new ProcessExit(1, immediate: true);
       }
     }
   }
@@ -299,9 +308,13 @@ Future<int> _exit(int code) async {
 
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
-    printTrace('exiting with code $code');
-    exit(code);
-    completer.complete();
+    try {
+      printTrace('exiting with code $code');
+      exit(code);
+      completer.complete();
+    } catch (error, stackTrace) {
+      completer.completeError(error, stackTrace);
+    }
   });
 
   await completer.future;

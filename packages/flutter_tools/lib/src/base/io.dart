@@ -25,9 +25,11 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
-import 'dart:io' as io show exit, exitCode;
+import 'dart:io' as io show exit;
 
 import 'package:meta/meta.dart';
+
+import 'process.dart';
 
 export 'dart:io'
     show
@@ -88,7 +90,7 @@ ExitFunction get exit => _exitFunction;
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
   _exitFunction = exitFunction ?? (int exitCode) {
-    throw new Exception('Exited with code ${io.exitCode}');
+    throw new ProcessExit(exitCode, immediate: true);
   };
 }
 
