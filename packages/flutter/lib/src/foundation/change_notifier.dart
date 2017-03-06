@@ -180,5 +180,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => 'ValueNotifier(value: $value)';
+  String toString() => '<$runtimeType>(value: $value)';
 }
