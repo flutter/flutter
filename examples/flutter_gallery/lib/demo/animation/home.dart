@@ -260,7 +260,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
   }
 }
 
-class _AllSectionsView extends StatelessWidget {
+class _AllSectionsView extends AnimatedWidget {
   _AllSectionsView({
     Key key,
     this.sectionIndex,
@@ -270,24 +270,25 @@ class _AllSectionsView extends StatelessWidget {
     this.midHeight,
     this.maxHeight,
     this.sectionCards: const <Widget>[],
-  }) : super(key: key) {
+  }) : super(key: key, listenable: selectedIndex) {
     assert(sections != null);
     assert(sectionCards != null);
     assert(sectionCards.length == sections.length);
     assert(sectionIndex >= 0 && sectionIndex < sections.length);
-    assert(selectedIndex >= 0.0 && selectedIndex < sections.length.toDouble());
+    assert(selectedIndex != null);
+    assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble());
   }
 
   final int sectionIndex;
   final List<Section> sections;
-  final double selectedIndex;
+  final ValueNotifier<double> selectedIndex;
   final double minHeight;
   final double midHeight;
   final double maxHeight;
   final List<Widget> sectionCards;
 
   double _selectedIndexDelta(int index) {
-    return (index.toDouble() - selectedIndex).abs().clamp(0.0, 1.0);
+    return (index.toDouble() - selectedIndex.value).abs().clamp(0.0, 1.0);
   }
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
@@ -348,11 +349,11 @@ class _AllSectionsView extends StatelessWidget {
 
     return new CustomMultiChildLayout(
       delegate: new _AllSectionsLayout(
-        translation: new FractionalOffset(selectedIndex - sectionIndex, 0.0),
+        translation: new FractionalOffset(selectedIndex.value - sectionIndex, 0.0),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,
-        selectedIndex: selectedIndex,
+        selectedIndex: selectedIndex.value,
       ),
       children: children,
     );
@@ -377,7 +378,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   final ScrollController _scrollController = new ScrollController();
   final PageController _headingPageController = new PageController();
   final PageController _detailsPageController = new PageController();
-  double _selectedIndex = 0.0;
+  ValueNotifier<double> selectedIndex = new ValueNotifier<double>(0.0);
 
   @override
   Widget build(BuildContext context) {
@@ -408,9 +409,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
 
   bool _handlePageNotification(ScrollNotification notification, PageController leader, PageController follower) {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
-      setState(() {
-        _selectedIndex = leader.page;
-      });
+      selectedIndex.value = leader.page;
       if (follower.page != leader.page)
         follower.position.jumpTo(leader.position.pixels, settle: false);
     }
@@ -452,7 +451,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             child: new _AllSectionsView(
               sectionIndex: index,
               sections: allSections,
-              selectedIndex: _selectedIndex,
+              selectedIndex: selectedIndex,
               minHeight: _kAppBarMinHeight,
               midHeight: _kAppBarMidHeight,
               maxHeight: maxHeight,
