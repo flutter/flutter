@@ -32,42 +32,47 @@ MockDoctor get testDoctor => context[Doctor];
 
 typedef dynamic Generator();
 
+typedef void ContextInitializer(AppContext testContext);
+
+void _defaultInitializeContext(AppContext testContext) {
+  testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
+  testContext.putIfAbsent(DevFSConfig, () => new DevFSConfig());
+  testContext.putIfAbsent(Doctor, () => new MockDoctor());
+  testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
+  testContext.putIfAbsent(Cache, () => new Cache());
+  testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
+  testContext.putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils());
+  testContext.putIfAbsent(Xcode, () => new Xcode());
+  testContext.putIfAbsent(IOSSimulatorUtils, () {
+    final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
+    when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
+    return mock;
+  });
+  testContext.putIfAbsent(SimControl, () => new MockSimControl());
+  testContext.putIfAbsent(Usage, () => new MockUsage());
+}
+
 void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
+  ContextInitializer initializeContext: _defaultInitializeContext,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   test(description, () async {
     final AppContext testContext = new AppContext();
 
-    // Initialize the test context with some default mocks.
-    // Seed these context entries first since others depend on them
+    // The context always starts with these value since others depend on them.
     testContext.putIfAbsent(Platform, () => const LocalPlatform());
     testContext.putIfAbsent(FileSystem, () => const LocalFileSystem());
     testContext.putIfAbsent(ProcessManager, () => const LocalProcessManager());
     testContext.putIfAbsent(Logger, () => new BufferLogger());
     testContext.putIfAbsent(Config, () => new Config());
 
-    // Order-independent context entries
-    testContext.putIfAbsent(DeviceManager, () => new MockDeviceManager());
-    testContext.putIfAbsent(DevFSConfig, () => new DevFSConfig());
-    testContext.putIfAbsent(Doctor, () => new MockDoctor());
-    testContext.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
-    testContext.putIfAbsent(Cache, () => new Cache());
-    testContext.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    testContext.putIfAbsent(OperatingSystemUtils, () => new MockOperatingSystemUtils());
-    testContext.putIfAbsent(Xcode, () => new Xcode());
-    testContext.putIfAbsent(IOSSimulatorUtils, () {
-      final MockIOSSimulatorUtils mock = new MockIOSSimulatorUtils();
-      when(mock.getAttachedDevices()).thenReturn(<IOSSimulator>[]);
-      return mock;
-    });
-    testContext.putIfAbsent(SimControl, () => new MockSimControl());
-    testContext.putIfAbsent(Usage, () => new MockUsage());
+    // Apply the initializer after seeding the base value above.
+    initializeContext(testContext);
 
-    final String basePath = fs.path.dirname(fs.path.fromUri(platform.script));
-    final String flutterRoot =
-        fs.path.normalize(fs.path.join(basePath, '..', '..', '..'));
+    final String flutterRoot = getFlutterRoot();
+
     try {
       return await testContext.runInZone(() {
         // Apply the overrides to the test context in the zone since their
@@ -93,6 +98,32 @@ void testUsingContext(String description, dynamic testMethod(), {
     }
 
   }, timeout: timeout, skip: skip);
+}
+
+String getFlutterRoot() {
+  Error invalidScript() => new StateError('Invalid script: ${platform.script}');
+
+  String toolsPath;
+  switch (platform.script.scheme) {
+    case 'file':
+      List<String> parts = fs.path.split(fs.path.fromUri(platform.script));
+      int toolsIndex = parts.indexOf('flutter_tools');
+      if (toolsIndex == -1)
+        throw invalidScript();
+      toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
+      break;
+    case 'data':
+      RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools)');
+      Match match = flutterTools.firstMatch(platform.script.path);
+      if (match == null)
+        throw invalidScript();
+      toolsPath = Uri.parse(match.group(1)).path;
+      break;
+    default:
+      throw invalidScript();
+  }
+
+  return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
 class MockDeviceManager implements DeviceManager {
