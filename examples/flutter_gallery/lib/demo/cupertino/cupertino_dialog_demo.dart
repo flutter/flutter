@@ -57,7 +57,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
                       onPressed: () { Navigator.pop(context, 'OK'); }
                     ),
                     new CupertinoDialogAction(
-                      child: new Text('Cancel', style: new TextStyle(fontWeight: FontWeight.w600)),
+                      child: new Text('Cancel', style: const TextStyle(fontWeight: FontWeight.w600)),
                       onPressed: () { Navigator.pop(context, 'Cancel'); }
                     ),
                   ]
@@ -69,7 +69,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
           new CupertinoButton(
             child: new Text('Alert with Title'),
             color: CupertinoButton.kBlue,
-            padding: new EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,

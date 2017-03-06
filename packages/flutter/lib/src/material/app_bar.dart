@@ -451,7 +451,7 @@ class _AppBarState extends State<AppBar> {
         children: <Widget>[
           new Flexible(
             child: new ConstrainedBox(
-              constraints: new BoxConstraints(maxHeight: kToolbarHeight),
+              constraints: const BoxConstraints(maxHeight: kToolbarHeight),
               child: appBar,
             ),
           ),

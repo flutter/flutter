@@ -32,7 +32,7 @@ void main() {
     });
 
     tearDown(() {
-      tools.crashFileSystem = new LocalFileSystem();
+      tools.crashFileSystem = const LocalFileSystem();
       restoreExitFunction();
       resetBaseCrashUrlForTesting();
     });
