@@ -10,8 +10,6 @@ import io.flutter.view.FlutterView.BinaryMessageReplyCallback;
 import io.flutter.view.FlutterView.BinaryMessageResponse;
 import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
 import java.nio.ByteBuffer;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A named channel for communicating with the Flutter application using semi-structured messages.
@@ -43,9 +41,12 @@ public final class FlutterMessageChannel<T> {
      * @param codec a {@link MessageCodec}.
      */
     public FlutterMessageChannel(FlutterView view, String name, MessageCodec<T> codec) {
-        this.view = Objects.requireNonNull(view);
-        this.name = Objects.requireNonNull(name);
-        this.codec = Objects.requireNonNull(codec);
+        assert view != null;
+        assert name != null;
+        assert codec != null;
+        this.view = view;
+        this.name = name;
+        this.codec = codec;
     }
 
     /**
