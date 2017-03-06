@@ -147,7 +147,9 @@ abstract class IOSApp extends ApplicationPackage {
     Directory bundleDir;
     try {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
-      addShutdownHook(() async => await tempDir.delete(recursive: true));
+      addShutdownHook(() async {
+        await tempDir.delete(recursive: true);
+      }, ShutdownStage.STILL_RECORDING);
       os.unzip(fs.file(applicationBinary), tempDir);
       final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
