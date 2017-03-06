@@ -33,8 +33,7 @@
 
 + (Class)layerClass {
 #if TARGET_IPHONE_SIMULATOR
-  return blink::Settings::Get().force_software_rendering ? [CALayer class]
-                                                         : [CAEAGLLayer class];
+  return [CALayer class];
 #else   // TARGET_IPHONE_SIMULATOR
   return [CAEAGLLayer class];
 #endif  // TARGET_IPHONE_SIMULATOR

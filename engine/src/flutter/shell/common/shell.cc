@@ -185,9 +185,6 @@ void Shell::InitStandalone(std::string icu_data_path,
   settings.trace_startup =
       command_line.HasSwitch(FlagForSwitch(Switch::TraceStartup));
 
-  settings.force_software_rendering =
-      command_line.HasSwitch(FlagForSwitch(Switch::ForceSoftwareRendering));
-
   settings.aot_snapshot_path =
       command_line.GetSwitchValueASCII(FlagForSwitch(Switch::AotSnapshotPath));
   settings.aot_vm_snapshot_data_filename = command_line.GetSwitchValueASCII(
