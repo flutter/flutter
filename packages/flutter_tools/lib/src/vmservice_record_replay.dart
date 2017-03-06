@@ -83,6 +83,10 @@ abstract class _Message implements Comparable<_Message> {
 
   @override
   int compareTo(_Message other) {
+    if (id == null) {
+      printError('Invalid VMService message data detected: $data');
+      return -1;
+    }
     final int result = id.compareTo(other.id);
     if (result != 0) {
       return result;
