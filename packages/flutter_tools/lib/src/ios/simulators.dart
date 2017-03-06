@@ -609,9 +609,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   _IOSSimulatorLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
-      onListen: () {
-        _start();
-      },
+      onListen: _start,
       onCancel: _stop
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');

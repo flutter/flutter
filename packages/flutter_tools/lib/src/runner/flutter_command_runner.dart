@@ -250,7 +250,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     }
 
     // The Android SDK could already have been set by tests.
-    context.putIfAbsent(AndroidSdk, () => AndroidSdk.locateAndroidSdk());
+    context.putIfAbsent(AndroidSdk, AndroidSdk.locateAndroidSdk);
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');

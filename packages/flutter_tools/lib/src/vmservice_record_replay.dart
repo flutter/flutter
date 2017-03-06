@@ -161,9 +161,7 @@ class _RecordingStream {
         // We currently don't support recording of errors.
         _controller.addError(error, stackTrace);
       },
-      onDone: () {
-        _controller.close();
-      },
+      onDone: _controller.close,
     );
   }
 

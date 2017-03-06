@@ -231,9 +231,7 @@ class MaterialFonts {
     ).then<Null>((Null value) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
       status.stop();
-    }).whenComplete(() {
-      status.cancel();
-    });
+    }).whenComplete(status.cancel);
   }
 }
 
@@ -376,8 +374,6 @@ class FlutterEngine {
     final Status status = logger.startProgress(message, expectSlowOperation: true);
     return Cache._downloadFileToCache(Uri.parse(url), dest, true).then<Null>((Null value) {
       status.stop();
-    }).whenComplete(() {
-      status.cancel();
-    });
+    }).whenComplete(status.cancel);
   }
 }

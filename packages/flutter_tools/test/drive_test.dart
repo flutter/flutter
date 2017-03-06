@@ -243,7 +243,7 @@ void main() {
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
 
       testUsingContext('uses existing Android device if and there are no simulators', () async {
@@ -256,7 +256,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
 
       testUsingContext('launches emulator', () async {
@@ -270,7 +270,7 @@ void main() {
         expect(device.name, 'new-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
     });
 
@@ -283,7 +283,7 @@ void main() {
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => platform(),
+        Platform: platform,
       });
 
       testUsingContext('uses existing Android device', () async {
@@ -295,7 +295,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => platform(),
+        Platform: platform,
       });
     }
 

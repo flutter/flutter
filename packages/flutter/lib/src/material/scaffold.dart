@@ -561,9 +561,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     switch (status) {
       case AnimationStatus.dismissed:
         assert(_snackBars.isNotEmpty);
-        setState(() {
-          _snackBars.removeFirst();
-        });
+        setState(_snackBars.removeFirst);
         if (_snackBars.isNotEmpty)
           _snackBarController.forward();
         break;

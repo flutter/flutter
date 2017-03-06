@@ -52,9 +52,7 @@ class BackButton extends StatelessWidget {
     return new IconButton(
       icon: new Icon(getIconData(Theme.of(context).platform)),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
-      onPressed: () {
-        Navigator.of(context).maybePop();
-      },
+      onPressed: Navigator.of(context).maybePop,
     );
   }
 }

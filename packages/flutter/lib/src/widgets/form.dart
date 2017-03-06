@@ -255,9 +255,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// Calls [FormField.validator] to set the [errorText]. Returns true if there
   /// were no errors.
   bool validate() {
-    setState(() {
-      _validate();
-    });
+    setState(_validate);
     return !hasError;
   }
 

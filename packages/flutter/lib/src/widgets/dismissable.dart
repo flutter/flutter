@@ -226,9 +226,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       _dragExtent = 0.0;
       _moveController.value = 0.0;
     }
-    setState(() {
-      _updateMoveAnimation();
-    });
+    setState(_updateMoveAnimation);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -256,9 +254,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
         break;
     }
     if (oldDragExtent.sign != _dragExtent.sign) {
-      setState(() {
-        _updateMoveAnimation();
-      });
+      setState(_updateMoveAnimation);
     }
     if (!_moveController.isAnimating) {
       _moveController.value = _dragExtent.abs() / _overallDragAxisExtent;

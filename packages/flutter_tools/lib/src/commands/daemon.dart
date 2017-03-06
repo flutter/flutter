@@ -264,7 +264,7 @@ class DaemonDomain extends Domain {
   }
 
   Future<Null> shutdown(Map<String, dynamic> args) {
-    Timer.run(() => daemon.shutdown());
+    Timer.run(daemon.shutdown);
     return new Future<Null>.value();
   }
 

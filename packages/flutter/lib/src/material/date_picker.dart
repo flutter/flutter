@@ -392,9 +392,7 @@ class _MonthPickerState extends State<MonthPicker> {
     if (_timer != null)
       _timer.cancel();
     _timer = new Timer(timeUntilTomorrow, () {
-      setState(() {
-        _updateCurrentDate();
-      });
+      setState(_updateCurrentDate);
     });
   }
 

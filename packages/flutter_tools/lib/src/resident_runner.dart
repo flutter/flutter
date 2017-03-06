@@ -228,9 +228,7 @@ abstract class ResidentRunner {
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(() {
-      appFinished();
-    });
+    vmService.done.whenComplete(appFinished);
   }
 
   /// Returns [true] if the input has been handled by this function.

@@ -106,9 +106,7 @@ class _CalculatorState extends State<Calculator> {
   }
 
   void handleDelTap() {
-    setState(() {
-      popCalcExpression();
-    });
+    setState(popCalcExpression);
   }
 
   @override
