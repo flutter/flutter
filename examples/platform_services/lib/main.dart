@@ -24,7 +24,7 @@ class _PlatformServicesState extends State<PlatformServices> {
     } else {
       try {
         int result = await platform.invokeMethod('getBatteryLevel');
-        batteryLevel = 'Battery level at ${result} %';
+        batteryLevel = 'Battery level at $result. %';
       } on PlatformException catch (e) {
         batteryLevel = "Failed to get battery level: '${e.message}'.";
       }
@@ -47,6 +47,9 @@ class _PlatformServicesState extends State<PlatformServices> {
             ),
             new Text(_batteryLevel)
           ],
+        )
+      )
+    );
   }
 }
   

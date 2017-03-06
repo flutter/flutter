@@ -6,9 +6,12 @@ You can read more about
 [accessing platform and third-party services in Flutter](https://flutter.io/platform-services/).
 
 ## iOS
-You can open `ios/Runner.xcworkspace` in Xcode and build the project as usual.
+You can use the commands `flutter build` and `flutter run` from the app's root
+directory to build/run the app or you can open `ios/Runner.xcworkspace` in Xcode
+and build/run the project as usual.
 
 ## Android
 
-To build with Android Studio, open the `android` folder in Android Studio and
-build the project as usual.
+You can use the commands `flutter build` and `flutter run` from the app's root
+directory to build/run the app or to build with Android Studio, open the
+`android` folder in Android Studio and build the project as usual.
