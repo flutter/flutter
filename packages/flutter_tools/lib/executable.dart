@@ -146,8 +146,8 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
       await _exit(0);
       runCompleter.complete(0);
     }, onError: (dynamic error, Chain chain) {
-      flutterVersion ??= FlutterVersion.getVersionString();
-      _handleToolError(error, chain, verbose, args, reportCrashes, flutterVersion)
+      String getVersion() => flutterVersion ?? FlutterVersion.getVersionString();
+      _handleToolError(error, chain, verbose, args, reportCrashes, getVersion)
           .then(runCompleter.complete, onError: runCompleter.completeError);
     });
     return runCompleter.future;
@@ -160,7 +160,7 @@ Future<int> _handleToolError(
     bool verbose,
     List<String> args,
     bool reportCrashes,
-    String flutterVersion,
+    String getFlutterVersion(),
 ) async {
   if (error is UsageException) {
     stderr.writeln(error.message);
@@ -208,7 +208,7 @@ Future<int> _handleToolError(
       await CrashReportSender.instance.sendReport(
         error: error,
         stackTrace: chain,
-        flutterVersion: flutterVersion,
+        flutterVersion: getFlutterVersion(),
       );
       try {
         final File file = await _createLocalCrashReport(args, error, chain);
