@@ -7,7 +7,7 @@ package io.flutter.plugin.common;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +65,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
         return value;
     }
 
+    private static final Charset UTF8 = Charset.forName("UTF8");
     private static final byte NULL = 0;
     private static final byte TRUE = 1;
     private static final byte FALSE = 2;
@@ -84,7 +85,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
         assert 0 <= value;
         if (value < 254) {
             stream.write(value);
-        } else if (value < 0xffff) {
+        } else if (value <= 0xffff) {
             stream.write(254);
             stream.write(value >>> 8);
             stream.write(value);
@@ -150,13 +151,13 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
             } else if (value instanceof BigInteger) {
                 stream.write(BIGINT);
                 writeBytes(stream,
-                    ((BigInteger) value).toString(16).getBytes(StandardCharsets.UTF_8));
+                    ((BigInteger) value).toString(16).getBytes(UTF8));
             } else {
                 throw new IllegalArgumentException("Unsupported Number type: " + value.getClass());
             }
         } else if (value instanceof String) {
             stream.write(STRING);
-            writeBytes(stream, ((String) value).getBytes(StandardCharsets.UTF_8));
+            writeBytes(stream, ((String) value).getBytes(UTF8));
         } else if (value instanceof byte[]) {
             stream.write(BYTE_ARRAY);
             writeBytes(stream, (byte[]) value);
@@ -259,7 +260,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
                 break;
             case BIGINT: {
                 final byte[] hex = readBytes(buffer);
-                result = new BigInteger(new String(hex, StandardCharsets.UTF_8), 16);
+                result = new BigInteger(new String(hex, UTF8), 16);
                 break;
             }
             case DOUBLE:
@@ -267,7 +268,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
                 break;
             case STRING: {
                 final byte[] bytes = readBytes(buffer);
-                result = new String(bytes, StandardCharsets.UTF_8);
+                result = new String(bytes, UTF8);
                 break;
             }
             case BYTE_ARRAY: {

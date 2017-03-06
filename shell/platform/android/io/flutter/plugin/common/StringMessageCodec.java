@@ -5,13 +5,14 @@
 package io.flutter.plugin.common;
 
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 
 /**
  * A {@link MessageCodec} using UTF-8 encoded String messages.
  */
 public final class StringMessageCodec implements MessageCodec<String> {
     // This codec must match the Dart codec of the same name in package flutter/services.
+    private static final Charset UTF8 = Charset.forName("UTF8");
     public static final StringMessageCodec INSTANCE = new StringMessageCodec();
 
     private StringMessageCodec() {
@@ -23,7 +24,7 @@ public final class StringMessageCodec implements MessageCodec<String> {
             return null;
         }
         // TODO(mravn): Avoid the extra copy below.
-        final byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+        final byte[] bytes = message.getBytes(UTF8);
         final ByteBuffer buffer = ByteBuffer.allocateDirect(bytes.length);
         buffer.put(bytes);
         return buffer;
@@ -46,6 +47,6 @@ public final class StringMessageCodec implements MessageCodec<String> {
             message.get(bytes);
             offset = 0;
         }
-        return new String(bytes, offset, length, StandardCharsets.UTF_8);
+        return new String(bytes, offset, length, UTF8);
     }
 }

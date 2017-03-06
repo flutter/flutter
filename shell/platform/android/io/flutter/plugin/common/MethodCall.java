@@ -27,7 +27,8 @@ public final class MethodCall {
      * @param arguments the arguments, a value supported by the channel's message codec.
      */
     public MethodCall(String method, Object arguments) {
-        this.method = Objects.requireNonNull(method);
+        assert method != null;
+        this.method = method;
         this.arguments = arguments;
     }
 }
