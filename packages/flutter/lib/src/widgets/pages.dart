@@ -29,7 +29,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 
   @override
   AnimationController createAnimationController() {
-    AnimationController controller = super.createAnimationController();
+    final AnimationController controller = super.createAnimationController();
     if (settings.isInitialRoute)
       controller.value = 1.0;
     return controller;

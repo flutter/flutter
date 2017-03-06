@@ -46,7 +46,7 @@ class HealthCheckResult {
 
   @override
   String toString() {
-    StringBuffer buf = new StringBuffer(succeeded ? 'succeeded' : 'failed');
+    final StringBuffer buf = new StringBuffer(succeeded ? 'succeeded' : 'failed');
     if (details != null && details.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
@@ -89,7 +89,7 @@ Directory dir(String path) => new Directory(path);
 File file(String path) => new File(path);
 
 void copy(File sourceFile, Directory targetDirectory, {String name}) {
-  File target = file(
+  final File target = file(
       path.join(targetDirectory.path, name ?? path.basename(sourceFile.path)));
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
 }
@@ -118,7 +118,7 @@ void section(String title) {
 
 Future<String> getDartVersion() async {
   // The Dart VM returns the version text to stderr.
-  ProcessResult result = Process.runSync(dartBin, <String>['--version']);
+  final ProcessResult result = Process.runSync(dartBin, <String>['--version']);
   String version = result.stderr.trim();
 
   // Convert:
@@ -146,13 +146,13 @@ Future<String> getCurrentFlutterRepoCommit() {
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
   return inDirectory(flutterDirectory, () async {
-    String unixTimestamp = await eval('git', <String>[
+    final String unixTimestamp = await eval('git', <String>[
       'show',
       '-s',
       '--format=%at',
       commit,
     ]);
-    int secondsSinceEpoch = int.parse(unixTimestamp);
+    final int secondsSinceEpoch = int.parse(unixTimestamp);
     return new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
   });
 }
@@ -163,17 +163,17 @@ Future<Process> startProcess(
   Map<String, String> environment,
   String workingDirectory,
 }) async {
-  String command = '$executable ${arguments?.join(" ") ?? ""}';
+  final String command = '$executable ${arguments?.join(" ") ?? ""}';
   print('Executing: $command');
   environment ??= <String, String>{};
   environment['BOT'] = 'true';
-  Process process = await Process.start(
+  final Process process = await Process.start(
     executable,
     arguments,
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
-  ProcessInfo processInfo = new ProcessInfo(command, process);
+  final ProcessInfo processInfo = new ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
   process.exitCode.whenComplete(() {
@@ -207,7 +207,7 @@ Future<int> exec(
   Map<String, String> environment,
   bool canFail: false,
 }) async {
-  Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment);
 
   process.stdout
       .transform(UTF8.decoder)
@@ -218,7 +218,7 @@ Future<int> exec(
       .transform(const LineSplitter())
       .listen(stderr.writeln);
 
-  int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
@@ -235,12 +235,12 @@ Future<String> eval(
   Map<String, String> environment,
   bool canFail: false,
 }) async {
-  Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment);
   process.stderr.listen((List<int> data) {
     stderr.add(data);
   });
-  String output = await UTF8.decodeStream(process.stdout);
-  int exitCode = await process.exitCode;
+  final String output = await UTF8.decodeStream(process.stdout);
+  final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
@@ -253,7 +253,7 @@ Future<int> flutter(String command, {
   bool canFail: false,
   Map<String, String> environment,
 }) {
-  List<String> args = <String>[command]..addAll(options);
+  final List<String> args = <String>[command]..addAll(options);
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -264,7 +264,7 @@ Future<String> evalFlutter(String command, {
   bool canFail: false,
   Map<String, String> environment,
 }) {
-  List<String> args = <String>[command]..addAll(options);
+  final List<String> args = <String>[command]..addAll(options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -275,7 +275,7 @@ String get dartBin =>
 Future<int> dart(List<String> args) => exec(dartBin, args);
 
 Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
-  String previousCwd = cwd;
+  final String previousCwd = cwd;
   try {
     cd(directory);
     return await action();
@@ -303,7 +303,7 @@ void cd(dynamic directory) {
 Directory get flutterDirectory => dir('../..').absolute;
 
 String requireEnvVar(String name) {
-  String value = Platform.environment[name];
+  final String value = Platform.environment[name];
 
   if (value == null) fail('$name environment variable is missing. Quitting.');
 
@@ -313,7 +313,7 @@ String requireEnvVar(String name) {
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName))
     fail('Configuration property not found: $propertyName');
-  T result = map[propertyName];
+  final T result = map[propertyName];
   return result;
 }
 
@@ -426,7 +426,7 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///
 ///     }
 Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
-  Completer<Null> completer = new Completer<Null>();
+  final Completer<Null> completer = new Completer<Null>();
   Chain.capture(() async {
     await callback();
     completer.complete();
@@ -441,7 +441,7 @@ Future<int> findAvailablePort() async {
   int port = 20000;
   while (true) {
     try {
-      ServerSocket socket =
+      final ServerSocket socket =
           await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
       await socket.close();
       return port;

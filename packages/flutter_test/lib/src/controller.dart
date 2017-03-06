@@ -75,7 +75,7 @@ class WidgetController {
   Iterable<T> widgetList<T extends Widget>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      T result = element.widget;
+      final T result = element.widget;
       return result;
     });
   }
@@ -223,7 +223,7 @@ class WidgetController {
   Iterable<T> renderObjectList<T extends RenderObject>(Finder finder) {
     TestAsyncUtils.guardSync();
     return finder.evaluate().map<T>((Element element) {
-      T result = element.renderObject;
+      final T result = element.renderObject;
       return result;
     });
   }
@@ -235,7 +235,7 @@ class WidgetController {
     TestAsyncUtils.guardSync();
     yield layer;
     if (layer is ContainerLayer) {
-      ContainerLayer root = layer;
+      final ContainerLayer root = layer;
       Layer child = root.firstChild;
       while (child != null) {
         yield* _walkLayers(child);
@@ -259,7 +259,7 @@ class WidgetController {
   /// location.
   Future<Null> tapAt(Point location, { int pointer: 1 }) {
     return TestAsyncUtils.guard(() async {
-      TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
       return null;
     });
@@ -278,7 +278,7 @@ class WidgetController {
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
   Future<Null> longPressAt(Point location, { int pointer: 1 }) {
     return TestAsyncUtils.guard(() async {
-      TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(location, pointer: pointer);
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
       return null;
@@ -360,7 +360,7 @@ class WidgetController {
   /// the given offset, and a pointer up.
   Future<Null> scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
     return TestAsyncUtils.guard(() async {
-      TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       await gesture.moveBy(offset);
       await gesture.up();
       return null;
@@ -421,8 +421,8 @@ class WidgetController {
 
   Point _getElementPoint(Finder finder, Point sizeToPoint(Size size)) {
     TestAsyncUtils.guardSync();
-    Element element = finder.evaluate().single;
-    RenderBox box = element.renderObject;
+    final Element element = finder.evaluate().single;
+    final RenderBox box = element.renderObject;
     assert(box != null);
     return box.localToGlobal(sizeToPoint(box.size));
   }
@@ -431,8 +431,8 @@ class WidgetController {
   /// the widget's render object has been laid out at least once.
   Size getSize(Finder finder) {
     TestAsyncUtils.guardSync();
-    Element element = finder.evaluate().single;
-    RenderBox box = element.renderObject;
+    final Element element = finder.evaluate().single;
+    final RenderBox box = element.renderObject;
     assert(box != null);
     return box.size;
   }

@@ -10,8 +10,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Positioned constructors', (WidgetTester tester) async {
-    Widget child = new Container();
-    Positioned a = new Positioned(
+    final Widget child = new Container();
+    final Positioned a = new Positioned(
       left: 101.0,
       right: 201.0,
       top: 301.0,
@@ -24,7 +24,7 @@ void main() {
     expect(a.bottom, 401.0);
     expect(a.width, null);
     expect(a.height, null);
-    Positioned b = new Positioned.fromRect(
+    final Positioned b = new Positioned.fromRect(
       rect: new Rect.fromLTRB(
         102.0,
         302.0,
@@ -39,7 +39,7 @@ void main() {
     expect(b.bottom, null);
     expect(b.width, 100.0);
     expect(b.height, 200.0);
-    Positioned c = new Positioned.fromRelativeRect(
+    final Positioned c = new Positioned.fromRelativeRect(
       rect: const RelativeRect.fromLTRB(
         103.0,
         303.0,
@@ -76,8 +76,8 @@ void main() {
     final GlobalKey key = new GlobalKey();
 
     void recordMetrics() {
-      RenderBox box = key.currentContext.findRenderObject();
-      BoxParentData boxParentData = box.parentData;
+      final RenderBox box = key.currentContext.findRenderObject();
+      final BoxParentData boxParentData = box.parentData;
       sizes.add(box.size);
       positions.add(boxParentData.offset);
     }
@@ -101,7 +101,7 @@ void main() {
       )
     ); // t=0
     recordMetrics();
-    Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = new Completer<Null>();
     controller.forward().whenComplete(completer.complete);
     expect(completer.isCompleted, isFalse);
     await tester.pump(); // t=0 again

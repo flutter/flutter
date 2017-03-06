@@ -108,8 +108,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> _screenshot() async {
-    Status status = logger.startProgress('Taking screenshot...');
-    File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    final Status status = logger.startProgress('Taking screenshot...');
+    final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {
         if (vmService != null)
@@ -133,7 +133,7 @@ abstract class ResidentRunner {
           }
         }
       }
-      int sizeKB = (await outputFile.length()) ~/ 1024;
+      final int sizeKB = (await outputFile.length()) ~/ 1024;
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
@@ -161,8 +161,10 @@ abstract class ResidentRunner {
       ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    if (!platform.isWindows) {
+      ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+      ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    }
   }
 
   Future<Null> _cleanUpAndExit(ProcessSignal signal) async {
@@ -263,7 +265,7 @@ abstract class ResidentRunner {
       }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
-        String platform = await _debugRotatePlatform();
+        final String platform = await _debugRotatePlatform();
         print('Switched operating system to: $platform');
         return true;
       }
@@ -285,7 +287,7 @@ abstract class ResidentRunner {
     }
     _processingTerminalRequest = true;
     try {
-      bool handled = await _commonTerminalInputHandler(command);
+      final bool handled = await _commonTerminalInputHandler(command);
       if (!handled)
         await handleTerminalCommand(command);
     } finally {
@@ -321,18 +323,18 @@ abstract class ResidentRunner {
   }
 
   Future<int> waitForAppToFinish() async {
-    int exitCode = await _finished.future;
+    final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
   }
 
   bool hasDirtyDependencies() {
-    DartDependencySetBuilder dartDependencySetBuilder =
+    final DartDependencySetBuilder dartDependencySetBuilder =
         new DartDependencySetBuilder(
             mainPath, projectRootPath, packagesFilePath);
-    DependencyChecker dependencyChecker =
+    final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
-    String path = package.packagePath;
+    final String path = package.packagePath;
     if (path == null) {
       return true;
     }
@@ -400,7 +402,7 @@ class OperationResult {
 String findMainDartFile([String target]) {
   if (target == null)
     target = '';
-  String targetPath = fs.path.absolute(target);
+  final String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))
     return fs.path.join(targetPath, 'lib', 'main.dart');
   else

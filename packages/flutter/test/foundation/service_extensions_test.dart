@@ -57,7 +57,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   Future<Null> flushMicrotasks() {
-    Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = new Completer<Null>();
     new Timer(const Duration(), () {
       completer.complete();
     });
@@ -82,7 +82,7 @@ Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingRes
 }
 
 void main() {
-  List<String> console = <String>[];
+  final List<String> console = <String>[];
 
   test('Service extensions - pretest', () async {
     binding = new TestServiceExtensionsBinding();

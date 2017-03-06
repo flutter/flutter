@@ -41,10 +41,10 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   // The icon is going to be in the same merged semantics box as the text
   // regardless of how the menu item is represented, so this is a good
   // way to find the menu item. I hope.
-  Element semantics = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), MergeSemantics);
+  final Element semantics = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), MergeSemantics);
   expect(semantics, isNotNull);
-  Element asset = findElementOfExactWidgetTypeGoingDown(semantics, RichText);
-  RichText richText = asset.widget;
+  final Element asset = findElementOfExactWidgetTypeGoingDown(semantics, RichText);
+  final RichText richText = asset.widget;
   expect(richText.text.style.color, equals(color));
 }
 
@@ -64,9 +64,9 @@ void main() {
     expect(find.text('Account Balance'), findsNothing);
 
     // drag the drawer out
-    Point left = new Point(0.0, ui.window.physicalSize.height / 2.0);
-    Point right = new Point(ui.window.physicalSize.width, left.y);
-    TestGesture gesture = await tester.startGesture(left);
+    final Point left = new Point(0.0, ui.window.physicalSize.height / 2.0);
+    final Point right = new Point(ui.window.physicalSize.width, left.y);
+    final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);
     await tester.pump();

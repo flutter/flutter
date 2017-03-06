@@ -22,7 +22,7 @@ bool get isRunningOnBot {
 }
 
 String hex(List<int> bytes) {
-  StringBuffer result = new StringBuffer();
+  final StringBuffer result = new StringBuffer();
   for (int part in bytes)
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   return result.toString();
@@ -55,18 +55,18 @@ String pluralize(String word, int count) => count == 1 ? word : word + 's';
 
 /// Return the name of an enum item.
 String getEnumName(dynamic enumItem) {
-  String name = '$enumItem';
-  int index = name.indexOf('.');
+  final String name = '$enumItem';
+  final int index = name.indexOf('.');
   return index == -1 ? name : name.substring(index + 1);
 }
 
 File getUniqueFile(Directory dir, String baseName, String ext) {
-  FileSystem fs = dir.fileSystem;
+  final FileSystem fs = dir.fileSystem;
   int i = 1;
 
   while (true) {
-    String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-    File file = fs.file(fs.path.join(dir.path, name));
+    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
+    final File file = fs.file(fs.path.join(dir.path, name));
     if (!file.existsSync())
       return file;
     i++;
@@ -87,7 +87,7 @@ String getElapsedAsMilliseconds(Duration duration) => '${duration.inMilliseconds
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath) {
-  String cwd = fs.currentDirectory.path + fs.path.separator;
+  final String cwd = fs.currentDirectory.path + fs.path.separator;
   return fullPath.startsWith(cwd) ?  fullPath.substring(cwd.length) : fullPath;
 }
 
@@ -114,10 +114,10 @@ class ItemListNotifier<T> {
   List<T> get items => _items.toList();
 
   void updateWithNewList(List<T> updatedList) {
-    Set<T> updatedSet = new Set<T>.from(updatedList);
+    final Set<T> updatedSet = new Set<T>.from(updatedList);
 
-    Set<T> addedItems = updatedSet.difference(_items);
-    Set<T> removedItems = _items.difference(updatedSet);
+    final Set<T> addedItems = updatedSet.difference(_items);
+    final Set<T> removedItems = _items.difference(updatedSet);
 
     _items = updatedSet;
 
@@ -140,7 +140,7 @@ class SettingsFile {
       line = line.trim();
       if (line.startsWith('#') || line.isEmpty)
         continue;
-      int index = line.indexOf('=');
+      final int index = line.indexOf('=');
       if (index != -1)
         values[line.substring(0, index)] = line.substring(index + 1);
     }
@@ -174,7 +174,7 @@ class Uuid {
   /// random numbers as the source of the generated uuid.
   String generateV4() {
     // Generate xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx / 8-4-4-4-12.
-    int special = 8 + _random.nextInt(4);
+    final int special = 8 + _random.nextInt(4);
 
     return
       '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'

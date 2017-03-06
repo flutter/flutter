@@ -241,7 +241,7 @@ class StockHomeState extends State<StockHome> {
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
     if (_searchQuery.text.isEmpty)
       return stocks;
-    RegExp regexp = new RegExp(_searchQuery.text, caseSensitive: false);
+    final RegExp regexp = new RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 

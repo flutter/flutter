@@ -57,9 +57,9 @@ class Matrix4Tween extends Tween<Matrix4> {
   Matrix4 lerp(double t) {
     // TODO(abarth): We should use [Matrix4.decompose] and animate the
     // decomposed parameters instead of just animating the translation.
-    Vector3 beginT = begin.getTranslation();
-    Vector3 endT = end.getTranslation();
-    Vector3 lerpT = beginT*(1.0-t) + endT*t;
+    final Vector3 beginT = begin.getTranslation();
+    final Vector3 endT = end.getTranslation();
+    final Vector3 lerpT = beginT*(1.0-t) + endT*t;
     return new Matrix4.identity()..translate(lerpT);
   }
 }

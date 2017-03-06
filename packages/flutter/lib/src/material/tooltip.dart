@@ -213,7 +213,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     else
       y = math.max(target.y - verticalOffset - childSize.height, _kScreenEdgeMargin);
     // HORIZONTAL DIRECTION
-    double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
+    final double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
     double x;
     if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
       x = _kScreenEdgeMargin;
@@ -255,8 +255,8 @@ class _TooltipOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-    ThemeData darkTheme = new ThemeData(
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,

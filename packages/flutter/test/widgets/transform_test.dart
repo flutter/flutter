@@ -177,12 +177,12 @@ void main() {
       ),
     );
 
-    List<Layer> layers = tester.layers
+    final List<Layer> layers = tester.layers
       ..retainWhere((Layer layer) => layer is TransformLayer);
     expect(layers.length, 2);
     // The first transform is from the render view.
-    TransformLayer layer = layers[1];
-    Matrix4 transform = layer.transform;
+    final TransformLayer layer = layers[1];
+    final Matrix4 transform = layer.transform;
     expect(transform.getTranslation(), equals(new Vector3(100.0, 75.0, 0.0)));
   });
 }

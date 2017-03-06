@@ -163,9 +163,9 @@ void main() {
   });
 
   testWidgets('Navigator.of fails gracefully when not found in context', (WidgetTester tester) async {
-    Key targetKey = const Key('foo');
+    final Key targetKey = const Key('foo');
     dynamic exception;
-    Widget widget = new ThirdWidget(
+    final Widget widget = new ThirdWidget(
       targetKey: targetKey,
       onException: (dynamic e) {
         exception = e;
@@ -185,12 +185,12 @@ void main() {
         );
       }
     ));
-    Object exception = tester.takeException();
+    final Object exception = tester.takeException();
     expect(exception is FlutterError, isTrue);
   });
 
   testWidgets('Gestures between push and build are ignored', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) {
         return new Row(
@@ -291,7 +291,7 @@ void main() {
     };
     bool isPushed = false;
     bool isPopped = false;
-    TestObserver observer = new TestObserver()
+    final TestObserver observer = new TestObserver()
       ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
         // Pushes the initial route.
         expect(route is PageRoute && route.settings.name == '/', isTrue);
@@ -351,8 +351,8 @@ void main() {
     };
     bool isPushed = false;
     bool isPopped = false;
-    TestObserver observer1 = new TestObserver();
-    TestObserver observer2 = new TestObserver()
+    final TestObserver observer1 = new TestObserver();
+    final TestObserver observer2 = new TestObserver()
       ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
         isPushed = true;
       }
@@ -458,7 +458,7 @@ void main() {
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsNothing);
 
-    String replaceNamedValue = await value; // replaceNamed result was 'B'
+    final String replaceNamedValue = await value; // replaceNamed result was 'B'
     expect(replaceNamedValue, 'B');
   });
 }

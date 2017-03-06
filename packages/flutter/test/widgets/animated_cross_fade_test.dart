@@ -74,7 +74,7 @@ void main() {
     );
 
     expect(find.byType(FadeTransition), findsNWidgets(2));
-    RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
+    final RenderBox box = tester.renderObject(find.byType(AnimatedCrossFade));
     expect(box.size.width, equals(200.0));
     expect(box.size.height, equals(200.0));
   });

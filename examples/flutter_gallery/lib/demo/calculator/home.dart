@@ -29,7 +29,7 @@ class _CalculatorState extends State<Calculator> {
 
   /// Pop the top expression off of the stack and make it the current expression.
   void popCalcExpression() {
-    if (_expressionStack.length > 0) {
+    if (_expressionStack.isNotEmpty) {
       _expression = _expressionStack.removeLast();
     } else {
       _expression = new CalcExpression.Empty();

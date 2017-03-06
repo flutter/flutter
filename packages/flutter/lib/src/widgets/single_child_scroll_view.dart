@@ -43,14 +43,15 @@ class SingleChildScrollView extends StatelessWidget {
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
-    this.primary: false,
+    bool primary,
     this.physics,
     this.controller,
     this.child,
-  }) : super(key: key) {
-    assert(scrollDirection != null);
-    assert(primary != null);
-    assert(controller == null || !primary,
+  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       super(key: key) {
+    assert(this.scrollDirection != null);
+    assert(this.primary != null);
+    assert(this.controller == null || !this.primary,
        'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
        'You cannot both set primary to true and pass an explicit controller.'
     );
@@ -64,6 +65,14 @@ class SingleChildScrollView extends StatelessWidget {
 
   final ScrollController controller;
 
+  /// Whether this is the primary scroll view associated with the parent
+  /// [PrimaryScrollController].
+  ///
+  /// On iOS, this identifies the scroll view that will scroll to top in
+  /// response to a tap in the status bar.
+  ///
+  /// Defaults to true when `scrollDirection` is vertical and `controller` is
+  /// not specified.
   final bool primary;
 
   final ScrollPhysics physics;
@@ -87,9 +96,12 @@ class SingleChildScrollView extends StatelessWidget {
     Widget contents = child;
     if (padding != null)
       contents = new Padding(padding: padding, child: contents);
-    return new Scrollable(
+    final ScrollController scrollController = primary
+        ? PrimaryScrollController.of(context)
+        : controller;
+    final Scrollable scrollable = new Scrollable(
       axisDirection: axisDirection,
-      controller: controller ?? (primary ? PrimaryScrollController.of(context) : null),
+      controller: scrollController,
       physics: physics,
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _SingleChildViewport(
@@ -99,6 +111,9 @@ class SingleChildScrollView extends StatelessWidget {
         );
       },
     );
+    return primary && scrollController != null
+      ? new PrimaryScrollController.none(child: scrollable)
+      : scrollable;
   }
 }
 

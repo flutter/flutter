@@ -72,8 +72,8 @@ class DevFSFileContent extends DevFSContent {
     _fileStat = file.statSync();
     if (_fileStat.type == FileSystemEntityType.LINK) {
       // Resolve, stat, and maybe cache the symlink target.
-      String resolved = file.resolveSymbolicLinksSync();
-      FileSystemEntity linkTarget = fs.file(resolved);
+      final String resolved = file.resolveSymbolicLinksSync();
+      final FileSystemEntity linkTarget = fs.file(resolved);
       // Stat the link target.
       _fileStat = linkTarget.statSync();
       if (devFSConfig.cacheSymlinks) {
@@ -84,7 +84,7 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   bool get isModified {
-    FileStat _oldFileStat = _fileStat;
+    final FileStat _oldFileStat = _fileStat;
     _stat();
     return _oldFileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
@@ -121,7 +121,7 @@ class DevFSByteContent extends DevFSContent {
   /// Return `true` only once so that the content is written to the device only once.
   @override
   bool get isModified {
-    bool modified = _isModified;
+    final bool modified = _isModified;
     _isModified = false;
     return modified;
   }
@@ -160,8 +160,8 @@ class DevFSStringContent extends DevFSByteContent {
 abstract class DevFSOperations {
   Future<Uri> create(String fsName);
   Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content);
-  Future<dynamic> deleteFile(String fsName, String devicePath);
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri);
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
@@ -173,7 +173,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
 
   @override
   Future<Uri> create(String fsName) async {
-    Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
+    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
     return Uri.parse(response['uri']);
   }
 
@@ -186,30 +186,31 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
     List<int> bytes;
     try {
       bytes = await content.contentsAsBytes();
     } catch (e) {
       return e;
     }
-    String fileContents = BASE64.encode(bytes);
+    final String fileContents = BASE64.encode(bytes);
     try {
       return await vmService.vm.invokeRpcRaw(
         '_writeDevFSFile',
         params: <String, dynamic> {
           'fsName': fsName,
-          'path': devicePath,
+          // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
+          'path': deviceUri.toFilePath(windows: false),
           'fileContents': fileContents
         },
       );
     } catch (error) {
-      printTrace('DevFS: Failed to write $devicePath: $error');
+      printTrace('DevFS: Failed to write $deviceUri: $error');
     }
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, String devicePath) async {
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
     // TODO(johnmccutchan): Add file deletion to the devFS protocol.
   }
 }
@@ -225,18 +226,18 @@ class _DevFSHttpWriter {
   static const int kMaxRetries = 3;
 
   int _inFlight = 0;
-  Map<String, DevFSContent> _outstanding;
+  Map<Uri, DevFSContent> _outstanding;
   Completer<Null> _completer;
   HttpClient _client;
   int _done;
   int _max;
 
-  Future<Null> write(Map<String, DevFSContent> entries,
+  Future<Null> write(Map<Uri, DevFSContent> entries,
                      {DevFSProgressReporter progressReporter}) async {
     _client = new HttpClient();
     _client.maxConnectionsPerHost = kMaxInFlight;
     _completer = new Completer<Null>();
-    _outstanding = new Map<String, DevFSContent>.from(entries);
+    _outstanding = new Map<Uri, DevFSContent>.from(entries);
     _done = 0;
     _max = _outstanding.length;
     _scheduleWrites(progressReporter);
@@ -246,40 +247,41 @@ class _DevFSHttpWriter {
 
   void _scheduleWrites(DevFSProgressReporter progressReporter) {
     while (_inFlight < kMaxInFlight) {
-      if (_outstanding.length == 0) {
+      if (_outstanding.isEmpty) {
         // Finished.
         break;
       }
-      String devicePath = _outstanding.keys.first;
-      DevFSContent content = _outstanding.remove(devicePath);
-      _scheduleWrite(devicePath, content, progressReporter);
+      final Uri deviceUri = _outstanding.keys.first;
+      final DevFSContent content = _outstanding.remove(deviceUri);
+      _scheduleWrite(deviceUri, content, progressReporter);
       _inFlight++;
     }
   }
 
   Future<Null> _scheduleWrite(
-    String devicePath,
+    Uri deviceUri,
     DevFSContent content,
     DevFSProgressReporter progressReporter, [
     int retry = 0,
   ]) async {
     try {
-      HttpClientRequest request = await _client.putUrl(httpAddress);
+      final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
+      // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
       request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(devicePath)));
-      Stream<List<int>> contents = content.contentsAsCompressedStream();
+                          BASE64.encode(UTF8.encode(deviceUri.toFilePath(windows: false))));
+      final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
-      HttpClientResponse response = await request.close();
+      final HttpClientResponse response = await request.close();
       await response.drain<Null>();
     } catch (e) {
       if (retry < kMaxRetries) {
-        printTrace('Retrying writing "$devicePath" to DevFS due to error: $e');
-        _scheduleWrite(devicePath, content, progressReporter, retry + 1);
+        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
+        _scheduleWrite(deviceUri, content, progressReporter, retry + 1);
         return;
       } else {
-        printError('Error writing "$devicePath" to DevFS: $e');
+        printError('Error writing "$deviceUri" to DevFS: $e');
       }
     }
     if (progressReporter != null) {
@@ -287,7 +289,7 @@ class _DevFSHttpWriter {
       progressReporter(_done, _max);
     }
     _inFlight--;
-    if ((_outstanding.length == 0) && (_inFlight == 0)) {
+    if ((_outstanding.isEmpty) && (_inFlight == 0)) {
       _completer.complete(null);
     } else {
       _scheduleWrites(progressReporter);
@@ -324,7 +326,7 @@ class DevFS {
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
-  final Map<String, DevFSContent> _entries = <String, DevFSContent>{};
+  final Map<Uri, DevFSContent> _entries = <Uri, DevFSContent>{};
   final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
@@ -373,17 +375,17 @@ class DevFS {
 
     // Handle deletions.
     printTrace('Scanning for deleted files');
-    String assetBuildDirPrefix = getAssetBuildDirectory() + fs.path.separator;
-    final List<String> toRemove = new List<String>();
-    _entries.forEach((String devicePath, DevFSContent content) {
+    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
+    final List<Uri> toRemove = new List<Uri>();
+    _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
-        Future<Map<String, dynamic>> operation =
-            _operations.deleteFile(fsName, devicePath);
+        final Future<Map<String, dynamic>> operation =
+            _operations.deleteFile(fsName, deviceUri);
         if (operation != null)
           _pendingOperations.add(operation);
-        toRemove.add(devicePath);
-        if (devicePath.startsWith(assetBuildDirPrefix)) {
-          String archivePath = devicePath.substring(assetBuildDirPrefix.length);
+        toRemove.add(deviceUri);
+        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+          final String archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
           assetPathsToEvict.add(archivePath);
         }
       }
@@ -397,19 +399,19 @@ class DevFS {
 
     // Update modified files
     int numBytes = 0;
-    Map<String, DevFSContent> dirtyEntries = <String, DevFSContent>{};
-    _entries.forEach((String devicePath, DevFSContent content) {
+    final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
+    _entries.forEach((Uri deviceUri, DevFSContent content) {
       String archivePath;
-      if (devicePath.startsWith(assetBuildDirPrefix))
-        archivePath = devicePath.substring(assetBuildDirPrefix.length);
+      if (deviceUri.path.startsWith(assetBuildDirPrefix))
+        archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
       if (content.isModified || (bundleDirty && archivePath != null)) {
-        dirtyEntries[devicePath] = content;
+        dirtyEntries[deviceUri] = content;
         numBytes += content.size;
         if (archivePath != null)
           assetPathsToEvict.add(archivePath);
       }
     });
-    if (dirtyEntries.length > 0) {
+    if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
       if (_httpWriter != null) {
         try {
@@ -420,9 +422,9 @@ class DevFS {
         }
       } else {
         // Make service protocol requests for each.
-        dirtyEntries.forEach((String devicePath, DevFSContent content) {
-          Future<Map<String, dynamic>> operation =
-              _operations.writeFile(fsName, devicePath, content);
+        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
+          final Future<Map<String, dynamic>> operation =
+              _operations.writeFile(fsName, deviceUri, content);
           if (operation != null)
             _pendingOperations.add(operation);
         });
@@ -446,44 +448,47 @@ class DevFS {
     return numBytes;
   }
 
-  void _scanFile(String devicePath, FileSystemEntity file) {
-    DevFSContent content = _entries.putIfAbsent(devicePath, () => new DevFSFileContent(file));
+  void _scanFile(Uri deviceUri, FileSystemEntity file) {
+    final DevFSContent content = _entries.putIfAbsent(deviceUri, () => new DevFSFileContent(file));
     content._exists = true;
   }
 
   void _scanBundleEntry(String archivePath, DevFSContent content, bool bundleDirty) {
     // We write the assets into the AssetBundle working dir so that they
     // are in the same location in DevFS and the iOS simulator.
-    final String devicePath = fs.path.join(getAssetBuildDirectory(), archivePath);
+    final Uri deviceUri = fs.path.toUri(fs.path.join(getAssetBuildDirectory(), archivePath));
 
-    _entries[devicePath] = content;
+    _entries[deviceUri] = content;
     content._exists = true;
   }
 
-  bool _shouldIgnore(String devicePath) {
-    List<String> ignoredPrefixes = <String>['android' + fs.path.separator,
-                                            getBuildDirectory(),
-                                            'ios' + fs.path.separator,
-                                            '.pub' + fs.path.separator];
-    for (String ignoredPrefix in ignoredPrefixes) {
-      if (devicePath.startsWith(ignoredPrefix))
+  bool _shouldIgnore(Uri deviceUri) {
+    final List<String> ignoredUriPrefixes = <String>['android/',
+                                               _asUriPath(getBuildDirectory()),
+                                               'ios/',
+                                               '.pub/'];
+    for (String ignoredUriPrefix in ignoredUriPrefixes) {
+      if (deviceUri.path.startsWith(ignoredUriPrefix))
         return true;
     }
     return false;
   }
 
   Future<bool> _scanDirectory(Directory directory,
-                              {String directoryNameOnDevice,
+                              {Uri directoryUriOnDevice,
                                bool recursive: false,
                                bool ignoreDotFiles: true,
                                Set<String> fileFilter}) async {
-    if (directoryNameOnDevice == null) {
-      directoryNameOnDevice = fs.path.relative(directory.path, from: rootDirectory.path);
-      if (directoryNameOnDevice == '.')
-        directoryNameOnDevice = '';
+    if (directoryUriOnDevice == null) {
+      final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
+      if (relativeRootPath == '.') {
+        directoryUriOnDevice = new Uri();
+      } else {
+        directoryUriOnDevice = fs.path.toUri(relativeRootPath);
+      }
     }
     try {
-      Stream<FileSystemEntity> files =
+      final Stream<FileSystemEntity> files =
           directory.list(recursive: recursive, followLinks: false);
       await for (FileSystemEntity file in files) {
         if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
@@ -506,17 +511,18 @@ class DevFS {
         }
         final String relativePath =
             fs.path.relative(file.path, from: directory.path);
-        final String devicePath = fs.path.join(directoryNameOnDevice, relativePath);
-        if ((fileFilter != null) && !fileFilter.contains(file.absolute.path)) {
+        final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
+        final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
+        if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
           // Skip files that are not included in the filter.
           continue;
         }
-        if (ignoreDotFiles && devicePath.startsWith('.')) {
+        if (ignoreDotFiles && deviceUri.path.startsWith('.')) {
           // Skip directories that start with a dot.
           continue;
         }
-        if (!_shouldIgnore(devicePath))
-          _scanFile(devicePath, file);
+        if (!_shouldIgnore(deviceUri))
+          _scanFile(deviceUri, file);
       }
     } catch (e) {
       // Ignore directory and error.
@@ -527,38 +533,42 @@ class DevFS {
 
   Future<Null> _scanPackages(Set<String> fileFilter) async {
     StringBuffer sb;
-    PackageMap packageMap = new PackageMap(_packagesFilePath);
+    final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
     for (String packageName in packageMap.map.keys) {
-      Uri packageUri = packageMap.map[packageName];
-      String packagePath = fs.path.fromUri(packageUri);
-      Directory packageDirectory = fs.directory(packageUri);
-      String directoryNameOnDevice = fs.path.join('packages', packageName);
+      final Uri packageUri = packageMap.map[packageName];
+      final String packagePath = packageUri.toFilePath();
+      final Directory packageDirectory = fs.directory(packageUri);
+      Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
       bool packageExists;
 
       if (fs.path.isWithin(rootDirectory.path, packagePath)) {
         // We already scanned everything under the root directory.
         packageExists = packageDirectory.existsSync();
-        directoryNameOnDevice = fs.path.relative(packagePath, from: rootDirectory.path);
+        directoryUriOnDevice = fs.path.toUri(
+            fs.path.relative(packagePath, from: rootDirectory.path) + fs.path.separator
+        );
       } else {
         packageExists =
             await _scanDirectory(packageDirectory,
-                                 directoryNameOnDevice: directoryNameOnDevice,
+                                 directoryUriOnDevice: directoryUriOnDevice,
                                  recursive: true,
                                  fileFilter: fileFilter);
       }
       if (packageExists) {
         sb ??= new StringBuffer();
-        sb.writeln('$packageName:$directoryNameOnDevice');
+        sb.writeln('$packageName:$directoryUriOnDevice');
       }
     }
     if (sb != null) {
-      DevFSContent content = _entries['.packages'];
+      final DevFSContent content = _entries[fs.path.toUri('.packages')];
       if (content is DevFSStringContent && content.string == sb.toString()) {
         content._exists = true;
         return;
       }
-      _entries['.packages'] = new DevFSStringContent(sb.toString());
+      _entries[fs.path.toUri('.packages')] = new DevFSStringContent(sb.toString());
     }
   }
 }
+/// Converts a platform-specific file path to a platform-independent Uri path.
+String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';

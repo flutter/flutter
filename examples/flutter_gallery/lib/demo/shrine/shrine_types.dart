@@ -54,7 +54,7 @@ class Product {
       description != null &&
       imageAsset != null &&
       categories != null &&
-      categories.length > 0 &&
+      categories.isNotEmpty &&
       price != null &&
       vendor.isValid();
   }

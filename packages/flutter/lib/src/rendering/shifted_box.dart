@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -156,7 +158,7 @@ class RenderPadding extends RenderShiftedBox {
       ));
       return;
     }
-    BoxConstraints innerConstraints = constraints.deflate(padding);
+    final BoxConstraints innerConstraints = constraints.deflate(padding);
     child.layout(innerConstraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = new Offset(padding.left, padding.top);
@@ -323,7 +325,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         final BoxParentData childParentData = child.parentData;
         if (childParentData.offset.dy > 0.0) {
           // vertical alignment arrows
-          double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
           path
             ..moveTo(offset.dx + size.width / 2.0, offset.dy)
             ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
@@ -341,7 +343,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         }
         if (childParentData.offset.dx > 0.0) {
           // horizontal alignment arrows
-          double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
           path
             ..moveTo(offset.dx, offset.dy + size.height / 2.0)
             ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
@@ -612,14 +614,14 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double minWidth = constraints.minWidth;
     double maxWidth = constraints.maxWidth;
     if (_widthFactor != null) {
-      double width = maxWidth * _widthFactor;
+      final double width = maxWidth * _widthFactor;
       minWidth = width;
       maxWidth = width;
     }
     double minHeight = constraints.minHeight;
     double maxHeight = constraints.maxHeight;
     if (_heightFactor != null) {
-      double height = maxHeight * _heightFactor;
+      final double height = maxHeight * _heightFactor;
       minHeight = height;
       maxHeight = height;
     }
@@ -699,12 +701,37 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 }
 
 /// A delegate for computing the layout of a render object with a single child.
+///
+/// Used by [CustomSingleChildLayout] (in the widgets library) and
+/// [RenderCustomSingleChildLayoutBox] (in the rendering library).
+///
+/// When asked to layout, [CustomSingleChildLayout] first calls [getSize] with
+/// its incoming constraints to determine its size. It then calls
+/// [getConstraintsForChild] to determine the constraints to apply to the child.
+/// After the child completes its layout, [RenderCustomSingleChildLayoutBox]
+/// calls [getPositionForChild] to determine the child's position.
+///
+/// The [shouldRelayout] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The most efficient way to trigger a relayout is to supply a relayout
+/// argument to the constructor of the [SingleChildLayoutDelegate]. The custom
+/// object will listen to this value and relayout whenever the animation
+/// ticks, avoiding both the build phase of the pipeline.
+///
+/// See also:
+///
+///  * [CustomSingleChildLayout], the widget that uses this delegate.
+///  * [RenderCustomSingleChildLayoutBox], render object that uses this
+///    delegate.
 abstract class SingleChildLayoutDelegate {
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
-  const SingleChildLayoutDelegate();
+  /// Creates a layout delegate.
+  ///
+  /// The layout will update whenever [relayout] notifies its listeners.
+  const SingleChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
 
-  // TODO(abarth): This class should take a Listenable to drive relayout.
+  final Listenable _relayout;
 
   /// The size of this object given the incoming constraints.
   ///
@@ -777,9 +804,26 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    final SingleChildLayoutDelegate oldDelegate = _delegate;
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
       markNeedsLayout();
     _delegate = newDelegate;
+    if (attached) {
+      oldDelegate?._relayout?.removeListener(markNeedsLayout);
+      newDelegate?._relayout?.addListener(markNeedsLayout);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _delegate?._relayout?.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _delegate?._relayout?.removeListener(markNeedsLayout);
+    super.detach();
   }
 
   Size _getSize(BoxConstraints constraints) {
@@ -826,7 +870,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
-      BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+      final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;

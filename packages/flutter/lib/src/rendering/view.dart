@@ -148,9 +148,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void compositeFrame() {
     Timeline.startSync('Compositing');
     try {
-      ui.SceneBuilder builder = new ui.SceneBuilder();
+      final ui.SceneBuilder builder = new ui.SceneBuilder();
       layer.addToScene(builder, Offset.zero);
-      ui.Scene scene = builder.build();
+      final ui.Scene scene = builder.build();
       ui.window.render(scene);
       scene.dispose();
       assert(() {

@@ -24,7 +24,7 @@ class _MountainViewPageTransition extends AnimatedWidget {
     this.child,
   }) : super(
     key: key,
-    animation: _kTween.animate(new CurvedAnimation(
+    listenable: _kTween.animate(new CurvedAnimation(
       parent: animation, // The route's linear 0.0 - 1.0 animation.
       curve: Curves.fastOutSlowIn
     )
@@ -36,7 +36,7 @@ class _MountainViewPageTransition extends AnimatedWidget {
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
-      position: animation,
+      position: listenable,
       child: child
     );
   }
@@ -55,7 +55,7 @@ class _CupertinoPageTransition extends AnimatedWidget {
     this.child
   }) : super(
     key: key,
-    animation: _kTween.animate(new CurvedAnimation(
+    listenable: _kTween.animate(new CurvedAnimation(
       parent: animation,
       curve: new _CupertinoTransitionCurve(null)
     )
@@ -68,7 +68,7 @@ class _CupertinoPageTransition extends AnimatedWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: animation,
+      position: listenable,
       child: new Material(
         elevation: 6,
         child: child
@@ -250,7 +250,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    Widget result = builder(context);
+    final Widget result = builder(context);
     assert(() {
       if (result == null) {
         throw new FlutterError(

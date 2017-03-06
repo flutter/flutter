@@ -9,9 +9,9 @@ import '../rendering/src/solid_color_box.dart';
 
 // Solid colour, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex: 0 }) {
-  RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
+  final RenderSolidColorBox child = new RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  FlexParentData childParentData = child.parentData;
+  final FlexParentData childParentData = child.parentData;
   childParentData.flex = flex;
 }
 
@@ -80,7 +80,7 @@ RenderTransform transformBox;
 void rotate(Duration timeStamp) {
   if (timeBase == null)
     timeBase = timeStamp;
-  double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
+  final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
 
   transformBox.setIdentity();
   transformBox.rotateZ(delta);
@@ -89,17 +89,17 @@ void rotate(Duration timeStamp) {
 }
 
 void main() {
-  WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
-  RenderProxyBox proxy = new RenderProxyBox();
+  final WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
+  final RenderProxyBox proxy = new RenderProxyBox();
   attachWidgetTreeToRenderTree(proxy);
 
-  RenderFlex flexRoot = new RenderFlex(direction: Axis.vertical);
+  final RenderFlex flexRoot = new RenderFlex(direction: Axis.vertical);
   addFlexChildSolidColor(flexRoot, const Color(0xFFFF00FF), flex: 1);
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
   transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity(), alignment: FractionalOffset.center);
-  RenderPadding root = new RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
+  final RenderPadding root = new RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
   binding.renderView.child = root;
   binding.addPersistentFrameCallback(rotate);

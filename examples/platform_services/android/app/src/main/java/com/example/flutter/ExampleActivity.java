@@ -4,85 +4,43 @@
 
 package com.example.flutter;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationManager;
+import android.os.BatteryManager;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 
 import io.flutter.app.FlutterActivity;
-import io.flutter.view.FlutterMain;
-import io.flutter.view.FlutterView;
-
-import java.io.File;
-import org.json.JSONException;
-import org.json.JSONObject;
+import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.FlutterMethodChannel.Response;
+import io.flutter.plugin.common.MethodCall;
 
 public class ExampleActivity extends FlutterActivity {
-    private static final String TAG = "ExampleActivity";
-    private FlutterView flutterView;
+  private static final String CHANNEL = "battery";
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+  @Override
+  public void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
 
-        flutterView = getFlutterView();
-        flutterView.addOnMessageListener("getLocation",
-            new FlutterView.OnMessageListener() {
-                @Override
-                public String onMessage(FlutterView view, String message) {
-                    return onGetLocation(message);
-                }
-            });
-    }
-
-    private String onGetLocation(String json) {
-        String provider;
-        try {
-            JSONObject message = new JSONObject(json);
-            provider = message.getString("provider");
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
-        }
-
-        String locationProvider;
-        if (provider.equals("network")) {
-            locationProvider = LocationManager.NETWORK_PROVIDER;
-        } else if (provider.equals("gps")) {
-            locationProvider = LocationManager.GPS_PROVIDER;
-        } else {
-            return null;
-        }
-
-        String permission = "android.permission.ACCESS_FINE_LOCATION";
-        Location location = null;
-        if (checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
-            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            location = locationManager.getLastKnownLocation(locationProvider);
-        }
-
-        JSONObject reply = new JSONObject();
-        try {
-            if (location != null) {
-              reply.put("latitude", location.getLatitude());
-              reply.put("longitude", location.getLongitude());
+    new FlutterMethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(
+        new MethodCallHandler() {
+          @Override
+          public void onMethodCall(MethodCall call, Response response) {
+            if (call.method.equals("getBatteryLevel")) {
+              getBatteryLevel(response);
             } else {
-              reply.put("latitude", 0);
-              reply.put("longitude", 0);
+              throw new IllegalArgumentException("Unknown method " + call.method);
             }
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
-        }
+          }
+    });
+  }
 
-        return reply.toString();
+  private void getBatteryLevel(Response response) {
+    BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+      response.success(batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
+    } else {
+      response.error("Not available", "Battery level not available.", null);
     }
+  }
 }

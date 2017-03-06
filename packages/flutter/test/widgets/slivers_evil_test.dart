@@ -158,7 +158,7 @@ void main() {
         ),
       ),
     );
-    ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
     await tester.pump(const Duration(milliseconds: 10));

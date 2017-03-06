@@ -45,7 +45,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (!hasIosDeploy)
       return false;
     try {
-      Version version = new Version.parse(iosDeployVersionText);
+      final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
       return false;
@@ -54,7 +54,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
@@ -142,7 +142,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       } else {
         // Check for compatibility between libimobiledevice and Xcode.
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
-        ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+        final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
         if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(

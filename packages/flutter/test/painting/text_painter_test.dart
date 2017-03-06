@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test("TextPainter caret test", () {
-    TextPainter painter = new TextPainter();
+    final TextPainter painter = new TextPainter();
 
     String text = 'A';
     painter.text = new TextSpan(text: text);
@@ -30,7 +30,7 @@ void main() {
   }, skip: io.Platform.isMacOS); // TODO(goderbauer): Disabled because of https://github.com/flutter/flutter/issues/4273
 
   test("TextPainter error test", () {
-    TextPainter painter = new TextPainter();
+    final TextPainter painter = new TextPainter();
     expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
   });
 }

@@ -126,7 +126,7 @@ class RenderParagraph extends RenderBox {
   }
 
   void _layoutText({ double minWidth: 0.0, double maxWidth: double.INFINITY }) {
-    bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
+    final bool wrap = _softWrap || (_overflow == TextOverflow.ellipsis && maxLines == null);
     _textPainter.layout(minWidth: minWidth, maxWidth: wrap ? maxWidth : double.INFINITY);
   }
 
@@ -179,9 +179,9 @@ class RenderParagraph extends RenderBox {
     if (event is! PointerDownEvent)
       return;
     _layoutTextWithConstraints(constraints);
-    Offset offset = entry.localPosition.toOffset();
-    TextPosition position = _textPainter.getPositionForOffset(offset);
-    TextSpan span = _textPainter.text.getSpanForPosition(position);
+    final Offset offset = entry.localPosition.toOffset();
+    final TextPosition position = _textPainter.getPositionForOffset(offset);
+    final TextSpan span = _textPainter.text.getSpanForPosition(position);
     span?.recognizer?.addPointer(event);
   }
 
@@ -212,7 +212,7 @@ class RenderParagraph extends RenderBox {
           _overflowShader = null;
           break;
         case TextOverflow.fade:
-          TextPainter fadeSizePainter = new TextPainter(
+          final TextPainter fadeSizePainter = new TextPainter(
             text: new TextSpan(style: _textPainter.text.style, text: '\u2026'),
             textScaleFactor: textScaleFactor
           )..layout();
@@ -256,7 +256,7 @@ class RenderParagraph extends RenderBox {
 
     assert(() {
       if (debugRepaintTextRainbowEnabled) {
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
           ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(offset & size, paint);
       }
@@ -275,7 +275,7 @@ class RenderParagraph extends RenderBox {
     if (_hasVisualOverflow) {
       if (_overflowShader != null) {
         canvas.translate(offset.dx, offset.dy);
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
         canvas.drawRect(Point.origin & size, paint);

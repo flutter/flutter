@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    Widget widget = new FadeTransition(
+    final Widget widget = new FadeTransition(
       opacity: kAlwaysCompleteAnimation,
       child: new Text('Ready'),
     );

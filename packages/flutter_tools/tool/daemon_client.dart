@@ -28,7 +28,7 @@ Future<Null> main() async {
 
   stdout.write('> ');
   stdin.transform(UTF8.decoder).transform(const LineSplitter()).listen((String line) {
-    List<String> words = line.split(' ');
+    final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {
       _send(<String, dynamic>{'method': 'daemon.version'});
@@ -80,7 +80,7 @@ int id = 0;
 
 void _send(Map<String, dynamic> map) {
   map['id'] = id++;
-  String str = '[${JSON.encode(map)}]';
+  final String str = '[${JSON.encode(map)}]';
   daemon.stdin.writeln(str);
   print('==> $str');
 }

@@ -112,7 +112,7 @@ class _TabStyle extends AnimatedWidget {
     this.labelStyle,
     this.unselectedLabelStyle,
     @required this.child,
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
   final TextStyle labelStyle;
   final TextStyle unselectedLabelStyle;
@@ -131,6 +131,7 @@ class _TabStyle extends AnimatedWidget {
       : defaultUnselectedStyle;
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Animation<double> animation = listenable;
     final Color color = selected
       ? Color.lerp(unselectedColor, selectedColor, animation.value)
       : Color.lerp(selectedColor, unselectedColor, animation.value);
@@ -430,7 +431,7 @@ class _TabBarState extends State<TabBar> {
   int _currentIndex;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 
@@ -675,7 +676,7 @@ class _TabBarViewState extends State<TabBarView> {
   int _warpUnderwayCount = 0;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 

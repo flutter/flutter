@@ -43,15 +43,15 @@ class Version implements Comparable<Version> {
 
   /// Creates a new [Version] by parsing [text].
   factory Version.parse(String text) {
-    Match match = versionPattern.firstMatch(text);
+    final Match match = versionPattern.firstMatch(text);
     if (match == null) {
       return null;
     }
 
     try {
-      int major = int.parse(match[1] ?? '0');
-      int minor = int.parse(match[3] ?? '0');
-      int patch = int.parse(match[5] ?? '0');
+      final int major = int.parse(match[1] ?? '0');
+      final int minor = int.parse(match[3] ?? '0');
+      final int patch = int.parse(match[5] ?? '0');
       return new Version._(major, minor, patch, text);
     } on FormatException {
       return null;

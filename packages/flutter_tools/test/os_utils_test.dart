@@ -22,13 +22,13 @@ void main() {
     });
 
     testUsingContext('makeExecutable', () async {
-      File file = fs.file(fs.path.join(temp.path, 'foo.script'));
+      final File file = fs.file(fs.path.join(temp.path, 'foo.script'));
       file.writeAsStringSync('hello world');
       os.makeExecutable(file);
 
       // Skip this test on windows.
       if (!platform.isWindows) {
-        String mode = file.statSync().modeString();
+        final String mode = file.statSync().modeString();
         // rwxr--r--
         expect(mode.substring(0, 3), endsWith('x'));
       }

@@ -561,7 +561,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         library: 'widgets library',
         context: 'attaching to the render tree'
       ));
-      Widget error = new ErrorWidget(exception);
+      final Widget error = new ErrorWidget(exception);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }

@@ -7,8 +7,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('setState() overbuild test', (WidgetTester tester) async {
-    List<String> log = <String>[];
-    Builder inner = new Builder(
+    final List<String> log = <String>[];
+    final Builder inner = new Builder(
       builder: (BuildContext context) {
         log.add('inner');
         return new Text('inner');

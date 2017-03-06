@@ -43,9 +43,9 @@ class TestDataSource extends DataTableSource {
 
 void main() {
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
-    TestDataSource source = new TestDataSource();
+    final TestDataSource source = new TestDataSource();
 
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new MaterialApp(
       home: new PaginatedDataTable(
@@ -109,7 +109,7 @@ void main() {
     TestDataSource source = new TestDataSource()
       ..generation = 42;
 
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     Widget buildTable(TestDataSource source) {
       return new PaginatedDataTable(
@@ -172,7 +172,7 @@ void main() {
     expect(find.text('43'), findsNothing);
     expect(find.text('15'), findsNWidgets(10));
 
-    PaginatedDataTableState state = tester.state(find.byType(PaginatedDataTable));
+    final PaginatedDataTableState state = tester.state(find.byType(PaginatedDataTable));
 
     expect(log, isEmpty);
     state.pageTo(23);

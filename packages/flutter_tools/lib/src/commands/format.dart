@@ -36,9 +36,9 @@ class FormatCommand extends FlutterCommand {
       );
     }
 
-    String dartfmt = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartfmt');
-    List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
-    int result = await runCommandAndStreamOutput(cmd);
+    final String dartfmt = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartfmt');
+    final List<String> cmd = <String>[dartfmt, '-w']..addAll(argResults.rest);
+    final int result = await runCommandAndStreamOutput(cmd);
     if (result != 0)
       throwToolExit('Formatting failed: $result', exitCode: result);
   }

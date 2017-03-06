@@ -12,7 +12,7 @@ void main() {
   test("RenderBaseline", () {
     RenderBaseline parent;
     RenderSizedBox child;
-    RenderBox root = new RenderPositionedBox(
+    final RenderBox root = new RenderPositionedBox(
       alignment: FractionalOffset.topLeft,
       child: parent = new RenderBaseline(
         baseline: 0.0,
@@ -20,7 +20,7 @@ void main() {
         child: child = new RenderSizedBox(const Size(100.0, 100.0))
       )
     );
-    BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child.parentData;
 
     layout(root, phase: EnginePhase.layout);
     expect(childParentData.offset.dx, equals(0.0));

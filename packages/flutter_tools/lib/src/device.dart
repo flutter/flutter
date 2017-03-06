@@ -42,8 +42,8 @@ class DeviceManager {
   /// This does a case insentitive compare with [deviceId].
   Future<List<Device>> getDevicesById(String deviceId) async {
     deviceId = deviceId.toLowerCase();
-    List<Device> devices = await getAllConnectedDevices();
-    Device device = devices.firstWhere(
+    final List<Device> devices = await getAllConnectedDevices();
+    final Device device = devices.firstWhere(
         (Device device) =>
             device.id.toLowerCase() == deviceId ||
             device.name.toLowerCase() == deviceId,
@@ -250,11 +250,11 @@ abstract class Device {
       return <String>[];
 
     // Extract device information
-    List<List<String>> table = <List<String>>[];
+    final List<List<String>> table = <List<String>>[];
     for (Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       if (device.isLocalEmulator) {
-        String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -266,7 +266,7 @@ abstract class Device {
     }
 
     // Calculate column widths
-    List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices = new List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map((int i) => 0).toList();
     for (List<String> row in table) {
       widths = indices.map((int i) => math.max(widths[i], row[i].length)).toList();
@@ -336,7 +336,7 @@ class LaunchResult {
 
   @override
   String toString() {
-    StringBuffer buf = new StringBuffer('started=$started');
+    final StringBuffer buf = new StringBuffer('started=$started');
     if (observatoryUri != null)
       buf.write(', observatory=$observatoryUri');
     if (diagnosticUri != null)

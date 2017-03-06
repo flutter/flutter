@@ -90,7 +90,7 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    MediaQueryData typedOther = other;
+    final MediaQueryData typedOther = other;
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
@@ -145,7 +145,7 @@ class MediaQuery extends InheritedWidget {
   /// MediaQueryData media = MediaQuery.of(context);
   /// ```
   static MediaQueryData of(BuildContext context) {
-    MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
     return query?.data ?? new MediaQueryData.fromWindow(ui.window);
   }
 

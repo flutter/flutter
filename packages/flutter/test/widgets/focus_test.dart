@@ -19,7 +19,7 @@ class TestFocusable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool focused = Focus.at(context, autofocus: autofocus);
+    final bool focused = Focus.at(context, autofocus: autofocus);
     return new GestureDetector(
       onTap: () { Focus.moveTo(key); },
       child: new Text(focused ? yes : no)
@@ -29,9 +29,9 @@ class TestFocusable extends StatelessWidget {
 
 void main() {
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
-    GlobalKey keyFocus = new GlobalKey();
-    GlobalKey keyA = new GlobalKey();
-    GlobalKey keyB = new GlobalKey();
+    final GlobalKey keyFocus = new GlobalKey();
+    final GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyB = new GlobalKey();
     await tester.pumpWidget(
       new Focus(
         key: keyFocus,
@@ -82,8 +82,8 @@ void main() {
   });
 
   testWidgets('Can blur', (WidgetTester tester) async {
-    GlobalKey keyFocus = new GlobalKey();
-    GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyFocus = new GlobalKey();
+    final GlobalKey keyA = new GlobalKey();
     await tester.pumpWidget(
       new Focus(
         key: keyFocus,
@@ -113,9 +113,9 @@ void main() {
   });
 
   testWidgets('Can move focus to scope', (WidgetTester tester) async {
-    GlobalKey keyParentFocus = new GlobalKey();
-    GlobalKey keyChildFocus = new GlobalKey();
-    GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyParentFocus = new GlobalKey();
+    final GlobalKey keyChildFocus = new GlobalKey();
+    final GlobalKey keyA = new GlobalKey();
     await tester.pumpWidget(
       new Focus(
         key: keyParentFocus,

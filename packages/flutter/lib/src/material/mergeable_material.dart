@@ -239,7 +239,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   void _removeChild(int index) {
-    MergeableMaterialItem child = _children.removeAt(index);
+    final MergeableMaterialItem child = _children.removeAt(index);
 
     if (child is MaterialGap)
       _animationTuples[child.key] = null;
@@ -316,7 +316,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
               while (startOld < j) {
                 if (_children[startOld] is MaterialGap) {
-                  MaterialGap gap = _children[startOld];
+                  final MaterialGap gap = _children[startOld];
                   gapSizeSum += gap.size;
                 }
 
@@ -357,7 +357,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
               for (int k = startNew; k < i; k += 1) {
                 if (newChildren[k] is MaterialGap) {
-                  MaterialGap gap = newChildren[k];
+                  final MaterialGap gap = newChildren[k];
                   gapSizeSum += gap.size;
                 }
               }
@@ -366,7 +366,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               // animate to their actual size.
               for (int k = startNew; k < i; k += 1) {
                 if (newChildren[k] is MaterialGap) {
-                  MaterialGap gap = newChildren[k];
+                  final MaterialGap gap = newChildren[k];
 
                   _animationTuples[gap.key].gapStart = gapSize * gap.size /
                       gapSizeSum;
@@ -382,7 +382,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               _insertChild(startOld + k, newChildren[startNew + k]);
 
               if (newChildren[startNew + k] is MaterialGap) {
-                MaterialGap gap = newChildren[startNew + k];
+                final MaterialGap gap = newChildren[startNew + k];
                 _animationTuples[gap.key].controller.forward();
               }
             }
@@ -397,7 +397,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
             while (startOld < j) {
               if (_children[startOld] is MaterialGap) {
-                MaterialGap gap = _children[startOld];
+                final MaterialGap gap = _children[startOld];
                 gapSizeSum += gap.size;
               }
 
@@ -406,7 +406,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             }
 
             if (gapSizeSum != 0.0) {
-              MaterialGap gap = new MaterialGap(
+              final MaterialGap gap = new MaterialGap(
                 key: new UniqueKey(),
                 size: gapSizeSum
               );
@@ -420,7 +420,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             }
           } else if (oldLength == 1) {
             // Shrink gap.
-            MaterialGap gap = _children[startOld];
+            final MaterialGap gap = _children[startOld];
             _animationTuples[gap.key].gapStart = 0.0;
             _animationTuples[gap.key].controller.reverse();
           }
@@ -487,7 +487,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   double _getGapSize(int index) {
-    MaterialGap gap = _children[index];
+    final MaterialGap gap = _children[index];
 
     return lerpDouble(
       _animationTuples[gap.key].gapStart,
@@ -537,7 +537,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
           )
         );
       } else {
-        MaterialSlice slice = _children[i];
+        final MaterialSlice slice = _children[i];
         Widget child = slice.child;
 
         if (config.hasDividers) {
@@ -656,7 +656,7 @@ class _MergeableMaterialBlockBody extends BlockBody {
 
   @override
   void updateRenderObject(BuildContext context, RenderBlock renderObject) {
-    _MergeableMaterialRenderBlock materialRenderBlock = renderObject;
+    final _MergeableMaterialRenderBlock materialRenderBlock = renderObject;
     materialRenderBlock
       ..mainAxis = mainAxis
       ..boxShadows = boxShadows;

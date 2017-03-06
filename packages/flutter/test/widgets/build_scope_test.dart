@@ -130,7 +130,7 @@ class Wrapper extends StatelessWidget {
 
 void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) async {
-    GlobalKey flipKey = new GlobalKey();
+    final GlobalKey flipKey = new GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
     await tester.pumpWidget(new ProbeWidget());
     expect(ProbeWidgetState.buildCount, equals(1));
@@ -142,11 +142,11 @@ void main() {
       right: new ProbeWidget()
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
-    FlipWidgetState flipState1 = flipKey.currentState;
+    final FlipWidgetState flipState1 = flipKey.currentState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    FlipWidgetState flipState2 = flipKey.currentState;
+    final FlipWidgetState flipState2 = flipKey.currentState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
@@ -168,15 +168,15 @@ void main() {
   });
 
   testWidgets('Dirty element list sort order', (WidgetTester tester) async {
-    GlobalKey key1 = new GlobalKey(debugLabel: 'key1');
-    GlobalKey key2 = new GlobalKey(debugLabel: 'key2');
+    final GlobalKey key1 = new GlobalKey(debugLabel: 'key1');
+    final GlobalKey key2 = new GlobalKey(debugLabel: 'key2');
 
     bool didMiddle = false;
     Widget middle;
-    List<StateSetter> setStates = <StateSetter>[];
+    final List<StateSetter> setStates = <StateSetter>[];
     Widget builder(BuildContext context, StateSetter setState) {
       setStates.add(setState);
-      bool returnMiddle = !didMiddle;
+      final bool returnMiddle = !didMiddle;
       didMiddle = true;
       return new Wrapper(
         child: new Wrapper(
@@ -186,7 +186,7 @@ void main() {
         ),
       );
     }
-    Widget part1 = new Wrapper(
+    final Widget part1 = new Wrapper(
       child: new KeyedSubtree(
         key: key1,
         child: new StatefulBuilder(
@@ -194,7 +194,7 @@ void main() {
         ),
       ),
     );
-    Widget part2 = new Wrapper(
+    final Widget part2 = new Wrapper(
       child: new KeyedSubtree(
         key: key2,
         child: new StatefulBuilder(

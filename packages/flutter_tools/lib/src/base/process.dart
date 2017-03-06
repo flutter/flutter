@@ -69,8 +69,8 @@ Future<Null> runShutdownHooks() async {
   _shutdownHooksRunning = true;
   try {
     for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
-      List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
-      List<Future<dynamic>> futures = <Future<dynamic>>[];
+      final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
+      final List<Future<dynamic>> futures = <Future<dynamic>>[];
       for (ShutdownHook shutdownHook in hooks)
         futures.add(shutdownHook());
       await Future.wait<dynamic>(futures);
@@ -100,7 +100,7 @@ Future<Process> runCommand(List<String> cmd, {
   Map<String, String> environment
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  Process process = await processManager.start(
+  final Process process = await processManager.start(
     cmd,
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter, environment)
@@ -119,13 +119,13 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
   StringConverter mapFunction,
   Map<String, String> environment
 }) async {
-  Process process = await runCommand(
+  final Process process = await runCommand(
     cmd,
     workingDirectory: workingDirectory,
     allowReentrantFlutter: allowReentrantFlutter,
     environment: environment
   );
-  StreamSubscription<String> subscription = process.stdout
+  final StreamSubscription<String> subscription = process.stdout
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
     .where((String line) => filter == null ? true : filter.hasMatch(line))
@@ -133,7 +133,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
       if (mapFunction != null)
         line = mapFunction(line);
       if (line != null) {
-        String message = '$prefix$line';
+        final String message = '$prefix$line';
         if (trace)
           printTrace(message);
         else
@@ -160,7 +160,7 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 }
 
 Future<Null> runAndKill(List<String> cmd, Duration timeout) {
-  Future<Process> proc = runDetached(cmd);
+  final Future<Process> proc = runDetached(cmd);
   return new Future<Null>.delayed(timeout, () async {
     printTrace('Intentionally killing ${cmd[0]}');
     processManager.killPid((await proc).pid);
@@ -169,7 +169,7 @@ Future<Null> runAndKill(List<String> cmd, Duration timeout) {
 
 Future<Process> runDetached(List<String> cmd) {
   _traceCommand(cmd);
-  Future<Process> proc = processManager.start(
+  final Future<Process> proc = processManager.start(
     cmd,
     mode: ProcessStartMode.DETACHED,
   );
@@ -181,12 +181,12 @@ Future<RunResult> runAsync(List<String> cmd, {
   bool allowReentrantFlutter: false
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  ProcessResult results = await processManager.run(
+  final ProcessResult results = await processManager.run(
     cmd,
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter),
   );
-  RunResult runResults = new RunResult(results);
+  final RunResult runResults = new RunResult(results);
   printTrace(runResults.toString());
   return runResults;
 }
@@ -241,7 +241,7 @@ String runSync(List<String> cmd, {
 }
 
 void _traceCommand(List<String> args, { String workingDirectory }) {
-  String argsText = args.join(' ');
+  final String argsText = args.join(' ');
   if (workingDirectory == null)
     printTrace(argsText);
   else
@@ -257,7 +257,7 @@ String _runWithLoggingSync(List<String> cmd, {
   bool hideStdout: false,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
-  ProcessResult results = processManager.runSync(
+  final ProcessResult results = processManager.runSync(
     cmd,
     workingDirectory: workingDirectory,
     environment: _environment(allowReentrantFlutter),
@@ -312,7 +312,7 @@ class RunResult {
 
   @override
   String toString() {
-    StringBuffer out = new StringBuffer();
+    final StringBuffer out = new StringBuffer();
     if (processResult.stdout.isNotEmpty)
       out.writeln(processResult.stdout);
     if (processResult.stderr.isNotEmpty)

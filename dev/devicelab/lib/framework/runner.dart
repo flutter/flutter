@@ -23,13 +23,13 @@ const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 11);
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
 Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) async {
-  String taskExecutable = 'bin/tasks/$taskName.dart';
+  final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
     throw 'Executable Dart file not found: $taskExecutable';
 
-  int vmServicePort = await findAvailablePort();
-  Process runner = await startProcess(dartBin, <String>[
+  final int vmServicePort = await findAvailablePort();
+  final Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=$vmServicePort',
     '--no-pause-isolates-on-exit',
     taskExecutable,
@@ -41,7 +41,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
     runnerFinished = true;
   });
 
-  StreamSubscription<String> stdoutSub = runner.stdout
+  final StreamSubscription<String> stdoutSub = runner.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
@@ -50,7 +50,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
     }
   });
 
-  StreamSubscription<String> stderrSub = runner.stderr
+  final StreamSubscription<String> stderrSub = runner.stderr
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
@@ -59,9 +59,9 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 
   String waitingFor = 'connection';
   try {
-    VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(vmServicePort);
     waitingFor = 'task completion';
-    Map<String, dynamic> taskResult =
+    final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
     waitingFor = 'task process to exit';
     await runner.exitCode.timeout(const Duration(seconds: 1));
@@ -81,8 +81,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent: false }) as
 }
 
 Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
-  String url = 'ws://localhost:$vmServicePort/ws';
-  DateTime started = new DateTime.now();
+  final String url = 'ws://localhost:$vmServicePort/ws';
+  final DateTime started = new DateTime.now();
 
   // TODO(yjbanov): due to lack of imagination at the moment the handshake with
   //                the task process is very rudimentary and requires this small
@@ -97,10 +97,10 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       await (await WebSocket.connect(url)).close();
 
       // Look up the isolate.
-      VMServiceClient client = new VMServiceClient.connect(url);
-      VM vm = await client.getVM();
-      VMIsolateRef isolate = vm.isolates.single;
-      String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
+      final VMServiceClient client = new VMServiceClient.connect(url);
+      final VM vm = await client.getVM();
+      final VMIsolateRef isolate = vm.isolates.single;
+      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
       if (response != 'ready') throw 'not ready yet';
       return isolate;
     } catch (error) {

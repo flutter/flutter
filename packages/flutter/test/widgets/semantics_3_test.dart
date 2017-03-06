@@ -12,7 +12,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 3', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     // implicit annotators
     await tester.pumpWidget(

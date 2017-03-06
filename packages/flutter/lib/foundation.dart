@@ -24,4 +24,5 @@ export 'src/foundation/licenses.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
+export 'src/foundation/serialization.dart';
 export 'src/foundation/synchronous_future.dart';

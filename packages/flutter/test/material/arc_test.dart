@@ -7,12 +7,12 @@ import 'package:flutter/material.dart';
 
 void main() {
   test('MaterialPointArcTween control test', () {
-    MaterialPointArcTween a = new MaterialPointArcTween(
+    final MaterialPointArcTween a = new MaterialPointArcTween(
       begin: Point.origin,
       end: const Point(0.0, 10.0)
     );
 
-    MaterialPointArcTween b = new MaterialPointArcTween(
+    final MaterialPointArcTween b = new MaterialPointArcTween(
       begin: Point.origin,
       end: const Point(0.0, 10.0)
     );
@@ -23,12 +23,12 @@ void main() {
   });
 
   test('MaterialRectArcTween control test', () {
-    MaterialRectArcTween a = new MaterialRectArcTween(
+    final MaterialRectArcTween a = new MaterialRectArcTween(
       begin: new Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
       end: new Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
     );
 
-    MaterialRectArcTween b = new MaterialRectArcTween(
+    final MaterialRectArcTween b = new MaterialRectArcTween(
       begin: new Rect.fromLTWH(0.0, 0.0, 10.0, 10.0),
       end: new Rect.fromLTWH(0.0, 10.0, 10.0, 10.0)
     );

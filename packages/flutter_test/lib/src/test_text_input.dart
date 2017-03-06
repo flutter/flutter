@@ -44,11 +44,11 @@ class TestTextInput {
 
   void updateEditingState(TextEditingState state) {
     expect(_client, isNonZero);
-    String message = JSON.encode(<String, dynamic>{
+    final String message = JSON.encode(<String, dynamic>{
       'method': 'TextInputClient.updateEditingState',
       'args': <dynamic>[_client, state.toJSON()],
     });
-    Uint8List encoded = UTF8.encoder.convert(message);
+    final Uint8List encoded = UTF8.encoder.convert(message);
     PlatformMessages.handlePlatformMessage(
         _kTextInputClientChannel, encoded.buffer.asByteData(), (_) {});
   }

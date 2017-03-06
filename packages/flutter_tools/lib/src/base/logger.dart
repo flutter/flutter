@@ -116,18 +116,19 @@ class StdoutLogger extends Logger {
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
 /// the Windows console with alternative symbols.
 ///
-/// This exists because of https://github.com/dart-lang/sdk/issues/28571.
+/// By default, Windows uses either "Consolas" or "Lucida Console" as fonts to
+/// render text in the console. Both fonts only have a limited character set.
+/// Unicode characters, that are not available in either of the two default
+/// fonts, should be replaced by this class with printable symbols. Otherwise,
+/// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
     stdout.write(message
         .replaceAll('✗', 'X')
-        .replaceAll('✓', '+')
-        .replaceAll('•', '*')
+        .replaceAll('✓', '√')
     );
-    // TODO(goderbauer): find a way to replace all other non-printable characters
-    //     with the unrepresentable character symbol '�'
   }
 }
 
@@ -205,7 +206,7 @@ class VerboseLogger extends Logger {
     if (message.trim().isEmpty)
       return;
 
-    int millis = stopwatch.elapsedMilliseconds;
+    final int millis = stopwatch.elapsedMilliseconds;
     stopwatch.reset();
 
     String prefix;
@@ -219,8 +220,8 @@ class VerboseLogger extends Logger {
     }
     prefix = '[$prefix] ';
 
-    String indent = ''.padLeft(prefix.length);
-    String indentMessage = message.replaceAll('\n', '\n$indent');
+    final String indent = ''.padLeft(prefix.length);
+    final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
       stderr.writeln(prefix + terminal.bolden(indentMessage));
@@ -242,9 +243,10 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    // TODO(devoncarew): This detection does not work for Windows (https://github.com/dart-lang/sdk/issues/28614).
-    String term = platform.environment['TERM'];
-    supportsColor = term != null && term != 'dumb';
+    final String term = platform.environment['TERM'];
+    // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
+    final bool flutterAnsiTerm = platform.environment.containsKey('FLUTTER_ANSI_TERMINAL');
+    supportsColor = (term != null && term != 'dumb') || flutterAnsiTerm;
   }
 
   static const String KEY_F1  = '\u001BOP';
@@ -324,7 +326,7 @@ class _AnsiStatus extends Status {
     live = false;
 
     if (expectSlowOperation) {
-      double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+      final double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
       print('\b\b\b\b\b${secondsFormat.format(seconds).padLeft(4)}s');
     } else {
       print('\b\b\b\b\b${millisecondsFormat.format(stopwatch.elapsedMilliseconds).padLeft(3)}ms');

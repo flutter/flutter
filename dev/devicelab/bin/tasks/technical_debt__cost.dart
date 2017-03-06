@@ -39,7 +39,7 @@ const String _kBenchmarkKey = 'technical_debt_in_dollars';
 
 Future<Null> main() async {
   await task(() async {
-    Process git = await startProcess(
+    final Process git = await startProcess(
       'git',
       <String>['ls-files', '--full-name', flutterDirectory.path],
       workingDirectory: flutterDirectory.path,
@@ -47,7 +47,7 @@ Future<Null> main() async {
     double total = 0.0;
     await for (String entry in git.stdout.transform(UTF8.decoder).transform(const LineSplitter()))
       total += await findCostsForFile(new File(path.join(flutterDirectory.path, entry)));
-    int gitExitCode = await git.exitCode;
+    final int gitExitCode = await git.exitCode;
     if (gitExitCode != 0)
       throw new Exception('git exit with unexpected error code $gitExitCode');
     return new TaskResult.success(

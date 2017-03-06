@@ -40,7 +40,7 @@ void main() {
       )
     );
 
-    IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
+    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme));
     expect(iconTheme.data.color, equals(Colors.black26));
   });
 

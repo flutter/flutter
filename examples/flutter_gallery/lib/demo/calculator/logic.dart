@@ -139,7 +139,7 @@ class CalcExpression {
   /// in the calculator's display panel.
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer('');
+    final StringBuffer buffer = new StringBuffer('');
     buffer.writeAll(_list);
     return buffer.toString();
   }
@@ -162,12 +162,12 @@ class CalcExpression {
         newToken = new IntToken('-$digit');
         break;
       case ExpressionState.Number:
-        ExpressionToken last = outList.removeLast();
+        final ExpressionToken last = outList.removeLast();
         newToken = new IntToken('${last.stringRep}$digit');
         break;
       case ExpressionState.Point:
       case ExpressionState.NumberWithPoint:
-        ExpressionToken last = outList.removeLast();
+        final ExpressionToken last = outList.removeLast();
         newState = ExpressionState.NumberWithPoint;
         newToken = new FloatToken('${last.stringRep}$digit');
         break;
@@ -191,7 +191,7 @@ class CalcExpression {
         break;
       case ExpressionState.LeadingNeg:
       case ExpressionState.Number:
-        ExpressionToken last = outList.removeLast();
+        final ExpressionToken last = outList.removeLast();
         newToken = new FloatToken(last.stringRep + '.');
         break;
       case ExpressionState.Point:
@@ -282,14 +282,14 @@ class CalcExpression {
 
     // We make a copy of _list because CalcExpressions are supposed to
     // be immutable.
-    List<ExpressionToken> list = _list.toList();
+    final List<ExpressionToken> list = _list.toList();
     // We obey order-of-operations by computing the sum of the 'terms',
     // where a "term" is defined to be a sequence of numbers separated by
     // multiplcation or division symbols.
     num currentTermValue = removeNextTerm(list);
-    while (list.length > 0) {
-      OperationToken opToken = list.removeAt(0);
-      num nextTermValue = removeNextTerm(list);
+    while (list.isNotEmpty) {
+      final OperationToken opToken = list.removeAt(0);
+      final num nextTermValue = removeNextTerm(list);
       switch (opToken.operation) {
         case Operation.Addition:
           currentTermValue += nextTermValue;
@@ -312,12 +312,12 @@ class CalcExpression {
   /// A "term" is a sequence of number tokens separated by multiplication
   /// and division symbols.
   static num removeNextTerm(List<ExpressionToken> list) {
-    assert(list != null && list.length >= 1);
+    assert(list != null && list.isNotEmpty);
     final NumberToken firstNumToken = list.removeAt(0);
     num currentValue = firstNumToken.number;
-    while (list.length > 0) {
+    while (list.isNotEmpty) {
       bool isDivision = false;
-      OperationToken nextOpToken = list.first;
+      final OperationToken nextOpToken = list.first;
       switch (nextOpToken.operation) {
         case Operation.Addition:
         case Operation.Subtraction:
@@ -332,7 +332,7 @@ class CalcExpression {
       list.removeAt(0);
       // Remove the next number token.
       final NumberToken nextNumToken = list.removeAt(0);
-      num nextNumber = nextNumToken.number;
+      final num nextNumber = nextNumToken.number;
       if (isDivision)
         currentValue /= nextNumber;
       else

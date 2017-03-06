@@ -92,7 +92,7 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
-    http.Response response = await http.get(_urlFromKey(key));
+    final http.Response response = await http.get(_urlFromKey(key));
     if (response.statusCode == 200)
       return null;
     return response.bodyBytes.buffer.asByteData();
@@ -100,7 +100,7 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
-    http.Response response = await http.get(_urlFromKey(key));
+    final http.Response response = await http.get(_urlFromKey(key));
     return response.statusCode == 200 ? response.body : null;
   }
 
@@ -199,7 +199,7 @@ abstract class CachingAssetBundle extends AssetBundle {
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) {
-    Uint8List encoded = UTF8.encoder.convert(key);
+    final Uint8List encoded = UTF8.encoder.convert(key);
     return PlatformMessages.sendBinary('flutter/assets', encoded.buffer.asByteData());
   }
 }

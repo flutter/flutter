@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-import 'shadows.dart';
 import 'theme.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
@@ -204,9 +203,10 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = _getBackgroundColor(context);
+    final Color backgroundColor = _getBackgroundColor(context);
+    assert(backgroundColor != null || config.type == MaterialType.transparency);
     Widget contents = config.child;
-    BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
+    final BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
         style: config.textStyle ?? Theme.of(context).textTheme.body1,
@@ -216,7 +216,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = new NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
         renderer._didChangeLayout();
         return true;
       },
@@ -228,11 +228,28 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
     if (config.type == MaterialType.circle) {
-      contents = new ClipOval(child: contents);
-    } else if (kMaterialEdges[config.type] != null) {
-      contents = new ClipRRect(
-        borderRadius: radius,
-        child: contents
+      contents = new PhysicalModel(
+        shape: BoxShape.circle,
+        elevation: config.elevation,
+        color: backgroundColor,
+        child: contents,
+      );
+    } else if (config.type == MaterialType.transparency) {
+      if (radius == null) {
+        contents = new ClipRect(child: contents);
+      } else {
+        contents = new ClipRRect(
+          borderRadius: radius,
+          child: contents
+        );
+      }
+    } else {
+      contents = new PhysicalModel(
+        shape: BoxShape.rectangle,
+        borderRadius: radius ?? BorderRadius.zero,
+        elevation: config.elevation,
+        color: backgroundColor,
+        child: contents,
       );
     }
     if (config.type != MaterialType.transparency) {
@@ -241,7 +258,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           borderRadius: radius,
-          boxShadow: config.elevation == 0 ? null : kElevationToShadow[config.elevation],
           shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
         ),
         child: new Container(

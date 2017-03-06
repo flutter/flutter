@@ -83,7 +83,7 @@ class PaintingContext {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
     });
-    PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
+    final PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
     childContext._stopRecordingIfNeeded();
   }
@@ -186,14 +186,14 @@ class PaintingContext {
       return;
     assert(() {
       if (debugRepaintRainbowEnabled) {
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 6.0
           ..color = debugCurrentRepaintColor.toColor();
         canvas.drawRect(_paintBounds.deflate(3.0), paint);
       }
       if (debugPaintLayerBordersEnabled) {
-        Paint paint = new Paint()
+        final Paint paint = new Paint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0
           ..color = debugPaintLayerBordersColor;
@@ -429,6 +429,33 @@ class PaintingContext {
     painter(childContext, offset);
     childContext._stopRecordingIfNeeded();
   }
+
+  /// Clip using a physical model layer.
+  ///
+  /// * `offset` is the offset from the origin of the canvas' coordinate system
+  ///   to the origin of the caller's coordinate system.
+  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  ///   into which `painter` will paint in.
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
+  ///   to use to clip the painting done by `painter`.
+  /// * `elevation` is the z-coordinate at which to place this material.
+  /// * `color` is the background color.
+  /// * `painter` is a callback that will paint with the `clipRRect` applied. This
+  ///   function calls the `painter` synchronously.
+  void pushPhysicalModel(Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+    final Rect offsetBounds = bounds.shift(offset);
+    final RRect offsetClipRRect = clipRRect.shift(offset);
+    _stopRecordingIfNeeded();
+    final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+      clipRRect: offsetClipRRect,
+      elevation: elevation,
+      color: color,
+    );
+    _appendLayer(physicalModel);
+    final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
+    painter(childContext, offset);
+    childContext._stopRecordingIfNeeded();
+  }
 }
 
 /// An abstract set of layout constraints.
@@ -555,14 +582,14 @@ class _SemanticsGeometry {
   Matrix4 transform;
   void applyAncestorChain(List<RenderObject> ancestorChain) {
     for (int index = ancestorChain.length-1; index > 0; index -= 1) {
-      RenderObject parent = ancestorChain[index];
-      RenderObject child = ancestorChain[index-1];
+      final RenderObject parent = ancestorChain[index];
+      final RenderObject child = ancestorChain[index-1];
       clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
       if (clipRect != null) {
         if (clipRect.isEmpty) {
           clipRect = Rect.zero;
         } else {
-          Matrix4 clipTransform = new Matrix4.identity();
+          final Matrix4 clipTransform = new Matrix4.identity();
           parent.applyPaintTransform(child, clipTransform);
           clipRect = MatrixUtils.inverseTransformRect(clipTransform, clipRect);
         }
@@ -596,7 +623,7 @@ abstract class _SemanticsFragment {
     assert(() {
       if (children == null)
         return true;
-      Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
+      final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
       for (_SemanticsFragment child in children)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -636,7 +663,7 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
-    SemanticsNode node = renderObjectOwner._semantics;
+    final SemanticsNode node = renderObjectOwner._semantics;
     assert(node != null);
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
@@ -661,7 +688,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
-    SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
+    final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
     if (annotator != null)
       annotator(node);
     for (_SemanticsFragment child in _children) {
@@ -699,7 +726,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
       owner: renderObjectOwner.owner.semanticsOwner
     );
-    SemanticsNode node = renderObjectOwner._semantics;
+    final SemanticsNode node = renderObjectOwner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
     assert(!node.wasAffectedByClip);
     node.rect = renderObjectOwner.semanticBounds;
@@ -724,7 +751,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     renderObjectOwner._semantics ??= new SemanticsNode(
       handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null
     );
-    SemanticsNode node = renderObjectOwner._semantics;
+    final SemanticsNode node = renderObjectOwner._semantics;
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
       geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node, parentSemantics: parentSemantics);
@@ -945,7 +972,7 @@ class PipelineOwner {
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
       while (_nodesNeedingLayout.isNotEmpty) {
-        List<RenderObject> dirtyNodes = _nodesNeedingLayout;
+        final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
         for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => a.depth - b.depth)) {
           if (node._needsLayout && node.owner == this)
@@ -968,7 +995,7 @@ class PipelineOwner {
   // See [RenderObject.invokeLayoutCallback].
   void _enableMutationsToDirtySubtrees(VoidCallback callback) {
     assert(_debugDoingLayout);
-    bool oldState = _debugAllowMutationsToDirtySubtrees;
+    final bool oldState = _debugAllowMutationsToDirtySubtrees;
     _debugAllowMutationsToDirtySubtrees = true;
     try {
       callback();
@@ -1014,7 +1041,7 @@ class PipelineOwner {
     Timeline.startSync('Paint');
     _debugDoingPaint = true;
     try {
-      List<RenderObject> dirtyNodes = _nodesNeedingPaint;
+      final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
       _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
@@ -1310,7 +1337,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       informationCollector: (StringBuffer information) {
         information.writeln('The following RenderObject was being processed when the exception was fired:');
         information.writeln('  ${toStringShallow('\n  ')}');
-        List<String> descendants = <String>[];
+        final List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
         const int maxLines = 25;
@@ -1657,9 +1684,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
       informationCollector: (StringBuffer information) {
-        List<String> stack = StackTrace.current.toString().split('\n');
+        final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
-        Pattern layoutFramePattern = new RegExp(r'^#[0-9]+ +RenderObject.layout \(');
+        final Pattern layoutFramePattern = new RegExp(r'^#[0-9]+ +RenderObject.layout \(');
         for (int i = 0; i < stack.length; i += 1) {
           if (layoutFramePattern.matchAsPrefix(stack[i]) != null) {
             targetFrame = i + 1;
@@ -1672,8 +1699,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
             'function by the following function, which probably computed the '
             'invalid constraints in question:'
           );
-          Pattern targetFramePattern = new RegExp(r'^#[0-9]+ +(.+)$');
-          Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
+          final Pattern targetFramePattern = new RegExp(r'^#[0-9]+ +(.+)$');
+          final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
           if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
             information.writeln('  ${targetFrameMatch.group(1)}');
           } else {
@@ -1702,7 +1729,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         // to itself, so it has the right internal debug values.
         _debugDoingThisResize = sizedByParent;
         _debugDoingThisLayout = !sizedByParent;
-        RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+        final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
         _debugActiveLayout = this;
         debugResetSize();
         _debugActiveLayout = debugPreviousActiveLayout;
@@ -1978,7 +2005,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void _updateCompositingBits() {
     if (!_needsCompositingBitsUpdate)
       return;
-    bool oldNeedsCompositing = _needsCompositing;
+    final bool oldNeedsCompositing = _needsCompositing;
     visitChildren((RenderObject child) {
       child._updateCompositingBits();
       if (child.needsCompositing)
@@ -2290,9 +2317,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     try {
       assert(_needsSemanticsUpdate);
       assert(_semantics != null || parent is! RenderObject);
-      _SemanticsFragment fragment = _getSemanticsFragment();
+      final _SemanticsFragment fragment = _getSemanticsFragment();
       assert(fragment is _InterestingSemanticsFragment);
-      SemanticsNode node = fragment.compile(parentSemantics: _semantics?.parent).single;
+      final SemanticsNode node = fragment.compile(parentSemantics: _semantics?.parent).single;
       assert(node != null);
       assert(node == _semantics);
     } catch (e, stack) {
@@ -2315,7 +2342,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
         child._needsSemanticsUpdate = true;
         child._needsSemanticsGeometryUpdate = true;
       }
-      _SemanticsFragment fragment = child._getSemanticsFragment();
+      final _SemanticsFragment fragment = child._getSemanticsFragment();
       if (fragment != null) {
         fragment.addAncestor(this);
         children ??= <_SemanticsFragment>[];
@@ -2325,7 +2352,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _needsSemanticsUpdate = false;
     _needsSemanticsGeometryUpdate = false;
-    SemanticsAnnotator annotator = semanticsAnnotator;
+    final SemanticsAnnotator annotator = semanticsAnnotator;
     if (parent is! RenderObject)
       return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children);
     if (isSemanticBoundary)
@@ -2429,19 +2456,19 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
   String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
     final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     result += description
       .expand((String description) => debugWordWrap(description, 65, wrapIndent: '  '))
       .map<String>((String line) => "$descriptionPrefix$line\n")
       .join();
     if (childrenDescription == '') {
-      String prefix = prefixOtherLines.trimRight();
+      final String prefix = prefixOtherLines.trimRight();
       if (prefix != '')
         result += '$prefix\n';
     } else {
@@ -2457,11 +2484,11 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   String toStringShallow([String joiner = '; ']) {
-    RenderObject debugPreviousActiveLayout = _debugActiveLayout;
+    final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('${this}$joiner'); // TODO(ianh): https://github.com/dart-lang/sdk/issues/28206
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     result.write(description.join(joiner));
     _debugActiveLayout = debugPreviousActiveLayout;
@@ -2701,7 +2728,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
     ChildType child = _firstChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      ChildType next = childParentData.nextSibling;
+      final ChildType next = childParentData.nextSibling;
       childParentData.previousSibling = null;
       childParentData.nextSibling = null;
       dropChild(child);

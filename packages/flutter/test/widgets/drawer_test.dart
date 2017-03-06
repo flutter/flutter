@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
 
   testWidgets('Drawer control test', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     BuildContext savedContext;
     await tester.pumpWidget(
       new MaterialApp(
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('Drawer tap test', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -72,7 +72,7 @@ void main() {
   });
 
   testWidgets('Drawer drag cancel resume', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -105,11 +105,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     // drawer should be starting to animate away
-    RenderBox textBox = tester.renderObject(find.text('drawer'));
-    double textLeft = textBox.localToGlobal(Point.origin).x;
+    final RenderBox textBox = tester.renderObject(find.text('drawer'));
+    final double textLeft = textBox.localToGlobal(Point.origin).x;
     expect(textLeft, lessThan(0.0));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     // drawer should be stopped.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
@@ -125,7 +125,7 @@ void main() {
   });
 
   testWidgets('Drawer navigator back button', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     bool buttonPressed = false;
 
     await tester.pumpWidget(

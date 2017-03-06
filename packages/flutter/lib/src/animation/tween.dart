@@ -60,7 +60,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 
   @override
   T evaluate(Animation<double> animation) {
-    double value = _parent.evaluate(animation);
+    final double value = _parent.evaluate(animation);
     return _evaluatable.evaluate(new AlwaysStoppedAnimation<double>(value));
   }
 
@@ -240,7 +240,7 @@ class CurveTween extends Animatable<double> {
 
   @override
   double evaluate(Animation<double> animation) {
-    double t = animation.value;
+    final double t = animation.value;
     if (t == 0.0 || t == 1.0) {
       assert(curve.transform(t).round() == t);
       return t;

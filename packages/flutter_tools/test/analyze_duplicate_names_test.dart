@@ -23,13 +23,13 @@ void main() {
 
   group('analyze', () {
     testUsingContext('flutter analyze with two files with the same name', () async {
-      File dartFileA = fs.file(fs.path.join(tempDir.path, 'a.dart'));
+      final File dartFileA = fs.file(fs.path.join(tempDir.path, 'a.dart'));
       dartFileA.parent.createSync();
       dartFileA.writeAsStringSync('library test;');
-      File dartFileB = fs.file(fs.path.join(tempDir.path, 'b.dart'));
+      final File dartFileB = fs.file(fs.path.join(tempDir.path, 'b.dart'));
       dartFileB.writeAsStringSync('library test;');
 
-      AnalyzeCommand command = new AnalyzeCommand();
+      final AnalyzeCommand command = new AnalyzeCommand();
       applyMocksToCommand(command);
       return createTestCommandRunner(command).run(
         <String>['analyze', '--no-current-package', '--no-current-directory', dartFileA.path, dartFileB.path]

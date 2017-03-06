@@ -122,9 +122,9 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       } else {
         assert(false);
       }
-      bool isLeading = controller == _leadingController;
+      final bool isLeading = controller == _leadingController;
       if (_lastNotificationType != OverscrollNotification) {
-        OverscrollIndicatorNotification confirmationNotification = new OverscrollIndicatorNotification(leading: isLeading);
+        final OverscrollIndicatorNotification confirmationNotification = new OverscrollIndicatorNotification(leading: isLeading);
         confirmationNotification.dispatch(context);
         _accepted[isLeading] = confirmationNotification._accepted;
       }
@@ -209,7 +209,7 @@ class _GlowController extends ChangeNotifier {
     assert(axis != null);
     _glowController = new AnimationController(vsync: vsync)
       ..addStatusListener(_changePhase);
-    Animation<double> decelerator = new CurvedAnimation(
+    final Animation<double> decelerator = new CurvedAnimation(
       parent: _glowController,
       curve: Curves.decelerate,
     )..addListener(notifyListeners);
@@ -380,7 +380,7 @@ class _GlowController extends ChangeNotifier {
 
   void _tickDisplacement(Duration elapsed) {
     if (_displacementTickerLastElapsed != null) {
-      double t = (elapsed.inMicroseconds - _displacementTickerLastElapsed.inMicroseconds).toDouble();
+      final double t = (elapsed.inMicroseconds - _displacementTickerLastElapsed.inMicroseconds).toDouble();
       _displacement = _displacementTarget - (_displacementTarget - _displacement) * math.pow(2.0, -t / _crossAxisHalfTime.inMicroseconds);
       notifyListeners();
     }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -65,6 +66,25 @@ class FixedSizeLayoutDelegate extends SingleChildLayoutDelegate {
   }
 }
 
+class NotifierLayoutDelegate extends SingleChildLayoutDelegate {
+  NotifierLayoutDelegate(ValueNotifier<Size> size) : size = size, super(relayout: size);
+
+  final ValueNotifier<Size> size;
+
+  @override
+  Size getSize(BoxConstraints constraints) => size.value;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return new BoxConstraints.tight(size.value);
+  }
+
+  @override
+  bool shouldRelayout(NotifierLayoutDelegate oldDelegate) {
+    return size != oldDelegate.size;
+  }
+}
+
 Widget buildFrame(SingleChildLayoutDelegate delegate) {
   return new Center(
     child: new CustomSingleChildLayout(
@@ -77,7 +97,7 @@ Widget buildFrame(SingleChildLayoutDelegate delegate) {
 void main() {
   testWidgets('Control test for CustomSingleChildLayout',
       (WidgetTester tester) async {
-    TestSingleChildLayoutDelegate delegate =
+    final TestSingleChildLayoutDelegate delegate =
         new TestSingleChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
@@ -133,6 +153,21 @@ void main() {
 
     await tester.pumpWidget(
         buildFrame(new FixedSizeLayoutDelegate(const Size(150.0, 240.0))));
+
+    box = tester.renderObject(find.byType(CustomSingleChildLayout));
+    expect(box.size, equals(const Size(150.0, 240.0)));
+  });
+
+  testWidgets('Can use listener for relayout', (WidgetTester tester) async {
+    final ValueNotifier<Size> size = new ValueNotifier<Size>(const Size(100.0, 200.0));
+
+    await tester.pumpWidget(buildFrame(new NotifierLayoutDelegate(size)));
+
+    RenderBox box = tester.renderObject(find.byType(CustomSingleChildLayout));
+    expect(box.size, equals(const Size(100.0, 200.0)));
+
+    size.value = const Size(150.0, 240.0);
+    await tester.pump();
 
     box = tester.renderObject(find.byType(CustomSingleChildLayout));
     expect(box.size, equals(const Size(150.0, 240.0)));

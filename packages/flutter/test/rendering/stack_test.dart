@@ -9,25 +9,25 @@ import 'rendering_tester.dart';
 
 void main() {
   test('Stack can layout with top, right, bottom, left 0.0', () {
-    RenderBox size = new RenderConstrainedBox(
+    final RenderBox size = new RenderConstrainedBox(
       additionalConstraints: new BoxConstraints.tight(const Size(100.0, 100.0))
     );
 
-    RenderBox red = new RenderDecoratedBox(
+    final RenderBox red = new RenderDecoratedBox(
       decoration: const BoxDecoration(
         backgroundColor: const Color(0xFFFF0000)
       ),
       child: size
     );
 
-    RenderBox green = new RenderDecoratedBox(
+    final RenderBox green = new RenderDecoratedBox(
       decoration: const BoxDecoration(
         backgroundColor: const Color(0xFFFF0000)
       )
     );
 
-    RenderBox stack = new RenderStack(children: <RenderBox>[red, green]);
-    StackParentData greenParentData = green.parentData;
+    final RenderBox stack = new RenderStack(children: <RenderBox>[red, green]);
+    final StackParentData greenParentData = green.parentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0

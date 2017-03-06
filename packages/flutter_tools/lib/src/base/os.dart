@@ -54,10 +54,10 @@ class _PosixUtils extends OperatingSystemUtils {
   /// to locate the binary.
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync(<String>['which', execName]);
+    final ProcessResult result = processManager.runSync(<String>['which', execName]);
     if (result.exitCode != 0)
       return null;
-    String path = result.stdout.trim().split('\n').first.trim();
+    final String path = result.stdout.trim().split('\n').first.trim();
     return fs.file(path);
   }
 
@@ -90,7 +90,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   File which(String execName) {
-    ProcessResult result = processManager.runSync(<String>['where', execName]);
+    final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
       return null;
     return fs.file(result.stdout.trim().split('\n').first.trim());
@@ -98,14 +98,14 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    Archive archive = new Archive();
+    final Archive archive = new Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
       }
-      File file = entity;
-      String path = file.fileSystem.path.relative(file.path, from: data.path);
-      List<int> bytes = file.readAsBytesSync();
+      final File file = entity;
+      final String path = file.fileSystem.path.relative(file.path, from: data.path);
+      final List<int> bytes = file.readAsBytesSync();
       archive.addFile(new ArchiveFile(path, bytes.length, bytes));
     }
     zipFile.writeAsBytesSync(new ZipEncoder().encode(archive), flush: true);
@@ -113,14 +113,14 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void unzip(File file, Directory targetDirectory) {
-    Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
 
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
         continue;
 
-      File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
+      final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync())
         destFile.parent.createSync(recursive: true);
       destFile.writeAsBytesSync(archiveFile.content);
@@ -134,8 +134,8 @@ class _WindowsUtils extends OperatingSystemUtils {
 }
 
 Future<int> findAvailablePort() async {
-  ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
-  int port = socket.port;
+  final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+  final int port = socket.port;
   await socket.close();
   return port;
 }
@@ -148,7 +148,7 @@ Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
   int iterationCount = 0;
 
   while (iterationCount < _kMaxSearchIterations) {
-    int port = defaultPort + iterationCount * searchStep;
+    final int port = defaultPort + iterationCount * searchStep;
     if (await _isPortAvailable(port))
       return port;
     iterationCount++;
@@ -160,7 +160,7 @@ Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
 Future<bool> _isPortAvailable(int port) async {
   try {
     // TODO(ianh): This is super racy.
-    ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
+    final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
     await socket.close();
     return true;
   } catch (error) {
@@ -178,7 +178,7 @@ String findProjectRoot([String directory]) {
   while (true) {
     if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
       return directory;
-    String parent = fs.path.dirname(directory);
+    final String parent = fs.path.dirname(directory);
     if (directory == parent) return null;
     directory = parent;
   }
