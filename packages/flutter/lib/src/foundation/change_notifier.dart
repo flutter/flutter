@@ -178,4 +178,7 @@ class ValueNotifier<T> extends ChangeNotifier {
     _value = newValue;
     notifyListeners();
   }
+
+  @override
+  String toString() => 'ValueNotifier(value: $value)';
 }
