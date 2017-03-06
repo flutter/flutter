@@ -2668,9 +2668,9 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   /// If `after` is null, then this inserts the child at the start of the list,
   /// and the child becomes the new [firstChild].
   void insert(ChildType child, { ChildType after }) {
-    assert(child != this);
-    assert(after != this);
-    assert(child != after);
+    assert(child != this, 'A RenderObject cannot be inserted into itself.');
+    assert(after != this, 'A RenderObject cannot simultaneously be both the parent and the sibling of another RenderObject.');
+    assert(child != after, 'A RenderObject cannot be inserted after itself.');
     assert(child != _firstChild);
     assert(child != _lastChild);
     adoptChild(child);
