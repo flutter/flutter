@@ -27,7 +27,7 @@ void main() {
   });
 
   testWidgets('Can change position data', (WidgetTester tester) async {
-    Key key = const Key('container');
+    final Key key = const Key('container');
 
     await tester.pumpWidget(
       new Stack(
@@ -82,8 +82,8 @@ void main() {
   });
 
   testWidgets('Can remove parent data', (WidgetTester tester) async {
-    Key key = const Key('container');
-    Container container = new Container(key: key, width: 10.0, height: 10.0);
+    final Key key = const Key('container');
+    final Container container = new Container(key: key, width: 10.0, height: 10.0);
 
     await tester.pumpWidget(new Stack(children: <Widget>[ new Positioned(left: 10.0, child: container) ]));
     Element containerElement = tester.element(find.byKey(key));
@@ -110,8 +110,8 @@ void main() {
   });
 
   testWidgets('Can align non-positioned children', (WidgetTester tester) async {
-    Key child0Key = const Key('child0');
-    Key child1Key = const Key('child1');
+    final Key child0Key = const Key('child0');
+    final Key child1Key = const Key('child1');
 
     await tester.pumpWidget(
       new Center(
@@ -125,11 +125,11 @@ void main() {
       )
     );
 
-    Element child0 = tester.element(find.byKey(child0Key));
+    final Element child0 = tester.element(find.byKey(child0Key));
     final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
     expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
 
-    Element child1 = tester.element(find.byKey(child1Key));
+    final Element child1 = tester.element(find.byKey(child1Key));
     final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
   });
@@ -143,12 +143,12 @@ void main() {
   });
 
   testWidgets('Can construct an IndexedStack', (WidgetTester tester) async {
-    int itemCount = 3;
+    final int itemCount = 3;
     List<int> itemsPainted;
 
     Widget buildFrame(int index) {
       itemsPainted = <int>[];
-      List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
+      final List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
         return new CustomPaint(
           child: new Text('$i'),
           painter: new TestCallbackPainter(
@@ -173,13 +173,13 @@ void main() {
   });
 
   testWidgets('Can hit test an IndexedStack', (WidgetTester tester) async {
-    Key key = const Key('indexedStack');
-    int itemCount = 3;
+    final Key key = const Key('indexedStack');
+    final int itemCount = 3;
     List<int> itemsTapped;
 
     Widget buildFrame(int index) {
       itemsTapped = <int>[];
-      List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
+      final List<Widget> items = new List<Widget>.generate(itemCount, (int i) {
         return new GestureDetector(child: new Text('$i'), onTap: () { itemsTapped.add(i); });
       });
       return new Center(child: new IndexedStack(children: items, key: key, index: index));
@@ -197,9 +197,9 @@ void main() {
   });
 
   testWidgets('Can set width and height', (WidgetTester tester) async {
-    Key key = const Key('container');
+    final Key key = const Key('container');
 
-    BoxDecoration kBoxDecoration = const BoxDecoration(
+    final BoxDecoration kBoxDecoration = const BoxDecoration(
       backgroundColor: const Color(0xFF00FF00)
     );
 
@@ -284,7 +284,7 @@ void main() {
     );
 
     await tester.tap(find.byType(IndexedStack));
-    RenderBox box = tester.renderObject(find.byType(IndexedStack));
+    final RenderBox box = tester.renderObject(find.byType(IndexedStack));
     expect(box.size, equals(const Size(200.0, 200.0)));
     expect(tapped, isNull);
   });

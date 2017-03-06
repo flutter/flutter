@@ -337,7 +337,7 @@ class _AppBarState extends State<AppBar> {
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    ScaffoldState scaffold = Scaffold.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
     _canPop = ModalRoute.of(context)?.canPop ?? false;
   }
@@ -354,7 +354,7 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = config.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = config.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    Brightness brightness = config.brightness ?? themeData.primaryColorBrightness;
+    final Brightness brightness = config.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark);
@@ -419,7 +419,7 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    Widget toolbar = new Padding(
+    final Widget toolbar = new Padding(
       padding: const EdgeInsets.only(right: 4.0),
       child: new CustomMultiChildLayout(
         delegate: new _ToolbarLayout(

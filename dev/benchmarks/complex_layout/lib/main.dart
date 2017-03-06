@@ -449,7 +449,7 @@ class ItemGalleryBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> tabNames = <String>[
+    final List<String> tabNames = <String>[
       'A', 'B', 'C', 'D'
     ];
 

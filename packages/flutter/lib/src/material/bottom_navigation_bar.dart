@@ -285,7 +285,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
         )..controller.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
             setState(() {
-              _Circle circle = _circles.removeFirst();
+              final _Circle circle = _circles.removeFirst();
               _backgroundColor = circle.color;
               circle.dispose();
             });
@@ -575,8 +575,8 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      double navWidth = math.min(bottomNavMaxWidth, size.width);
-      Point center = new Point(
+      final double navWidth = math.min(bottomNavMaxWidth, size.width);
+      final Point center = new Point(
         (size.width - navWidth) / 2.0 + circle.offset.dx * navWidth,
         circle.offset.dy * size.height
       );

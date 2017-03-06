@@ -181,7 +181,7 @@ void main() {
   });
 
   testWidgets('Heroes animate', (WidgetTester tester) async {
-    MutatingRoute route = new MutatingRoute();
+    final MutatingRoute route = new MutatingRoute();
 
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
@@ -246,7 +246,7 @@ void main() {
   });
 
   testWidgets('Heroes are not interactive', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new MaterialApp(
       home: new Center(
@@ -291,7 +291,7 @@ void main() {
     expect(log, equals(<String>['foo']));
     log.clear();
 
-    NavigatorState navigator = tester.state(find.byType(Navigator));
+    final NavigatorState navigator = tester.state(find.byType(Navigator));
     navigator.pushNamed('/next');
 
     expect(log, isEmpty);
@@ -326,7 +326,7 @@ void main() {
     ));
     await tester.pump();
 
-    Finder heroes = find.byType(Hero);
+    final Finder heroes = find.byType(Hero);
     expect(heroes, findsOneWidget);
 
     Navigator.pushNamed(heroes.evaluate().first, 'test');
@@ -352,7 +352,7 @@ void main() {
     ));
     await tester.pump();
 
-    Finder heroes = find.byType(Hero);
+    final Finder heroes = find.byType(Hero);
     expect(heroes, findsOneWidget);
 
     Navigator.pushNamed(heroes.evaluate().first, 'test');

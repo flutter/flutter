@@ -16,8 +16,8 @@ void main() {
 
     expect(LocaleQuery.of(tester.element(find.byType(Container))), isNull);
 
-    LocaleQueryData data = new TestLocaleQueryData();
-    Widget widget = new LocaleQuery(
+    final LocaleQueryData data = new TestLocaleQueryData();
+    final Widget widget = new LocaleQuery(
       data: data,
       child: new Container(),
     );

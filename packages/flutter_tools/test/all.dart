@@ -23,6 +23,7 @@ import 'bug_report_test.dart' as bug_report_test;
 import 'channel_test.dart' as channel_test;
 import 'config_test.dart' as config_test;
 import 'context_test.dart' as context_test;
+import 'crash_reporting_test.dart' as crash_reporting_test;
 import 'create_test.dart' as create_test;
 import 'daemon_test.dart' as daemon_test;
 import 'dart_dependencies_test.dart' as dart_dependencies_test;
@@ -64,6 +65,7 @@ void main() {
   channel_test.main();
   config_test.main();
   context_test.main();
+  crash_reporting_test.main();
   create_test.main();
   daemon_test.main();
   dart_dependencies_test.main();

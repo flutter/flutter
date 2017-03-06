@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
-  FlutterCommandRunner runner  = new FlutterCommandRunner();
+  final FlutterCommandRunner runner  = new FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
   return runner;
@@ -21,7 +21,7 @@ CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
 void updateFileModificationTime(String path,
                                 DateTime baseTime,
                                 int seconds) {
-  DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
+  final DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 

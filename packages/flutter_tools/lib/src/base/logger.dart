@@ -206,7 +206,7 @@ class VerboseLogger extends Logger {
     if (message.trim().isEmpty)
       return;
 
-    int millis = stopwatch.elapsedMilliseconds;
+    final int millis = stopwatch.elapsedMilliseconds;
     stopwatch.reset();
 
     String prefix;
@@ -220,8 +220,8 @@ class VerboseLogger extends Logger {
     }
     prefix = '[$prefix] ';
 
-    String indent = ''.padLeft(prefix.length);
-    String indentMessage = message.replaceAll('\n', '\n$indent');
+    final String indent = ''.padLeft(prefix.length);
+    final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
       stderr.writeln(prefix + terminal.bolden(indentMessage));
@@ -243,9 +243,9 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    String term = platform.environment['TERM'];
+    final String term = platform.environment['TERM'];
     // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
-    bool flutterAnsiTerm = platform.environment.containsKey('FLUTTER_ANSI_TERMINAL');
+    final bool flutterAnsiTerm = platform.environment.containsKey('FLUTTER_ANSI_TERMINAL');
     supportsColor = (term != null && term != 'dumb') || flutterAnsiTerm;
   }
 
@@ -326,7 +326,7 @@ class _AnsiStatus extends Status {
     live = false;
 
     if (expectSlowOperation) {
-      double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+      final double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
       print('\b\b\b\b\b${secondsFormat.format(seconds).padLeft(4)}s');
     } else {
       print('\b\b\b\b\b${millisecondsFormat.format(stopwatch.elapsedMilliseconds).padLeft(3)}ms');

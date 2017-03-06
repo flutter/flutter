@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
-    Key bodyKey = new UniqueKey();
+    final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Scaffold(
       appBar: new AppBar(title: new Text('Title')),
       body: new Container(key: bodyKey)
@@ -42,7 +42,7 @@ void main() {
   });
 
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
-    Key bodyKey = new UniqueKey();
+    final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new MediaQuery(
       data: new MediaQueryData(
         padding: const EdgeInsets.only(bottom: 700.0),
@@ -52,7 +52,7 @@ void main() {
       ),
     ));
 
-    RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
+    final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(new MediaQuery(
@@ -118,10 +118,10 @@ void main() {
   });
 
   testWidgets('Drawer scrolling', (WidgetTester tester) async {
-    Key drawerKey = new UniqueKey();
+    final Key drawerKey = new UniqueKey();
     const double appBarHeight = 256.0;
 
-    ScrollController scrollOffset = new ScrollController();
+    final ScrollController scrollOffset = new ScrollController();
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -157,7 +157,7 @@ void main() {
       )
     );
 
-    ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
 
     await tester.pump();
@@ -171,7 +171,7 @@ void main() {
 
     expect(scrollOffset.offset, scrollDelta);
 
-    RenderBox renderBox = tester.renderObject(find.byType(AppBar));
+    final RenderBox renderBox = tester.renderObject(find.byType(AppBar));
     expect(renderBox.size.height, equals(appBarHeight));
   });
 
@@ -222,7 +222,7 @@ void main() {
   });
 
   testWidgets('Bottom sheet cannot overlap app bar', (WidgetTester tester) async {
-    Key sheetKey = new UniqueKey();
+    final Key sheetKey = new UniqueKey();
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -254,11 +254,11 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
 
-    RenderBox appBarBox = tester.renderObject(find.byType(AppBar));
-    RenderBox sheetBox = tester.renderObject(find.byKey(sheetKey));
+    final RenderBox appBarBox = tester.renderObject(find.byType(AppBar));
+    final RenderBox sheetBox = tester.renderObject(find.byKey(sheetKey));
 
-    Point appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Point.origin));
-    Point sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Point.origin));
+    final Point appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Point.origin));
+    final Point sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Point.origin));
 
     expect(appBarBottomRight, equals(sheetTopRight));
   });
@@ -297,7 +297,7 @@ void main() {
 
   group('back arrow', () {
     Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
-      GlobalKey rootKey = new GlobalKey();
+      final GlobalKey rootKey = new GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         '/': (_) => new Container(key: rootKey, child: new Text('Home')),
         '/scaffold': (_) => new Scaffold(
@@ -313,7 +313,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
 
-      Icon icon = tester.widget(find.byType(Icon));
+      final Icon icon = tester.widget(find.byType(Icon));
       expect(icon.icon, expectedIcon);
     }
 
@@ -332,7 +332,7 @@ void main() {
 
   group('body size', () {
     testWidgets('body size with container', (WidgetTester tester) async {
-      Key testKey = new UniqueKey();
+      final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new Scaffold(body: new Container(key: testKey))
       );
@@ -341,7 +341,7 @@ void main() {
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
-      Key testKey = new UniqueKey();
+      final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new Scaffold(body: new Container(key: testKey, height: 100.0))
       );
@@ -350,7 +350,7 @@ void main() {
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
-      Key testKey = new UniqueKey();
+      final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new Scaffold(body: new Center(child: new Container(key: testKey)))
       );
@@ -359,7 +359,7 @@ void main() {
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
-      Key testKey = new UniqueKey();
+      final Key testKey = new UniqueKey();
       await tester.pumpWidget(
         new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: new Text('')))
       );

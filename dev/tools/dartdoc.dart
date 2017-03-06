@@ -25,7 +25,7 @@ Future<Null> main(List<String> args) async {
     Directory.current = Directory.current.parent.parent;
 
   // Create the pubspec.yaml file.
-  StringBuffer buf = new StringBuffer('''
+  final StringBuffer buf = new StringBuffer('''
 name: Flutter
 dependencies:
 ''');
@@ -40,10 +40,10 @@ dependencies:
   new File('dev/docs/pubspec.yaml').writeAsStringSync(buf.toString());
 
   // Create the library file.
-  Directory libDir = new Directory('dev/docs/lib');
+  final Directory libDir = new Directory('dev/docs/lib');
   libDir.createSync();
 
-  StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
+  final StringBuffer contents = new StringBuffer('library temp_doc;\n\n');
   for (String libraryRef in libraryRefs()) {
     contents.writeln('import \'package:$libraryRef\';');
   }
@@ -58,14 +58,14 @@ dependencies:
   );
   printStream(process.stdout);
   printStream(process.stderr);
-  int code = await process.exitCode;
+  final int code = await process.exitCode;
   if (code != 0)
     exit(code);
 
   createFooter('dev/docs/lib/footer.html');
 
   // Generate the documentation.
-  List<String> args = <String>[
+  final List<String> args = <String>[
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
@@ -84,7 +84,7 @@ dependencies:
   process = await Process.start('pub', args, workingDirectory: 'dev/docs');
   printStream(process.stdout);
   printStream(process.stderr);
-  int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode;
 
   if (exitCode != 0)
     exit(exitCode);
@@ -95,10 +95,10 @@ dependencies:
 }
 
 void createFooter(String footerPath) {
-  ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  final String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
 
-  String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
+  final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
   new File(footerPath).writeAsStringSync(
     '<p class="text-center" style="font-size: 10px">'
@@ -107,7 +107,7 @@ void createFooter(String footerPath) {
 }
 
 void sanityCheckDocs() {
-  List<String> canaries = <String>[
+  final List<String> canaries = <String>[
     '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
@@ -151,7 +151,7 @@ void copyIndexToRootOfDocs() {
 }
 
 void addHtmlBaseToIndex() {
-  File indexFile = new File('$kDocRoot/index.html');
+  final File indexFile = new File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst('</title>\n',
     '</title>\n  <base href="./flutter/">\n');
@@ -163,7 +163,7 @@ void addHtmlBaseToIndex() {
 }
 
 void putRedirectInOldIndexLocation() {
-  String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  final String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
@@ -178,7 +178,7 @@ List<Directory> findPackages() {
     .where((FileSystemEntity entity) {
       if (entity is! Directory)
         return false;
-      File pubspec = new File('${entity.path}/pubspec.yaml');
+      final File pubspec = new File('${entity.path}/pubspec.yaml');
       // TODO(ianh): Use a real YAML parser here
       return !pubspec.readAsStringSync().contains('nodoc: true');
     })
@@ -190,7 +190,7 @@ List<Directory> findPackages() {
 /// diskPath toggles between import paths vs. disk paths.
 Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   for (Directory dir in findPackages()) {
-    String dirName = path.basename(dir.path);
+    final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
       if (file is File && file.path.endsWith('.dart')) {
         if (diskPath)

@@ -37,7 +37,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
-    FormState form = _formKey.currentState;
+    final FormState form = _formKey.currentState;
     if (!form.validate()) {
       _autovalidate = true;  // Start validating on every change.
       showInSnackBar('Please fix the errors in red before submitting.');
@@ -51,7 +51,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     _formWasEdited = true;
     if (value.text.isEmpty)
       return 'Name is required.';
-    RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
+    final RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
     if (!nameExp.hasMatch(value.text))
       return 'Please enter only alphabetical characters.';
     return null;
@@ -59,7 +59,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
 
   String _validatePhoneNumber(InputValue value) {
     _formWasEdited = true;
-    RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
+    final RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value.text))
       return '###-###-#### - Please enter a valid phone number.';
     return null;
@@ -67,7 +67,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
 
   String _validatePassword(InputValue value) {
     _formWasEdited = true;
-    FormFieldState<InputValue> passwordField = _passwordFieldKey.currentState;
+    final FormFieldState<InputValue> passwordField = _passwordFieldKey.currentState;
     if (passwordField.value == null || passwordField.value.text.isEmpty)
       return 'Please choose a password.';
     if (passwordField.value.text != value.text)

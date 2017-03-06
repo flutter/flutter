@@ -26,8 +26,8 @@ void main() {
     });
 
     Future<Null> createProject() async {
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
     }
@@ -35,8 +35,8 @@ void main() {
     Future<Null> runCommand(String verb) async {
       await createProject();
 
-      PackagesCommand command = new PackagesCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final PackagesCommand command = new PackagesCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['packages', verb, temp.path]);
     }

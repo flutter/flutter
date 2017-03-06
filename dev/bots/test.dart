@@ -31,7 +31,7 @@ Future<Null> main() async {
     print('\x1B[32mDONE: Analysis successful.\x1B[0m');
   } else {
     // Verify that the tests actually return failure on failure and success on success.
-    String automatedTests = p.join(flutterRoot, 'dev', 'automated_tests');
+    final String automatedTests = p.join(flutterRoot, 'dev', 'automated_tests');
     await _runFlutterTest(automatedTests,
       script: p.join('test_smoke_test', 'fail_test.dart'),
       expectFailure: true,
@@ -67,7 +67,7 @@ Future<Null> main() async {
       printOutput: false,
     );
 
-    List<String> coverageFlags = <String>[];
+    final List<String> coverageFlags = <String>[];
     if (Platform.environment['TRAVIS'] != null && Platform.environment['TRAVIS_PULL_REQUEST'] == 'false')
       coverageFlags.add('--coverage');
 
@@ -100,15 +100,15 @@ Future<Null> _runCmd(String executable, List<String> arguments, {
   bool printOutput: true,
   bool skip: false,
 }) async {
-  String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
-  String relativeWorkingDir = p.relative(workingDirectory);
+  final String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = p.relative(workingDirectory);
   if (skip) {
     _printProgress('SKIPPING', relativeWorkingDir, cmd);
     return null;
   }
   _printProgress('RUNNING', relativeWorkingDir, cmd);
 
-  Process process = await Process.start(executable, arguments,
+  final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
@@ -118,7 +118,7 @@ Future<Null> _runCmd(String executable, List<String> arguments, {
     stderr.addStream(process.stderr);
   }
 
-  int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
     print(
       '\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m\n'
@@ -136,7 +136,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     List<String> options: const <String>[],
     bool skip: false,
 }) {
-  List<String> args = <String>['test']..addAll(options);
+  final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null)
     args.add(flutterTestArgs);
   if (script != null)
@@ -152,7 +152,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
 }) {
-  List<String> args = <String>['--checked', p.join('test', 'all.dart')];
+  final List<String> args = <String>['--checked', p.join('test', 'all.dart')];
   return _runCmd(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,

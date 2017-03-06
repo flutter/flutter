@@ -41,10 +41,10 @@ void main() {
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAAAAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAAAAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size, equals(boxB.size));
@@ -72,8 +72,8 @@ void main() {
         ]
       )
     );
-    RenderBox boxA1 = tester.renderObject(find.text('A'));
-    RenderBox boxG1 = tester.renderObject(find.text('G'));
+    final RenderBox boxA1 = tester.renderObject(find.text('A'));
+    final RenderBox boxG1 = tester.renderObject(find.text('G'));
     expect(boxA1, isNotNull);
     expect(boxG1, isNotNull);
     await tester.pumpWidget(
@@ -92,8 +92,8 @@ void main() {
         ]
       )
     );
-    RenderBox boxA2 = tester.renderObject(find.text('a'));
-    RenderBox boxG2 = tester.renderObject(find.text('g'));
+    final RenderBox boxA2 = tester.renderObject(find.text('a'));
+    final RenderBox boxG2 = tester.renderObject(find.text('g'));
     expect(boxA2, isNotNull);
     expect(boxG2, isNotNull);
     expect(boxA1, equals(boxA2));
@@ -143,10 +143,10 @@ void main() {
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size, equals(boxB.size));
@@ -175,10 +175,10 @@ void main() {
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
@@ -230,10 +230,10 @@ void main() {
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('A'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('A'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, lessThan(boxB.size.width));
@@ -284,10 +284,10 @@ void main() {
         ]
       )
     );
-    RenderBox boxA = tester.renderObject(find.text('AAA'));
-    RenderBox boxD = tester.renderObject(find.text('D'));
-    RenderBox boxG = tester.renderObject(find.text('G'));
-    RenderBox boxB = tester.renderObject(find.text('B'));
+    final RenderBox boxA = tester.renderObject(find.text('AAA'));
+    final RenderBox boxD = tester.renderObject(find.text('D'));
+    final RenderBox boxG = tester.renderObject(find.text('G'));
+    final RenderBox boxB = tester.renderObject(find.text('B'));
     expect(boxA.size, equals(boxD.size));
     expect(boxA.size, equals(boxG.size));
     expect(boxA.size.width, greaterThan(boxB.size.width));
@@ -295,7 +295,7 @@ void main() {
   });
 
   testWidgets('Table widget - moving test', (WidgetTester tester) async {
-    List<BuildContext> contexts = <BuildContext>[];
+    final List<BuildContext> contexts = <BuildContext>[];
     await tester.pumpWidget(
       new Table(
         children: <TableRow>[
@@ -366,10 +366,10 @@ void main() {
       )
     );
 
-    TestStatefulWidgetState state11 = tester.state(find.byKey(const ValueKey<int>(11)));
-    TestStatefulWidgetState state12 = tester.state(find.byKey(const ValueKey<int>(12)));
-    TestStatefulWidgetState state21 = tester.state(find.byKey(const ValueKey<int>(21)));
-    TestStatefulWidgetState state22 = tester.state(find.byKey(const ValueKey<int>(22)));
+    final TestStatefulWidgetState state11 = tester.state(find.byKey(const ValueKey<int>(11)));
+    final TestStatefulWidgetState state12 = tester.state(find.byKey(const ValueKey<int>(12)));
+    final TestStatefulWidgetState state21 = tester.state(find.byKey(const ValueKey<int>(21)));
+    final TestStatefulWidgetState state22 = tester.state(find.byKey(const ValueKey<int>(22)));
 
     expect(state11.mounted, isTrue);
     expect(state12.mounted, isTrue);
@@ -397,8 +397,8 @@ void main() {
   });
 
   testWidgets('Table widget - global key reparenting', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
-    Key tableKey = new UniqueKey();
+    final GlobalKey key = new GlobalKey();
+    final Key tableKey = new UniqueKey();
 
     await tester.pumpWidget(
       new Column(
@@ -421,7 +421,7 @@ void main() {
       ),
     );
 
-    RenderTable table = tester.renderObject(find.byType(Table));
+    final RenderTable table = tester.renderObject(find.byType(Table));
     expect(table.row(0).length, 3);
 
     await tester.pumpWidget(

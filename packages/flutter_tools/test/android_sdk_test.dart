@@ -18,7 +18,7 @@ void main() {
 
     testUsingContext('parse sdk', () {
       sdkDir = _createSdkDirectory();
-      AndroidSdk sdk = new AndroidSdk(sdkDir.path);
+      final AndroidSdk sdk = new AndroidSdk(sdkDir.path);
 
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 23);
@@ -26,7 +26,7 @@ void main() {
 
     testUsingContext('parse sdk N', () {
       sdkDir = _createSdkDirectory(withAndroidN: true);
-      AndroidSdk sdk = new AndroidSdk(sdkDir.path);
+      final AndroidSdk sdk = new AndroidSdk(sdkDir.path);
 
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 24);
@@ -35,15 +35,15 @@ void main() {
 
   group('android_sdk AndroidSdkVersion', () {
     testUsingContext('parse normal', () {
-      AndroidSdk sdk = new AndroidSdk('.');
-      AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
+      final AndroidSdk sdk = new AndroidSdk('.');
+      final AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
         platformVersionName: 'android-23', buildToolsVersionName: '23.0.0');
       expect(ver.sdkLevel, 23);
     });
 
     testUsingContext('parse android n', () {
-      AndroidSdk sdk = new AndroidSdk('.');
-      AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
+      final AndroidSdk sdk = new AndroidSdk('.');
+      final AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
         platformVersionName: 'android-N', buildToolsVersionName: '24.0.0');
       expect(ver.sdkLevel, 24);
     });
@@ -51,7 +51,7 @@ void main() {
 }
 
 Directory _createSdkDirectory({ bool withAndroidN: false }) {
-  Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
+  final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
 
   _createSdkFile(dir, 'platform-tools/adb');
 
@@ -70,6 +70,6 @@ Directory _createSdkDirectory({ bool withAndroidN: false }) {
 }
 
 void _createSdkFile(Directory dir, String filePath) {
-  File file = fs.file(fs.path.join(dir.path, filePath));
+  final File file = fs.file(fs.path.join(dir.path, filePath));
   file.createSync(recursive: true);
 }

@@ -99,7 +99,7 @@ class SemanticsData {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType($rect');
     if (transform != null)
       buffer.write('; $transform');
@@ -307,7 +307,7 @@ class SemanticsNode extends AbstractNode {
 
   /// Restore this node to its default state.
   void reset() {
-    bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
+    final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
     if (hadInheritedMergeAllDescendantsIntoThisNode)
@@ -336,7 +336,7 @@ class SemanticsNode extends AbstractNode {
       return true;
     });
     assert(() {
-      Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
+      final Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
       for (SemanticsNode child in _newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
@@ -411,7 +411,7 @@ class SemanticsNode extends AbstractNode {
         }
       }
     }
-    List<SemanticsNode> oldChildren = _children;
+    final List<SemanticsNode> oldChildren = _children;
     _children = _newChildren;
     oldChildren?.clear();
     _newChildren = oldChildren;
@@ -565,7 +565,7 @@ class SemanticsNode extends AbstractNode {
 
   @override
   String toString() {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     buffer.write('$runtimeType($id');
     if (_dirty)
       buffer.write(' (${ owner != null && owner._dirtyNodes.contains(this) ? "dirty" : "STALE; owner=$owner" })');
@@ -595,7 +595,7 @@ class SemanticsNode extends AbstractNode {
     String result = '$prefixLineOne$this\n';
     if (_children != null && _children.isNotEmpty) {
       for (int index = 0; index < _children.length - 1; index += 1) {
-        SemanticsNode child = _children[index];
+        final SemanticsNode child = _children[index];
         result += '${child.toStringDeep("$prefixOtherLines \u251C", "$prefixOtherLines \u2502")}';
       }
       result += '${_children.last.toStringDeep("$prefixOtherLines \u2514", "$prefixOtherLines  ")}';
@@ -631,9 +631,9 @@ class SemanticsOwner extends ChangeNotifier {
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
-    List<SemanticsNode> visitedNodes = <SemanticsNode>[];
+    final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
     while (_dirtyNodes.isNotEmpty) {
-      List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
+      final List<SemanticsNode> localDirtyNodes = _dirtyNodes.where((SemanticsNode node) => !_detachedNodes.contains(node)).toList();
       _dirtyNodes.clear();
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
@@ -669,7 +669,7 @@ class SemanticsOwner extends ChangeNotifier {
       }
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
-    ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
+    final ui.SemanticsUpdateBuilder builder = new ui.SemanticsUpdateBuilder();
     for (SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
@@ -712,13 +712,13 @@ class SemanticsOwner extends ChangeNotifier {
   /// this function does nothing.
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
-    SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
+    final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     handler?.performAction(action);
   }
 
   SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Point position, SemanticsAction action) {
     if (node.transform != null) {
-      Matrix4 inverse = new Matrix4.identity();
+      final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
         return null;
       position = MatrixUtils.transformPoint(inverse, position);
@@ -738,7 +738,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (node.hasChildren) {
       for (SemanticsNode child in node._children.reversed) {
-        SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
@@ -755,7 +755,7 @@ class SemanticsOwner extends ChangeNotifier {
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
       return;
-    SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
     handler?.performAction(action);
   }
 

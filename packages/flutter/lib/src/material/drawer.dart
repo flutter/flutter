@@ -148,7 +148,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
-      ModalRoute<dynamic> route = ModalRoute.of(context);
+      final ModalRoute<dynamic> route = ModalRoute.of(context);
       if (route != null) {
         _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
@@ -196,7 +196,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   double get _width {
-    RenderBox drawerBox = _drawerKey.currentContext?.findRenderObject();
+    final RenderBox drawerBox = _drawerKey.currentContext?.findRenderObject();
     if (drawerBox != null)
       return drawerBox.size.width;
     return _kWidth; // drawer not being shown currently

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.allowAllFrames = true;
 
@@ -16,7 +16,7 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    Finder finder = find.byWidgetPredicate((Widget widget) {
+    final Finder finder = find.byWidgetPredicate((Widget widget) {
       return widget is Tooltip && widget.message == 'Open navigation menu';
     });
     expect(finder, findsOneWidget);

@@ -102,7 +102,7 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   Widget buildSettingsPane(BuildContext context) {
-    List<Widget> rows = <Widget>[
+    final List<Widget> rows = <Widget>[
       new DrawerItem(
         icon: new Icon(Icons.thumb_up),
         onPressed: () => _confirmOptimismChange(),

@@ -32,10 +32,10 @@ class TestFlowDelegate extends FlowDelegate {
 
 void main() {
   testWidgets('Flow control test', (WidgetTester tester) async {
-    AnimationController startOffset = new AnimationController.unbounded(
+    final AnimationController startOffset = new AnimationController.unbounded(
       vsync: tester,
     );
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     Widget buildBox(int i) {
       return new GestureDetector(

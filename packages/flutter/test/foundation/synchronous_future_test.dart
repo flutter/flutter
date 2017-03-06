@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('SynchronousFuture control test', () async {
-    Future<int> future = new SynchronousFuture<int>(42);
+    final Future<int> future = new SynchronousFuture<int>(42);
 
     int result;
     future.then<Null>((int value) { result = value; });
@@ -17,19 +17,19 @@ void main() {
     expect(result, equals(42));
     result = null;
 
-    Future<int> futureWithTimeout = future.timeout(const Duration(milliseconds: 1));
+    final Future<int> futureWithTimeout = future.timeout(const Duration(milliseconds: 1));
     futureWithTimeout.then<Null>((int value) { result = value; });
     expect(result, isNull);
     await futureWithTimeout;
     expect(result, equals(42));
     result = null;
 
-    Stream<int> stream = future.asStream();
+    final Stream<int> stream = future.asStream();
 
     expect(await stream.single, equals(42));
 
     bool ranAction = false;
-    Future<int> completeResult = future.whenComplete(() {
+    final Future<int> completeResult = future.whenComplete(() {
       ranAction = true;
       return new Future<int>.value(31);
     });

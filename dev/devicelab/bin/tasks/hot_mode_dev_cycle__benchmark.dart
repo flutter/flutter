@@ -12,11 +12,11 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 void main() {
   task(() async {
-    Device device = await devices.workingDevice;
+    final Device device = await devices.workingDevice;
     await device.unlock();
-    Directory appDir =
+    final Directory appDir =
         dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
-    File benchmarkFile = file(path.join(appDir.path, 'hot_benchmark.json'));
+    final File benchmarkFile = file(path.join(appDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
     await inDirectory(appDir, () async {
       return await flutter('run',

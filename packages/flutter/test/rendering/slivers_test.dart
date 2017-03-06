@@ -9,7 +9,7 @@ import 'rendering_tester.dart';
 
 void main() {
   test('RenderViewport basic test - no children', () {
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
     );
     layout(root);
@@ -19,7 +19,7 @@ void main() {
 
   test('RenderViewport basic test - down', () {
     RenderBox a, b, c, d, e;
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -70,14 +70,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderViewport basic test - up', () {
     RenderBox a, b, c, d, e;
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -123,14 +123,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderViewport basic test - right', () {
     RenderBox a, b, c, d, e;
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -176,14 +176,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(300.0, 0.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(700.0, 0.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderViewport basic test - left', () {
     RenderBox a, b, c, d, e;
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -229,7 +229,7 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(100.0, 0.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-300.0, 0.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -239,7 +239,7 @@ void main() {
   // TODO(ianh): test semantics
 
   test('RenderShrinkWrappingViewport basic test - no children', () {
-    RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+    final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       offset: new ViewportOffset.zero(),
     );
     layout(root);
@@ -249,7 +249,7 @@ void main() {
 
   test('RenderShrinkWrappingViewport basic test - down', () {
     RenderBox a, b, c, d, e;
-    RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+    final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         new RenderSliverToBoxAdapter(child: a = new RenderSizedBox(const Size(100.0, 400.0))),
@@ -300,14 +300,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - up', () {
     RenderBox a, b, c, d, e;
-    RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+    final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -353,14 +353,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - right', () {
     RenderBox a, b, c, d, e;
-    RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+    final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -406,14 +406,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(300.0, 0.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(700.0, 0.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport basic test - left', () {
     RenderBox a, b, c, d, e;
-    RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
+    final RenderShrinkWrappingViewport root = new RenderShrinkWrappingViewport(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -459,14 +459,14 @@ void main() {
     expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(100.0, 0.0));
     expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-300.0, 0.0));
 
-    HitTestResult result = new HitTestResult();
+    final HitTestResult result = new HitTestResult();
     root.hitTest(result, position: const Point(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
   test('RenderShrinkWrappingViewport shrinkwrap test - 1 child', () {
     RenderBox child;
-    RenderBox root = new RenderPositionedBox(
+    final RenderBox root = new RenderPositionedBox(
       child: child = new RenderShrinkWrappingViewport(
         axisDirection: AxisDirection.left,
         offset: new ViewportOffset.fixed(200.0),
@@ -485,7 +485,7 @@ void main() {
 
   test('RenderShrinkWrappingViewport shrinkwrap test - 2 children', () {
     RenderBox child;
-    RenderBox root = new RenderPositionedBox(
+    final RenderBox root = new RenderPositionedBox(
       child: child = new RenderShrinkWrappingViewport(
         axisDirection: AxisDirection.right,
         offset: new ViewportOffset.fixed(200.0),

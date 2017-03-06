@@ -9,10 +9,10 @@ import 'package:flutter_devicelab/framework/manifest.dart';
 void main() {
   group('production manifest', () {
     test('must be valid', () {
-      Manifest manifest = loadTaskManifest();
+      final Manifest manifest = loadTaskManifest();
       expect(manifest.tasks, isNotEmpty);
 
-      ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'flutter_gallery__start_up');
+      final ManifestTask task = manifest.tasks.firstWhere((ManifestTask task) => task.name == 'flutter_gallery__start_up');
       expect(task.description, 'Measures the startup time of the Flutter Gallery app on Android.\n');
       expect(task.stage, 'devicelab');
       expect(task.requiredAgentCapabilities, <String>['has-android-device']);

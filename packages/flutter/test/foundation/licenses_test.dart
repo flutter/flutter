@@ -9,7 +9,7 @@ void main() {
   test('LicenseEntryWithLineBreaks - most cases', () {
     // There's some trailing spaces in this string.
     // To avoid IDEs stripping them, I've escaped them as \u0020.
-    List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(null, '''
+    final List<LicenseParagraph> paragraphs = const LicenseEntryWithLineBreaks(null, '''
 A
 A
 A
@@ -183,7 +183,7 @@ S
       yield const LicenseEntryWithLineBreaks(null, 'D');
     });
     expect(await LicenseRegistry.licenses.toList(), hasLength(4));
-    List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();
+    final List<LicenseEntry> licenses = await LicenseRegistry.licenses.toList();
     expect(licenses, hasLength(4));
     expect(licenses[0].paragraphs.single.text, 'A');
     expect(licenses[1].paragraphs.single.text, 'B');

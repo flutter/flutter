@@ -42,16 +42,16 @@ class LogsCommand extends FlutterCommand {
     if (argResults['clear'])
       device.clearLogs();
 
-    DeviceLogReader logReader = device.getLogReader();
+    final DeviceLogReader logReader = device.getLogReader();
 
     Cache.releaseLockEarly();
 
     printStatus('Showing $logReader logs:');
 
-    Completer<int> exitCompleter = new Completer<int>();
+    final Completer<int> exitCompleter = new Completer<int>();
 
     // Start reading.
-    StreamSubscription<String> subscription = logReader.logLines.listen(
+    final StreamSubscription<String> subscription = logReader.logLines.listen(
       printStatus,
       onDone: () {
         exitCompleter.complete(0);
@@ -75,7 +75,7 @@ class LogsCommand extends FlutterCommand {
     }
 
     // Wait for the log reader to be finished.
-    int result = await exitCompleter.future;
+    final int result = await exitCompleter.future;
     subscription.cancel();
     if (result != 0)
       throwToolExit('Error listening to $logReader logs.');

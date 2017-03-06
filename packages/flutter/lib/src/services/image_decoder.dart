@@ -12,7 +12,7 @@ import 'dart:ui' as ui show Image, decodeImageFromList;
 /// the returned [Future] resolves to the decoded image. Otherwise, the [Future]
 /// resolves to [null].
 Future<ui.Image> decodeImageFromList(Uint8List list) {
-  Completer<ui.Image> completer = new Completer<ui.Image>();
+  final Completer<ui.Image> completer = new Completer<ui.Image>();
   ui.decodeImageFromList(list, (ui.Image image) {
     completer.complete(image);
   });

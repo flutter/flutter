@@ -47,8 +47,8 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   bool skip: false,
   test_package.Timeout timeout
 }) {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  WidgetTester tester = new WidgetTester._(binding);
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.group('-', () {
     test_package.test(description, () => binding.runTest(() => callback(tester), tester._endOfTestVerifications), skip: skip);
@@ -106,9 +106,9 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
   });
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
-  WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = new WidgetTester._(binding);
   return binding.runTest(() => callback(tester), tester._endOfTestVerifications) ?? new Future<Null>.value();
 }
 

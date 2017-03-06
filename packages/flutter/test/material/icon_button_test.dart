@@ -32,7 +32,7 @@ void main() {
       ),
     );
 
-    RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
     expect(iconButton.size, new Size(48.0, 48.0));
 
     await tester.tap(find.byType(IconButton));
@@ -52,7 +52,7 @@ void main() {
       ),
     );
 
-    RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
     expect(iconButton.size, new Size(48.0, 48.0));
   });
 
@@ -70,7 +70,7 @@ void main() {
       ),
     );
 
-    RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
     expect(iconButton.size, new Size(70.0, 70.0));
   });
 
@@ -88,7 +88,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(IconButton));
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
     expect(box.size, new Size(80.0, 80.0));
   });
 
@@ -109,7 +109,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(IconButton));
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
     expect(box.size, new Size(48.0, 600.0));
   });
 
@@ -126,7 +126,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(IconButton));
+    final RenderBox box = tester.renderObject(find.byType(IconButton));
     expect(box.size, new Size(96.0, 96.0));
   });
 
@@ -185,8 +185,8 @@ void main() {
       ),
     );
 
-    RenderBox barBox = tester.renderObject(find.byType(AppBar));
-    RenderBox iconBox = tester.renderObject(find.byType(IconButton));
+    final RenderBox barBox = tester.renderObject(find.byType(AppBar));
+    final RenderBox iconBox = tester.renderObject(find.byType(IconButton));
     expect(iconBox.size.height, equals(barBox.size.height));
   });
 }

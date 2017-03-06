@@ -130,7 +130,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     try {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
-      String script = platform.script.toFilePath();
+      final String script = platform.script.toFilePath();
       if (fs.path.basename(script) == kSnapshotFileName)
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
       if (fs.path.basename(script) == kFlutterToolsScriptFileName)
@@ -171,14 +171,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['bug-report']) {
       // --bug-report implies --record-to=<tmp_path>
-      Directory tmp = await const LocalFileSystem()
+      final Directory tmp = await const LocalFileSystem()
           .systemTempDirectory
           .createTemp('flutter_tools_');
       recordTo = tmp.path;
 
       // Record the arguments that were used to invoke this runner.
-      File manifest = tmp.childFile('MANIFEST.txt');
-      StringBuffer buffer = new StringBuffer()
+      final File manifest = tmp.childFile('MANIFEST.txt');
+      final StringBuffer buffer = new StringBuffer()
         ..writeln('# arguments')
         ..writeln(globalResults.arguments)
         ..writeln()
@@ -188,7 +188,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
       // ZIP the recording up once the recording has been serialized.
       addShutdownHook(() async {
-        File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
+        final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
         os.zip(tmp, zipFile);
         printStatus(
             'Bug report written to ${zipFile.basename}.\n'
@@ -244,7 +244,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     deviceManager.specifiedDeviceId = globalResults['device-id'];
 
     // Set up the tooling configuration.
-    String enginePath = _findEnginePath(globalResults);
+    final String enginePath = _findEnginePath(globalResults);
     if (enginePath != null) {
       Artifacts.useLocalEngine(enginePath, _findEngineBuildPath(globalResults, enginePath));
     }
@@ -272,10 +272,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        final Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         if (engineUri != null) {
           engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
-          bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
+          final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
           if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
             engineSourcePath = null;
         }
@@ -312,7 +312,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throw new ProcessExit(2);
     }
 
-    String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
+    final String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
     if (!fs.isDirectorySync(engineBuildPath)) {
       printError('No Flutter engine build found at $engineBuildPath.');
       throw new ProcessExit(2);
@@ -385,7 +385,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         break;
       }
 
-      String parent = fs.path.dirname(directory);
+      final String parent = fs.path.dirname(directory);
       if (parent == directory)
         break;
       directory = parent;
@@ -393,13 +393,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
-      PackageMap packageMap = new PackageMap(kPackagesFileName);
-      Uri flutterUri = packageMap.map['flutter'];
+      final PackageMap packageMap = new PackageMap(kPackagesFileName);
+      final Uri flutterUri = packageMap.map['flutter'];
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib
-        Uri rootUri = flutterUri.resolve('../../..');
-        String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
+        final Uri rootUri = flutterUri.resolve('../../..');
+        final String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
 
         if (!fs.isDirectorySync(flutterPath)) {
           printError(

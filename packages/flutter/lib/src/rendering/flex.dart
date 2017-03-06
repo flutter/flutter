@@ -247,10 +247,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       double maxFlexFractionSoFar = 0.0;
       RenderBox child = firstChild;
       while (child != null) {
-        int flex = _getFlex(child);
+        final int flex = _getFlex(child);
         totalFlex += flex;
         if (flex > 0) {
-          double flexFraction = childSize(child, extent) / _getFlex(child);
+          final double flexFraction = childSize(child, extent) / _getFlex(child);
           maxFlexFractionSoFar = math.max(maxFlexFractionSoFar, flexFraction);
         } else {
           inflexibleSpace += childSize(child, extent);
@@ -267,13 +267,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // TODO(ianh): Support baseline alignment.
 
       // Get inflexible space using the max intrinsic dimensions of fixed children in the main direction.
-      double availableMainSpace = extent;
+      final double availableMainSpace = extent;
       int totalFlex = 0;
       double inflexibleSpace = 0.0;
       double maxCrossSize = 0.0;
       RenderBox child = firstChild;
       while (child != null) {
-        int flex = _getFlex(child);
+        final int flex = _getFlex(child);
         totalFlex += flex;
         double mainSize;
         double crossSize;
@@ -297,13 +297,13 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
       // Determine the spacePerFlex by allocating the remaining available space.
       // When you're overconstrained spacePerFlex can be negative.
-      double spacePerFlex = math.max(0.0,
+      final double spacePerFlex = math.max(0.0,
           (availableMainSpace - inflexibleSpace) / totalFlex);
 
       // Size remaining (flexible) items, find the maximum cross size.
       child = firstChild;
       while (child != null) {
-        int flex = _getFlex(child);
+        final int flex = _getFlex(child);
         if (flex > 0)
           maxCrossSize = math.max(maxCrossSize, childSize(child, spacePerFlex * flex));
         final FlexParentData childParentData = child.parentData;
@@ -404,7 +404,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                       'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
                       'axis. Setting a flex on a child (e.g. using a Flexible) indicates that the child is to '
                       'expand to fill the remaining space in the $axis direction.';
-            StringBuffer information = new StringBuffer();
+            final StringBuffer information = new StringBuffer();
             RenderBox node = this;
             switch (_direction) {
               case Axis.horizontal:
@@ -423,7 +423,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             if (node != null) {
               information.writeln('The nearest ancestor providing an unbounded width constraint is:');
               information.writeln('  $node');
-              List<String> description = <String>[];
+              final List<String> description = <String>[];
               node.debugFillDescription(description);
               for (String line in description)
                 information.writeln('  $line');
@@ -543,7 +543,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
               throw new FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
             return true;
           });
-          double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
+          final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
         }
@@ -638,7 +638,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           childCrossPosition = 0.0;
           if (_direction == Axis.horizontal) {
             assert(textBaseline != null);
-            double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
+            final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
             if (distance != null)
               childCrossPosition = maxBaselineDistance - distance;
           }
@@ -681,8 +681,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       // If you do want clipping, use a RenderClip (Clip in the
       // Widgets library).
 
-      Paint markerPaint = new Paint()..color = const Color(0xE0FF0000);
-      Paint highlightPaint = new Paint()..color = const Color(0x7FFF0000);
+      final Paint markerPaint = new Paint()..color = const Color(0xE0FF0000);
+      final Paint highlightPaint = new Paint()..color = const Color(0x7FFF0000);
       const double kMarkerSize = 0.1;
       Rect markerRect, overflowRect;
       switch(direction) {

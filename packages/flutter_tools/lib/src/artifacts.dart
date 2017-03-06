@@ -105,7 +105,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.chromiumDebugKeyStore:
       case Artifact.classesDexJar:
@@ -119,7 +119,7 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
-        String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return fs.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -128,7 +128,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
@@ -157,8 +157,8 @@ class CachedArtifacts extends Artifacts {
         continue returnResourcePath;
       returnResourcePath:
       case Artifact.icudtlDat:
-        String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        String platformDirName = getNameForTargetPlatform(platform);
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -169,8 +169,8 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
-    String engineDir = cache.getArtifactDirectory('engine').path;
-    String platformName = getNameForTargetPlatform(platform);
+    final String engineDir = cache.getArtifactDirectory('engine').path;
+    final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
@@ -182,7 +182,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
         return fs.path.join(engineDir, platformName + suffix);
     }
     assert(false, 'Invalid platform $platform.');
@@ -222,7 +222,7 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.classesDexJar:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', _artifactToFileName(artifact));
       case Artifact.libskyShellSo:
-        String abi = _getAbiDirectory(platform);
+        final String abi = _getAbiDirectory(platform);
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', fs.path.join('android', 'libs', abi, _artifactToFileName(artifact)));
       case Artifact.genSnapshot:
         return _genSnapshotPath(platform);
@@ -257,7 +257,7 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _skySnapshotPath() {
-    String clangPath = fs.path.join(engineOutPath, 'clang_x64', _artifactToFileName(Artifact.skySnapshot));
+    final String clangPath = fs.path.join(engineOutPath, 'clang_x64', _artifactToFileName(Artifact.skySnapshot));
     if (fs.isFileSync(clangPath))
       return clangPath;
     return fs.path.join(engineOutPath, _artifactToFileName(Artifact.skySnapshot));

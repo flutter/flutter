@@ -11,7 +11,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       new Material(
         child: new Center(

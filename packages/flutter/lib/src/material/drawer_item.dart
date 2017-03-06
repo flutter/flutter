@@ -84,7 +84,7 @@ class DrawerItem extends StatelessWidget {
   }
 
   TextStyle _getTextStyle(ThemeData themeData) {
-    TextStyle result = themeData.textTheme.body2;
+    final TextStyle result = themeData.textTheme.body2;
     if (selected) {
       switch (themeData.brightness) {
         case Brightness.light:
@@ -99,9 +99,9 @@ class DrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
 
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     if (icon != null) {
       children.add(
         new Padding(

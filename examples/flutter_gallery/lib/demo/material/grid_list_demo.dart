@@ -185,7 +185,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       )
     );
 
-    IconData icon = photo.isFavorite ? Icons.star : Icons.star_border;
+    final IconData icon = photo.isFavorite ? Icons.star : Icons.star_border;
 
     switch(tileStyle) {
       case GridDemoTileStyle.imageOnly:

@@ -387,7 +387,7 @@ void main() {
       )
     ));
 
-    RenderBox renderBox = tester.renderObject(find.byKey(childKey));
+    final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
     expect(renderBox.size.width, equals(100.0));
     expect(renderBox.size.height, equals(0.0));
   });

@@ -190,8 +190,8 @@ class Cubic extends Curve {
     double start = 0.0;
     double end = 1.0;
     while (true) {
-      double midpoint = (start + end) / 2;
-      double estimate = _evaluateCubic(a, c, midpoint);
+      final double midpoint = (start + end) / 2;
+      final double estimate = _evaluateCubic(a, c, midpoint);
       if ((t - estimate).abs() < _kCubicErrorBound)
         return _evaluateCubic(b, d, midpoint);
       if (estimate < t)
@@ -326,7 +326,7 @@ class ElasticInCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     t = t - 1.0;
     return -math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);
   }
@@ -350,7 +350,7 @@ class ElasticOutCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     return math.pow(2.0, -10 * t) * math.sin((t - s) * (math.PI * 2.0) / period) + 1.0;
   }
 
@@ -373,7 +373,7 @@ class ElasticInOutCurve extends Curve {
   @override
   double transform(double t) {
     assert(t >= 0.0 && t <= 1.0);
-    double s = period / 4.0;
+    final double s = period / 4.0;
     t = 2.0 * t - 1.0;
     if (t < 0.0)
       return -0.5 * math.pow(2.0, 10.0 * t) * math.sin((t - s) * (math.PI * 2.0) / period);

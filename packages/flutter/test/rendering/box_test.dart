@@ -10,7 +10,7 @@ import 'rendering_tester.dart';
 
 void main() {
   test("should size to render view", () {
-    RenderBox root = new RenderDecoratedBox(
+    final RenderBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(
         backgroundColor: const Color(0xFF00FF00),
         gradient: new RadialGradient(
@@ -26,25 +26,25 @@ void main() {
   });
 
   test('Flex and padding', () {
-    RenderBox size = new RenderConstrainedBox(
+    final RenderBox size = new RenderConstrainedBox(
       additionalConstraints: const BoxConstraints().tighten(height: 100.0),
     );
-    RenderBox inner = new RenderDecoratedBox(
+    final RenderBox inner = new RenderDecoratedBox(
       decoration: const BoxDecoration(
         backgroundColor: const Color(0xFF00FF00),
       ),
       child: size,
     );
-    RenderBox padding = new RenderPadding(
+    final RenderBox padding = new RenderPadding(
       padding: const EdgeInsets.all(50.0),
       child: inner,
     );
-    RenderBox flex = new RenderFlex(
+    final RenderBox flex = new RenderFlex(
       children: <RenderBox>[padding],
       direction: Axis.vertical,
       crossAxisAlignment: CrossAxisAlignment.stretch,
     );
-    RenderBox outer = new RenderDecoratedBox(
+    final RenderBox outer = new RenderDecoratedBox(
       decoration: const BoxDecoration(
         backgroundColor: const Color(0xFF0000FF)
       ),
@@ -66,14 +66,14 @@ void main() {
   });
 
   test("should not have a 0 sized colored Box", () {
-    RenderBox coloredBox = new RenderDecoratedBox(
+    final RenderBox coloredBox = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
-    RenderBox paddingBox = new RenderPadding(
+    final RenderBox paddingBox = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
       child: coloredBox,
     );
-    RenderBox root = new RenderDecoratedBox(
+    final RenderBox root = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
       child: paddingBox,
     );
@@ -83,20 +83,20 @@ void main() {
   });
 
   test("reparenting should clear position", () {
-    RenderDecoratedBox coloredBox = new RenderDecoratedBox(
+    final RenderDecoratedBox coloredBox = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
 
-    RenderPadding paddedBox = new RenderPadding(
+    final RenderPadding paddedBox = new RenderPadding(
       child: coloredBox,
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    BoxParentData parentData = coloredBox.parentData;
+    final BoxParentData parentData = coloredBox.parentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
-    RenderConstrainedBox constraintedBox = new RenderConstrainedBox(
+    final RenderConstrainedBox constraintedBox = new RenderConstrainedBox(
       child: coloredBox,
       additionalConstraints: const BoxConstraints(),
     );

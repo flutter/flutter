@@ -104,7 +104,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// this route from the previous one, and back to the previous route from this
   /// one.
   AnimationController createAnimationController() {
-    Duration duration = transitionDuration;
+    final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.ZERO);
     return new AnimationController(
       duration: duration,
@@ -198,7 +198,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   void _updateForwardAnimation(Route<dynamic> nextRoute) {
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      Animation<double> current = _forwardAnimation.parent;
+      final Animation<double> current = _forwardAnimation.parent;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
@@ -323,7 +323,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   @override
   bool didPop(T result) {
     if (_localHistory != null && _localHistory.isNotEmpty) {
-      LocalHistoryEntry entry = _localHistory.removeLast();
+      final LocalHistoryEntry entry = _localHistory.removeLast();
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
@@ -506,7 +506,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ModalRoute<dynamic> route = ModalRoute.of(context);
   /// ```
   static ModalRoute<dynamic> of(BuildContext context) {
-    _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
+    final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
   }
 
@@ -588,7 +588,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   Future<Null> didPush() {
     if (!settings.isInitialRoute) {
-      BuildContext overlayContext = navigator.overlay?.context;
+      final BuildContext overlayContext = navigator.overlay?.context;
       assert(() {
         if (overlayContext == null) {
           throw new FlutterError(
@@ -807,7 +807,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null) {
       assert(barrierColor != _kTransparent);
-      Animation<Color> color = new ColorTween(
+      final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
         end: barrierColor
       ).animate(new CurvedAnimation(

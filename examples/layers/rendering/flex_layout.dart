@@ -10,13 +10,13 @@ import 'package:flutter/rendering.dart';
 import 'src/solid_color_box.dart';
 
 void main() {
-  RenderFlex table = new RenderFlex(direction: Axis.vertical);
+  final RenderFlex table = new RenderFlex(direction: Axis.vertical);
 
   void addAlignmentRow(CrossAxisAlignment crossAxisAlignment) {
     TextStyle style = const TextStyle(color: const Color(0xFF000000));
-    RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$crossAxisAlignment'));
+    final RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$crossAxisAlignment'));
     table.add(new RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    RenderFlex row = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
+    final RenderFlex row = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
     style = const TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
       decoration: const BoxDecoration(backgroundColor: const Color(0x7FFFCCCC)),
@@ -27,7 +27,7 @@ void main() {
       decoration: const BoxDecoration(backgroundColor: const Color(0x7FCCFFCC)),
       child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo'))
     ));
-    RenderFlex subrow = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
+    final RenderFlex subrow = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
     style = const TextStyle(fontSize: 25.0, color: const Color(0xFF000000));
     subrow.add(new RenderDecoratedBox(
       decoration: const BoxDecoration(backgroundColor: const Color(0x7FCCCCFF)),
@@ -48,9 +48,9 @@ void main() {
 
   void addJustificationRow(MainAxisAlignment justify) {
     const TextStyle style = const TextStyle(color: const Color(0xFF000000));
-    RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$justify'));
+    final RenderParagraph paragraph = new RenderParagraph(new TextSpan(style: style, text: '$justify'));
     table.add(new RenderPadding(child: paragraph, padding: const EdgeInsets.only(top: 20.0)));
-    RenderFlex row = new RenderFlex(direction: Axis.horizontal);
+    final RenderFlex row = new RenderFlex(direction: Axis.horizontal);
     row.add(new RenderSolidColorBox(const Color(0xFFFFCCCC), desiredSize: const Size(80.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCFFCC), desiredSize: const Size(64.0, 60.0)));
     row.add(new RenderSolidColorBox(const Color(0xFFCCCCFF), desiredSize: const Size(160.0, 60.0)));
@@ -66,7 +66,7 @@ void main() {
   addJustificationRow(MainAxisAlignment.spaceBetween);
   addJustificationRow(MainAxisAlignment.spaceAround);
 
-  RenderDecoratedBox root = new RenderDecoratedBox(
+  final RenderDecoratedBox root = new RenderDecoratedBox(
     decoration: const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
     child: new RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0))
   );

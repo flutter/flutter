@@ -83,14 +83,14 @@ class ColdRunner extends ResidentRunner {
 
     if (package == null) {
       String message = 'No application found for ${device.platform}.';
-      String hint = getMissingPackageHintForPlatform(device.platform);
+      final String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
       return 1;
     }
 
-    Stopwatch startTime = new Stopwatch()..start();
+    final Stopwatch startTime = new Stopwatch()..start();
 
     Map<String, dynamic> platformArgs;
     if (traceStartup != null)
@@ -98,7 +98,7 @@ class ColdRunner extends ResidentRunner {
 
     await startEchoingDeviceLog(package);
 
-    String modeName = getModeName(debuggingOptions.buildMode);
+    final String modeName = getModeName(debuggingOptions.buildMode);
     if (mainPath == null) {
       assert(prebuiltMode);
       printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');

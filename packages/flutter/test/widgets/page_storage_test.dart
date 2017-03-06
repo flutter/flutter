@@ -26,7 +26,7 @@ void main() {
       )
     );
 
-    Element builderElement = tester.element(find.byKey(builderKey));
+    final Element builderElement = tester.element(find.byKey(builderKey));
     expect(PageStorage.of(builderElement), isNotNull);
     expect(PageStorage.of(builderElement).readState(builderElement), equals(storedValue));
 

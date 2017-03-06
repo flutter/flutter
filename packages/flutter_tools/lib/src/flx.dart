@@ -59,7 +59,7 @@ Future<int> _createScriptSnapshotWithSkySnapshot({
   assert(mainPath != null);
   assert(snapshotPath != null);
   assert(packages != null);
-  String snapshotterPath = artifacts.getArtifactPath(Artifact.skySnapshot);
+  final String snapshotterPath = artifacts.getArtifactPath(Artifact.skySnapshot);
 
   final List<String> args = <String>[
     snapshotterPath,
@@ -83,9 +83,9 @@ Future<int> _creteScriptSnapshotWithGenSnapshot({
   assert(mainPath != null);
   assert(snapshotPath != null);
   assert(packages != null);
-  String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot);
-  String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-  String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
+  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot);
+  final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
+  final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 
   final List<String> args = <String>[
     snapshotterPath,
@@ -149,7 +149,7 @@ Future<Null> build({
   if (kernelContent != null) {
     // TODO(danrubel) in the future, call the VM to generate this file
     kernelFile = fs.file(kernelPath);
-    IOSink sink = kernelFile.openWrite();
+    final IOSink sink = kernelFile.openWrite();
     await sink.addStream(kernelContent.contentsAsStream());
     sink.close();
   }
@@ -158,7 +158,7 @@ Future<Null> build({
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    int result = await createSnapshot(
+    final int result = await createSnapshot(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
@@ -201,8 +201,8 @@ Future<Null> assemble({
   printTrace('Building $outputPath');
 
   // Build the asset bundle.
-  AssetBundle assetBundle = new AssetBundle();
-  int result = await assetBundle.build(
+  final AssetBundle assetBundle = new AssetBundle();
+  final int result = await assetBundle.build(
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
@@ -213,7 +213,7 @@ Future<Null> assemble({
   if (result != 0)
     throwToolExit('Error building $outputPath: $result', exitCode: result);
 
-  ZipBuilder zipBuilder = new ZipBuilder();
+  final ZipBuilder zipBuilder = new ZipBuilder();
 
   // Add all entries from the asset bundle.
   zipBuilder.entries.addAll(assetBundle.entries);

@@ -24,6 +24,9 @@ class DartDependencySetBuilder {
   final String projectRootPath;
   final String packagesFilePath;
 
+  /// Returns a set of canonicalize paths.
+  ///
+  /// The paths have been canonicalize with `fs.path.canonicalize`.
   Set<String> build() {
     final String skySnapshotPath =
         Artifacts.instance.getArtifactPath(Artifact.skySnapshot);
@@ -35,9 +38,11 @@ class DartDependencySetBuilder {
       mainScriptPath
     ];
 
-    String output = runSyncAndThrowStdErrOnError(args);
+    final String output = runSyncAndThrowStdErrOnError(args);
 
-    return new Set<String>.from(LineSplitter.split(output));
+    return new Set<String>.from(LineSplitter.split(output).map(
+        (String path) => fs.path.canonicalize(path))
+    );
   }
 }
 
@@ -65,8 +70,8 @@ class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
     assert(fs.path.isAbsolute(this.projectRootPath));
 
     // TODO(goderbauer): Implement --print-deps in gen_snapshot so we don't have to parse the Makefile
-    Directory tempDir = fs.systemTempDirectory.createTempSync('dart_dependency_set_builder_');
-    String depfilePath = fs.path.join(tempDir.path, 'snapshot_blob.bin.d');
+    final Directory tempDir = fs.systemTempDirectory.createTempSync('dart_dependency_set_builder_');
+    final String depfilePath = fs.path.join(tempDir.path, 'snapshot_blob.bin.d');
 
     final List<String> args = <String>[
       snapshotterPath,
@@ -84,14 +89,15 @@ class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
     String output = fs.file(depfilePath).readAsStringSync();
     tempDir.deleteSync(recursive: true);
 
-    int splitIndex = output.indexOf(':');
+    final int splitIndex = output.indexOf(':');
     if (splitIndex == -1)
       throw new Exception('Unexpected output $output');
 
     output = output.substring(splitIndex + 1);
     // Note: next line means we cannot process anything with spaces in the path
     //       because Makefiles don't support spaces in paths :(
-    List<String> depsList = output.trim().split(' ');
-    return new Set<String>.from(depsList);
+    return new Set<String>.from(output.trim().split(' ').map(
+        (String path) => fs.path.canonicalize(path)
+    ));
   }
 }

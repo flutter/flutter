@@ -113,7 +113,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @protected
   @mustCallSuper
   void resolve(GestureDisposition disposition) {
-    List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries.values);
+    final List<GestureArenaEntry> localEntries = new List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
     for (GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
@@ -303,7 +303,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   }
 
   double _getDistance(PointerEvent event) {
-    Offset offset = event.position - initialPosition;
+    final Offset offset = event.position - initialPosition;
     return offset.distance;
   }
 

@@ -10,7 +10,7 @@ import 'src/context.dart';
 void main() {
   group('ApkManifestData', () {
     testUsingContext('parse sdk', () {
-      ApkManifestData data = ApkManifestData.parseFromAaptBadging(_aaptData);
+      final ApkManifestData data = ApkManifestData.parseFromAaptBadging(_aaptData);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.gallery');
       expect(data.launchableActivityName, 'io.flutter.app.FlutterActivity');

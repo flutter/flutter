@@ -475,7 +475,7 @@ class ThemeData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    ThemeData otherData = other;
+    final ThemeData otherData = other;
     return (otherData.brightness == brightness) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&

@@ -60,7 +60,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(remainingPaintExtent >= 0.0);
     final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
 
-    BoxConstraints childConstraints = constraints.asBoxConstraints(
+    final BoxConstraints childConstraints = constraints.asBoxConstraints(
       minExtent: itemExtent,
       maxExtent: itemExtent,
     );
