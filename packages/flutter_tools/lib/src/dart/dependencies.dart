@@ -69,10 +69,6 @@ class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
         Artifacts.instance.getArtifactPath(Artifact.isolateSnapshotData);
     assert(fs.path.isAbsolute(this.projectRootPath));
 
-    // TODO(goderbauer): Implement --print-deps in gen_snapshot so we don't have to parse the Makefile
-    final Directory tempDir = fs.systemTempDirectory.createTempSync('dart_dependency_set_builder_');
-    final String depfilePath = fs.path.join(tempDir.path, 'snapshot_blob.bin.d');
-
     final List<String> args = <String>[
       snapshotterPath,
       '--snapshot_kind=script',
@@ -80,24 +76,15 @@ class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
       '--vm_snapshot_data=$vmSnapshotData',
       '--isolate_snapshot_data=$isolateSnapshotData',
       '--packages=$packagesFilePath',
-      '--dependencies=$depfilePath',
+      '--print-dependencies',
       '--script_snapshot=snapshot_blob.bin',
       mainScriptPath
     ];
 
-    runSyncAndThrowStdErrOnError(args);
-    String output = fs.file(depfilePath).readAsStringSync();
-    tempDir.deleteSync(recursive: true);
+    final String output = runSyncAndThrowStdErrOnError(args);
 
-    final int splitIndex = output.indexOf(':');
-    if (splitIndex == -1)
-      throw new Exception('Unexpected output $output');
-
-    output = output.substring(splitIndex + 1);
-    // Note: next line means we cannot process anything with spaces in the path
-    //       because Makefiles don't support spaces in paths :(
-    return new Set<String>.from(output.trim().split(' ').map(
-        (String path) => fs.path.canonicalize(path)
-    ));
+    return new Set<String>.from(LineSplitter.split(output).map(
+            (String path) => fs.path.canonicalize(path))
+    );
   }
 }
