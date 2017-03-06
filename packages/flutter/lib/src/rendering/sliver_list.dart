@@ -19,12 +19,12 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     assert(childManager.debugAssertChildListLocked());
     childManager.setDidUnderflow(false);
 
-    double scrollOffset = constraints.scrollOffset;
+    final double scrollOffset = constraints.scrollOffset;
     assert(scrollOffset >= 0.0);
-    double remainingPaintExtent = constraints.remainingPaintExtent;
+    final double remainingPaintExtent = constraints.remainingPaintExtent;
     assert(remainingPaintExtent >= 0.0);
-    double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
-    BoxConstraints childConstraints = constraints.asBoxConstraints();
+    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final BoxConstraints childConstraints = constraints.asBoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
     bool reachedEnd = false;

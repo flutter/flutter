@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('onSaved callback is called', (WidgetTester tester) async {
-    GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+    final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     String fieldValue;
 
     Widget builder() {
@@ -70,8 +70,8 @@ void main() {
   });
 
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
-    GlobalKey<FormState> formKey = new GlobalKey<FormState>();
-    GlobalKey inputKey = new GlobalKey();
+    final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+    final GlobalKey inputKey = new GlobalKey();
     String errorText(InputValue input) => input.text + '/error';
 
     Widget builder(bool autovalidate) {
@@ -118,9 +118,9 @@ void main() {
   });
 
   testWidgets('Multiple Inputs communicate', (WidgetTester tester) async {
-    GlobalKey<FormState> formKey = new GlobalKey<FormState>();
-    GlobalKey<FormFieldState<InputValue>> fieldKey = new GlobalKey<FormFieldState<InputValue>>();
-    GlobalKey focusKey = new GlobalKey();
+    final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+    final GlobalKey<FormFieldState<InputValue>> fieldKey = new GlobalKey<FormFieldState<InputValue>>();
+    final GlobalKey focusKey = new GlobalKey();
     // Input 2's validator depends on a input 1's value.
     String errorText(InputValue input) => fieldKey.currentState.value?.text.toString() + '/error';
 
@@ -165,8 +165,8 @@ void main() {
   });
 
   testWidgets('Provide initial value to input', (WidgetTester tester) async {
-    String initialValue = 'hello';
-    GlobalKey<FormFieldState<InputValue>> inputKey = new GlobalKey<FormFieldState<InputValue>>();
+    final String initialValue = 'hello';
+    final GlobalKey<FormFieldState<InputValue>> inputKey = new GlobalKey<FormFieldState<InputValue>>();
 
     Widget builder() {
       return new Center(
@@ -189,7 +189,7 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals(initialValue));
 
     // initial value should also be visible in the raw input line
-    EditableTextState editableText = tester.state(find.byType(EditableText));
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.config.value.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
@@ -202,8 +202,8 @@ void main() {
   });
 
   testWidgets('No crash when a FormField is removed from the tree', (WidgetTester tester) async {
-    GlobalKey<FormState> formKey = new GlobalKey<FormState>();
-    GlobalKey fieldKey = new GlobalKey();
+    final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
+    final GlobalKey fieldKey = new GlobalKey();
     String fieldValue;
 
     Widget builder(bool remove) {

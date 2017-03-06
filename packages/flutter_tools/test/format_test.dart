@@ -28,8 +28,8 @@ void main() {
     });
 
     Future<Null> createProject() async {
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
     }
@@ -37,15 +37,15 @@ void main() {
     testUsingContext('a file', () async {
       await createProject();
 
-      File srcFile = fs.file(fs.path.join(temp.path, 'lib', 'main.dart'));
-      String original = srcFile.readAsStringSync();
+      final File srcFile = fs.file(fs.path.join(temp.path, 'lib', 'main.dart'));
+      final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
-      FormatCommand command = new FormatCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final FormatCommand command = new FormatCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['format', srcFile.path]);
 
-      String formatted = srcFile.readAsStringSync();
+      final String formatted = srcFile.readAsStringSync();
       expect(formatted, original);
     });
   });

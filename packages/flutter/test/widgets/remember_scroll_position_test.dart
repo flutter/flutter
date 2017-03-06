@@ -27,7 +27,7 @@ Future<Null> performTest(WidgetTester tester) async {
 
 void main() {
   testWidgets('whether we remember our scroll position', (WidgetTester tester) async {
-    GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
     await tester.pumpWidget(new Navigator(
       key: navigatorKey,
       onGenerateRoute: (RouteSettings settings) {
@@ -96,7 +96,7 @@ void main() {
 
     // Ensure we don't clamp the scroll offset even during the navigation.
     // https://github.com/flutter/flutter/issues/4883
-    ScrollableState state = tester.state(find.byType(Scrollable).first);
+    final ScrollableState state = tester.state(find.byType(Scrollable).first);
     expect(state.position.pixels, equals(1000.0));
 
     await tester.pump(const Duration(seconds: 1));

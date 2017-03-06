@@ -154,7 +154,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<Null> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard(() async {
       assert(inTest);
-      Locale locale = new Locale(languageCode, countryCode);
+      final Locale locale = new Locale(languageCode, countryCode);
       dispatchLocaleChanged(locale);
       return null;
     });
@@ -220,7 +220,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// null in that case.
   dynamic takeException() {
     assert(inTest);
-    dynamic result = _pendingExceptionDetails?.exception;
+    final dynamic result = _pendingExceptionDetails?.exception;
     _pendingExceptionDetails = null;
     return result;
   }
@@ -315,7 +315,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     };
     _currentTestCompleter = new Completer<Null>();
-    ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
+    final ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
       handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
         if (_currentTestCompleter.isCompleted) {
           // Well this is not a good sign.
@@ -388,7 +388,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     );
     _parentZone = Zone.current;
-    Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
+    final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinaryGuarded(_runTestBody, testBody, invariantTester)
       .whenComplete(_testCompletionHandler);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
@@ -498,7 +498,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<Null> idle() {
-    Future<Null> result = super.idle();
+    final Future<Null> result = super.idle();
     _fakeAsync.flushMicrotasks();
     return result;
   }
@@ -755,16 +755,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Point globalToLocal(Point point) {
-    Matrix4 transform = renderView.configuration.toHitTestMatrix();
-    double det = transform.invert();
+    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final double det = transform.invert();
     assert(det != 0.0);
-    Point result = MatrixUtils.transformPoint(transform, point);
+    final Point result = MatrixUtils.transformPoint(transform, point);
     return result;
   }
 
   @override
   Point localToGlobal(Point point) {
-    Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
   }
 }
@@ -853,8 +853,8 @@ class _LiveTestRenderView extends RenderView {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    Matrix4 transform = configuration.toHitTestMatrix();
-    double det = transform.invert();
+    final Matrix4 transform = configuration.toHitTestMatrix();
+    final double det = transform.invert();
     assert(det != 0.0);
     position = MatrixUtils.transformPoint(transform, position);
     return super.hitTest(result, position: position);
@@ -878,7 +878,7 @@ class _LiveTestRenderView extends RenderView {
         ..style = PaintingStyle.stroke;
       bool dirty = false;
       for (int pointer in _pointers.keys) {
-        _LiveTestPointerRecord record = _pointers[pointer];
+        final _LiveTestPointerRecord record = _pointers[pointer];
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position.toOffset()), paint);
         if (record.decay < 0)

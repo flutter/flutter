@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new Text('Hello')));
-    HitTestResult result = tester.hitTestOnBinding(Point.origin);
+    final HitTestResult result = tester.hitTestOnBinding(Point.origin);
     expect(result, hasOneLineDescription);
     expect(result.path.first, hasOneLineDescription);
   });

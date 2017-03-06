@@ -84,11 +84,11 @@ abstract class Layer {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
     final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     result += description.map((String description) => "$descriptionPrefix$description\n").join();
     if (childrenDescription == '') {
-      String prefix = prefixOtherLines.trimRight();
+      final String prefix = prefixOtherLines.trimRight();
       if (prefix != '')
         result += '$prefix\n';
     } else {
@@ -258,7 +258,7 @@ class ContainerLayer extends Layer {
   void removeAllChildren() {
     Layer child = _firstChild;
     while (child != null) {
-      Layer next = child.nextSibling;
+      final Layer next = child.nextSibling;
       child._previousSibling = null;
       child._nextSibling = null;
       child._parent = null;

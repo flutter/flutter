@@ -821,7 +821,7 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      Rect rect = Point.origin & size;
+      final Rect rect = Point.origin & size;
       context.pushShaderMask(offset, _shaderCallback(rect), rect, _blendMode, super.paint);
     }
   }
@@ -881,6 +881,13 @@ class RenderBackdropFilter extends RenderProxyBox {
 /// supply a reclip argument to the constructor of the [CustomClipper]. The
 /// custom object will listen to this animation and update the clip whenever the
 /// animation ticks, avoiding both the build and layout phases of the pipeline.
+///
+/// See also:
+///
+///  * [ClipRect], which can be customized with a [CustomClipper].
+///  * [ClipRRect], which can be customized with a [CustomClipper].
+///  * [ClipOval], which can be customized with a [CustomClipper].
+///  * [ClipPath], which can be customized with a [CustomClipper].
 abstract class CustomClipper<T> {
   /// Creates a custom clipper.
   ///
@@ -933,7 +940,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   set clipper (CustomClipper<T> newClipper) {
     if (_clipper == newClipper)
       return;
-    CustomClipper<T> oldClipper = _clipper;
+    final CustomClipper<T> oldClipper = _clipper;
     _clipper = newClipper;
     assert(newClipper != null || oldClipper != null);
     if (newClipper == null || oldClipper == null ||
@@ -1116,9 +1123,9 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   bool hitTest(HitTestResult result, { Point position }) {
     _updateClip();
     assert(_clip != null);
-    Point center = _clip.center;
+    final Point center = _clip.center;
     // convert the position to an offset from the center of the unit circle
-    Offset offset = new Offset((position.x - center.x) / _clip.width,
+    final Offset offset = new Offset((position.x - center.x) / _clip.width,
                                (position.y - center.y) / _clip.height);
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
@@ -1258,7 +1265,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     if (_shape == BoxShape.rectangle) {
       return _borderRadius.toRRect(Point.origin & size);
     } else {
-      Rect rect = Point.origin & size;
+      final Rect rect = Point.origin & size;
       return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
   }
@@ -1522,7 +1529,7 @@ class RenderTransform extends RenderProxyBox {
   Matrix4 get _effectiveTransform {
     if (_origin == null && _alignment == null)
       return _transform;
-    Matrix4 result = new Matrix4.identity();
+    final Matrix4 result = new Matrix4.identity();
     if (_origin != null)
       result.translate(_origin.dx, _origin.dy);
     Offset translation;
@@ -1557,8 +1564,8 @@ class RenderTransform extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
-      Matrix4 transform = _effectiveTransform;
-      Offset childOffset = MatrixUtils.getAsTranslation(transform);
+      final Matrix4 transform = _effectiveTransform;
+      final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null)
         context.pushTransform(needsCompositing, offset, transform, super.paint);
       else
@@ -1666,7 +1673,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   void _paintChildWithTransform(PaintingContext context, Offset offset) {
-    Offset childOffset = MatrixUtils.getAsTranslation(_transform);
+    final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
       context.pushTransform(needsCompositing, offset, _transform, super.paint);
     else
@@ -1943,7 +1950,7 @@ class RenderCustomPaint extends RenderProxyBox {
   set painter (CustomPainter newPainter) {
     if (_painter == newPainter)
       return;
-    CustomPainter oldPainter = _painter;
+    final CustomPainter oldPainter = _painter;
     _painter = newPainter;
     _didUpdatePainter(_painter, oldPainter);
   }
@@ -1968,7 +1975,7 @@ class RenderCustomPaint extends RenderProxyBox {
   set foregroundPainter (CustomPainter newPainter) {
     if (_foregroundPainter == newPainter)
       return;
-    CustomPainter oldPainter = _foregroundPainter;
+    final CustomPainter oldPainter = _foregroundPainter;
     _foregroundPainter = newPainter;
     _didUpdatePainter(_foregroundPainter, oldPainter);
   }
@@ -2050,7 +2057,7 @@ class RenderCustomPaint extends RenderProxyBox {
       // Canvas class to lock the canvas at a particular save count
       // such that restore() fails if it would take the lock count
       // below that number.
-      int debugNewCanvasSaveCount = canvas.getSaveCount();
+      final int debugNewCanvasSaveCount = canvas.getSaveCount();
       if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
         throw new FlutterError(
           'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
@@ -2159,7 +2166,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    List<String> listeners = <String>[];
+    final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
     if (onPointerMove != null)
@@ -2268,7 +2275,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
       if (debugSymmetricPaintCount + debugAsymmetricPaintCount == 0) {
         description.add('usefulness ratio: no metrics collected yet (never painted)');
       } else {
-        double percentage = 100.0 * debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
+        final double percentage = 100.0 * debugAsymmetricPaintCount / (debugSymmetricPaintCount + debugAsymmetricPaintCount);
         String diagnosis;
         if (debugSymmetricPaintCount + debugAsymmetricPaintCount < 5) {
           diagnosis = 'insufficient data to draw conclusion (less than five repaints)';
@@ -2343,7 +2350,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   set ignoringSemantics(bool value) {
     if (value == _ignoringSemantics)
       return;
-    bool oldEffectiveValue = _effectiveIgnoringSemantics;
+    final bool oldEffectiveValue = _effectiveIgnoringSemantics;
     _ignoringSemantics = value;
     if (oldEffectiveValue != _effectiveIgnoringSemantics)
       markNeedsSemanticsUpdate();
@@ -2569,8 +2576,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    bool wasSemanticBoundary = isSemanticBoundary;
-    bool hadHandler = _onTap != null;
+    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
@@ -2582,8 +2589,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    bool wasSemanticBoundary = isSemanticBoundary;
-    bool hadHandler = _onLongPress != null;
+    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
@@ -2595,8 +2602,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    bool wasSemanticBoundary = isSemanticBoundary;
-    bool hadHandler = _onHorizontalDragUpdate != null;
+    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
@@ -2608,8 +2615,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    bool wasSemanticBoundary = isSemanticBoundary;
-    bool hadHandler = _onVerticalDragUpdate != null;
+    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
       markNeedsSemanticsUpdate(onlyChanges: isSemanticBoundary == wasSemanticBoundary);
@@ -2743,7 +2750,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set checked(bool value) {
     if (checked == value)
       return;
-    bool hadValue = checked != null;
+    final bool hadValue = checked != null;
     _checked = value;
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }
@@ -2754,7 +2761,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set label(String value) {
     if (label == value)
       return;
-    bool hadValue = label != null;
+    final bool hadValue = label != null;
     _label = value;
     markNeedsSemanticsUpdate(onlyChanges: (value != null) == hadValue);
   }

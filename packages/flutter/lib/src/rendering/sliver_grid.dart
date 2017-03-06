@@ -468,7 +468,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     }
 
     final SliverGridGeometry firstChildGridGeometry = layout.getGeometryForChildIndex(firstIndex);
-    double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
+    final double leadingScrollOffset = firstChildGridGeometry.scrollOffset;
     double trailingScrollOffset = firstChildGridGeometry.trailingScrollOffset;
 
     if (firstChild == null) {

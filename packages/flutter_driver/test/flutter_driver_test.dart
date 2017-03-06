@@ -53,7 +53,7 @@ void main() {
       when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
       when(mockIsolate.onExtensionAdded).thenReturn(new Stream<String>.fromIterable(<String>['ext.flutter.driver']));
 
-      FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused at start');
     });
@@ -62,7 +62,7 @@ void main() {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
       when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
 
-      FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is paused mid-flight');
     });
@@ -79,14 +79,14 @@ void main() {
         return new Future<Null>.error(new rpc.RpcException(101, ''));
       });
 
-      FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Attempted to resume an already resumed isolate');
     });
 
     test('connects to unpaused isolate', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMResumeEvent());
-      FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
+      final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
       expectLogContains('Isolate is not paused. Assuming application is ready.');
     });
@@ -108,7 +108,7 @@ void main() {
     test('checks the health of the driver extension', () async {
       when(mockIsolate.invokeExtension(any, any)).thenReturn(
           makeMockResponse(<String, dynamic>{'status': 'ok'}));
-      Health result = await driver.checkHealth();
+      final Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
     });
 
@@ -175,7 +175,7 @@ void main() {
             'text': 'hello'
           });
         });
-        String result = await driver.getText(find.byValueKey(123));
+        final String result = await driver.getText(find.byValueKey(123));
         expect(result, 'hello');
       });
     });
@@ -240,7 +240,7 @@ void main() {
           };
         });
 
-        Timeline timeline = await driver.traceAction(() {
+        final Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         });
 
@@ -279,7 +279,7 @@ void main() {
           };
         });
 
-        Timeline timeline = await driver.traceAction(() {
+        final Timeline timeline = await driver.traceAction(() {
           actionCalled = true;
         },
         streams: const <TimelineStream>[

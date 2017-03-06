@@ -32,7 +32,7 @@ void main() {
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
-    double oldHeight = box.size.height;
+    final double oldHeight = box.size.height;
     expect(find.byType(ExpandIcon), findsOneWidget);
     await tester.tap(find.byType(ExpandIcon));
     expect(index, 0);

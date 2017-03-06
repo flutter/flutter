@@ -234,8 +234,8 @@ class TextSelectionOverlay implements TextSelectionDelegate {
       return new Container();
 
     // Find the horizontal midpoint, just above the selected text.
-    List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    Point midpoint = new Point(
+    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
+    final Point midpoint = new Point(
       (endpoints.length == 1) ?
         endpoints[0].point.x :
         (endpoints[0].point.x + endpoints[1].point.x) / 2.0,
@@ -281,7 +281,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   set inputValue(InputValue value) {
     update(value);
     if (onSelectionOverlayChanged != null) {
-      Rect caretRect = renderObject.getLocalRectForCaret(value.selection.extent);
+      final Rect caretRect = renderObject.getLocalRectForCaret(value.selection.extent);
       onSelectionOverlayChanged(value, caretRect);
     }
   }
@@ -324,7 +324,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
   void _handleDragUpdate(DragUpdateDetails details) {
     _dragPosition += details.delta;
-    TextPosition position = config.renderObject.getPositionForPoint(_dragPosition);
+    final TextPosition position = config.renderObject.getPositionForPoint(_dragPosition);
 
     if (config.selection.isCollapsed) {
       config.onSelectionHandleChanged(new TextSelection.fromPosition(position));
@@ -359,7 +359,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
   @override
   Widget build(BuildContext context) {
-    List<TextSelectionPoint> endpoints = config.renderObject.getEndpointsForSelection(config.selection);
+    final List<TextSelectionPoint> endpoints = config.renderObject.getEndpointsForSelection(config.selection);
     Point point;
     TextSelectionHandleType type;
 

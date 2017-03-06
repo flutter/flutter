@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('Bordered Container insets its child', (WidgetTester tester) async {
-    Key key = const Key('outerContainer');
+    final Key key = const Key('outerContainer');
     await tester.pumpWidget(
       new Center(
         child: new Container(

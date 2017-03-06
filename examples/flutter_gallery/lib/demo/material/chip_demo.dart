@@ -22,7 +22,7 @@ class _ChipDemoState extends State<ChipDemo> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> chips = <Widget>[
+    final List<Widget> chips = <Widget>[
       new Chip(
         label: new Text('Apple')
       ),

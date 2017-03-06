@@ -116,7 +116,7 @@ class PageController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    _PagePosition pagePosition = position;
+    final _PagePosition pagePosition = position;
     pagePosition.viewportFraction = viewportFraction;
   }
 }
@@ -176,7 +176,7 @@ class _PagePosition extends ScrollPosition {
     return page * viewportDimension * viewportFraction;
   }
 
-  double get page => pixels == null ? null : getPageFromPixels(pixels, viewportDimension);
+  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
 
   @override
   bool applyViewportDimension(double viewportDimension) {

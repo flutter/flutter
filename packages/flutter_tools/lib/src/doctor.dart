@@ -28,7 +28,7 @@ const Map<String, String> _osNames = const <String, String>{
 };
 
 String osName() {
-  String os = platform.operatingSystem;
+  final String os = platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
 }
 
@@ -59,7 +59,7 @@ class Doctor {
       if (_iosWorkflow.appliesToHostPlatform)
         _validators.add(_iosWorkflow);
 
-      List<DoctorValidator> ideValidators = <DoctorValidator>[];
+      final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
       ideValidators.addAll(IntelliJValidator.installedValidators);
       if (ideValidators.isNotEmpty)
@@ -82,12 +82,12 @@ class Doctor {
   }
 
   Future<String> get summaryText async {
-    StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
 
     bool allGood = true;
 
     for (DoctorValidator validator in validators) {
-      ValidationResult result = await validator.validate();
+      final ValidationResult result = await validator.validate();
       buffer.write('${result.leadingBox} ${validator.title} is ');
       if (result.type == ValidationType.missing)
         buffer.write('not installed.');
@@ -123,7 +123,7 @@ class Doctor {
         printStatus('');
       firstLine = false;
 
-      ValidationResult result = await validator.validate();
+      final ValidationResult result = await validator.validate();
 
       if (result.type == ValidationType.missing)
         doctorResult = false;
@@ -134,7 +134,7 @@ class Doctor {
         printStatus('${result.leadingBox} ${validator.title}');
 
       for (ValidationMessage message in result.messages) {
-        String text = message.message.replaceAll('\n', '\n      ');
+        final String text = message.message.replaceAll('\n', '\n      ');
         if (message.isError) {
           printStatus('    ✗ $text', emphasis: true);
         } else {
@@ -211,10 +211,10 @@ class _FlutterValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType valid = ValidationType.installed;
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final ValidationType valid = ValidationType.installed;
 
-    FlutterVersion version = FlutterVersion.getVersion();
+    final FlutterVersion version = FlutterVersion.getVersion();
 
     messages.add(new ValidationMessage('Flutter at ${version.flutterRoot}'));
     messages.add(new ValidationMessage(
@@ -262,7 +262,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
 
     int installCount = 0;
 
@@ -300,25 +300,25 @@ abstract class IntelliJValidator extends DoctorValidator {
       ));
       return false;
     }
-    String version = _readPackageVersion(packageName);
+    final String version = _readPackageVersion(packageName);
     messages.add(new ValidationMessage('$title plugin '
         '${version != null ? "version $version" : "installed"}'));
     return true;
   }
 
   String _readPackageVersion(String packageName) {
-    String jarPath = packageName.endsWith('.jar')
+    final String jarPath = packageName.endsWith('.jar')
         ? fs.path.join(pluginsPath, packageName)
         : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
     // TODO(danrubel) look for a better way to extract a single 2K file from the zip
     // rather than reading the entire file into memory.
     try {
-      Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
-      ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      String content = UTF8.decode(file.content);
-      String versionStartTag = '<version>';
-      int start = content.indexOf(versionStartTag);
-      int end = content.indexOf('</version>', start);
+      final Archive archive = new ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
+      final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
+      final String content = UTF8.decode(file.content);
+      final String versionStartTag = '<version>';
+      final int start = content.indexOf(versionStartTag);
+      final int end = content.indexOf('</version>', start);
       return content.substring(start + versionStartTag.length, end);
     } catch (_) {
       return null;
@@ -326,7 +326,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   bool hasPackage(String packageName) {
-    String packagePath = fs.path.join(pluginsPath, packageName);
+    final String packagePath = fs.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar'))
       return fs.isFileSync(packagePath);
     return fs.isDirectorySync(packagePath);
@@ -345,14 +345,14 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
   String pluginsPath;
 
   static Iterable<DoctorValidator> get installed {
-    List<DoctorValidator> validators = <DoctorValidator>[];
+    final List<DoctorValidator> validators = <DoctorValidator>[];
     if (homeDirPath == null) return validators;
 
     void addValidator(String title, String version, String installPath, String pluginsPath) {
-      IntelliJValidatorOnLinuxAndWindows validator =
+      final IntelliJValidatorOnLinuxAndWindows validator =
         new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
-        DoctorValidator other = validators[index];
+        final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
           if (validator.version.compareTo(other.version) > 0)
             validators[index] = validator;
@@ -364,10 +364,10 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 
     for (FileSystemEntity dir in fs.directory(homeDirPath).listSync()) {
       if (dir is Directory) {
-        String name = fs.path.basename(dir.path);
+        final String name = fs.path.basename(dir.path);
         IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
-            String version = name.substring(id.length + 1);
+            final String version = name.substring(id.length + 1);
             String installPath;
             try {
               installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
@@ -375,7 +375,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
               // ignored
             }
             if (installPath != null && fs.isDirectorySync(installPath)) {
-              String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
+              final String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
               addValidator(title, version, installPath, pluginsPath);
             }
           }
@@ -400,21 +400,21 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   };
 
   static Iterable<DoctorValidator> get installed {
-    List<DoctorValidator> validators = <DoctorValidator>[];
-    List<String> installPaths = <String>['/Applications', fs.path.join(homeDirPath, 'Applications')];
+    final List<DoctorValidator> validators = <DoctorValidator>[];
+    final List<String> installPaths = <String>['/Applications', fs.path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
-      String name = fs.path.basename(dir.path);
+      final String name = fs.path.basename(dir.path);
       _dirNameToId.forEach((String dirName, String id) {
         if (name == dirName) {
-          String title = IntelliJValidator._idToTitle[id];
+          final String title = IntelliJValidator._idToTitle[id];
           validators.add(new IntelliJValidatorOnMac(title, id, dir.path));
         }
       });
     }
 
     try {
-      Iterable<FileSystemEntity> installDirs = installPaths
+      final Iterable<FileSystemEntity> installDirs = installPaths
               .map((String installPath) => fs.directory(installPath).listSync())
               .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .where((FileSystemEntity mappedDir) => mappedDir is Directory);
@@ -444,7 +444,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   @override
   String get version {
     if (_version == null) {
-      String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
+      final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
       _version = getValueFromFile(plistFile, kCFBundleShortVersionStringKey) ?? 'unknown';
     }
     return _version;
@@ -453,9 +453,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   @override
   String get pluginsPath {
-    List<String> split = version.split('.');
-    String major = split[0];
-    String minor = split[1];
+    final List<String> split = version.split('.');
+    final String major = split[0];
+    final String minor = split[1];
     return fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
   }
 }
@@ -465,7 +465,7 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    List<Device> devices = await deviceManager.getAllConnectedDevices();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices();
     List<ValidationMessage> messages;
     if (devices.isEmpty) {
       messages = <ValidationMessage>[new ValidationMessage('None')];

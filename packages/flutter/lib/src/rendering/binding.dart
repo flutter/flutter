@@ -74,7 +74,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
         name: 'repaintRainbow',
         getter: () async => debugRepaintRainbowEnabled,
         setter: (bool value) {
-          bool repaint = debugRepaintRainbowEnabled && !value;
+          final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint)
             return _forceRepaint();

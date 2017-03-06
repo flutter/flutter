@@ -80,7 +80,7 @@ class BasicMock {
   final List<String> messages = new List<String>();
 
   void expectMessages(List<String> expectedMessages) {
-    List<String> actualMessages = new List<String>.from(messages);
+    final List<String> actualMessages = new List<String>.from(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -88,7 +88,7 @@ class BasicMock {
   bool contains(String match) {
     print('Checking for `$match` in:');
     print(messages);
-    bool result = messages.contains(match);
+    final bool result = messages.contains(match);
     messages.clear();
     return result;
   }

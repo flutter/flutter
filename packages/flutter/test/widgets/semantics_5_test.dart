@@ -10,7 +10,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 5', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
       new Stack(

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Radio control test', (WidgetTester tester) async {
-    Key key = new UniqueKey();
-    List<int> log = <int>[];
+    final Key key = new UniqueKey();
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(new Material(
       child: new Center(

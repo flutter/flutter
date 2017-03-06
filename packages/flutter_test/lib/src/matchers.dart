@@ -100,7 +100,7 @@ class _FindsWidgetMatcher extends Matcher {
     assert(min == null || max == null || min <= max);
     matchState[Finder] = finder;
     int count = 0;
-    Iterator<Element> iterator = finder.evaluate().iterator;
+    final Iterator<Element> iterator = finder.evaluate().iterator;
     if (min != null) {
       while (count < min && iterator.moveNext())
         count += 1;
@@ -146,8 +146,8 @@ class _FindsWidgetMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose
   ) {
-    Finder finder = matchState[Finder];
-    int count = finder.evaluate().length;
+    final Finder finder = matchState[Finder];
+    final int count = finder.evaluate().length;
     if (count == 0) {
       assert(min != null && min > 0);
       if (min == 1 && max == 1)
@@ -167,7 +167,7 @@ class _FindsWidgetMatcher extends Matcher {
 }
 
 bool _hasAncestorMatching(Finder finder, bool predicate(Widget widget)) {
-  Iterable<Element> nodes = finder.evaluate();
+  final Iterable<Element> nodes = finder.evaluate();
   if (nodes.length != 1)
     return false;
   bool result = false;
@@ -206,12 +206,12 @@ class _IsOnstage extends Matcher {
 
   @override
   bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
-    Iterable<Element> nodes = finder.evaluate();
+    final Iterable<Element> nodes = finder.evaluate();
     if (nodes.length != 1)
       return false;
     bool result = true;
     nodes.single.visitAncestorElements((Element ancestor) {
-      Widget widget = ancestor.widget;
+      final Widget widget = ancestor.widget;
       if (widget is Offstage) {
         result = !widget.offstage;
         return false;
@@ -250,7 +250,7 @@ class _HasOneLineDescription extends Matcher {
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    String description = object.toString();
+    final String description = object.toString();
     return description.isNotEmpty
         && !description.contains('\n')
         && !description.contains('Instance of ')

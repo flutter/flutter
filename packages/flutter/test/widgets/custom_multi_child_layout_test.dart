@@ -26,7 +26,7 @@ class TestMultiChildLayoutDelegate extends MultiChildLayoutDelegate {
     assert(!RenderObject.debugCheckingIntrinsics);
     expect(() {
       performLayoutSize = size;
-      BoxConstraints constraints = new BoxConstraints.loose(size);
+      final BoxConstraints constraints = new BoxConstraints.loose(size);
       performLayoutSize0 = layoutChild(0, constraints);
       performLayoutSize1 = layoutChild(1, constraints);
       performLayoutIsChild = hasChild('fred');
@@ -75,7 +75,7 @@ class PreferredSizeDelegate extends MultiChildLayoutDelegate {
 
 void main() {
   testWidgets('Control test for CustomMultiChildLayout', (WidgetTester tester) async {
-    TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+    final TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
     await tester.pumpWidget(buildFrame(delegate));
 
     expect(delegate.getSizeConstraints.minWidth, 0.0);
@@ -116,7 +116,7 @@ void main() {
   });
 
   testWidgets('Nested CustomMultiChildLayouts', (WidgetTester tester) async {
-    TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
+    final TestMultiChildLayoutDelegate delegate = new TestMultiChildLayoutDelegate();
     await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         children: <Widget>[
@@ -139,7 +139,7 @@ void main() {
   });
 
   testWidgets('Loose constraints', (WidgetTester tester) async {
-    Key key = new UniqueKey();
+    final Key key = new UniqueKey();
     await tester.pumpWidget(new Center(
       child: new CustomMultiChildLayout(
         key: key,
@@ -147,7 +147,7 @@ void main() {
       )
     ));
 
-    RenderBox box = tester.renderObject(find.byKey(key));
+    final RenderBox box = tester.renderObject(find.byKey(key));
     expect(box.size.width, equals(300.0));
     expect(box.size.height, equals(200.0));
 

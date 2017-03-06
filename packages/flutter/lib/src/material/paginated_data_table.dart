@@ -281,7 +281,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
     double leftPadding = 24.0;
@@ -318,7 +318,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final TextStyle footerTextStyle = themeData.textTheme.caption;
     final List<Widget> footerWidgets = <Widget>[];
     if (config.onRowsPerPageChanged != null) {
-      List<Widget> availableRowsPerPage = config.availableRowsPerPage
+      final List<Widget> availableRowsPerPage = config.availableRowsPerPage
         .where((int value) => value <= _rowCount)
         .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(

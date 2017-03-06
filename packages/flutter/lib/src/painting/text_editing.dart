@@ -73,7 +73,7 @@ class TextRange {
       return true;
     if (other is! TextRange)
       return false;
-    TextRange typedOther = other;
+    final TextRange typedOther = other;
     return typedOther.start == start
         && typedOther.end == end;
   }
@@ -181,7 +181,7 @@ class TextSelection extends TextRange {
       return true;
     if (other is! TextSelection)
       return false;
-    TextSelection typedOther = other;
+    final TextSelection typedOther = other;
     return typedOther.baseOffset == baseOffset
         && typedOther.extentOffset == extentOffset
         && typedOther.affinity == affinity

@@ -11,8 +11,8 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('Should recognize pan', (GestureTester tester) {
-    PanGestureRecognizer pan = new PanGestureRecognizer();
-    TapGestureRecognizer tap = new TapGestureRecognizer();
+    final PanGestureRecognizer pan = new PanGestureRecognizer();
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool didStartPan = false;
     pan.onStart = (_) {
@@ -34,8 +34,8 @@ void main() {
       didTap = true;
     };
 
-    TestPointer pointer = new TestPointer(5);
-    PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
     tester.closeArena(5);
@@ -77,7 +77,7 @@ void main() {
   });
 
   testGesture('Should recognize drag', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
 
     bool didStartDrag = false;
     drag.onStart = (_) {
@@ -94,8 +94,8 @@ void main() {
       didEndDrag = true;
     };
 
-    TestPointer pointer = new TestPointer(5);
-    PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -130,7 +130,7 @@ void main() {
   });
 
   testGesture('Clamp max velocity', (GestureTester tester) {
-    HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
 
     Velocity velocity;
     double primaryVelocity;
@@ -139,8 +139,8 @@ void main() {
       primaryVelocity = details.primaryVelocity;
     };
 
-    TestPointer pointer = new TestPointer(5);
-    PointerDownEvent down = pointer.down(const Point(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Point(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(5);
     tester.route(down);

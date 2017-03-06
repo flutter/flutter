@@ -69,21 +69,21 @@ class CreateCommand extends FlutterCommand {
 
     await Cache.instance.updateAll();
 
-    String flutterRoot = fs.path.absolute(Cache.flutterRoot);
+    final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
-    String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
-    String flutterPackagePath = fs.path.join(flutterPackagesDirectory, 'flutter');
+    final String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
+    final String flutterPackagePath = fs.path.join(flutterPackagesDirectory, 'flutter');
     if (!fs.isFileSync(fs.path.join(flutterPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter in $flutterPackagePath', exitCode: 2);
 
-    String flutterDriverPackagePath = fs.path.join(flutterRoot, 'packages', 'flutter_driver');
+    final String flutterDriverPackagePath = fs.path.join(flutterRoot, 'packages', 'flutter_driver');
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    Directory projectDir = fs.directory(argResults.rest.first);
-    String dirPath = fs.path.normalize(projectDir.absolute.path);
-    String relativePath = fs.path.relative(dirPath);
-    String projectName = _normalizeProjectName(fs.path.basename(dirPath));
+    final Directory projectDir = fs.directory(argResults.rest.first);
+    final String dirPath = fs.path.normalize(projectDir.absolute.path);
+    final String relativePath = fs.path.relative(dirPath);
+    final String projectName = _normalizeProjectName(fs.path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
     if (error != null)
@@ -93,7 +93,7 @@ class CreateCommand extends FlutterCommand {
     if (error != null)
       throwToolExit(error);
 
-    int generatedCount = _renderTemplates(
+    final int generatedCount = _renderTemplates(
       projectName,
       argResults['description'],
       dirPath,
@@ -148,7 +148,7 @@ Your main program file is lib/main.dart in the $relativePath directory.
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
 
-    Map<String, dynamic> templateContext = <String, dynamic>{
+    final Map<String, dynamic> templateContext = <String, dynamic>{
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
@@ -161,7 +161,7 @@ Your main program file is lib/main.dart in the $relativePath directory.
 
     templateContext['withDriverTest'] = renderDriverTest;
 
-    Template createTemplate = new Template.fromName('create');
+    final Template createTemplate = new Template.fromName('create');
     fileCount += createTemplate.render(
       fs.directory(dirPath),
       templateContext, overwriteExisting: false,
@@ -169,7 +169,7 @@ Your main program file is lib/main.dart in the $relativePath directory.
     );
 
     if (renderDriverTest) {
-      Template driverTemplate = new Template.fromName('driver');
+      final Template driverTemplate = new Template.fromName('driver');
       fileCount += driverTemplate.render(fs.directory(fs.path.join(dirPath, 'test_driver')),
           templateContext, overwriteExisting: false);
     }
@@ -192,7 +192,7 @@ String _createAndroidIdentifier(String name) {
 
 String _createUTIIdentifier(String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
+  final RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return 'com.yourcompany.$name';
@@ -236,7 +236,7 @@ String _validateProjectDir(String dirPath, { String flutterRoot }) {
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
 
-  FileSystemEntityType type = fs.typeSync(dirPath);
+  final FileSystemEntityType type = fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.NOT_FOUND) {
     switch(type) {
@@ -253,7 +253,7 @@ String _validateProjectDir(String dirPath, { String flutterRoot }) {
 }
 
 String _relativePath({ String from, String to }) {
-  String result = fs.path.relative(to, from: from);
+  final String result = fs.path.relative(to, from: from);
   // `fs.path.relative()` doesn't always return a correct result: dart-lang/path#12.
   if (fs.isDirectorySync(fs.path.join(from, result)))
     return result;

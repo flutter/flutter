@@ -92,7 +92,7 @@ class InputValue {
       return true;
     if (other is! InputValue)
       return false;
-    InputValue typedOther = other;
+    final InputValue typedOther = other;
     return typedOther.text == text
         && typedOther.selection == selection
         && typedOther.composing == composing;
@@ -406,7 +406,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   @override
   Widget build(BuildContext context) {
-    bool focused = Focus.at(config.focusKey.currentContext);
+    final bool focused = Focus.at(config.focusKey.currentContext);
     _attachOrDetachKeyboard(focused);
 
     if (_cursorTimer == null && focused && config.value.selection.isCollapsed)
@@ -502,7 +502,7 @@ class _Editable extends LeafRenderObjectWidget {
 
   TextSpan get _styledTextSpan {
     if (!obscureText && value.composing.isValid) {
-      TextStyle composingStyle = style.merge(
+      final TextStyle composingStyle = style.merge(
         const TextStyle(decoration: TextDecoration.underline)
       );
 

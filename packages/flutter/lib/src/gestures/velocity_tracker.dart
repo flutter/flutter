@@ -63,30 +63,30 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   @override
   _Estimate getEstimate() {
     // Iterate over movement samples in reverse time order and collect samples.
-    List<double> x = new List<double>();
-    List<double> y = new List<double>();
-    List<double> w = new List<double>();
-    List<double> time = new List<double>();
+    final List<double> x = new List<double>();
+    final List<double> y = new List<double>();
+    final List<double> w = new List<double>();
+    final List<double> time = new List<double>();
     int m = 0;
     int index = _index;
 
-    _Movement newestMovement = _movements[index];
+    final _Movement newestMovement = _movements[index];
     _Movement previousMovement = newestMovement;
     if (newestMovement == null)
       return null;
 
     do {
-      _Movement movement = _movements[index];
+      final _Movement movement = _movements[index];
       if (movement == null)
         break;
 
-      double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
-      double delta = (movement.eventTime - previousMovement.eventTime).inMilliseconds.abs().toDouble();
+      final double age = (newestMovement.eventTime - movement.eventTime).inMilliseconds.toDouble();
+      final double delta = (movement.eventTime - previousMovement.eventTime).inMilliseconds.abs().toDouble();
       previousMovement = movement;
       if (age > kHorizonMilliseconds || delta > kAssumePointerMoveStoppedMilliseconds)
         break;
 
-      Point position = movement.position;
+      final Point position = movement.position;
       x.add(position.x);
       y.add(position.y);
       w.add(1.0);
@@ -102,11 +102,11 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
       n = m - 1;
 
     if (n >= 1) {
-      LeastSquaresSolver xSolver = new LeastSquaresSolver(time, x, w);
-      PolynomialFit xFit = xSolver.solve(n);
+      final LeastSquaresSolver xSolver = new LeastSquaresSolver(time, x, w);
+      final PolynomialFit xFit = xSolver.solve(n);
       if (xFit != null) {
-        LeastSquaresSolver ySolver = new LeastSquaresSolver(time, y, w);
-        PolynomialFit yFit = ySolver.solve(n);
+        final LeastSquaresSolver ySolver = new LeastSquaresSolver(time, y, w);
+        final PolynomialFit yFit = ySolver.solve(n);
         if (yFit != null) {
           return new _Estimate(
             xCoefficients: xFit.coefficients,
@@ -223,7 +223,7 @@ class VelocityTracker {
   /// getVelocity() will return null if no estimate is available or if
   /// the velocity is zero.
   Velocity getVelocity() {
-    _Estimate estimate = _strategy.getEstimate();
+    final _Estimate estimate = _strategy.getEstimate();
     if (estimate != null && estimate.degree >= 1) {
       return new Velocity(
         pixelsPerSecond: new Offset( // convert from pixels/ms to pixels/s

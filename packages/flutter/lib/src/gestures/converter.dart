@@ -53,7 +53,7 @@ class PointerEventConverter {
       switch (datum.change) {
         case ui.PointerChange.add:
           assert(!_pointers.containsKey(datum.device));
-          _PointerState state = _ensureStateForPointer(datum, position);
+          final _PointerState state = _ensureStateForPointer(datum, position);
           assert(state.lastPosition == position);
           yield new PointerAddedEvent(
             timeStamp: timeStamp,
@@ -73,7 +73,7 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.hover:
           final bool alreadyAdded = _pointers.containsKey(datum.device);
-          _PointerState state = _ensureStateForPointer(datum, position);
+          final _PointerState state = _ensureStateForPointer(datum, position);
           assert(!state.down);
           if (!alreadyAdded) {
             assert(state.lastPosition == position);
@@ -93,7 +93,7 @@ class PointerEventConverter {
               tilt: datum.tilt
             );
           }
-          Offset offset = position - state.lastPosition;
+          final Offset offset = position - state.lastPosition;
           state.lastPosition = position;
           yield new PointerHoverEvent(
             timeStamp: timeStamp,
@@ -118,7 +118,7 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.down:
           final bool alreadyAdded = _pointers.containsKey(datum.device);
-          _PointerState state = _ensureStateForPointer(datum, position);
+          final _PointerState state = _ensureStateForPointer(datum, position);
           assert(!state.down);
           if (!alreadyAdded) {
             assert(state.lastPosition == position);
@@ -142,7 +142,7 @@ class PointerEventConverter {
             // Not all sources of pointer packets respect the invariant that
             // they hover the pointer to the down location before sending the
             // down event. We restore the invariant here for our clients.
-            Offset offset = position - state.lastPosition;
+            final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
             yield new PointerHoverEvent(
               timeStamp: timeStamp,
@@ -192,9 +192,9 @@ class PointerEventConverter {
           // start sending us ADDED and REMOVED data points.
           // See also: https://github.com/flutter/flutter/issues/720
           assert(_pointers.containsKey(datum.device));
-          _PointerState state = _pointers[datum.device];
+          final _PointerState state = _pointers[datum.device];
           assert(state.down);
-          Offset offset = position - state.lastPosition;
+          final Offset offset = position - state.lastPosition;
           state.lastPosition = position;
           yield new PointerMoveEvent(
             timeStamp: timeStamp,
@@ -220,7 +220,7 @@ class PointerEventConverter {
         case ui.PointerChange.up:
         case ui.PointerChange.cancel:
           assert(_pointers.containsKey(datum.device));
-          _PointerState state = _pointers[datum.device];
+          final _PointerState state = _pointers[datum.device];
           assert(state.down);
           if (position != state.lastPosition) {
             // Not all sources of pointer packets respect the invariant that
@@ -228,7 +228,7 @@ class PointerEventConverter {
             // event. For example, in the iOS simulator, of you drag outside the
             // window, you'll get a stream of pointers that violates that
             // invariant. We restore the invariant here for our clients.
-            Offset offset = position - state.lastPosition;
+            final Offset offset = position - state.lastPosition;
             state.lastPosition = position;
             yield new PointerMoveEvent(
               timeStamp: timeStamp,
@@ -293,7 +293,7 @@ class PointerEventConverter {
           break;
         case ui.PointerChange.remove:
           assert(_pointers.containsKey(datum.device));
-          _PointerState state = _pointers[datum.device];
+          final _PointerState state = _pointers[datum.device];
           if (state.down) {
             yield new PointerCancelEvent(
               timeStamp: timeStamp,

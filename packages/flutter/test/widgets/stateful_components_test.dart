@@ -45,18 +45,18 @@ class OuterContainerState extends State<OuterContainer> {
 
 void main() {
   testWidgets('resync stateful widget', (WidgetTester tester) async {
-    Key innerKey = const Key('inner');
-    Key outerKey = const Key('outer');
+    final Key innerKey = const Key('inner');
+    final Key outerKey = const Key('outer');
 
-    InnerWidget inner1 = new InnerWidget(key: innerKey);
+    final InnerWidget inner1 = new InnerWidget(key: innerKey);
     InnerWidget inner2;
-    OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
+    final OuterContainer outer1 = new OuterContainer(key: outerKey, child: inner1);
     OuterContainer outer2;
 
     await tester.pumpWidget(outer1);
 
-    StatefulElement innerElement = tester.element(find.byKey(innerKey));
-    InnerWidgetState innerElementState = innerElement.state;
+    final StatefulElement innerElement = tester.element(find.byKey(innerKey));
+    final InnerWidgetState innerElementState = innerElement.state;
     expect(innerElementState.config, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject.attached, isTrue);
@@ -73,7 +73,7 @@ void main() {
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject.attached, isTrue);
 
-    StatefulElement outerElement = tester.element(find.byKey(outerKey));
+    final StatefulElement outerElement = tester.element(find.byKey(outerKey));
     expect(outerElement.state.config, equals(outer2));
     outerElement.markNeedsBuild();
     await tester.pump();

@@ -160,7 +160,7 @@ class Container extends StatelessWidget {
   EdgeInsets get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
-    EdgeInsets decorationPadding = decoration.padding;
+    final EdgeInsets decorationPadding = decoration.padding;
     if (padding == null)
       return decorationPadding;
     return padding + decorationPadding;
@@ -181,7 +181,7 @@ class Container extends StatelessWidget {
     if (alignment != null)
       current = new Align(alignment: alignment, child: current);
 
-    EdgeInsets effectivePadding = _paddingIncludingDecoration;
+    final EdgeInsets effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
 

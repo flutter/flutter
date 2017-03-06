@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('SnackBar control test', (WidgetTester tester) async {
-    String helloSnackBar = 'Hello SnackBar';
-    Key tapTarget = const Key('tap-target');
+    final String helloSnackBar = 'Hello SnackBar';
+    final Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('SnackBar twice test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = const Key('tap-target');
+    final Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('SnackBar cancel test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = const Key('tap-target');
+    final Key tapTarget = const Key('tap-target');
     int time;
     ScaffoldFeatureController<SnackBar, SnackBarClosedReason> lastController;
     await tester.pumpWidget(new MaterialApp(
@@ -158,7 +158,7 @@ void main() {
     expect(find.text('bar2'), findsNothing);
     time = 1000;
     await tester.tap(find.byKey(tapTarget)); // queue bar1
-    ScaffoldFeatureController<SnackBar, SnackBarClosedReason> firstController = lastController;
+    final ScaffoldFeatureController<SnackBar, SnackBarClosedReason> firstController = lastController;
     time = 2;
     await tester.tap(find.byKey(tapTarget)); // queue bar2
     expect(find.text('bar1'), findsNothing);
@@ -214,7 +214,7 @@ void main() {
 
   testWidgets('SnackBar dismiss test', (WidgetTester tester) async {
     int snackBarCount = 0;
-    Key tapTarget = const Key('tap-target');
+    final Key tapTarget = const Key('tap-target');
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         body: new Builder(
@@ -319,16 +319,16 @@ void main() {
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750));
 
-    RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
+    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
+    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
+    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
 
-    Point textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Point.origin));
-    Point textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Point.origin));
-    Point actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Point.origin));
-    Point actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Point.origin));
-    Point snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Point.origin));
-    Point snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Point.origin));
+    final Point textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Point.origin));
+    final Point textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Point.origin));
+    final Point actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Point.origin));
+    final Point actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Point.origin));
+    final Point snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Point.origin));
+    final Point snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Point.origin));
 
     expect(textBottomLeft.x - snackBarBottomLeft.x, 24.0);
     expect(actionTextBottomLeft.x - textBottomRight.x, 24.0);

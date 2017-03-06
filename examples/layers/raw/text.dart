@@ -12,8 +12,8 @@ import 'dart:ui' as ui;
 ui.Paragraph paragraph;
 
 ui.Picture paint(ui.Rect paintBounds) {
-  ui.PictureRecorder recorder = new ui.PictureRecorder();
-  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  final ui.PictureRecorder recorder = new ui.PictureRecorder();
+  final ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
   final double devicePixelRatio = ui.window.devicePixelRatio;
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
@@ -31,12 +31,12 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  Float64List deviceTransform = new Float64List(16)
+  final Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
+  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
@@ -44,15 +44,15 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
-  ui.Picture picture = paint(paintBounds);
-  ui.Scene scene = composite(picture, paintBounds);
+  final ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Picture picture = paint(paintBounds);
+  final ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);
 }
 
 void main() {
   // To create a paragraph of text, we use ParagraphBuilder.
-  ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
+  final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle())
     // We first push a style that turns the text blue.
     ..pushStyle(new ui.TextStyle(color: const ui.Color(0xFF0000FF)))
     ..addText('Hello, ')

@@ -65,7 +65,7 @@ class RenderDots extends RenderBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
-      Color color = _kColors[event.pointer.remainder(_kColors.length)];
+      final Color color = _kColors[event.pointer.remainder(_kColors.length)];
       _dots[event.pointer] = new Dot(color: color)..update(event);
       // We call markNeedsPaint to indicate that our painting commands have
       // changed and that paint needs to be called before displaying a new frame
@@ -101,7 +101,7 @@ class RenderDots extends RenderBox {
 
 void main() {
   // Create some styled text to tell the user to interact with the app.
-  RenderParagraph paragraph = new RenderParagraph(
+  final RenderParagraph paragraph = new RenderParagraph(
     new TextSpan(
       style: new TextStyle(color: Colors.black87),
       text: "Touch me!"
@@ -110,7 +110,7 @@ void main() {
   // A stack is a render object that layers its children on top of each other.
   // The bottom later is our RenderDots object, and on top of that we show the
   // text.
-  RenderStack stack = new RenderStack(
+  final RenderStack stack = new RenderStack(
     children: <RenderBox>[
       new RenderDots(),
       paragraph,

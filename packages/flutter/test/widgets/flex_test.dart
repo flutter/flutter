@@ -57,7 +57,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(SizedBox));
+    final RenderBox box = tester.renderObject(find.byType(SizedBox));
     expect(box.size.width, 100.0);
   });
 

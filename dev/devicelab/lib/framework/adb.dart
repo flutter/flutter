@@ -118,7 +118,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<Null> chooseWorkingDevice() async {
-    List<Device> allDevices = (await discoverDevices())
+    final List<Device> allDevices = (await discoverDevices())
       .map((String id) => new AndroidDevice(deviceId: id))
       .toList();
 
@@ -131,9 +131,9 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
+    final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
         .trim().split('\n');
-    List<String> results = <String>[];
+    final List<String> results = <String>[];
     for (String line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon '))
@@ -143,10 +143,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
         continue;
 
       if (_kDeviceRegex.hasMatch(line)) {
-        Match match = _kDeviceRegex.firstMatch(line);
+        final Match match = _kDeviceRegex.firstMatch(line);
 
-        String deviceID = match[1];
-        String deviceState = match[2];
+        final String deviceID = match[1];
+        final String deviceState = match[2];
 
         if (!const <String>['unauthorized', 'offline'].contains(deviceState)) {
           results.add(deviceID);
@@ -161,10 +161,10 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
       try {
-        AndroidDevice device = new AndroidDevice(deviceId: deviceId);
+        final AndroidDevice device = new AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
         // TODO(yjbanov): check battery level
         await device._getWakefulness();
@@ -240,8 +240,8 @@ class AndroidDevice implements Device {
   ///
   /// See: https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/os/PowerManagerInternal.java
   Future<String> _getWakefulness() async {
-    String powerInfo = await shellEval('dumpsys', <String>['power']);
-    String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
+    final String powerInfo = await shellEval('dumpsys', <String>['power']);
+    final String wakefulness = grep('mWakefulness=', from: powerInfo).single.split('=')[1].trim();
     return wakefulness;
   }
 
@@ -257,8 +257,8 @@ class AndroidDevice implements Device {
 
   @override
   Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
-    String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
-    Match match = new RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
+    final String meminfo = await shellEval('dumpsys', <String>['meminfo', packageName]);
+    final Match match = new RegExp(r'TOTAL\s+(\d+)').firstMatch(meminfo);
     return <String, dynamic>{
       'total_kb': int.parse(match.group(1)),
     };
@@ -295,7 +295,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<Null> chooseWorkingDevice() async {
-    List<IosDevice> allDevices = (await discoverDevices())
+    final List<IosDevice> allDevices = (await discoverDevices())
       .map((String id) => new IosDevice(deviceId: id))
       .toList();
 
@@ -309,7 +309,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<List<String>> discoverDevices() async {
     // TODO: use the -k UniqueDeviceID option, which requires much less parsing.
-    List<String> iosDeviceIds = grep('UniqueDeviceID', from: await eval('ideviceinfo', <String>[]))
+    final List<String> iosDeviceIds = grep('UniqueDeviceID', from: await eval('ideviceinfo', <String>[]))
       .map((String line) => line.split(' ').last).toList();
 
     if (iosDeviceIds.isEmpty)
@@ -320,7 +320,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
-    Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
     for (String deviceId in await discoverDevices()) {
       // TODO: do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = new HealthCheckResult.success();
@@ -376,13 +376,13 @@ class IosDevice implements Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  String androidHome = Platform.environment['ANDROID_HOME'];
+  final String androidHome = Platform.environment['ANDROID_HOME'];
 
   if (androidHome == null)
     throw 'ANDROID_HOME environment variable missing. This variable must '
         'point to the Android SDK directory containing platform-tools.';
 
-  File adbPath = file(path.join(androidHome, 'platform-tools/adb'));
+  final File adbPath = file(path.join(androidHome, 'platform-tools/adb'));
 
   if (!adbPath.existsSync()) throw 'adb not found at: $adbPath';
 

@@ -9,7 +9,7 @@ import 'states.dart';
 
 void main() {
   testWidgets('ListView control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new ListView(
       children: kStates.map<Widget>((String state) {
@@ -69,12 +69,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
 
-    Viewport viewport = tester.widget(find.byType(Viewport));
+    final Viewport viewport = tester.widget(find.byType(Viewport));
     expect(viewport.offset.pixels, equals(2400.0));
   });
 
   testWidgets('CustomScrollView control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new CustomScrollView(
       slivers: <Widget>[
@@ -138,7 +138,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await gesture.moveBy(const Offset(0.0, -100.0));
 
     expect(log, equals(<Type>[
@@ -170,17 +170,17 @@ void main() {
   });
 
   testWidgets('Vertical CustomScrollViews are primary by default', (WidgetTester tester) async {
-    CustomScrollView view = new CustomScrollView(scrollDirection: Axis.vertical);
+    final CustomScrollView view = new CustomScrollView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
   testWidgets('Vertical ListViews are primary by default', (WidgetTester tester) async {
-    ListView view = new ListView(scrollDirection: Axis.vertical);
+    final ListView view = new ListView(scrollDirection: Axis.vertical);
     expect(view.primary, isTrue);
   });
 
   testWidgets('Vertical GridViews are primary by default', (WidgetTester tester) async {
-    GridView view = new GridView.count(
+    final GridView view = new GridView.count(
       scrollDirection: Axis.vertical,
       crossAxisCount: 1,
     );
@@ -188,17 +188,17 @@ void main() {
   });
 
   testWidgets('Horizontal CustomScrollViews are non-primary by default', (WidgetTester tester) async {
-    CustomScrollView view = new CustomScrollView(scrollDirection: Axis.horizontal);
+    final CustomScrollView view = new CustomScrollView(scrollDirection: Axis.horizontal);
     expect(view.primary, isFalse);
   });
 
   testWidgets('Horizontal ListViews are non-primary by default', (WidgetTester tester) async {
-    ListView view = new ListView(scrollDirection: Axis.horizontal);
+    final ListView view = new ListView(scrollDirection: Axis.horizontal);
     expect(view.primary, isFalse);
   });
 
   testWidgets('Horizontal GridViews are non-primary by default', (WidgetTester tester) async {
-    GridView view = new GridView.count(
+    final GridView view = new GridView.count(
       scrollDirection: Axis.horizontal,
       crossAxisCount: 1,
     );
@@ -206,7 +206,7 @@ void main() {
   });
 
   testWidgets('CustomScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
-    CustomScrollView view = new CustomScrollView(
+    final CustomScrollView view = new CustomScrollView(
       controller: new ScrollController(),
       scrollDirection: Axis.vertical,
     );
@@ -214,7 +214,7 @@ void main() {
   });
 
   testWidgets('ListViews with controllers are non-primary by default', (WidgetTester tester) async {
-    ListView view = new ListView(
+    final ListView view = new ListView(
       controller: new ScrollController(),
       scrollDirection: Axis.vertical,
     );
@@ -222,7 +222,7 @@ void main() {
   });
 
   testWidgets('GridViews with controllers are non-primary by default', (WidgetTester tester) async {
-    GridView view = new GridView.count(
+    final GridView view = new GridView.count(
       controller: new ScrollController(),
       scrollDirection: Axis.vertical,
       crossAxisCount: 1,
@@ -231,38 +231,38 @@ void main() {
   });
 
   testWidgets('CustomScrollView sets PrimaryScrollController when primary', (WidgetTester tester) async {
-    ScrollController primaryScrollController = new ScrollController();
+    final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(new PrimaryScrollController(
       controller: primaryScrollController,
       child: new CustomScrollView(primary: true),
     ));
-    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
 
   testWidgets('ListView sets PrimaryScrollController when primary', (WidgetTester tester) async {
-    ScrollController primaryScrollController = new ScrollController();
+    final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(new PrimaryScrollController(
       controller: primaryScrollController,
       child: new ListView(primary: true),
     ));
-    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
 
   testWidgets('GridView sets PrimaryScrollController when primary', (WidgetTester tester) async {
-    ScrollController primaryScrollController = new ScrollController();
+    final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(new PrimaryScrollController(
       controller: primaryScrollController,
       child: new GridView.count(primary: true, crossAxisCount: 1),
     ));
-    Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    final Scrollable scrollable = tester.widget(find.byType(Scrollable));
     expect(scrollable.controller, primaryScrollController);
   });
 
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = const Key('inner');
-    ScrollController primaryScrollController = new ScrollController();
+    final ScrollController primaryScrollController = new ScrollController();
     await tester.pumpWidget(new PrimaryScrollController(
       controller: primaryScrollController,
       child: new ListView(
@@ -276,7 +276,7 @@ void main() {
       ),
     ));
 
-    Scrollable innerScrollable = tester.widget(
+    final Scrollable innerScrollable = tester.widget(
       find.descendant(
         of: find.byKey(innerKey),
         matching: find.byType(Scrollable),

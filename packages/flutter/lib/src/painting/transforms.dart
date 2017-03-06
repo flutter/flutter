@@ -19,7 +19,7 @@ class MatrixUtils {
   /// Otherwise, returns null.
   static Offset getAsTranslation(Matrix4 transform) {
     assert(transform != null);
-    Float64List values = transform.storage;
+    final Float64List values = transform.storage;
     // Values are stored in column-major order.
     if (values[0] == 1.0 && // col 1
         values[1] == 0.0 &&
@@ -95,8 +95,8 @@ class MatrixUtils {
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
   static Point transformPoint(Matrix4 transform, Point point) {
-    Vector3 position3 = new Vector3(point.x, point.y, 0.0);
-    Vector3 transformed3 = transform.perspectiveTransform(position3);
+    final Vector3 position3 = new Vector3(point.x, point.y, 0.0);
+    final Vector3 transformed3 = transform.perspectiveTransform(position3);
     return new Point(transformed3.x, transformed3.y);
   }
 
@@ -107,10 +107,10 @@ class MatrixUtils {
   /// The transformed rect is then projected back into the plane with z equals
   /// 0.0 before computing its bounding rect.
   static Rect transformRect(Matrix4 transform, Rect rect) {
-    Point point1 = transformPoint(transform, rect.topLeft);
-    Point point2 = transformPoint(transform, rect.topRight);
-    Point point3 = transformPoint(transform, rect.bottomLeft);
-    Point point4 = transformPoint(transform, rect.bottomRight);
+    final Point point1 = transformPoint(transform, rect.topLeft);
+    final Point point2 = transformPoint(transform, rect.topRight);
+    final Point point3 = transformPoint(transform, rect.bottomLeft);
+    final Point point4 = transformPoint(transform, rect.bottomRight);
     return new Rect.fromLTRB(
         _min4(point1.x, point2.x, point3.x, point4.x),
         _min4(point1.y, point2.y, point3.y, point4.y),

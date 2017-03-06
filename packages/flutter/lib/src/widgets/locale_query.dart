@@ -31,7 +31,7 @@ class LocaleQuery extends InheritedWidget {
   /// MyLocaleData data = LocaleQueryData.of(context);
   /// ```
   static LocaleQueryData of(BuildContext context) {
-    LocaleQuery query = context.inheritFromWidgetOfExactType(LocaleQuery);
+    final LocaleQuery query = context.inheritFromWidgetOfExactType(LocaleQuery);
     return query?.data;
   }
 

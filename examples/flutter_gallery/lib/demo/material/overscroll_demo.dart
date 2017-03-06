@@ -25,7 +25,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   ];
 
   Future<Null> _handleRefresh() {
-    Completer<Null> completer = new Completer<Null>();
+    final Completer<Null> completer = new Completer<Null>();
     new Timer(const Duration(seconds: 3), () { completer.complete(null); });
     return completer.future.then((_) {
        _scaffoldKey.currentState?.showSnackBar(new SnackBar(
@@ -63,7 +63,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
           padding: const EdgeInsets.all(8.0),
           itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) {
-            String item = _items[index];
+            final String item = _items[index];
             return new ListItem(
               isThreeLine: true,
               leading: new CircleAvatar(child: new Text(item)),

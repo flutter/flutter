@@ -41,7 +41,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 void main() {
   testWidgets('Moving global key inside a LayoutBuilder', (WidgetTester tester) async {
-    GlobalKey<StatefulWrapperState> key = new GlobalKey<StatefulWrapperState>();
+    final GlobalKey<StatefulWrapperState> key = new GlobalKey<StatefulWrapperState>();
     await tester.pumpWidget(
       new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
         return new Wrapper(

@@ -20,11 +20,11 @@ void main() {
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollStartNotification>());
     expect(notification.depth, equals(0));
-    ScrollStartNotification start = notification;
+    final ScrollStartNotification start = notification;
     expect(start.dragDetails, isNotNull);
     expect(start.dragDetails.globalPosition, equals(const Point(100.0, 100.0)));
 
@@ -32,7 +32,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
-    ScrollUpdateNotification update = notification;
+    final ScrollUpdateNotification update = notification;
     expect(update.dragDetails, isNotNull);
     expect(update.dragDetails.globalPosition, equals(const Point(90.0, 90.0)));
     expect(update.dragDetails.delta, equals(const Offset(0.0, -10.0)));
@@ -41,7 +41,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, const isInstanceOf<ScrollEndNotification>());
     expect(notification.depth, equals(0));
-    ScrollEndNotification end = notification;
+    final ScrollEndNotification end = notification;
     expect(end.dragDetails, isNotNull);
     expect(end.dragDetails.velocity, equals(Velocity.zero));
   });
@@ -76,7 +76,7 @@ void main() {
       )
     ));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
     await gesture.moveBy(const Offset(-10.0, -10.0));
     await tester.pump(const Duration(seconds: 1));

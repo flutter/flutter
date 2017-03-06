@@ -100,7 +100,7 @@ class ButtonTheme extends InheritedWidget {
   /// ButtonTheme theme = ButtonTheme.of(context);
   /// ```
   static ButtonTheme of(BuildContext context) {
-    ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
+    final ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
     return result ?? const ButtonTheme();
   }
 

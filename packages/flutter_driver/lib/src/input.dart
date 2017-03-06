@@ -26,7 +26,7 @@ class SetInputText extends CommandWithTarget {
 
   @override
   Map<String, String> serialize() {
-    Map<String, String> json = super.serialize();
+    final Map<String, String> json = super.serialize();
     json['text'] = text;
     return json;
   }

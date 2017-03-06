@@ -53,8 +53,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
     assert(delta > 0.0);
     double total = 0.0;
     if (start < lowLimit) {
-      double distanceToLimit = lowLimit - start;
-      double deltaToLimit = distanceToLimit / gamma;
+      final double distanceToLimit = lowLimit - start;
+      final double deltaToLimit = distanceToLimit / gamma;
       if (delta < deltaToLimit)
         return total + delta * gamma;
       total += distanceToLimit;

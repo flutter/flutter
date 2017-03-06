@@ -30,13 +30,13 @@ void main()  {
       final String fooPath = fs.path.join(testPath, 'foo.dart');
       final String barPath = fs.path.join(testPath, 'lib', 'bar.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
-      DartDependencySetBuilder builder =
+      final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
-      DependencyChecker dependencyChecker =
+      final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 
       // Set file modification time on all dependencies to be in the past.
-      DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = new DateTime.now();
       updateFileModificationTime(packagesPath, baseTime, -10);
       updateFileModificationTime(mainPath, baseTime, -10);
       updateFileModificationTime(fooPath, baseTime, -10);
@@ -62,12 +62,12 @@ void main()  {
       final String fooPath = fs.path.join(testPath, 'foo.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
 
-      DartDependencySetBuilder builder =
+      final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, testPath, packagesPath);
-      DependencyChecker dependencyChecker =
+      final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 
-      DateTime baseTime = new DateTime.now();
+      final DateTime baseTime = new DateTime.now();
 
       // Set file modification time on all dependencies to be in the past.
       updateFileModificationTime(packagesPath, baseTime, -10);
@@ -84,10 +84,10 @@ void main()  {
     /// Tests that the flutter tool doesn't crash and displays a warning when its own location
     /// changed since it was last referenced to in a package's .packages file.
     testUsingContext('moved flutter sdk', () async {
-      Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
+      final Directory destinationPath = fs.systemTempDirectory.createTempSync('dependency_checker_test_');
       // Copy the golden input and let the test run in an isolated temporary in-memory file system.
-      LocalFileSystem localFileSystem = const LocalFileSystem();
-      Directory sourcePath =  localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
+      final LocalFileSystem localFileSystem = const LocalFileSystem();
+      final Directory sourcePath =  localFileSystem.directory(localFileSystem.path.join(dataPath, 'changed_sdk_location'));
       copyDirectorySync(sourcePath, destinationPath);
       fs.currentDirectory = destinationPath;
 

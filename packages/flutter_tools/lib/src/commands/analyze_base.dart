@@ -39,7 +39,7 @@ abstract class AnalyzeBase {
 
   void writeBenchmark(Stopwatch stopwatch, int errorCount, int membersMissingDocumentation) {
     final String benchmarkOut = 'analysis_benchmark.json';
-    Map<String, dynamic> data = <String, dynamic>{
+    final Map<String, dynamic> data = <String, dynamic>{
       'time': (stopwatch.elapsedMilliseconds / 1000.0),
       'issues': errorCount,
       'missingDartDocs': membersMissingDocumentation
@@ -56,8 +56,8 @@ abstract class AnalyzeBase {
 bool inRepo(List<String> fileList) {
   if (fileList == null || fileList.isEmpty)
     fileList = <String>[fs.path.current];
-  String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
-  String prefix = root + fs.path.separator;
+  final String root = fs.path.normalize(fs.path.absolute(Cache.flutterRoot));
+  final String prefix = root + fs.path.separator;
   for (String file in fileList) {
     file = fs.path.normalize(fs.path.absolute(file));
     if (file == root || file.startsWith(prefix))
