@@ -161,12 +161,14 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 // until they're all visible.
 class _AllSectionsLayout extends MultiChildLayoutDelegate {
   _AllSectionsLayout({
+    this.translation,
     this.tColumnToRow,
     this.tCollapsed,
     this.cardCount,
     this.selectedIndex,
   });
 
+  final FractionalOffset translation;
   final double tColumnToRow;
   final double tCollapsed;
   final int cardCount;
@@ -186,6 +188,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     final double columnCardWidth = size.width - columnCardX;
     final double columnCardHeight = size.height / cardCount;
     final double rowCardWidth = size.width;
+    final Offset offset = translation.alongSize(size);
     double columnCardY = 0.0;
     double rowCardX = -(selectedIndex * rowCardWidth);
 
@@ -209,7 +212,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       // Layout the card for index.
       final Rect columnCardRect = new Rect.fromLTWH(columnCardX, columnCardY, columnCardWidth, columnCardHeight);
       final Rect rowCardRect = new Rect.fromLTWH(rowCardX, 0.0, rowCardWidth, size.height);
-      final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect);
+      final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
         // Add a small horizontal gap between the cards.
@@ -228,7 +231,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final Point columnTitleOrigin = new Point(columnTitleX, columnTitleY);
       final Point rowTitleOrigin = new Point(centeredRowTitleX, rowTitleY);
       final Point titleOrigin = _interpolatePoint(columnTitleOrigin, rowTitleOrigin);
-      positionChild('title$index', titleOrigin.toOffset());
+      positionChild('title$index', titleOrigin.toOffset() + offset);
 
       // Layout the selection indicator for index.
       final Size indicatorSize = layoutChild('indicator$index', new BoxConstraints.loose(cardRect.size));
@@ -240,7 +243,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final double rowIndicatorY = titleRect.bottomCenter.y + 16.0;
       final Point rowIndicatorOrigin = new Point(centeredRowIndicatorX, rowIndicatorY);
       final Point indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin);
-      positionChild('indicator$index', indicatorOrigin.toOffset());
+      positionChild('indicator$index', indicatorOrigin.toOffset() + offset);
 
       columnCardY += columnCardHeight;
       rowCardX += rowCardWidth;
@@ -260,6 +263,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 class _AllSectionsView extends StatelessWidget {
   _AllSectionsView({
     Key key,
+    this.sectionIndex,
     this.sections,
     this.selectedIndex,
     this.minHeight,
@@ -270,9 +274,11 @@ class _AllSectionsView extends StatelessWidget {
     assert(sections != null);
     assert(sectionCards != null);
     assert(sectionCards.length == sections.length);
+    assert(sectionIndex >= 0 && sectionIndex < sections.length);
     assert(selectedIndex >= 0.0 && selectedIndex < sections.length.toDouble());
   }
 
+  final int sectionIndex;
   final List<Section> sections;
   final double selectedIndex;
   final double minHeight;
@@ -342,6 +348,7 @@ class _AllSectionsView extends StatelessWidget {
 
     return new CustomMultiChildLayout(
       delegate: new _AllSectionsLayout(
+        translation: new FractionalOffset(selectedIndex - sectionIndex, 0.0),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,
@@ -441,17 +448,15 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     for (int index = 0; index < allSections.length; index++) {
       headings.add(new Container(
           decoration: new BoxDecoration(backgroundColor: _kAppBackgroundColor),
-          child: new FractionalTranslation(
-            translation: new FractionalOffset(_selectedIndex - index, 0.0),
-            child: new ClipRect(
-              child: new _AllSectionsView(
-                sections: allSections,
-                selectedIndex: _selectedIndex,
-                minHeight: _kAppBarMinHeight,
-                midHeight: _kAppBarMidHeight,
-                maxHeight: maxHeight,
-                sectionCards: sectionCards,
-              ),
+          child: new ClipRect(
+            child: new _AllSectionsView(
+              sectionIndex: index,
+              sections: allSections,
+              selectedIndex: _selectedIndex,
+              minHeight: _kAppBarMinHeight,
+              midHeight: _kAppBarMidHeight,
+              maxHeight: maxHeight,
+              sectionCards: sectionCards,
             ),
           ),
         )
