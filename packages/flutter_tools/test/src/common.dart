@@ -7,6 +7,7 @@ import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -25,7 +26,7 @@ void updateFileModificationTime(String path,
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 
-/// Matcher for functions that throw ToolExit.
+/// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit([int exitCode]) {
   return exitCode == null
     ? throwsA(isToolExit)
@@ -34,3 +35,13 @@ Matcher throwsToolExit([int exitCode]) {
 
 /// Matcher for [ToolExit]s.
 const Matcher isToolExit = const isInstanceOf<ToolExit>();
+
+/// Matcher for functions that throw [ProcessExit].
+Matcher throwsProcessExit([dynamic exitCode]) {
+  return exitCode == null
+      ? throwsA(isProcessExit)
+      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+}
+
+/// Matcher for [ProcessExit]s.
+const Matcher isProcessExit = const isInstanceOf<ProcessExit>();
