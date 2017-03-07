@@ -38,14 +38,14 @@ void main() {
     testUsingContext('parse normal', () {
       final AndroidSdk sdk = new AndroidSdk('.');
       final AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
-        platformVersionName: 'android-23', buildToolsVersionName: '23.0.0');
+        platformVersionName: 'android-23', buildToolsVersion: new Version.parse('23.0.0'));
       expect(ver.sdkLevel, 23);
     });
 
     testUsingContext('parse android n', () {
       final AndroidSdk sdk = new AndroidSdk('.');
       final AndroidSdkVersion ver = new AndroidSdkVersion(sdk,
-        platformVersionName: 'android-N', buildToolsVersionName: '24.0.0');
+        platformVersionName: 'android-N', buildToolsVersion: new Version.parse('24.0.0'));
       expect(ver.sdkLevel, 24);
     });
   });
