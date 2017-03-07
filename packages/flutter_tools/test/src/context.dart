@@ -74,7 +74,7 @@ void testUsingContext(String description, dynamic testMethod(), {
     final String flutterRoot = getFlutterRoot();
 
     try {
-      return await testContext.runInZone(() {
+      return await testContext.runInZone(() async {
         // Apply the overrides to the test context in the zone since their
         // instantiation may reference items already stored on the context.
         overrides.forEach((Type type, dynamic value()) {
@@ -83,21 +83,26 @@ void testUsingContext(String description, dynamic testMethod(), {
         // Provide a sane default for the flutterRoot directory. Individual
         // tests can override this.
         Cache.flutterRoot = flutterRoot;
-        return testMethod();
+        return await testMethod();
+      }, onError: (dynamic error, StackTrace stackTrace) {
+        _printBufferedErrors(testContext);
+        throw error;
       });
     } catch (error) {
-      if (testContext[Logger] is BufferLogger) {
-        final BufferLogger bufferLogger = testContext[Logger];
-        if (bufferLogger.errorText.isNotEmpty)
-          print(bufferLogger.errorText);
-      }
-      // Previously the following line read "throw error;". This is bad because
-      // it drops the error's actual stacktrace. Use 'rethrow' to preserve
-      // the stacktrace.
+      _printBufferedErrors(testContext);
       rethrow;
     }
 
   }, timeout: timeout, skip: skip);
+}
+
+void _printBufferedErrors(AppContext testContext) {
+  if (testContext[Logger] is BufferLogger) {
+    final BufferLogger bufferLogger = testContext[Logger];
+    if (bufferLogger.errorText.isNotEmpty)
+      print(bufferLogger.errorText);
+    bufferLogger.clear();
+  }
 }
 
 String getFlutterRoot() {
