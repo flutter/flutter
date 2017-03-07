@@ -37,18 +37,19 @@ String _kStackTraceFileField = 'DartError';
 /// it must be supplied in the request.
 String _kStackTraceFilename = 'stacktrace_file';
 
+/// We only send crash reports in testing mode.
+///
+/// See [enterTestingMode] and [exitTestingMode].
 bool _testing = false;
 
 /// Sends crash reports to Google.
 class CrashReportSender {
-  static final Uri _defaultBaseUri = new Uri(
+  static final Uri _baseUri = new Uri(
       scheme: 'https',
       host: _kCrashServerHost,
       port: 443,
       path: _kCrashEndpointPath,
   );
-
-  static Uri _baseUri = _defaultBaseUri;
 
   static CrashReportSender _instance;
 
@@ -128,19 +129,15 @@ class CrashReportSender {
   }
 }
 
-/// Overrides [CrashReportSender._baseUri] for testing and enables testing
-/// mode.
+/// Enables testing mode.
 @visibleForTesting
-void overrideBaseCrashUrlForTesting(Uri uri) {
-  CrashReportSender._baseUri = uri;
+void enterTestingMode() {
   _testing = true;
 }
 
-/// Resets [CrashReportSender._baseUri] back to the original value and disables
-/// test mode.
+/// Disables testing mode.
 @visibleForTesting
-void resetBaseCrashUrlForTesting() {
-  CrashReportSender._baseUri = CrashReportSender._defaultBaseUri;
+void exitTestingMode() {
   _testing = false;
 }
 
