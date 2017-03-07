@@ -277,8 +277,8 @@
         "io.flutter.HelloFlutter",
         "--enable-dart-profiling",
         "--enable-checked-mode",
-        "--observatory-port=8136",
-        "--diagnostic-port=8137"
+        "--observatory-port=8100",
+        "--diagnostic-port=8101"
       ],
       "includeParentEnvironment": true,
       "runInShell": false,

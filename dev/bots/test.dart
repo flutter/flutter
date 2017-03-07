@@ -6,7 +6,7 @@ import 'package:path/path.dart' as p;
 String flutterRoot = p.dirname(p.dirname(p.dirname(p.fromUri(Platform.script))));
 String flutter = p.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 String dart = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-String pub = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.exe' : 'pub');
+String pub = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 
 /// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
