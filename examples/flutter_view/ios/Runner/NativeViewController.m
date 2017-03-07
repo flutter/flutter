@@ -19,9 +19,6 @@
   self.counter = 0;
 }
 
-- (void)didReceiveMemoryWarning {
-  [super didReceiveMemoryWarning];
-}
 - (IBAction)handleIncrement:(MDButton*)sender {
   [self.delegate didTapIncrementButton];
 }

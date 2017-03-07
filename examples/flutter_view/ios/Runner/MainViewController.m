@@ -10,21 +10,17 @@
 
 @interface MainViewController ()
 
-@property(strong, nonatomic) NSString* messageName;
 @property (strong, nonatomic) NativeViewController* nativeViewController;
 @property (strong, nonatomic) FlutterViewController* flutterViewController;
 @end
 
 static NSString* const emptyString = @"";
+static NSString* const channel = @"increment";
 
 @implementation MainViewController
 
-- (void)viewDidLoad {
-  [super viewDidLoad];
-}
-
-- (void)didReceiveMemoryWarning {
-  [super didReceiveMemoryWarning];
+- (NSString*) messageName {
+  return channel;
 }
 
 - (NSString*)didReceiveString:(NSString*)message {
@@ -33,7 +29,6 @@ static NSString* const emptyString = @"";
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue*)segue sender:(id)sender {
-  self.messageName = @"increment";
 
   if ([segue.identifier isEqualToString: @"NativeViewControllerSegue"]) {
     self.nativeViewController = segue.destinationViewController;
