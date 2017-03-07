@@ -99,8 +99,7 @@ class HotRunner extends ResidentRunner {
       return true;
     }
     final DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(
-              mainPath, projectRootPath, packagesFilePath);
+        new DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = new Set<String>.from(dartDependencySetBuilder.build());
     } catch (error) {

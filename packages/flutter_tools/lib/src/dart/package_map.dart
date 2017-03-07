@@ -40,13 +40,16 @@ class PackageMap {
   Map<String, Uri> _map;
 
   /// Returns the path to [packageUri].
-  String pathForPackage(Uri packageUri) {
+  String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
+
+  /// Returns the path to [packageUri] as Uri.
+  Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
     final List<String> pathSegments = packageUri.pathSegments.toList();
     final String packageName = pathSegments.removeAt(0);
     final Uri packageBase = map[packageName];
     final String packageRelativePath = fs.path.joinAll(pathSegments);
-    return packageBase.resolve(packageRelativePath).path;
+    return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
   }
 
   String checkValid() {

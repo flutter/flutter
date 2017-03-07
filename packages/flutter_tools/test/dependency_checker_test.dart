@@ -31,7 +31,7 @@ void main()  {
       final String barPath = fs.path.join(testPath, 'lib', 'bar.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
+          new DartDependencySetBuilder(mainPath, packagesPath);
       final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 
@@ -63,7 +63,7 @@ void main()  {
       final String packagesPath = fs.path.join(testPath, '.packages');
 
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
+          new DartDependencySetBuilder(mainPath, packagesPath);
       final DependencyChecker dependencyChecker =
           new DependencyChecker(builder, null);
 

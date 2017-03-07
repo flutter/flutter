@@ -2,89 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'package:analyzer/analyzer.dart';
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
-import '../base/process.dart';
+import '../dart/package_map.dart';
 
 class DartDependencySetBuilder {
+  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
+        this._mainScriptPath = fs.path.canonicalize(mainScriptPath),
+        this._mainScriptUri = fs.path.toUri(mainScriptPath),
+        this._packagesFilePath = fs.path.canonicalize(packagesFilePath);
 
-  factory DartDependencySetBuilder(
-      String mainScriptPath, String projectRootPath, String packagesFilePath) {
-    if (platform.isWindows)
-      return new _GenSnapshotDartDependencySetBuilder(mainScriptPath, projectRootPath, packagesFilePath);
-    return new DartDependencySetBuilder._(mainScriptPath, projectRootPath, packagesFilePath);
-  }
+  final String _mainScriptPath;
+  final String _packagesFilePath;
 
-  DartDependencySetBuilder._(this.mainScriptPath, this.projectRootPath, this.packagesFilePath);
+  final Uri _mainScriptUri;
 
-  final String mainScriptPath;
-  final String projectRootPath;
-  final String packagesFilePath;
-
-  /// Returns a set of canonicalize paths.
-  ///
-  /// The paths have been canonicalize with `fs.path.canonicalize`.
   Set<String> build() {
-    final String skySnapshotPath =
-        Artifacts.instance.getArtifactPath(Artifact.skySnapshot);
+    final List<String> dependencies = <String>[_mainScriptPath, _packagesFilePath];
+    final List<Uri> toProcess = <Uri>[_mainScriptUri];
+    final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
-    final List<String> args = <String>[
-      skySnapshotPath,
-      '--packages=$packagesFilePath',
-      '--print-deps',
-      mainScriptPath
-    ];
-
-    final String output = runSyncAndThrowStdErrOnError(args);
-
-    return new Set<String>.from(LineSplitter.split(output).map(
-        (String path) => fs.path.canonicalize(path))
-    );
+    while (toProcess.isNotEmpty) {
+      final Uri currentUri = toProcess.removeLast();
+      final CompilationUnit unit = _parse(currentUri.toFilePath());
+      for (Directive directive in unit.directives) {
+        if (!(directive is UriBasedDirective))
+          continue;
+        final UriBasedDirective uriBasedDirective = directive;
+        final String uriAsString = uriBasedDirective.uri.stringValue;
+        Uri resolvedUri = resolveRelativeUri(currentUri, Uri.parse(uriAsString));
+        if (resolvedUri.scheme.startsWith('dart'))
+          continue;
+        if (resolvedUri.scheme == 'package')
+          resolvedUri = packageMap.uriForPackage(resolvedUri);
+        final String path = fs.path.canonicalize(resolvedUri.toFilePath());
+        if (!dependencies.contains(path)) {
+          dependencies.add(path);
+          toProcess.add(resolvedUri);
+        }
+      }
+    }
+    return dependencies.toSet();
   }
-}
 
-/// A [DartDependencySetBuilder] that is backed by gen_snapshot.
-class _GenSnapshotDartDependencySetBuilder implements DartDependencySetBuilder {
-  _GenSnapshotDartDependencySetBuilder(this.mainScriptPath,
-                                       this.projectRootPath,
-                                       this.packagesFilePath);
-
-  @override
-  final String mainScriptPath;
-  @override
-  final String projectRootPath;
-  @override
-  final String packagesFilePath;
-
-  @override
-  Set<String> build() {
-    final String snapshotterPath =
-        Artifacts.instance.getArtifactPath(Artifact.genSnapshot);
-    final String vmSnapshotData =
-        Artifacts.instance.getArtifactPath(Artifact.vmSnapshotData);
-    final String isolateSnapshotData =
-        Artifacts.instance.getArtifactPath(Artifact.isolateSnapshotData);
-    assert(fs.path.isAbsolute(this.projectRootPath));
-
-    final List<String> args = <String>[
-      snapshotterPath,
-      '--snapshot_kind=script',
-      '--dependencies-only',
-      '--vm_snapshot_data=$vmSnapshotData',
-      '--isolate_snapshot_data=$isolateSnapshotData',
-      '--packages=$packagesFilePath',
-      '--print-dependencies',
-      '--script_snapshot=snapshot_blob.bin',
-      mainScriptPath
-    ];
-
-    final String output = runSyncAndThrowStdErrOnError(args);
-
-    return new Set<String>.from(LineSplitter.split(output).map(
-            (String path) => fs.path.canonicalize(path))
-    );
-  }
+  CompilationUnit _parse(String path) => parseDirectives(fs.file(path).readAsStringSync(), name: path);
 }
