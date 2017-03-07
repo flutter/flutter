@@ -382,7 +382,7 @@ Future<Null> writeStreamToSink<O, I extends O>(Stream<I> stream, EventSink<O> si
   final Completer<Null> completer = new Completer<Null>();
   stream.listen(sink.add,
       onError: sink.addError,
-      onDone: () => completer.complete());
+      onDone: completer.complete);
   return completer.future;
 }
 

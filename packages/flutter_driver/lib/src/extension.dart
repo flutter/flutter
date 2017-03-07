@@ -171,7 +171,7 @@ class FlutterDriverExtension {
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
 
-    await _waitUntilFrame(() => finder.precache());
+    await _waitUntilFrame(finder.precache);
 
     if (_frameSync)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);

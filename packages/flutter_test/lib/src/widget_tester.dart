@@ -351,7 +351,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Does not run timers. May result in an infinite loop or run out of memory
   /// if microtasks continue to recursively schedule new microtasks.
   Future<Null> idle() {
-    return TestAsyncUtils.guard(() => binding.idle());
+    return TestAsyncUtils.guard(binding.idle);
   }
 
   Set<Ticker> _tickers;

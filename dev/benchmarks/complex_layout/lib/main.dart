@@ -611,7 +611,7 @@ class GalleryDrawer extends StatelessWidget {
           new DrawerItem(
             icon: new Icon(Icons.hourglass_empty),
             selected: timeDilation != 1.0,
-            onPressed: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
+            onPressed: ComplexLayoutApp.of(context).toggleAnimationSpeed,
             child: new Row(
               children: <Widget>[
                 new Expanded(child: new Text('Animate Slowly')),

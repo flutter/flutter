@@ -1859,9 +1859,7 @@ class BuildOwner {
   void finalizeTree() {
     Timeline.startSync('Finalize tree');
     try {
-      lockState(() {
-        _inactiveElements._unmountAll();
-      });
+      lockState(_inactiveElements._unmountAll);
       assert(GlobalKey._debugCheckForDuplicates);
       scheduleMicrotask(GlobalKey._notifyListeners);
     } catch (e, stack) {

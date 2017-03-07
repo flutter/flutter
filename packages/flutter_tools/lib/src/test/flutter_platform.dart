@@ -222,7 +222,7 @@ class _FlutterPlatform extends PlatformPlugin {
           processObservatoryPort = detectedPort;
         },
         startTimeoutTimer: () {
-          new Future<_InitialResult>.delayed(_kTestStartupTimeout, () => timeout.complete());
+          new Future<_InitialResult>.delayed(_kTestStartupTimeout, timeout.complete);
         },
       );
 
@@ -265,7 +265,7 @@ class _FlutterPlatform extends PlatformPlugin {
           final Completer<Null> harnessDone = new Completer<Null>();
           final StreamSubscription<dynamic> harnessToTest = controller.stream.listen(
             (dynamic event) { testSocket.add(JSON.encode(event)); },
-            onDone: () { harnessDone.complete(); },
+            onDone: harnessDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
@@ -285,7 +285,7 @@ class _FlutterPlatform extends PlatformPlugin {
               assert(encodedEvent is String); // we shouldn't ever get binary messages
               controller.sink.add(JSON.decode(encodedEvent));
             },
-            onDone: () { testDone.complete(); },
+            onDone: testDone.complete,
             onError: (dynamic error, dynamic stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');

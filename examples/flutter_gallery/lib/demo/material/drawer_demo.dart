@@ -155,9 +155,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       ),
       body: new Center(
         child: new InkWell(
-          onTap: () {
-            _scaffoldKey.currentState.openDrawer();
-          },
+          onTap: _scaffoldKey.currentState.openDrawer,
           child: new Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[

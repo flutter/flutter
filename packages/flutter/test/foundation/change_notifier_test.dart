@@ -187,8 +187,8 @@ void main() {
     source.dispose();
     expect(() { source.addListener(null); }, throwsFlutterError);
     expect(() { source.removeListener(null); }, throwsFlutterError);
-    expect(() { source.dispose(); }, throwsFlutterError);
-    expect(() { source.notify(); }, throwsFlutterError);
+    expect(source.dispose, throwsFlutterError);
+    expect(source.notify, throwsFlutterError);
   });
 
   test('Value notifier', () {
