@@ -166,6 +166,13 @@ class BufferLogger extends Logger {
     printStatus(message);
     return new Status();
   }
+
+  /// Clears all buffers.
+  void clear() {
+    _error.clear();
+    _status.clear();
+    _trace.clear();
+  }
 }
 
 class VerboseLogger extends Logger {
