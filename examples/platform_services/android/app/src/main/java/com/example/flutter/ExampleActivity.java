@@ -4,6 +4,9 @@
 
 package com.example.flutter;
 
+import android.content.ContextWrapper;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
@@ -36,9 +39,18 @@ public class ExampleActivity extends FlutterActivity {
   }
 
   private void getBatteryLevel(Response response) {
-    BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
+    int batteryLevel = -1;
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
-      response.success(batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY));
+      BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
+      batteryLevel = batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+    } else {
+      Intent intent = new ContextWrapper(getApplicationContext()).
+          registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+      batteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+    }
+
+    if (batteryLevel != -1) {
+      response.success(batteryLevel);
     } else {
       response.error("Not available", "Battery level not available.", null);
     }
