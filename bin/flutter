@@ -48,7 +48,10 @@ PUB="$DART_SDK_PATH/bin/pub"
 
 # Test if running as superuser
 if [[ "$EUID" == "0" ]]; then
-  echo "Error: Flutter does not support running as root."
+  echo "   Woah! You appear to be trying to run flutter as root."
+  echo "   We strongly recommend running the flutter tool without superuser privileges."
+  echo "  /"
+  echo "📎"
   exit 1
 fi
 
