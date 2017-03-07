@@ -132,7 +132,6 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Xcode, () => new Xcode());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
     context.putIfAbsent(Usage, () => new Usage());

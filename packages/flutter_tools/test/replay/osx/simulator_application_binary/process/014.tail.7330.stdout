@@ -1,0 +1,18 @@
+Mar  7 14:28:21 flutter-macpro CoreSimulatorBridge[3520]: Pasteboard change listener callback port <NSMachPort: 0x7ff96e707960> registered
+Mar  7 14:28:21 flutter-macpro CoreSimulatorBridge[3520]: Requesting launch of io.flutter.HelloFlutter with options: {
+	    arguments =     (
+	        "--enable-dart-profiling",
+	        "--enable-checked-mode",
+	        "--observatory-port=8136",
+	        "--diagnostic-port=8137"
+	    );
+	    environment =     {
+	    };
+	}
+Mar  7 14:28:21 flutter-macpro CoreSimulatorBridge[3520]: [Common] [FBSSystemService][0xff6d] Sending request to open "io.flutter.HelloFlutter"
+Mar  7 14:28:21 flutter-macpro CoreSimulatorBridge[3520]: [Common] [FBSSystemService][0xff6d] Request successful: <FBSProcessHandle: 0x7ff970e02da0; hello_flutter:7332; valid: YES>
+Mar  7 14:28:21 flutter-macpro logd[3505]: metadata shared cached uuid is null (using logd's shared cache info) hello_flutter (7332)
+Mar  7 14:28:21 flutter-macpro logd[3505]: Failed to harvest strings for pathless uuid '00000000-0000-0000-0000-000000000000'
+Mar  7 14:28:21 flutter-macpro hello_flutter[7332]: assertion failed: 16D32 14B72: libxpc.dylib + 62597 [17F6B510-0FB1-30D3-B29C-D74A5D63719E]: 0x7d
+Mar  7 14:28:21 flutter-macpro hello_flutter[7332]: Diagnostic server listening on http://127.0.0.1:58826
+Mar  7 14:28:21 flutter-macpro hello_flutter[7332]: Observatory listening on http://127.0.0.1:8136/
