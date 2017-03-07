@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pub_semver/pub_semver.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import '../globals.dart';
 
 AndroidSdk get androidSdk => context[AndroidSdk];
@@ -35,6 +34,9 @@ const Map<String, int> _namedVersionMap = const <String, int> {
   'android-N': 24,
   'android-stable': 24,
 };
+
+/// The minimum Android SDK version we support.
+const int minimumAndroidSdkVersion = 25;
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
@@ -188,7 +190,7 @@ class AndroidSdk {
       return new AndroidSdkVersion(
         this,
         platformVersionName: platformName,
-        buildToolsVersionName: buildToolsVersion.toString()
+        buildToolsVersion: buildToolsVersion
       );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
@@ -204,12 +206,13 @@ class AndroidSdk {
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion(this.sdk, {
     this.platformVersionName,
-    this.buildToolsVersionName
+    this.buildToolsVersion,
   });
 
   final AndroidSdk sdk;
   final String platformVersionName;
-  final String buildToolsVersionName;
+  final Version buildToolsVersion;
+  String get buildToolsVersionName => buildToolsVersion.toString();
 
   int get sdkLevel {
     if (_namedVersionMap.containsKey(platformVersionName))
@@ -229,6 +232,10 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String get apksignerPath => getBuildToolsPath('apksigner');
 
   List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+    if (buildToolsVersion.major < minimumAndroidSdkVersion) {
+      return <String>['Minimum supported Android SDK version is $minimumAndroidSdkVersion '
+                      'but this system has ${buildToolsVersion.major}. Please upgrade.'];
+    }
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 

@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:pub_semver/pub_semver.dart' show Version;
-
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
