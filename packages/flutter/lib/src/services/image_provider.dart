@@ -9,9 +9,10 @@ import 'dart:ui' as ui show Image;
 import 'dart:ui' show Size, Locale, hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
+import 'package:http/http.dart' as http;
 
 import 'asset_bundle.dart';
+import 'http_client.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_stream.dart';
@@ -332,11 +333,13 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
+  static final http.Client _httpClient = createHttpClient();
+
   Future<ImageInfo> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await http.get(resolved);
+    final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
       return null;
 
