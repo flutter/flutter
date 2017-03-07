@@ -20,16 +20,16 @@
         "hostCPU": "Intel(R) Xeon(R) CPU E5-2697 v2 @ 2.70GHz",
         "version": "1.21.0-edge.554c3c9683264ab9840a2c2371942b5a9f5e1fae (Wed Dec  7 14:50:39 2016) on \"ios_x64\"",
         "_profilerMode": "Dart",
-        "pid": 7332,
-        "_maxRSS": 81494016,
-        "startTime": 1488925701465,
+        "pid": 14974,
+        "_maxRSS": 83714048,
+        "startTime": 1488929313252,
         "isolates": [
           {
             "type": "@Isolate",
             "fixedId": true,
-            "id": "isolates/4625236",
+            "id": "isolates/374374322",
             "name": "hello_flutter_lib_flx.flx$main",
-            "number": "4625236"
+            "number": "374374322"
           }
         ]
       },
@@ -43,7 +43,7 @@
       "method": "getIsolate",
       "id": 1,
       "params": {
-        "isolateId": "isolates/4625236"
+        "isolateId": "isolates/374374322"
       }
     }
   },
@@ -54,11 +54,11 @@
       "result": {
         "type": "Isolate",
         "fixedId": true,
-        "id": "isolates/4625236",
+        "id": "isolates/374374322",
         "name": "hello_flutter_lib_flx.flx$main",
-        "number": "4625236",
-        "_originNumber": "4625236",
-        "startTime": 1488925701536,
+        "number": "374374322",
+        "_originNumber": "374374322",
+        "startTime": 1488929313274,
         "_heaps": {
           "new": {
             "type": "HeapSpace",
@@ -66,7 +66,7 @@
             "vmName": "Scavenger",
             "collections": 0,
             "avgCollectionPeriodMillis": 0.0,
-            "used": 1027280,
+            "used": 1478320,
             "capacity": 2097152,
             "external": 0,
             "time": 0.0
@@ -76,8 +76,8 @@
             "name": "old",
             "vmName": "PageSpace",
             "collections": 0,
-            "used": 10197760,
-            "capacity": 10330112,
+            "used": 12554896,
+            "capacity": 12693504,
             "external": 789040,
             "time": 0.0,
             "avgCollectionPeriodMillis": 0.0
@@ -93,11 +93,11 @@
           "isolate": {
             "type": "@Isolate",
             "fixedId": true,
-            "id": "isolates/4625236",
+            "id": "isolates/374374322",
             "name": "hello_flutter_lib_flx.flx$main",
-            "number": "4625236"
+            "number": "374374322"
           },
-          "timestamp": 1488925701600,
+          "timestamp": 1488929313359,
           "topFrame": {
             "type": "Frame",
             "location": {
@@ -105,22 +105,22 @@
               "script": {
                 "type": "@Script",
                 "fixedId": true,
-                "id": "libraries/118/scripts/package%3Aflutter%2Fsrc%2Frendering%2Fobject.dart/15aaae335cf",
-                "uri": "package:flutter/src/rendering/object.dart",
+                "id": "libraries/54/scripts/package%3Aflutter%2Fsrc%2Fmaterial%2Fscaffold.dart/15aab1a523c",
+                "uri": "package:flutter/src/material/scaffold.dart",
                 "_kind": "library"
               },
-              "tokenPos": 14515
+              "tokenPos": 5579
             },
             "function": {
               "type": "@Function",
               "fixedId": true,
-              "id": "classes/1705/functions/attach",
-              "name": "attach",
+              "id": "classes/1826/functions/build",
+              "name": "build",
               "owner": {
                 "type": "@Class",
                 "fixedId": true,
-                "id": "classes/1705",
-                "name": "RenderBox&ContainerRenderObjectMixin"
+                "id": "classes/1826",
+                "name": "ScaffoldState"
               },
               "_kind": "RegularFunction",
               "static": false,
@@ -131,9 +131,9 @@
             "code": {
               "type": "@Code",
               "fixedId": true,
-              "id": "code/2c4f21753f8-121627520",
-              "name": "RenderBox&ContainerRenderObjectMixin.attach",
-              "_vmName": "attach",
+              "id": "code/2c5c95f736d-1178b4580",
+              "name": "ScaffoldState.build",
+              "_vmName": "build",
               "kind": "Dart",
               "_optimized": false,
               "_intrinsic": false,
@@ -148,15 +148,15 @@
                   "class": {
                     "type": "@Class",
                     "fixedId": true,
-                    "id": "classes/1703",
-                    "name": "RenderStack"
+                    "id": "classes/1826",
+                    "name": "ScaffoldState"
                   },
                   "kind": "PlainInstance",
                   "id": "objects/0"
                 },
-                "declarationTokenPos": 14512,
-                "scopeStartTokenPos": 14512,
-                "scopeEndTokenPos": 14590
+                "declarationTokenPos": 5575,
+                "scopeStartTokenPos": 5575,
+                "scopeEndTokenPos": 6843
               }
             ],
             "index": 0
@@ -192,20 +192,20 @@
           "counters": [
             0,
             0,
-            7,
+            17,
             0,
-            50,
-            30,
-            0,
-            0,
+            65,
+            24,
             0,
             0,
             0,
-            3,
+            0,
+            0,
+            2,
             0,
             0,
             0,
-            5,
+            9,
             0
           ]
         },
@@ -2983,13 +2983,13 @@
         "views": [
           {
             "type": "FlutterView",
-            "id": "_flutterView/0x648000168580",
+            "id": "_flutterView/0x60000016ba00",
             "isolate": {
               "type": "@Isolate",
               "fixedId": true,
-              "id": "isolates/4625236",
-              "name": "hello_flutter_lib_flx.flx$main-4625236",
-              "number": "4625236"
+              "id": "isolates/374374322",
+              "name": "hello_flutter_lib_flx.flx$main-374374322",
+              "number": "374374322"
             }
           }
         ]
@@ -3015,13 +3015,13 @@
         "views": [
           {
             "type": "FlutterView",
-            "id": "_flutterView/0x648000168580",
+            "id": "_flutterView/0x60000016ba00",
             "isolate": {
               "type": "@Isolate",
               "fixedId": true,
-              "id": "isolates/4625236",
-              "name": "hello_flutter_lib_flx.flx$main-4625236",
-              "number": "4625236"
+              "id": "isolates/374374322",
+              "name": "hello_flutter_lib_flx.flx$main-374374322",
+              "number": "374374322"
             }
           }
         ]

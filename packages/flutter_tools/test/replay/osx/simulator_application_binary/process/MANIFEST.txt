@@ -2,8 +2,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7296,
-      "basename": "000.defaults.7296",
+      "pid": 14906,
+      "basename": "000.defaults.14906",
       "command": [
         "/usr/bin/defaults",
         "read",
@@ -36,8 +36,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7297,
-      "basename": "003.xcode-select.7297",
+      "pid": 14907,
+      "basename": "003.xcode-select.14907",
       "command": [
         "xcode-select",
         "--print-path"
@@ -54,8 +54,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7298,
-      "basename": "004.xcodebuild.7298",
+      "pid": 14908,
+      "basename": "004.xcodebuild.14908",
       "command": [
         "xcodebuild",
         "-version"
@@ -72,8 +72,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7299,
-      "basename": "005.clang.7299",
+      "pid": 14909,
+      "basename": "005.clang.14909",
       "command": [
         "/usr/bin/xcrun",
         "clang"
@@ -90,8 +90,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7305,
-      "basename": "006.adb.7305",
+      "pid": 14910,
+      "basename": "006.adb.14910",
       "command": [
         "/Users/flutter/Library/Android/sdk/platform-tools/adb",
         "devices",
@@ -109,8 +109,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7306,
-      "basename": "007.idevice_id.7306",
+      "pid": 14911,
+      "basename": "007.idevice_id.14911",
       "command": [
         "idevice_id",
         "-h"
@@ -127,8 +127,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7307,
-      "basename": "008.which.7307",
+      "pid": 14912,
+      "basename": "008.which.14912",
       "command": [
         "which",
         "idevice_id"
@@ -145,8 +145,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7308,
-      "basename": "009.idevice_id.7308",
+      "pid": 14913,
+      "basename": "009.idevice_id.14913",
       "command": [
         "/Users/flutter/homebrew/bin/idevice_id",
         "-l"
@@ -163,8 +163,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7309,
-      "basename": "010.simctl.7309",
+      "pid": 14914,
+      "basename": "010.simctl.14914",
       "command": [
         "/usr/bin/xcrun",
         "simctl",
@@ -184,15 +184,15 @@
   {
     "type": "run",
     "body": {
-      "pid": 7310,
-      "basename": "011.unzip.7310",
+      "pid": 14916,
+      "basename": "011.unzip.14916",
       "command": [
         "unzip",
         "-o",
         "-q",
         "hello_flutter.ipa",
         "-d",
-        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_PDojvc"
+        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb"
       ],
       "includeParentEnvironment": true,
       "runInShell": false,
@@ -206,12 +206,12 @@
   {
     "type": "run",
     "body": {
-      "pid": 7311,
-      "basename": "012.defaults.7311",
+      "pid": 14927,
+      "basename": "012.defaults.14927",
       "command": [
         "/usr/bin/defaults",
         "read",
-        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_PDojvc/Payload/hello_flutter.app/Info",
+        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app/Info",
         "CFBundleIdentifier"
       ],
       "includeParentEnvironment": true,
@@ -226,14 +226,14 @@
   {
     "type": "run",
     "body": {
-      "pid": 7314,
-      "basename": "013.simctl.7314",
+      "pid": 14928,
+      "basename": "013.simctl.14928",
       "command": [
         "/usr/bin/xcrun",
         "simctl",
         "install",
         "AA8FFDB0-593A-44E4-A927-8E49A138BDA5",
-        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_PDojvc/Payload/hello_flutter.app"
+        "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app"
       ],
       "includeParentEnvironment": true,
       "runInShell": false,
@@ -247,8 +247,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7330,
-      "basename": "014.tail.7330",
+      "pid": 14972,
+      "basename": "014.tail.14972",
       "command": [
         "tail",
         "-n",
@@ -267,8 +267,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7331,
-      "basename": "015.simctl.7331",
+      "pid": 14973,
+      "basename": "015.simctl.14973",
       "command": [
         "/usr/bin/xcrun",
         "simctl",
@@ -292,8 +292,8 @@
   {
     "type": "run",
     "body": {
-      "pid": 7333,
-      "basename": "016.tail.7333",
+      "pid": 14975,
+      "basename": "016.tail.14975",
       "command": [
         "tail",
         "-n",

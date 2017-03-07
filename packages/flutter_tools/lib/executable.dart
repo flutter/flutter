@@ -49,7 +49,6 @@ import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/mac.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
