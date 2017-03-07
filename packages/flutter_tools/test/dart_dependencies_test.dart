@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:analyzer/analyzer.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -17,7 +18,7 @@ void main()  {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
+          new DartDependencySetBuilder(mainPath, packagesPath);
       final Set<String> dependencies = builder.build();
       expect(dependencies.contains(fs.path.canonicalize(mainPath)), isTrue);
       expect(dependencies.contains(fs.path.canonicalize(fs.path.join(testPath, 'foo.dart'))), isTrue);
@@ -27,13 +28,12 @@ void main()  {
       final String mainPath = fs.path.join(testPath, 'main.dart');
       final String packagesPath = fs.path.join(testPath, '.packages');
       final DartDependencySetBuilder builder =
-          new DartDependencySetBuilder(mainPath, testPath, packagesPath);
+          new DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
         fail('expect an assertion to be thrown.');
-      } catch (e) {
-        expect(e, const isInstanceOf<String>());
-        expect(e.contains('unexpected token \'bad\''), isTrue);
+      } on AnalyzerErrorGroup catch (e) {
+        expect(e.toString(), contains('foo.dart: Expected a string literal'));
       }
     });
   });

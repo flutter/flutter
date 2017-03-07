@@ -330,8 +330,7 @@ abstract class ResidentRunner {
 
   bool hasDirtyDependencies() {
     final DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(
-            mainPath, projectRootPath, packagesFilePath);
+        new DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
     final String path = package.packagePath;
