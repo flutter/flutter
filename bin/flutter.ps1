@@ -26,5 +26,5 @@ If ($stdout -ne -1) {
     }
 }
 
-flutter.bat $args
+& $PSScriptRoot\flutter.bat $args
 exit $LastExitCode

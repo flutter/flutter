@@ -40,10 +40,12 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\dart-sdk.zip"
-
 Import-Module BitsTransfer
 Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
+
+Write-Host "Unzipping Dart SDK..."
 Expand-Archive $dartSdkZip -DestinationPath $cachePath
+
 Remove-Item $dartSdkZip
 $dartSdkVersion | Out-File $dartSdkStampPath -Encoding ASCII
 
