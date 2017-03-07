@@ -36,7 +36,7 @@ const Map<String, int> _namedVersionMap = const <String, int> {
 };
 
 /// The minimum Android SDK version we support.
-const minimumAndroidSdkVersion = 25;
+const int minimumAndroidSdkVersion = 25;
 
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
