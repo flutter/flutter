@@ -14,8 +14,8 @@ class A<U extends X> {
 
 void main() {
   test('Assignment through a covariant template throws exception', () {
-    A<Y> ay = new A<Y>();
-    A<X> ayAsAx = ay;
+    final A<Y> ay = new A<Y>();
+    final A<X> ayAsAx = ay;
     expect(() {
       ayAsAx.u = new X();
     }, throwsAssertionError);

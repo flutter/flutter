@@ -47,8 +47,8 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   bool skip: false,
   test_package.Timeout timeout
 }) {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  WidgetTester tester = new WidgetTester._(binding);
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.group('-', () {
     test_package.test(description, () => binding.runTest(() => callback(tester), tester._endOfTestVerifications), skip: skip);
@@ -106,9 +106,9 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
   });
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
-  WidgetTester tester = new WidgetTester._(binding);
+  final WidgetTester tester = new WidgetTester._(binding);
   return binding.runTest(() => callback(tester), tester._endOfTestVerifications) ?? new Future<Null>.value();
 }
 
@@ -119,10 +119,9 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
 /// that have not yet resolved.
 void expect(dynamic actual, dynamic matcher, {
   String reason,
-  bool verbose: false,
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
+  test_package.expect(actual, matcher, reason: reason);
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -136,9 +135,8 @@ void expect(dynamic actual, dynamic matcher, {
 /// that asynchronous APIs are not being called.
 void expectSync(dynamic actual, dynamic matcher, {
   String reason,
-  bool verbose: false,
 }) {
-  test_package.expect(actual, matcher, reason: reason, verbose: verbose);
+  test_package.expect(actual, matcher, reason: reason);
 }
 
 /// Class that programmatically interacts with widgets and the test environment.

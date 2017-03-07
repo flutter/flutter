@@ -12,14 +12,14 @@ class TestTransition extends AnimatedWidget {
     this.childFirstHalf,
     this.childSecondHalf,
     Animation<double> animation
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.animation;
+    final Animation<double> animation = this.listenable;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
@@ -52,7 +52,7 @@ void main() {
 
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
 
-    GlobalKey insideKey = new GlobalKey();
+    final GlobalKey insideKey = new GlobalKey();
 
     String state({ bool skipOffstage: true }) {
       String result = '';
@@ -83,7 +83,7 @@ void main() {
                 child: new Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    PageRoute<Null> route = ModalRoute.of(context);
+                    final PageRoute<Null> route = ModalRoute.of(context);
                     return new Column(
                       children: <Widget>[
                         new TestTransition(
@@ -109,7 +109,7 @@ void main() {
       )
     );
 
-    NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+    final NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 

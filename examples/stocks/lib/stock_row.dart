@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import 'stock_data.dart';
 import 'stock_arrow.dart';
+import 'stock_data.dart';
 
 typedef void StockRowActionCallback(Stock stock);
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/commands/install.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -13,10 +13,10 @@ import 'src/mocks.dart';
 void main() {
   group('install', () {
     testUsingContext('returns 0 when Android is connected and ready for an install', () async {
-      InstallCommand command = new InstallCommand();
+      final InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
 
-      MockAndroidDevice device = new MockAndroidDevice();
+      final MockAndroidDevice device = new MockAndroidDevice();
       when(device.isAppInstalled(any)).thenReturn(false);
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);
@@ -25,10 +25,10 @@ void main() {
     });
 
     testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
-      InstallCommand command = new InstallCommand();
+      final InstallCommand command = new InstallCommand();
       applyMocksToCommand(command);
 
-      MockIOSDevice device = new MockIOSDevice();
+      final MockIOSDevice device = new MockIOSDevice();
       when(device.isAppInstalled(any)).thenReturn(false);
       when(device.installApp(any)).thenReturn(true);
       testDeviceManager.addDevice(device);

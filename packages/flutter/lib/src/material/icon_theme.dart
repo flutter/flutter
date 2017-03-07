@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'icon_theme_data.dart';
-import 'package:flutter/foundation.dart';
 import 'theme.dart';
 
 /// Controls the default color, opacity, and size of icons in a widget subtree.
@@ -56,12 +56,12 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    IconThemeData iconThemeData = _getInheritedIconThemData(context);
+    final IconThemeData iconThemeData = _getInheritedIconThemData(context);
     return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
   static IconThemeData _getInheritedIconThemData(BuildContext context) {
-    IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
+    final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
     return iconTheme?.data ?? Theme.of(context).iconTheme;
   }
 

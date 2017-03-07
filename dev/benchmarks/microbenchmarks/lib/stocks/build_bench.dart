@@ -21,7 +21,7 @@ Future<Null> main() async {
 
   // This allows us to call onBeginFrame even when the engine didn't request it,
   // and have it actually do something:
-  LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   binding.allowAllFrames = true;
 
   final Stopwatch watch = new Stopwatch();
@@ -50,7 +50,7 @@ Future<Null> main() async {
     watch.stop();
   });
 
-  BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
+  final BenchmarkResultPrinter printer = new BenchmarkResultPrinter();
   printer.addResult(
     description: 'Stock build',
     value: watch.elapsedMicroseconds / iterations,

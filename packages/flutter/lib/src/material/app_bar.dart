@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'back_button.dart';
 import 'constants.dart';
 import 'flexible_space_bar.dart';
 import 'icon.dart';
@@ -47,7 +48,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   final bool centerTitle;
 
   static const double kLeadingWidth = 56.0; // So it's square with kToolbarHeight.
-  static const double kTitleLeft = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
+  static const double kTitleLeftWithLeading = 72.0; // As per https://material.io/guidelines/layout/metrics-keylines.html#metrics-keylines-keylines-spacing.
+  static const double kTitleLeftWithoutLeading = 16.0;
 
   @override
   void performLayout(Size size) {
@@ -69,11 +71,13 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.title)) {
-      final double maxWidth = math.max(size.width - kTitleLeft - actionsWidth, 0.0);
+      final double titleLeftMargin =
+          hasChild(_ToolbarSlot.leading) ? kTitleLeftWithLeading : kTitleLeftWithoutLeading;
+      final double maxWidth = math.max(size.width - titleLeftMargin - actionsWidth, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size titleSize = layoutChild(_ToolbarSlot.title, constraints);
       final double titleY = (size.height - titleSize.height) / 2.0;
-      double titleX = kTitleLeft;
+      double titleX = titleLeftMargin;
 
       // If the centered title will not fit between the leading and actions
       // widgets, then align its left or right edge with the adjacent boundary.
@@ -81,8 +85,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
         titleX = (size.width - titleSize.width) / 2.0;
         if (titleX + titleSize.width > size.width - actionsWidth)
           titleX = size.width - actionsWidth - titleSize.width;
-        else if (titleX < kTitleLeft)
-          titleX = kTitleLeft;
+        else if (titleX < titleLeftMargin)
+          titleX = titleLeftMargin;
       }
 
       positionChild(_ToolbarSlot.title, new Offset(titleX, titleY));
@@ -91,6 +95,29 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) => centerTitle != oldDelegate.centerTitle;
+}
+
+// Bottom justify the kToolbarHeight child which may overflow the top.
+class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
+  const _ToolbarContainerLayout();
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
+    return constraints.tighten(height: kToolbarHeight);
+  }
+
+  @override
+  Size getSize(BoxConstraints constraints) {
+    return new Size(constraints.maxWidth, kToolbarHeight);
+  }
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    return new Offset(0.0, size.height - childSize.height);
+  }
+
+  @override
+  bool shouldRelayout(_ToolbarContainerLayout oldDelegate) => false;
 }
 
 // TODO(eseidel) Toolbar needs to change size based on orientation:
@@ -162,7 +189,7 @@ class AppBar extends StatefulWidget {
   /// example, if the [AppBar] is in a [Scaffold] that also has a [Drawer], the
   /// [Scaffold] will fill this widget with an [IconButton] that opens the
   /// drawer. If there's no [Drawer] and the parent [Navigator] can go back, the
-  /// [AppBar] will use an [IconButton] that calls [Navigator.pop].
+  /// [AppBar] will use a [BackButton] that calls [Navigator.maybePop].
   final Widget leading;
 
   /// The primary widget displayed in the appbar.
@@ -310,17 +337,13 @@ class _AppBarState extends State<AppBar> {
   @override
   void dependenciesChanged() {
     super.dependenciesChanged();
-    ScaffoldState scaffold = Scaffold.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
     _canPop = ModalRoute.of(context)?.canPop ?? false;
   }
 
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
-  }
-
-  void _handleBackButton() {
-    Navigator.of(context).maybePop();
   }
 
   @override
@@ -331,7 +354,7 @@ class _AppBarState extends State<AppBar> {
     TextStyle centerStyle = config.textTheme?.title ?? themeData.primaryTextTheme.title;
     TextStyle sideStyle = config.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    Brightness brightness = config.brightness ?? themeData.primaryColorBrightness;
+    final Brightness brightness = config.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark);
@@ -357,24 +380,8 @@ class _AppBarState extends State<AppBar> {
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
       } else {
-        if (_canPop) {
-          IconData backIcon;
-          switch (Theme.of(context).platform) {
-            case TargetPlatform.android:
-            case TargetPlatform.fuchsia:
-              backIcon = Icons.arrow_back;
-              break;
-            case TargetPlatform.iOS:
-              backIcon = Icons.arrow_back_ios;
-              break;
-          }
-          assert(backIcon != null);
-          leading = new IconButton(
-            icon: new Icon(backIcon),
-            onPressed: _handleBackButton,
-            tooltip: 'Back' // TODO(ianh): Figure out how to localize this string
-          );
-        }
+        if (_canPop)
+          leading = const BackButton();
       }
     }
     if (leading != null) {
@@ -412,7 +419,7 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    Widget toolbar = new Padding(
+    final Widget toolbar = new Padding(
       padding: const EdgeInsets.only(right: 4.0),
       child: new CustomMultiChildLayout(
         delegate: new _ToolbarLayout(
@@ -422,24 +429,32 @@ class _AppBarState extends State<AppBar> {
       ),
     );
 
-    Widget appBar = new SizedBox(
-      height: kToolbarHeight,
-      child: new IconTheme.merge(
-        context: context,
-        data: appBarIconTheme,
-        child: new DefaultTextStyle(
-          style: sideStyle,
-          child: toolbar,
+    // If the toolbar is allocated less than kToolbarHeight make it
+    // appear to scroll upwards within its shrinking container.
+    Widget appBar = new ClipRect(
+      child: new CustomSingleChildLayout(
+        delegate: const _ToolbarContainerLayout(),
+        child: new IconTheme.merge(
+          context: context,
+          data: appBarIconTheme,
+          child: new DefaultTextStyle(
+            style: sideStyle,
+            child: toolbar,
+          ),
         ),
       ),
     );
-
 
     if (config.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          appBar,
+          new Flexible(
+            child: new ConstrainedBox(
+              constraints: new BoxConstraints(maxHeight: kToolbarHeight),
+              child: appBar,
+            ),
+          ),
           config.bottomOpacity == 1.0 ? config.bottom : new Opacity(
             opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(config.bottomOpacity),
             child: config.bottom,
@@ -491,7 +506,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.primary,
     @required this.centerTitle,
     @required this.expandedHeight,
+    @required this.collapsedHeight,
     @required this.topPadding,
+    @required this.floating,
     @required this.pinned,
   }) : bottom = bottom,
       _bottomHeight = bottom?.bottomHeight ?? 0.0 {
@@ -511,21 +528,24 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool primary;
   final bool centerTitle;
   final double expandedHeight;
+  final double collapsedHeight;
   final double topPadding;
+  final bool floating;
   final bool pinned;
 
   final double _bottomHeight;
 
   @override
-  double get minExtent => topPadding + kToolbarHeight + _bottomHeight;
+  double get minExtent => collapsedHeight ?? (topPadding + kToolbarHeight + _bottomHeight);
 
   @override
-  double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight), minExtent);
+  double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
-    double toolbarOpacity = pinned ? 1.0 : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
+    final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
+    final double toolbarOpacity = pinned && !floating ? 1.0
+      : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
     return FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -566,7 +586,9 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
         || expandedHeight != oldDelegate.expandedHeight
-        || topPadding != oldDelegate.topPadding;
+        || topPadding != oldDelegate.topPadding
+        || pinned != oldDelegate.pinned
+        || floating != oldDelegate.floating;
   }
 
   @override
@@ -627,7 +649,7 @@ class SliverAppBar extends StatelessWidget {
     assert(primary != null);
     assert(floating != null);
     assert(pinned != null);
-    assert(!floating || !pinned);
+    assert(pinned && floating ? bottom != null : true);
   }
 
   /// A widget to display before the [title].
@@ -760,6 +782,10 @@ class SliverAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double topPadding = primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double collapsedHeight = (pinned && floating && bottom != null)
+      ? bottom.bottomHeight + topPadding : null;
+
     return new SliverPersistentHeader(
       floating: floating,
       pinned: pinned,
@@ -777,7 +803,9 @@ class SliverAppBar extends StatelessWidget {
         primary: primary,
         centerTitle: centerTitle,
         expandedHeight: expandedHeight,
-        topPadding: primary ? MediaQuery.of(context).padding.top : 0.0,
+        collapsedHeight: collapsedHeight,
+        topPadding: topPadding,
+        floating: floating,
         pinned: pinned,
       ),
     );

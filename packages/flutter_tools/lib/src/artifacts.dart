@@ -21,6 +21,8 @@ enum Artifact {
   skySnapshot,
   snapshotDart,
   flutterFramework,
+  vmSnapshotData,
+  isolateSnapshotData
 }
 
 String _artifactToFileName(Artifact artifact) {
@@ -49,6 +51,10 @@ String _artifactToFileName(Artifact artifact) {
       return 'snapshot.dart';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
+    case Artifact.vmSnapshotData:
+      return 'vm_isolate_snapshot.bin';
+    case Artifact.isolateSnapshotData:
+      return 'isolate_snapshot.bin';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -85,6 +91,7 @@ class CachedArtifacts extends Artifacts {
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return _getHostArtifactPath(artifact, platform);
     }
@@ -98,7 +105,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.chromiumDebugKeyStore:
       case Artifact.classesDexJar:
@@ -112,7 +119,7 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
-        String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
         return fs.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
@@ -121,7 +128,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    String engineDir = _getEngineArtifactsPath(platform, mode);
+    final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
@@ -139,22 +146,35 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.skyShell:
       case Artifact.skySnapshot:
+        if (platform == TargetPlatform.windows_x64)
+          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
+        continue returnResourcePath;
+      case Artifact.genSnapshot:
+      case Artifact.vmSnapshotData:
+      case Artifact.isolateSnapshotData:
+        if (platform != TargetPlatform.windows_x64)
+          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
+        continue returnResourcePath;
+      returnResourcePath:
       case Artifact.icudtlDat:
-        String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        String platformDirName = getNameForTargetPlatform(platform);
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
+    assert(false, 'Artifact $artifact not available for platform $platform.');
+    return null;
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
-    String engineDir = cache.getArtifactDirectory('engine').path;
-    String platformName = getNameForTargetPlatform(platform);
+    final String engineDir = cache.getArtifactDirectory('engine').path;
+    final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
@@ -162,7 +182,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
-        String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
+        final String suffix = mode != BuildMode.debug ? '-${getModeName(mode)}' : '';
         return fs.path.join(engineDir, platformName + suffix);
     }
     assert(false, 'Invalid platform $platform.');
@@ -174,6 +194,8 @@ class CachedArtifacts extends Artifacts {
       return TargetPlatform.darwin_x64;
     if (platform.isLinux)
       return TargetPlatform.linux_x64;
+    if (platform.isWindows)
+      return TargetPlatform.windows_x64;
     throw new UnimplementedError('Host OS not supported.');
   }
 }
@@ -193,17 +215,14 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.dartIoEntriesTxt:
         return fs.path.join(_engineSrcPath, 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsTxt:
-        return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsAndroidTxt:
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
       case Artifact.classesDexJar:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', _artifactToFileName(artifact));
-      case Artifact.icudtlDat:
-        return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.libskyShellSo:
-        String abi = _getAbiDirectory(platform);
+        final String abi = _getAbiDirectory(platform);
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', fs.path.join('android', 'libs', abi, _artifactToFileName(artifact)));
       case Artifact.genSnapshot:
         return _genSnapshotPath(platform);
@@ -211,6 +230,10 @@ class LocalEngineArtifacts extends Artifacts {
         return _skyShellPath(platform);
       case Artifact.skySnapshot:
         return _skySnapshotPath();
+      case Artifact.isolateSnapshotData:
+      case Artifact.vmSnapshotData:
+        return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
+      case Artifact.icudtlDat:
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
@@ -234,7 +257,7 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _skySnapshotPath() {
-    String clangPath = fs.path.join(engineOutPath, 'clang_x64', _artifactToFileName(Artifact.skySnapshot));
+    final String clangPath = fs.path.join(engineOutPath, 'clang_x64', _artifactToFileName(Artifact.skySnapshot));
     if (fs.isFileSync(clangPath))
       return clangPath;
     return fs.path.join(engineOutPath, _artifactToFileName(Artifact.skySnapshot));

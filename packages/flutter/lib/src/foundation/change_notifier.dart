@@ -37,6 +37,10 @@ abstract class Listenable {
 /// [ChangeNotifier] is optimised for small numbers (one or two) of listeners.
 /// It is O(N) for adding and removing listeners and O(N²) for dispatching
 /// notifications (where N is the number of listeners).
+///
+/// See also:
+///
+///  * [ValueNotifier], which is a [ChangeNotifier] that wraps a single value.
 class ChangeNotifier extends Listenable {
   ObserverList<VoidCallback> _listeners = new ObserverList<VoidCallback>();
 
@@ -154,4 +158,27 @@ class _MergingListenable extends ChangeNotifier {
       child?.removeListener(notifyListeners);
     super.dispose();
   }
+}
+
+/// A [ChangeNotifier] that holds a single value.
+///
+/// When [value] is replaced, this class notifies its listeners.
+class ValueNotifier<T> extends ChangeNotifier {
+  /// Creates a [ChangeNotifier] that wraps this value.
+  ValueNotifier(this._value);
+
+  /// The current value stored in this notifier.
+  ///
+  /// When the value is replaced, this class notifies its listeners.
+  T get value => _value;
+  T _value;
+  set value(T newValue) {
+    if (_value == newValue)
+      return;
+    _value = newValue;
+    notifyListeners();
+  }
+
+  @override
+  String toString() => '<$runtimeType>(value: $value)';
 }

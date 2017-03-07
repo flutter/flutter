@@ -132,7 +132,7 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
     int currentLineIndent = 0;
     int currentParagraphIndentation;
     _LicenseEntryWithLineBreaksParserState state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
-    List<String> lines = <String>[];
+    final List<String> lines = <String>[];
 
     void addLine() {
       assert(lineStart < currentPosition);

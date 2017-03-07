@@ -12,8 +12,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
-import 'build_apk.dart';
 import 'build_aot.dart';
+import 'build_apk.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
 
@@ -54,14 +54,14 @@ abstract class BuildSubCommand extends FlutterCommand {
   @mustCallSuper
   Future<Null> runCommand() async {
     if (isRunningOnBot) {
-      File dotPackages = fs.file('.packages');
+      final File dotPackages = fs.file('.packages');
       printStatus('Contents of .packages:');
       if (dotPackages.existsSync())
         printStatus(dotPackages.readAsStringSync());
       else
         printError('File not found: ${dotPackages.absolute.path}');
 
-      File pubspecLock = fs.file('pubspec.lock');
+      final File pubspecLock = fs.file('pubspec.lock');
       printStatus('Contents of pubspec.lock:');
       if (pubspecLock.existsSync())
         printStatus(pubspecLock.readAsStringSync());
@@ -86,7 +86,7 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    Directory buildDir = fs.directory(getBuildDirectory());
+    final Directory buildDir = fs.directory(getBuildDirectory());
     printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
 
     if (!buildDir.existsSync())

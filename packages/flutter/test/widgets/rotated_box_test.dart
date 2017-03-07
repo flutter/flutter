@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Rotated box control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
-    Key rotatedBoxKey = new UniqueKey();
+    final List<String> log = <String>[];
+    final Key rotatedBoxKey = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -23,24 +23,24 @@ void main() {
                 child: new Container(
                   width: 100.0,
                   height: 40.0,
-                  decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
-                )
+                  color: Colors.blue[500],
+                ),
               ),
               new GestureDetector(
                 onTap: () { log.add('right'); },
                 child: new Container(
                   width: 75.0,
                   height: 65.0,
-                  decoration: new BoxDecoration(backgroundColor: Colors.blue[500])
-                )
+                  color: Colors.blue[500],
+                ),
               ),
-            ]
-          )
-        )
-      )
+            ],
+          ),
+        ),
+      ),
     );
 
-    RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));
+    final RenderBox box = tester.renderObject(find.byKey(rotatedBoxKey));
     expect(box.size.width, equals(65.0));
     expect(box.size.height, equals(175.0));
 

@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
-
-import 'package:meta/meta.dart';
 
 /// Signature for [CommonFinders.byPredicate].
 typedef bool WidgetPredicate(Widget widget);
@@ -342,7 +341,7 @@ class _TextFinder extends MatchFinder {
   bool matches(Element candidate) {
     if (candidate.widget is! Text)
       return false;
-    Text textWidget = candidate.widget;
+    final Text textWidget = candidate.widget;
     return textWidget.data == text;
   }
 }
@@ -359,7 +358,7 @@ class _IconFinder extends MatchFinder {
   bool matches(Element candidate) {
     if (candidate.widget is! Icon)
       return false;
-    Icon iconWidget = candidate.widget;
+    final Icon iconWidget = candidate.widget;
     return iconWidget.icon == icon;
   }
 }
@@ -380,7 +379,7 @@ class _WidgetWithTextFinder extends Finder {
         if (textElement.widget is! Text)
           return null;
 
-        Text textWidget = textElement.widget;
+        final Text textWidget = textElement.widget;
         if (textWidget.data == text) {
           try {
             textElement.visitAncestorElements((Element element) {

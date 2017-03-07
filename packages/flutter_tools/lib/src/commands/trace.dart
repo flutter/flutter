@@ -11,8 +11,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
-import '../vmservice.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 // Names of some of the Timeline events we care about.
 const String kFlutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
@@ -51,11 +51,11 @@ class TraceCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    int observatoryPort = int.parse(argResults['debug-port']);
+    final int observatoryPort = int.parse(argResults['debug-port']);
 
     // TODO(danrubel): this will break if we move to the new observatory URL
     // See https://github.com/flutter/flutter/issues/7038
-    Uri observatoryUri = Uri.parse('http://127.0.0.1:$observatoryPort');
+    final Uri observatoryUri = Uri.parse('http://127.0.0.1:$observatoryPort');
 
     Tracing tracing;
 
@@ -84,7 +84,7 @@ class TraceCommand extends FlutterCommand {
   }
 
   Future<Null> _stopTracing(Tracing tracing) async {
-    Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline();
+    final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline();
     File localFile;
 
     if (argResults['out'] != null) {
@@ -103,7 +103,7 @@ class Tracing {
   Tracing(this.vmService);
 
   static Tracing connect(Uri uri) {
-    VMService observatory = VMService.connect(uri);
+    final VMService observatory = VMService.connect(uri);
     return new Tracing(observatory);
   }
 
@@ -125,10 +125,10 @@ class Tracing {
       await vmService.vm.setVMTimelineFlags(<String>[]);
       timeline = await vmService.vm.getVMTimeline();
     } else {
-      Completer<Null> whenFirstFrameRendered = new Completer<Null>();
+      final Completer<Null> whenFirstFrameRendered = new Completer<Null>();
 
       vmService.onTimelineEvent.listen((ServiceEvent timelineEvent) {
-        List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
+        final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
         for (Map<String, dynamic> event in events) {
           if (event['name'] == kFirstUsefulFrameEventName)
             whenFirstFrameRendered.complete();
@@ -159,8 +159,8 @@ class Tracing {
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
 Future<Null> downloadStartupTrace(VMService observatory) async {
-  String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
-  File traceInfoFile = fs.file(traceInfoFilePath);
+  final String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
+  final File traceInfoFile = fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.
   if (await traceInfoFile.exists())
@@ -170,23 +170,23 @@ Future<Null> downloadStartupTrace(VMService observatory) async {
   if (!(await traceInfoFile.parent.exists()))
     await traceInfoFile.parent.create();
 
-  Tracing tracing = new Tracing(observatory);
+  final Tracing tracing = new Tracing(observatory);
 
-  Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
+  final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
     waitForFirstFrame: true
   );
 
   int extractInstantEventTimestamp(String eventName) {
-    List<Map<String, dynamic>> events = timeline['traceEvents'];
-    Map<String, dynamic> event = events.firstWhere(
+    final List<Map<String, dynamic>> events = timeline['traceEvents'];
+    final Map<String, dynamic> event = events.firstWhere(
       (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null
     );
     return event == null ? null : event['ts'];
   }
 
-  int engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
-  int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
-  int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
+  final int engineEnterTimestampMicros = extractInstantEventTimestamp(kFlutterEngineMainEnterEventName);
+  final int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
+  final int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
 
   if (engineEnterTimestampMicros == null) {
     throw 'Engine start event is missing in the timeline. Cannot compute startup time.';
@@ -196,8 +196,8 @@ Future<Null> downloadStartupTrace(VMService observatory) async {
     throw 'First frame event is missing in the timeline. Cannot compute startup time.';
   }
 
-  int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
-  Map<String, dynamic> traceInfo = <String, dynamic>{
+  final int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
+  final Map<String, dynamic> traceInfo = <String, dynamic>{
     'engineEnterTimestampMicros': engineEnterTimestampMicros,
     'timeToFirstFrameMicros': timeToFirstFrameMicros,
   };

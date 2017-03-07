@@ -92,8 +92,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   }
 
   void _handlePanEnd(DragEndDetails details) {
-    double vx = details.velocity.pixelsPerSecond.dx;
-    double vy = details.velocity.pixelsPerSecond.dy;
+    final double vx = details.velocity.pixelsPerSecond.dx;
+    final double vy = details.velocity.pixelsPerSecond.dy;
     if (vx.abs() == vy.abs())
       return;
     if (vx.abs() > vy.abs()) {
@@ -175,8 +175,8 @@ class _SemanticsClient extends ChangeNotifier {
 }
 
 String _getMessage(SemanticsNode node) {
-  SemanticsData data = node.getSemanticsData();
-  List<String> annotations = <String>[];
+  final SemanticsData data = node.getSemanticsData();
+  final List<String> annotations = <String>[];
 
   bool wantsTap = false;
   if (data.hasFlag(SemanticsFlags.hasCheckedState)) {
@@ -231,13 +231,13 @@ const TextStyle _messageStyle = const TextStyle(
 );
 
 void _paintMessage(Canvas canvas, SemanticsNode node) {
-  String message = _getMessage(node);
+  final String message = _getMessage(node);
   if (message.isEmpty)
     return;
   final Rect rect = node.rect;
   canvas.save();
   canvas.clipRect(rect);
-  TextPainter textPainter = new TextPainter()
+  final TextPainter textPainter = new TextPainter()
     ..text = new TextSpan(style: _messageStyle, text: message)
     ..layout(maxWidth: rect.width);
 
@@ -260,21 +260,21 @@ void _paint(Canvas canvas, SemanticsNode node, int rank) {
   canvas.save();
   if (node.transform != null)
     canvas.transform(node.transform.storage);
-  Rect rect = node.rect;
+  final Rect rect = node.rect;
   if (!rect.isEmpty) {
-    Color lineColor = new Color(0xFF000000 + new math.Random(node.id).nextInt(0xFFFFFF));
-    Rect innerRect = rect.deflate(rank * 1.0);
+    final Color lineColor = new Color(0xFF000000 + new math.Random(node.id).nextInt(0xFFFFFF));
+    final Rect innerRect = rect.deflate(rank * 1.0);
     if (innerRect.isEmpty) {
-      Paint fill = new Paint()
+      final Paint fill = new Paint()
        ..color = lineColor
        ..style = PaintingStyle.fill;
       canvas.drawRect(rect, fill);
     } else {
-      Paint fill = new Paint()
+      final Paint fill = new Paint()
        ..color = const Color(0xFFFFFFFF)
        ..style = PaintingStyle.fill;
       canvas.drawRect(rect, fill);
-      Paint line = new Paint()
+      final Paint line = new Paint()
        ..strokeWidth = rank * 2.0
        ..color = lineColor
        ..style = PaintingStyle.stroke;
@@ -309,7 +309,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     if (rootNode != null)
       _paint(canvas, rootNode, _findDepth(rootNode));
     if (pointerPosition != null) {
-      Paint paint = new Paint();
+      final Paint paint = new Paint();
       paint.color = const Color(0x7F0090FF);
       canvas.drawCircle(pointerPosition, 10.0, paint);
     }

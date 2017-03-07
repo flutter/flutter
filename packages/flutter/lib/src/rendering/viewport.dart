@@ -9,8 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'box.dart';
 import 'binding.dart';
+import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -120,6 +120,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   double layoutOneSide(
     RenderSliver child,
     double scrollOffset,
+    double overlap,
     double layoutOffset,
     double remainingPaintExtent,
     double mainAxisExtent,
@@ -129,28 +130,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ) {
     assert(scrollOffset.isFinite);
     assert(scrollOffset >= 0.0);
-    ScrollDirection adjustedUserScrollDirection;
-    switch (growthDirection) {
-      case GrowthDirection.forward:
-        adjustedUserScrollDirection = offset.userScrollDirection;
-        break;
-      case GrowthDirection.reverse:
-        switch (offset.userScrollDirection) {
-          case ScrollDirection.forward:
-            adjustedUserScrollDirection = ScrollDirection.reverse;
-            break;
-          case ScrollDirection.reverse:
-            adjustedUserScrollDirection = ScrollDirection.forward;
-            break;
-          case ScrollDirection.idle:
-            adjustedUserScrollDirection = ScrollDirection.idle;
-            break;
-        }
-        break;
-    }
+    final double initialLayoutOffset = layoutOffset;
+    final ScrollDirection adjustedUserScrollDirection =
+        applyGrowthDirecitonToScrollDirection(offset.userScrollDirection, growthDirection);
     assert(adjustedUserScrollDirection != null);
-    double maxPaintOffset = layoutOffset;
-    double initialLayoutOffset = layoutOffset;
+    double maxPaintOffset = layoutOffset + overlap;
     while (child != null) {
       assert(scrollOffset >= 0.0);
       child.layout(new SliverConstraints(
@@ -163,19 +147,19 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         crossAxisExtent: crossAxisExtent,
         viewportMainAxisExtent: mainAxisExtent,
       ), parentUsesSize: true);
-      // collect the child's objects
-      final SliverGeometry childLayoutGeometry = child.geometry;
 
+      final SliverGeometry childLayoutGeometry = child.geometry;
       assert(childLayoutGeometry.debugAssertIsValid);
 
-      // first check that there isn't a correction to apply. If there is we'll
-      // have to start over.
+      // If there is a correction to apply, we'll have to start over.
       if (childLayoutGeometry.scrollOffsetCorrection != 0.0)
         return childLayoutGeometry.scrollOffsetCorrection;
 
-      // geometry
-      updateChildLayoutOffset(child, layoutOffset, growthDirection);
-      maxPaintOffset = math.max(layoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
+      // We use the child's paint origin in our coordinate system as the
+      // layoutOffset we store in the child's parent data.
+      final double effectiveLayoutOffset = layoutOffset + childLayoutGeometry.paintOrigin;
+      updateChildLayoutOffset(child, effectiveLayoutOffset, growthDirection);
+      maxPaintOffset = math.max(effectiveLayoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
       scrollOffset -= childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
 
@@ -530,7 +514,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'In this case, a vertical viewport was given an unlimited amount of '
                 'vertical space in which to expand. This situation typically happens '
                 'when a scrollable widget is nested inside another scrollable widget.\n'
-                '\n'
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'vertical space for the children. In this case, consider using a '
@@ -557,7 +540,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'In this case, a horizontal viewport was given an unlimited amount of '
                 'horizontal space in which to expand. This situation typically happens '
                 'when a scrollable widget is nested inside another scrollable widget.\n'
-                '\n'
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'horizontal space for the children. In this case, consider using a '
@@ -687,24 +669,30 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double clampedForwardCenter = math.max(0.0, math.min(mainAxisExtent, centerOffset));
     final double clampedReverseCenter = math.max(0.0, math.min(mainAxisExtent, mainAxisExtent - centerOffset));
 
-    // negative scroll offsets
-    double result = layoutOneSide(
-      childBefore(center),
-      math.max(mainAxisExtent, mainAxisExtent * anchor - correctedOffset) - mainAxisExtent,
-      clampedReverseCenter,
-      clampedForwardCenter,
-      mainAxisExtent,
-      crossAxisExtent,
-      GrowthDirection.reverse,
-      childBefore,
-    );
-    if (result != 0.0)
-      return -result;
+    final RenderSliver leadingNegativeChild = childBefore(center);
+
+    if (leadingNegativeChild != null) {
+      // negative scroll offsets
+      final double result = layoutOneSide(
+        leadingNegativeChild,
+        math.max(mainAxisExtent, centerOffset) - mainAxisExtent,
+        0.0,
+        clampedReverseCenter,
+        clampedForwardCenter,
+        mainAxisExtent,
+        crossAxisExtent,
+        GrowthDirection.reverse,
+        childBefore,
+      );
+      if (result != 0.0)
+        return -result;
+    }
 
     // positive scroll offsets
     return layoutOneSide(
       center,
-      math.max(0.0, correctedOffset - mainAxisExtent * anchor),
+      math.max(0.0, -centerOffset),
+      leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
       clampedForwardCenter,
       clampedReverseCenter,
       mainAxisExtent,
@@ -969,6 +957,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     return layoutOneSide(
       firstChild,
       math.max(0.0, correctedOffset),
+      math.min(0.0, correctedOffset),
       0.0,
       mainAxisExtent,
       mainAxisExtent,

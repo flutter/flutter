@@ -58,7 +58,7 @@ class ColorItem extends StatelessWidget {
     return new Container(
       height: kColorItemHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: new BoxDecoration(backgroundColor: color),
+      color: color,
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -82,7 +82,7 @@ class ColorSwatchTabView extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    List<Widget> colorItems =  swatch.colors.keys.map((int index) {
+    final List<Widget> colorItems =  swatch.colors.keys.map((int index) {
       return new DefaultTextStyle(
         style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
         child: new ColorItem(index: index, color: swatch.colors[index]),

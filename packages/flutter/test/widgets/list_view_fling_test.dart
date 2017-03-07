@@ -23,7 +23,7 @@ void main() {
     await tester.fling(find.byType(ListView), const Offset(0.0, -kFlingOffset), 1000.0);
     expect(getCurrentOffset(), kFlingOffset);
     while (tester.binding.transientCallbackCount > 0) {
-      double lastOffset = getCurrentOffset();
+      final double lastOffset = getCurrentOffset();
       await tester.pump(const Duration(milliseconds: 20));
       expect(getCurrentOffset(), greaterThan(lastOffset));
     }

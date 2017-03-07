@@ -24,7 +24,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> items = <Widget>[];
+    final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
       items.add(new FlatButton(child: new Text('CUT'), onPressed: _handleCut));
@@ -68,8 +68,8 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   Future<Null> _handlePaste() async {
-    InputValue value = this.value;  // Snapshot the input before using `await`.
-    ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
+    final InputValue value = this.value;  // Snapshot the input before using `await`.
+    final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
       delegate.inputValue = new InputValue(
         text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
@@ -131,8 +131,8 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = new Paint()..color = color;
-    double radius = size.width/2.0;
+    final Paint paint = new Paint()..color = color;
+    final double radius = size.width/2.0;
     canvas.drawCircle(new Point(radius, radius), radius, paint);
     canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
@@ -164,7 +164,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style text selection handles.
   @override
   Widget buildHandle(BuildContext context, TextSelectionHandleType type) {
-    Widget handle = new SizedBox(
+    final Widget handle = new SizedBox(
       width: _kHandleSize,
       height: _kHandleSize,
       child: new CustomPaint(

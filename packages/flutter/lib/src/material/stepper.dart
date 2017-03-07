@@ -514,7 +514,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   }
 
   Widget _buildVertical() {
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
 
     for (int i = 0; i < config.steps.length; i += 1) {
       children.add(

@@ -29,7 +29,7 @@ class TestScrollPosition extends ScrollPosition {
 
   @override
   double setPixels(double value) {
-    double oldPixels = _pixels;
+    final double oldPixels = _pixels;
     _pixels = value;
     state.dispatchNotification(activity.createScrollUpdateNotification(state, _pixels - oldPixels));
     return 0.0;
@@ -42,9 +42,9 @@ class TestScrollPosition extends ScrollPosition {
 
   @override
   ScrollMetrics getMetrics() {
-    double insideExtent = viewportDimension;
-    double beforeExtent = _pixels - minScrollExtent;
-    double afterExtent = maxScrollExtent - _pixels;
+    final double insideExtent = viewportDimension;
+    final double beforeExtent = _pixels - minScrollExtent;
+    final double afterExtent = maxScrollExtent - _pixels;
     if (insideExtent > 0.0) {
       return new ScrollMetrics(
         extentBefore: physics.extentMultiplier * beforeExtent / insideExtent,
@@ -125,7 +125,7 @@ void main() {
         ],
       ),
     ));
-    ScrollableState state = tester.state(find.byType(Scrollable));
+    final ScrollableState state = tester.state(find.byType(Scrollable));
 
     expect(state.position.getMetrics().extentInside, 1.0);
     await tester.pumpWidget(new ScrollConfiguration(

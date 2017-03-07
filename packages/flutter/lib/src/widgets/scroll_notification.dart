@@ -6,8 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
-import 'framework.dart';
 import 'basic.dart';
+import 'framework.dart';
 import 'notification_listener.dart';
 import 'scrollable.dart' show Scrollable, ScrollableState;
 
@@ -28,6 +28,14 @@ class ScrollMetrics {
     @required this.extentAfter,
     @required this.viewportDimension,
   });
+
+  /// Creates a [ScrollMetrics] that has the same properties as the given
+  /// [ScrollMetrics].
+  ScrollMetrics.clone(ScrollMetrics other)
+    : extentBefore = other.extentBefore,
+      extentInside = other.extentInside,
+      extentAfter = other.extentAfter,
+      viewportDimension = other.viewportDimension;
 
   /// The quantity of content conceptually "above" the currently visible content
   /// of the viewport in the scrollable. This is the content above the content

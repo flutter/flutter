@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
     Size layoutBuilderSize;
-    Key childKey = new UniqueKey();
-    Key parentKey = new UniqueKey();
+    final Key childKey = new UniqueKey();
+    final Key parentKey = new UniqueKey();
 
     await tester.pumpWidget(
       new Center(
@@ -32,17 +32,17 @@ void main() {
     );
 
     expect(layoutBuilderSize, const Size(100.0, 200.0));
-    RenderBox parentBox = tester.renderObject(find.byKey(parentKey));
+    final RenderBox parentBox = tester.renderObject(find.byKey(parentKey));
     expect(parentBox.size, equals(const Size(50.0, 100.0)));
-    RenderBox childBox = tester.renderObject(find.byKey(childKey));
+    final RenderBox childBox = tester.renderObject(find.byKey(childKey));
     expect(childBox.size, equals(const Size(50.0, 100.0)));
   });
 
   testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
-    Key childKey = new UniqueKey();
-    Key parentKey = new UniqueKey();
+    final Key childKey = new UniqueKey();
+    final Key parentKey = new UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
@@ -87,7 +87,7 @@ void main() {
   testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
-    Key childKey = new UniqueKey();
+    final Key childKey = new UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
@@ -131,7 +131,7 @@ void main() {
 
   testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
-    Widget target = new LayoutBuilder(
+    final Widget target = new LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         return new Container();
@@ -154,7 +154,7 @@ void main() {
 
   testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
     int built = 0;
-    Widget target = new LayoutBuilder(
+    final Widget target = new LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         MediaQuery.of(context);

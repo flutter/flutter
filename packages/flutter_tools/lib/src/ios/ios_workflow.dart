@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
-import 'package:pub_semver/pub_semver.dart' show Version;
-
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/version.dart';
 import '../doctor.dart';
 import 'mac.dart';
 
@@ -46,7 +45,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (!hasIosDeploy)
       return false;
     try {
-      Version version = new Version.parse(iosDeployVersionText);
+      final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
       return false;
@@ -55,7 +54,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   @override
   Future<ValidationResult> validate() async {
-    List<ValidationMessage> messages = <ValidationMessage>[];
+    final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType xcodeStatus = ValidationType.missing;
     ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
@@ -132,19 +131,18 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         brewStatus = ValidationType.partial;
         if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
-            'ios-deploy out of date: $iosDeployMinimumVersion is required.\n'
-            'Upgrade via \'brew upgrade ios-deploy\'.'
+            'ios-deploy out of date ($iosDeployMinimumVersion is required): '
+            'upgrade via \'brew upgrade ios-deploy\'.'
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'ios-deploy not installed: $iosDeployMinimumVersion is required.\n'
-            'Install via \'brew install ios-deploy\'.'
+            'ios-deploy not installed: install via \'brew install ios-deploy\'.'
           ));
         }
       } else {
         // Check for compatibility between libimobiledevice and Xcode.
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
-        ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+        final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
         if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(

@@ -21,9 +21,9 @@ void main() {
     });
 
     test('measure', () async {
-      Timeline timeline = await driver.traceAction(() async {
+      final Timeline timeline = await driver.traceAction(() async {
         // Find the scrollable stock list
-        SerializableFinder stockList = find.byValueKey('Gallery List');
+        final SerializableFinder stockList = find.byValueKey('Gallery List');
         expect(stockList, isNotNull);
 
         await driver.tap(find.text('Demos'));

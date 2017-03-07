@@ -9,8 +9,8 @@ import 'button.dart';
 import 'flat_button.dart';
 import 'material.dart';
 import 'scaffold.dart';
-import 'theme_data.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 
 // https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
@@ -190,13 +190,13 @@ class SnackBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(animation != null);
-    ThemeData theme = Theme.of(context);
-    ThemeData darkTheme = new ThemeData(
+    final ThemeData theme = Theme.of(context);
+    final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
       accentColorBrightness: theme.accentColorBrightness
     );
-    List<Widget> children = <Widget>[
+    final List<Widget> children = <Widget>[
       const SizedBox(width: _kSnackBarPadding),
       new Expanded(
         child: new Container(
@@ -217,8 +217,8 @@ class SnackBar extends StatelessWidget {
     } else {
       children.add(const SizedBox(width: _kSnackBarPadding));
     }
-    CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
-    CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
+    final CurvedAnimation heightAnimation = new CurvedAnimation(parent: animation, curve: _snackBarHeightCurve);
+    final CurvedAnimation fadeAnimation = new CurvedAnimation(parent: animation, curve: _snackBarFadeCurve, reverseCurve: const Threshold(0.0));
     return new ClipRect(
       child: new AnimatedBuilder(
         animation: heightAnimation,

@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:developer' as developer;
-import 'dart:ui' as ui show window;
 import 'dart:ui' show AppLifecycleState, Locale;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -561,7 +561,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         library: 'widgets library',
         context: 'attaching to the render tree'
       ));
-      Widget error = new ErrorWidget(exception);
+      final Widget error = new ErrorWidget(exception);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }

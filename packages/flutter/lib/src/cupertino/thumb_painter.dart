@@ -21,7 +21,7 @@ class CupertinoThumbPainter {
   void paint(Canvas canvas, Rect rect) {
     final RRect rrect = new RRect.fromRectAndRadius(rect, new Radius.circular(rect.shortestSide / 2.0));
 
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = shadowColor
       ..maskFilter = _kShadowMaskFilter;
     canvas.drawRRect(rrect, paint);

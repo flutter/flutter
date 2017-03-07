@@ -8,20 +8,19 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-
 import 'dart/dependencies.dart';
 import 'devfs.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
-
-import 'vmservice.dart';
 import 'usage.dart';
+import 'vmservice.dart';
 
 class HotRunnerConfig {
   /// Should the hot runner compute the minimal Dart dependencies?
@@ -83,6 +82,9 @@ class HotRunner extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
+      // Actually exit on ToolExit.
+      if (error is ToolExit)
+        throw error;
       printError('Exception from flutter run: $error', stackTrace);
     });
   }
@@ -96,22 +98,11 @@ class HotRunner extends ResidentRunner {
       // Already computed.
       return true;
     }
-    DartDependencySetBuilder dartDependencySetBuilder =
+    final DartDependencySetBuilder dartDependencySetBuilder =
         new DartDependencySetBuilder(
               mainPath, projectRootPath, packagesFilePath);
     try {
-      Set<String> dependencies = dartDependencySetBuilder.build();
-      _dartDependencies = new Set<String>();
-      for (String path in dependencies) {
-        // We need to tweak package: uris so that they reflect their devFS
-        // location.
-        if (path.startsWith('package:')) {
-          // Swap out package: for packages/ because we place all package
-          // sources under packages/.
-          path = path.replaceFirst('package:', 'packages/');
-        }
-        _dartDependencies.add(path);
-      }
+      _dartDependencies = new Set<String>.from(dartDependencySetBuilder.build());
     } catch (error) {
       printStatus('Error detected in application source code:', emphasis: true);
       printError('$error');
@@ -138,7 +129,7 @@ class HotRunner extends ResidentRunner {
 
     if (package == null) {
       String message = 'No application found for ${device.platform}.';
-      String hint = getMissingPackageHintForPlatform(device.platform);
+      final String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
@@ -151,11 +142,11 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    Map<String, dynamic> platformArgs = new Map<String, dynamic>();
+    final Map<String, dynamic> platformArgs = new Map<String, dynamic>();
 
     await startEchoingDeviceLog(package);
 
-    String modeName = getModeName(debuggingOptions.buildMode);
+    final String modeName = getModeName(debuggingOptions.buildMode);
     printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
 
     // Include kernel code
@@ -164,7 +155,7 @@ class HotRunner extends ResidentRunner {
       kernelContent = new DevFSFileContent(fs.file(kernelFilePath));
 
     // Start the application.
-    Future<LaunchResult> futureResult = device.startApp(
+    final Future<LaunchResult> futureResult = device.startApp(
       package,
       debuggingOptions.buildMode,
       mainPath: mainPath,
@@ -176,7 +167,7 @@ class HotRunner extends ResidentRunner {
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
     );
 
-    LaunchResult result = await futureResult;
+    final LaunchResult result = await futureResult;
 
     if (!result.started) {
       printError('Error launching application on ${device.name}.');
@@ -193,7 +184,7 @@ class HotRunner extends ResidentRunner {
     }
 
     try {
-      Uri baseUri = await _initDevFS();
+      final Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {
         connectionInfoCompleter.complete(
           new DebugConnectionInfo(
@@ -207,7 +198,7 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
-    bool devfsResult = await _updateDevFS();
+    final bool devfsResult = await _updateDevFS();
     if (!devfsResult) {
       printError('Could not perform initial file synchronization.');
       return 3;
@@ -238,7 +229,7 @@ class HotRunner extends ResidentRunner {
       await _cleanupDevFS();
       await stopEchoingDeviceLog();
       await stopApp();
-      File benchmarkOutput = fs.file('hot_benchmark.json');
+      final File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
     }
 
@@ -252,7 +243,7 @@ class HotRunner extends ResidentRunner {
   Future<Null> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
     if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
-      OperationResult result = await restart(fullRestart: code == 'R');
+      final OperationResult result = await restart(fullRestart: code == 'R');
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
         // occurred and tighten this message.
@@ -264,7 +255,7 @@ class HotRunner extends ResidentRunner {
   DevFS _devFS;
 
   Future<Uri> _initDevFS() {
-    String fsName = fs.path.basename(projectRootPath);
+    final String fsName = fs.path.basename(projectRootPath);
     _devFS = new DevFS(vmService,
                        fsName,
                        fs.directory(projectRootPath),
@@ -280,13 +271,13 @@ class HotRunner extends ResidentRunner {
     final bool rebuildBundle = assetBundle.needsBuild();
     if (rebuildBundle) {
       printTrace('Updating assets');
-      int result = await assetBundle.build();
+      final int result = await assetBundle.build();
       if (result != 0)
         return false;
     }
-    Status devFSStatus = logger.startProgress('Syncing files to device...',
+    final Status devFSStatus = logger.startProgress('Syncing files to device...',
         expectSlowOperation: true);
-    int bytes = await _devFS.update(progressReporter: progressReporter,
+    final int bytes = await _devFS.update(progressReporter: progressReporter,
                         bundle: assetBundle,
                         bundleDirty: rebuildBundle,
                         fileFilter: _dartDependencies);
@@ -322,31 +313,29 @@ class HotRunner extends ResidentRunner {
     _devFS = null;
   }
 
-  Future<Null> _launchInView(String entryPath,
-                             String packagesPath,
-                             String assetsDirectoryPath) async {
-    FlutterView view = vmService.vm.mainView;
-    return view.runFromSource(entryPath, packagesPath, assetsDirectoryPath);
+  Future<Null> _launchInView(Uri entryUri,
+                             Uri packagesUri,
+                             Uri assetsDirectoryUri) async {
+    final FlutterView view = vmService.vm.mainView;
+    return view.runFromSource(entryUri, packagesUri, assetsDirectoryUri);
   }
 
   Future<Null> _launchFromDevFS(ApplicationPackage package,
                                 String mainScript) async {
-    String entryPath = fs.path.relative(mainScript, from: projectRootPath);
-    String deviceEntryPath =
-        _devFS.baseUri.resolve(entryPath).toFilePath();
-    String devicePackagesPath =
-        _devFS.baseUri.resolve('.packages').toFilePath();
-    String deviceAssetsDirectoryPath =
-        _devFS.baseUri.resolve(getAssetBuildDirectory()).toFilePath();
-    await _launchInView(deviceEntryPath,
-                        devicePackagesPath,
-                        deviceAssetsDirectoryPath);
+    final String entryUri = fs.path.relative(mainScript, from: projectRootPath);
+    final Uri deviceEntryUri = _devFS.baseUri.resolveUri(fs.path.toUri(entryUri));
+    final Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
+    final Uri deviceAssetsDirectoryUri =
+        _devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
+    await _launchInView(deviceEntryUri,
+                        devicePackagesUri,
+                        deviceAssetsDirectoryUri);
   }
 
   Future<OperationResult> _restartFromSources() async {
-    Stopwatch restartTimer = new Stopwatch();
+    final Stopwatch restartTimer = new Stopwatch();
     restartTimer.start();
-    bool updatedDevFS = await _updateDevFS();
+    final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'Dart Source Error');
     await _launchFromDevFS(package, mainPath);
@@ -385,7 +374,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) async {
     if (fullRestart) {
-      Status status = logger.startProgress('Performing full restart...', progressId: 'hot.restart');
+      final Status status = logger.startProgress('Performing full restart...', progressId: 'hot.restart');
       try {
         await _restartFromSources();
         status.stop();
@@ -396,9 +385,9 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
     } else {
-      Status status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
+      final Status status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
       try {
-        OperationResult result = await _reloadSources(pause: pauseAfterRestart);
+        final OperationResult result = await _reloadSources(pause: pauseAfterRestart);
         status.stop();
         if (result.isOk)
           printStatus("${result.message}.");
@@ -420,7 +409,7 @@ class HotRunner extends ResidentRunner {
     // not be affected, so we resume reporting reload times on the second
     // reload.
     final bool shouldReportReloadTime = !_runningFromSnapshot;
-    Stopwatch reloadTimer = new Stopwatch();
+    final Stopwatch reloadTimer = new Stopwatch();
     reloadTimer.start();
     Stopwatch devFSTimer;
     Stopwatch vmReloadTimer;
@@ -431,7 +420,7 @@ class HotRunner extends ResidentRunner {
       vmReloadTimer = new Stopwatch();
       reassembleTimer = new Stopwatch();
     }
-    bool updatedDevFS = await _updateDevFS();
+    final bool updatedDevFS = await _updateDevFS();
     if (benchmarkMode) {
       devFSTimer.stop();
       // Record time it took to synchronize to DevFS.
@@ -442,31 +431,29 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'Dart Source Error');
     String reloadMessage;
     try {
-      String entryPath = fs.path.relative(mainPath, from: projectRootPath);
-      String deviceEntryPath =
-          _devFS.baseUri.resolve(entryPath).toFilePath();
-      String devicePackagesPath =
-          _devFS.baseUri.resolve('.packages').toFilePath();
+      final String entryPath = fs.path.relative(mainPath, from: projectRootPath);
+      final Uri deviceEntryUri = _devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
+      final Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
       if (benchmarkMode)
         vmReloadTimer.start();
-      Map<String, dynamic> reloadReport =
+      final Map<String, dynamic> reloadReport =
           await currentView.uiIsolate.reloadSources(
               pause: pause,
-              rootLibPath: deviceEntryPath,
-              packagesPath: devicePackagesPath);
+              rootLibUri: deviceEntryUri,
+              packagesUri: devicePackagesUri);
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
         return new OperationResult(1, 'reload rejected');
       } else {
         flutterUsage.sendEvent('hot', 'reload');
-        int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
-        int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
+        final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
+        final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
         reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
-      int errorCode = error['code'];
-      String errorMessage = error['message'];
+      final int errorCode = error['code'];
+      final String errorMessage = error['message'];
       if (errorCode == Isolate.kIsolateReloadBarred) {
         printError('Unable to hot reload app due to an unrecoverable error in '
                    'the source code. Please address the error and then use '

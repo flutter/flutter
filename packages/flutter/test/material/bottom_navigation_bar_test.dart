@@ -52,7 +52,7 @@ void main() {
       )
     );
 
-    RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
     expect(box.size.height, 60.0);
     expect(find.text('AC'), findsOneWidget);
     expect(find.text('Alarm'), findsOneWidget);
@@ -141,7 +141,7 @@ void main() {
     // they grow.
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
-    Point originalOrigin = actions.elementAt(3).localToGlobal(Point.origin);
+    final Point originalOrigin = actions.elementAt(3).localToGlobal(Point.origin);
 
     await tester.tap(find.text('AC'));
     await tester.pump();
@@ -269,7 +269,7 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject(find.byType(Icon));
+    final RenderBox box = tester.renderObject(find.byType(Icon));
     expect(box.size.width, equals(12.0));
     expect(box.size.height, equals(12.0));
     expect(builderIconSize, 12.0);

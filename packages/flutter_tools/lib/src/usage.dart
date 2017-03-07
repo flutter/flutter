@@ -20,7 +20,7 @@ Usage get flutterUsage => Usage.instance;
 class Usage {
   /// Create a new Usage instance; [versionOverride] is used for testing.
   Usage({ String settingsName: 'flutter', String versionOverride }) {
-    String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
+    final String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
 
     bool runningOnCI = false;

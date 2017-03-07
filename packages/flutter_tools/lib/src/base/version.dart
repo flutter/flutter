@@ -43,20 +43,34 @@ class Version implements Comparable<Version> {
 
   /// Creates a new [Version] by parsing [text].
   factory Version.parse(String text) {
-    Match match = versionPattern.firstMatch(text);
+    final Match match = versionPattern.firstMatch(text);
     if (match == null) {
-      throw new FormatException('Could not parse "$text".');
+      return null;
     }
 
     try {
-      int major = int.parse(match[1] ?? '0');
-      int minor = int.parse(match[3] ?? '0');
-      int patch = int.parse(match[5] ?? '0');
+      final int major = int.parse(match[1] ?? '0');
+      final int minor = int.parse(match[3] ?? '0');
+      final int patch = int.parse(match[5] ?? '0');
       return new Version._(major, minor, patch, text);
     } on FormatException {
-      throw new FormatException('Could not parse "$text".');
+      return null;
     }
   }
+
+  /// Returns the primary version out of a list of candidates.
+  ///
+  /// This is the highest-numbered stable version.
+  static Version primary(List<Version> versions) {
+    Version primary;
+    for (Version version in versions) {
+      if (primary == null || (version > primary)) {
+        primary = version;
+      }
+    }
+    return primary;
+  }
+
 
   static Version get unknown => new Version(0, 0, 0, text: 'unknown');
 

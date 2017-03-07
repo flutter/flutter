@@ -109,9 +109,13 @@ class _TabStyle extends AnimatedWidget {
     this.selected,
     this.labelColor,
     this.unselectedLabelColor,
+    this.labelStyle,
+    this.unselectedLabelStyle,
     @required this.child,
-  }) : super(key: key, animation: animation);
+  }) : super(key: key, listenable: animation);
 
+  final TextStyle labelStyle;
+  final TextStyle unselectedLabelStyle;
   final bool selected;
   final Color labelColor;
   final Color unselectedLabelColor;
@@ -120,9 +124,14 @@ class _TabStyle extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle textStyle = themeData.primaryTextTheme.body2;
+    final TextStyle defaultStyle = labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle defaultUnselectedStyle = unselectedLabelStyle ?? labelStyle ?? themeData.primaryTextTheme.body2;
+    final TextStyle textStyle = selected
+      ? defaultStyle
+      : defaultUnselectedStyle;
     final Color selectedColor = labelColor ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Animation<double> animation = listenable;
     final Color color = selected
       ? Color.lerp(unselectedColor, selectedColor, animation.value)
       : Color.lerp(selectedColor, unselectedColor, animation.value);
@@ -340,7 +349,9 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
     this.isScrollable: false,
     this.indicatorColor,
     this.labelColor,
+    this.labelStyle,
     this.unselectedLabelColor,
+    this.unselectedLabelStyle,
   }) : super(key: key) {
     assert(tabs != null && tabs.length > 1);
     assert(isScrollable != null);
@@ -381,6 +392,20 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// [labelColor] rendered at 70% opacity.
   final Color unselectedLabelColor;
 
+  /// The text style of the selected tab labels. If [unselectedLabelStyle] is
+  /// null then this text style will be used for both selected and unselected
+  /// label styles.
+  ///
+  /// If this property is null then the text style of the theme's body2
+  /// definition is used.
+  final TextStyle labelStyle;
+
+  /// The text style of the unselected tab labels
+  ///
+  /// If this property is null then the [labelStyle] value is used. If [labelStyle]
+  /// is null then the text style of the theme's body2 definition is used.
+  final TextStyle unselectedLabelStyle;
+
   @override
   double get bottomHeight {
     for (Widget widget in tabs) {
@@ -406,7 +431,7 @@ class _TabBarState extends State<TabBar> {
   int _currentIndex;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 
@@ -542,6 +567,8 @@ class _TabBarState extends State<TabBar> {
           selected: true,
           labelColor: config.labelColor,
           unselectedLabelColor: config.unselectedLabelColor,
+          labelStyle: config.labelStyle,
+          unselectedLabelStyle: config.unselectedLabelStyle,
           child: wrappedTabs[_currentIndex],
         );
         wrappedTabs[previousIndex] = new _TabStyle(
@@ -549,6 +576,8 @@ class _TabBarState extends State<TabBar> {
           selected: false,
           labelColor: config.labelColor,
           unselectedLabelColor: config.unselectedLabelColor,
+          labelStyle: config.labelStyle,
+          unselectedLabelStyle: config.unselectedLabelStyle,
           child: wrappedTabs[previousIndex],
         );
       } else {
@@ -557,6 +586,8 @@ class _TabBarState extends State<TabBar> {
           selected: true,
           labelColor: config.labelColor,
           unselectedLabelColor: config.unselectedLabelColor,
+          labelStyle: config.labelStyle,
+          unselectedLabelStyle: config.unselectedLabelStyle,
           child: wrappedTabs[_currentIndex],
         );
       }
@@ -583,6 +614,8 @@ class _TabBarState extends State<TabBar> {
           selected: false,
           labelColor: config.labelColor,
           unselectedLabelColor: config.unselectedLabelColor,
+          labelStyle: config.labelStyle,
+          unselectedLabelStyle: config.unselectedLabelStyle,
           child: new _TabLabelBar(
             onPerformLayout: _saveTabOffsets,
             children:  wrappedTabs,
@@ -643,7 +676,7 @@ class _TabBarViewState extends State<TabBarView> {
   int _warpUnderwayCount = 0;
 
   void _updateTabController() {
-    TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = config.controller ?? DefaultTabController.of(context);
     if (newController == _controller)
       return;
 

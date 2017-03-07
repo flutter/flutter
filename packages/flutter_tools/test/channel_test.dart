@@ -12,8 +12,8 @@ import 'src/context.dart';
 void main() {
   group('channel', () {
     testUsingContext('list', () async {
-      ChannelCommand command = new ChannelCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = new ChannelCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)

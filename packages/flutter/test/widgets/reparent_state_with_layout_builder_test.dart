@@ -71,7 +71,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(new Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
-    BarState s = tester.state<BarState>(find.byType(Bar));
+    final BarState s = tester.state<BarState>(find.byType(Bar));
     s.trigger();
     await tester.pump();
     expect(StatefulCreationCounterState.creationCount, 1);
@@ -79,11 +79,11 @@ void main() {
 
   testWidgets('Clean then reparent with dependencies',
       (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     StateSetter keyedSetState;
 
-    Widget keyedWidget = new StatefulBuilder(
+    final Widget keyedWidget = new StatefulBuilder(
       key: key,
       builder: (BuildContext context, StateSetter setState) {
         keyedSetState = setState;

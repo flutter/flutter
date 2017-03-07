@@ -157,6 +157,7 @@ class ListItem extends StatelessWidget {
     Widget item = iterator.current;
     while (iterator.moveNext()) {
       yield new DecoratedBox(
+        position: DecorationPosition.foreground,
         decoration: new BoxDecoration(
           border: new Border(
             bottom: new BorderSide(color: dividerColor),

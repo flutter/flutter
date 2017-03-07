@@ -61,7 +61,7 @@ class TestPointer {
   /// argument.
   PointerMoveEvent move(Point newLocation, { Duration timeStamp: Duration.ZERO }) {
     assert(isDown);
-    Offset delta = newLocation - location;
+    final Offset delta = newLocation - location;
     _location = newLocation;
     return new PointerMoveEvent(
       timeStamp: timeStamp,

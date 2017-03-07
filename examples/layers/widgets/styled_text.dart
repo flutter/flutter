@@ -33,7 +33,7 @@ final TextStyle _kUnderline = const TextStyle(
 );
 
 Widget toStyledText(String name, String text) {
-  TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
+  final TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
   return new RichText(
     key: new Key(text),
     text: new TextSpan(
@@ -94,11 +94,11 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> lines = _kNameLines
+    final List<Widget> lines = _kNameLines
       .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
       .toList();
 
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     for (Widget line in lines) {
       children.add(line);
       if (line != lines.last)

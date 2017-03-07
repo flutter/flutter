@@ -31,7 +31,7 @@ void main() {
     );
 
     expect(find.text('Archive'), findsNothing);
-    ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
     state.openDrawer();
 
     await tester.pump();

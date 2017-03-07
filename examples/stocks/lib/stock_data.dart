@@ -44,7 +44,7 @@ class StockData {
 
   void appendTo(Map<String, Stock> stocks, List<String> symbols) {
     for (List<String> fields in _data) {
-      Stock stock = new Stock.fromFields(fields);
+      final Stock stock = new Stock.fromFields(fields);
       symbols.add(stock.symbol);
       stocks[stock.symbol] = stock;
     }
@@ -73,12 +73,12 @@ class StockDataFetcher {
     if (!actuallyFetchData)
       return;
     http.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
-      String json = response.body;
+      final String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
         return null;
       }
-      JsonDecoder decoder = const JsonDecoder();
+      final JsonDecoder decoder = const JsonDecoder();
       callback(new StockData(decoder.convert(json)));
       if (_nextChunk < _kChunkCount)
         _fetchNextChunk();

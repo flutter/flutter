@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'assertions.dart';
-import 'print.dart';
 import 'platform.dart';
+import 'print.dart';
 
 /// Returns true if none of the foundation library debug variables have been
 /// changed.

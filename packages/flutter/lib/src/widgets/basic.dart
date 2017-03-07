@@ -11,8 +11,8 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 
-export 'package:flutter/foundation.dart' show TargetPlatform;
 export 'package:flutter/animation.dart';
+export 'package:flutter/foundation.dart' show TargetPlatform;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
   Axis,
@@ -20,6 +20,7 @@ export 'package:flutter/rendering.dart' show
   CrossAxisAlignment,
   CustomClipper,
   CustomPainter,
+  DecorationPosition,
   FlexFit,
   FlowDelegate,
   FlowPaintingContext,
@@ -251,6 +252,39 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// By default, [ClipRect] prevents its child from painting outside its
 /// bounds, but the size and location of the clip rect can be customized using a
 /// custom [clipper].
+///
+/// [ClipRect] is commonly used with these widgets, which commonly paint outside
+/// their bounds.
+///
+///  * [CustomPaint]
+///  * [CustomSingleChildLayout]
+///  * [CustomMultiChildLayout]
+///  * [Align] and [Center] (e.g., if [Align.widthFactor] or
+///    [Align.heightFactor] is less than 1.0).
+///  * [OverflowBox]
+///  * [SizedOverflowBox]
+///
+/// ## Example
+///
+/// For example, use a clip to show the top half of an [Image], you can use a
+/// [ClipRect] combined with an [Align]:
+///
+/// ```dart
+/// new ClipRect(
+///   child: new Align(
+///     alignment: FractionalOffset.topCenter,
+///     heightFactor: 0.5,
+///     child: new Image(...),
+///   ),
+/// ),
+/// ```
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRRect], for a clip with rounded corners.
+///  * [ClipOval], for an elliptical clip.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipRect extends SingleChildRenderObjectWidget {
   /// Creates a rectangular clip.
   ///
@@ -280,6 +314,13 @@ class ClipRect extends SingleChildRenderObjectWidget {
 /// By default, [ClipRRect] uses its own bounds as the base rectangle for the
 /// clip, but the size and location of the clip can be customized using a custom
 /// [clipper].
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipOval], for an elliptical clip.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipRRect extends SingleChildRenderObjectWidget {
   /// Creates a rounded-rectangular clip.
   ///
@@ -323,6 +364,14 @@ class ClipRRect extends SingleChildRenderObjectWidget {
 /// By default, inscribes an axis-aligned oval into its layout dimensions and
 /// prevents its child from painting outside that oval, but the size and
 /// location of the clip oval can be customized using a custom [clipper].
+/// See also:
+///
+/// See also:
+///
+///  * [CustomClipper], for information about creating custom clips.
+///  * [ClipRect], for more efficient clips without rounded corners.
+///  * [ClipRRect], for a clip with rounded corners.
+///  * [ClipPath], for an arbitrarily shaped clip.
 class ClipOval extends SingleChildRenderObjectWidget {
   /// Creates an oval-shaped clip.
   ///
@@ -397,6 +446,51 @@ class ClipPath extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget representing a physical layer that clips its children to a shape.
+class PhysicalModel extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with a rounded-rectangular clip.
+  PhysicalModel({
+    Key key,
+    @required this.shape,
+    this.borderRadius: BorderRadius.zero,
+    @required this.elevation,
+    @required this.color,
+    Widget child,
+  }) : super(key: key, child: child) {
+    if (shape == BoxShape.rectangle)
+      assert(borderRadius != null);
+    assert(shape != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
+
+  /// The type of shape.
+  final BoxShape shape;
+
+  /// The border radius of the rounded corners.
+  ///
+  /// Values are clamped so that horizontal and vertical radii sums do not
+  /// exceed width/height.
+  final BorderRadius borderRadius;
+
+  /// The z-coordinate at which to place this physical object.
+  final int elevation;
+
+  /// The background color.
+  final Color color;
+
+  @override
+  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
+    renderObject
+      ..shape = shape
+      ..borderRadius = borderRadius
+      ..elevation = elevation
+      ..color = color;
+  }
+}
 
 // POSITIONING AND SIZING NODES
 
@@ -664,6 +758,14 @@ class Align extends SingleChildRenderObjectWidget {
 
 /// A widget that centers its child within itself.
 ///
+/// This widget will be as big as possible if its dimensions are constrained and
+/// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
+/// and the corresponding size factor is null then the widget will match its
+/// child's size in that dimension. If a size factor is non-null then the
+/// corresponding dimension of this widget will be the product of the child's
+/// dimension and the size factor. For example if widthFactor is 2.0 then
+/// the width of this widget will always be twice its child's width.
+///
 /// See also:
 ///
 ///  * [Align], which lets you arbitrarily position a child within itself,
@@ -740,7 +842,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
     final MultiChildLayoutParentData parentData = renderObject.parentData;
     if (parentData.id != id) {
       parentData.id = id;
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -858,7 +960,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    String type = (width == double.INFINITY && height == double.INFINITY) ?
+    final String type = (width == double.INFINITY && height == double.INFINITY) ?
                   '$runtimeType.expand' : '$runtimeType';
     return key == null ? '$type' : '$type-$key';
   }
@@ -1718,7 +1820,7 @@ class Positioned extends ParentDataWidget<Stack> {
     }
 
     if (needsLayout) {
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -2081,7 +2183,7 @@ class Flexible extends ParentDataWidget<Flex> {
     }
 
     if (needsLayout) {
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }
@@ -2449,7 +2551,7 @@ class DefaultAssetBundle extends InheritedWidget {
   /// AssetBundle bundle = DefaultAssetBundle.of(context);
   /// ```
   static AssetBundle of(BuildContext context) {
-    DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
+    final DefaultAssetBundle result = context.inheritFromWidgetOfExactType(DefaultAssetBundle);
     return result?.bundle ?? rootBundle;
   }
 
@@ -2560,7 +2662,7 @@ class Listener extends SingleChildRenderObjectWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    List<String> listeners = <String>[];
+    final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
     if (onPointerMove != null)
@@ -2605,7 +2707,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// (if the child has a non-null key) or from the given `childIndex`.
   factory RepaintBoundary.wrap(Widget child, int childIndex) {
     assert(child != null);
-    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new RepaintBoundary(key: key, child: child);
   }
 
@@ -2615,7 +2717,7 @@ class RepaintBoundary extends SingleChildRenderObjectWidget {
   /// child's key (if the wrapped child has a non-null key) or from the wrapped
   /// child's index in the list.
   static List<RepaintBoundary> wrapAll(List<Widget> widgets) {
-    List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
+    final List<RepaintBoundary> result = new List<RepaintBoundary>(widgets.length);
     for (int i = 0; i < result.length; ++i)
       result[i] = new RepaintBoundary.wrap(widgets[i], i);
     return result;
@@ -2914,7 +3016,7 @@ class KeyedSubtree extends StatelessWidget {
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.
   factory KeyedSubtree.wrap(Widget child, int childIndex) {
-    Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
+    final Key key = child.key != null ? new ValueKey<Key>(child.key) : new ValueKey<int>(childIndex);
     return new KeyedSubtree(key: key, child: child);
   }
 
@@ -2924,7 +3026,7 @@ class KeyedSubtree extends StatelessWidget {
     if (items == null || items.isEmpty)
       return items;
 
-    List<Widget> itemsWithUniqueKeys = <Widget>[];
+    final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
     for (Widget item in items) {
       itemsWithUniqueKeys.add(new KeyedSubtree.wrap(item, itemIndex));

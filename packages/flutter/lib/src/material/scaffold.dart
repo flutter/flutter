@@ -48,7 +48,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   void performLayout(Size size) {
-    BoxConstraints looseConstraints = new BoxConstraints.loose(size);
+    final BoxConstraints looseConstraints = new BoxConstraints.loose(size);
 
     // This part of the layout has the same effect as putting the app bar and
     // body in a column and making the body flexible. What's different is that
@@ -56,8 +56,8 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
+    final double bottom = math.max(0.0, size.height - padding.bottom);
     double contentTop = 0.0;
-    double bottom = size.height - padding.bottom;
     double contentBottom = bottom;
 
     if (hasChild(_ScaffoldSlot.appBar)) {
@@ -78,10 +78,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.body)) {
-      final double bodyHeight = contentBottom - contentTop;
       final BoxConstraints bodyConstraints = new BoxConstraints(
         maxWidth: fullWidthConstraints.maxWidth,
-        maxHeight: bodyHeight,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
       );
       layoutChild(_ScaffoldSlot.body, bodyConstraints);
       positionChild(_ScaffoldSlot.body, new Offset(0.0, contentTop));
@@ -470,10 +469,10 @@ class Scaffold extends StatefulWidget {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
-      _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+      final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
       return scaffold?.hasDrawer ?? false;
     } else {
-      ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+      final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
       return scaffold?.hasDrawer ?? false;
     }
   }
@@ -641,12 +640,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet.close();
       assert(_currentBottomSheet == null);
     }
-    Completer<T> completer = new Completer<T>();
-    GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
-    AnimationController controller = BottomSheet.createAnimationController(this)
+    final Completer<T> completer = new Completer<T>();
+    final GlobalKey<_PersistentBottomSheetState> bottomSheetKey = new GlobalKey<_PersistentBottomSheetState>();
+    final AnimationController controller = BottomSheet.createAnimationController(this)
       ..forward();
     _PersistentBottomSheet bottomSheet;
-    LocalHistoryEntry entry = new LocalHistoryEntry(
+    final LocalHistoryEntry entry = new LocalHistoryEntry(
       onRemove: () {
         assert(_currentBottomSheet._widget == bottomSheet);
         assert(bottomSheetKey.currentState != null);
@@ -759,7 +758,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     if (!config.resizeToAvoidBottomPadding)
       padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
@@ -784,9 +783,9 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (config.appBar != null) {
       assert(config.appBar.primary || padding.top == 0.0, 'A non-primary AppBar was passed to a Scaffold but the MediaQuery in scope has top padding.');
-      double topPadding = config.appBar.primary ? padding.top : 0.0;
+      final double topPadding = config.appBar.primary ? padding.top : 0.0;
       Widget appBar = config.appBar;
-      double extent = config.appBar.minExtent + topPadding;
+      final double extent = config.appBar.minExtent + topPadding;
       if (config.appBar.flexibleSpace != null) {
         appBar = FlexibleSpaceBar.createSettings(
           currentExtent: extent,
@@ -839,7 +838,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         bottomSheets.addAll(_dismissedBottomSheets);
       if (_currentBottomSheet != null)
         bottomSheets.add(_currentBottomSheet._widget);
-      Widget stack = new Stack(
+      final Widget stack = new Stack(
         children: bottomSheets,
         alignment: FractionalOffset.bottomCenter,
       );

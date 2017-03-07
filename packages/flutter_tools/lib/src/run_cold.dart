@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -54,6 +55,9 @@ class ColdRunner extends ResidentRunner {
         shouldBuild: shouldBuild
       );
     }, onError: (dynamic error, StackTrace stackTrace) {
+      // Actually exit on ToolExit.
+      if (error is ToolExit)
+        throw error;
       printError('Exception from flutter run: $error', stackTrace);
     });
   }
@@ -79,14 +83,14 @@ class ColdRunner extends ResidentRunner {
 
     if (package == null) {
       String message = 'No application found for ${device.platform}.';
-      String hint = getMissingPackageHintForPlatform(device.platform);
+      final String hint = getMissingPackageHintForPlatform(device.platform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
       return 1;
     }
 
-    Stopwatch startTime = new Stopwatch()..start();
+    final Stopwatch startTime = new Stopwatch()..start();
 
     Map<String, dynamic> platformArgs;
     if (traceStartup != null)
@@ -94,7 +98,7 @@ class ColdRunner extends ResidentRunner {
 
     await startEchoingDeviceLog(package);
 
-    String modeName = getModeName(debuggingOptions.buildMode);
+    final String modeName = getModeName(debuggingOptions.buildMode);
     if (mainPath == null) {
       assert(prebuiltMode);
       printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');

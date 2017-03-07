@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Comparing coordinates', (WidgetTester tester) async {
-    Key keyA = new GlobalKey();
-    Key keyB = new GlobalKey();
+    final Key keyA = new GlobalKey();
+    final Key keyB = new GlobalKey();
 
     await tester.pumpWidget(
       new Stack(
@@ -36,10 +36,10 @@ void main() {
       )
     );
 
-    RenderBox boxA = tester.renderObject(find.byKey(keyA));
+    final RenderBox boxA = tester.renderObject(find.byKey(keyA));
     expect(boxA.localToGlobal(const Point(0.0, 0.0)), equals(const Point(100.0, 100.0)));
 
-    RenderBox boxB = tester.renderObject(find.byKey(keyB));
+    final RenderBox boxB = tester.renderObject(find.byKey(keyB));
     expect(boxB.localToGlobal(const Point(0.0, 0.0)), equals(const Point(100.0, 200.0)));
     expect(boxB.globalToLocal(const Point(110.0, 205.0)), equals(const Point(10.0, 5.0)));
   });

@@ -16,13 +16,13 @@ import 'package:flutter_devicelab/framework/utils.dart';
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
 TaskFunction createMicrobenchmarkTask() {
   return () async {
-    Device device = await devices.workingDevice;
+    final Device device = await devices.workingDevice;
     await device.unlock();
 
     Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
       print('Running $benchmarkPath');
-      Directory appDir = dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
-      Process flutterProcess = await inDirectory(appDir, () async {
+      final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
+      final Process flutterProcess = await inDirectory(appDir, () async {
         return await _startFlutter(
           options: <String>[
             '--profile',  // --release doesn't work on iOS due to code signing issues
@@ -37,7 +37,7 @@ TaskFunction createMicrobenchmarkTask() {
       return await _readJsonResults(flutterProcess);
     }
 
-    Map<String, double> allResults = <String, double>{};
+    final Map<String, double> allResults = <String, double>{};
     allResults.addAll(await _runMicrobench('lib/stocks/layout_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
@@ -53,7 +53,7 @@ Future<Process> _startFlutter({
   bool canFail: false,
   Map<String, String> environment,
 }) {
-  List<String> args = <String>['run']..addAll(options);
+  final List<String> args = <String>['run']..addAll(options);
   return startProcess(path.join(flutterDirectory.path, 'bin', 'flutter'), args, environment: environment);
 }
 
@@ -62,8 +62,8 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';
   bool jsonStarted = false;
-  StringBuffer jsonBuf = new StringBuffer();
-  Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
+  final StringBuffer jsonBuf = new StringBuffer();
+  final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
   StreamSubscription<String> stdoutSub;
 
   int prefixLength = 0;

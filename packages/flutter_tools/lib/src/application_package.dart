@@ -50,14 +50,14 @@ class AndroidApk extends ApplicationPackage {
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(String applicationBinary) {
-    String aaptPath = androidSdk?.latestVersion?.aaptPath;
+    final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
       printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
       return null;
     }
 
-    List<String> aaptArgs = <String>[aaptPath, 'dump', 'badging', applicationBinary];
-    ApkManifestData data = ApkManifestData.parseFromAaptBadging(runCheckedSync(aaptArgs));
+    final List<String> aaptArgs = <String>[aaptPath, 'dump', 'badging', applicationBinary];
+    final ApkManifestData data = ApkManifestData.parseFromAaptBadging(runCheckedSync(aaptArgs));
 
     if (data == null) {
       printError('Unable to read manifest info from $applicationBinary.');
@@ -82,6 +82,14 @@ class AndroidApk extends ApplicationPackage {
     String apkPath;
 
     if (isProjectUsingGradle()) {
+      if (fs.file(gradleAppOut).existsSync()) {
+        // Grab information from the .apk. The gradle build script might alter
+        // the application Id, so we need to look at what was actually built.
+        return new AndroidApk.fromApk(gradleAppOut);
+      }
+      // The .apk hasn't been built yet, so we work with what we have. The run
+      // command will grab a new AndroidApk after building, to get the updated
+      // IDs.
       manifestPath = gradleManifestPath;
       apkPath = gradleAppOut;
     } else {
@@ -92,19 +100,19 @@ class AndroidApk extends ApplicationPackage {
     if (!fs.isFileSync(manifestPath))
       return null;
 
-    String manifestString = fs.file(manifestPath).readAsStringSync();
-    xml.XmlDocument document = xml.parse(manifestString);
+    final String manifestString = fs.file(manifestPath).readAsStringSync();
+    final xml.XmlDocument document = xml.parse(manifestString);
 
-    Iterable<xml.XmlElement> manifests = document.findElements('manifest');
+    final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
       return null;
-    String packageId = manifests.first.getAttribute('package');
+    final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
     for (xml.XmlElement category in document.findAllElements('category')) {
       if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
-        xml.XmlElement activity = category.parent.parent;
-        String activityName = activity.getAttribute('android:name');
+        final xml.XmlElement activity = category.parent.parent;
+        final String activityName = activity.getAttribute('android:name');
         launchActivity = "$packageId/$activityName";
         break;
       }
@@ -138,18 +146,20 @@ abstract class IOSApp extends ApplicationPackage {
   factory IOSApp.fromIpa(String applicationBinary) {
     Directory bundleDir;
     try {
-      Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
-      addShutdownHook(() async => await tempDir.delete(recursive: true));
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app_');
+      addShutdownHook(() async {
+        await tempDir.delete(recursive: true);
+      }, ShutdownStage.STILL_RECORDING);
       os.unzip(fs.file(applicationBinary), tempDir);
-      Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
+      final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
     } on StateError catch (e, stackTrace) {
       printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);
       return null;
     }
 
-    String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
-    String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    final String plistPath = fs.path.join(bundleDir.path, 'Info.plist');
+    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null)
       return null;
 
@@ -165,11 +175,11 @@ abstract class IOSApp extends ApplicationPackage {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       return null;
 
-    String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
+    final String plistPath = fs.path.join('ios', 'Runner', 'Info.plist');
     String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
     if (id == null)
       return null;
-    String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
+    final String projectPath = fs.path.join('ios', 'Runner.xcodeproj');
     id = substituteXcodeVariables(id, projectPath, 'Runner');
 
     return new BuildableIOSApp(
@@ -250,6 +260,7 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
           : new IOSApp.fromIpa(applicationBinary);
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
+    case TargetPlatform.windows_x64:
       return null;
   }
   assert(platform != null);
@@ -274,6 +285,7 @@ class ApplicationPackageStore {
         return iOS;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
+      case TargetPlatform.windows_x64:
         return null;
     }
     return null;
@@ -289,22 +301,22 @@ class ApkManifestData {
 
     // package: name='io.flutter.gallery' versionCode='1' versionName='0.0.1' platformBuildVersionName='NMR1'
     // launchable-activity: name='io.flutter.app.FlutterActivity'  label='' icon=''
-    Map<String, Map<String, String>> map = <String, Map<String, String>>{};
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
 
     for (String line in data.split('\n')) {
-      int index = line.indexOf(':');
+      final int index = line.indexOf(':');
       if (index != -1) {
-        String name = line.substring(0, index);
+        final String name = line.substring(0, index);
         line = line.substring(index + 1).trim();
 
-        Map<String, String> entries = <String, String>{};
+        final Map<String, String> entries = <String, String>{};
         map[name] = entries;
 
         for (String entry in line.split(' ')) {
           entry = entry.trim();
           if (entry.isNotEmpty && entry.contains('=')) {
-            int split = entry.indexOf('=');
-            String key = entry.substring(0, split);
+            final int split = entry.indexOf('=');
+            final String key = entry.substring(0, split);
             String value = entry.substring(split + 1);
             if (value.startsWith("'") && value.endsWith("'"))
               value = value.substring(1, value.length - 1);

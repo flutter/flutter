@@ -50,7 +50,7 @@ class Clipboard {
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
   static Future<ClipboardData> getData(String format) async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
+    final Map<String, dynamic> result = await PlatformMessages.invokeMethod(
       _kChannelName,
       'Clipboard.getData',
       <String>[format]

@@ -41,6 +41,8 @@ class InkResponse extends StatefulWidget {
     this.containedInkWell: false,
     this.highlightShape: BoxShape.circle,
     this.radius,
+    this.highlightColor,
+    this.splashColor,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -70,6 +72,14 @@ class InkResponse extends StatefulWidget {
 
   /// The radius of the ink splash.
   final double radius;
+
+  /// The highlight color of the ink response. If this property is null then the
+  /// highlight color of the theme will be used.
+  final Color highlightColor;
+
+  /// The splash color of the ink response. If this property is null then the
+  /// splash color of the theme will be used.
+  final Color splashColor;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -116,7 +126,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
         _lastHighlight = new InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: Theme.of(context).highlightColor,
+          color: config.highlightColor ?? Theme.of(context).highlightColor,
           shape: config.highlightShape,
           rectCallback: config.getRectCallback(referenceBox),
           onRemoved: () {
@@ -143,7 +153,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       controller: Material.of(context),
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(details.globalPosition),
-      color: Theme.of(context).splashColor,
+      color: config.splashColor ?? Theme.of(context).splashColor,
       containedInkWell: config.containedInkWell,
       rectCallback: config.containedInkWell ? rectCallback : null,
       radius: config.radius,
@@ -241,7 +251,9 @@ class InkWell extends InkResponse {
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
     GestureLongPressCallback onLongPress,
-    ValueChanged<bool> onHighlightChanged
+    ValueChanged<bool> onHighlightChanged,
+    Color highlightColor,
+    Color splashColor,
   }) : super(
     key: key,
     child: child,
@@ -250,6 +262,8 @@ class InkWell extends InkResponse {
     onLongPress: onLongPress,
     onHighlightChanged: onHighlightChanged,
     containedInkWell: true,
-    highlightShape: BoxShape.rectangle
+    highlightShape: BoxShape.rectangle,
+    highlightColor: highlightColor,
+    splashColor: splashColor,
   );
 }

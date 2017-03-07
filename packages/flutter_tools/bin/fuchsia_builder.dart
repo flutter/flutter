@@ -35,7 +35,7 @@ const List<String> _kRequiredOptions = const <String>[
 ];
 
 Future<Null> main(List<String> args) async {
-  AppContext executableContext = new AppContext();
+  final AppContext executableContext = new AppContext();
   executableContext.setVariable(Logger, new StdoutLogger());
   executableContext.runInZone(() {
     // Initialize the context with some defaults.
@@ -66,7 +66,7 @@ Future<Null> run(List<String> args) async {
     exit(1);
   }
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
-  String outputPath = argResults[_kOptionOutput];
+  final String outputPath = argResults[_kOptionOutput];
   try {
     await assemble(
       outputPath: outputPath,

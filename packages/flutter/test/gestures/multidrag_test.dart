@@ -14,7 +14,7 @@ void main() {
   setUp(ensureGestureBinding);
 
   testGesture('MultiDrag control test', (GestureTester tester) {
-    DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
+    final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
     drag.onStart = (Point position) {
@@ -22,8 +22,8 @@ void main() {
       return new TestDrag();
     };
 
-    TestPointer pointer = new TestPointer(5);
-    PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);

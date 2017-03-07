@@ -41,7 +41,7 @@ class ShrinePageState extends State<ShrinePage> {
   int _appBarElevation = 0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
+    final int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
     if (elevation != _appBarElevation) {
       setState(() {
         _appBarElevation = elevation;

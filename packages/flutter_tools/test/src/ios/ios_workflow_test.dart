@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:test/test.dart';
 
 import '../context.dart';
@@ -21,27 +21,27 @@ void main() {
     testUsingContext('Emit missing status when nothing is installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..hasPythonSixModule = false
         ..hasHomebrew = false
         ..hasIosDeploy = false;
-      ValidationResult result = await workflow.validate();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
     testUsingContext('Emits partial status when Xcode is not installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
-      ValidationResult result = await workflow.validate();
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
     testUsingContext('Emits partial status when Xcode is partially installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
-      ValidationResult result = await workflow.validate();
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -51,8 +51,8 @@ void main() {
           .thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
       when(xcode.eulaSigned).thenReturn(true);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
-      ValidationResult result = await workflow.validate();
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -62,8 +62,8 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(false);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
-      ValidationResult result = await workflow.validate();
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -73,9 +73,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..hasPythonSixModule = false;
-      ValidationResult result = await workflow.validate();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -85,9 +85,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..hasHomebrew = false;
-      ValidationResult result = await workflow.validate();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -97,9 +97,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..hasIosDeploy = false;
-      ValidationResult result = await workflow.validate();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -109,9 +109,9 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
         ..iosDeployVersionText = '1.8.0';
-      ValidationResult result = await workflow.validate();
+      final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
@@ -121,7 +121,7 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      ValidationResult result = await new IOSWorkflowTestTarget().validate();
+      final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
   });

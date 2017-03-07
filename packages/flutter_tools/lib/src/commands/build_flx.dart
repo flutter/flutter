@@ -38,7 +38,7 @@ class BuildFlxCommand extends BuildSubCommand {
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
-    String outputPath = argResults['output-file'];
+    final String outputPath = argResults['output-file'];
 
     await build(
       mainPath: targetFile,

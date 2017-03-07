@@ -33,14 +33,14 @@ Future<Null> main(List<String> rawArgs) async {
 
   if (!args.wasParsed('task')) {
     if (args.wasParsed('stage')) {
-      String stageName = args['stage'];
-      List<ManifestTask> tasks = loadTaskManifest().tasks;
+      final String stageName = args['stage'];
+      final List<ManifestTask> tasks = loadTaskManifest().tasks;
       for (ManifestTask task in tasks) {
         if (task.stage == stageName)
           _taskNames.add(task.name);
       }
     } else if (args.wasParsed('all')) {
-      List<ManifestTask> tasks = loadTaskManifest().tasks;
+      final List<ManifestTask> tasks = loadTaskManifest().tasks;
       for (ManifestTask task in tasks) {
         _taskNames.add(task.name);
       }
@@ -53,11 +53,11 @@ Future<Null> main(List<String> rawArgs) async {
     return null;
   }
 
-  bool silent = args['silent'];
+  final bool silent = args['silent'];
 
   for (String taskName in _taskNames) {
     section('Running task "$taskName"');
-    Map<String, dynamic> result = await runTask(taskName, silent: silent);
+    final Map<String, dynamic> result = await runTask(taskName, silent: silent);
 
     if (!result['success'])
       exitCode = 1;
@@ -82,8 +82,8 @@ final ArgParser _argParser = new ArgParser()
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
       for (String nameOrPath in value) {
-        List<String> fragments = path.split(nameOrPath);
-        bool isDartFile = fragments.last.endsWith('.dart');
+        final List<String> fragments = path.split(nameOrPath);
+        final bool isDartFile = fragments.last.endsWith('.dart');
 
         if (fragments.length == 1 && !isDartFile) {
           // Not a path

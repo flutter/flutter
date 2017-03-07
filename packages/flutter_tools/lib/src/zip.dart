@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:archive/archive.dart';
 
-import 'devfs.dart';
 import 'base/file_system.dart';
 import 'base/process.dart';
+import 'devfs.dart';
 
 abstract class ZipBuilder {
   factory ZipBuilder() {
@@ -31,7 +31,7 @@ class _ArchiveZipBuilder extends ZipBuilder {
 
   @override
   Future<Null> createZip(File outFile, Directory zipBuildDir) async {
-    Archive archive = new Archive();
+    final Archive archive = new Archive();
 
     final Completer<Null> finished = new Completer<Null>();
     int count = entries.length;
@@ -45,7 +45,7 @@ class _ArchiveZipBuilder extends ZipBuilder {
     });
     await finished.future;
 
-    List<int> zipData = new ZipEncoder().encode(archive);
+    final List<int> zipData = new ZipEncoder().encode(archive);
     await outFile.writeAsBytes(zipData);
   }
 }
@@ -57,7 +57,7 @@ class _ZipToolBuilder extends ZipBuilder {
   Future<Null> createZip(File outFile, Directory zipBuildDir) async {
     // If there are no assets, then create an empty zip file.
     if (entries.isEmpty) {
-      List<int> zipData = new ZipEncoder().encode(new Archive());
+      final List<int> zipData = new ZipEncoder().encode(new Archive());
       await outFile.writeAsBytes(zipData);
       return;
     }
@@ -73,7 +73,7 @@ class _ZipToolBuilder extends ZipBuilder {
     int count = entries.length;
     entries.forEach((String archivePath, DevFSContent content) {
       content.contentsAsBytes().then<Null>((List<int> data) {
-        File file = fs.file(fs.path.join(zipBuildDir.path, archivePath));
+        final File file = fs.file(fs.path.join(zipBuildDir.path, archivePath));
         file.parent.createSync(recursive: true);
         file.writeAsBytes(data).then<Null>((File value) {
           count -= 1;

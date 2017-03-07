@@ -214,7 +214,7 @@ class FlutterError extends AssertionError {
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
         bool ourFault = true;
         if (stackLines != null) {
-          List<String> stackList = stackLines.take(2).toList();
+          final List<String> stackList = stackLines.take(2).toList();
           if (stackList.length >= 2) {
             final RegExp throwPattern = new RegExp(r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
             final RegExp assertPattern = new RegExp(r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
@@ -247,7 +247,7 @@ class FlutterError extends AssertionError {
           debugPrint(line, wrapWidth: _kWrapWidth);
       }
       if (details.informationCollector != null) {
-        StringBuffer information = new StringBuffer();
+        final StringBuffer information = new StringBuffer();
         details.informationCollector(information);
         debugPrint('\n$information', wrapWidth: _kWrapWidth);
       }
@@ -285,11 +285,11 @@ class FlutterError extends AssertionError {
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (String line in frames) {
-      Match match = stackParser.firstMatch(line);
+      final Match match = stackParser.firstMatch(line);
       if (match != null) {
         assert(match.groupCount == 2);
         if (filteredPackages.contains(match.group(2))) {
-          Match packageMatch = packageParser.firstMatch(match.group(2));
+          final Match packageMatch = packageParser.firstMatch(match.group(2));
           if (packageMatch != null && packageMatch.group(1) == 'package') {
             skipped.add('package ${packageMatch.group(2)}'); // avoid "package package:foo"
           } else {
@@ -307,7 +307,7 @@ class FlutterError extends AssertionError {
     if (skipped.length == 1) {
       result.add('(elided one frame from ${skipped.single})');
     } else if (skipped.length > 1) {
-      List<String> where = new Set<String>.from(skipped).toList()..sort();
+      final List<String> where = new Set<String>.from(skipped).toList()..sort();
       if (where.length > 1)
         where[where.length - 1] = 'and ${where.last}';
       if (where.length > 2) {

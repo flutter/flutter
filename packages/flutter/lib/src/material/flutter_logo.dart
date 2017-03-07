@@ -4,9 +4,9 @@
 
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
-import 'colors.dart';
 
 /// The Flutter logo, in widget form. This widget respects the [IconTheme].
 ///

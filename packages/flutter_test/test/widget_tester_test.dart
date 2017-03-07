@@ -21,7 +21,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
       expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
       expect(message, contains('Actual: ?:<zero widgets with text "foo">\n'));
       expect(message, contains('Which: means none were found but one was expected\n'));
@@ -44,7 +44,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo": Text("foo")>\n'));
@@ -62,7 +62,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo")>\n'));
@@ -73,7 +73,7 @@ void main() {
       await tester.pumpWidget(new Text('foo'));
       int count;
 
-      AnimationController test = new AnimationController(
+      final AnimationController test = new AnimationController(
         duration: const Duration(milliseconds: 5100),
         vsync: tester,
       );
@@ -108,7 +108,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(new Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(new Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);

@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mockito/mockito_no_mirrors.dart';
 import 'package:test/test.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
@@ -80,7 +80,7 @@ class BasicMock {
   final List<String> messages = new List<String>();
 
   void expectMessages(List<String> expectedMessages) {
-    List<String> actualMessages = new List<String>.from(messages);
+    final List<String> actualMessages = new List<String>.from(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -88,13 +88,15 @@ class BasicMock {
   bool contains(String match) {
     print('Checking for `$match` in:');
     print(messages);
-    bool result = messages.contains(match);
+    final bool result = messages.contains(match);
     messages.clear();
     return result;
   }
 }
 
 class MockDevFSOperations extends BasicMock implements DevFSOperations {
+  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
+
   @override
   Future<Uri> create(String fsName) async {
     messages.add('create $fsName');
@@ -107,12 +109,14 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
-    messages.add('writeFile $fsName $devicePath');
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
+    messages.add('writeFile $fsName $deviceUri');
+    devicePathToContent[deviceUri] = content;
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, String devicePath) async {
-    messages.add('deleteFile $fsName $devicePath');
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
+    messages.add('deleteFile $fsName $deviceUri');
+    devicePathToContent.remove(deviceUri);
   }
 }

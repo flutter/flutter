@@ -162,7 +162,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData theme = Theme.of(context);
+    final ThemeData theme = Theme.of(context);
     return new _SliderRenderObjectWidget(
       value: (config.value - config.min) / (config.max - config.min),
       divisions: config.divisions,
@@ -277,7 +277,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
         super(additionalConstraints: _getAdditionalConstraints(label)) {
     assert(value != null && value >= 0.0 && value <= 1.0);
     this.label = label;
-    GestureArenaTeam team = new GestureArenaTeam();
+    final GestureArenaTeam team = new GestureArenaTeam();
     _drag = new HorizontalDragGestureRecognizer()
       ..team = team
       ..onStart = _handleDragStart
@@ -501,14 +501,14 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
         final double tipAttachment = _kLabelBalloonTipAttachmentRatio * radius;
 
         canvas.drawCircle(center, radius, primaryPaint);
-        Path path = new Path()
+        final Path path = new Path()
           ..moveTo(tip.x, tip.y)
           ..lineTo(center.x - tipAttachment, center.y + tipAttachment)
           ..lineTo(center.x + tipAttachment, center.y + tipAttachment)
           ..close();
         canvas.drawPath(path, primaryPaint);
         _labelPainter.layout();
-        Offset labelOffset = new Offset(
+        final Offset labelOffset = new Offset(
           center.x - _labelPainter.width / 2.0,
           center.y - _labelPainter.height / 2.0
         );

@@ -13,15 +13,18 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../usage.dart';
 import '../version.dart';
+import '../vmservice.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -65,6 +68,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         negatable: false,
         hide: !verboseHelp,
         help: 'Suppress analytics reporting when this command runs.');
+    argParser.addFlag('bug-report',
+        negatable: false,
+        help:
+            'Captures a bug report file to submit to the Flutter team '
+            '(contains local paths, device identifiers, and log snippets).');
 
     String packagesHelp;
     if (fs.isFileSync(kPackagesFileName))
@@ -96,14 +104,14 @@ class FlutterCommandRunner extends CommandRunner<Null> {
             'Use this to select a specific version of the engine if you have built multiple engine targets.\n'
             'This path is relative to --local-engine-src-path/out.');
     argParser.addOption('record-to',
-        hide: !verboseHelp,
+        hide: true,
         help:
             'Enables recording of process invocations (including stdout and stderr of all such invocations),\n'
             'and file system access (reads and writes).\n'
             'Serializes that recording to a directory with the path specified in this flag. If the\n'
             'directory does not already exist, it will be created.');
     argParser.addOption('replay-from',
-        hide: !verboseHelp,
+        hide: true,
         help:
             'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from\n'
             'the specified recording (obtained via --record-to). The path specified in this flag must refer\n'
@@ -122,7 +130,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     try {
       if (platform.script.scheme == 'data')
         return '../..'; // we're running as a test
-      String script = platform.script.toFilePath();
+      final String script = platform.script.toFilePath();
       if (fs.path.basename(script) == kSnapshotFileName)
         return fs.path.dirname(fs.path.dirname(fs.path.dirname(script)));
       if (fs.path.basename(script) == kFlutterToolsScriptFileName)
@@ -158,26 +166,58 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       context.setVariable(Logger, new VerboseLogger());
     }
 
-    if (globalResults['record-to'] != null &&
-        globalResults['replay-from'] != null)
-      throwToolExit('--record-to and --replay-from cannot be used together.');
+    String recordTo = globalResults['record-to'];
+    String replayFrom = globalResults['replay-from'];
 
-    if (globalResults['record-to'] != null) {
-      String recordTo = globalResults['record-to'].trim();
+    if (globalResults['bug-report']) {
+      // --bug-report implies --record-to=<tmp_path>
+      final Directory tmp = await const LocalFileSystem()
+          .systemTempDirectory
+          .createTemp('flutter_tools_');
+      recordTo = tmp.path;
+
+      // Record the arguments that were used to invoke this runner.
+      final File manifest = tmp.childFile('MANIFEST.txt');
+      final StringBuffer buffer = new StringBuffer()
+        ..writeln('# arguments')
+        ..writeln(globalResults.arguments)
+        ..writeln()
+        ..writeln('# rest')
+        ..writeln(globalResults.rest);
+      await manifest.writeAsString(buffer.toString(), flush: true);
+
+      // ZIP the recording up once the recording has been serialized.
+      addShutdownHook(() async {
+        final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
+        os.zip(tmp, zipFile);
+        printStatus(
+            'Bug report written to ${zipFile.basename}.\n'
+            'Note that this bug report contains local paths, device '
+            'identifiers, and log snippets.');
+      }, ShutdownStage.POST_PROCESS_RECORDING);
+      addShutdownHook(() => tmp.delete(recursive: true), ShutdownStage.CLEANUP);
+    }
+
+    assert(recordTo == null || replayFrom == null);
+
+    if (recordTo != null) {
+      recordTo = recordTo.trim();
       if (recordTo.isEmpty)
         throwToolExit('record-to location not specified');
       enableRecordingProcessManager(recordTo);
       enableRecordingFileSystem(recordTo);
       await enableRecordingPlatform(recordTo);
+      VMService.enableRecordingConnection(recordTo);
     }
 
-    if (globalResults['replay-from'] != null) {
-      String replayFrom = globalResults['replay-from'].trim();
+    if (replayFrom != null) {
+      replayFrom = replayFrom.trim();
       if (replayFrom.isEmpty)
         throwToolExit('replay-from location not specified');
       await enableReplayProcessManager(replayFrom);
       enableReplayFileSystem(replayFrom);
       await enableReplayPlatform(replayFrom);
+      VMService.enableReplayConnection(replayFrom);
     }
 
     logger.quiet = globalResults['quiet'];
@@ -204,7 +244,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     deviceManager.specifiedDeviceId = globalResults['device-id'];
 
     // Set up the tooling configuration.
-    String enginePath = _findEnginePath(globalResults);
+    final String enginePath = _findEnginePath(globalResults);
     if (enginePath != null) {
       Artifacts.useLocalEngine(enginePath, _findEngineBuildPath(globalResults, enginePath));
     }
@@ -232,10 +272,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
-        Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
+        final Uri engineUri = new PackageMap(PackageMap.globalPackagesPath).map[kFlutterEnginePackageName];
         if (engineUri != null) {
           engineSourcePath = fs.path.dirname(fs.path.dirname(fs.path.dirname(fs.path.dirname(engineUri.path))));
-          bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
+          final bool dirExists = fs.isDirectorySync(fs.path.join(engineSourcePath, 'out'));
           if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
             engineSourcePath = null;
         }
@@ -272,7 +312,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       throw new ProcessExit(2);
     }
 
-    String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
+    final String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
     if (!fs.isDirectorySync(engineBuildPath)) {
       printError('No Flutter engine build found at $engineBuildPath.');
       throw new ProcessExit(2);
@@ -345,7 +385,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         break;
       }
 
-      String parent = fs.path.dirname(directory);
+      final String parent = fs.path.dirname(directory);
       if (parent == directory)
         break;
       directory = parent;
@@ -353,13 +393,13 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
-      PackageMap packageMap = new PackageMap(kPackagesFileName);
-      Uri flutterUri = packageMap.map['flutter'];
+      final PackageMap packageMap = new PackageMap(kPackagesFileName);
+      final Uri flutterUri = packageMap.map['flutter'];
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib
-        Uri rootUri = flutterUri.resolve('../../..');
-        String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
+        final Uri rootUri = flutterUri.resolve('../../..');
+        final String flutterPath = fs.path.normalize(fs.file(rootUri).absolute.path);
 
         if (!fs.isDirectorySync(flutterPath)) {
           printError(

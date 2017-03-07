@@ -19,10 +19,10 @@ String getValueFromFile(String plistFilePath, String key) {
   if (!fs.isFileSync(plistFilePath))
     return null;
 
-  String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
+  final String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
 
   try {
-    String value = runCheckedSync(<String>[
+    final String value = runCheckedSync(<String>[
       '/usr/bin/defaults', 'read', normalizedPlistPath, key
     ]);
     return value.isEmpty ? null : value;

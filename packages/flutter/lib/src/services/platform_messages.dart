@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 ByteData _encodeUTF8(String message) {
   if (message == null)
     return null;
-  Uint8List encoded = UTF8.encoder.convert(message);
+  final Uint8List encoded = UTF8.encoder.convert(message);
   return encoded.buffer.asByteData();
 }
 
@@ -66,13 +66,12 @@ class PlatformMessages {
   /// Typically called by [ServicesBinding] to handle platform messages received
   /// from [ui.window.onPlatformMessage].
   ///
-  /// To register a handler for a given message channel, see
-  /// [setStringMessageHandler] and [setJSONMessageHandler].
+  /// To register a handler for a given message channel, see [PlatformChannel].
   static Future<Null> handlePlatformMessage(
         String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
     ByteData response;
     try {
-      _PlatformMessageHandler handler = _handlers[channel];
+      final _PlatformMessageHandler handler = _handlers[channel];
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
@@ -104,6 +103,8 @@ class PlatformMessages {
   ///
   /// Returns a [Future] which completes to the received response, decoded as a
   /// UTF-8 string, or to an error, if the decoding fails.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.send] instead.
   static Future<String> sendString(String channel, String message) async {
     return _decodeUTF8(await sendBinary(channel, _encodeUTF8(message)));
   }
@@ -115,6 +116,8 @@ class PlatformMessages {
   /// Returns a [Future] which completes to the received response, decoded as a
   /// UTF-8-encoded JSON representation of a JSON value (a [String], [bool],
   /// [double], [List], or [Map]), or to an error, if the decoding fails.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.send] instead.
   static Future<dynamic> sendJSON(String channel, dynamic json) async {
     return _decodeJSON(await sendString(channel, _encodeJSON(json)));
   }
@@ -129,6 +132,8 @@ class PlatformMessages {
   /// The response from the method call is decoded as UTF-8, then the UTF-8 is
   /// decoded as JSON. The returned [Future] completes to this fully decoded
   /// response, or to an error, if the decoding fails.
+  ///
+  /// Deprecated, use [PlatformMethodChannel.invokeMethod] instead.
   static Future<dynamic> invokeMethod(String channel, String method, [ List<dynamic> args = const <Null>[] ]) {
     return sendJSON(channel, <String, dynamic>{
       'method': method,
@@ -155,6 +160,8 @@ class PlatformMessages {
   ///
   /// The handler's return value, if non-null, is sent as a response, encoded as
   /// a UTF-8 string.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
   static void setStringMessageHandler(String channel, Future<String> handler(String message)) {
     setBinaryMessageHandler(channel, (ByteData message) async {
       return _encodeUTF8(await handler(_decodeUTF8(message)));
@@ -169,6 +176,8 @@ class PlatformMessages {
   ///
   /// The handler's return value, if non-null, is sent as a response, encoded as
   /// JSON and then as a UTF-8 string.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMessageHandler] instead.
   static void setJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     setStringMessageHandler(channel, (String message) async {
       return _encodeJSON(await handler(_decodeJSON(message)));
@@ -205,6 +214,8 @@ class PlatformMessages {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
   static void setMockStringMessageHandler(String channel, Future<String> handler(String message)) {
     if (handler == null) {
       setMockBinaryMessageHandler(channel, null);
@@ -227,6 +238,8 @@ class PlatformMessages {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
+  ///
+  /// Deprecated, use [PlatformMessageChannel.setMockMessageHandler] instead.
   static void setMockJSONMessageHandler(String channel, Future<dynamic> handler(dynamic message)) {
     if (handler == null) {
       setMockStringMessageHandler(channel, null);

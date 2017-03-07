@@ -51,7 +51,7 @@ class TableRow {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('TableRow(');
     if (key != null)
       result.write('$key, ');
@@ -117,7 +117,7 @@ class Table extends RenderObjectWidget {
       return true;
     });
     assert(() {
-      List<Widget> flatChildren = children.expand((TableRow row) => row.children).toList(growable: false);
+      final List<Widget> flatChildren = children.expand((TableRow row) => row.children).toList(growable: false);
       if (debugChildrenHaveDuplicateKeys(this, flatChildren)) {
         throw new FlutterError(
           'Two or more cells in this Table contain widgets with the same key.\n'
@@ -279,7 +279,7 @@ class _TableElement extends RenderObjectElement {
       }
       return false;
     });
-    TableCellParentData childParentData = child.parentData;
+    final TableCellParentData childParentData = child.parentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
 
@@ -289,14 +289,14 @@ class _TableElement extends RenderObjectElement {
   void update(Table newWidget) {
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; });
-    Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
+    final Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
       _children.where((_TableElementRow row) => row.key != null),
       key:   (_TableElementRow row) => row.key,
       value: (_TableElementRow row) => row.children
     );
-    Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
-    List<_TableElementRow> newChildren = <_TableElementRow>[];
-    Set<List<Element>> taken = new Set<List<Element>>();
+    final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
+    final List<_TableElementRow> newChildren = <_TableElementRow>[];
+    final Set<List<Element>> taken = new Set<List<Element>>();
     for (TableRow row in newWidget.children) {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
@@ -369,7 +369,7 @@ class TableCell extends ParentDataWidget<Table> {
     final TableCellParentData parentData = renderObject.parentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
-      AbstractNode targetParent = renderObject.parent;
+      final AbstractNode targetParent = renderObject.parent;
       if (targetParent is RenderObject)
         targetParent.markNeedsLayout();
     }

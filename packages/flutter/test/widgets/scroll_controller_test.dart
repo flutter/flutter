@@ -9,7 +9,7 @@ import 'states.dart';
 
 void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    ScrollController controller = new ScrollController();
+    final ScrollController controller = new ScrollController();
 
     await tester.pumpWidget(new ListView(
       controller: controller,
@@ -63,7 +63,7 @@ void main() {
     expect(controller.offset, equals(653.0));
     expect(realOffset(), equals(controller.offset));
 
-    ScrollController controller2 = new ScrollController();
+    final ScrollController controller2 = new ScrollController();
 
     await tester.pumpWidget(new ListView(
       key: const Key('second'),
@@ -110,7 +110,7 @@ void main() {
   });
 
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    ScrollController controller = new ScrollController(
+    final ScrollController controller = new ScrollController(
       initialScrollOffset: 209.0,
     );
 
@@ -145,7 +145,7 @@ void main() {
   });
 
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
-    ScrollController controller = new ScrollController();
+    final ScrollController controller = new ScrollController();
 
     await tester.pumpWidget(new ListView(
       controller: controller,
@@ -160,4 +160,75 @@ void main() {
     await tester.pumpWidget(new Container(), const Duration(seconds: 2));
   });
 
+  testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    expect(() => controller.offset, throwsAssertionError);
+    expect(() => controller.position, throwsAssertionError);
+  });
+
+  testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    await tester.pumpWidget(new ListView(
+      children: <Widget>[
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+      ],
+    ));
+
+    expect(() => controller.offset, throwsAssertionError);
+    expect(() => controller.position, throwsAssertionError);
+  });
+
+  testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
+    expect(() => controller.jumpTo(1.0), throwsAssertionError);
+  });
+
+  testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    await tester.pumpWidget(new ListView(
+      children: <Widget>[
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+        new Container(
+          constraints: const BoxConstraints(maxHeight: 500.0),
+          child: new ListView(
+            controller: controller,
+            children: kStates.map<Widget>((String state) {
+              return new Container(height: 200.0, child: new Text(state));
+            }).toList(),
+          ),
+        ),
+      ],
+    ));
+
+    controller.jumpTo(1.0);
+    controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
+    await tester.pump();
+    await tester.pumpUntilNoTransientCallbacks();
+  });
 }

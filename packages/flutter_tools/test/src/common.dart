@@ -7,11 +7,12 @@ import 'package:test/test.dart';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
-  FlutterCommandRunner runner  = new FlutterCommandRunner();
+  final FlutterCommandRunner runner  = new FlutterCommandRunner();
   if (command != null)
     runner.addCommand(command);
   return runner;
@@ -21,11 +22,11 @@ CommandRunner<Null> createTestCommandRunner([FlutterCommand command]) {
 void updateFileModificationTime(String path,
                                 DateTime baseTime,
                                 int seconds) {
-  DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
+  final DateTime modificationTime = baseTime.add(new Duration(seconds: seconds));
   fs.file(path).setLastModifiedSync(modificationTime);
 }
 
-/// Matcher for functions that throw ToolExit.
+/// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit([int exitCode]) {
   return exitCode == null
     ? throwsA(isToolExit)
@@ -34,3 +35,13 @@ Matcher throwsToolExit([int exitCode]) {
 
 /// Matcher for [ToolExit]s.
 const Matcher isToolExit = const isInstanceOf<ToolExit>();
+
+/// Matcher for functions that throw [ProcessExit].
+Matcher throwsProcessExit([dynamic exitCode]) {
+  return exitCode == null
+      ? throwsA(isProcessExit)
+      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+}
+
+/// Matcher for [ProcessExit]s.
+const Matcher isProcessExit = const isInstanceOf<ProcessExit>();

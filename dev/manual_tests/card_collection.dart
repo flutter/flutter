@@ -42,7 +42,7 @@ class CardCollectionState extends State<CardCollection> {
   bool _varyFontSizes = false;
 
   void _initVariableSizedCardModels() {
-    List<double> cardHeights = <double>[
+    final List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -119,7 +119,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   String _dismissDirectionText(DismissDirection direction) {
-    String s = direction.toString();
+    final String s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
 
@@ -247,8 +247,8 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget _buildCard(BuildContext context, int index) {
-    CardModel cardModel = _cardModels[index];
-    Widget card = new Dismissable(
+    final CardModel cardModel = _cardModels[index];
+    final Widget card = new Dismissable(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
@@ -318,13 +318,13 @@ class CardCollectionState extends State<CardCollection> {
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
     // background (text and icons) will just be clipped, not resized.
-    Widget background = new Positioned.fill(
+    final Widget background = new Positioned.fill(
       child: new Container(
         margin: const EdgeInsets.all(4.0),
         child: new SingleChildScrollView(
           child: new Container(
             height: cardModel.height,
-            decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+            color: theme.primaryColor,
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,
@@ -376,9 +376,9 @@ class CardCollectionState extends State<CardCollection> {
       );
     }
 
-    Widget body = new Container(
+    final Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
+      color: _primaryColor[50],
       child: cardCollection,
     );
 

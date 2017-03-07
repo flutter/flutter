@@ -24,7 +24,7 @@ class PathProvider {
   ///
   /// On Android, this uses the `getCacheDir` API on the context.
   static Future<Directory> getTemporaryDirectory() async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
+    final Map<String, dynamic> result = await PlatformMessages.invokeMethod(
         _kChannelName, 'PathProvider.getTemporaryDirectory');
     if (result == null)
       return null;
@@ -39,7 +39,7 @@ class PathProvider {
   ///
   /// On Android, this returns the AppData directory.
   static Future<Directory> getApplicationDocumentsDirectory() async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
+    final Map<String, dynamic> result = await PlatformMessages.invokeMethod(
         _kChannelName, 'PathProvider.getApplicationDocumentsDirectory');
     if (result == null)
       return null;

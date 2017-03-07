@@ -16,5 +16,5 @@
 library http;
 
 export 'src/http/http.dart';
-export 'src/http/response.dart';
 export 'src/http/mock_client.dart';
+export 'src/http/response.dart';

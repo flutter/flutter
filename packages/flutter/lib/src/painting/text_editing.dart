@@ -4,9 +4,9 @@
 
 import 'dart:ui' show hashValues, TextAffinity, TextPosition;
 
-export 'dart:ui' show TextAffinity, TextPosition;
-
 import 'package:meta/meta.dart';
+
+export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
 class TextRange {
@@ -73,7 +73,7 @@ class TextRange {
       return true;
     if (other is! TextRange)
       return false;
-    TextRange typedOther = other;
+    final TextRange typedOther = other;
     return typedOther.start == start
         && typedOther.end == end;
   }
@@ -181,7 +181,7 @@ class TextSelection extends TextRange {
       return true;
     if (other is! TextSelection)
       return false;
-    TextSelection typedOther = other;
+    final TextSelection typedOther = other;
     return typedOther.baseOffset == baseOffset
         && typedOther.extentOffset == extentOffset
         && typedOther.affinity == affinity

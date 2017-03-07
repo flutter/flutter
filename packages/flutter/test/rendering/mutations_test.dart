@@ -36,7 +36,7 @@ void main() {
     RenderBox child1, child2;
     bool movedChild1 = false;
     bool movedChild2 = false;
-    RenderFlex block = new RenderFlex();
+    final RenderFlex block = new RenderFlex();
     block.add(child1 = new RenderLayoutTestBox(() { movedChild1 = true; }));
     block.add(child2 = new RenderLayoutTestBox(() { movedChild2 = true; }));
 

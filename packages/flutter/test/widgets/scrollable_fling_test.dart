@@ -50,9 +50,9 @@ void main() {
   });
 
   testWidgets('fling and tap to stop', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
-    List<Widget> textWidgets = <Widget>[];
+    final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i++)
       textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
     await tester.pumpWidget(new ListView(children: textWidgets));
@@ -73,9 +73,9 @@ void main() {
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
-    List<Widget> textWidgets = <Widget>[];
+    final List<Widget> textWidgets = <Widget>[];
     for (int i = 0; i < 250; i++)
       textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
     await tester.pumpWidget(new ListView(children: textWidgets));
@@ -91,6 +91,6 @@ void main() {
     expect(log, equals(<String>['tap 18']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18', 'tap 43']));
+    expect(log, equals(<String>['tap 18', 'tap 42']));
   }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
 }

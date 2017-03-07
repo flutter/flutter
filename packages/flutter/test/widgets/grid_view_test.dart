@@ -17,7 +17,7 @@ void main() {
   });
 
   testWidgets('GridView.count control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new GridView.count(
       crossAxisCount: 4,
@@ -85,7 +85,7 @@ void main() {
   });
 
   testWidgets('GridView.extent control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new GridView.extent(
       maxCrossAxisExtent: 200.0,
@@ -128,7 +128,7 @@ void main() {
   });
 
   testWidgets('GridView large scroll jump', (WidgetTester tester) async {
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(
       new GridView.extent(
@@ -158,8 +158,8 @@ void main() {
     log.clear();
 
 
-    ScrollableState state = tester.state(find.byType(Scrollable));
-    ScrollPosition position = state.position;
+    final ScrollableState state = tester.state(find.byType(Scrollable));
+    final ScrollPosition position = state.position;
     position.jumpTo(3025.0);
 
     expect(log, isEmpty);
@@ -188,7 +188,7 @@ void main() {
   });
 
   testWidgets('GridView - change crossAxisCount', (WidgetTester tester) async {
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(
       new GridView(
@@ -247,7 +247,7 @@ void main() {
   });
 
   testWidgets('GridView - change maxChildCrossAxisExtent', (WidgetTester tester) async {
-    List<int> log = <int>[];
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(
       new GridView(

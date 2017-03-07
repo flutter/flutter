@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'basic_types.dart';
 import 'dart:ui' as ui show lerpDouble;
+
+import 'basic_types.dart';
 
 /// An offset that's expressed as a fraction of a Size.
 ///

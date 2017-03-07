@@ -54,10 +54,10 @@ class AnimatedModalBarrier extends AnimatedWidget {
     Key key,
     Animation<Color> color,
     this.dismissable: true
-  }) : super(key: key, animation: color);
+  }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
-  Animation<Color> get color => animation;
+  Animation<Color> get color => listenable;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   final bool dismissable;

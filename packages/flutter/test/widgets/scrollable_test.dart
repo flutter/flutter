@@ -24,13 +24,13 @@ Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
 const double dragOffset = 200.0;
 
 double getScrollOffset(WidgetTester tester) {
-  RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   return viewport.offset.pixels;
 }
 
 void resetScrollOffset(WidgetTester tester) {
-  RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  ScrollPosition position = viewport.offset;
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final ScrollPosition position = viewport.offset;
   position.jumpTo(0.0);
 }
 

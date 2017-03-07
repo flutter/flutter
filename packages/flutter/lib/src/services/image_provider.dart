@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-import 'dart:ui' show Size, Locale, hashValues;
-import 'dart:ui' as ui show Image;
 import 'dart:typed_data';
+import 'dart:ui' as ui show Image;
+import 'dart:ui' show Size, Locale, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/http.dart' as http;
@@ -92,7 +92,7 @@ class ImageConfiguration {
 
   @override
   String toString() {
-    StringBuffer result = new StringBuffer();
+    final StringBuffer result = new StringBuffer();
     result.write('ImageConfiguration(');
     bool hasArguments = false;
     if (bundle != null) {
@@ -340,7 +340,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (response == null || response.statusCode != 200)
       return null;
 
-    Uint8List bytes = response.bodyBytes;
+    final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
       return null;
 
@@ -402,7 +402,7 @@ class FileImage extends ImageProvider<FileImage> {
   Future<ImageInfo> _loadAsync(FileImage key) async {
     assert(key == this);
 
-    Uint8List bytes = await file.readAsBytes();
+    final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 

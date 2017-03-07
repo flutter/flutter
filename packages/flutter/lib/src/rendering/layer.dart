@@ -84,11 +84,11 @@ abstract class Layer {
     String result = '$prefixLineOne$this\n';
     final String childrenDescription = debugDescribeChildren(prefixOtherLines);
     final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     result += description.map((String description) => "$descriptionPrefix$description\n").join();
     if (childrenDescription == '') {
-      String prefix = prefixOtherLines.trimRight();
+      final String prefix = prefixOtherLines.trimRight();
       if (prefix != '')
         result += '$prefix\n';
     } else {
@@ -258,7 +258,7 @@ class ContainerLayer extends Layer {
   void removeAllChildren() {
     Layer child = _firstChild;
     while (child != null) {
-      Layer next = child.nextSibling;
+      final Layer next = child.nextSibling;
       child._previousSibling = null;
       child._nextSibling = null;
       child._parent = null;
@@ -519,5 +519,47 @@ class BackdropFilterLayer extends ContainerLayer {
     builder.pushBackdropFilter(filter);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
+  }
+}
+
+class PhysicalModelLayer extends ContainerLayer {
+  /// Creates a layer with a rounded-rectangular clip.
+  ///
+  /// The [clipRRect] property must be non-null before the compositing phase of
+  /// the pipeline.
+  PhysicalModelLayer({
+    @required this.clipRRect,
+    @required this.elevation,
+    @required this.color,
+  }) {
+    assert(clipRRect != null);
+    assert(elevation != null);
+    assert(color != null);
+  }
+
+  /// The rounded-rect to clip in the parent's coordinate system
+  RRect clipRRect;
+
+  /// The z-coordinate at which to place this physical object.
+  int elevation;
+
+  /// The background color.
+  Color color;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    builder.pushPhysicalModel(
+      rrect: clipRRect.shift(layerOffset),
+      elevation: elevation,
+      color: color,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('clipRRect: $clipRRect');
   }
 }

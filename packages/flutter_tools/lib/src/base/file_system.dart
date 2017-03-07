@@ -34,10 +34,14 @@ FileSystem get fs => context == null ? _kLocalFs : context[FileSystem];
 /// It is permissible for [location] to represent an existing non-empty
 /// directory as long as there is no collision with the `"file"` subdirectory.
 void enableRecordingFileSystem(String location) {
-  Directory dir = getRecordingSink(location, _kRecordingType);
-  RecordingFileSystem fileSystem = new RecordingFileSystem(
+  final FileSystem originalFileSystem = fs;
+  final Directory dir = getRecordingSink(location, _kRecordingType);
+  final RecordingFileSystem fileSystem = new RecordingFileSystem(
       delegate: _kLocalFs, destination: dir);
-  addShutdownHook(() => fileSystem.recording.flush());
+  addShutdownHook(() async {
+    await fileSystem.recording.flush();
+    context.setVariable(FileSystem, originalFileSystem);
+  }, ShutdownStage.SERIALIZE_RECORDING);
   context.setVariable(FileSystem, fileSystem);
 }
 
@@ -50,13 +54,13 @@ void enableRecordingFileSystem(String location) {
 /// been recorded (i.e. the result of having been previously passed to
 /// [enableRecordingFileSystem]), or a [ToolExit] will be thrown.
 void enableReplayFileSystem(String location) {
-  Directory dir = getReplaySource(location, _kRecordingType);
+  final Directory dir = getReplaySource(location, _kRecordingType);
   context.setVariable(FileSystem, new ReplayFileSystem(recording: dir));
 }
 
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
-  String dirPath = fs.path.dirname(filePath);
+  final String dirPath = fs.path.dirname(filePath);
   if (fs.isDirectorySync(dirPath))
     return;
   try {
@@ -77,9 +81,9 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
     destDir.createSync(recursive: true);
 
   srcDir.listSync().forEach((FileSystemEntity entity) {
-    String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
+    final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
-      File newFile = destDir.fileSystem.file(newPath);
+      final File newFile = destDir.fileSystem.file(newPath);
       newFile.writeAsBytesSync(entity.readAsBytesSync());
     } else if (entity is Directory) {
       copyDirectorySync(
@@ -101,7 +105,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir) {
 /// directory exists as an entity other than a directory, a [ToolExit] will
 /// also be thrown.
 Directory getRecordingSink(String dirname, String basename) {
-  String location = _kLocalFs.path.join(dirname, basename);
+  final String location = _kLocalFs.path.join(dirname, basename);
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
     case FileSystemEntityType.FILE:
     case FileSystemEntityType.LINK:
@@ -125,7 +129,7 @@ Directory getRecordingSink(String dirname, String basename) {
 ///
 /// If the target directory does not exist, a [ToolExit] will be thrown.
 Directory getReplaySource(String dirname, String basename) {
-  Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
+  final Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
   if (!dir.existsSync())
     throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
   return dir;

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 
 void main() {
   test('Path provider control test', () async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
     String response;
 
     PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
@@ -28,7 +28,7 @@ void main() {
     expect(log, equals(<String>['{"method":"PathProvider.getApplicationDocumentsDirectory","args":[]}']));
     expect(directory, isNull);
 
-    String fakePath = "/foo/bar/baz";
+    final String fakePath = "/foo/bar/baz";
     response = '{"path":"$fakePath"}';
 
     directory = await PathProvider.getTemporaryDirectory();

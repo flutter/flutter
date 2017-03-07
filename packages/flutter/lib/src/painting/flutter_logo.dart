@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/services.dart';
 
@@ -384,7 +384,7 @@ class _FlutterLogoPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
-    Size canvasSize = _config.margin.deflateSize(configuration.size);
+    final Size canvasSize = _config.margin.deflateSize(configuration.size);
     Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style

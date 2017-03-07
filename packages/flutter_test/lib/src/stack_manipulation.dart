@@ -13,19 +13,22 @@
 /// with the precise file and line number that called that function.
 int reportExpectCall(StackTrace stack, StringBuffer information) {
   final RegExp line0 = new RegExp(r'^#0 +fail \(.+\)$');
-  final RegExp line1 = new RegExp(r'^#1 +expect \(.+\)$');
+  final RegExp line1 = new RegExp(r'^#1 +_expect \(.+\)$');
   final RegExp line2 = new RegExp(r'^#2 +expect \(.+\)$');
-  final RegExp line3 = new RegExp(r'^#3 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
+  final RegExp line3 = new RegExp(r'^#3 +expect \(.+\)$');
+  final RegExp line4 = new RegExp(r'^#4 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
   final List<String> stackLines = stack.toString().split('\n');
   if (line0.firstMatch(stackLines[0]) != null &&
       line1.firstMatch(stackLines[1]) != null &&
-      line2.firstMatch(stackLines[2]) != null) {
-    Match expectMatch = line3.firstMatch(stackLines[3]);
+      line2.firstMatch(stackLines[2]) != null &&
+      line3.firstMatch(stackLines[3]) != null
+      ) {
+    final Match expectMatch = line4.firstMatch(stackLines[4]);
     assert(expectMatch != null);
     assert(expectMatch.groupCount == 2);
     information.writeln('This was caught by the test expectation on the following line:');
     information.writeln('  ${expectMatch.group(1)} line ${expectMatch.group(2)}');
-    return 3;
+    return 4;
   }
   return 0;
 }

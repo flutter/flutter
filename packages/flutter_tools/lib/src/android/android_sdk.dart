@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pub_semver/pub_semver.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import '../globals.dart';
 
 AndroidSdk get androidSdk => context[AndroidSdk];
@@ -36,6 +35,9 @@ const Map<String, int> _namedVersionMap = const <String, int> {
   'android-stable': 24,
 };
 
+/// The minimum Android SDK version we support.
+const int minimumAndroidSdkVersion = 25;
+
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
 /// will work for those users who have Android Platform Tools installed but
@@ -44,7 +46,7 @@ String getAdbPath([AndroidSdk existingSdk]) {
   if (existingSdk?.adbPath != null)
     return existingSdk.adbPath;
 
-  AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {
     return os.which('adb')?.path;
@@ -89,7 +91,7 @@ class AndroidSdk {
     if (aaptBin != null) {
       // Make sure we're using the aapt from the SDK.
       aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
-      String dir = aaptBin.parent.parent.parent.path;
+      final String dir = aaptBin.parent.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
@@ -98,7 +100,7 @@ class AndroidSdk {
     if (adbBin != null) {
       // Make sure we're using the adb from the SDK.
       adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
-      String dir = adbBin.parent.parent.path;
+      final String dir = adbBin.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
@@ -137,7 +139,7 @@ class AndroidSdk {
   void _init() {
     List<String> platforms = <String>[]; // android-22, ...
 
-    Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
+    final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
@@ -148,7 +150,7 @@ class AndroidSdk {
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
-    Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
+    final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()
@@ -188,7 +190,7 @@ class AndroidSdk {
       return new AndroidSdkVersion(
         this,
         platformVersionName: platformName,
-        buildToolsVersionName: buildToolsVersion.toString()
+        buildToolsVersion: buildToolsVersion
       );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
@@ -204,12 +206,13 @@ class AndroidSdk {
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion(this.sdk, {
     this.platformVersionName,
-    this.buildToolsVersionName
+    this.buildToolsVersion,
   });
 
   final AndroidSdk sdk;
   final String platformVersionName;
-  final String buildToolsVersionName;
+  final Version buildToolsVersion;
+  String get buildToolsVersionName => buildToolsVersion.toString();
 
   int get sdkLevel {
     if (_namedVersionMap.containsKey(platformVersionName))
@@ -229,6 +232,10 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   String get apksignerPath => getBuildToolsPath('apksigner');
 
   List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+    if (buildToolsVersion.major < minimumAndroidSdkVersion) {
+      return <String>['Minimum supported Android SDK version is $minimumAndroidSdkVersion '
+                      'but this system has ${buildToolsVersion.major}. Please upgrade.'];
+    }
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 

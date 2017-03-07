@@ -182,7 +182,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// millisecond), so as to not cause the regular frame callbacks to
   /// get delayed.
   void scheduleTask(VoidCallback task, Priority priority) {
-    bool isFirstTask = _taskQueue.isEmpty;
+    final bool isFirstTask = _taskQueue.isEmpty;
     _taskQueue.add(new _TaskEntry(task, priority.value));
     if (isFirstTask)
       _ensureEventLoopCallback();
@@ -209,7 +209,7 @@ abstract class SchedulerBinding extends BindingBase {
   void _runTasks() {
     if (_taskQueue.isEmpty)
       return;
-    _TaskEntry entry = _taskQueue.first;
+    final _TaskEntry entry = _taskQueue.first;
     // TODO(floitsch): for now we only expose the priority. It might
     // be interesting to provide more info (like, how long the task
     // ran the last time, or how long is left in this frame).
@@ -354,7 +354,7 @@ abstract class SchedulerBinding extends BindingBase {
               );
             }
             for (int id in callbacks.keys) {
-              _FrameCallbackEntry entry = callbacks[id];
+              final _FrameCallbackEntry entry = callbacks[id];
               information.writeln('── callback $id ──');
               FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
             }
@@ -533,7 +533,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// These mechanisms together combine to ensure that the durations we give
   /// during frame callbacks are monotonically increasing.
   Duration _adjustForEpoch(Duration rawTimeStamp) {
-    Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.ZERO : rawTimeStamp - _firstRawTimeStampInEpoch;
+    final Duration rawDurationSinceEpoch = _firstRawTimeStampInEpoch == null ? Duration.ZERO : rawTimeStamp - _firstRawTimeStampInEpoch;
     return new Duration(microseconds: (rawDurationSinceEpoch.inMicroseconds / timeDilation).round() + _epochStart.inMicroseconds);
   }
 
@@ -584,7 +584,7 @@ abstract class SchedulerBinding extends BindingBase {
     assert(() {
       _debugFrameNumber += 1;
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
-        StringBuffer frameTimeStampDescription = new StringBuffer();
+        final StringBuffer frameTimeStampDescription = new StringBuffer();
         if (rawTimeStamp != null) {
           _debugDescribeTimeStamp(_currentFrameTimeStamp, frameTimeStampDescription);
         } else {
@@ -612,7 +612,7 @@ abstract class SchedulerBinding extends BindingBase {
 
       // POST-FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.postFrameCallbacks;
-      List<FrameCallback> localPostFrameCallbacks =
+      final List<FrameCallback> localPostFrameCallbacks =
           new List<FrameCallback>.from(_postFrameCallbacks);
       _postFrameCallbacks.clear();
       for (FrameCallback callback in localPostFrameCallbacks)
@@ -636,7 +636,7 @@ abstract class SchedulerBinding extends BindingBase {
   void _invokeTransientFrameCallbacks(Duration timeStamp) {
     Timeline.startSync('Animate');
     assert(schedulerPhase == SchedulerPhase.transientCallbacks);
-    Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
+    final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
     _transientCallbacks = new Map<int, _FrameCallbackEntry>();
     callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
       if (!_removedIds.contains(id))
@@ -656,7 +656,7 @@ abstract class SchedulerBinding extends BindingBase {
     if (timeStamp.inSeconds > 0)
       buffer.write('${timeStamp.inSeconds - timeStamp.inMinutes * Duration.SECONDS_PER_MINUTE}s ');
     buffer.write('${timeStamp.inMilliseconds - timeStamp.inSeconds * Duration.MILLISECONDS_PER_SECOND}');
-    int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.MICROSECONDS_PER_MILLISECOND;
+    final int microseconds = timeStamp.inMicroseconds - timeStamp.inMilliseconds * Duration.MICROSECONDS_PER_MILLISECOND;
     if (microseconds > 0)
       buffer.write('.${microseconds.toString().padLeft(3, "0")}');
     buffer.write('ms');

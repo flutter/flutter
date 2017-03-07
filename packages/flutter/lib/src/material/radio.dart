@@ -112,7 +112,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    ThemeData themeData = Theme.of(context);
+    final ThemeData themeData = Theme.of(context);
     return new Semantics(
       checked: config.value == config.groupValue,
       child: new _RadioRenderObjectWidget(
@@ -192,11 +192,11 @@ class _RenderRadio extends RenderToggleable {
 
     paintRadialReaction(canvas, offset, const Point(kRadialReactionRadius, kRadialReactionRadius));
 
-    Point center = (offset & size).center;
-    Color radioColor = onChanged != null ? activeColor : inactiveColor;
+    final Point center = (offset & size).center;
+    final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = Color.lerp(inactiveColor, radioColor, position.value)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;

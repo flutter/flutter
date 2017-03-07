@@ -9,8 +9,8 @@ import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
 import 'flat_button.dart';
-import 'icon_theme_data.dart';
 import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'raised_button.dart';
@@ -100,7 +100,7 @@ class ButtonTheme extends InheritedWidget {
   /// ButtonTheme theme = ButtonTheme.of(context);
   /// ```
   static ButtonTheme of(BuildContext context) {
-    ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
+    final ButtonTheme result = context.inheritFromWidgetOfExactType(ButtonTheme);
     return result ?? const ButtonTheme();
   }
 

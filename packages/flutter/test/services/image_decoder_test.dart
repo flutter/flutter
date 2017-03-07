@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
@@ -18,7 +18,7 @@ const List<int> transparentImage = const <int>[
 
 void main() {
   test('Image decoder control test', () async {
-    ui.Image image = await decodeImageFromList(new Uint8List.fromList(transparentImage));
+    final ui.Image image = await decodeImageFromList(new Uint8List.fromList(transparentImage));
     expect(image, isNotNull);
     expect(image.width, 1);
     expect(image.height, 1);

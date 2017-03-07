@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
 import 'icon.dart';
-import 'icons.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'list_item.dart';
 import 'theme.dart';
 import 'theme_data.dart';

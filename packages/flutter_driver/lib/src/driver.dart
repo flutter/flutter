@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'package:file/file.dart' as f;
 import 'dart:io';
+
+import 'package:file/file.dart' as f;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
@@ -138,9 +139,9 @@ class FlutterDriver {
 
     // Connect to Dart VM servcies
     _log.info('Connecting to Flutter application at $dartVmServiceUrl');
-    VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
-    VMServiceClient client = connection.client;
-    VM vm = await client.getVM();
+    final VMServiceClientConnection connection = await vmServiceConnectFunction(dartVmServiceUrl);
+    final VMServiceClient client = connection.client;
+    final VM vm = await client.getVM();
     _log.trace('Looking for the isolate');
     VMIsolate isolate = await vm.isolates.first.loadRunnable();
 
@@ -161,7 +162,7 @@ class FlutterDriver {
       isolate = await vm.isolates.first.loadRunnable();
     }
 
-    FlutterDriver driver = new FlutterDriver.connectedTo(
+    final FlutterDriver driver = new FlutterDriver.connectedTo(
         client, connection.peer, isolate,
         printCommunication: printCommunication,
         logCommunicationToFile: logCommunicationToFile
@@ -202,8 +203,8 @@ class FlutterDriver {
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      Future<dynamic> whenResumed = resumeLeniently();
-      Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
+      final Future<dynamic> whenResumed = resumeLeniently();
+      final Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
@@ -211,7 +212,7 @@ class FlutterDriver {
       ]);
       await whenResumed;
       _log.trace('Waiting for service extension');
-      dynamic signal = await whenServiceExtensionReady;
+      final dynamic signal = await whenServiceExtensionReady;
       if (signal == 'timeout') {
         throw new DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
@@ -238,7 +239,7 @@ class FlutterDriver {
     }
 
     // At this point the service extension must be installed. Verify it.
-    Health health = await driver.checkHealth();
+    final Health health = await driver.checkHealth();
     if (health.status != HealthStatus.ok) {
       await client.close();
       throw new DriverError('Flutter application health check failed.');
@@ -264,7 +265,7 @@ class FlutterDriver {
   Future<Map<String, dynamic>> _sendCommand(Command command) async {
     Map<String, dynamic> response;
     try {
-      Map<String, String> serialized = command.serialize();
+      final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
       response = await _appIsolate
           .invokeExtension(_kFlutterExtensionMethod, serialized)
@@ -292,7 +293,7 @@ class FlutterDriver {
     if (_printCommunication)
       _log.info(message);
     if (_logCommunicationToFile) {
-      f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
+      final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
       file.writeAsStringSync('${new DateTime.now()} $message\n', mode: f.FileMode.APPEND, flush: true);
     }
@@ -328,13 +329,22 @@ class FlutterDriver {
   /// This command invokes the `onSubmitted` handler of the `Input` widget and
   /// the returns the submitted text value.
   Future<String> submitInputText(SerializableFinder finder) async {
-    Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder));
+    final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder));
     return json['text'];
   }
 
   /// Waits until [finder] locates the target.
   Future<Null> waitFor(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new WaitFor(finder, timeout: timeout));
+    return null;
+  }
+
+  /// Waits until there are no more transient callbacks in the queue.
+  ///
+  /// Use this method when you need to wait for the moment when the application
+  /// becomes "stable", for example, prior to taking a [screenshot].
+  Future<Null> waitUntilNoTransientCallbacks({Duration timeout}) async {
+    await _sendCommand(new WaitUntilNoTransientCallbacks(timeout: timeout));
     return null;
   }
 
@@ -368,7 +378,7 @@ class FlutterDriver {
 
   /// Take a screenshot.  The image will be returned as a PNG.
   Future<List<int>> screenshot() async {
-    Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
     return BASE64.decode(result['screenshot']);
   }
 
@@ -392,13 +402,13 @@ class FlutterDriver {
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   Future<List<Map<String, dynamic>>> getVmFlags() async {
-    Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
     return result['flags'];
   }
 
   /// Starts recording performance traces.
   Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
-    assert(streams != null && streams.length > 0);
+    assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)
@@ -473,7 +483,6 @@ class FlutterDriver {
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  // TODO(yjbanov): cleanup object references
   Future<Null> close() async {
     // Don't leak vm_service_client-specific objects, if any
     await _serviceClient.close();
@@ -516,7 +525,7 @@ void restoreVmServiceConnectFunction() {
 ///
 /// Times out after 30 seconds.
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
-  Stopwatch timer = new Stopwatch()..start();
+  final Stopwatch timer = new Stopwatch()..start();
 
   Future<VMServiceClientConnection> attemptConnection() async {
     Uri uri = Uri.parse(url);
