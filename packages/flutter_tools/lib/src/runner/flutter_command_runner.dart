@@ -226,7 +226,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
-    String flutterRoot = globalResults['flutter-root'] ?? _defaultFlutterRoot;
+    final String flutterRoot = globalResults['flutter-root'] ?? _defaultFlutterRoot;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
