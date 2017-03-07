@@ -46,6 +46,12 @@ DART_SDK_PATH="$FLUTTER_ROOT/bin/cache/dart-sdk"
 DART="$DART_SDK_PATH/bin/dart"
 PUB="$DART_SDK_PATH/bin/pub"
 
+# Test if running as superuser
+if [[ "$EUID" == "0" ]]; then
+  echo "Error: Flutter does not support running as root."
+  exit 1
+fi
+
 # Test if Git is available on the Host
 if ! hash git 2>/dev/null; then
   echo "Error: Unable to find git in your PATH."
