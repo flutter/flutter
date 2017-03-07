@@ -303,7 +303,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   static dynamic _readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
-      throw throw const FormatException('Message corrupted');
+      throw const FormatException('Message corrupted');
     dynamic result;
     switch (buffer.getUint8()) {
       case _kNull:
