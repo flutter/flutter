@@ -40,6 +40,8 @@ class RaisedButton extends StatelessWidget {
     Key key,
     @required this.onPressed,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.disabledColor,
     this.elevation: 2,
     this.highlightElevation: 8,
@@ -64,6 +66,16 @@ class RaisedButton extends StatelessWidget {
   ///  ),
   /// ```
   final Color color;
+
+  /// The highlight color of the button.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
+
+  /// The splash color of the button.
+  ///
+  /// Defaults to the splash color from the [Theme].
+  final Color splashColor;
 
   /// The color of the button when the button is disabled. Buttons are disabled
   /// by default. To enable a button, set its [onPressed] property to a non-null
@@ -124,11 +136,21 @@ class RaisedButton extends StatelessWidget {
     }
   }
 
+  Color _getHighlightColor(BuildContext context) {
+    return highlightColor ?? Theme.of(context).highlightColor;
+  }
+
+  Color _getSplashColor(BuildContext context) {
+    return splashColor ?? Theme.of(context).splashColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new MaterialButton(
       onPressed: onPressed,
       color: _getColor(context),
+      highlightColor: _getHighlightColor(context),
+      splashColor: _getSplashColor(context),
       elevation: enabled ? elevation : disabledElevation,
       highlightElevation: enabled ? highlightElevation : disabledElevation,
       colorBrightness: colorBrightness,

@@ -53,6 +53,8 @@ class FlatButton extends StatelessWidget {
     this.textColor,
     this.disabledTextColor,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.disabledColor,
     this.textTheme,
     this.colorBrightness,
@@ -75,6 +77,16 @@ class FlatButton extends StatelessWidget {
   ///
   /// Defaults to a color derived from the [Theme].
   final Color disabledTextColor;
+
+  /// The highlight color of the button.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
+
+  /// The splash color of the button.
+  ///
+  /// Defaults to the splash color from the [Theme].
+  final Color splashColor;
 
   /// The color of the button, as printed on the [Material]. Defaults to null,
   /// meaning that the color is automatically derived from the [Theme].
@@ -114,12 +126,22 @@ class FlatButton extends StatelessWidget {
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
 
+  Color _getHighlightColor(BuildContext context) {
+    return highlightColor ?? Theme.of(context).highlightColor;
+  }
+
+  Color _getSplashColor(BuildContext context) {
+    return splashColor ?? Theme.of(context).splashColor;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new MaterialButton(
       onPressed: onPressed,
       textColor: enabled ? textColor : disabledTextColor,
       color: enabled ? color : disabledColor,
+      highlightColor: _getHighlightColor(context),
+      splashColor: _getSplashColor(context),
       textTheme: textTheme,
       colorBrightness: colorBrightness,
       child: child
