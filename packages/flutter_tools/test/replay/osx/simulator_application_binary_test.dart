@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/commands/run.dart';
-import 'package:path/path.dart' as p;
+import 'package:file/file.dart';
+import 'package:file/local.dart';
 
 import '../common.dart';
 
 void main() {
   testReplay('runsWithoutError', () async {
-    final String replay = p.join(replayBase, 'osx', 'simulator_application_binary');
+    final FileSystem fs = const LocalFileSystem();
+    final String replay = fs.path.join(replayBase, 'osx', 'simulator_application_binary');
     expectProcessExits(
       new RunCommand(),
       args: <String>[
