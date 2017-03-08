@@ -7,9 +7,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
+import 'package:http/http.dart' as http;
 
 import 'platform_messages.dart';
+import 'http_client.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -84,15 +85,18 @@ abstract class AssetBundle {
 class NetworkAssetBundle extends AssetBundle {
   /// Creates an network asset bundle that resolves asset keys as URLs relative
   /// to the given base URL.
-  NetworkAssetBundle(Uri baseUrl) : _baseUrl = baseUrl;
+  NetworkAssetBundle(Uri baseUrl)
+    : _baseUrl = baseUrl,
+      _httpClient = createHttpClient();
 
   final Uri _baseUrl;
+  final http.Client _httpClient;
 
   String _urlFromKey(String key) => _baseUrl.resolve(key).toString();
 
   @override
   Future<ByteData> load(String key) async {
-    final http.Response response = await http.get(_urlFromKey(key));
+    final http.Response response = await _httpClient.get(_urlFromKey(key));
     if (response.statusCode == 200)
       return null;
     return response.bodyBytes.buffer.asByteData();
@@ -100,7 +104,7 @@ class NetworkAssetBundle extends AssetBundle {
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
-    final http.Response response = await http.get(_urlFromKey(key));
+    final http.Response response = await _httpClient.get(_urlFromKey(key));
     return response.statusCode == 200 ? response.body : null;
   }
 

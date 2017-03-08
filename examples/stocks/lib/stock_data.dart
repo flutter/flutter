@@ -10,7 +10,8 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/http.dart' as http;
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 final math.Random _rng = new math.Random();
 
@@ -60,19 +61,22 @@ String _urlToFetch(int chunk) {
 }
 
 class StockDataFetcher {
-  int _nextChunk = 0;
+  StockDataFetcher(this.callback) {
+    _httpClient = createHttpClient();
+    _fetchNextChunk();
+  }
+
   final StockDataCallback callback;
+  http.Client _httpClient;
 
   static bool actuallyFetchData = true;
 
-  StockDataFetcher(this.callback) {
-    _fetchNextChunk();
-  }
+  int _nextChunk = 0;
 
   void _fetchNextChunk() {
     if (!actuallyFetchData)
       return;
-    http.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
+    _httpClient.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
       final String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
