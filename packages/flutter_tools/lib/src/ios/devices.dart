@@ -20,9 +20,9 @@ import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
-const String _ideviceinstallerInstructions =
+const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller.\n'
-    'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
+    'To install, run \'brew install ideviceinstaller\'.';
 
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
@@ -124,7 +124,7 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _ideviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
