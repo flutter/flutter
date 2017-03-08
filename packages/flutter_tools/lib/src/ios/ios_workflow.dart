@@ -172,7 +172,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       podStatus = ValidationType.missing;
       messages.add(new ValidationMessage.error(
         'CocoaPods not installed; this is used for iOS development.\n'
-        'Install by running: \'sudo gem install cocoapods\''
+        'Install by running: \'brew install cocoapods\''
       ));
     }
 
