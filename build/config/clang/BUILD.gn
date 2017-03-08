@@ -12,5 +12,6 @@ config("extra_warnings") {
 
     # Warns when a const char[] is converted to bool.
     "-Wstring-conversion",
+    "-Wthread-safety",
   ]
 }
