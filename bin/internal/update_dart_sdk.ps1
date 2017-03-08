@@ -44,7 +44,16 @@ Import-Module BitsTransfer
 Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 
 Write-Host "Unzipping Dart SDK..."
-Expand-Archive $dartSdkZip -DestinationPath $cachePath
+if (Get-Command Expand-Archive -errorAction SilentlyContinue) {
+    # Expand-Archive requires PowerShell 5 or newer
+    Expand-Archive $dartSdkZip -DestinationPath $cachePath
+} else {
+    $shell = New-Object -com shell.application
+    $zip = $shell.NameSpace($dartSdkZip)
+    foreach($item in $zip.items()) {
+        $shell.Namespace($cachePath).copyhere($item)
+    }
+}
 
 Remove-Item $dartSdkZip
 $dartSdkVersion | Out-File $dartSdkStampPath -Encoding ASCII
