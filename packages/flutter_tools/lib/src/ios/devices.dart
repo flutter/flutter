@@ -434,7 +434,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 }
 
 class _IOSDevicePortForwarder extends DevicePortForwarder {
-  _IOSDevicePortForwarder(this.device) : _forwardedPorts = new List<ForwardedPort>();
+  _IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
 
   final IOSDevice device;
 

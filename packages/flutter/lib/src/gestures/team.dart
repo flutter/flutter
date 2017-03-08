@@ -90,7 +90,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// To assign a gesture recognizer to a team, see
 /// [OneSequenceGestureRecognizer.team].
 class GestureArenaTeam {
-  final Map<int, _CombiningGestureArenaMember> _combiners = new Map<int, _CombiningGestureArenaMember>();
+  final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
 
   /// Adds a new member to the arena on behalf of this team.
   ///

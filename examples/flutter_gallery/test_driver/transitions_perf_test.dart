@@ -82,7 +82,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
       final String routeName = startEvent['args']['to'];
-      durations[routeName] ??= new List<int>();
+      durations[routeName] ??= <int>[];
       durations[routeName].add(event['dur']);
       startEvent = null;
     }

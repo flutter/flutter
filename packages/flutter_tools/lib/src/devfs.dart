@@ -330,7 +330,7 @@ class DevFS {
   final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
-      new List<Future<Map<String, dynamic>>>();
+      <Future<Map<String, dynamic>>>[];
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -376,7 +376,7 @@ class DevFS {
     // Handle deletions.
     printTrace('Scanning for deleted files');
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-    final List<Uri> toRemove = new List<Uri>();
+    final List<Uri> toRemove = <Uri>[];
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =

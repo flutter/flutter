@@ -24,7 +24,7 @@ const String _kCopyTemplateExtension = '.copy.tmpl';
 /// extensions.
 class Template {
   Template(Directory templateSource, Directory baseDir) {
-    _templateFilePaths = new Map<String, String>();
+    _templateFilePaths = <String, String>{};
 
     if (!templateSource.existsSync()) {
       return;

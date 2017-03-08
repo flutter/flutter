@@ -167,11 +167,11 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// constructor.
   const GlobalKey.constructor() : super._();
 
-  static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
-  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
+  static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
+  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = <GlobalKey, Set<GlobalKeyRemoveListener>>{};
   static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
   static final Set<Element> _debugIllFatedElements = new HashSet<Element>();
-  static final Map<GlobalKey, Element> _debugReservations = new Map<GlobalKey, Element>();
+  static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
 
   void _register(Element element) {
     assert(() {
@@ -3421,7 +3421,7 @@ class InheritedElement extends ProxyElement {
     if (incomingWidgets != null)
       _inheritedWidgets = new Map<Type, InheritedElement>.from(incomingWidgets);
     else
-      _inheritedWidgets = new Map<Type, InheritedElement>();
+      _inheritedWidgets = <Type, InheritedElement>{};
     _inheritedWidgets[widget.runtimeType] = this;
   }
 
@@ -3789,7 +3789,7 @@ abstract class RenderObjectElement extends BuildableElement {
     final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
     Map<Key, Element> oldKeyedChildren;
     if (haveOldChildren) {
-      oldKeyedChildren = new Map<Key, Element>();
+      oldKeyedChildren = <Key, Element>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final Element oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
         assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);

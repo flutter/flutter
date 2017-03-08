@@ -358,7 +358,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         break;
       case _kMap:
         final int length = _readSize(buffer);
-        result = new Map<dynamic, dynamic>();
+        result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++) {
           result[_readValue(buffer)] = _readValue(buffer);
         }
@@ -418,4 +418,3 @@ class StandardMethodCodec implements MethodCodec {
       throw new FormatException('Invalid envelope');
   }
 }
-

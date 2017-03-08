@@ -63,10 +63,10 @@ class _LeastSquaresVelocityTrackerStrategy extends _VelocityTrackerStrategy {
   @override
   _Estimate getEstimate() {
     // Iterate over movement samples in reverse time order and collect samples.
-    final List<double> x = new List<double>();
-    final List<double> y = new List<double>();
-    final List<double> w = new List<double>();
-    final List<double> time = new List<double>();
+    final List<double> x = <double>[];
+    final List<double> y = <double>[];
+    final List<double> w = <double>[];
+    final List<double> time = <double>[];
     int m = 0;
     int index = _index;
 

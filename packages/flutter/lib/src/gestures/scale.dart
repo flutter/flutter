@@ -115,7 +115,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double _initialSpan;
   double _currentSpan;
   Map<int, Point> _pointerLocations;
-  Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
+  Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -127,7 +127,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
-      _pointerLocations = new Map<int, Point>();
+      _pointerLocations = <int, Point>{};
     }
   }
 
