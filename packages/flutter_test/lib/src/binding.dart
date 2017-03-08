@@ -512,26 +512,25 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     try {
       debugBuildingDirtyElements = true;
       buildOwner.buildScope(renderViewElement);
-      if (_phase == EnginePhase.build)
-        return;
-      assert(renderView != null);
-      pipelineOwner.flushLayout();
-      if (_phase == EnginePhase.layout)
-        return;
-      pipelineOwner.flushCompositingBits();
-      if (_phase == EnginePhase.compositingBits)
-        return;
-      pipelineOwner.flushPaint();
-      if (_phase == EnginePhase.paint)
-        return;
-      renderView.compositeFrame(); // this sends the bits to the GPU
-      if (_phase == EnginePhase.composite)
-        return;
-      pipelineOwner.flushSemantics();
-      if (_phase == EnginePhase.flushSemantics)
-        return;
-    } finally {
+      if (_phase != EnginePhase.build) {
+        assert(renderView != null);
+        pipelineOwner.flushLayout();
+        if (_phase != EnginePhase.layout) {
+          pipelineOwner.flushCompositingBits();
+          if (_phase != EnginePhase.compositingBits) {
+            pipelineOwner.flushPaint();
+            if (_phase != EnginePhase.paint) {
+              renderView.compositeFrame(); // this sends the bits to the GPU
+              if (_phase != EnginePhase.composite) {
+                pipelineOwner.flushSemantics();
+                assert(_phase == EnginePhase.flushSemantics || _phase == EnginePhase.sendSemanticsTree);
+              }
+            }
+          }
+        }
+      }
       buildOwner.finalizeTree();
+    } finally {
       debugBuildingDirtyElements = false;
     }
   }

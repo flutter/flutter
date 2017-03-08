@@ -22,7 +22,7 @@ class StatefulLeaf extends StatefulWidget {
 }
 
 class StatefulLeafState extends State<StatefulLeaf> {
-  void test() { setState(() { }); }
+  void markNeedsBuild() { setState(() { }); }
 
   @override
   Widget build(BuildContext context) => new Text('leaf');
@@ -38,7 +38,7 @@ class KeyedWrapper extends StatelessWidget {
     return new Container(
       key: key1,
       child: new StatefulLeaf(
-        key: key2
+        key: key2,
       )
     );
   }
@@ -48,16 +48,16 @@ Widget builder() {
   return new Column(
     children: <Widget>[
       new KeyedWrapper(items[1].key1, items[1].key2),
-      new KeyedWrapper(items[0].key1, items[0].key2)
-    ]
+      new KeyedWrapper(items[0].key1, items[0].key2),
+    ],
   );
 }
 
 void main() {
-  testWidgets('duplicate key smoke test', (WidgetTester tester) async {
+  testWidgets('moving subtrees with global keys - smoketest', (WidgetTester tester) async {
     await tester.pumpWidget(builder());
     final StatefulLeafState leaf = tester.firstState(find.byType(StatefulLeaf));
-    leaf.test();
+    leaf.markNeedsBuild();
     await tester.pump();
     final Item lastItem = items[1];
     items.remove(lastItem);
