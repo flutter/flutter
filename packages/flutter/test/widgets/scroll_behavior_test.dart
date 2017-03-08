@@ -25,7 +25,7 @@ void main() {
   testWidgets('Inherited ScrollConfiguration changed', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey(debugLabel: 'scrollable');
     TestScrollBehavior behavior;
-    ScrollPosition position;
+    ScrollIndependentPosition position;
 
     final Widget scrollView = new SingleChildScrollView(
       key: key,

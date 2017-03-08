@@ -6,10 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
-class TestScrollPosition extends ScrollPosition {
+class TestScrollPosition extends ScrollIndependentPosition {
   TestScrollPosition({
     ScrollPhysics physics,
-    AbstractScrollState state,
+    ScrollWidgetInterface state,
     ScrollPosition oldPosition,
   }) : _pixels = 100.0, super(
     physics: physics,
@@ -88,7 +88,7 @@ class TestScrollPhysics extends ScrollPhysics {
 
 class TestScrollController extends ScrollController {
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
     return new TestScrollPosition(physics: physics, state: state, oldPosition: oldPosition);
   }
 }

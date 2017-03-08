@@ -13,6 +13,9 @@ import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'scroll_controller.dart';
+import 'scroll_independent_position.dart';
+import 'scroll_interfaces.dart';
+import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
@@ -70,7 +73,11 @@ class PageController extends ScrollController {
     @required Curve curve,
   }) {
     final _PagePosition position = this.position;
-    return position.animateTo(position.getPixelsFromPage(page.toDouble()), duration: duration, curve: curve);
+    return position.animateTo(
+      position.getPixelsFromPage(page.toDouble()),
+      duration: duration,
+      curve: curve,
+    );
   }
 
   /// Changes which page is displayed in the controlled [PageView].
@@ -105,7 +112,7 @@ class PageController extends ScrollController {
   }
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
     return new _PagePosition(
       physics: physics,
       state: state,
@@ -139,10 +146,10 @@ class PageMetrics extends ScrollMetrics {
   final double page;
 }
 
-class _PagePosition extends ScrollPosition {
+class _PagePosition extends ScrollIndependentPosition {
   _PagePosition({
     ScrollPhysics physics,
-    AbstractScrollState state,
+    ScrollWidgetInterface state,
     this.initialPage: 0,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
@@ -167,7 +174,7 @@ class _PagePosition extends ScrollPosition {
     final double oldPage = page;
     _viewportFraction = value;
     if (oldPage != null)
-      correctPixels(getPixelsFromPage(oldPage));
+      forcePixels(getPixelsFromPage(oldPage));
   }
 
   double getPageFromPixels(double pixels, double viewportDimension) {
@@ -235,7 +242,7 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollPosition position, double velocity) {
+  Simulation createBallisticSimulation(ScrollPositionReadInterface position, double velocity) {
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||
@@ -243,7 +250,9 @@ class PageScrollPhysics extends ScrollPhysics {
       return super.createBallisticSimulation(position, velocity);
     final Tolerance tolerance = this.tolerance;
     final double target = _getTargetPixels(position, tolerance, velocity);
-    return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+    if (target != position.pixels)
+      return new ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+    return null;
   }
 }
 
@@ -421,10 +430,10 @@ class _PageViewState extends State<PageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: widget.physics == null ? _kPagePhysics : _kPagePhysics.applyTo(widget.physics),
-        viewportBuilder: (BuildContext context, ViewportOffset offset) {
+        viewportBuilder: (BuildContext context, ViewportOffset position) {
           return new Viewport(
             axisDirection: axisDirection,
-            offset: offset,
+            offset: position,
             slivers: <Widget>[
               new SliverFillViewport(
                 viewportFraction: widget.controller.viewportFraction,

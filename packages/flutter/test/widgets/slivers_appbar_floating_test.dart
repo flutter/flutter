@@ -162,7 +162,7 @@ void main() {
         ],
       ),
     );
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollIndependentPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 600.0), false);

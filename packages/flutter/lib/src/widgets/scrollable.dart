@@ -15,7 +15,10 @@ import 'gesture_detector.dart';
 import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
+import 'scroll_interfaces.dart';
+import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
@@ -69,7 +72,8 @@ class Scrollable extends StatefulWidget {
     return widget?.scrollable;
   }
 
-  /// Scrolls the closest enclosing scrollable to make the given context visible.
+  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// given context visible.
   static Future<Null> ensureVisible(BuildContext context, {
     double alignment: 0.0,
     Duration duration: Duration.ZERO,
@@ -92,7 +96,7 @@ class Scrollable extends StatefulWidget {
     if (futures.isEmpty || duration == Duration.ZERO)
       return new Future<Null>.value();
     if (futures.length == 1)
-      return futures.first;
+      return futures.single;
     return Future.wait<Null>(futures);
   }
 }
@@ -130,15 +134,20 @@ class _ScrollableScope extends InheritedWidget {
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
 class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
-    implements AbstractScrollState {
-  /// The controller for this [Scrollable] widget's viewport position.
+    implements ScrollWidgetInterface {
+  /// The manager for this [Scrollable] widget's viewport position.
   ///
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
-  /// provide it with custom [ScrollPhysics] that creates the appropriate
-  /// [ScrollPosition] controller in its [ScrollPhysics.createScrollPosition]
-  /// method.
+  /// provide it with custom [ScrollController] that creates the appropriate
+  /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  @override
+  AxisDirection get axisDirection => widget.axisDirection;
+
+  @override
+  ScrollMetrics getMetrics() => position.getMetrics();
 
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
@@ -278,7 +287,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   // TOUCH HANDLERS
 
-  DragScrollActivity _drag;
+  ScrollDragInterface _drag;
 
   bool get _reverseDirection {
     assert(widget.axisDirection != null);
@@ -300,24 +309,22 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
-    _drag = position.beginDragActivity(details);
+    _drag = position.beginDrag(details, _handleDragCanceled);
     assert(_drag != null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    // _drag might be null if the drag activity ended and called didEndDrag.
+    // _drag might be null if the drag activity ended and called _handleDragCanceled.
     _drag?.update(details, reverse: _reverseDirection);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    // _drag might be null if the drag activity ended and called didEndDrag.
+    // _drag might be null if the drag activity ended and called _handleDragCanceled.
     _drag?.end(details, reverse: _reverseDirection);
     assert(_drag == null);
   }
 
-  @override
-  @protected
-  void didEndDrag() {
+  void _handleDragCanceled() {
     _drag = null;
   }
 

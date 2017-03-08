@@ -9,59 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
-import 'scrollable.dart' show Scrollable, ScrollableState;
-
-/// A description of a [Scrollable]'s contents, useful for modelling the state
-/// of the viewport, for example by a [Scrollbar].
-///
-/// The units used by the [extentBefore], [extentInside], and [extentAfter] are
-/// not defined, but must be consistent. For example, they could be in pixels,
-/// or in percentages, or in units of the [extentInside] (in the latter case,
-/// [extentInside] would always be 1.0).
-@immutable
-class ScrollMetrics {
-  /// Create a description of the metrics of a [Scrollable]'s contents.
-  ///
-  /// The three arguments must be present, non-null, finite, and non-negative.
-  const ScrollMetrics({
-    @required this.extentBefore,
-    @required this.extentInside,
-    @required this.extentAfter,
-    @required this.viewportDimension,
-  });
-
-  /// Creates a [ScrollMetrics] that has the same properties as the given
-  /// [ScrollMetrics].
-  ScrollMetrics.clone(ScrollMetrics other)
-    : extentBefore = other.extentBefore,
-      extentInside = other.extentInside,
-      extentAfter = other.extentAfter,
-      viewportDimension = other.viewportDimension;
-
-  /// The quantity of content conceptually "above" the currently visible content
-  /// of the viewport in the scrollable. This is the content above the content
-  /// described by [extentInside].
-  final double extentBefore;
-
-  /// The quantity of visible content.
-  ///
-  /// If [extentBefore] and [extentAfter] are non-zero, then this is typically
-  /// the height of the viewport. It could be less if there is less content
-  /// visible than the size of the viewport.
-  final double extentInside;
-
-  /// The quantity of content conceptually "below" the currently visible content
-  /// of the viewport in the scrollable. This is the content below the content
-  /// described by [extentInside].
-  final double extentAfter;
-
-  final double viewportDimension;
-
-  @override
-  String toString() {
-    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)}})';
-  }
-}
+import 'scroll_interfaces.dart';
+import 'scroll_metrics.dart';
 
 /// Mixin for [Notification]s that track how many [RenderAbstractViewport] they
 /// have bubbled through.
@@ -95,9 +44,9 @@ abstract class ViewportNotificationMixin extends Notification {
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Creates a notification about scrolling.
   ScrollNotification({
-    @required ScrollableState scrollable,
-  }) : axisDirection = scrollable.widget.axisDirection,
-       metrics = scrollable.position.getMetrics(),
+    @required ScrollWidgetInterface scrollable,
+  }) : axisDirection = scrollable.axisDirection,
+       metrics = scrollable.getMetrics(),
        context = scrollable.context;
 
   /// The direction that positive scroll offsets indicate.
@@ -123,7 +72,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
 
 class ScrollStartNotification extends ScrollNotification {
   ScrollStartNotification({
-    @required ScrollableState scrollable,
+    @required ScrollWidgetInterface scrollable,
     this.dragDetails,
   }) : super(scrollable: scrollable);
 
@@ -139,7 +88,7 @@ class ScrollStartNotification extends ScrollNotification {
 
 class ScrollUpdateNotification extends ScrollNotification {
   ScrollUpdateNotification({
-    @required ScrollableState scrollable,
+    @required ScrollWidgetInterface scrollable,
     this.dragDetails,
     this.scrollDelta,
   }) : super(scrollable: scrollable);
@@ -160,7 +109,7 @@ class ScrollUpdateNotification extends ScrollNotification {
 
 class OverscrollNotification extends ScrollNotification {
   OverscrollNotification({
-    @required ScrollableState scrollable,
+    @required ScrollWidgetInterface scrollable,
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
@@ -199,7 +148,7 @@ class OverscrollNotification extends ScrollNotification {
 
 class ScrollEndNotification extends ScrollNotification {
   ScrollEndNotification({
-    @required ScrollableState scrollable,
+    @required ScrollWidgetInterface scrollable,
     this.dragDetails,
   }) : super(scrollable: scrollable);
 
@@ -215,7 +164,7 @@ class ScrollEndNotification extends ScrollNotification {
 
 class UserScrollNotification extends ScrollNotification {
   UserScrollNotification({
-    @required ScrollableState scrollable,
+    @required ScrollWidgetInterface scrollable,
     this.direction,
   }) : super(scrollable: scrollable);
 

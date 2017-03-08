@@ -35,6 +35,6 @@ class PrimaryScrollController extends InheritedWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${controller ?? 'no controller'}');
+    description.add('${controller ?? "no controller"}');
   }
 }
