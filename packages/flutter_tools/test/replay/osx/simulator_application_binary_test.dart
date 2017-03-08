@@ -2,17 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/commands/run.dart';
+import 'package:path/path.dart' as p;
+
 import '../common.dart';
 
 void main() {
   testReplay('runsWithoutError', () async {
-    expectProcessExits(<String>[
-      'run',
-      '--no-hot',
-      '--no-resident',
-      '--device-id=iPhone',
-      '--use-application-binary=hello_flutter.ipa',
-      '--replay-from=test/replay/osx/simulator_application_binary',
-    ]);
+    final String replay = p.join(replayBase, 'osx', 'simulator_application_binary');
+    expectProcessExits(
+      new RunCommand(),
+      args: <String>[
+        '--no-hot',
+        '--no-resident',
+        '--device-id=iPhone',
+        '--use-application-binary=hello_flutter.ipa',
+        '--replay-from=$replay',
+      ],
+    );
   });
 }

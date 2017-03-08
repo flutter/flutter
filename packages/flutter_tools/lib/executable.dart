@@ -18,7 +18,6 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/os.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
@@ -130,10 +129,8 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
-    context.putIfAbsent(Usage, () => new Usage());
 
     // Initialize the system locale.
     await intl.findSystemLocale();
@@ -206,7 +203,7 @@ Future<int> _handleToolError(
       await CrashReportSender.instance.sendReport(
         error: error,
         stackTrace: chain,
-        flutterVersion: getFlutterVersion(),
+        getFlutterVersion: getFlutterVersion,
       );
       try {
         final File file = await _createLocalCrashReport(args, error, chain);

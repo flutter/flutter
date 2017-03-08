@@ -8,29 +8,29 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 25
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 27
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
     "timestamp": 30
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 31
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 34
   },
   {
     "type": "invoke",
@@ -42,7 +42,7 @@
     "object": "__fs__",
     "result": "RecordingFile@1",
     "error": null,
-    "timestamp": 30
+    "timestamp": 34
   },
   {
     "type": "invoke",
@@ -54,7 +54,7 @@
     "object": "RecordingFile@1",
     "result": "RecordingRandomAccessFile@2",
     "error": null,
-    "timestamp": 36
+    "timestamp": 40
   },
   {
     "type": "invoke",
@@ -64,7 +64,7 @@
     "object": "RecordingRandomAccessFile@2",
     "result": "RecordingRandomAccessFile@2",
     "error": null,
-    "timestamp": 40
+    "timestamp": 45
   },
   {
     "type": "get",
@@ -75,7 +75,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 43
+    "timestamp": 47
   },
   {
     "type": "get",
@@ -86,7 +86,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 43
+    "timestamp": 47
   },
   {
     "type": "get",
@@ -94,7 +94,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@3",
     "error": null,
-    "timestamp": 43
+    "timestamp": 47
   },
   {
     "type": "get",
@@ -102,7 +102,7 @@
     "object": "RecordingDirectory@3",
     "result": "/Users/flutter/project/flutter/flutter/examples/hello_world",
     "error": null,
-    "timestamp": 44
+    "timestamp": 49
   },
   {
     "type": "get",
@@ -113,7 +113,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 45
+    "timestamp": 49
   },
   {
     "type": "invoke",
@@ -125,176 +125,7 @@
     "object": "__fs__",
     "result": "NOT_FOUND",
     "error": null,
-    "timestamp": 45
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 45
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 46
-  },
-  {
-    "type": "invoke",
-    "method": "typeSync",
-    "positionalArguments": [
-      "/Users/flutter/project/flutter/flutter/examples/bin/flutter"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "NOT_FOUND",
-    "error": null,
-    "timestamp": 46
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 46
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "invoke",
-    "method": "typeSync",
-    "positionalArguments": [
-      "/Users/flutter/project/flutter/flutter/bin/flutter"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "FILE",
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "invoke",
-    "method": "typeSync",
-    "positionalArguments": [
-      "/Users/flutter/project/flutter/flutter/bin/cache/engine.stamp"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "FILE",
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "invoke",
-    "method": "directory",
-    "positionalArguments": [
-      "/Users/flutter/project/flutter/flutter"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "RecordingDirectory@4",
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "invoke",
-    "method": "resolveSymbolicLinksSync",
-    "positionalArguments": [],
-    "namedArguments": {},
-    "object": "RecordingDirectory@4",
-    "result": "/Users/flutter/project/flutter/flutter",
-    "error": null,
-    "timestamp": 47
-  },
-  {
-    "type": "get",
-    "property": "path",
-    "object": "__fs__",
-    "result": {
-      "style": "posix",
-      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
-    },
-    "error": null,
-    "timestamp": 48
-  },
-  {
-    "type": "invoke",
-    "method": "directory",
-    "positionalArguments": [
-      "/Users/flutter/project/flutter/flutter"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "RecordingDirectory@5",
-    "error": null,
-    "timestamp": 48
-  },
-  {
-    "type": "invoke",
-    "method": "resolveSymbolicLinksSync",
-    "positionalArguments": [],
-    "namedArguments": {},
-    "object": "RecordingDirectory@5",
-    "result": "/Users/flutter/project/flutter/flutter",
-    "error": null,
-    "timestamp": 48
-  },
-  {
-    "type": "invoke",
-    "method": "typeSync",
-    "positionalArguments": [
-      ".packages"
-    ],
-    "namedArguments": {},
-    "object": "__fs__",
-    "result": "NOT_FOUND",
-    "error": null,
-    "timestamp": 48
+    "timestamp": 49
   },
   {
     "type": "get",
@@ -316,7 +147,19 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 50
+    "timestamp": 51
+  },
+  {
+    "type": "invoke",
+    "method": "typeSync",
+    "positionalArguments": [
+      "/Users/flutter/project/flutter/flutter/examples/bin/flutter"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "NOT_FOUND",
+    "error": null,
+    "timestamp": 51
   },
   {
     "type": "get",
@@ -327,7 +170,164 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 50
+    "timestamp": 51
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "invoke",
+    "method": "typeSync",
+    "positionalArguments": [
+      "/Users/flutter/project/flutter/flutter/bin/flutter"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "FILE",
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "invoke",
+    "method": "typeSync",
+    "positionalArguments": [
+      "/Users/flutter/project/flutter/flutter/bin/cache/engine.stamp"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "FILE",
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "invoke",
+    "method": "directory",
+    "positionalArguments": [
+      "/Users/flutter/project/flutter/flutter"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "RecordingDirectory@4",
+    "error": null,
+    "timestamp": 51
+  },
+  {
+    "type": "invoke",
+    "method": "resolveSymbolicLinksSync",
+    "positionalArguments": [],
+    "namedArguments": {},
+    "object": "RecordingDirectory@4",
+    "result": "/Users/flutter/project/flutter/flutter",
+    "error": null,
+    "timestamp": 52
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 52
+  },
+  {
+    "type": "invoke",
+    "method": "directory",
+    "positionalArguments": [
+      "/Users/flutter/project/flutter/flutter"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "RecordingDirectory@5",
+    "error": null,
+    "timestamp": 52
+  },
+  {
+    "type": "invoke",
+    "method": "resolveSymbolicLinksSync",
+    "positionalArguments": [],
+    "namedArguments": {},
+    "object": "RecordingDirectory@5",
+    "result": "/Users/flutter/project/flutter/flutter",
+    "error": null,
+    "timestamp": 52
+  },
+  {
+    "type": "invoke",
+    "method": "typeSync",
+    "positionalArguments": [
+      ".packages"
+    ],
+    "namedArguments": {},
+    "object": "__fs__",
+    "result": "NOT_FOUND",
+    "error": null,
+    "timestamp": 52
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 54
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 54
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 54
   },
   {
     "type": "invoke",
@@ -339,7 +339,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 50
+    "timestamp": 54
   },
   {
     "type": "get",
@@ -350,7 +350,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 51
+    "timestamp": 55
   },
   {
     "type": "invoke",
@@ -362,7 +362,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@6",
     "error": null,
-    "timestamp": 51
+    "timestamp": 56
   },
   {
     "type": "invoke",
@@ -372,7 +372,7 @@
     "object": "RecordingDirectory@6",
     "result": true,
     "error": null,
-    "timestamp": 52
+    "timestamp": 56
   },
   {
     "type": "invoke",
@@ -384,7 +384,7 @@
       "RecordingDirectory@7"
     ],
     "error": null,
-    "timestamp": 52
+    "timestamp": 56
   },
   {
     "type": "get",
@@ -395,7 +395,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 53
+    "timestamp": 58
   },
   {
     "type": "get",
@@ -403,7 +403,7 @@
     "object": "RecordingDirectory@7",
     "result": "/Users/flutter/Library/Android/sdk/platforms/android-23",
     "error": null,
-    "timestamp": 53
+    "timestamp": 58
   },
   {
     "type": "get",
@@ -414,7 +414,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 54
+    "timestamp": 58
   },
   {
     "type": "invoke",
@@ -426,7 +426,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@8",
     "error": null,
-    "timestamp": 54
+    "timestamp": 58
   },
   {
     "type": "invoke",
@@ -436,7 +436,7 @@
     "object": "RecordingDirectory@8",
     "result": true,
     "error": null,
-    "timestamp": 54
+    "timestamp": 58
   },
   {
     "type": "invoke",
@@ -448,7 +448,7 @@
       "RecordingDirectory@9"
     ],
     "error": null,
-    "timestamp": 54
+    "timestamp": 58
   },
   {
     "type": "get",
@@ -459,7 +459,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 55
+    "timestamp": 59
   },
   {
     "type": "get",
@@ -467,7 +467,7 @@
     "object": "RecordingDirectory@9",
     "result": "/Users/flutter/Library/Android/sdk/build-tools/23.0.3",
     "error": null,
-    "timestamp": 55
+    "timestamp": 59
   },
   {
     "type": "invoke",
@@ -479,7 +479,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 67
+    "timestamp": 147
   },
   {
     "type": "invoke",
@@ -491,7 +491,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@10",
     "error": null,
-    "timestamp": 67
+    "timestamp": 148
   },
   {
     "type": "invoke",
@@ -556,7 +556,7 @@
       "RecordingDirectory@64"
     ],
     "error": null,
-    "timestamp": 67
+    "timestamp": 148
   },
   {
     "type": "get",
@@ -564,7 +564,7 @@
     "object": "RecordingDirectory@12",
     "result": ".esets",
     "error": null,
-    "timestamp": 71
+    "timestamp": 152
   },
   {
     "type": "get",
@@ -572,7 +572,7 @@
     "object": "RecordingDirectory@12",
     "result": "/Applications/.esets",
     "error": null,
-    "timestamp": 72
+    "timestamp": 152
   },
   {
     "type": "get",
@@ -580,7 +580,7 @@
     "object": "RecordingDirectory@12",
     "result": "/Applications/.esets",
     "error": null,
-    "timestamp": 72
+    "timestamp": 152
   },
   {
     "type": "invoke",
@@ -592,7 +592,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 72
+    "timestamp": 152
   },
   {
     "type": "invoke",
@@ -604,7 +604,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@65",
     "error": null,
-    "timestamp": 72
+    "timestamp": 152
   },
   {
     "type": "invoke",
@@ -616,7 +616,7 @@
       "RecordingDirectory@66"
     ],
     "error": null,
-    "timestamp": 72
+    "timestamp": 153
   },
   {
     "type": "get",
@@ -624,7 +624,7 @@
     "object": "RecordingDirectory@66",
     "result": "Contents",
     "error": null,
-    "timestamp": 72
+    "timestamp": 153
   },
   {
     "type": "get",
@@ -632,7 +632,7 @@
     "object": "RecordingDirectory@66",
     "result": "/Applications/.esets/Contents",
     "error": null,
-    "timestamp": 73
+    "timestamp": 153
   },
   {
     "type": "get",
@@ -640,7 +640,7 @@
     "object": "RecordingDirectory@66",
     "result": "/Applications/.esets/Contents",
     "error": null,
-    "timestamp": 73
+    "timestamp": 153
   },
   {
     "type": "invoke",
@@ -652,7 +652,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 73
+    "timestamp": 153
   },
   {
     "type": "invoke",
@@ -664,7 +664,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@67",
     "error": null,
-    "timestamp": 73
+    "timestamp": 153
   },
   {
     "type": "invoke",
@@ -684,7 +684,7 @@
       "RecordingDirectory@76"
     ],
     "error": null,
-    "timestamp": 73
+    "timestamp": 153
   },
   {
     "type": "get",
@@ -692,7 +692,7 @@
     "object": "RecordingDirectory@68",
     "result": "_CodeSignature",
     "error": null,
-    "timestamp": 77
+    "timestamp": 157
   },
   {
     "type": "get",
@@ -700,7 +700,7 @@
     "object": "RecordingDirectory@68",
     "result": "/Applications/.esets/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 77
+    "timestamp": 157
   },
   {
     "type": "get",
@@ -708,7 +708,7 @@
     "object": "RecordingDirectory@68",
     "result": "/Applications/.esets/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 77
+    "timestamp": 157
   },
   {
     "type": "invoke",
@@ -720,7 +720,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 77
+    "timestamp": 157
   },
   {
     "type": "invoke",
@@ -732,7 +732,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@77",
     "error": null,
-    "timestamp": 77
+    "timestamp": 158
   },
   {
     "type": "invoke",
@@ -744,7 +744,7 @@
       "RecordingFile@78"
     ],
     "error": null,
-    "timestamp": 77
+    "timestamp": 158
   },
   {
     "type": "get",
@@ -752,7 +752,7 @@
     "object": "RecordingDirectory@69",
     "result": "FinderMenu",
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "get",
@@ -760,7 +760,7 @@
     "object": "RecordingDirectory@69",
     "result": "/Applications/.esets/Contents/FinderMenu",
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "get",
@@ -768,7 +768,7 @@
     "object": "RecordingDirectory@69",
     "result": "/Applications/.esets/Contents/FinderMenu",
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "invoke",
@@ -780,7 +780,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "invoke",
@@ -792,7 +792,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@79",
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "invoke",
@@ -811,7 +811,7 @@
       "RecordingFile@87"
     ],
     "error": null,
-    "timestamp": 78
+    "timestamp": 158
   },
   {
     "type": "get",
@@ -819,7 +819,7 @@
     "object": "RecordingDirectory@70",
     "result": "Helpers",
     "error": null,
-    "timestamp": 78
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -827,7 +827,7 @@
     "object": "RecordingDirectory@70",
     "result": "/Applications/.esets/Contents/Helpers",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -835,7 +835,7 @@
     "object": "RecordingDirectory@70",
     "result": "/Applications/.esets/Contents/Helpers",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -847,7 +847,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -859,7 +859,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@88",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -872,7 +872,7 @@
       "RecordingDirectory@90"
     ],
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -880,7 +880,7 @@
     "object": "RecordingDirectory@90",
     "result": "Uninstaller.app",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -888,7 +888,7 @@
     "object": "RecordingDirectory@90",
     "result": "/Applications/.esets/Contents/Helpers/Uninstaller.app",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -896,7 +896,7 @@
     "object": "RecordingDirectory@72",
     "result": "MacOS",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -904,7 +904,7 @@
     "object": "RecordingDirectory@72",
     "result": "/Applications/.esets/Contents/MacOS",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -912,7 +912,7 @@
     "object": "RecordingDirectory@72",
     "result": "/Applications/.esets/Contents/MacOS",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -924,7 +924,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -936,7 +936,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@91",
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "invoke",
@@ -956,7 +956,7 @@
       "RecordingFile@100"
     ],
     "error": null,
-    "timestamp": 79
+    "timestamp": 159
   },
   {
     "type": "get",
@@ -964,7 +964,7 @@
     "object": "RecordingDirectory@74",
     "result": "PlugIns",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "get",
@@ -972,7 +972,7 @@
     "object": "RecordingDirectory@74",
     "result": "/Applications/.esets/Contents/PlugIns",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "get",
@@ -980,7 +980,7 @@
     "object": "RecordingDirectory@74",
     "result": "/Applications/.esets/Contents/PlugIns",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "invoke",
@@ -992,7 +992,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "invoke",
@@ -1004,7 +1004,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@101",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "invoke",
@@ -1016,7 +1016,7 @@
       "RecordingDirectory@102"
     ],
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "get",
@@ -1024,7 +1024,7 @@
     "object": "RecordingDirectory@102",
     "result": "kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "get",
@@ -1032,7 +1032,7 @@
     "object": "RecordingDirectory@102",
     "result": "/Applications/.esets/Contents/PlugIns/kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "get",
@@ -1040,7 +1040,7 @@
     "object": "RecordingDirectory@102",
     "result": "/Applications/.esets/Contents/PlugIns/kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "invoke",
@@ -1052,7 +1052,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 80
+    "timestamp": 160
   },
   {
     "type": "invoke",
@@ -1064,7 +1064,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@103",
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1077,7 +1077,7 @@
       "RecordingDirectory@105"
     ],
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1085,7 +1085,7 @@
     "object": "RecordingDirectory@104",
     "result": "esets_kac_32_105.kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1093,7 +1093,7 @@
     "object": "RecordingDirectory@104",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1101,7 +1101,7 @@
     "object": "RecordingDirectory@104",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext",
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1113,7 +1113,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 80
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1125,7 +1125,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@106",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1137,7 +1137,7 @@
       "RecordingDirectory@107"
     ],
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1145,7 +1145,7 @@
     "object": "RecordingDirectory@107",
     "result": "Contents",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1153,7 +1153,7 @@
     "object": "RecordingDirectory@107",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1161,7 +1161,7 @@
     "object": "RecordingDirectory@107",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1173,7 +1173,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1185,7 +1185,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@108",
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "invoke",
@@ -1200,7 +1200,7 @@
       "RecordingDirectory@112"
     ],
     "error": null,
-    "timestamp": 81
+    "timestamp": 161
   },
   {
     "type": "get",
@@ -1208,7 +1208,7 @@
     "object": "RecordingDirectory@109",
     "result": "_CodeSignature",
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "get",
@@ -1216,7 +1216,7 @@
     "object": "RecordingDirectory@109",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "get",
@@ -1224,7 +1224,7 @@
     "object": "RecordingDirectory@109",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1236,7 +1236,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1248,7 +1248,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@113",
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1263,7 +1263,7 @@
       "RecordingFile@117"
     ],
     "error": null,
-    "timestamp": 81
+    "timestamp": 162
   },
   {
     "type": "get",
@@ -1271,7 +1271,7 @@
     "object": "RecordingDirectory@111",
     "result": "MacOS",
     "error": null,
-    "timestamp": 82
+    "timestamp": 162
   },
   {
     "type": "get",
@@ -1279,7 +1279,7 @@
     "object": "RecordingDirectory@111",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/MacOS",
     "error": null,
-    "timestamp": 82
+    "timestamp": 162
   },
   {
     "type": "get",
@@ -1287,7 +1287,7 @@
     "object": "RecordingDirectory@111",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/MacOS",
     "error": null,
-    "timestamp": 82
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1299,7 +1299,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 82
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1311,7 +1311,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@118",
     "error": null,
-    "timestamp": 82
+    "timestamp": 162
   },
   {
     "type": "invoke",
@@ -1323,7 +1323,7 @@
       "RecordingFile@119"
     ],
     "error": null,
-    "timestamp": 82
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1331,7 +1331,7 @@
     "object": "RecordingDirectory@112",
     "result": "Resources",
     "error": null,
-    "timestamp": 82
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1339,7 +1339,7 @@
     "object": "RecordingDirectory@112",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/Resources",
     "error": null,
-    "timestamp": 82
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1347,7 +1347,7 @@
     "object": "RecordingDirectory@112",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_32_105.kext/Contents/Resources",
     "error": null,
-    "timestamp": 82
+    "timestamp": 163
   },
   {
     "type": "invoke",
@@ -1359,7 +1359,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 82
+    "timestamp": 163
   },
   {
     "type": "invoke",
@@ -1371,7 +1371,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@120",
     "error": null,
-    "timestamp": 83
+    "timestamp": 163
   },
   {
     "type": "invoke",
@@ -1383,7 +1383,7 @@
       "RecordingFile@121"
     ],
     "error": null,
-    "timestamp": 83
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1391,7 +1391,7 @@
     "object": "RecordingDirectory@105",
     "result": "esets_kac_64_109.kext",
     "error": null,
-    "timestamp": 83
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1399,7 +1399,7 @@
     "object": "RecordingDirectory@105",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext",
     "error": null,
-    "timestamp": 83
+    "timestamp": 163
   },
   {
     "type": "get",
@@ -1407,7 +1407,7 @@
     "object": "RecordingDirectory@105",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext",
     "error": null,
-    "timestamp": 83
+    "timestamp": 163
   },
   {
     "type": "invoke",
@@ -1419,7 +1419,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "invoke",
@@ -1431,7 +1431,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@122",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "invoke",
@@ -1443,7 +1443,7 @@
       "RecordingDirectory@123"
     ],
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "get",
@@ -1451,7 +1451,7 @@
     "object": "RecordingDirectory@123",
     "result": "Contents",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "get",
@@ -1459,7 +1459,7 @@
     "object": "RecordingDirectory@123",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "get",
@@ -1467,7 +1467,7 @@
     "object": "RecordingDirectory@123",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "invoke",
@@ -1479,7 +1479,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "invoke",
@@ -1491,7 +1491,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@124",
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "invoke",
@@ -1506,7 +1506,7 @@
       "RecordingDirectory@128"
     ],
     "error": null,
-    "timestamp": 83
+    "timestamp": 164
   },
   {
     "type": "get",
@@ -1514,7 +1514,7 @@
     "object": "RecordingDirectory@125",
     "result": "_CodeSignature",
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1522,7 +1522,7 @@
     "object": "RecordingDirectory@125",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1530,7 +1530,7 @@
     "object": "RecordingDirectory@125",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/_CodeSignature",
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1542,7 +1542,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1554,7 +1554,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@129",
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1566,7 +1566,7 @@
       "RecordingFile@130"
     ],
     "error": null,
-    "timestamp": 84
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1574,7 +1574,7 @@
     "object": "RecordingDirectory@127",
     "result": "MacOS",
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1582,7 +1582,7 @@
     "object": "RecordingDirectory@127",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/MacOS",
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1590,7 +1590,7 @@
     "object": "RecordingDirectory@127",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/MacOS",
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1602,7 +1602,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1614,7 +1614,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@131",
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "invoke",
@@ -1626,7 +1626,7 @@
       "RecordingFile@132"
     ],
     "error": null,
-    "timestamp": 85
+    "timestamp": 165
   },
   {
     "type": "get",
@@ -1634,7 +1634,7 @@
     "object": "RecordingDirectory@128",
     "result": "Resources",
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "get",
@@ -1642,7 +1642,7 @@
     "object": "RecordingDirectory@128",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/Resources",
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "get",
@@ -1650,7 +1650,7 @@
     "object": "RecordingDirectory@128",
     "result": "/Applications/.esets/Contents/PlugIns/kext/esets_kac_64_109.kext/Contents/Resources",
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "invoke",
@@ -1662,7 +1662,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "invoke",
@@ -1674,7 +1674,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@133",
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "invoke",
@@ -1686,7 +1686,7 @@
       "RecordingFile@134"
     ],
     "error": null,
-    "timestamp": 85
+    "timestamp": 169
   },
   {
     "type": "get",
@@ -1694,7 +1694,7 @@
     "object": "RecordingDirectory@75",
     "result": "Resources",
     "error": null,
-    "timestamp": 85
+    "timestamp": 170
   },
   {
     "type": "get",
@@ -1702,7 +1702,7 @@
     "object": "RecordingDirectory@75",
     "result": "/Applications/.esets/Contents/Resources",
     "error": null,
-    "timestamp": 86
+    "timestamp": 170
   },
   {
     "type": "get",
@@ -1710,7 +1710,7 @@
     "object": "RecordingDirectory@75",
     "result": "/Applications/.esets/Contents/Resources",
     "error": null,
-    "timestamp": 86
+    "timestamp": 170
   },
   {
     "type": "invoke",
@@ -1722,7 +1722,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 86
+    "timestamp": 170
   },
   {
     "type": "invoke",
@@ -1734,7 +1734,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@135",
     "error": null,
-    "timestamp": 89
+    "timestamp": 170
   },
   {
     "type": "invoke",
@@ -1843,7 +1843,7 @@
       "RecordingFile@233"
     ],
     "error": null,
-    "timestamp": 89
+    "timestamp": 170
   },
   {
     "type": "get",
@@ -1851,7 +1851,7 @@
     "object": "RecordingDirectory@147",
     "result": "en.lproj",
     "error": null,
-    "timestamp": 92
+    "timestamp": 173
   },
   {
     "type": "get",
@@ -1859,7 +1859,7 @@
     "object": "RecordingDirectory@147",
     "result": "/Applications/.esets/Contents/Resources/en.lproj",
     "error": null,
-    "timestamp": 92
+    "timestamp": 174
   },
   {
     "type": "get",
@@ -1867,7 +1867,7 @@
     "object": "RecordingDirectory@147",
     "result": "/Applications/.esets/Contents/Resources/en.lproj",
     "error": null,
-    "timestamp": 92
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1879,7 +1879,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 92
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1891,7 +1891,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@234",
     "error": null,
-    "timestamp": 92
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1903,7 +1903,7 @@
       "RecordingFile@235"
     ],
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "get",
@@ -1911,7 +1911,7 @@
     "object": "RecordingDirectory@148",
     "result": "English.lproj",
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "get",
@@ -1919,7 +1919,7 @@
     "object": "RecordingDirectory@148",
     "result": "/Applications/.esets/Contents/Resources/English.lproj",
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "get",
@@ -1927,7 +1927,7 @@
     "object": "RecordingDirectory@148",
     "result": "/Applications/.esets/Contents/Resources/English.lproj",
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1939,7 +1939,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1951,7 +1951,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@236",
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "invoke",
@@ -1978,7 +1978,7 @@
       "RecordingFile@252"
     ],
     "error": null,
-    "timestamp": 93
+    "timestamp": 174
   },
   {
     "type": "get",
@@ -1986,7 +1986,7 @@
     "object": "RecordingDirectory@161",
     "result": "help",
     "error": null,
-    "timestamp": 93
+    "timestamp": 175
   },
   {
     "type": "get",
@@ -1994,7 +1994,7 @@
     "object": "RecordingDirectory@161",
     "result": "/Applications/.esets/Contents/Resources/help",
     "error": null,
-    "timestamp": 94
+    "timestamp": 175
   },
   {
     "type": "get",
@@ -2002,7 +2002,7 @@
     "object": "RecordingDirectory@161",
     "result": "/Applications/.esets/Contents/Resources/help",
     "error": null,
-    "timestamp": 94
+    "timestamp": 175
   },
   {
     "type": "invoke",
@@ -2014,7 +2014,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 94
+    "timestamp": 175
   },
   {
     "type": "invoke",
@@ -2026,7 +2026,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@253",
     "error": null,
-    "timestamp": 94
+    "timestamp": 175
   },
   {
     "type": "invoke",
@@ -2151,7 +2151,7 @@
       "RecordingFile@367"
     ],
     "error": null,
-    "timestamp": 94
+    "timestamp": 175
   },
   {
     "type": "get",
@@ -2159,7 +2159,7 @@
     "object": "RecordingDirectory@185",
     "result": "share",
     "error": null,
-    "timestamp": 99
+    "timestamp": 180
   },
   {
     "type": "get",
@@ -2167,7 +2167,7 @@
     "object": "RecordingDirectory@185",
     "result": "/Applications/.esets/Contents/Resources/share",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2175,7 +2175,7 @@
     "object": "RecordingDirectory@185",
     "result": "/Applications/.esets/Contents/Resources/share",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2187,7 +2187,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2199,7 +2199,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@368",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2211,7 +2211,7 @@
       "RecordingFile@369"
     ],
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2219,7 +2219,7 @@
     "object": "RecordingDirectory@76",
     "result": "Scripts",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2227,7 +2227,7 @@
     "object": "RecordingDirectory@76",
     "result": "/Applications/.esets/Contents/Scripts",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2235,7 +2235,7 @@
     "object": "RecordingDirectory@76",
     "result": "/Applications/.esets/Contents/Scripts",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2247,7 +2247,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2259,7 +2259,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@370",
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "invoke",
@@ -2272,7 +2272,7 @@
       "RecordingFile@372"
     ],
     "error": null,
-    "timestamp": 99
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2280,7 +2280,7 @@
     "object": "RecordingDirectory@14",
     "result": "Android Studio.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2288,7 +2288,7 @@
     "object": "RecordingDirectory@15",
     "result": "App Store.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 181
   },
   {
     "type": "get",
@@ -2296,7 +2296,7 @@
     "object": "RecordingDirectory@15",
     "result": "/Applications/App Store.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2304,7 +2304,7 @@
     "object": "RecordingDirectory@16",
     "result": "Atom.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2312,7 +2312,7 @@
     "object": "RecordingDirectory@16",
     "result": "/Applications/Atom.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2320,7 +2320,7 @@
     "object": "RecordingDirectory@17",
     "result": "Automator.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2328,7 +2328,7 @@
     "object": "RecordingDirectory@17",
     "result": "/Applications/Automator.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2336,7 +2336,7 @@
     "object": "RecordingDirectory@18",
     "result": "Calculator.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2344,7 +2344,7 @@
     "object": "RecordingDirectory@18",
     "result": "/Applications/Calculator.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2352,7 +2352,7 @@
     "object": "RecordingDirectory@19",
     "result": "Calendar.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2360,7 +2360,7 @@
     "object": "RecordingDirectory@19",
     "result": "/Applications/Calendar.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2368,7 +2368,7 @@
     "object": "RecordingDirectory@20",
     "result": "Chess.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2376,7 +2376,7 @@
     "object": "RecordingDirectory@20",
     "result": "/Applications/Chess.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2384,7 +2384,7 @@
     "object": "RecordingDirectory@21",
     "result": "Chrome Remote Desktop Host Uninstaller.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2392,7 +2392,7 @@
     "object": "RecordingDirectory@21",
     "result": "/Applications/Chrome Remote Desktop Host Uninstaller.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2400,7 +2400,7 @@
     "object": "RecordingDirectory@22",
     "result": "Contacts.app",
     "error": null,
-    "timestamp": 100
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2408,7 +2408,7 @@
     "object": "RecordingDirectory@22",
     "result": "/Applications/Contacts.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2416,7 +2416,7 @@
     "object": "RecordingDirectory@23",
     "result": "Dashboard.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2424,7 +2424,7 @@
     "object": "RecordingDirectory@23",
     "result": "/Applications/Dashboard.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2432,7 +2432,7 @@
     "object": "RecordingDirectory@24",
     "result": "Dictionary.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 182
   },
   {
     "type": "get",
@@ -2440,7 +2440,7 @@
     "object": "RecordingDirectory@24",
     "result": "/Applications/Dictionary.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2448,7 +2448,7 @@
     "object": "RecordingDirectory@25",
     "result": "DVD Player.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2456,7 +2456,7 @@
     "object": "RecordingDirectory@25",
     "result": "/Applications/DVD Player.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2464,7 +2464,7 @@
     "object": "RecordingDirectory@26",
     "result": "Emacs.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2472,7 +2472,7 @@
     "object": "RecordingDirectory@26",
     "result": "/Applications/Emacs.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2480,7 +2480,7 @@
     "object": "RecordingDirectory@27",
     "result": "ESET NOD32 Antivirus.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2488,7 +2488,7 @@
     "object": "RecordingDirectory@27",
     "result": "/Applications/ESET NOD32 Antivirus.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2496,7 +2496,7 @@
     "object": "RecordingDirectory@28",
     "result": "FaceTime.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2504,7 +2504,7 @@
     "object": "RecordingDirectory@28",
     "result": "/Applications/FaceTime.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2512,7 +2512,7 @@
     "object": "RecordingDirectory@29",
     "result": "Font Book.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2520,7 +2520,7 @@
     "object": "RecordingDirectory@29",
     "result": "/Applications/Font Book.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2528,7 +2528,7 @@
     "object": "RecordingDirectory@30",
     "result": "GIMP.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2536,7 +2536,7 @@
     "object": "RecordingDirectory@30",
     "result": "/Applications/GIMP.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2544,7 +2544,7 @@
     "object": "RecordingDirectory@31",
     "result": "gMacInformation.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2552,7 +2552,7 @@
     "object": "RecordingDirectory@31",
     "result": "/Applications/gMacInformation.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2560,7 +2560,7 @@
     "object": "RecordingDirectory@32",
     "result": "gmenu.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2568,7 +2568,7 @@
     "object": "RecordingDirectory@32",
     "result": "/Applications/gmenu.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2576,7 +2576,7 @@
     "object": "RecordingDirectory@33",
     "result": "Google Chrome.app",
     "error": null,
-    "timestamp": 101
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2584,7 +2584,7 @@
     "object": "RecordingDirectory@33",
     "result": "/Applications/Google Chrome.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2592,7 +2592,7 @@
     "object": "RecordingDirectory@34",
     "result": "Google Drive.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 183
   },
   {
     "type": "get",
@@ -2600,7 +2600,7 @@
     "object": "RecordingDirectory@34",
     "result": "/Applications/Google Drive.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2608,7 +2608,7 @@
     "object": "RecordingDirectory@35",
     "result": "Hex Fiend.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2616,7 +2616,7 @@
     "object": "RecordingDirectory@35",
     "result": "/Applications/Hex Fiend.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2624,7 +2624,7 @@
     "object": "RecordingDirectory@36",
     "result": "iBooks.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2632,7 +2632,7 @@
     "object": "RecordingDirectory@36",
     "result": "/Applications/iBooks.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2640,7 +2640,7 @@
     "object": "RecordingDirectory@37",
     "result": "Image Capture.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2648,7 +2648,7 @@
     "object": "RecordingDirectory@37",
     "result": "/Applications/Image Capture.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2656,7 +2656,7 @@
     "object": "RecordingDirectory@38",
     "result": "IntelliJ IDEA CE.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2664,7 +2664,7 @@
     "object": "RecordingDirectory@38",
     "result": "/Applications/IntelliJ IDEA CE.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2672,7 +2672,7 @@
     "object": "RecordingDirectory@39",
     "result": "iTunes.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2680,7 +2680,7 @@
     "object": "RecordingDirectory@39",
     "result": "/Applications/iTunes.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2688,7 +2688,7 @@
     "object": "RecordingDirectory@40",
     "result": "Launchpad.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2696,7 +2696,7 @@
     "object": "RecordingDirectory@40",
     "result": "/Applications/Launchpad.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2704,7 +2704,7 @@
     "object": "RecordingDirectory@41",
     "result": "MacPushy.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2712,7 +2712,7 @@
     "object": "RecordingDirectory@41",
     "result": "/Applications/MacPushy.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2720,7 +2720,7 @@
     "object": "RecordingDirectory@42",
     "result": "Mail.app",
     "error": null,
-    "timestamp": 102
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2728,7 +2728,7 @@
     "object": "RecordingDirectory@42",
     "result": "/Applications/Mail.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2736,7 +2736,7 @@
     "object": "RecordingDirectory@43",
     "result": "Managed Software Center.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2744,7 +2744,7 @@
     "object": "RecordingDirectory@43",
     "result": "/Applications/Managed Software Center.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2752,7 +2752,7 @@
     "object": "RecordingDirectory@44",
     "result": "Maps.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2760,7 +2760,7 @@
     "object": "RecordingDirectory@44",
     "result": "/Applications/Maps.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 184
   },
   {
     "type": "get",
@@ -2768,7 +2768,7 @@
     "object": "RecordingDirectory@45",
     "result": "Messages.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2776,7 +2776,7 @@
     "object": "RecordingDirectory@45",
     "result": "/Applications/Messages.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2784,7 +2784,7 @@
     "object": "RecordingDirectory@46",
     "result": "Mission Control.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2792,7 +2792,7 @@
     "object": "RecordingDirectory@46",
     "result": "/Applications/Mission Control.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2800,7 +2800,7 @@
     "object": "RecordingDirectory@47",
     "result": "NoMachine.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2808,7 +2808,7 @@
     "object": "RecordingDirectory@47",
     "result": "/Applications/NoMachine.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2816,7 +2816,7 @@
     "object": "RecordingDirectory@48",
     "result": "Notes.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2824,7 +2824,7 @@
     "object": "RecordingDirectory@48",
     "result": "/Applications/Notes.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2832,7 +2832,7 @@
     "object": "RecordingDirectory@49",
     "result": "Photo Booth.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2840,7 +2840,7 @@
     "object": "RecordingDirectory@49",
     "result": "/Applications/Photo Booth.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2848,7 +2848,7 @@
     "object": "RecordingDirectory@50",
     "result": "Photos.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2856,7 +2856,7 @@
     "object": "RecordingDirectory@50",
     "result": "/Applications/Photos.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2864,7 +2864,7 @@
     "object": "RecordingDirectory@51",
     "result": "Preview.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2872,7 +2872,7 @@
     "object": "RecordingDirectory@51",
     "result": "/Applications/Preview.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2880,7 +2880,7 @@
     "object": "RecordingDirectory@52",
     "result": "QuickTime Player.app",
     "error": null,
-    "timestamp": 103
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2888,7 +2888,7 @@
     "object": "RecordingDirectory@52",
     "result": "/Applications/QuickTime Player.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2896,7 +2896,7 @@
     "object": "RecordingDirectory@53",
     "result": "Reminders.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2904,7 +2904,7 @@
     "object": "RecordingDirectory@53",
     "result": "/Applications/Reminders.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2912,7 +2912,7 @@
     "object": "RecordingDirectory@54",
     "result": "Safari.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 185
   },
   {
     "type": "get",
@@ -2920,7 +2920,7 @@
     "object": "RecordingDirectory@54",
     "result": "/Applications/Safari.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2928,7 +2928,7 @@
     "object": "RecordingDirectory@55",
     "result": "Santa.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2936,7 +2936,7 @@
     "object": "RecordingDirectory@55",
     "result": "/Applications/Santa.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2944,7 +2944,7 @@
     "object": "RecordingDirectory@56",
     "result": "Siri.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2952,7 +2952,7 @@
     "object": "RecordingDirectory@56",
     "result": "/Applications/Siri.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2960,7 +2960,7 @@
     "object": "RecordingDirectory@57",
     "result": "Stickies.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2968,7 +2968,7 @@
     "object": "RecordingDirectory@57",
     "result": "/Applications/Stickies.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2976,7 +2976,7 @@
     "object": "RecordingDirectory@58",
     "result": "System Preferences.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2984,7 +2984,7 @@
     "object": "RecordingDirectory@58",
     "result": "/Applications/System Preferences.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -2992,7 +2992,7 @@
     "object": "RecordingDirectory@59",
     "result": "TextEdit.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3000,7 +3000,7 @@
     "object": "RecordingDirectory@59",
     "result": "/Applications/TextEdit.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3008,7 +3008,7 @@
     "object": "RecordingDirectory@60",
     "result": "Time Machine.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3016,7 +3016,7 @@
     "object": "RecordingDirectory@60",
     "result": "/Applications/Time Machine.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3024,7 +3024,7 @@
     "object": "RecordingDirectory@61",
     "result": "Tulsi.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3032,7 +3032,7 @@
     "object": "RecordingDirectory@61",
     "result": "/Applications/Tulsi.app",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3040,7 +3040,7 @@
     "object": "RecordingDirectory@62",
     "result": "Utilities",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3048,7 +3048,7 @@
     "object": "RecordingDirectory@62",
     "result": "/Applications/Utilities",
     "error": null,
-    "timestamp": 104
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3056,7 +3056,7 @@
     "object": "RecordingDirectory@62",
     "result": "/Applications/Utilities",
     "error": null,
-    "timestamp": 105
+    "timestamp": 186
   },
   {
     "type": "invoke",
@@ -3068,7 +3068,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 105
+    "timestamp": 186
   },
   {
     "type": "invoke",
@@ -3080,7 +3080,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@373",
     "error": null,
-    "timestamp": 105
+    "timestamp": 186
   },
   {
     "type": "invoke",
@@ -3113,7 +3113,7 @@
       "RecordingDirectory@395"
     ],
     "error": null,
-    "timestamp": 105
+    "timestamp": 186
   },
   {
     "type": "get",
@@ -3121,7 +3121,7 @@
     "object": "RecordingDirectory@376",
     "result": "Activity Monitor.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 187
   },
   {
     "type": "get",
@@ -3129,7 +3129,7 @@
     "object": "RecordingDirectory@376",
     "result": "/Applications/Utilities/Activity Monitor.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 187
   },
   {
     "type": "get",
@@ -3137,7 +3137,7 @@
     "object": "RecordingDirectory@377",
     "result": "AirPort Utility.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3145,7 +3145,7 @@
     "object": "RecordingDirectory@377",
     "result": "/Applications/Utilities/AirPort Utility.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3153,7 +3153,7 @@
     "object": "RecordingDirectory@378",
     "result": "Audio MIDI Setup.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3161,7 +3161,7 @@
     "object": "RecordingDirectory@378",
     "result": "/Applications/Utilities/Audio MIDI Setup.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3169,7 +3169,7 @@
     "object": "RecordingDirectory@379",
     "result": "Bluetooth File Exchange.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3177,7 +3177,7 @@
     "object": "RecordingDirectory@379",
     "result": "/Applications/Utilities/Bluetooth File Exchange.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3185,7 +3185,7 @@
     "object": "RecordingDirectory@380",
     "result": "Boot Camp Assistant.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3193,7 +3193,7 @@
     "object": "RecordingDirectory@380",
     "result": "/Applications/Utilities/Boot Camp Assistant.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3201,7 +3201,7 @@
     "object": "RecordingDirectory@381",
     "result": "ColorSync Utility.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3209,7 +3209,7 @@
     "object": "RecordingDirectory@381",
     "result": "/Applications/Utilities/ColorSync Utility.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3217,7 +3217,7 @@
     "object": "RecordingDirectory@382",
     "result": "Console.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3225,7 +3225,7 @@
     "object": "RecordingDirectory@382",
     "result": "/Applications/Utilities/Console.app",
     "error": null,
-    "timestamp": 106
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3233,7 +3233,7 @@
     "object": "RecordingDirectory@383",
     "result": "Digital Color Meter.app",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3241,7 +3241,7 @@
     "object": "RecordingDirectory@383",
     "result": "/Applications/Utilities/Digital Color Meter.app",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3249,7 +3249,7 @@
     "object": "RecordingDirectory@384",
     "result": "Disk Utility.app",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3257,7 +3257,7 @@
     "object": "RecordingDirectory@384",
     "result": "/Applications/Utilities/Disk Utility.app",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3265,7 +3265,7 @@
     "object": "RecordingDirectory@385",
     "result": "GoogleCorporate",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3273,7 +3273,7 @@
     "object": "RecordingDirectory@385",
     "result": "/Applications/Utilities/GoogleCorporate",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "get",
@@ -3281,7 +3281,7 @@
     "object": "RecordingDirectory@385",
     "result": "/Applications/Utilities/GoogleCorporate",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "invoke",
@@ -3293,7 +3293,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 107
+    "timestamp": 188
   },
   {
     "type": "invoke",
@@ -3305,7 +3305,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@396",
     "error": null,
-    "timestamp": 107
+    "timestamp": 189
   },
   {
     "type": "invoke",
@@ -3323,7 +3323,7 @@
       "RecordingFile@403"
     ],
     "error": null,
-    "timestamp": 107
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3331,7 +3331,7 @@
     "object": "RecordingDirectory@397",
     "result": "Capport.app",
     "error": null,
-    "timestamp": 107
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3339,7 +3339,7 @@
     "object": "RecordingDirectory@397",
     "result": "/Applications/Utilities/GoogleCorporate/Capport.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3347,7 +3347,7 @@
     "object": "RecordingDirectory@398",
     "result": "CocoaDialog.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3355,7 +3355,7 @@
     "object": "RecordingDirectory@398",
     "result": "/Applications/Utilities/GoogleCorporate/CocoaDialog.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3363,7 +3363,7 @@
     "object": "RecordingDirectory@399",
     "result": "gFeedback.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3371,7 +3371,7 @@
     "object": "RecordingDirectory@399",
     "result": "/Applications/Utilities/GoogleCorporate/gFeedback.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3379,7 +3379,7 @@
     "object": "RecordingDirectory@400",
     "result": "gMacCertInstaller.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3387,7 +3387,7 @@
     "object": "RecordingDirectory@400",
     "result": "/Applications/Utilities/GoogleCorporate/gMacCertInstaller.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3395,7 +3395,7 @@
     "object": "RecordingDirectory@401",
     "result": "gWelcome.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 189
   },
   {
     "type": "get",
@@ -3403,7 +3403,7 @@
     "object": "RecordingDirectory@401",
     "result": "/Applications/Utilities/GoogleCorporate/gWelcome.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3411,7 +3411,7 @@
     "object": "RecordingDirectory@386",
     "result": "Grab.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3419,7 +3419,7 @@
     "object": "RecordingDirectory@386",
     "result": "/Applications/Utilities/Grab.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3427,7 +3427,7 @@
     "object": "RecordingDirectory@387",
     "result": "Grapher.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3435,7 +3435,7 @@
     "object": "RecordingDirectory@387",
     "result": "/Applications/Utilities/Grapher.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3443,7 +3443,7 @@
     "object": "RecordingDirectory@388",
     "result": "Keychain Access.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3451,7 +3451,7 @@
     "object": "RecordingDirectory@388",
     "result": "/Applications/Utilities/Keychain Access.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3459,7 +3459,7 @@
     "object": "RecordingDirectory@389",
     "result": "Migration Assistant.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3467,7 +3467,7 @@
     "object": "RecordingDirectory@389",
     "result": "/Applications/Utilities/Migration Assistant.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3475,7 +3475,7 @@
     "object": "RecordingDirectory@390",
     "result": "Script Editor.app",
     "error": null,
-    "timestamp": 108
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3483,7 +3483,7 @@
     "object": "RecordingDirectory@390",
     "result": "/Applications/Utilities/Script Editor.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3491,7 +3491,7 @@
     "object": "RecordingDirectory@391",
     "result": "System Information.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3499,7 +3499,7 @@
     "object": "RecordingDirectory@391",
     "result": "/Applications/Utilities/System Information.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3507,7 +3507,7 @@
     "object": "RecordingDirectory@392",
     "result": "Terminal.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3515,7 +3515,7 @@
     "object": "RecordingDirectory@392",
     "result": "/Applications/Utilities/Terminal.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3523,7 +3523,7 @@
     "object": "RecordingDirectory@393",
     "result": "Ticket Viewer.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3531,7 +3531,7 @@
     "object": "RecordingDirectory@393",
     "result": "/Applications/Utilities/Ticket Viewer.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3539,7 +3539,7 @@
     "object": "RecordingDirectory@394",
     "result": "VoiceOver Utility.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3547,7 +3547,7 @@
     "object": "RecordingDirectory@394",
     "result": "/Applications/Utilities/VoiceOver Utility.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3555,7 +3555,7 @@
     "object": "RecordingDirectory@395",
     "result": "XQuartz.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 190
   },
   {
     "type": "get",
@@ -3563,7 +3563,7 @@
     "object": "RecordingDirectory@395",
     "result": "/Applications/Utilities/XQuartz.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3571,7 +3571,7 @@
     "object": "RecordingDirectory@63",
     "result": "Xcode.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3579,7 +3579,7 @@
     "object": "RecordingDirectory@63",
     "result": "/Applications/Xcode.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3587,7 +3587,7 @@
     "object": "RecordingDirectory@64",
     "result": "Zenmap.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3595,7 +3595,7 @@
     "object": "RecordingDirectory@64",
     "result": "/Applications/Zenmap.app",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3606,7 +3606,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "invoke",
@@ -3618,7 +3618,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "invoke",
@@ -3630,7 +3630,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@404",
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "invoke",
@@ -3644,7 +3644,7 @@
       "RecordingDirectory@407"
     ],
     "error": null,
-    "timestamp": 109
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3652,7 +3652,7 @@
     "object": "RecordingDirectory@407",
     "result": "Chrome Apps.localized",
     "error": null,
-    "timestamp": 110
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3660,7 +3660,7 @@
     "object": "RecordingDirectory@407",
     "result": "/Users/flutter/Applications/Chrome Apps.localized",
     "error": null,
-    "timestamp": 110
+    "timestamp": 191
   },
   {
     "type": "get",
@@ -3668,7 +3668,7 @@
     "object": "RecordingDirectory@407",
     "result": "/Users/flutter/Applications/Chrome Apps.localized",
     "error": null,
-    "timestamp": 110
+    "timestamp": 191
   },
   {
     "type": "invoke",
@@ -3680,7 +3680,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 110
+    "timestamp": 191
   },
   {
     "type": "invoke",
@@ -3692,7 +3692,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@408",
     "error": null,
-    "timestamp": 110
+    "timestamp": 192
   },
   {
     "type": "invoke",
@@ -3733,7 +3733,7 @@
       "RecordingDirectory@438"
     ],
     "error": null,
-    "timestamp": 110
+    "timestamp": 192
   },
   {
     "type": "get",
@@ -3741,7 +3741,7 @@
     "object": "RecordingDirectory@409",
     "result": ".localized",
     "error": null,
-    "timestamp": 111
+    "timestamp": 192
   },
   {
     "type": "get",
@@ -3749,7 +3749,7 @@
     "object": "RecordingDirectory@409",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/.localized",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3757,7 +3757,7 @@
     "object": "RecordingDirectory@409",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/.localized",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "invoke",
@@ -3769,7 +3769,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "invoke",
@@ -3781,7 +3781,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@439",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "invoke",
@@ -3793,7 +3793,7 @@
       "RecordingFile@440"
     ],
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3801,7 +3801,7 @@
     "object": "RecordingDirectory@410",
     "result": "Default apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3809,7 +3809,7 @@
     "object": "RecordingDirectory@410",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3817,7 +3817,7 @@
     "object": "RecordingDirectory@411",
     "result": "Default beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3825,7 +3825,7 @@
     "object": "RecordingDirectory@411",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3833,7 +3833,7 @@
     "object": "RecordingDirectory@412",
     "result": "Default blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3841,7 +3841,7 @@
     "object": "RecordingDirectory@412",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3849,7 +3849,7 @@
     "object": "RecordingDirectory@413",
     "result": "Default coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3857,7 +3857,7 @@
     "object": "RecordingDirectory@413",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3865,7 +3865,7 @@
     "object": "RecordingDirectory@414",
     "result": "Default fajgmpcceamgfegfadkijlfajpnbdmma.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3873,7 +3873,7 @@
     "object": "RecordingDirectory@414",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default fajgmpcceamgfegfadkijlfajpnbdmma.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3881,7 +3881,7 @@
     "object": "RecordingDirectory@415",
     "result": "Default npcpnahjfihkilahpohiieimoffneflm.app",
     "error": null,
-    "timestamp": 111
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3889,7 +3889,7 @@
     "object": "RecordingDirectory@415",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default npcpnahjfihkilahpohiieimoffneflm.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3897,7 +3897,7 @@
     "object": "RecordingDirectory@416",
     "result": "Default pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 193
   },
   {
     "type": "get",
@@ -3905,7 +3905,7 @@
     "object": "RecordingDirectory@416",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3913,7 +3913,7 @@
     "object": "RecordingDirectory@418",
     "result": "Profile 1 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3921,7 +3921,7 @@
     "object": "RecordingDirectory@418",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3929,7 +3929,7 @@
     "object": "RecordingDirectory@419",
     "result": "Profile 1 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3937,7 +3937,7 @@
     "object": "RecordingDirectory@419",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3945,7 +3945,7 @@
     "object": "RecordingDirectory@420",
     "result": "Profile 1 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3953,7 +3953,7 @@
     "object": "RecordingDirectory@420",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3961,7 +3961,7 @@
     "object": "RecordingDirectory@421",
     "result": "Profile 1 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3969,7 +3969,7 @@
     "object": "RecordingDirectory@421",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3977,7 +3977,7 @@
     "object": "RecordingDirectory@422",
     "result": "Profile 1 fahmaaghhglfmonjliepjlchgpgfmobi.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3985,7 +3985,7 @@
     "object": "RecordingDirectory@422",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 fahmaaghhglfmonjliepjlchgpgfmobi.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -3993,7 +3993,7 @@
     "object": "RecordingDirectory@423",
     "result": "Profile 1 hmjkmjkepdijhoojdojkdfohbdgmmhki.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4001,7 +4001,7 @@
     "object": "RecordingDirectory@423",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 hmjkmjkepdijhoojdojkdfohbdgmmhki.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4009,7 +4009,7 @@
     "object": "RecordingDirectory@424",
     "result": "Profile 1 lefigjbiimiemfhjmibbgemkpenelmag.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4017,7 +4017,7 @@
     "object": "RecordingDirectory@424",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 lefigjbiimiemfhjmibbgemkpenelmag.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4025,7 +4025,7 @@
     "object": "RecordingDirectory@425",
     "result": "Profile 1 pifccnhncmnilgbnnkjkgicpkeclodpd.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4033,7 +4033,7 @@
     "object": "RecordingDirectory@425",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 pifccnhncmnilgbnnkjkgicpkeclodpd.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4041,7 +4041,7 @@
     "object": "RecordingDirectory@426",
     "result": "Profile 1 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4049,7 +4049,7 @@
     "object": "RecordingDirectory@426",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 112
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4057,7 +4057,7 @@
     "object": "RecordingDirectory@427",
     "result": "Profile 2 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 194
   },
   {
     "type": "get",
@@ -4065,7 +4065,7 @@
     "object": "RecordingDirectory@427",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4073,7 +4073,7 @@
     "object": "RecordingDirectory@428",
     "result": "Profile 2 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4081,7 +4081,7 @@
     "object": "RecordingDirectory@428",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4089,7 +4089,7 @@
     "object": "RecordingDirectory@429",
     "result": "Profile 2 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4097,7 +4097,7 @@
     "object": "RecordingDirectory@429",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4105,7 +4105,7 @@
     "object": "RecordingDirectory@430",
     "result": "Profile 2 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4113,7 +4113,7 @@
     "object": "RecordingDirectory@430",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4121,7 +4121,7 @@
     "object": "RecordingDirectory@431",
     "result": "Profile 2 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4129,7 +4129,7 @@
     "object": "RecordingDirectory@431",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4137,7 +4137,7 @@
     "object": "RecordingDirectory@432",
     "result": "Profile 3 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4145,7 +4145,7 @@
     "object": "RecordingDirectory@432",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 3 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4153,7 +4153,7 @@
     "object": "RecordingDirectory@433",
     "result": "Profile 4 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4161,7 +4161,7 @@
     "object": "RecordingDirectory@433",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 4 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4169,7 +4169,7 @@
     "object": "RecordingDirectory@434",
     "result": "Profile 5 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4177,7 +4177,7 @@
     "object": "RecordingDirectory@434",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 5 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4185,7 +4185,7 @@
     "object": "RecordingDirectory@435",
     "result": "Profile 6 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4193,7 +4193,7 @@
     "object": "RecordingDirectory@435",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 6 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4201,7 +4201,7 @@
     "object": "RecordingDirectory@436",
     "result": "Profile 7 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4209,7 +4209,7 @@
     "object": "RecordingDirectory@436",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 7 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4217,7 +4217,7 @@
     "object": "RecordingDirectory@437",
     "result": "Profile 8 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 113
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4225,7 +4225,7 @@
     "object": "RecordingDirectory@437",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 8 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 114
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4233,7 +4233,7 @@
     "object": "RecordingDirectory@438",
     "result": "Profile 9 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 114
+    "timestamp": 195
   },
   {
     "type": "get",
@@ -4241,7 +4241,7 @@
     "object": "RecordingDirectory@438",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 9 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 114
+    "timestamp": 196
   },
   {
     "type": "get",
@@ -4249,7 +4249,7 @@
     "object": "RecordingDirectory@14",
     "result": "/Applications/Android Studio.app",
     "error": null,
-    "timestamp": 114
+    "timestamp": 196
   },
   {
     "type": "get",
@@ -4260,7 +4260,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 114
+    "timestamp": 196
   },
   {
     "type": "get",
@@ -4271,7 +4271,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 114
+    "timestamp": 196
   },
   {
     "type": "invoke",
@@ -4283,7 +4283,7 @@
     "object": "__fs__",
     "result": "FILE",
     "error": null,
-    "timestamp": 115
+    "timestamp": 197
   },
   {
     "type": "get",
@@ -4294,7 +4294,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 115
+    "timestamp": 197
   },
   {
     "type": "get",
@@ -4305,7 +4305,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 115
+    "timestamp": 197
   },
   {
     "type": "invoke",
@@ -4317,7 +4317,7 @@
     "object": "__fs__",
     "result": "DIRECTORY",
     "error": null,
-    "timestamp": 239
+    "timestamp": 311
   },
   {
     "type": "get",
@@ -4328,7 +4328,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 239
+    "timestamp": 312
   },
   {
     "type": "invoke",
@@ -4340,7 +4340,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@441",
     "error": null,
-    "timestamp": 240
+    "timestamp": 312
   },
   {
     "type": "invoke",
@@ -4353,7 +4353,7 @@
       "RecordingDirectory@443"
     ],
     "error": null,
-    "timestamp": 240
+    "timestamp": 312
   },
   {
     "type": "get",
@@ -4361,7 +4361,7 @@
     "object": "RecordingDirectory@442",
     "result": "gradle-2.14.1",
     "error": null,
-    "timestamp": 240
+    "timestamp": 312
   },
   {
     "type": "get",
@@ -4369,7 +4369,7 @@
     "object": "RecordingDirectory@442",
     "result": "gradle-2.14.1",
     "error": null,
-    "timestamp": 240
+    "timestamp": 312
   },
   {
     "type": "get",
@@ -4377,7 +4377,7 @@
     "object": "RecordingDirectory@442",
     "result": "/Applications/Android Studio.app/Contents/gradle/gradle-2.14.1",
     "error": null,
-    "timestamp": 241
+    "timestamp": 313
   },
   {
     "type": "get",
@@ -4385,7 +4385,7 @@
     "object": "RecordingDirectory@443",
     "result": "m2repository",
     "error": null,
-    "timestamp": 241
+    "timestamp": 314
   },
   {
     "type": "get",
@@ -4396,7 +4396,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 241
+    "timestamp": 314
   },
   {
     "type": "get",
@@ -4407,7 +4407,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 244
+    "timestamp": 316
   },
   {
     "type": "invoke",
@@ -4419,7 +4419,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@444",
     "error": null,
-    "timestamp": 244
+    "timestamp": 316
   },
   {
     "type": "invoke",
@@ -4484,7 +4484,7 @@
       "RecordingDirectory@498"
     ],
     "error": null,
-    "timestamp": 244
+    "timestamp": 316
   },
   {
     "type": "get",
@@ -4495,7 +4495,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 245
+    "timestamp": 318
   },
   {
     "type": "get",
@@ -4503,7 +4503,7 @@
     "object": "RecordingDirectory@446",
     "result": "/Applications/.esets",
     "error": null,
-    "timestamp": 245
+    "timestamp": 318
   },
   {
     "type": "get",
@@ -4511,7 +4511,7 @@
     "object": "RecordingDirectory@446",
     "result": "/Applications/.esets",
     "error": null,
-    "timestamp": 246
+    "timestamp": 318
   },
   {
     "type": "invoke",
@@ -4523,7 +4523,7 @@
       "RecordingDirectory@499"
     ],
     "error": null,
-    "timestamp": 246
+    "timestamp": 318
   },
   {
     "type": "get",
@@ -4534,7 +4534,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4542,7 +4542,7 @@
     "object": "RecordingDirectory@499",
     "result": "/Applications/.esets/Contents",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4553,7 +4553,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4561,7 +4561,7 @@
     "object": "RecordingDirectory@448",
     "result": "/Applications/Android Studio.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4569,7 +4569,7 @@
     "object": "RecordingDirectory@448",
     "result": "/Applications/Android Studio.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4580,7 +4580,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4588,7 +4588,7 @@
     "object": "RecordingDirectory@449",
     "result": "/Applications/App Store.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4596,7 +4596,7 @@
     "object": "RecordingDirectory@449",
     "result": "/Applications/App Store.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4607,7 +4607,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4615,7 +4615,7 @@
     "object": "RecordingDirectory@450",
     "result": "/Applications/Atom.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4623,7 +4623,7 @@
     "object": "RecordingDirectory@450",
     "result": "/Applications/Atom.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4634,7 +4634,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4642,7 +4642,7 @@
     "object": "RecordingDirectory@451",
     "result": "/Applications/Automator.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4650,7 +4650,7 @@
     "object": "RecordingDirectory@451",
     "result": "/Applications/Automator.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4661,7 +4661,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4669,7 +4669,7 @@
     "object": "RecordingDirectory@452",
     "result": "/Applications/Calculator.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4677,7 +4677,7 @@
     "object": "RecordingDirectory@452",
     "result": "/Applications/Calculator.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4688,7 +4688,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4696,7 +4696,7 @@
     "object": "RecordingDirectory@453",
     "result": "/Applications/Calendar.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4704,7 +4704,7 @@
     "object": "RecordingDirectory@453",
     "result": "/Applications/Calendar.app",
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4715,7 +4715,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 246
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4723,7 +4723,7 @@
     "object": "RecordingDirectory@454",
     "result": "/Applications/Chess.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4731,7 +4731,7 @@
     "object": "RecordingDirectory@454",
     "result": "/Applications/Chess.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4742,7 +4742,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4750,7 +4750,7 @@
     "object": "RecordingDirectory@455",
     "result": "/Applications/Chrome Remote Desktop Host Uninstaller.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 319
   },
   {
     "type": "get",
@@ -4758,7 +4758,7 @@
     "object": "RecordingDirectory@455",
     "result": "/Applications/Chrome Remote Desktop Host Uninstaller.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4769,7 +4769,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4777,7 +4777,7 @@
     "object": "RecordingDirectory@456",
     "result": "/Applications/Contacts.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4785,7 +4785,7 @@
     "object": "RecordingDirectory@456",
     "result": "/Applications/Contacts.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4796,7 +4796,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4804,7 +4804,7 @@
     "object": "RecordingDirectory@457",
     "result": "/Applications/Dashboard.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4812,7 +4812,7 @@
     "object": "RecordingDirectory@457",
     "result": "/Applications/Dashboard.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4823,7 +4823,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4831,7 +4831,7 @@
     "object": "RecordingDirectory@458",
     "result": "/Applications/Dictionary.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4839,7 +4839,7 @@
     "object": "RecordingDirectory@458",
     "result": "/Applications/Dictionary.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4850,7 +4850,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4858,7 +4858,7 @@
     "object": "RecordingDirectory@459",
     "result": "/Applications/DVD Player.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4866,7 +4866,7 @@
     "object": "RecordingDirectory@459",
     "result": "/Applications/DVD Player.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4877,7 +4877,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4885,7 +4885,7 @@
     "object": "RecordingDirectory@460",
     "result": "/Applications/Emacs.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4893,7 +4893,7 @@
     "object": "RecordingDirectory@460",
     "result": "/Applications/Emacs.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4904,7 +4904,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4912,7 +4912,7 @@
     "object": "RecordingDirectory@461",
     "result": "/Applications/ESET NOD32 Antivirus.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4920,7 +4920,7 @@
     "object": "RecordingDirectory@461",
     "result": "/Applications/ESET NOD32 Antivirus.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4931,7 +4931,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4939,7 +4939,7 @@
     "object": "RecordingDirectory@462",
     "result": "/Applications/FaceTime.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4947,7 +4947,7 @@
     "object": "RecordingDirectory@462",
     "result": "/Applications/FaceTime.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4958,7 +4958,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4966,7 +4966,7 @@
     "object": "RecordingDirectory@463",
     "result": "/Applications/Font Book.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4974,7 +4974,7 @@
     "object": "RecordingDirectory@463",
     "result": "/Applications/Font Book.app",
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4985,7 +4985,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 247
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -4993,7 +4993,7 @@
     "object": "RecordingDirectory@464",
     "result": "/Applications/GIMP.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -5001,7 +5001,7 @@
     "object": "RecordingDirectory@464",
     "result": "/Applications/GIMP.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -5012,7 +5012,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 320
   },
   {
     "type": "get",
@@ -5020,7 +5020,7 @@
     "object": "RecordingDirectory@465",
     "result": "/Applications/gMacInformation.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5028,7 +5028,7 @@
     "object": "RecordingDirectory@465",
     "result": "/Applications/gMacInformation.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5039,7 +5039,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5047,7 +5047,7 @@
     "object": "RecordingDirectory@466",
     "result": "/Applications/gmenu.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5055,7 +5055,7 @@
     "object": "RecordingDirectory@466",
     "result": "/Applications/gmenu.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5066,7 +5066,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5074,7 +5074,7 @@
     "object": "RecordingDirectory@467",
     "result": "/Applications/Google Chrome.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5082,7 +5082,7 @@
     "object": "RecordingDirectory@467",
     "result": "/Applications/Google Chrome.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5093,7 +5093,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5101,7 +5101,7 @@
     "object": "RecordingDirectory@468",
     "result": "/Applications/Google Drive.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5109,7 +5109,7 @@
     "object": "RecordingDirectory@468",
     "result": "/Applications/Google Drive.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5120,7 +5120,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5128,7 +5128,7 @@
     "object": "RecordingDirectory@469",
     "result": "/Applications/Hex Fiend.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5136,7 +5136,7 @@
     "object": "RecordingDirectory@469",
     "result": "/Applications/Hex Fiend.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5147,7 +5147,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5155,7 +5155,7 @@
     "object": "RecordingDirectory@470",
     "result": "/Applications/iBooks.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5163,7 +5163,7 @@
     "object": "RecordingDirectory@470",
     "result": "/Applications/iBooks.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5174,7 +5174,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5182,7 +5182,7 @@
     "object": "RecordingDirectory@471",
     "result": "/Applications/Image Capture.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5190,7 +5190,7 @@
     "object": "RecordingDirectory@471",
     "result": "/Applications/Image Capture.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5201,7 +5201,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5209,7 +5209,7 @@
     "object": "RecordingDirectory@472",
     "result": "/Applications/IntelliJ IDEA CE.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 321
   },
   {
     "type": "get",
@@ -5217,7 +5217,7 @@
     "object": "RecordingDirectory@472",
     "result": "/Applications/IntelliJ IDEA CE.app",
     "error": null,
-    "timestamp": 248
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5225,7 +5225,7 @@
     "object": "RecordingDirectory@472",
     "result": "/Applications/IntelliJ IDEA CE.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5236,7 +5236,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5244,7 +5244,7 @@
     "object": "RecordingDirectory@473",
     "result": "/Applications/iTunes.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5252,7 +5252,7 @@
     "object": "RecordingDirectory@473",
     "result": "/Applications/iTunes.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5263,7 +5263,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5271,7 +5271,7 @@
     "object": "RecordingDirectory@474",
     "result": "/Applications/Launchpad.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5279,7 +5279,7 @@
     "object": "RecordingDirectory@474",
     "result": "/Applications/Launchpad.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5290,7 +5290,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5298,7 +5298,7 @@
     "object": "RecordingDirectory@475",
     "result": "/Applications/MacPushy.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5306,7 +5306,7 @@
     "object": "RecordingDirectory@475",
     "result": "/Applications/MacPushy.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5317,7 +5317,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5325,7 +5325,7 @@
     "object": "RecordingDirectory@476",
     "result": "/Applications/Mail.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5333,7 +5333,7 @@
     "object": "RecordingDirectory@476",
     "result": "/Applications/Mail.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5344,7 +5344,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5352,7 +5352,7 @@
     "object": "RecordingDirectory@477",
     "result": "/Applications/Managed Software Center.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5360,7 +5360,7 @@
     "object": "RecordingDirectory@477",
     "result": "/Applications/Managed Software Center.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5371,7 +5371,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5379,7 +5379,7 @@
     "object": "RecordingDirectory@478",
     "result": "/Applications/Maps.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5387,7 +5387,7 @@
     "object": "RecordingDirectory@478",
     "result": "/Applications/Maps.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5398,7 +5398,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5406,7 +5406,7 @@
     "object": "RecordingDirectory@479",
     "result": "/Applications/Messages.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5414,7 +5414,7 @@
     "object": "RecordingDirectory@479",
     "result": "/Applications/Messages.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5425,7 +5425,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 322
   },
   {
     "type": "get",
@@ -5433,7 +5433,7 @@
     "object": "RecordingDirectory@480",
     "result": "/Applications/Mission Control.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5441,7 +5441,7 @@
     "object": "RecordingDirectory@480",
     "result": "/Applications/Mission Control.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5452,7 +5452,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5460,7 +5460,7 @@
     "object": "RecordingDirectory@481",
     "result": "/Applications/NoMachine.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5468,7 +5468,7 @@
     "object": "RecordingDirectory@481",
     "result": "/Applications/NoMachine.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5479,7 +5479,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5487,7 +5487,7 @@
     "object": "RecordingDirectory@482",
     "result": "/Applications/Notes.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5495,7 +5495,7 @@
     "object": "RecordingDirectory@482",
     "result": "/Applications/Notes.app",
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5506,7 +5506,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 249
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5514,7 +5514,7 @@
     "object": "RecordingDirectory@483",
     "result": "/Applications/Photo Booth.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5522,7 +5522,7 @@
     "object": "RecordingDirectory@483",
     "result": "/Applications/Photo Booth.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5533,7 +5533,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5541,7 +5541,7 @@
     "object": "RecordingDirectory@484",
     "result": "/Applications/Photos.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5549,7 +5549,7 @@
     "object": "RecordingDirectory@484",
     "result": "/Applications/Photos.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5560,7 +5560,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5568,7 +5568,7 @@
     "object": "RecordingDirectory@485",
     "result": "/Applications/Preview.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5576,7 +5576,7 @@
     "object": "RecordingDirectory@485",
     "result": "/Applications/Preview.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5587,7 +5587,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5595,7 +5595,7 @@
     "object": "RecordingDirectory@486",
     "result": "/Applications/QuickTime Player.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5603,7 +5603,7 @@
     "object": "RecordingDirectory@486",
     "result": "/Applications/QuickTime Player.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5614,7 +5614,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5622,7 +5622,7 @@
     "object": "RecordingDirectory@487",
     "result": "/Applications/Reminders.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5630,7 +5630,7 @@
     "object": "RecordingDirectory@487",
     "result": "/Applications/Reminders.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5641,7 +5641,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5649,7 +5649,7 @@
     "object": "RecordingDirectory@488",
     "result": "/Applications/Safari.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5657,7 +5657,7 @@
     "object": "RecordingDirectory@488",
     "result": "/Applications/Safari.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5668,7 +5668,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 323
   },
   {
     "type": "get",
@@ -5676,7 +5676,7 @@
     "object": "RecordingDirectory@489",
     "result": "/Applications/Santa.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5684,7 +5684,7 @@
     "object": "RecordingDirectory@489",
     "result": "/Applications/Santa.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5695,7 +5695,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5703,7 +5703,7 @@
     "object": "RecordingDirectory@490",
     "result": "/Applications/Siri.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5711,7 +5711,7 @@
     "object": "RecordingDirectory@490",
     "result": "/Applications/Siri.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5722,7 +5722,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5730,7 +5730,7 @@
     "object": "RecordingDirectory@491",
     "result": "/Applications/Stickies.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5738,7 +5738,7 @@
     "object": "RecordingDirectory@491",
     "result": "/Applications/Stickies.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5749,7 +5749,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5757,7 +5757,7 @@
     "object": "RecordingDirectory@492",
     "result": "/Applications/System Preferences.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5765,7 +5765,7 @@
     "object": "RecordingDirectory@492",
     "result": "/Applications/System Preferences.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5776,7 +5776,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5784,7 +5784,7 @@
     "object": "RecordingDirectory@493",
     "result": "/Applications/TextEdit.app",
     "error": null,
-    "timestamp": 250
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5792,7 +5792,7 @@
     "object": "RecordingDirectory@493",
     "result": "/Applications/TextEdit.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5803,7 +5803,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5811,7 +5811,7 @@
     "object": "RecordingDirectory@494",
     "result": "/Applications/Time Machine.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5819,7 +5819,7 @@
     "object": "RecordingDirectory@494",
     "result": "/Applications/Time Machine.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5830,7 +5830,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5838,7 +5838,7 @@
     "object": "RecordingDirectory@495",
     "result": "/Applications/Tulsi.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5846,7 +5846,7 @@
     "object": "RecordingDirectory@495",
     "result": "/Applications/Tulsi.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5857,7 +5857,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5865,7 +5865,7 @@
     "object": "RecordingDirectory@496",
     "result": "/Applications/Utilities",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5873,7 +5873,7 @@
     "object": "RecordingDirectory@496",
     "result": "/Applications/Utilities",
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "invoke",
@@ -5906,7 +5906,7 @@
       "RecordingDirectory@521"
     ],
     "error": null,
-    "timestamp": 251
+    "timestamp": 324
   },
   {
     "type": "get",
@@ -5917,7 +5917,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5925,7 +5925,7 @@
     "object": "RecordingDirectory@502",
     "result": "/Applications/Utilities/Activity Monitor.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5936,7 +5936,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5944,7 +5944,7 @@
     "object": "RecordingDirectory@503",
     "result": "/Applications/Utilities/AirPort Utility.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5955,7 +5955,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5963,7 +5963,7 @@
     "object": "RecordingDirectory@504",
     "result": "/Applications/Utilities/Audio MIDI Setup.app",
     "error": null,
-    "timestamp": 251
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5974,7 +5974,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5982,7 +5982,7 @@
     "object": "RecordingDirectory@505",
     "result": "/Applications/Utilities/Bluetooth File Exchange.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -5993,7 +5993,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -6001,7 +6001,7 @@
     "object": "RecordingDirectory@506",
     "result": "/Applications/Utilities/Boot Camp Assistant.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -6012,7 +6012,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 325
   },
   {
     "type": "get",
@@ -6020,7 +6020,7 @@
     "object": "RecordingDirectory@507",
     "result": "/Applications/Utilities/ColorSync Utility.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6031,7 +6031,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6039,7 +6039,7 @@
     "object": "RecordingDirectory@508",
     "result": "/Applications/Utilities/Console.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6050,7 +6050,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6058,7 +6058,7 @@
     "object": "RecordingDirectory@509",
     "result": "/Applications/Utilities/Digital Color Meter.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6069,7 +6069,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6077,7 +6077,7 @@
     "object": "RecordingDirectory@510",
     "result": "/Applications/Utilities/Disk Utility.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6088,7 +6088,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6096,7 +6096,7 @@
     "object": "RecordingDirectory@511",
     "result": "/Applications/Utilities/GoogleCorporate",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6107,7 +6107,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6115,7 +6115,7 @@
     "object": "RecordingDirectory@512",
     "result": "/Applications/Utilities/Grab.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6126,7 +6126,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6134,7 +6134,7 @@
     "object": "RecordingDirectory@513",
     "result": "/Applications/Utilities/Grapher.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6145,7 +6145,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6153,7 +6153,7 @@
     "object": "RecordingDirectory@514",
     "result": "/Applications/Utilities/Keychain Access.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6164,7 +6164,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6172,7 +6172,7 @@
     "object": "RecordingDirectory@515",
     "result": "/Applications/Utilities/Migration Assistant.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6183,7 +6183,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6191,7 +6191,7 @@
     "object": "RecordingDirectory@516",
     "result": "/Applications/Utilities/Script Editor.app",
     "error": null,
-    "timestamp": 252
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6202,7 +6202,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6210,7 +6210,7 @@
     "object": "RecordingDirectory@517",
     "result": "/Applications/Utilities/System Information.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 326
   },
   {
     "type": "get",
@@ -6221,7 +6221,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6229,7 +6229,7 @@
     "object": "RecordingDirectory@518",
     "result": "/Applications/Utilities/Terminal.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6240,7 +6240,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6248,7 +6248,7 @@
     "object": "RecordingDirectory@519",
     "result": "/Applications/Utilities/Ticket Viewer.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6259,7 +6259,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6267,7 +6267,7 @@
     "object": "RecordingDirectory@520",
     "result": "/Applications/Utilities/VoiceOver Utility.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6278,7 +6278,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6286,7 +6286,7 @@
     "object": "RecordingDirectory@521",
     "result": "/Applications/Utilities/XQuartz.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6297,7 +6297,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6305,7 +6305,7 @@
     "object": "RecordingDirectory@497",
     "result": "/Applications/Xcode.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6313,7 +6313,7 @@
     "object": "RecordingDirectory@497",
     "result": "/Applications/Xcode.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6324,7 +6324,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6332,7 +6332,7 @@
     "object": "RecordingDirectory@498",
     "result": "/Applications/Zenmap.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6340,7 +6340,7 @@
     "object": "RecordingDirectory@498",
     "result": "/Applications/Zenmap.app",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "invoke",
@@ -6352,7 +6352,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@522",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "invoke",
@@ -6366,7 +6366,7 @@
       "RecordingDirectory@525"
     ],
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6377,7 +6377,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6385,7 +6385,7 @@
     "object": "RecordingDirectory@525",
     "result": "/Users/flutter/Applications/Chrome Apps.localized",
     "error": null,
-    "timestamp": 253
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6393,7 +6393,7 @@
     "object": "RecordingDirectory@525",
     "result": "/Users/flutter/Applications/Chrome Apps.localized",
     "error": null,
-    "timestamp": 254
+    "timestamp": 327
   },
   {
     "type": "invoke",
@@ -6434,7 +6434,7 @@
       "RecordingDirectory@555"
     ],
     "error": null,
-    "timestamp": 254
+    "timestamp": 327
   },
   {
     "type": "get",
@@ -6445,7 +6445,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6453,7 +6453,7 @@
     "object": "RecordingDirectory@526",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/.localized",
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6464,7 +6464,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6472,7 +6472,7 @@
     "object": "RecordingDirectory@527",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6483,7 +6483,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6491,7 +6491,7 @@
     "object": "RecordingDirectory@528",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6502,7 +6502,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 328
   },
   {
     "type": "get",
@@ -6510,7 +6510,7 @@
     "object": "RecordingDirectory@529",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 254
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6521,7 +6521,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6529,7 +6529,7 @@
     "object": "RecordingDirectory@530",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 254
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6540,7 +6540,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 254
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6548,7 +6548,7 @@
     "object": "RecordingDirectory@531",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default fajgmpcceamgfegfadkijlfajpnbdmma.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6559,7 +6559,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6567,7 +6567,7 @@
     "object": "RecordingDirectory@532",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default npcpnahjfihkilahpohiieimoffneflm.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6578,7 +6578,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6586,7 +6586,7 @@
     "object": "RecordingDirectory@533",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Default pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6597,7 +6597,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6605,7 +6605,7 @@
     "object": "RecordingDirectory@535",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6616,7 +6616,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 329
   },
   {
     "type": "get",
@@ -6624,7 +6624,7 @@
     "object": "RecordingDirectory@536",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6635,7 +6635,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6643,7 +6643,7 @@
     "object": "RecordingDirectory@537",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6654,7 +6654,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6662,7 +6662,7 @@
     "object": "RecordingDirectory@538",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6673,7 +6673,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6681,7 +6681,7 @@
     "object": "RecordingDirectory@539",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 fahmaaghhglfmonjliepjlchgpgfmobi.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6692,7 +6692,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6700,7 +6700,7 @@
     "object": "RecordingDirectory@540",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 hmjkmjkepdijhoojdojkdfohbdgmmhki.app",
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6711,7 +6711,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 255
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6719,7 +6719,7 @@
     "object": "RecordingDirectory@541",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 lefigjbiimiemfhjmibbgemkpenelmag.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6730,7 +6730,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6738,7 +6738,7 @@
     "object": "RecordingDirectory@542",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 pifccnhncmnilgbnnkjkgicpkeclodpd.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6749,7 +6749,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6757,7 +6757,7 @@
     "object": "RecordingDirectory@543",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 1 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6768,7 +6768,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6776,7 +6776,7 @@
     "object": "RecordingDirectory@544",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 apdfllckaahabafndbhieahigkjlhalf.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6787,7 +6787,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 330
   },
   {
     "type": "get",
@@ -6795,7 +6795,7 @@
     "object": "RecordingDirectory@545",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6806,7 +6806,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6814,7 +6814,7 @@
     "object": "RecordingDirectory@546",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 blpcfgokakmgnkcojhhkbfbldkacnbeo.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6825,7 +6825,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6833,7 +6833,7 @@
     "object": "RecordingDirectory@547",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 coobgpohoikkiipiblmjeljniedjpjpf.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6844,7 +6844,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6852,7 +6852,7 @@
     "object": "RecordingDirectory@548",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 2 pjkljhegncpnkpknbcohdijeoejaedia.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6863,7 +6863,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6871,7 +6871,7 @@
     "object": "RecordingDirectory@549",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 3 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6882,7 +6882,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6890,7 +6890,7 @@
     "object": "RecordingDirectory@550",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 4 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6901,7 +6901,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6909,7 +6909,7 @@
     "object": "RecordingDirectory@551",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 5 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6920,7 +6920,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6928,7 +6928,7 @@
     "object": "RecordingDirectory@552",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 6 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6939,7 +6939,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 256
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6947,7 +6947,7 @@
     "object": "RecordingDirectory@553",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 7 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 257
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6958,7 +6958,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 257
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6966,7 +6966,7 @@
     "object": "RecordingDirectory@554",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 8 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 257
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6977,7 +6977,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 257
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6985,7 +6985,7 @@
     "object": "RecordingDirectory@555",
     "result": "/Users/flutter/Applications/Chrome Apps.localized/Profile 9 beknehfpfkghjoafdifaflglpjkojoco.app",
     "error": null,
-    "timestamp": 257
+    "timestamp": 331
   },
   {
     "type": "get",
@@ -6996,7 +6996,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 258
+    "timestamp": 332
   },
   {
     "type": "get",
@@ -7007,7 +7007,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 379
+    "timestamp": 541
   },
   {
     "type": "get",
@@ -7018,7 +7018,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 379
+    "timestamp": 541
   },
   {
     "type": "get",
@@ -7029,7 +7029,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 559
+    "timestamp": 708
   },
   {
     "type": "get",
@@ -7040,7 +7040,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 559
+    "timestamp": 708
   },
   {
     "type": "get",
@@ -7051,7 +7051,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 559
+    "timestamp": 708
   },
   {
     "type": "invoke",
@@ -7063,7 +7063,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@556",
     "error": null,
-    "timestamp": 559
+    "timestamp": 708
   },
   {
     "type": "get",
@@ -7071,7 +7071,7 @@
     "object": "RecordingDirectory@556",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7083,7 +7083,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@557",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7093,7 +7093,7 @@
     "object": "RecordingDirectory@557",
     "result": true,
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "get",
@@ -7101,7 +7101,7 @@
     "object": "RecordingDirectory@557",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7113,7 +7113,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@558",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7123,7 +7123,7 @@
     "object": "RecordingDirectory@558",
     "result": true,
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "get",
@@ -7134,7 +7134,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7146,7 +7146,7 @@
     "object": "__fs__",
     "result": "RecordingFile@559",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7156,7 +7156,7 @@
     "object": "RecordingFile@559",
     "result": true,
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "invoke",
@@ -7166,7 +7166,7 @@
     "object": "RecordingFile@559",
     "result": "!560.material_fonts.version",
     "error": null,
-    "timestamp": 560
+    "timestamp": 709
   },
   {
     "type": "get",
@@ -7177,7 +7177,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "get",
@@ -7188,7 +7188,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "invoke",
@@ -7200,7 +7200,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@561",
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "get",
@@ -7208,7 +7208,7 @@
     "object": "RecordingDirectory@561",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache",
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "invoke",
@@ -7220,7 +7220,7 @@
     "object": "__fs__",
     "result": "RecordingFile@562",
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "invoke",
@@ -7230,7 +7230,7 @@
     "object": "RecordingFile@562",
     "result": true,
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "invoke",
@@ -7240,7 +7240,7 @@
     "object": "RecordingFile@562",
     "result": "!563.material_fonts.stamp",
     "error": null,
-    "timestamp": 563
+    "timestamp": 712
   },
   {
     "type": "get",
@@ -7251,7 +7251,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 564
+    "timestamp": 713
   },
   {
     "type": "get",
@@ -7262,7 +7262,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 564
+    "timestamp": 713
   },
   {
     "type": "invoke",
@@ -7274,7 +7274,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@564",
     "error": null,
-    "timestamp": 565
+    "timestamp": 713
   },
   {
     "type": "get",
@@ -7282,7 +7282,7 @@
     "object": "RecordingDirectory@564",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache",
     "error": null,
-    "timestamp": 565
+    "timestamp": 713
   },
   {
     "type": "invoke",
@@ -7294,7 +7294,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@565",
     "error": null,
-    "timestamp": 565
+    "timestamp": 713
   },
   {
     "type": "invoke",
@@ -7304,7 +7304,7 @@
     "object": "RecordingDirectory@565",
     "result": true,
     "error": null,
-    "timestamp": 565
+    "timestamp": 713
   },
   {
     "type": "get",
@@ -7315,7 +7315,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7323,7 +7323,7 @@
     "object": "RecordingDirectory@565",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/pkg",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7335,7 +7335,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@566",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7345,7 +7345,7 @@
     "object": "RecordingDirectory@566",
     "result": true,
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7356,7 +7356,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7367,7 +7367,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7378,7 +7378,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7390,7 +7390,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@567",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7398,7 +7398,7 @@
     "object": "RecordingDirectory@567",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7410,7 +7410,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@568",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7420,7 +7420,7 @@
     "object": "RecordingDirectory@568",
     "result": true,
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7428,7 +7428,7 @@
     "object": "RecordingDirectory@568",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "invoke",
@@ -7440,7 +7440,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@569",
     "error": null,
-    "timestamp": 565
+    "timestamp": 714
   },
   {
     "type": "get",
@@ -7451,7 +7451,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7459,7 +7459,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7471,7 +7471,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@570",
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7481,7 +7481,7 @@
     "object": "RecordingDirectory@570",
     "result": true,
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7492,7 +7492,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7500,7 +7500,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7512,7 +7512,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@571",
     "error": null,
-    "timestamp": 566
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7522,7 +7522,7 @@
     "object": "RecordingDirectory@571",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7533,7 +7533,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7541,7 +7541,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7553,7 +7553,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@572",
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "invoke",
@@ -7563,7 +7563,7 @@
     "object": "RecordingDirectory@572",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7574,7 +7574,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 715
   },
   {
     "type": "get",
@@ -7582,7 +7582,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7594,7 +7594,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@573",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7604,7 +7604,7 @@
     "object": "RecordingDirectory@573",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7615,7 +7615,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7623,7 +7623,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7635,7 +7635,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@574",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7645,7 +7645,7 @@
     "object": "RecordingDirectory@574",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7656,7 +7656,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7664,7 +7664,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7676,7 +7676,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@575",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7686,7 +7686,7 @@
     "object": "RecordingDirectory@575",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7697,7 +7697,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7705,7 +7705,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7717,7 +7717,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@576",
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7727,7 +7727,7 @@
     "object": "RecordingDirectory@576",
     "result": true,
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7738,7 +7738,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 567
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7746,7 +7746,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7758,7 +7758,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@577",
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7768,7 +7768,7 @@
     "object": "RecordingDirectory@577",
     "result": true,
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7779,7 +7779,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7787,7 +7787,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7799,7 +7799,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@578",
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "invoke",
@@ -7809,7 +7809,7 @@
     "object": "RecordingDirectory@578",
     "result": true,
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7820,7 +7820,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 568
+    "timestamp": 716
   },
   {
     "type": "get",
@@ -7828,7 +7828,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7840,7 +7840,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@579",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7850,7 +7850,7 @@
     "object": "RecordingDirectory@579",
     "result": true,
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "get",
@@ -7861,7 +7861,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "get",
@@ -7869,7 +7869,7 @@
     "object": "RecordingDirectory@569",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache/artifacts/engine",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7881,7 +7881,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@580",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7891,7 +7891,7 @@
     "object": "RecordingDirectory@580",
     "result": true,
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "get",
@@ -7902,7 +7902,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7914,7 +7914,7 @@
     "object": "__fs__",
     "result": "RecordingFile@581",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7924,7 +7924,7 @@
     "object": "RecordingFile@581",
     "result": true,
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "invoke",
@@ -7934,7 +7934,7 @@
     "object": "RecordingFile@581",
     "result": "!582.engine.version",
     "error": null,
-    "timestamp": 568
+    "timestamp": 717
   },
   {
     "type": "get",
@@ -7945,7 +7945,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "get",
@@ -7956,7 +7956,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "invoke",
@@ -7968,7 +7968,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@583",
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "get",
@@ -7976,7 +7976,7 @@
     "object": "RecordingDirectory@583",
     "result": "/Users/flutter/project/flutter/flutter/bin/cache",
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "invoke",
@@ -7988,7 +7988,7 @@
     "object": "__fs__",
     "result": "RecordingFile@584",
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "invoke",
@@ -7998,7 +7998,7 @@
     "object": "RecordingFile@584",
     "result": true,
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "invoke",
@@ -8008,7 +8008,7 @@
     "object": "RecordingFile@584",
     "result": "!585.engine.stamp",
     "error": null,
-    "timestamp": 569
+    "timestamp": 718
   },
   {
     "type": "invoke",
@@ -8018,7 +8018,7 @@
     "object": "RecordingRandomAccessFile@2",
     "result": null,
     "error": null,
-    "timestamp": 581
+    "timestamp": 730
   },
   {
     "type": "get",
@@ -8029,7 +8029,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 583
+    "timestamp": 732
   },
   {
     "type": "invoke",
@@ -8041,7 +8041,7 @@
     "object": "__fs__",
     "result": "FILE",
     "error": null,
-    "timestamp": 583
+    "timestamp": 732
   },
   {
     "type": "get",
@@ -8049,7 +8049,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@586",
     "error": null,
-    "timestamp": 584
+    "timestamp": 732
   },
   {
     "type": "get",
@@ -8057,7 +8057,7 @@
     "object": "RecordingDirectory@586",
     "result": "/Users/flutter/project/flutter/flutter/examples/hello_world",
     "error": null,
-    "timestamp": 584
+    "timestamp": 732
   },
   {
     "type": "get",
@@ -8068,7 +8068,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 584
+    "timestamp": 732
   },
   {
     "type": "get",
@@ -8076,7 +8076,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@587",
     "error": null,
-    "timestamp": 588
+    "timestamp": 736
   },
   {
     "type": "invoke",
@@ -8088,7 +8088,7 @@
     "object": "RecordingDirectory@587",
     "result": "RecordingDirectory@588",
     "error": null,
-    "timestamp": 589
+    "timestamp": 737
   },
   {
     "type": "invoke",
@@ -8100,7 +8100,7 @@
     "object": "__fs__",
     "result": "RecordingFile@589",
     "error": null,
-    "timestamp": 590
+    "timestamp": 739
   },
   {
     "type": "get",
@@ -8108,15 +8108,15 @@
     "object": "RecordingFile@589",
     "result": "hello_flutter.ipa",
     "error": null,
-    "timestamp": 590
+    "timestamp": 739
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@588",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx",
     "error": null,
-    "timestamp": 590
+    "timestamp": 739
   },
   {
     "type": "get",
@@ -8127,27 +8127,27 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1069
+    "timestamp": 1192
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@588",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx",
     "error": null,
-    "timestamp": 1069
+    "timestamp": 1192
   },
   {
     "type": "invoke",
     "method": "directory",
     "positionalArguments": [
-      "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload"
+      "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload"
     ],
     "namedArguments": {},
     "object": "__fs__",
     "result": "RecordingDirectory@590",
     "error": null,
-    "timestamp": 1070
+    "timestamp": 1192
   },
   {
     "type": "invoke",
@@ -8159,15 +8159,15 @@
       "RecordingDirectory@591"
     ],
     "error": null,
-    "timestamp": 1070
+    "timestamp": 1192
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@591",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload/hello_flutter.app",
     "error": null,
-    "timestamp": 1070
+    "timestamp": 1193
   },
   {
     "type": "get",
@@ -8178,27 +8178,27 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1070
+    "timestamp": 1193
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@591",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload/hello_flutter.app",
     "error": null,
-    "timestamp": 1071
+    "timestamp": 1193
   },
   {
     "type": "invoke",
     "method": "typeSync",
     "positionalArguments": [
-      "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app/Info.plist"
+      "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload/hello_flutter.app/Info.plist"
     ],
     "namedArguments": {},
     "object": "__fs__",
     "result": "FILE",
     "error": null,
-    "timestamp": 1071
+    "timestamp": 1193
   },
   {
     "type": "get",
@@ -8209,7 +8209,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1071
+    "timestamp": 1193
   },
   {
     "type": "get",
@@ -8220,7 +8220,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1071
+    "timestamp": 1193
   },
   {
     "type": "get",
@@ -8231,15 +8231,15 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1172
+    "timestamp": 1295
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@591",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload/hello_flutter.app",
     "error": null,
-    "timestamp": 1173
+    "timestamp": 1295
   },
   {
     "type": "get",
@@ -8247,7 +8247,7 @@
     "object": "__fs__",
     "result": "RecordingDirectory@592",
     "error": null,
-    "timestamp": 1180
+    "timestamp": 1302
   },
   {
     "type": "get",
@@ -8255,7 +8255,7 @@
     "object": "RecordingDirectory@592",
     "result": "/Users/flutter/project/flutter/flutter/examples/hello_world",
     "error": null,
-    "timestamp": 1180
+    "timestamp": 1302
   },
   {
     "type": "get",
@@ -8266,7 +8266,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1180
+    "timestamp": 1302
   },
   {
     "type": "get",
@@ -8277,7 +8277,40 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1189
+    "timestamp": 1308
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 1309
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 1309
+  },
+  {
+    "type": "get",
+    "property": "path",
+    "object": "__fs__",
+    "result": {
+      "style": "posix",
+      "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
+    },
+    "error": null,
+    "timestamp": 1311
   },
   {
     "type": "invoke",
@@ -8289,7 +8322,7 @@
     "object": "__fs__",
     "result": "RecordingFile@593",
     "error": null,
-    "timestamp": 1189
+    "timestamp": 1311
   },
   {
     "type": "invoke",
@@ -8299,7 +8332,7 @@
     "object": "RecordingFile@593",
     "result": true,
     "error": null,
-    "timestamp": 1189
+    "timestamp": 1311
   },
   {
     "type": "get",
@@ -8310,15 +8343,15 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 1190
+    "timestamp": 1311
   },
   {
     "type": "get",
     "property": "path",
     "object": "RecordingDirectory@591",
-    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_bKCxMb/Payload/hello_flutter.app",
+    "result": "/var/folders/n5/klvyv2fj5lj2lhn_61080t0m003g3j/T/flutter_app_N0zaZx/Payload/hello_flutter.app",
     "error": null,
-    "timestamp": 1191
+    "timestamp": 1313
   },
   {
     "type": "get",
@@ -8329,7 +8362,7 @@
       "cwd": "/Users/flutter/project/flutter/flutter/examples/hello_world"
     },
     "error": null,
-    "timestamp": 5790
+    "timestamp": 5833
   },
   {
     "type": "invoke",
@@ -8341,6 +8374,6 @@
     "object": "RecordingDirectory@588",
     "result": "RecordingDirectory@594",
     "error": null,
-    "timestamp": 6250
+    "timestamp": 6290
   }
 ]

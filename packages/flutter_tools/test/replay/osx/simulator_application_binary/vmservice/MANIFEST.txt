@@ -20,16 +20,16 @@
         "hostCPU": "Intel(R) Xeon(R) CPU E5-2697 v2 @ 2.70GHz",
         "version": "1.21.0-edge.554c3c9683264ab9840a2c2371942b5a9f5e1fae (Wed Dec  7 14:50:39 2016) on \"ios_x64\"",
         "_profilerMode": "Dart",
-        "pid": 14974,
-        "_maxRSS": 83714048,
-        "startTime": 1488929313252,
+        "pid": 60434,
+        "_maxRSS": 83877888,
+        "startTime": 1489003178455,
         "isolates": [
           {
             "type": "@Isolate",
             "fixedId": true,
-            "id": "isolates/374374322",
+            "id": "isolates/755012617",
             "name": "hello_flutter_lib_flx.flx$main",
-            "number": "374374322"
+            "number": "755012617"
           }
         ]
       },
@@ -43,7 +43,7 @@
       "method": "getIsolate",
       "id": 1,
       "params": {
-        "isolateId": "isolates/374374322"
+        "isolateId": "isolates/755012617"
       }
     }
   },
@@ -54,11 +54,11 @@
       "result": {
         "type": "Isolate",
         "fixedId": true,
-        "id": "isolates/374374322",
+        "id": "isolates/755012617",
         "name": "hello_flutter_lib_flx.flx$main",
-        "number": "374374322",
-        "_originNumber": "374374322",
-        "startTime": 1488929313274,
+        "number": "755012617",
+        "_originNumber": "755012617",
+        "startTime": 1489003178490,
         "_heaps": {
           "new": {
             "type": "HeapSpace",
@@ -66,7 +66,7 @@
             "vmName": "Scavenger",
             "collections": 0,
             "avgCollectionPeriodMillis": 0.0,
-            "used": 1478320,
+            "used": 1465088,
             "capacity": 2097152,
             "external": 0,
             "time": 0.0
@@ -76,7 +76,7 @@
             "name": "old",
             "vmName": "PageSpace",
             "collections": 0,
-            "used": 12554896,
+            "used": 12438448,
             "capacity": 12693504,
             "external": 789040,
             "time": 0.0,
@@ -93,11 +93,11 @@
           "isolate": {
             "type": "@Isolate",
             "fixedId": true,
-            "id": "isolates/374374322",
+            "id": "isolates/755012617",
             "name": "hello_flutter_lib_flx.flx$main",
-            "number": "374374322"
+            "number": "755012617"
           },
-          "timestamp": 1488929313359,
+          "timestamp": 1489003178567,
           "topFrame": {
             "type": "Frame",
             "location": {
@@ -105,22 +105,24 @@
               "script": {
                 "type": "@Script",
                 "fixedId": true,
-                "id": "libraries/54/scripts/package%3Aflutter%2Fsrc%2Fmaterial%2Fscaffold.dart/15aab1a523c",
-                "uri": "package:flutter/src/material/scaffold.dart",
-                "_kind": "library"
+                "id": "libraries/0/scripts/dart%3Acore-patch%2Fgrowable_array.dart/0",
+                "uri": "dart:core-patch/growable_array.dart",
+                "_kind": "patch"
               },
-              "tokenPos": 5579
+              "tokenPos": 1988
             },
             "function": {
               "type": "@Function",
               "fixedId": true,
-              "id": "classes/1826/functions/build",
-              "name": "build",
+              "id": "classes/54/functions/_grow%400150898",
+              "name": "_grow",
+              "_vmName": "_grow@0150898",
               "owner": {
                 "type": "@Class",
                 "fixedId": true,
-                "id": "classes/1826",
-                "name": "ScaffoldState"
+                "id": "classes/54",
+                "name": "_GrowableList",
+                "_vmName": "_GrowableList@0150898"
               },
               "_kind": "RegularFunction",
               "static": false,
@@ -131,9 +133,9 @@
             "code": {
               "type": "@Code",
               "fixedId": true,
-              "id": "code/2c5c95f736d-1178b4580",
-              "name": "ScaffoldState.build",
-              "_vmName": "build",
+              "id": "code/2d6fc10882c-113764780",
+              "name": "_GrowableList._grow",
+              "_vmName": "_grow",
               "kind": "Dart",
               "_optimized": false,
               "_intrinsic": false,
@@ -145,18 +147,86 @@
                 "name": "this",
                 "value": {
                   "type": "@Instance",
+                  "_vmType": "GrowableObjectArray",
                   "class": {
                     "type": "@Class",
                     "fixedId": true,
-                    "id": "classes/1826",
-                    "name": "ScaffoldState"
+                    "id": "classes/54",
+                    "name": "_GrowableList",
+                    "_vmName": "_GrowableList@0150898"
                   },
-                  "kind": "PlainInstance",
-                  "id": "objects/0"
+                  "kind": "List",
+                  "id": "objects/0",
+                  "length": 2
                 },
-                "declarationTokenPos": 5575,
-                "scopeStartTokenPos": 5575,
-                "scopeEndTokenPos": 6843
+                "declarationTokenPos": 1948,
+                "scopeStartTokenPos": 1948,
+                "scopeEndTokenPos": 2021
+              },
+              {
+                "type": "BoundVariable",
+                "name": "new_capacity",
+                "value": {
+                  "type": "@Instance",
+                  "_vmType": "Smi",
+                  "class": {
+                    "type": "@Class",
+                    "fixedId": true,
+                    "id": "classes/49",
+                    "name": "_Smi",
+                    "_vmName": "_Smi@0150898"
+                  },
+                  "kind": "Int",
+                  "fixedId": true,
+                  "id": "objects/int-4",
+                  "valueAsString": "4"
+                },
+                "declarationTokenPos": 1954,
+                "scopeStartTokenPos": 1954,
+                "scopeEndTokenPos": 2021
+              },
+              {
+                "type": "BoundVariable",
+                "name": "new_data",
+                "value": {
+                  "type": "@Instance",
+                  "_vmType": "Array",
+                  "class": {
+                    "type": "@Class",
+                    "fixedId": true,
+                    "id": "classes/69",
+                    "name": "_List",
+                    "_vmName": "_List@0150898"
+                  },
+                  "kind": "List",
+                  "id": "objects/1",
+                  "length": 4
+                },
+                "declarationTokenPos": 1960,
+                "scopeStartTokenPos": 1970,
+                "scopeEndTokenPos": 2021
+              },
+              {
+                "type": "BoundVariable",
+                "name": "i",
+                "value": {
+                  "type": "@Instance",
+                  "_vmType": "Smi",
+                  "class": {
+                    "type": "@Class",
+                    "fixedId": true,
+                    "id": "classes/49",
+                    "name": "_Smi",
+                    "_vmName": "_Smi@0150898"
+                  },
+                  "kind": "Int",
+                  "fixedId": true,
+                  "id": "objects/int-1",
+                  "valueAsString": "1"
+                },
+                "declarationTokenPos": 1976,
+                "scopeStartTokenPos": 1981,
+                "scopeEndTokenPos": 2010
               }
             ],
             "index": 0
@@ -192,21 +262,21 @@
           "counters": [
             0,
             0,
-            17,
+            13,
             0,
-            65,
-            24,
-            0,
-            0,
+            66,
+            27,
             0,
             0,
             0,
-            2,
+            0,
+            0,
+            1,
             0,
             0,
             0,
-            9,
-            0
+            8,
+            1
           ]
         },
         "libraries": [
@@ -2983,13 +3053,13 @@
         "views": [
           {
             "type": "FlutterView",
-            "id": "_flutterView/0x60000016ba00",
+            "id": "_flutterView/0x600000168700",
             "isolate": {
               "type": "@Isolate",
               "fixedId": true,
-              "id": "isolates/374374322",
-              "name": "hello_flutter_lib_flx.flx$main-374374322",
-              "number": "374374322"
+              "id": "isolates/755012617",
+              "name": "hello_flutter_lib_flx.flx$main-755012617",
+              "number": "755012617"
             }
           }
         ]
@@ -3015,13 +3085,13 @@
         "views": [
           {
             "type": "FlutterView",
-            "id": "_flutterView/0x60000016ba00",
+            "id": "_flutterView/0x600000168700",
             "isolate": {
               "type": "@Isolate",
               "fixedId": true,
-              "id": "isolates/374374322",
-              "name": "hello_flutter_lib_flx.flx$main-374374322",
-              "number": "374374322"
+              "id": "isolates/755012617",
+              "name": "hello_flutter_lib_flx.flx$main-755012617",
+              "number": "755012617"
             }
           }
         ]

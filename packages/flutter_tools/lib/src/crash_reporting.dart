@@ -72,7 +72,7 @@ class CrashReportSender {
   Future<Null> sendReport({
     @required dynamic error,
     @required dynamic stackTrace,
-    @required String flutterVersion,
+    @required String getFlutterVersion(),
   }) async {
     try {
       // TODO(yjbanov): we only actually send crash reports in tests. When we
@@ -86,6 +86,7 @@ class CrashReportSender {
 
       printStatus('Sending crash report to Google.');
 
+      final String flutterVersion = getFlutterVersion();
       final Uri uri = _baseUri.replace(
         queryParameters: <String, String>{
           'product': _kProductId,
