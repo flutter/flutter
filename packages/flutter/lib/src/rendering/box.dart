@@ -1483,7 +1483,7 @@ abstract class RenderBox extends RenderObject {
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
     if (_cachedBaselines == null)
-      _cachedBaselines = new Map<TextBaseline, double>();
+      _cachedBaselines = <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
   }

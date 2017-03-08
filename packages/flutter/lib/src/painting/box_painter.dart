@@ -578,10 +578,10 @@ class BoxShadow {
     if (a == null && b == null)
       return null;
     if (a == null)
-      a = new List<BoxShadow>();
+      a = <BoxShadow>[];
     if (b == null)
-      b = new List<BoxShadow>();
-    final List<BoxShadow> result = new List<BoxShadow>();
+      b = <BoxShadow>[];
+    final List<BoxShadow> result = <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
     for (int i = 0; i < commonLength; ++i)
       result.add(BoxShadow.lerp(a[i], b[i], t));

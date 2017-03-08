@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
-    final List<String> log = new List<String>();
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(
       new Listener(

@@ -134,7 +134,7 @@ class AlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = new List<Widget>();
+    final List<Widget> children = <Widget>[];
 
     if (title != null) {
       children.add(new Padding(

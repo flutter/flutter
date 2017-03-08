@@ -178,7 +178,7 @@ class Stepper extends StatefulWidget {
 
 class _StepperState extends State<Stepper> with TickerProviderStateMixin {
   List<GlobalKey> _keys;
-  final Map<int, StepState> _oldStates = new Map<int, StepState>();
+  final Map<int, StepState> _oldStates = <int, StepState>{};
 
   @override
   void initState() {

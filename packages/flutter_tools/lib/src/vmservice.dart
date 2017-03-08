@@ -505,14 +505,14 @@ class VM extends ServiceObjectOwner {
     _removeDeadIsolates(map['isolates']);
   }
 
-  final Map<String, ServiceObject> _cache = new Map<String,ServiceObject>();
-  final Map<String,Isolate> _isolateCache = new Map<String,Isolate>();
+  final Map<String, ServiceObject> _cache = <String,ServiceObject>{};
+  final Map<String,Isolate> _isolateCache = <String,Isolate>{};
 
   /// The list of live isolates, ordered by isolate start time.
-  final List<Isolate> isolates = new List<Isolate>();
+  final List<Isolate> isolates = <Isolate>[];
 
   /// The set of live views.
-  final Map<String, FlutterView> _viewCache = new Map<String, FlutterView>();
+  final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -767,7 +767,7 @@ class Isolate extends ServiceObjectOwner {
   DateTime startTime;
   ServiceEvent pauseEvent;
 
-  final Map<String, ServiceObject> _cache = new Map<String, ServiceObject>();
+  final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
 
   @override
   ServiceObject getFromMap(Map<String, dynamic> map) {
@@ -967,7 +967,7 @@ class Isolate extends ServiceObjectOwner {
 class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   ServiceMap._empty(ServiceObjectOwner owner) : super._empty(owner);
 
-  final Map<String, dynamic> _map = new Map<String, dynamic>();
+  final Map<String, dynamic> _map = <String, dynamic>{};
 
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {

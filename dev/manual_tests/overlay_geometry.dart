@@ -134,7 +134,7 @@ class CardBuilder extends SliverChildDelegate {
 
 class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   List<CardModel> cardModels;
-  Map<MarkerType, Point> markers = new Map<MarkerType, Point>();
+  Map<MarkerType, Point> markers = <MarkerType, Point>{};
   double markersScrollOffset = 0.0;
 
   @override

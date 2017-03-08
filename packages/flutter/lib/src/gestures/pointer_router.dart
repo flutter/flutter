@@ -13,7 +13,7 @@ typedef void PointerRoute(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
-  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = new Map<int, LinkedHashSet<PointerRoute>>();
+  final Map<int, LinkedHashSet<PointerRoute>> _routeMap = <int, LinkedHashSet<PointerRoute>>{};
   final LinkedHashSet<PointerRoute> _globalRoutes = new LinkedHashSet<PointerRoute>();
 
   /// Adds a route to the routing table.

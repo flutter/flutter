@@ -170,7 +170,7 @@ abstract class MultiChildLayoutDelegate {
     });
 
     try {
-      _idToChild = new Map<Object, RenderBox>();
+      _idToChild = <Object, RenderBox>{};
       RenderBox child = firstChild;
       while (child != null) {
         final MultiChildLayoutParentData childParentData = child.parentData;

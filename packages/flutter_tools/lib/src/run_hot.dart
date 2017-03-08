@@ -61,7 +61,7 @@ class HotRunner extends ResidentRunner {
   Uri _observatoryUri;
 
   final bool benchmarkMode;
-  final Map<String, int> benchmarkData = new Map<String, int>();
+  final Map<String, int> benchmarkData = <String, int>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   String kernelFilePath;
@@ -141,7 +141,7 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    final Map<String, dynamic> platformArgs = new Map<String, dynamic>();
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
 
     await startEchoingDeviceLog(package);
 

@@ -94,7 +94,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
-  final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
+  final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
 
   @override
   void addPointer(PointerEvent event) {
@@ -341,7 +341,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback onLongTapDown;
 
-  final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
+  final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
   void addPointer(PointerEvent event) {

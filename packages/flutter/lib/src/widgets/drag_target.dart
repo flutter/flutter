@@ -380,8 +380,8 @@ List<T> _mapAvatarsToData<T>(List<_DragAvatar<T>> avatars) {
 }
 
 class _DragTargetState<T> extends State<DragTarget<T>> {
-  final List<_DragAvatar<T>> _candidateAvatars = new List<_DragAvatar<T>>();
-  final List<_DragAvatar<dynamic>> _rejectedAvatars = new List<_DragAvatar<dynamic>>();
+  final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
+  final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
 
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));

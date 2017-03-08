@@ -402,7 +402,7 @@ abstract class SchedulerBinding extends BindingBase {
     });
   }
 
-  final List<FrameCallback> _persistentCallbacks = new List<FrameCallback>();
+  final List<FrameCallback> _persistentCallbacks = <FrameCallback>[];
 
   /// Adds a persistent frame callback.
   ///
@@ -420,7 +420,7 @@ abstract class SchedulerBinding extends BindingBase {
     _persistentCallbacks.add(callback);
   }
 
-  final List<FrameCallback> _postFrameCallbacks = new List<FrameCallback>();
+  final List<FrameCallback> _postFrameCallbacks = <FrameCallback>[];
 
   /// Schedule a callback for the end of this frame.
   ///
@@ -637,7 +637,7 @@ abstract class SchedulerBinding extends BindingBase {
     Timeline.startSync('Animate');
     assert(schedulerPhase == SchedulerPhase.transientCallbacks);
     final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
-    _transientCallbacks = new Map<int, _FrameCallbackEntry>();
+    _transientCallbacks = <int, _FrameCallbackEntry>{};
     callbacks.forEach((int id, _FrameCallbackEntry callbackEntry) {
       if (!_removedIds.contains(id))
         _invokeFrameCallback(callbackEntry.callback, timeStamp, callbackEntry.debugStack);
