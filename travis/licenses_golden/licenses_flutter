@@ -2086,8 +2086,6 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.ja
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/view/ResourcePaths.java
 FILE: ../../../flutter/shell/platform/android/library_loader.cc
-FILE: ../../../flutter/shell/platform/android/org/domokit/sky/shell/SkyActivity.java
-FILE: ../../../flutter/shell/platform/android/org/domokit/sky/shell/SkyApplication.java
 FILE: ../../../flutter/shell/platform/android/platform_view_android.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android.h
 FILE: ../../../flutter/shell/platform/darwin/common/platform_mac.h
