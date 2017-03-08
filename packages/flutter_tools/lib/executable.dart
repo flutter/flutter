@@ -238,7 +238,7 @@ Future<int> _handleToolError(
 /// be recording. Additionally, in the case of a crash we do not trust the
 /// integrity of the [AppContext].
 @visibleForTesting
-FileSystem crashFileSystem = new LocalFileSystem();
+FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {

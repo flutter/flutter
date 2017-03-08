@@ -47,7 +47,7 @@ void main() {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       child: new Text('X', style: testStyle),
       onPressed: null,
-      color: new Color(0xFFFFFFFF),
+      color: const Color(0xFFFFFFFF),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -61,7 +61,7 @@ void main() {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       child: new Text(' ', style: testStyle),
       onPressed: null,
-      padding: new EdgeInsets.all(100.0),
+      padding: const EdgeInsets.all(100.0),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(

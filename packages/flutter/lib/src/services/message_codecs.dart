@@ -205,7 +205,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     final ReadBuffer buffer = new ReadBuffer(message);
     final dynamic result = _readValue(buffer);
     if (buffer.hasRemaining)
-      throw new FormatException('Message corrupted');
+      throw const FormatException('Message corrupted');
     return result;
   }
 
@@ -303,7 +303,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   static dynamic _readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
-      throw throw new FormatException('Message corrupted');
+      throw const FormatException('Message corrupted');
     dynamic result;
     switch (buffer.getUint8()) {
       case _kNull:
@@ -363,7 +363,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
           result[_readValue(buffer)] = _readValue(buffer);
         }
         break;
-      default: throw new FormatException('Message corrupted');
+      default: throw const FormatException('Message corrupted');
     }
     return result;
   }
@@ -405,7 +405,7 @@ class StandardMethodCodec implements MethodCodec {
   dynamic decodeEnvelope(ByteData envelope) {
     // First byte is zero in success case, and non-zero otherwise.
     if (envelope == null || envelope.lengthInBytes == 0)
-      throw new FormatException('Expected envelope, got nothing');
+      throw const FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = new ReadBuffer(envelope);
     if (buffer.getUint8() == 0)
       return StandardMessageCodec._readValue(buffer);
@@ -415,6 +415,6 @@ class StandardMethodCodec implements MethodCodec {
     if (errorCode is String && (errorMessage == null || errorMessage is String))
       throw new PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
     else
-      throw new FormatException('Invalid envelope');
+      throw const FormatException('Invalid envelope');
   }
 }

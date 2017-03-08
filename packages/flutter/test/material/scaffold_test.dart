@@ -44,7 +44,7 @@ void main() {
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 700.0),
       ),
       child: new Scaffold(
@@ -56,7 +56,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 500.0),
       ),
       child: new Scaffold(
@@ -67,7 +67,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 580.0),
       ),
       child: new Scaffold(
