@@ -1075,6 +1075,7 @@ FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java
 FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_mac.xib
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
 FILE: ../../../flutter/sky/engine/core/editing/CompositionUnderlineRangeFilter.cpp
