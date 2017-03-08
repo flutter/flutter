@@ -130,6 +130,8 @@ class MaterialButton extends StatefulWidget {
     this.textTheme,
     this.textColor,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.elevation,
     this.highlightElevation,
     this.minWidth,
@@ -154,6 +156,16 @@ class MaterialButton extends StatefulWidget {
 
   /// The color of the button, as printed on the [Material].
   final Color color;
+
+  /// The highlight color of the button.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
+
+  /// The splash color of the button.
+  ///
+  /// Defaults to the splash color from the [Theme].
+  final Color splashColor;
 
   /// The z-coordinate at which to place this button.
   ///
@@ -250,8 +262,9 @@ class _MaterialButtonState extends State<MaterialButton> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
     final Color textColor = _textColor;
-    final TextStyle style = Theme.of(context).textTheme.button.copyWith(color: textColor);
+    final TextStyle style = theme.textTheme.button.copyWith(color: textColor);
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = config.height ?? buttonTheme.height;
     final int elevation = (_highlight ? config.highlightElevation : config.elevation) ?? 0;
@@ -261,6 +274,8 @@ class _MaterialButtonState extends State<MaterialButton> {
         color: textColor
       ),
       child: new InkWell(
+        highlightColor: config.highlightColor ?? theme.highlightColor,
+        splashColor: config.splashColor ?? theme.splashColor,
         onTap: config.onPressed,
         onHighlightChanged: _handleHighlightChanged,
         child: new Container(
