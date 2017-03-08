@@ -4,10 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'theme.dart';
-import 'icon_button.dart';
 import 'icon.dart';
+import 'icon_button.dart';
 import 'icons.dart';
+import 'theme.dart';
 
 /// A material design back button.
 ///

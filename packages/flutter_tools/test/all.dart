@@ -42,12 +42,12 @@ import 'os_utils_test.dart' as os_utils_test;
 import 'packages_test.dart' as packages_test;
 import 'protocol_discovery_test.dart' as protocol_discovery_test;
 import 'run_test.dart' as run_test;
+import 'src/base/process_test.dart' as process_test;
 import 'stop_test.dart' as stop_test;
 import 'test_test.dart' as test_test;
 import 'trace_test.dart' as trace_test;
 import 'upgrade_test.dart' as upgrade_test;
 import 'utils_test.dart' as utils_test;
-import 'src/base/process_test.dart' as process_test;
 
 void main() {
   Cache.disableLocking();
