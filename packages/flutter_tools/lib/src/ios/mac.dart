@@ -317,8 +317,18 @@ bool _checkXcodeVersion() {
   return true;
 }
 
+bool _checkCocoaPodsInstalled() {
+  if (!platform.isMacOS)
+    return false;
+  return exitsHappy(<String>['pod', '--version']);
+}
+
 void _installCocoaPods(Directory bundle, String engineDirectory)  {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
+    if (!_checkCocoaPodsInstalled()) {
+      printError('Warning: CocoaPods not installed. Not running pod install.');
+      return;
+    }
     runCheckedSync(
         <String>['pod', 'install'],
         workingDirectory: bundle.path,
