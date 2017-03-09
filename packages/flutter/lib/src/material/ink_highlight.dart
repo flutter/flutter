@@ -40,10 +40,12 @@ class InkHighlight extends InkFeature {
     @required RenderBox referenceBox,
     @required Color color,
     BoxShape shape: BoxShape.rectangle,
+    BorderRadius borderRadius,
     RectCallback rectCallback,
     VoidCallback onRemoved,
   }) : _color = color,
        _shape = shape,
+       _borderRadius = borderRadius ?? BorderRadius.zero,
        _rectCallback = rectCallback,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
     assert(color != null);
@@ -61,6 +63,7 @@ class InkHighlight extends InkFeature {
   }
 
   final BoxShape _shape;
+  final BorderRadius _borderRadius;
   final RectCallback _rectCallback;
 
   Animation<int> _alpha;
@@ -110,7 +113,16 @@ class InkHighlight extends InkFeature {
         canvas.drawCircle(rect.center, Material.defaultSplashRadius, paint);
         break;
       case BoxShape.rectangle:
-        canvas.drawRect(rect, paint);
+        if (_borderRadius != BorderRadius.zero) {
+          final RRect clipRRect = new RRect.fromRectAndCorners(
+            rect,
+            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+          );
+          canvas.drawRRect(clipRRect, paint);
+        } else {
+          canvas.drawRect(rect, paint);
+        }
         break;
     }
   }

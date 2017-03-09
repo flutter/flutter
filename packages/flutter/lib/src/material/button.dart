@@ -16,6 +16,10 @@ import 'material.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 
+/// The default button radius for buttons that don't contain a [Material] child element
+/// (no color and/or elevation).
+final BorderRadius kMaterialButtonDefaultBorderRadius = kMaterialEdges[MaterialType.button];
+
 /// Whether a button should use the accent color for its text.
 ///
 /// See also:
@@ -255,12 +259,14 @@ class _MaterialButtonState extends State<MaterialButton> {
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = config.height ?? buttonTheme.height;
     final int elevation = (_highlight ? config.highlightElevation : config.elevation) ?? 0;
+    final bool hasColorOrElevation = (config.color != null || elevation > 0);
     Widget contents = new IconTheme.merge(
       context: context,
       data: new IconThemeData(
         color: textColor
       ),
       child: new InkWell(
+        borderRadius: hasColorOrElevation ? BorderRadius.zero : kMaterialButtonDefaultBorderRadius,
         onTap: config.onPressed,
         onHighlightChanged: _handleHighlightChanged,
         child: new Container(
@@ -272,7 +278,7 @@ class _MaterialButtonState extends State<MaterialButton> {
         )
       )
     );
-    if (elevation > 0 || config.color != null) {
+    if (hasColorOrElevation) {
       contents = new Material(
         type: MaterialType.button,
         color: config.color,

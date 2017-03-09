@@ -80,10 +80,12 @@ class InkSplash extends InkFeature {
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
+    BorderRadius borderRadius,
     double radius,
     VoidCallback onRemoved,
   }) : _position = position,
        _color = color,
+        _borderRadius = borderRadius ?? BorderRadius.zero,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
@@ -108,6 +110,7 @@ class InkSplash extends InkFeature {
 
   final Point _position;
   final Color _color;
+  final BorderRadius _borderRadius;
   final double _targetRadius;
   final RectCallback _clipCallback;
   final bool _repositionToReferenceBox;
@@ -158,14 +161,33 @@ class InkSplash extends InkFeature {
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      if (_clipCallback != null)
-        canvas.clipRect(_clipCallback());
+      if (_clipCallback != null) {
+        if (_borderRadius != BorderRadius.zero) {
+          final RRect clipRRect = new RRect.fromRectAndCorners(
+            _clipCallback(),
+            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+          );
+          canvas.clipRRect(clipRRect);
+        } else {
+          canvas.clipRect(_clipCallback());
+        }
+      }
       canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
       if (_clipCallback != null) {
         canvas.save();
-        canvas.clipRect(_clipCallback().shift(originOffset));
+        if (_borderRadius != BorderRadius.zero) {
+          final RRect clipRRect = new RRect.fromRectAndCorners(
+            _clipCallback(),
+            topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+            bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+          );
+          canvas.clipRRect(clipRRect.shift(originOffset));
+        } else {
+          canvas.clipRect(_clipCallback().shift(originOffset));
+        }
       }
       canvas.drawCircle(center + originOffset, _radius.value, paint);
       if (_clipCallback != null)
