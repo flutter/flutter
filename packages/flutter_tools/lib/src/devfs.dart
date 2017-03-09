@@ -113,8 +113,8 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  set bytes(List<int> newBytes) {
-    _bytes = newBytes;
+  set bytes(List<int> value) {
+    _bytes = value;
     _isModified = true;
   }
 
@@ -145,14 +145,14 @@ class DevFSStringContent extends DevFSByteContent {
 
   String get string => _string;
 
-  set string(String newString) {
-    _string = newString;
+  set string(String value) {
+    _string = value;
     super.bytes = UTF8.encode(_string);
   }
 
   @override
-  set bytes(List<int> newBytes) {
-    string = UTF8.decode(newBytes);
+  set bytes(List<int> value) {
+    string = UTF8.decode(value);
   }
 }
 

@@ -206,12 +206,12 @@ class RenderConstrainedBox extends RenderProxyBox {
   /// Additional constraints to apply to [child] during layout
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
-  set additionalConstraints (BoxConstraints newConstraints) {
-    assert(newConstraints != null);
-    assert(newConstraints.debugAssertIsValid());
-    if (_additionalConstraints == newConstraints)
+  set additionalConstraints (BoxConstraints value) {
+    assert(value != null);
+    assert(value.debugAssertIsValid());
+    if (_additionalConstraints == value)
       return;
-    _additionalConstraints = newConstraints;
+    _additionalConstraints = value;
     markNeedsLayout();
   }
 
@@ -399,13 +399,13 @@ class RenderAspectRatio extends RenderProxyBox {
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   double get aspectRatio => _aspectRatio;
   double _aspectRatio;
-  set aspectRatio (double newAspectRatio) {
-    assert(newAspectRatio != null);
-    assert(newAspectRatio > 0.0);
-    assert(newAspectRatio.isFinite);
-    if (_aspectRatio == newAspectRatio)
+  set aspectRatio (double value) {
+    assert(value != null);
+    assert(value > 0.0);
+    assert(value.isFinite);
+    if (_aspectRatio == value)
       return;
-    _aspectRatio = newAspectRatio;
+    _aspectRatio = value;
     markNeedsLayout();
   }
 
@@ -541,20 +541,20 @@ class RenderIntrinsicWidth extends RenderProxyBox {
   /// If non-null, force the child's width to be a multiple of this value.
   double get stepWidth => _stepWidth;
   double _stepWidth;
-  set stepWidth(double newStepWidth) {
-    if (newStepWidth == _stepWidth)
+  set stepWidth(double value) {
+    if (value == _stepWidth)
       return;
-    _stepWidth = newStepWidth;
+    _stepWidth = value;
     markNeedsLayout();
   }
 
   /// If non-null, force the child's height to be a multiple of this value.
   double get stepHeight => _stepHeight;
   double _stepHeight;
-  set stepHeight(double newStepHeight) {
-    if (newStepHeight == _stepHeight)
+  set stepHeight(double value) {
+    if (value == _stepHeight)
       return;
-    _stepHeight = newStepHeight;
+    _stepHeight = value;
     markNeedsLayout();
   }
 
@@ -721,12 +721,12 @@ class RenderOpacity extends RenderProxyBox {
   /// expensive.
   double get opacity => _opacity;
   double _opacity;
-  set opacity (double newOpacity) {
-    assert(newOpacity != null);
-    assert(newOpacity >= 0.0 && newOpacity <= 1.0);
-    if (_opacity == newOpacity)
+  set opacity (double value) {
+    assert(value != null);
+    assert(value >= 0.0 && value <= 1.0);
+    if (_opacity == value)
       return;
-    _opacity = newOpacity;
+    _opacity = value;
     _alpha = _getAlphaFromOpacity(_opacity);
     markNeedsCompositingBitsUpdate();
     markNeedsPaint();
@@ -792,11 +792,11 @@ class RenderShaderMask extends RenderProxyBox {
   // repaints when the ShaderCallback changes identity.
   ShaderCallback get shaderCallback => _shaderCallback;
   ShaderCallback _shaderCallback;
-  set shaderCallback (ShaderCallback newShaderCallback) {
-    assert(newShaderCallback != null);
-    if (_shaderCallback == newShaderCallback)
+  set shaderCallback (ShaderCallback value) {
+    assert(value != null);
+    if (_shaderCallback == value)
       return;
-    _shaderCallback = newShaderCallback;
+    _shaderCallback = value;
     markNeedsPaint();
   }
 
@@ -806,11 +806,11 @@ class RenderShaderMask extends RenderProxyBox {
   /// to the child. Other blend modes can be used to create other effects.
   BlendMode get blendMode => _blendMode;
   BlendMode _blendMode;
-  set blendMode (BlendMode newBlendMode) {
-    assert(newBlendMode != null);
-    if (_blendMode == newBlendMode)
+  set blendMode (BlendMode value) {
+    assert(value != null);
+    if (_blendMode == value)
       return;
-    _blendMode = newBlendMode;
+    _blendMode = value;
     markNeedsPaint();
   }
 
@@ -846,11 +846,11 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// blur effect
   ui.ImageFilter get filter => _filter;
   ui.ImageFilter _filter;
-  set filter (ui.ImageFilter newFilter) {
-    assert(newFilter != null);
-    if (_filter == newFilter)
+  set filter (ui.ImageFilter value) {
+    assert(value != null);
+    if (_filter == value)
       return;
-    _filter = newFilter;
+    _filter = value;
     markNeedsPaint();
   }
 
@@ -1329,24 +1329,24 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// Commonly a [BoxDecoration].
   Decoration get decoration => _decoration;
   Decoration _decoration;
-  set decoration (Decoration newDecoration) {
-    assert(newDecoration != null);
-    if (newDecoration == _decoration)
+  set decoration (Decoration value) {
+    assert(value != null);
+    if (value == _decoration)
       return;
     _painter?.dispose();
     _painter = null;
-    _decoration = newDecoration;
+    _decoration = value;
     markNeedsPaint();
   }
 
   /// Whether to paint the box decoration behind or in front of the child.
   DecorationPosition get position => _position;
   DecorationPosition _position;
-  set position (DecorationPosition newPosition) {
-    assert(newPosition != null);
-    if (newPosition == _position)
+  set position (DecorationPosition value) {
+    assert(value != null);
+    if (value == _position)
       return;
-    _position = newPosition;
+    _position = value;
     markNeedsPaint();
   }
 
@@ -1355,11 +1355,11 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// [BoxPainter.paint].
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration newConfiguration) {
-    assert(newConfiguration != null);
-    if (newConfiguration == _configuration)
+  set configuration (ImageConfiguration value) {
+    assert(value != null);
+    if (value == _configuration)
       return;
-    _configuration = newConfiguration;
+    _configuration = value;
     markNeedsPaint();
   }
 
@@ -1449,10 +1449,10 @@ class RenderTransform extends RenderProxyBox {
   /// translation. This property is provided just for convenience.
   Offset get origin => _origin;
   Offset _origin;
-  set origin (Offset newOrigin) {
-    if (_origin == newOrigin)
+  set origin (Offset value) {
+    if (_origin == value)
       return;
-    _origin = newOrigin;
+    _origin = value;
     markNeedsPaint();
   }
 
@@ -1462,11 +1462,11 @@ class RenderTransform extends RenderProxyBox {
   /// If it is specified at the same time as an offset, both are applied.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment == null || (newAlignment.dx != null && newAlignment.dy != null));
-    if (_alignment == newAlignment)
+  set alignment (FractionalOffset value) {
+    assert(value == null || (value.dx != null && value.dy != null));
+    if (_alignment == value)
       return;
-    _alignment = newAlignment;
+    _alignment = value;
     markNeedsPaint();
   }
 
@@ -1482,11 +1482,11 @@ class RenderTransform extends RenderProxyBox {
   Matrix4 _transform;
 
   /// The matrix to transform the child by during painting.
-  set transform(Matrix4 newTransform) {
-    assert(newTransform != null);
-    if (_transform == newTransform)
+  set transform(Matrix4 value) {
+    assert(value != null);
+    if (_transform == value)
       return;
-    _transform = new Matrix4.copy(newTransform);
+    _transform = new Matrix4.copy(value);
     markNeedsPaint();
   }
 
@@ -1607,11 +1607,11 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to inscribe the child into the space allocated during layout.
   ImageFit get fit => _fit;
   ImageFit _fit;
-  set fit (ImageFit newFit) {
-    assert(newFit != null);
-    if (_fit == newFit)
+  set fit (ImageFit value) {
+    assert(value != null);
+    if (_fit == value)
       return;
-    _fit = newFit;
+    _fit = value;
     _clearPaintData();
     markNeedsPaint();
   }
@@ -1623,11 +1623,11 @@ class RenderFittedBox extends RenderProxyBox {
   /// of the right edge of its parent's bounds.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
-    if (_alignment == newAlignment)
+  set alignment (FractionalOffset value) {
+    assert(value != null && value.dx != null && value.dy != null);
+    if (_alignment == value)
       return;
-    _alignment = newAlignment;
+    _alignment = value;
     _clearPaintData();
     markNeedsPaint();
   }
@@ -1744,11 +1744,11 @@ class RenderFractionalTranslation extends RenderProxyBox {
   /// The translation to apply to the child, as a multiple of the size.
   FractionalOffset get translation => _translation;
   FractionalOffset _translation;
-  set translation (FractionalOffset newTranslation) {
-    assert(newTranslation == null || (newTranslation.dx != null && newTranslation.dy != null));
-    if (_translation == newTranslation)
+  set translation (FractionalOffset value) {
+    assert(value == null || (value.dx != null && value.dy != null));
+    if (_translation == value)
       return;
-    _translation = newTranslation;
+    _translation = value;
     markNeedsPaint();
   }
 
@@ -1947,11 +1947,11 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter (CustomPainter newPainter) {
-    if (_painter == newPainter)
+  set painter (CustomPainter value) {
+    if (_painter == value)
       return;
     final CustomPainter oldPainter = _painter;
-    _painter = newPainter;
+    _painter = value;
     _didUpdatePainter(_painter, oldPainter);
   }
 
@@ -1972,11 +1972,11 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter (CustomPainter newPainter) {
-    if (_foregroundPainter == newPainter)
+  set foregroundPainter (CustomPainter value) {
+    if (_foregroundPainter == value)
       return;
     final CustomPainter oldPainter = _foregroundPainter;
-    _foregroundPainter = newPainter;
+    _foregroundPainter = value;
     _didUpdatePainter(_foregroundPainter, oldPainter);
   }
 
