@@ -124,7 +124,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
-          'Install via \'brew install ideviceinstaller\'.'
+          'To install, run:\n'
+          'brew install --HEAD libimobiledevice\n'
+          'brew install ideviceinstaller'
         ));
       }
 
