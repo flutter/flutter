@@ -46,13 +46,14 @@ public class ExampleActivity extends FlutterActivity {
     } else {
       Intent intent = new ContextWrapper(getApplicationContext()).
           registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-      batteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+      batteryLevel = (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
+          intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
     }
 
     if (batteryLevel != -1) {
       response.success(batteryLevel);
     } else {
-      response.error("Not available", "Battery level not available.", null);
+      response.error("UNAVAILABLE", "Battery level not available.", null);
     }
   }
 }
