@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:file/local.dart';
 import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -74,7 +74,7 @@ void expectProcessExits(
 
 /// The base path of the replay tests.
 String get replayBase {
-  return p.joinAll(<String>[
+  return const LocalFileSystem().path.joinAll(<String>[
     Cache.flutterRoot,
     'packages',
     'flutter_tools',
