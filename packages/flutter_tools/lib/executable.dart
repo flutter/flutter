@@ -187,14 +187,14 @@ Future<int> _handleToolError(
     // We've crashed; emit a log report.
     stderr.writeln();
 
-    flutterUsage.sendException(error, chain);
-
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       stderr.writeln('$error');
       stderr.writeln(chain.terse.toString());
       return _exit(1);
     } else {
+      flutterUsage.sendException(error, chain);
+
       if (error is String)
         stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
       else
