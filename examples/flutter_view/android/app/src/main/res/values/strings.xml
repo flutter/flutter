@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Flutter View</string>
+  <string name="title">Flutter Application</string>
+  <string name="button_tap">Flutter button tapped 0 times.</string>
+  <string name="android">Android</string>
+</resources>
