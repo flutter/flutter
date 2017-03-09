@@ -12,10 +12,6 @@ import '../globals.dart';
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
-String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
-}
-
 void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -38,7 +34,8 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(mode)}');
+  final String flutterFrameworkDir = fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;

@@ -123,10 +123,8 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
-  final Directory appDirectory = fs.directory(app.appDirectory);
-  await _addServicesToBundle(appDirectory);
 
-  _installCocoaPods(appDirectory, flutterFrameworkDir(mode));
+  await _addServicesToBundle(fs.directory(app.appDirectory));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -315,26 +313,6 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
-}
-
-bool _checkCocoaPodsInstalled() {
-  if (!platform.isMacOS)
-    return false;
-  return exitsHappy(<String>['pod', '--version']);
-}
-
-void _installCocoaPods(Directory bundle, String engineDirectory)  {
-  if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!_checkCocoaPodsInstalled()) {
-      printError('Warning: CocoaPods not installed. Not running pod install.');
-      return;
-    }
-    runCheckedSync(
-        <String>['pod', 'install'],
-        workingDirectory: bundle.path,
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-    );
-  }
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {
