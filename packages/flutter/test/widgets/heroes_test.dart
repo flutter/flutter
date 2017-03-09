@@ -643,4 +643,165 @@ void main() {
     expect(finalHeight, 100.0);
 
   });
+
+  testWidgets('Destination hero scrolls mid-flight', (WidgetTester tester) async {
+    final Key homeHeroKey = const Key('home hero');
+    final Key routeHeroKey = const Key('route hero');
+    final Key routeContainerKey = const Key('route hero container');
+
+    // Show a 200x200 Hero tagged 'H', with key routeHeroKey
+    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              new SizedBox(height: 100.0),
+              // This container will appear at Y=100
+              new Container(
+                key: routeContainerKey,
+                child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
+              ),
+              new FlatButton(
+                child: new Text('POP'),
+                onPressed: () { Navigator.pop(context); }
+              ),
+              new SizedBox(height: 600.0),
+            ],
+          )
+        );
+      },
+    );
+
+    // Show a 100x100 Hero tagged 'H' with key homeHeroKey
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return new ListView(
+                children: <Widget> [
+                  new SizedBox(height: 200.0),
+                  // This container will appear at Y=200
+                  new Container(
+                    child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
+                  ),
+                  new FlatButton(
+                    child: new Text('PUSH'),
+                    onPressed: () { Navigator.push(context, route); }
+                  ),
+                  new SizedBox(height: 600.0),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    // Pushes route
+    await tester.tap(find.text('PUSH'));
+    await tester.pump();
+    await tester.pump();
+
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(initialY, 200.0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(yAt100ms, lessThan(200.0));
+    expect(yAt100ms, greaterThan(100.0));
+
+    // Scroll the target upwards by 25 pixels. The Hero flight's Y coordinate
+    // will be redirected from 100 to 75.
+    await(tester.scroll(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(yAt110ms, lessThan(yAt100ms));
+    expect(yAt110ms, greaterThan(75.0));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(finalHeroY, 75.0); // 100 less 25 for the scroll
+  });
+
+  testWidgets('Destination hero scrolls out of view mid-flight', (WidgetTester tester) async {
+    final Key homeHeroKey = const Key('home hero');
+    final Key routeHeroKey = const Key('route hero');
+    final Key routeContainerKey = const Key('route hero container');
+
+    // Show a 200x200 Hero tagged 'H', with key routeHeroKey
+    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              new SizedBox(height: 100.0),
+              // This container will appear at Y=100
+              new Container(
+                key: routeContainerKey,
+                child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
+              ),
+              new SizedBox(height: 800.0),
+            ],
+          )
+        );
+      },
+    );
+
+    // Show a 100x100 Hero tagged 'H' with key homeHeroKey
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return new ListView(
+                children: <Widget> [
+                  new SizedBox(height: 200.0),
+                  // This container will appear at Y=200
+                  new Container(
+                    child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
+                  ),
+                  new FlatButton(
+                    child: new Text('PUSH'),
+                    onPressed: () { Navigator.push(context, route); }
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    // Pushes route
+    await tester.tap(find.text('PUSH'));
+    await tester.pump();
+    await tester.pump();
+
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(initialY, 200.0);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(yAt100ms, lessThan(200.0));
+    expect(yAt100ms, greaterThan(100.0));
+
+    await(tester.scroll(find.byKey(routeContainerKey), const Offset(0.0, -400.0)));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.byKey(routeContainerKey), findsNothing); // Scrolled off the top
+
+    // Flight continues (the hero will fade out) even though the destination
+    // no longer exists.
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    expect(yAt110ms, lessThan(yAt100ms));
+    expect(yAt110ms, greaterThan(100.0));
+
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pump();
+    expect(find.byKey(routeHeroKey), findsNothing);
+  });
+
 }
