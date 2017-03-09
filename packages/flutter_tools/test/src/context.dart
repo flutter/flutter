@@ -111,17 +111,14 @@ String getFlutterRoot() {
   String toolsPath;
   switch (platform.script.scheme) {
     case 'file':
-      print('file :: 1');
       final List<String> parts = fs.path.split(fs.path.fromUri(platform.script));
-      print('file :: 2 :: $parts');
       final int toolsIndex = parts.indexOf('flutter_tools');
       if (toolsIndex == -1)
         throw invalidScript();
       toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-      print('file :: 3 :: $toolsPath');
       break;
     case 'data':
-      print('data :: 1');
+      print('data :: 1 :: ${platform.script.path}');
       final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools)');
       final Match match = flutterTools.firstMatch(platform.script.path);
       if (match == null)
