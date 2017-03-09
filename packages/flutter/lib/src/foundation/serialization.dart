@@ -11,8 +11,7 @@ import 'package:typed_data/typed_buffers.dart' show Uint8Buffer;
 /// A WriteBuffer instance can be used only once. Attempts to reuse will result
 /// in [NoSuchMethodError]s being thrown.
 ///
-/// The byte order of serialized data is [Endianness.BIG_ENDIAN].
-/// The byte order of deserialized data is [Endianness.HOST_ENDIAN].
+/// The byte order used is [Endianness.HOST_ENDIAN] throughout.
 class WriteBuffer {
   WriteBuffer() {
     _buffer = new Uint8Buffer();
@@ -28,26 +27,28 @@ class WriteBuffer {
     _buffer.add(byte);
   }
 
+  void putUint16(int value) {
+    _eightBytes.setUint16(0, value, Endianness.HOST_ENDIAN);
+    _buffer.addAll(_eightBytesAsList, 0, 2);
+  }
+
+  void putUint32(int value) {
+    _eightBytes.setUint32(0, value, Endianness.HOST_ENDIAN);
+    _buffer.addAll(_eightBytesAsList, 0, 4);
+  }
+
   void putInt32(int value) {
-    putUint8(value >> 24);
-    putUint8(value >> 16);
-    putUint8(value >> 8);
-    putUint8(value);
+    _eightBytes.setInt32(0, value, Endianness.HOST_ENDIAN);
+    _buffer.addAll(_eightBytesAsList, 0, 4);
   }
 
   void putInt64(int value) {
-    putUint8(value >> 56);
-    putUint8(value >> 48);
-    putUint8(value >> 40);
-    putUint8(value >> 32);
-    putUint8(value >> 24);
-    putUint8(value >> 16);
-    putUint8(value >> 8);
-    putUint8(value);
+    _eightBytes.setInt64(0, value, Endianness.HOST_ENDIAN);
+    _buffer.addAll(_eightBytesAsList, 0, 8);
   }
 
   void putFloat64(double value) {
-    _eightBytes.setFloat64(0, value);
+    _eightBytes.setFloat64(0, value, Endianness.HOST_ENDIAN);
     _buffer.addAll(_eightBytesAsList);
   }
 
@@ -57,32 +58,17 @@ class WriteBuffer {
 
   void putInt32List(Int32List list) {
     _alignTo(4);
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
-    } else {
-      for (final int value in list)
-        putInt32(value);
-    }
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 4 * list.length));
   }
 
   void putInt64List(Int64List list) {
     _alignTo(8);
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
-    } else {
-      for (final int value in list)
-        putInt64(value);
-    }
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   void putFloat64List(Float64List list) {
     _alignTo(8);
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
-    } else {
-      for (final double value in list)
-        putFloat64(value);
-    }
+    _buffer.addAll(list.buffer.asUint8List(list.offsetInBytes, 8 * list.length));
   }
 
   void _alignTo(int alignment) {
@@ -102,8 +88,7 @@ class WriteBuffer {
 
 /// Read-only buffer for reading sequentially from a [ByteData] instance.
 ///
-/// The byte order of serialized data is [Endianness.BIG_ENDIAN].
-/// The byte order of deserialized data is [Endianness.HOST_ENDIAN].
+/// The byte order used is [Endianness.HOST_ENDIAN] throughout.
 class ReadBuffer {
   final ByteData data;
   int position = 0;
@@ -117,20 +102,32 @@ class ReadBuffer {
     return data.getUint8(position++);
   }
 
+  int getUint16() {
+    final int value = data.getUint16(position, Endianness.HOST_ENDIAN);
+    position += 2;
+    return value;
+  }
+
+  int getUint32() {
+    final int value = data.getUint32(position, Endianness.HOST_ENDIAN);
+    position += 4;
+    return value;
+  }
+
   int getInt32() {
-    final int value = data.getInt32(position);
+    final int value = data.getInt32(position, Endianness.HOST_ENDIAN);
     position += 4;
     return value;
   }
 
   int getInt64() {
-    final int value = data.getInt64(position);
+    final int value = data.getInt64(position, Endianness.HOST_ENDIAN);
     position += 8;
     return value;
   }
 
   double getFloat64() {
-    final double value = data.getFloat64(position);
+    final double value = data.getFloat64(position, Endianness.HOST_ENDIAN);
     position += 8;
     return value;
   }
@@ -143,45 +140,21 @@ class ReadBuffer {
 
   Int32List getInt32List(int length) {
     _alignTo(4);
-    Int32List list;
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      list = data.buffer.asInt32List(data.offsetInBytes + position, length);
-    } else {
-      final ByteData invertedData = new ByteData(4 * length);
-      for (int i = 0; i < length; i++)
-        invertedData.setInt32(i * 4, data.getInt32(position + i * 4, Endianness.HOST_ENDIAN));
-      list = new Int32List.view(invertedData.buffer);
-    }
+    Int32List list = data.buffer.asInt32List(data.offsetInBytes + position, length);
     position += 4 * length;
     return list;
   }
 
   Int64List getInt64List(int length) {
     _alignTo(8);
-    Int64List list;
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      list = data.buffer.asInt64List(data.offsetInBytes + position, length);
-    } else {
-      final ByteData invertedData = new ByteData(8 * length);
-      for (int i = 0; i < length; i++)
-        invertedData.setInt64(i * 8, data.getInt64(position + i * 8, Endianness.HOST_ENDIAN));
-      list = new Int64List.view(invertedData.buffer);
-    }
+    Int64List list = data.buffer.asInt64List(data.offsetInBytes + position, length);
     position += 8 * length;
     return list;
   }
 
   Float64List getFloat64List(int length) {
     _alignTo(8);
-    Float64List list;
-    if (Endianness.HOST_ENDIAN == Endianness.BIG_ENDIAN) {
-      list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
-    } else {
-      final ByteData invertedData = new ByteData(8 * length);
-      for (int i = 0; i < length; i++)
-        invertedData.setFloat64(i * 8, data.getFloat64(position + i * 8, Endianness.HOST_ENDIAN));
-      list = new Float64List.view(invertedData.buffer);
-    }
+    Float64List list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
     position += 8 * length;
     return list;
   }

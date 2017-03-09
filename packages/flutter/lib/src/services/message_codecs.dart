@@ -136,21 +136,20 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   // * A single byte with one of the constant values below determines the
   //   type of the value.
   // * The serialization of the value itself follows the type byte.
+  // * Numbers are represented using the host endianness throughout.
   // * Lengths and sizes of serialized parts are encoded using an expanding
   //   format optimized for the common case of small non-negative integers:
   //   * values 0..253 inclusive using one byte with that value;
   //   * values 254..2^16 inclusive using three bytes, the first of which is
-  //     254, the next two the usual big-endian unsigned representation of the
-  //     value;
+  //     254, the next two the usual unsigned representation of the value;
   //   * values 2^16+1..2^32 inclusive using five bytes, the first of which is
-  //     255, the next four the usual big-endian unsigned representation of the
-  //     value.
+  //     255, the next four the usual unsigned representation of the value.
   // * null, true, and false have empty serialization; they are encoded directly
   //   in the type byte (using _kNull, _kTrue, _kFalse)
-  // * Integers representable in 32 bits are encoded using 4 bytes big-endian,
-  //   two's complement representation.
-  // * Larger integers representable in 64 bits are encoded using 8 bytes
-  //   big-endian, two's complement representation.
+  // * Integers representable in 32 bits are encoded using 4 bytes two's
+  //   complement representation.
+  // * Larger integers representable in 64 bits are encoded using 8 bytes two's
+  //   complement representation.
   // * Still larger integers are encoded using their hexadecimal string
   //   representation. First the length of that is encoded in the expanding
   //   format, then follows the UTF-8 representation of the hex string.
@@ -164,8 +163,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   //   smallest number of zero bytes needed to align the position in the full
   //   message with a multiple of the number of bytes per element, then the
   //   encoding of the list elements themselves, end-to-end with no additional
-  //   type information, using big-endian two's complement or IEEE 754 as
-  //   applicable.
+  //   type information, using two's complement or IEEE 754 as applicable.
   // * Lists are encoded by first encoding their length in the expanding format,
   //   then follows the recursive encoding of each element value, including the
   //   type byte (Lists are assumed to be heterogeneous).
@@ -215,14 +213,10 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(value);
     } else if (value <= 0xffff) {
       buffer.putUint8(254);
-      buffer.putUint8(value >> 8);
-      buffer.putUint8(value);
+      buffer.putUint16(value);
     } else {
       buffer.putUint8(255);
-      buffer.putUint8(value >> 24);
-      buffer.putUint8(value >> 16);
-      buffer.putUint8(value >> 8);
-      buffer.putUint8(value);
+      buffer.putUint32(value);
     }
   }
 
@@ -288,17 +282,12 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   static int _readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    if (value < 254) {
+    if (value < 254)
       return value;
-    } else if (value == 254) {
-      return (buffer.getUint8() << 8)
-           |  buffer.getUint8();
-    } else {
-      return (buffer.getUint8() << 24)
-           | (buffer.getUint8() << 16)
-           | (buffer.getUint8() << 8)
-           |  buffer.getUint8();
-    }
+    else if (value == 254)
+      return buffer.getUint16();
+    else
+      return buffer.getUint32();
   }
 
   static dynamic _readValue(ReadBuffer buffer) {

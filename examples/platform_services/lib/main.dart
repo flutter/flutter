@@ -19,15 +19,11 @@ class _PlatformServicesState extends State<PlatformServices> {
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
-    if (Platform.isIOS) {
-      batteryLevel = "iOS is not supported yet.";
-    } else {
-      try {
-        final int result = await platform.invokeMethod('getBatteryLevel');
-        batteryLevel = 'Battery level at $result % .';
-      } on PlatformException catch (e) {
-        batteryLevel = "Failed to get battery level: '${e.message}'.";
-      }
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
     }
     setState(() {
       _batteryLevel = batteryLevel;
