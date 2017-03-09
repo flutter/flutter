@@ -15,12 +15,17 @@ import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'src/context.dart';
 
 void main() {
   group('crash reporting', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() async {
       tools.crashFileSystem = new MemoryFileSystem();
       setExitFunctionForTests((_) { });

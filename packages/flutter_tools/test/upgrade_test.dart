@@ -17,6 +17,10 @@ import 'src/context.dart';
 
 void main() {
   group('upgrade', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     bool _match(String line) => UpgradeCommand.matchesGitLine(line);
 
     test('regex match', () {
