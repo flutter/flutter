@@ -108,28 +108,27 @@ void _printBufferedErrors(AppContext testContext) {
 String getFlutterRoot() {
   Error invalidScript() => new StateError('Invalid script: ${platform.script}');
 
-  String toolsPath;
+  Uri scriptUri;
   switch (platform.script.scheme) {
     case 'file':
-      final List<String> parts = fs.path.split(fs.path.fromUri(platform.script));
-      final int toolsIndex = parts.indexOf('flutter_tools');
-      if (toolsIndex == -1)
-        throw invalidScript();
-      toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
+      scriptUri = platform.script;
       break;
     case 'data':
-      print('data :: 1 :: ${platform.script.path}');
-      final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools)');
+      final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools[^%]+\.dart)%');
       final Match match = flutterTools.firstMatch(platform.script.path);
       if (match == null)
         throw invalidScript();
-      toolsPath = Uri.parse(match.group(1)).path;
-      print('data :: 2 :: $toolsPath');
+      scriptUri = Uri.parse(match.group(1));
       break;
     default:
       throw invalidScript();
   }
 
+  final List<String> parts = fs.path.split(fs.path.fromUri(scriptUri));
+  final int toolsIndex = parts.indexOf('flutter_tools');
+  if (toolsIndex == -1)
+    throw invalidScript();
+  final String toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
   return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
 }
 
