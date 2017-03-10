@@ -16,10 +16,6 @@ import 'material.dart';
 import 'raised_button.dart';
 import 'theme.dart';
 
-/// The default button radius for buttons that don't contain a [Material] child element
-/// (no color and/or elevation).
-final BorderRadius kMaterialButtonDefaultBorderRadius = kMaterialEdges[MaterialType.button];
-
 /// Whether a button should use the accent color for its text.
 ///
 /// See also:
@@ -266,7 +262,7 @@ class _MaterialButtonState extends State<MaterialButton> {
         color: textColor
       ),
       child: new InkWell(
-        borderRadius: hasColorOrElevation ? BorderRadius.zero : kMaterialButtonDefaultBorderRadius,
+        borderRadius: hasColorOrElevation ? null : kMaterialEdges[MaterialType.button],
         onTap: config.onPressed,
         onHighlightChanged: _handleHighlightChanged,
         child: new Container(

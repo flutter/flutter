@@ -41,7 +41,7 @@ class InkResponse extends StatefulWidget {
     this.containedInkWell: false,
     this.highlightShape: BoxShape.circle,
     this.radius,
-    this.borderRadius,
+    this.borderRadius: BorderRadius.zero,
     this.highlightColor,
     this.splashColor,
   }) : super(key: key);
@@ -74,8 +74,7 @@ class InkResponse extends StatefulWidget {
   /// The radius of the ink splash.
   final double radius;
 
-  /// The clipping radius of the containing rect. Used for ink responses that are not contained in [Material]
-  /// parents but generally useful for containing feedback inside non-rect containers.
+  /// The clipping radius of the containing rect.
   final BorderRadius borderRadius;
 
   /// The highlight color of the ink response. If this property is null then the
@@ -133,7 +132,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
           referenceBox: referenceBox,
           color: config.highlightColor ?? Theme.of(context).highlightColor,
           shape: config.highlightShape,
-          borderRadius: config.borderRadius ?? BorderRadius.zero,
+          borderRadius: config.borderRadius,
           rectCallback: config.getRectCallback(referenceBox),
           onRemoved: () {
             assert(_lastHighlight != null);
