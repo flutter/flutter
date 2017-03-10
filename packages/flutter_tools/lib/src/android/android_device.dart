@@ -89,7 +89,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  TargetPlatform get platform {
+  TargetPlatform get targetPlatform {
     if (_platform == null) {
       // http://developer.android.com/ndk/guides/abis.html (x86, armeabi-v7a, ...)
       switch (_getProperty('ro.product.cpu.abi')) {
@@ -278,14 +278,14 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !_checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    if (platform != TargetPlatform.android_arm && mode != BuildMode.debug) {
+    if (targetPlatform != TargetPlatform.android_arm && mode != BuildMode.debug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return new LaunchResult.failed();
     }
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
-      await buildApk(platform,
+      await buildApk(targetPlatform,
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
           kernelContent: kernelContent,

@@ -176,7 +176,7 @@ abstract class FlutterCommand extends Command<Null> {
     devices = devices.where((Device device) => device.isSupported()).toList();
 
     if (androidOnly)
-      devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
+      devices = devices.where((Device device) => device.targetPlatform == TargetPlatform.android_arm).toList();
 
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');

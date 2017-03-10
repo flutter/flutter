@@ -169,7 +169,7 @@ abstract class Device {
 
   // TODO(tvolkert): Rename to `targetPlatform`, and remove the "as p"
   // aliases on the `platform.dart` imports where applicable.
-  TargetPlatform get platform;
+  TargetPlatform get targetPlatform;
 
   String get sdkNameAndVersion;
 
@@ -254,13 +254,13 @@ abstract class Device {
     for (Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       if (device.isLocalEmulator) {
-        final String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = device.targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
         device.name,
         device.id,
-        '${getNameForTargetPlatform(device.platform)}',
+        '${getNameForTargetPlatform(device.targetPlatform)}',
         '${device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
