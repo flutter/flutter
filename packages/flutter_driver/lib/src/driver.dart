@@ -56,6 +56,12 @@ enum TimelineStream {
 
 const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
 
+/// Default timeout for long-running RPCs.
+const Duration _kLongTimeout = const Duration(seconds: 20);
+
+/// Default timeout for short-running RPCs.
+const Duration _kShortTimeout = const Duration(seconds: 5);
+
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
   final String contents = streams.map((TimelineStream stream) {
@@ -300,18 +306,18 @@ class FlutterDriver {
   }
 
   /// Checks the status of the Flutter Driver extension.
-  Future<Health> checkHealth() async {
-    return Health.fromJson(await _sendCommand(new GetHealth()));
+  Future<Health> checkHealth({Duration timeout}) async {
+    return Health.fromJson(await _sendCommand(new GetHealth(timeout: timeout)));
   }
 
   /// Returns a dump of the render tree.
-  Future<RenderTree> getRenderTree() async {
-    return RenderTree.fromJson(await _sendCommand(new GetRenderTree()));
+  Future<RenderTree> getRenderTree({Duration timeout}) async {
+    return RenderTree.fromJson(await _sendCommand(new GetRenderTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
-  Future<Null> tap(SerializableFinder finder) async {
-    await _sendCommand(new Tap(finder));
+  Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
+    await _sendCommand(new Tap(finder, timeout: timeout));
     return null;
   }
 
@@ -319,8 +325,8 @@ class FlutterDriver {
   ///
   /// This command invokes the `onChanged` handler of the `Input` widget with
   /// the provided [text].
-  Future<Null> setInputText(SerializableFinder finder, String text) async {
-    await _sendCommand(new SetInputText(finder, text));
+  Future<Null> setInputText(SerializableFinder finder, String text, {Duration timeout}) async {
+    await _sendCommand(new SetInputText(finder, text, timeout: timeout));
     return null;
   }
 
@@ -328,8 +334,8 @@ class FlutterDriver {
   ///
   /// This command invokes the `onSubmitted` handler of the `Input` widget and
   /// the returns the submitted text value.
-  Future<String> submitInputText(SerializableFinder finder) async {
-    final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder));
+  Future<String> submitInputText(SerializableFinder finder, {Duration timeout}) async {
+    final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder, timeout: timeout));
     return json['text'];
   }
 
@@ -361,24 +367,24 @@ class FlutterDriver {
   ///
   /// The move events are generated at a given [frequency] in Hz (or events per
   /// second). It defaults to 60Hz.
-  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, {int frequency: 60}) async {
-    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency)).then((Map<String, dynamic> _) => null);
+  Future<Null> scroll(SerializableFinder finder, double dx, double dy, Duration duration, { int frequency: 60, Duration timeout }) async {
+    return await _sendCommand(new Scroll(finder, dx, dy, duration, frequency, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Scrolls the Scrollable ancestor of the widget located by [finder]
   /// until the widget is completely visible.
-  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment: 0.0 }) async {
-    return await _sendCommand(new ScrollIntoView(finder, alignment: alignment)).then((Map<String, dynamic> _) => null);
+  Future<Null> scrollIntoView(SerializableFinder finder, { double alignment: 0.0, Duration timeout }) async {
+    return await _sendCommand(new ScrollIntoView(finder, alignment: alignment, timeout: timeout)).then((Map<String, dynamic> _) => null);
   }
 
   /// Returns the text in the `Text` widget located by [finder].
-  Future<String> getText(SerializableFinder finder) async {
-    return GetTextResult.fromJson(await _sendCommand(new GetText(finder))).text;
+  Future<String> getText(SerializableFinder finder, { Duration timeout }) async {
+    return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.
-  Future<List<int>> screenshot() async {
-    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
+  Future<List<int>> screenshot({ Duration timeout: _kLongTimeout }) async {
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return BASE64.decode(result['screenshot']);
   }
 
@@ -401,18 +407,18 @@ class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
-  Future<List<Map<String, dynamic>>> getVmFlags() async {
-    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+  Future<List<Map<String, dynamic>>> getVmFlags({ Duration timeout: _kShortTimeout }) async {
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList').timeout(timeout);
     return result['flags'];
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({List<TimelineStream> streams: _defaultStreams}) async {
+  Future<Null> startTracing({ List<TimelineStream> streams: _defaultStreams, Duration timeout: _kShortTimeout }) async {
     assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
         'recordedStreams': _timelineStreamsToString(streams)
-      });
+      }).timeout(timeout);
       return null;
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -424,9 +430,11 @@ class FlutterDriver {
   }
 
   /// Stops recording performance traces and downloads the timeline.
-  Future<Timeline> stopTracingAndDownloadTimeline() async {
+  Future<Timeline> stopTracingAndDownloadTimeline({ Duration timeout: _kShortTimeout }) async {
     try {
-      await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'});
+      await _peer
+          .sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{'recordedStreams': '[]'})
+          .timeout(timeout);
       return new Timeline.fromJson(await _peer.sendRequest(_kGetVMTimelineMethod));
     } catch(error, stackTrace) {
       throw new DriverError(
@@ -469,13 +477,13 @@ class FlutterDriver {
   /// With frame sync disabled, its the responsibility of the test author to
   /// ensure that no action is performed while the app is undergoing a
   /// transition to avoid flakiness.
-  Future<T> runUnsynchronized<T>(Future<T> action()) async {
-    await _sendCommand(new SetFrameSync(false));
+  Future<T> runUnsynchronized<T>(Future<T> action(), { Duration timeout }) async {
+    await _sendCommand(new SetFrameSync(false, timeout: timeout));
     T result;
     try {
       result = await action();
     } finally {
-      await _sendCommand(new SetFrameSync(true));
+      await _sendCommand(new SetFrameSync(true, timeout: timeout));
     }
     return result;
   }
