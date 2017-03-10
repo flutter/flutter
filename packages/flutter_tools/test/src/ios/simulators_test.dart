@@ -5,6 +5,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -15,6 +16,9 @@ class MockFile extends Mock implements File {}
 class MockProcessManager extends Mock implements ProcessManager {}
 
 void main() {
+  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
+  osx.operatingSystem = 'macos';
+
   group('compareIosVersions', () {
     test('compares correctly', () {
       // This list must be sorted in ascending preference order
@@ -65,36 +69,52 @@ void main() {
   });
 
   group('IOSSimulator.isSupported', () {
-    test('Apple TV is unsupported', () {
+    testUsingContext('Apple TV is unsupported', () {
       expect(new IOSSimulator('x', name: 'Apple TV').isSupported(), false);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('Apple Watch is unsupported', () {
+    testUsingContext('Apple Watch is unsupported', () {
       expect(new IOSSimulator('x', name: 'Apple Watch').isSupported(), false);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPad 2 is unsupported', () {
+    testUsingContext('iPad 2 is unsupported', () {
       expect(new IOSSimulator('x', name: 'iPad 2').isSupported(), false);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPad Retina is unsupported', () {
+    testUsingContext('iPad Retina is unsupported', () {
       expect(new IOSSimulator('x', name: 'iPad Retina').isSupported(), false);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPhone 5 is unsupported', () {
+    testUsingContext('iPhone 5 is unsupported', () {
       expect(new IOSSimulator('x', name: 'iPhone 5').isSupported(), false);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPhone 5s is supported', () {
+    testUsingContext('iPhone 5s is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone 5s').isSupported(), true);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPhone SE is supported', () {
+    testUsingContext('iPhone SE is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone SE').isSupported(), true);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
 
-    test('iPhone 7 Plus is supported', () {
+    testUsingContext('iPhone 7 Plus is supported', () {
       expect(new IOSSimulator('x', name: 'iPhone 7 Plus').isSupported(), true);
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
     });
   });
 

@@ -3,12 +3,19 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/adb.dart';
+import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
 
 void main() {
-  final Adb adb = new Adb('adb');
+  final String adbPath = new OperatingSystemUtils().which('adb')?.path;
+  final Adb adb = new Adb(adbPath);
+
+  // We only test the [Adb] class is we're able to locate the adb binary.
+  if (processManager.runSync(<String>[adbPath, 'version']).exitCode != 0)
+    return;
 
   group('adb', () {
     testUsingContext('getVersion', () {
