@@ -16,6 +16,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
@@ -127,7 +128,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
 
-  _installCocoaPods(appDirectory, flutterFrameworkDir(mode));
+  _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -312,21 +313,15 @@ bool _checkXcodeVersion() {
       return false;
     }
   } catch (e) {
-    printError('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   return true;
 }
 
-bool _checkCocoaPodsInstalled() {
-  if (!platform.isMacOS)
-    return false;
-  return exitsHappy(<String>['pod', '--version']);
-}
-
-void _installCocoaPods(Directory bundle, String engineDirectory)  {
+void _runPodInstall(Directory bundle, String engineDirectory)  {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!_checkCocoaPodsInstalled()) {
+    if (!doctor.iosWorkflow.hasCocoaPods) {
       printError('Warning: CocoaPods not installed. Not running pod install.');
       return;
     }
