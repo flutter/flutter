@@ -299,7 +299,7 @@ class MockVMService extends BasicMock implements VMService {
     _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_path_b64')));
+      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain<List<int>>().then<Null>((List<int> value) {
         request.response
