@@ -191,7 +191,7 @@ ThinAppFrameworks() {
   local frameworks_dir="${app_path}/Frameworks"
 
   [[ -d "$frameworks_dir" ]] || return 0
-  for framework_dir in $(find "${app_path}" -type d -name "*.framework"); do
+  find "${app_path}" -type d -name "*.framework" | while read framework_dir; do
     ThinFramework "$framework_dir" "$ARCHS"
   done
 }
