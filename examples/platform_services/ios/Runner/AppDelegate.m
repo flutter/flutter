@@ -11,25 +11,25 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   FlutterViewController *controller =
       (FlutterViewController *)self.window.rootViewController;
-  FlutterMethodChannel *batteryChannel =
-      [FlutterMethodChannel withController:controller
-                                      name:@"battery"
-                                     codec:[FlutterStandardMethodCodec shared]];
-  [batteryChannel handleMethodCallsWith:^(FlutterMethodCall *call,
-                                          FlutterResultReceiver result) {
+  FlutterMethodChannel *batteryChannel = [FlutterMethodChannel
+      methodChannelWithController:controller
+                             name:@"battery"
+                            codec:[FlutterStandardMethodCodec sharedInstance]];
+  [batteryChannel setMethodCallHandler:^(FlutterMethodCall *call,
+                                         FlutterResultReceiver result) {
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
       UIDevice *device = UIDevice.currentDevice;
       device.batteryMonitoringEnabled = YES;
       if (device.batteryState == UIDeviceBatteryStateUnknown)
-        result(nil, [FlutterError withCode:@"UNAVAILABLE"
-                                   message:@"Battery info unavailable"
-                                   details:nil]);
+        result(nil, [FlutterError errorWithCode:@"UNAVAILABLE"
+                                        message:@"Battery info unavailable"
+                                        details:nil]);
       else
         result([NSNumber numberWithInt:(int)(device.batteryLevel * 100)], nil);
     }
-    result(nil, [FlutterError withCode:@"UNKNOWN_METHOD"
-                               message:@"Unknown battery method called"
-                               details:nil]);
+    result(nil, [FlutterError errorWithCode:@"UNKNOWN_METHOD"
+                                    message:@"Unknown battery method called"
+                                    details:nil]);
   }];
   return YES;
 }
