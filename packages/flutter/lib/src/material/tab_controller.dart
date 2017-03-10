@@ -148,13 +148,13 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController.value - _index.toDouble();
-  set offset(double newOffset) {
-    assert(newOffset != null);
-    assert(newOffset >= -1.0 && newOffset <= 1.0);
+  set offset(double value) {
+    assert(value != null);
+    assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
-    if (newOffset == offset)
+    if (value == offset)
       return;
-    _animationController.value = newOffset + _index.toDouble();
+    _animationController.value = value + _index.toDouble();
   }
 
   @override

@@ -163,11 +163,11 @@ class RenderSliverFixedExtentList extends RenderSliverFixedExtentBoxAdaptor {
   @override
   double get itemExtent => _itemExtent;
   double _itemExtent;
-  set itemExtent (double newValue) {
-    assert(newValue != null);
-    if (_itemExtent == newValue)
+  set itemExtent (double value) {
+    assert(value != null);
+    if (_itemExtent == value)
       return;
-    _itemExtent = newValue;
+    _itemExtent = value;
     markNeedsLayout();
   }
 }
@@ -186,11 +186,11 @@ class RenderSliverFill extends RenderSliverFixedExtentBoxAdaptor {
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-  set viewportFraction (double newValue) {
-    assert(newValue != null);
-    if (_viewportFraction == newValue)
+  set viewportFraction (double value) {
+    assert(value != null);
+    if (_viewportFraction == value)
       return;
-    _viewportFraction = newValue;
+    _viewportFraction = value;
     markNeedsLayout();
   }
 

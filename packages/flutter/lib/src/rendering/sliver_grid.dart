@@ -426,14 +426,14 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
   SliverGridDelegate get gridDelegate => _gridDelegate;
   SliverGridDelegate _gridDelegate;
 
-  set gridDelegate(SliverGridDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_gridDelegate == newDelegate)
+  set gridDelegate(SliverGridDelegate value) {
+    assert(value != null);
+    if (_gridDelegate == value)
       return;
-    if (newDelegate.runtimeType != _gridDelegate.runtimeType ||
-        newDelegate.shouldRelayout(_gridDelegate))
+    if (value.runtimeType != _gridDelegate.runtimeType ||
+        value.shouldRelayout(_gridDelegate))
       markNeedsLayout();
-    _gridDelegate = newDelegate;
+    _gridDelegate = value;
   }
 
   @override

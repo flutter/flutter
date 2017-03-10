@@ -212,11 +212,11 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// Sets the alignment to a new value, and triggers a layout update.
   ///
   /// The new alignment must not be null or have any null properties.
-  set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
-    if (_alignment == newAlignment)
+  set alignment (FractionalOffset value) {
+    assert(value != null && value.dx != null && value.dy != null);
+    if (_alignment == value)
       return;
-    _alignment = newAlignment;
+    _alignment = value;
     markNeedsLayout();
   }
 
