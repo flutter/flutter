@@ -206,7 +206,7 @@ class RenderConstrainedBox extends RenderProxyBox {
   /// Additional constraints to apply to [child] during layout
   BoxConstraints get additionalConstraints => _additionalConstraints;
   BoxConstraints _additionalConstraints;
-  set additionalConstraints (BoxConstraints value) {
+  set additionalConstraints(BoxConstraints value) {
     assert(value != null);
     assert(value.debugAssertIsValid());
     if (_additionalConstraints == value)
@@ -306,7 +306,7 @@ class RenderLimitedBox extends RenderProxyBox {
   /// The value to use for maxWidth if the incoming maxWidth constraint is infinite.
   double get maxWidth => _maxWidth;
   double _maxWidth;
-  set maxWidth (double value) {
+  set maxWidth(double value) {
     assert(value != null && value >= 0.0);
     if (_maxWidth == value)
       return;
@@ -317,7 +317,7 @@ class RenderLimitedBox extends RenderProxyBox {
   /// The value to use for maxHeight if the incoming maxHeight constraint is infinite.
   double get maxHeight => _maxHeight;
   double _maxHeight;
-  set maxHeight (double value) {
+  set maxHeight(double value) {
     assert(value != null && value >= 0.0);
     if (_maxHeight == value)
       return;
@@ -399,7 +399,7 @@ class RenderAspectRatio extends RenderProxyBox {
   /// a 16:9 width:height aspect ratio would have a value of 16.0/9.0.
   double get aspectRatio => _aspectRatio;
   double _aspectRatio;
-  set aspectRatio (double value) {
+  set aspectRatio(double value) {
     assert(value != null);
     assert(value > 0.0);
     assert(value.isFinite);
@@ -721,7 +721,7 @@ class RenderOpacity extends RenderProxyBox {
   /// expensive.
   double get opacity => _opacity;
   double _opacity;
-  set opacity (double value) {
+  set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
@@ -792,7 +792,7 @@ class RenderShaderMask extends RenderProxyBox {
   // repaints when the ShaderCallback changes identity.
   ShaderCallback get shaderCallback => _shaderCallback;
   ShaderCallback _shaderCallback;
-  set shaderCallback (ShaderCallback value) {
+  set shaderCallback(ShaderCallback value) {
     assert(value != null);
     if (_shaderCallback == value)
       return;
@@ -806,7 +806,7 @@ class RenderShaderMask extends RenderProxyBox {
   /// to the child. Other blend modes can be used to create other effects.
   BlendMode get blendMode => _blendMode;
   BlendMode _blendMode;
-  set blendMode (BlendMode value) {
+  set blendMode(BlendMode value) {
     assert(value != null);
     if (_blendMode == value)
       return;
@@ -846,7 +846,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// blur effect
   ui.ImageFilter get filter => _filter;
   ui.ImageFilter _filter;
-  set filter (ui.ImageFilter value) {
+  set filter(ui.ImageFilter value) {
     assert(value != null);
     if (_filter == value)
       return;
@@ -937,7 +937,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   /// If non-null, determines which clip to use on the child.
   CustomClipper<T> get clipper => _clipper;
   CustomClipper<T> _clipper;
-  set clipper (CustomClipper<T> newClipper) {
+  set clipper(CustomClipper<T> newClipper) {
     if (_clipper == newClipper)
       return;
     final CustomClipper<T> oldClipper = _clipper;
@@ -1059,7 +1059,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   /// This value is ignored if [clipper] is non-null.
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
-  set borderRadius (BorderRadius value) {
+  set borderRadius(BorderRadius value) {
     assert(value != null);
     if (_borderRadius == value)
       return;
@@ -1216,7 +1216,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   /// The shape of the layer.
   BoxShape get shape => _shape;
   BoxShape _shape;
-  set shape (BoxShape value) {
+  set shape(BoxShape value) {
     assert(value != null);
     if (_shape == value)
       return;
@@ -1230,7 +1230,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   /// exceed width/height.
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
-  set borderRadius (BorderRadius value) {
+  set borderRadius(BorderRadius value) {
     assert(value != null);
     if (_borderRadius == value)
       return;
@@ -1241,7 +1241,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   /// The z-coordinate at which to place this material.
   int get elevation => _elevation;
   int _elevation;
-  set elevation (int value) {
+  set elevation(int value) {
     assert(value != null);
     if (_elevation == value)
       return;
@@ -1252,7 +1252,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   /// The background color.
   Color get color => _color;
   Color _color;
-  set color (Color value) {
+  set color(Color value) {
     assert(value != null);
     if (_color == value)
       return;
@@ -1329,7 +1329,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// Commonly a [BoxDecoration].
   Decoration get decoration => _decoration;
   Decoration _decoration;
-  set decoration (Decoration value) {
+  set decoration(Decoration value) {
     assert(value != null);
     if (value == _decoration)
       return;
@@ -1342,7 +1342,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// Whether to paint the box decoration behind or in front of the child.
   DecorationPosition get position => _position;
   DecorationPosition _position;
-  set position (DecorationPosition value) {
+  set position(DecorationPosition value) {
     assert(value != null);
     if (value == _position)
       return;
@@ -1355,7 +1355,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// [BoxPainter.paint].
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration value) {
+  set configuration(ImageConfiguration value) {
     assert(value != null);
     if (value == _configuration)
       return;
@@ -1449,7 +1449,7 @@ class RenderTransform extends RenderProxyBox {
   /// translation. This property is provided just for convenience.
   Offset get origin => _origin;
   Offset _origin;
-  set origin (Offset value) {
+  set origin(Offset value) {
     if (_origin == value)
       return;
     _origin = value;
@@ -1462,7 +1462,7 @@ class RenderTransform extends RenderProxyBox {
   /// If it is specified at the same time as an offset, both are applied.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset value) {
+  set alignment(FractionalOffset value) {
     assert(value == null || (value.dx != null && value.dy != null));
     if (_alignment == value)
       return;
@@ -1607,7 +1607,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// How to inscribe the child into the space allocated during layout.
   ImageFit get fit => _fit;
   ImageFit _fit;
-  set fit (ImageFit value) {
+  set fit(ImageFit value) {
     assert(value != null);
     if (_fit == value)
       return;
@@ -1623,7 +1623,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// of the right edge of its parent's bounds.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset value) {
+  set alignment(FractionalOffset value) {
     assert(value != null && value.dx != null && value.dy != null);
     if (_alignment == value)
       return;
@@ -1744,7 +1744,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   /// The translation to apply to the child, as a multiple of the size.
   FractionalOffset get translation => _translation;
   FractionalOffset _translation;
-  set translation (FractionalOffset value) {
+  set translation(FractionalOffset value) {
     assert(value == null || (value.dx != null && value.dy != null));
     if (_translation == value)
       return;
@@ -1947,7 +1947,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no background custom painter.
-  set painter (CustomPainter value) {
+  set painter(CustomPainter value) {
     if (_painter == value)
       return;
     final CustomPainter oldPainter = _painter;
@@ -1972,7 +1972,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// delegate will be called.
   ///
   /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter (CustomPainter value) {
+  set foregroundPainter(CustomPainter value) {
     if (_foregroundPainter == value)
       return;
     final CustomPainter oldPainter = _foregroundPainter;
@@ -2004,7 +2004,7 @@ class RenderCustomPaint extends RenderProxyBox {
   /// instead.
   Size get preferredSize => _preferredSize;
   Size _preferredSize;
-  set preferredSize (Size value) {
+  set preferredSize(Size value) {
     assert(value != null);
     if (preferredSize == value)
       return;

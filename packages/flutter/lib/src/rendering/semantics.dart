@@ -184,7 +184,7 @@ class SemanticsNode extends AbstractNode {
   /// parent).
   Matrix4 get transform => _transform;
   Matrix4 _transform;
-  set transform (Matrix4 value) {
+  set transform(Matrix4 value) {
     if (!MatrixUtils.matrixEquals(_transform, value)) {
       _transform = value;
       _markDirty();
@@ -194,7 +194,7 @@ class SemanticsNode extends AbstractNode {
   /// The bounding box for this node in its coordinate system.
   Rect get rect => _rect;
   Rect _rect = Rect.zero;
-  set rect (Rect value) {
+  set rect(Rect value) {
     assert(value != null);
     if (_rect != value) {
       _rect = value;

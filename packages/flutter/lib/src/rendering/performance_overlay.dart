@@ -90,7 +90,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// is suitable for capturing an SkPicture trace for further analysis.
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
-  set rasterizerThreshold (int value) {
+  set rasterizerThreshold(int value) {
     assert(value != null);
     if (value == _rasterizerThreshold)
       return;
@@ -101,7 +101,7 @@ class RenderPerformanceOverlay extends RenderBox {
   /// Whether the raster cache should checkerboard cached entries.
   bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
   bool _checkerboardRasterCacheImages;
-  set checkerboardRasterCacheImages (bool value) {
+  set checkerboardRasterCacheImages(bool value) {
     assert(value != null);
     if (value == _checkerboardRasterCacheImages)
       return;

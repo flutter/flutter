@@ -41,7 +41,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   /// The amount to pad the child in each dimension.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
-  set padding (EdgeInsets value) {
+  set padding(EdgeInsets value) {
     assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)

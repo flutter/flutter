@@ -282,7 +282,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
-  set delegate (MultiChildLayoutDelegate value) {
+  set delegate(MultiChildLayoutDelegate value) {
     assert(value != null);
     if (_delegate == value)
       return;

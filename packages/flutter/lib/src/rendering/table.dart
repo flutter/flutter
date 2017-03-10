@@ -644,7 +644,7 @@ class RenderTable extends RenderBox {
   /// [BoxPainter.paint].
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration value) {
+  set configuration(ImageConfiguration value) {
     assert(value != null);
     if (value == _configuration)
       return;
@@ -655,7 +655,7 @@ class RenderTable extends RenderBox {
   /// How cells that do not explicitly specify a vertical alignment are aligned vertically.
   TableCellVerticalAlignment get defaultVerticalAlignment => _defaultVerticalAlignment;
   TableCellVerticalAlignment _defaultVerticalAlignment;
-  set defaultVerticalAlignment (TableCellVerticalAlignment value) {
+  set defaultVerticalAlignment(TableCellVerticalAlignment value) {
     if (_defaultVerticalAlignment == value)
       return;
     _defaultVerticalAlignment = value;
@@ -665,7 +665,7 @@ class RenderTable extends RenderBox {
   /// The text baseline to use when aligning rows using [TableCellVerticalAlignment.baseline].
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  set textBaseline (TextBaseline value) {
+  set textBaseline(TextBaseline value) {
     if (_textBaseline == value)
       return;
     _textBaseline = value;
