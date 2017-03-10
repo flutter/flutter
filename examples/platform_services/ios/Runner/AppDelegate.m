@@ -20,16 +20,18 @@
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
       UIDevice *device = UIDevice.currentDevice;
       device.batteryMonitoringEnabled = YES;
-      if (device.batteryState == UIDeviceBatteryStateUnknown)
+      if (device.batteryState == UIDeviceBatteryStateUnknown) {
         result(nil, [FlutterError errorWithCode:@"UNAVAILABLE"
                                         message:@"Battery info unavailable"
                                         details:nil]);
-      else
+      } else {
         result([NSNumber numberWithInt:(int)(device.batteryLevel * 100)], nil);
+      }
+    } else {
+      result(nil, [FlutterError errorWithCode:@"UNKNOWN_METHOD"
+                                      message:@"Unknown battery method called"
+                                      details:nil]);
     }
-    result(nil, [FlutterError errorWithCode:@"UNKNOWN_METHOD"
-                                    message:@"Unknown battery method called"
-                                    details:nil]);
   }];
   return YES;
 }
