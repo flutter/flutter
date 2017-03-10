@@ -47,10 +47,8 @@ class IOSDevice extends Device {
     _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
         'ios-deploy',
-        'To copy files to iOS devices, please install ios-deploy. '
-        'You can do this using homebrew as follows:\n'
-        '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy');
+        'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
+        'brew install ios-deploy');
   }
 
   String _installerPath;
