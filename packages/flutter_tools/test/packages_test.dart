@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:test/test.dart';
@@ -16,6 +17,10 @@ import 'src/context.dart';
 void main() {
   group('packages', () {
     Directory temp;
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');

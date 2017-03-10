@@ -13,9 +13,14 @@ import 'file_system.dart';
 import 'process.dart';
 
 const String _kRecordingType = 'process';
+const ProcessManager _kLocalProcessManager = const LocalProcessManager();
 
 /// The active process manager.
-ProcessManager get processManager => context[ProcessManager];
+ProcessManager get processManager {
+  return context == null
+      ? _kLocalProcessManager
+      : context[ProcessManager];
+}
 
 /// Enables recording of process invocation activity to the specified base
 /// recording [location].

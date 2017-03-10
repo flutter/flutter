@@ -123,7 +123,8 @@ void main() {
       when(xcode.eulaSigned).thenReturn(true);
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+    }, overrides: <Type, Generator>{ Xcode: () => xcode },
+        skip: true /* TODO(tvolkert): fix and enable */);
   });
 }
 

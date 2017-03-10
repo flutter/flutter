@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -30,6 +31,10 @@ void main() {
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
     }
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() {
       command = new DriveCommand();

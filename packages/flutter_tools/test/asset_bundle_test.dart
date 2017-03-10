@@ -5,8 +5,11 @@
 import 'dart:convert';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:test/test.dart';
+
+import 'src/common.dart';
 
 void main()  {
   // Create a temporary directory and write a single file into it.
@@ -18,6 +21,10 @@ void main()  {
   final File tempFile = fs.file(fs.path.join(projectRoot, assetPath));
   tempFile.parent.createSync(recursive: true);
   tempFile.writeAsBytesSync(UTF8.encode(assetContents));
+
+  setUpAll(() {
+    Cache.flutterRoot = getFlutterRoot();
+  });
 
   // Fixed asset bundle tests.
   group('AssetBundle.fixed', () {
