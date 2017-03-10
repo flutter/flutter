@@ -202,7 +202,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// the focus change.
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
-  set focusedEditable (EditableTextState value) {
+  set focusedEditable(EditableTextState value) {
     _focusedEditable = value..requestKeyboard();
   }
 
