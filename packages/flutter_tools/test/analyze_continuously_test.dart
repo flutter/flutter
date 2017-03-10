@@ -65,10 +65,10 @@ void main() {
     await server.start();
     await onDone;
 
-    expect(errorCount, 2);
+    expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
-  }, skip: true /* TODO(tvolkert): fix and enable */);
+  });
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode: false }) {
