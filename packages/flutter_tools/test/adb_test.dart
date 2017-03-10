@@ -4,18 +4,22 @@
 
 import 'package:flutter_tools/src/android/adb.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
 
 void main() {
-  final String adbPath = new OperatingSystemUtils().which('adb')?.path;
-  final Adb adb = new Adb(adbPath);
-
   // We only test the [Adb] class is we're able to locate the adb binary.
-  if (processManager.runSync(<String>[adbPath, 'version']).exitCode != 0)
+  final String adbPath = new OperatingSystemUtils().which('adb')?.path;
+  if (adbPath == null)
     return;
+
+  Adb adb;
+
+  setUp(() {
+    if (adbPath != null)
+      adb = new Adb(adbPath);
+  });
 
   group('adb', () {
     testUsingContext('getVersion', () {
@@ -37,5 +41,5 @@ void main() {
       // Any result is ok.
       expect(devices, isList);
     });
-  });
+  }, skip: adbPath == null);
 }
