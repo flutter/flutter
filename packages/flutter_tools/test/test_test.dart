@@ -20,10 +20,6 @@ Future<Null> _testExclusionLock;
 void main() {
   group('test', () {
 
-    setUpAll(() {
-      Cache.disableLocking();
-    });
-
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
