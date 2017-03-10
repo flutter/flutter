@@ -40,7 +40,7 @@ dependencies:
   front_end: any
 
 dev_dependencies:
-  mockito: ^1.0.0
+  mockito: ^2.0.2
 
 # Exclude this package from the hosted API docs.
 dartdoc:

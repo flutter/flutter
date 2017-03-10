@@ -9,7 +9,7 @@ import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
 import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
 
