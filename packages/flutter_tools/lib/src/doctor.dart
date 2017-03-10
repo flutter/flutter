@@ -41,7 +41,6 @@ class Doctor {
   IOSWorkflow _iosWorkflow;
   AndroidWorkflow _androidWorkflow;
 
-  /// This can return null for platforms that don't support developing for iOS.
   IOSWorkflow get iosWorkflow => _iosWorkflow;
 
   AndroidWorkflow get androidWorkflow => _androidWorkflow;

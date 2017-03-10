@@ -41,6 +41,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
 
+  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
+
+  String get cocoaPodsMinimumVersion => '1.0.0';
+
+  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
+
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
@@ -48,6 +54,17 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
+      return false;
+    }
+  }
+
+  bool get _cocoaPodsInstalledAndMeetsVersionCheck {
+    if (!hasCocoaPods)
+      return false;
+    try {
+      final Version installedVersion = new Version.parse(cocoaPodsVersionText);
+      return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
+    } on FormatException {
       return false;
     }
   }
@@ -156,6 +173,23 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
             'brew update\n'
             'brew uninstall --ignore-dependencies libimobiledevice\n'
             'brew install --HEAD libimobiledevice'
+          ));
+        }
+      }
+      if (_cocoaPodsInstalledAndMeetsVersionCheck) {
+        messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+      } else {
+        if (!hasCocoaPods) {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods not installed. To install:\n'
+            'brew update\n'
+            'brew install cocoapods'
+          ));
+        } else {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods out of date ($cocoaPodsMinimumVersion is required). To upgrade:\n'
+            'brew update\n'
+            'brew upgrade cocoapods'
           ));
         }
       }
