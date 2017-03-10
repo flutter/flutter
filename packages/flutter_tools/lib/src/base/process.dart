@@ -211,7 +211,6 @@ String runCheckedSync(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter: false,
   bool hideStdout: false,
-  Map<String, String> environment,
 }) {
   return _runWithLoggingSync(
     cmd,
@@ -220,7 +219,6 @@ String runCheckedSync(List<String> cmd, {
     hideStdout: hideStdout,
     checked: true,
     noisyErrors: true,
-    environment: environment,
   );
 }
 
@@ -261,13 +259,12 @@ String _runWithLoggingSync(List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter: false,
   bool hideStdout: false,
-  Map<String, String> environment,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = processManager.runSync(
     cmd,
     workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter, environment),
+    environment: _environment(allowReentrantFlutter),
   );
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
