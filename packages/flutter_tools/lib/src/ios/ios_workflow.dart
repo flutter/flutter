@@ -41,6 +41,10 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
 
+  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
+
+  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
+
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
@@ -58,6 +62,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     ValidationType xcodeStatus = ValidationType.missing;
     ValidationType pythonStatus = ValidationType.missing;
     ValidationType brewStatus = ValidationType.missing;
+    ValidationType podStatus = ValidationType.missing;
     String xcodeVersionInfo;
 
     if (xcode.isInstalled) {
@@ -167,8 +172,19 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       ));
     }
 
+    if (hasCocoaPods) {
+      podStatus = ValidationType.installed;
+      messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+    } else {
+      podStatus = ValidationType.missing;
+      messages.add(new ValidationMessage.error(
+        'CocoaPods not installed; this is used for iOS development.\n'
+        'Install by running: \'brew install cocoapods\''
+      ));
+    }
+
     return new ValidationResult(
-      <ValidationType>[xcodeStatus, pythonStatus, brewStatus].reduce(_mergeValidationTypes),
+      <ValidationType>[xcodeStatus, pythonStatus, brewStatus, podStatus].reduce(_mergeValidationTypes),
       messages,
       statusInfo: xcodeVersionInfo
     );
