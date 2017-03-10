@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
@@ -329,11 +330,15 @@ void _installCocoaPods(Directory bundle, String engineDirectory)  {
       printError('Warning: CocoaPods not installed. Not running pod install.');
       return;
     }
-    runCheckedSync(
-        <String>['pod', 'install'],
-        workingDirectory: bundle.path,
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-    );
+    try {
+      runCheckedSync(
+          <String>['pod', 'install'],
+          workingDirectory: bundle.path,
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      );
+    } catch (e) {
+      throwToolExit('Error running pod install: $e');
+    }
   }
 }
 
