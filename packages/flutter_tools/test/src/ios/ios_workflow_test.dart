@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
-
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../context.dart';
@@ -14,8 +15,11 @@ import '../context.dart';
 void main() {
   group('iOS Workflow validation', () {
     MockXcode xcode;
+    MockProcessManager processManager;
+
     setUp(() {
       xcode = new MockXcode();
+      processManager = new MockProcessManager();
     });
 
     testUsingContext('Emit missing status when nothing is installed', () async {
@@ -121,14 +125,30 @@ void main() {
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
+
+      when(processManager.runSync(argThat(contains('idevice_id'))))
+          .thenReturn(exitsHappy);
+      when(processManager.run(argThat(contains('idevice_id')), workingDirectory: any, environment: any))
+          .thenReturn(exitsHappy);
+
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
-    }, overrides: <Type, Generator>{ Xcode: () => xcode },
-        skip: true /* TODO(tvolkert): fix and enable */);
+    }, overrides: <Type, Generator>{
+      Xcode: () => xcode,
+      ProcessManager: () => processManager,
+    });
   });
 }
 
+final ProcessResult exitsHappy = new ProcessResult(
+  1,     // pid
+  0,     // exitCode
+  '',    // stdout
+  '',    // stderr
+);
+
 class MockXcode extends Mock implements Xcode {}
+class MockProcessManager extends Mock implements ProcessManager {}
 
 class IOSWorkflowTestTarget extends IOSWorkflow {
   @override
@@ -142,4 +162,7 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   String iosDeployVersionText = '1.9.0';
+
+  @override
+  bool get hasIDeviceInstaller => true;
 }
