@@ -79,11 +79,11 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
+    package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
-      String message = 'No application found for ${device.platform}.';
-      final String hint = getMissingPackageHintForPlatform(device.platform);
+      String message = 'No application found for ${device.targetPlatform}.';
+      final String hint = getMissingPackageHintForPlatform(device.targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);

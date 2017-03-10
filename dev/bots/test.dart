@@ -79,12 +79,7 @@ Future<Null> main() async {
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      environment: <String, String>{ 'FLUTTER_ROOT': flutterRoot },
-    );
-    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      testPath: 'test/replay',
-    );
+    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'));
 
     await _runAllDartTests(p.join(flutterRoot, 'dev', 'devicelab'));
     await _runFlutterTest(p.join(flutterRoot, 'dev', 'manual_tests'));

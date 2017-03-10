@@ -356,9 +356,9 @@ class _Block {
   List<_Block> subBlocks;
 
   bool get open => _open;
-  set open(bool open) {
-    _open = open;
-    if (!open && subBlocks.isNotEmpty)
+  set open(bool value) {
+    _open = value;
+    if (!value && subBlocks.isNotEmpty)
       subBlocks.last.isLast = true;
   }
 

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_sdk.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:test/test.dart';
@@ -12,6 +13,10 @@ import 'src/context.dart';
 
 void main() {
   group('devices', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testUsingContext('returns 0 when called', () async {
       final DevicesCommand command = new DevicesCommand();
       await createTestCommandRunner(command).run(<String>['devices']);

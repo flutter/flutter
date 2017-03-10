@@ -686,7 +686,9 @@ class SliverAppBar extends StatelessWidget {
   ///           new IconButton(
   ///             icon: new Icon(Icons.shopping_cart),
   ///             tooltip: 'Open shopping cart',
-  ///             onPressed: _openCart,
+  ///             onPressed: () {
+  ///               // handle the press
+  ///             },
   ///           ),
   ///         ],
   ///       ),

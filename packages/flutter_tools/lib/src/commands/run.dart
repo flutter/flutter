@@ -151,7 +151,7 @@ class RunCommand extends RunCommandBase {
       return command;
 
     // Return 'run/ios'.
-    return '$command/${getNameForTargetPlatform(device.platform)}';
+    return '$command/${getNameForTargetPlatform(device.targetPlatform)}';
   }
 
   @override

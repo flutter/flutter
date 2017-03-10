@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 class MockApplicationPackageStore extends ApplicationPackageStore {
@@ -31,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.android_arm;
+  TargetPlatform get targetPlatform => TargetPlatform.android_arm;
 
   @override
   bool isSupported() => true;
@@ -39,7 +39,7 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
 class MockIOSDevice extends Mock implements IOSDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -47,7 +47,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;

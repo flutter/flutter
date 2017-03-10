@@ -15,8 +15,11 @@ import 'src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
+Future<Null> _testExclusionLock;
+
 void main() {
   group('test', () {
+
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
@@ -24,10 +27,12 @@ void main() {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', 1, automatedTestsDirectory, flutterTestDirectory);
     });
+
     testUsingContext('TestAsyncUtils unguarded function test', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', 1, automatedTestsDirectory, flutterTestDirectory);
     });
+
     testUsingContext('Missing flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
@@ -43,16 +48,29 @@ Future<Null> _testFile(String testName, int wantedExitCode, String workingDirect
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   expect(expectationFile.existsSync(), true);
-  final ProcessResult exec = await Process.run(
-    fs.path.join(dartSdkPath, 'bin', 'dart'),
-    <String>[
-      fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-      'test',
-      '--no-color',
-      fullTestName
-    ],
-    workingDirectory: workingDirectory
-  );
+
+  while (_testExclusionLock != null)
+    await _testExclusionLock;
+
+  ProcessResult exec;
+  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  _testExclusionLock = testExclusionCompleter.future;
+  try {
+    exec = await Process.run(
+      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      <String>[
+        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+        'test',
+        '--no-color',
+        fullTestName,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  } finally {
+    _testExclusionLock = null;
+    testExclusionCompleter.complete();
+  }
+
   expect(exec.exitCode, wantedExitCode);
   final List<String> output = exec.stdout.split('\n');
   output.add('<<stderr>>');

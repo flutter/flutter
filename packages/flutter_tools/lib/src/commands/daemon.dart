@@ -647,7 +647,7 @@ Map<String, dynamic> _deviceToMap(Device device) {
   return <String, dynamic>{
     'id': device.id,
     'name': device.name,
-    'platform': getNameForTargetPlatform(device.platform),
+    'platform': getNameForTargetPlatform(device.targetPlatform),
     'emulator': device.isLocalEmulator
   };
 }

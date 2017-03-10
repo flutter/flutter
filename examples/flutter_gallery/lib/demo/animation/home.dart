@@ -41,7 +41,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   // The height of the status bar
   double get maxHeight => _maxHeight;
   double _maxHeight;
-  set maxHeight (double value) {
+  set maxHeight(double value) {
     assert(maxHeight != null && maxHeight >= 0.0);
     if (_maxHeight == value)
       return;
@@ -53,7 +53,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   // offset changes.
   double get scrollFactor => _scrollFactor;
   double _scrollFactor;
-  set scrollFactor (double value) {
+  set scrollFactor(double value) {
     assert(scrollFactor != null && scrollFactor >= 1.0);
     if (_scrollFactor == value)
       return;

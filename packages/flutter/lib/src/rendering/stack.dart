@@ -275,7 +275,7 @@ class RenderStack extends RenderBox
   /// [Overflow.clipped], children cannot paint outside of the stack's box.
   Overflow get overflow => _overflow;
   Overflow _overflow;
-  set overflow (Overflow value) {
+  set overflow(Overflow value) {
     assert(value != null);
     if (_overflow != value) {
       _overflow = value;
@@ -291,7 +291,7 @@ class RenderStack extends RenderBox
   /// each non-positioned child will be located at the same global coordinate.
   FractionalOffset get alignment => _alignment;
   FractionalOffset _alignment;
-  set alignment (FractionalOffset value) {
+  set alignment(FractionalOffset value) {
     if (_alignment != value) {
       _alignment = value;
       markNeedsLayout();
@@ -467,7 +467,7 @@ class RenderIndexedStack extends RenderStack {
   /// The index of the child to show, null if nothing is to be displayed.
   int get index => _index;
   int _index;
-  set index (int value) {
+  set index(int value) {
     if (_index != value) {
       _index = value;
       markNeedsLayout();

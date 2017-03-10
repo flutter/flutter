@@ -148,7 +148,7 @@ abstract class RenderDecoratedSector extends RenderSector {
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
-  set decoration (BoxDecoration value) {
+  set decoration(BoxDecoration value) {
     if (value == _decoration)
       return;
     _decoration = value;
