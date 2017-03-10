@@ -5,6 +5,8 @@
 # This is a wrapper arround flutter.bat, which checks if the terminal supports
 # ANSI codes to work around https://github.com/dart-lang/sdk/issues/28614.
 
+$ErrorActionPreference = "Stop"
+
 Add-Type -MemberDefinition @"
 [DllImport("kernel32.dll", SetLastError=true)]
 public static extern bool SetConsoleMode(IntPtr hConsoleHandle, int mode);
@@ -26,5 +28,7 @@ If ($stdout -ne -1) {
     }
 }
 
-& $PSScriptRoot\flutter.bat $args
+# Cannot use $PSScriptRoot as that requires PowerShell 3 or newer
+$scriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent
+& $scriptRoot\flutter.bat $args
 exit $LastExitCode

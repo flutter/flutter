@@ -697,7 +697,7 @@ class Navigator extends StatefulWidget {
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
-  final List<Route<dynamic>> _history = new List<Route<dynamic>>();
+  final List<Route<dynamic>> _history = <Route<dynamic>>[];
   final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
 
   @override

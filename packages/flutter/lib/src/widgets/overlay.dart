@@ -266,7 +266,7 @@ class Overlay extends StatefulWidget {
 /// Used to insert [OverlayEntry]s into the overlay using the [insert] and
 /// [insertAll] functions.
 class OverlayState extends State<Overlay> with TickerProviderStateMixin {
-  final List<OverlayEntry> _entries = new List<OverlayEntry>();
+  final List<OverlayEntry> _entries = <OverlayEntry>[];
 
   @override
   void initState() {

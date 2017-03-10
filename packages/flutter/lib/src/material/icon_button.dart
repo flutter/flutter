@@ -143,7 +143,7 @@ class IconButton extends StatelessWidget {
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
     Widget result = new ConstrainedBox(
-      constraints: new BoxConstraints(minWidth: kMinButtonSize, minHeight: kMinButtonSize),
+      constraints: const BoxConstraints(minWidth: kMinButtonSize, minHeight: kMinButtonSize),
       child: new Padding(
         padding: padding,
         child: new SizedBox(

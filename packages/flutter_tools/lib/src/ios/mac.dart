@@ -59,7 +59,7 @@ class Xcode {
   }
 
   /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context[Xcode];
+  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 

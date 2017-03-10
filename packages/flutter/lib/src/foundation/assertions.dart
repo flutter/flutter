@@ -102,6 +102,42 @@ class FlutterErrorDetails {
   /// error to the console on end-user devices, while still allowing a custom
   /// error handler to see the errors even in release builds.
   final bool silent;
+
+  /// Converts the [exception] to a string.
+  ///
+  /// This applies some additional logic to 
+  String exceptionAsString() {
+    String longMessage;
+    if (exception is AssertionError) {
+      // Regular _AssertionErrors thrown by assert() put the message last, after
+      // some code snippets. This leads to ugly messages. To avoid this, we move
+      // the assertion message up to before the code snippets, separated by a
+      // newline, if we recognise that format is being used.
+      final String message = exception.message;
+      final String fullMessage = exception.toString();
+      if (message is String && message != fullMessage) {
+        if (fullMessage.length > message.length) {
+          final int position = fullMessage.lastIndexOf(message);
+          if (position == fullMessage.length - message.length &&
+              position > 2 &&
+              fullMessage.substring(position - 2, position) == ': ') {
+            longMessage = '${message.trimRight()}\n${fullMessage.substring(0, position - 2)}';
+          }
+        }
+      }
+      longMessage ??= fullMessage;
+    } else if (exception is String) {
+      longMessage = exception;
+    } else if (exception is Error || exception is Exception) {
+      longMessage = exception.toString();
+    } else {
+      longMessage = '  ${exception.toString()}';
+    }
+    longMessage = longMessage.trimRight();
+    if (longMessage.isEmpty)
+      longMessage = '  <no message available>';
+    return longMessage;
+  }
 }
 
 /// Error class used to report Flutter-specific assertion failures and
@@ -207,8 +243,14 @@ class FlutterError extends AssertionError {
         } else {
           errorName = '${details.exception.runtimeType} object';
         }
-        debugPrint('The following $errorName was $verb:', wrapWidth: _kWrapWidth);
-        debugPrint('${details.exception}', wrapWidth: _kWrapWidth);
+        // Many exception classes put their type at the head of their message.
+        // This is redundant with the way we display exceptions, so attempt to
+        // strip out that header when we see it.
+        final String prefix = '${details.exception.runtimeType}: ';
+        String message = details.exceptionAsString();
+        if (message.startsWith(prefix))
+          message = message.substring(prefix.length);
+        debugPrint('The following $errorName was $verb:\n$message', wrapWidth: _kWrapWidth);
       }
       Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
@@ -216,6 +258,7 @@ class FlutterError extends AssertionError {
         if (stackLines != null) {
           final List<String> stackList = stackLines.take(2).toList();
           if (stackList.length >= 2) {
+            // TODO(ianh): This has bitrotted and is no longer matching. https://github.com/flutter/flutter/issues/4021
             final RegExp throwPattern = new RegExp(r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
             final RegExp assertPattern = new RegExp(r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
             if (throwPattern.hasMatch(stackList[0])) {
@@ -249,11 +292,11 @@ class FlutterError extends AssertionError {
       if (details.informationCollector != null) {
         final StringBuffer information = new StringBuffer();
         details.informationCollector(information);
-        debugPrint('\n$information', wrapWidth: _kWrapWidth);
+        debugPrint('\n${information.toString().trimRight()}', wrapWidth: _kWrapWidth);
       }
       debugPrint(footer);
     } else {
-      debugPrint('Another exception was thrown: ${details.exception.toString().split("\n")[0]}');
+      debugPrint('Another exception was thrown: ${details.exceptionAsString().split("\n")[0].trimLeft()}');
     }
     _errorCount += 1;
   }

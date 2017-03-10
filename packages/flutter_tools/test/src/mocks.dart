@@ -77,7 +77,7 @@ void applyMocksToCommand(FlutterCommand command) {
 
 /// Common functionality for tracking mock interaction
 class BasicMock {
-  final List<String> messages = new List<String>();
+  final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
     final List<String> actualMessages = new List<String>.from(messages);

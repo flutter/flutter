@@ -12,6 +12,7 @@ dart_package("flutter") {
   deps = [
     "//third_party/dart-pkg/pub/async",
     "//third_party/dart-pkg/pub/collection",
+    "//third_party/dart-pkg/pub/http",
     "//third_party/dart-pkg/pub/http_parser",
     "//third_party/dart-pkg/pub/intl",
     "//third_party/dart-pkg/pub/meta",

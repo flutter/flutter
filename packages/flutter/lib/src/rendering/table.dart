@@ -494,7 +494,7 @@ class RenderTable extends RenderBox {
     assert(configuration != null);
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
-    _children = new List<RenderBox>()..length = _columns * _rows;
+    _children = <RenderBox>[]..length = _columns * _rows;
     _columnWidths = columnWidths ?? new HashMap<int, TableColumnWidth>();
     _defaultColumnWidth = defaultColumnWidth;
     _border = border;
@@ -529,7 +529,7 @@ class RenderTable extends RenderBox {
     final int oldColumns = columns;
     final List<RenderBox> oldChildren = _children;
     _columns = value;
-    _children = new List<RenderBox>()..length = columns * rows;
+    _children = <RenderBox>[]..length = columns * rows;
     final int columnsToCopy = math.min(columns, oldColumns);
     for (int y = 0; y < rows; y += 1) {
       for (int x = 0; x < columnsToCopy; x += 1)

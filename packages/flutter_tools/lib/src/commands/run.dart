@@ -99,9 +99,6 @@ class RunCommand extends RunCommandBase {
         help: 'Path to a pre-built kernel blob to use when running.\n'
               'This option only exists for testing new kernel code execution on devices\n'
               'and is not needed during normal application development.');
-    argParser.addOption('snapshotter',
-        hide: !verboseHelp,
-        help: 'Specify the path to the sky_snapshot binary.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');

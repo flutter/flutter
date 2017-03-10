@@ -23,12 +23,14 @@ void main() {
   group('crash reporting', () {
     setUp(() async {
       tools.crashFileSystem = new MemoryFileSystem();
+      tools.writelnStderr = ([_]) { };
       setExitFunctionForTests((_) { });
       enterTestingMode();
     });
 
     tearDown(() {
-      tools.crashFileSystem = new LocalFileSystem();
+      tools.crashFileSystem = const LocalFileSystem();
+      tools.writelnStderr = stderr.writeln;
       restoreExitFunction();
       exitTestingMode();
     });

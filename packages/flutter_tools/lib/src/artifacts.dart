@@ -18,7 +18,6 @@ enum Artifact {
   dartVmEntryPointsAndroidTxt,
   genSnapshot,
   skyShell,
-  skySnapshot,
   snapshotDart,
   flutterFramework,
   vmSnapshotData,
@@ -43,8 +42,6 @@ String _artifactToFileName(Artifact artifact) {
       return 'dart_vm_entry_points_android.txt';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
-    case Artifact.skySnapshot:
-      return 'sky_snapshot';
     case Artifact.skyShell:
       return 'sky_shell';
     case Artifact.snapshotDart:
@@ -144,18 +141,17 @@ class CachedArtifacts extends Artifacts {
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform) {
     switch (artifact) {
+      case Artifact.genSnapshot:
+        // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
+        // android_arm in profile mode because it is available on all supported host platforms.
+        return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.skyShell:
-      case Artifact.skySnapshot:
         if (platform == TargetPlatform.windows_x64)
           throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
-        continue returnResourcePath;
-      case Artifact.genSnapshot:
+        continue fallThrough;
+      fallThrough:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
-        if (platform != TargetPlatform.windows_x64)
-          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
-        continue returnResourcePath;
-      returnResourcePath:
       case Artifact.icudtlDat:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
@@ -228,8 +224,6 @@ class LocalEngineArtifacts extends Artifacts {
         return _genSnapshotPath(platform);
       case Artifact.skyShell:
         return _skyShellPath(platform);
-      case Artifact.skySnapshot:
-        return _skySnapshotPath();
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
@@ -254,13 +248,6 @@ class LocalEngineArtifacts extends Artifacts {
       clang = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';
     }
     return fs.path.join(engineOutPath, clang, _artifactToFileName(Artifact.genSnapshot));
-  }
-
-  String _skySnapshotPath() {
-    final String clangPath = fs.path.join(engineOutPath, 'clang_x64', _artifactToFileName(Artifact.skySnapshot));
-    if (fs.isFileSync(clangPath))
-      return clangPath;
-    return fs.path.join(engineOutPath, _artifactToFileName(Artifact.skySnapshot));
   }
 
   String _skyShellPath(TargetPlatform platform) {

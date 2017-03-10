@@ -446,7 +446,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
       headings.add(new Container(
-          decoration: new BoxDecoration(backgroundColor: _kAppBackgroundColor),
+          decoration: const BoxDecoration(backgroundColor: _kAppBackgroundColor),
           child: new ClipRect(
             child: new _AllSectionsView(
               sectionIndex: index,
@@ -526,8 +526,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             top: statusBarHeight,
             left: 0.0,
             child: new IconTheme(
-              data: new IconThemeData(color: Colors.white),
-              child: new BackButton(),
+              data: const IconThemeData(color: Colors.white),
+              child: const BackButton(),
             ),
           ),
         ],

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'image_stream.dart';
 
 const int _kDefaultSize = 1000;
@@ -27,7 +25,7 @@ const int _kDefaultSize = 1000;
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
 class ImageCache {
-  final LinkedHashMap<Object, ImageStreamCompleter> _cache = new LinkedHashMap<Object, ImageStreamCompleter>();
+  final Map<Object, ImageStreamCompleter> _cache = <Object, ImageStreamCompleter>{};
 
   /// Maximum number of entries to store in the cache.
   ///

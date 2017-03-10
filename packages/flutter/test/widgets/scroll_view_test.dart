@@ -269,7 +269,7 @@ void main() {
         primary: true,
         children: <Widget>[
           new Container(
-            constraints: new BoxConstraints(maxHeight: 200.0),
+            constraints: const BoxConstraints(maxHeight: 200.0),
             child: new ListView(key: innerKey, primary: true),
           ),
         ],

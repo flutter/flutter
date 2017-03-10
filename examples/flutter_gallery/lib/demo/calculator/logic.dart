@@ -303,7 +303,7 @@ class CalcExpression {
           assert(false);
       }
     }
-    final List<ExpressionToken> outList = new List<ExpressionToken>();
+    final List<ExpressionToken> outList = <ExpressionToken>[];
     outList.add(new ResultToken(currentTermValue));
     return new CalcExpression(outList, ExpressionState.Result);
   }

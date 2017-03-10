@@ -149,31 +149,37 @@ typedef void GlobalKeyRemoveListener(GlobalKey key);
 /// Global keys are relatively expensive. If you don't need any of the features
 /// listed above, consider using a [Key], [ValueKey], [ObjectKey], or
 /// [UniqueKey] instead.
+///
+/// You cannot simultaneously include two widgets in the tree with the same
+/// global key. Attempting to do so will assert at runtime.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
-  /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for debugging.
+  /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
+  /// debugging.
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
-  factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._; // the label is purely for debugging purposes and is otherwise ignored
+  factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._;
 
   /// Creates a global key without a label.
   ///
-  /// Used by subclasss because the factory constructor shadows the implicit
+  /// Used by subclasses because the factory constructor shadows the implicit
   /// constructor.
   const GlobalKey.constructor() : super._();
 
-  static final Map<GlobalKey, Element> _registry = new Map<GlobalKey, Element>();
-  static final Map<GlobalKey, int> _debugDuplicates = new Map<GlobalKey, int>();
-  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = new Map<GlobalKey, Set<GlobalKeyRemoveListener>>();
+  static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
+  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = <GlobalKey, Set<GlobalKeyRemoveListener>>{};
   static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
+  static final Set<Element> _debugIllFatedElements = new HashSet<Element>();
+  static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
 
   void _register(Element element) {
     assert(() {
       if (_registry.containsKey(this)) {
-        final int oldCount = _debugDuplicates.putIfAbsent(this, () => 1);
-        assert(oldCount >= 1);
-        _debugDuplicates[this] = oldCount + 1;
+        assert(element.widget != null);
+        assert(_registry[this].widget != null);
+        assert(element.widget.runtimeType != _registry[this].widget.runtimeType);
+        _debugIllFatedElements.add(_registry[this]);
       }
       return true;
     });
@@ -182,14 +188,10 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
 
   void _unregister(Element element) {
     assert(() {
-      if (_registry.containsKey(this) && _debugDuplicates.containsKey(this)) {
-        final int oldCount = _debugDuplicates[this];
-        assert(oldCount >= 2);
-        if (oldCount == 2) {
-          _debugDuplicates.remove(this);
-        } else {
-          _debugDuplicates[this] = oldCount - 1;
-        }
+      if (_registry.containsKey(this) && _registry[this] != element) {
+        assert(element.widget != null);
+        assert(_registry[this].widget != null);
+        assert(element.widget.runtimeType != _registry[this].widget.runtimeType);
       }
       return true;
     });
@@ -197,6 +199,73 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       _registry.remove(this);
       _removedKeys.add(this);
     }
+  }
+
+  void _debugReserveFor(Element parent) {
+    assert(() {
+      assert(parent != null);
+      if (_debugReservations.containsKey(this) && _debugReservations[this] != parent) {
+        // It's possible for an element to get built multiple times in one
+        // frame, in which case it'll reserve the same child's key multiple
+        // times. We catch multiple children of one widget having the same key
+        // by verifying that an element never steals elements from itself, so we
+        // don't care to verify that here as well.
+        final String older = _debugReservations[this].toString();
+        final String newer = parent.toString();
+        if (older != newer) {
+          throw new FlutterError(
+            'Multiple widgets used the same GlobalKey.\n'
+            'The key $this was used by multiple widgets. The parents of those widgets were:\n'
+            '- $older\n'
+            '- $newer\n'
+            'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+          );
+        }
+        throw new FlutterError(
+          'Multiple widgets used the same GlobalKey.\n'
+          'The key $this was used by multiple widgets. The parents of those widgets were '
+          'different widgets that both had the following description:\n'
+          '  $newer\n'
+          'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+        );
+      }
+      _debugReservations[this] = parent;
+      return true;
+    });
+  }
+
+  static void _debugVerifyIllFatedPopulation() {
+    assert(() {
+      Map<GlobalKey, Set<Element>> duplicates;
+      for (Element element in _debugIllFatedElements) {
+        if (element._debugLifecycleState != _ElementLifecycle.defunct) {
+          assert(element != null);
+          assert(element.widget != null);
+          assert(element.widget.key != null);
+          final GlobalKey key = element.widget.key;
+          assert(_registry.containsKey(key));
+          duplicates ??= <GlobalKey, Set<Element>>{};
+          final Set<Element> elements = duplicates.putIfAbsent(key, () => new HashSet<Element>());
+          elements.add(element);
+          elements.add(_registry[key]);
+        }
+      }
+      _debugIllFatedElements.clear();
+      _debugReservations.clear();
+      if (duplicates != null) {
+        final StringBuffer buffer = new StringBuffer();
+        buffer.writeln('Multiple widgets used the same GlobalKey.\n');
+        for (GlobalKey key in duplicates.keys) {
+          final Set<Element> elements = duplicates[key];
+          buffer.writeln('The key $key was used by ${elements.length} widgets:');
+          for (Element element in elements)
+            buffer.writeln('- $element');
+        }
+        buffer.write('A GlobalKey can only be specified on one widget at a time in the widget tree.');
+        throw new FlutterError(buffer.toString());
+      }
+      return true;
+    });
   }
 
   Element get _currentElement => _registry[this];
@@ -253,21 +322,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     if (_removeListeners[key].isEmpty)
       _removeListeners.remove(key);
     assert(removed);
-  }
-
-  static bool _debugCheckForDuplicates() {
-    String message = '';
-    for (GlobalKey key in _debugDuplicates.keys) {
-      message += 'The following GlobalKey was found multiple times among mounted elements: $key (${_debugDuplicates[key]} instances)\n';
-      message += 'The most recently registered instance is: ${_registry[key]}\n';
-    }
-    if (_debugDuplicates.isNotEmpty) {
-      throw new FlutterError(
-        'Incorrect GlobalKey usage.\n'
-        '$message'
-      );
-    }
-    return true;
   }
 
   static void _notifyListeners() {
@@ -1128,9 +1182,9 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
                '$description has a $T ancestor, but there are other widgets between them:\n';
       for (Widget ancestor in badAncestors) {
         if (ancestor.runtimeType == runtimeType) {
-          result += '  $ancestor (this is a different $runtimeType than the one with the problem)\n';
+          result += '- $ancestor (this is a different $runtimeType than the one with the problem)\n';
         } else {
-          result += '  $ancestor\n';
+          result += '- $ancestor\n';
         }
       }
       result += 'These widgets cannot come between a $runtimeType and its $T.\n';
@@ -1355,6 +1409,15 @@ class _InactiveElements {
     assert(element._parent == null);
     _elements.remove(element);
     assert(!element._active);
+  }
+
+  bool debugContains(Element element) {
+    bool result;
+    assert(() {
+      result = _elements.contains(element);
+      return true;
+    });
+    return result;
   }
 }
 
@@ -1669,9 +1732,9 @@ class BuildOwner {
           debugPrintStack(label: 'markNeedsToResortDirtyElements() called; _dirtyElementsNeedsResorting was $_dirtyElementsNeedsResorting (now true); dirty list is: $_dirtyElements');
         if (_dirtyElementsNeedsResorting == null) {
           throw new FlutterError(
-              'markNeedsToResortDirtyElements() called inappropriately.\n'
-                  'The markNeedsToResortDirtyElements() method should only be called while the '
-                  'buildScope() method is actively rebuilding the widget tree.'
+            'markNeedsToResortDirtyElements() called inappropriately.\n'
+            'The markNeedsToResortDirtyElements() method should only be called while the '
+            'buildScope() method is actively rebuilding the widget tree.'
           );
         }
         return true;
@@ -1774,6 +1837,7 @@ class BuildOwner {
             context._debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
             assert(_debugCurrentBuildTarget == context);
             _debugCurrentBuildTarget = debugPreviousBuildTarget;
+            _debugElementWasRebuilt(context);
             return true;
           });
         }
@@ -1846,13 +1910,26 @@ class BuildOwner {
     assert(_debugStateLockLevel >= 0);
   }
 
+  Map<Element, Set<GlobalKey>> _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans;
+
+  void _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(Element node, GlobalKey key) {
+    _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans ??= new HashMap<Element, Set<GlobalKey>>();
+    final Set<GlobalKey> keys = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans
+      .putIfAbsent(node, () => new HashSet<GlobalKey>());
+    keys.add(key);
+  }
+
+  void _debugElementWasRebuilt(Element node) {
+    _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans?.remove(node);
+  }
+
   /// Complete the element build pass by unmounting any elements that are no
   /// longer active.
   ///
   /// This is called by [WidgetsBinding.beginFrame].
   ///
-  /// In checked mode, this also verifies that each global key is used at most
-  /// once.
+  /// In debug mode, this also runs some sanity checks, for example checking for
+  /// duplicate global keys.
   ///
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
@@ -1860,9 +1937,86 @@ class BuildOwner {
     Timeline.startSync('Finalize tree');
     try {
       lockState(() {
-        _inactiveElements._unmountAll();
+        _inactiveElements._unmountAll(); // this unregisters the GlobalKeys
       });
-      assert(GlobalKey._debugCheckForDuplicates);
+      assert(() {
+        try {
+          GlobalKey._debugVerifyIllFatedPopulation();
+          if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
+              _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.isNotEmpty) {
+            final Set<GlobalKey> keys = new HashSet<GlobalKey>();
+            for (Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys) {
+              if (element._debugLifecycleState != _ElementLifecycle.defunct)
+                keys.addAll(_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans[element]);
+            }
+            if (keys.isNotEmpty) {
+              final Map<String, int> keyStringCount = new HashMap<String, int>();
+              for (String key in keys.map<String>((GlobalKey key) => key.toString())) {
+                if (keyStringCount.containsKey(key)) {
+                  keyStringCount[key] += 1;
+                } else {
+                  keyStringCount[key] = 1;
+                }
+              }
+              final List<String> keyLabels = <String>[];
+              keyStringCount.forEach((String key, int count) {
+                if (count == 1) {
+                  keyLabels.add(key);
+                } else {
+                  keyLabels.add('$key ($count different affected keys had this toString representation)');
+                }
+              });
+              final Iterable<Element> elements = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys;
+              final Map<String, int> elementStringCount = new HashMap<String, int>();
+              for (String element in elements.map<String>((Element element) => element.toString())) {
+                if (elementStringCount.containsKey(element)) {
+                  elementStringCount[element] += 1;
+                } else {
+                  elementStringCount[element] = 1;
+                }
+              }
+              final List<String> elementLabels = <String>[];
+              elementStringCount.forEach((String element, int count) {
+                if (count == 1) {
+                  elementLabels.add(element);
+                } else {
+                  elementLabels.add('$element ($count different affected elements had this toString representation)');
+                }
+              });
+              assert(keyLabels.isNotEmpty);
+              final String the = keys.length == 1 ? ' the' : '';
+              final String s = keys.length == 1 ? '' : 's';
+              final String were = keys.length == 1 ? 'was' : 'were';
+              final String their = keys.length == 1 ? 'its' : 'their';
+              final String respective = elementLabels.length == 1 ? '' : ' respective';
+              final String those = keys.length == 1 ? 'that' : 'those';
+              final String s2 = elementLabels.length == 1 ? '' : 's';
+              final String those2 = elementLabels.length == 1 ? 'that' : 'those';
+              final String they = elementLabels.length == 1 ? 'it' : 'they';
+              final String think = elementLabels.length == 1 ? 'thinks' : 'think';
+              final String are = elementLabels.length == 1 ? 'is' : 'are';
+              throw new FlutterError(
+                'Duplicate GlobalKey$s detected in widget tree.\n'
+                'The following GlobalKey$s $were specified multiple times in the widget tree. This will lead to '
+                'parts of the widget tree being truncated unexpectedly, because the second time a key is seen, '
+                'the previous instance is moved to the new location. The key$s $were:\n'
+                '- ${keyLabels.join("\n  ")}\n'
+                'This was determined by noticing that after$the widget$s with the above global key$s $were moved '
+                'out of $their$respective previous parent$s2, $those2 previous parent$s2 never updated during this frame, meaning '
+                'that $they either did not update at all or updated before the widget$s $were moved, in either case '
+                'implying that $they still $think that $they should have a child with $those global key$s.\n'
+                'The specific parent$s2 that did not update after having one or more children forcibly removed '
+                'due to GlobalKey reparenting $are:\n'
+                '- ${elementLabels.join("\n  ")}\n'
+                'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+              );
+            }
+          }
+        } finally {
+          _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans?.clear();
+        }
+        return true;
+      });
       scheduleMicrotask(GlobalKey._notifyListeners);
     } catch (e, stack) {
       _debugReportException('while finalizing the widget tree', e, stack);
@@ -2078,6 +2232,13 @@ abstract class Element implements BuildContext {
   /// </table>
   @protected
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
+    assert(() {
+      if (newWidget != null && newWidget.key is GlobalKey) {
+        final GlobalKey key = newWidget.key;
+        key._debugReserveFor(this);
+      }
+      return true;
+    });
     if (newWidget == null) {
       if (child != null)
         deactivateChild(child);
@@ -2094,6 +2255,10 @@ abstract class Element implements BuildContext {
           updateSlotForChild(child, newSlot);
         child.update(newWidget);
         assert(child.widget == newWidget);
+        assert(() {
+          child.owner._debugElementWasRebuilt(child);
+          return true;
+        });
         return child;
       }
       deactivateChild(child);
@@ -2222,6 +2387,12 @@ abstract class Element implements BuildContext {
   }
 
   Element _retakeInactiveElement(GlobalKey key, Widget newWidget) {
+    // The "inactivity" of the element being retaken here may be forward-looking: if
+    // we are taking an element with a GlobalKey from an element that currently has
+    // it as a child, then we know that that element will soon no longer have that
+    // element as a child. The only way that assumption could be false is if the
+    // global key is being duplicated, and we'll try to track that using the
+    // _debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans call below.
     final Element element = key._currentElement;
     if (element == null)
       return null;
@@ -2234,6 +2405,23 @@ abstract class Element implements BuildContext {
     });
     final Element parent = element._parent;
     if (parent != null) {
+      assert(() {
+        if (parent == this) {
+          throw new FlutterError(
+            'A GlobalKey was used multiple times inside one widget\'s child list.\n'
+            'The offending GlobalKey was: $key\n'
+            'The parent of the widgets with that key was:\n  $parent\n'
+            'The first child to get instantiated with that key became:\n  $element\n'
+            'The second child that was to be instantiated with that key was:\n  $widget\n'
+            'A GlobalKey can only be specified on one widget at a time in the widget tree.'
+          );
+        }
+        parent.owner._debugTrackElementThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans(
+          parent,
+          key,
+        );
+        return true;
+      });
       parent.forgetChild(element);
       parent.deactivateChild(element);
     }
@@ -2783,9 +2971,9 @@ abstract class BuildableElement extends Element {
     owner.scheduleBuildFor(this);
   }
 
-  /// Called by the binding when [BuildOwner.scheduleBuildFor] has been called
-  /// to mark this element dirty, and, in components, by [mount] when the
-  /// element is first built and by [update] when the widget has changed.
+  /// Called by the [BuildOwner] when [BuildOwner.scheduleBuildFor] has been
+  /// called to mark this element dirty, by [mount] when the element is first
+  /// built, and by [update] when the widget has changed.
   void rebuild() {
     assert(_debugLifecycleState != _ElementLifecycle.initial);
     if (!_active || !_dirty)
@@ -2807,7 +2995,7 @@ abstract class BuildableElement extends Element {
     assert(() {
       debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
       owner._debugCurrentBuildTarget = this;
-     return true;
+      return true;
     });
     performRebuild();
     assert(() {
@@ -3233,7 +3421,7 @@ class InheritedElement extends ProxyElement {
     if (incomingWidgets != null)
       _inheritedWidgets = new Map<Type, InheritedElement>.from(incomingWidgets);
     else
-      _inheritedWidgets = new Map<Type, InheritedElement>();
+      _inheritedWidgets = <Type, InheritedElement>{};
     _inheritedWidgets[widget.runtimeType] = this;
   }
 
@@ -3601,7 +3789,7 @@ abstract class RenderObjectElement extends BuildableElement {
     final bool haveOldChildren = oldChildrenTop <= oldChildrenBottom;
     Map<Key, Element> oldKeyedChildren;
     if (haveOldChildren) {
-      oldKeyedChildren = new Map<Key, Element>();
+      oldKeyedChildren = <Key, Element>{};
       while (oldChildrenTop <= oldChildrenBottom) {
         final Element oldChild = replaceWithNullIfForgotten(oldChildren[oldChildrenTop]);
         assert(oldChild == null || oldChild._debugLifecycleState == _ElementLifecycle.active);
