@@ -11,7 +11,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart' as p;
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -31,7 +31,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   @override
-  bool get supportsPlatform => p.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -366,7 +366,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!p.platform.isMacOS) {
+    if (!platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
@@ -541,7 +541,7 @@ class IOSSimulator extends Device {
 
   Future<bool> pushFile(
       ApplicationPackage app, String localFile, String targetFile) async {
-    if (p.platform.isMacOS) {
+    if (platform.isMacOS) {
       final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       runCheckedSync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
       return true;
@@ -554,7 +554,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   String get sdkNameAndVersion => category;
