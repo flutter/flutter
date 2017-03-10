@@ -44,10 +44,14 @@ Import-Module BitsTransfer
 Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
 
 Write-Host "Unzipping Dart SDK..."
-if (Get-Command Expand-Archive -errorAction SilentlyContinue) {
-    # Expand-Archive requires PowerShell 5 or newer
+If (Get-Command 7z -errorAction SilentlyContinue) {
+    # The built-in unzippers are painfully slow. Use 7-Zip, if available.
+    & 7z x $dartSdkZip -o"$cachePath" -bd | Out-Null
+} ElseIf (Get-Command Expand-Archive -errorAction SilentlyContinue) {
+    # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
     Expand-Archive $dartSdkZip -DestinationPath $cachePath
-} else {
+} Else {
+    # As last resort: fall back to the Windows GUI.
     $shell = New-Object -com shell.application
     $zip = $shell.NameSpace($dartSdkZip)
     foreach($item in $zip.items()) {
