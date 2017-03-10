@@ -57,14 +57,14 @@ Future<Null> _testFile(String testName, int wantedExitCode, String workingDirect
   _testExclusionLock = testExclusionCompleter.future;
   try {
     exec = await Process.run(
-        fs.path.join(dartSdkPath, 'bin', 'dart'),
-        <String>[
-          fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-          'test',
-          '--no-color',
-          fullTestName
-        ],
-        workingDirectory: workingDirectory
+      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      <String>[
+        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+        'test',
+        '--no-color',
+        fullTestName,
+      ],
+      workingDirectory: workingDirectory,
     );
   } finally {
     _testExclusionLock = null;
