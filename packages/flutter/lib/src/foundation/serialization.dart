@@ -140,21 +140,21 @@ class ReadBuffer {
 
   Int32List getInt32List(int length) {
     _alignTo(4);
-    Int32List list = data.buffer.asInt32List(data.offsetInBytes + position, length);
+    final Int32List list = data.buffer.asInt32List(data.offsetInBytes + position, length);
     position += 4 * length;
     return list;
   }
 
   Int64List getInt64List(int length) {
     _alignTo(8);
-    Int64List list = data.buffer.asInt64List(data.offsetInBytes + position, length);
+    final Int64List list = data.buffer.asInt64List(data.offsetInBytes + position, length);
     position += 8 * length;
     return list;
   }
 
   Float64List getFloat64List(int length) {
     _alignTo(8);
-    Float64List list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
+    final Float64List list = data.buffer.asFloat64List(data.offsetInBytes + position, length);
     position += 8 * length;
     return list;
   }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +13,8 @@ class PlatformServices extends StatefulWidget {
 }
 
 class _PlatformServicesState extends State<PlatformServices> {
-  static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
+  static const PlatformMethodChannel platform =
+      const PlatformMethodChannel('battery');
   String _batteryLevel = 'Unknown battery level.';
 
   Future<Null> _getBatteryLevel() async {
@@ -33,22 +33,20 @@ class _PlatformServicesState extends State<PlatformServices> {
   @override
   Widget build(BuildContext context) {
     return new Material(
-      child: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            new RaisedButton(
-              child: new Text('Get Battery Level'),
-              onPressed: _getBatteryLevel,
-            ),
-            new Text(_batteryLevel)
-          ],
-        )
-      )
-    );
+        child: new Center(
+            child: new Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        new RaisedButton(
+          child: new Text('Get Battery Level'),
+          onPressed: _getBatteryLevel,
+        ),
+        new Text(_batteryLevel)
+      ],
+    )));
   }
 }
-  
+
 void main() {
   runApp(new PlatformServices());
 }
