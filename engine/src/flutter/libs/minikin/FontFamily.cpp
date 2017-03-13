@@ -118,7 +118,7 @@ FontFamily::FontFamily(std::vector<Font>&& fonts, const uint8_t* acceleratorTabl
 
 FontFamily::FontFamily(int variant, std::vector<Font>&& fonts, const uint8_t* acceleratorTable,
         size_t tableSize)
-    : FontFamily(FontLanguageListCache::kEmptyListId, variant, std::move(fonts), acceleratorTable,
+    : FontFamily(kEmptyLanguageListId, variant, std::move(fonts), acceleratorTable,
             tableSize) {
 }
 
