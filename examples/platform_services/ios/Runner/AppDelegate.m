@@ -7,18 +7,18 @@
 #import <Flutter/Flutter.h>
 
 @implementation AppDelegate
-- (BOOL)application:(UIApplication *)application
-    didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-  FlutterViewController *controller =
-      (FlutterViewController *)self.window.rootViewController;
-  FlutterMethodChannel *batteryChannel = [FlutterMethodChannel
-      methodChannelWithController:controller
-                             name:@"battery"
-                            codec:[FlutterStandardMethodCodec sharedInstance]];
-  [batteryChannel setMethodCallHandler:^(FlutterMethodCall *call,
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+  FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
+      methodChannelNamed:@"battery"
+         binaryMessenger:controller
+                   codec:[FlutterStandardMethodCodec sharedInstance]];
+  [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResultReceiver result) {
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
-      UIDevice *device = UIDevice.currentDevice;
+      UIDevice* device = UIDevice.currentDevice;
       device.batteryMonitoringEnabled = YES;
       if (device.batteryState == UIDeviceBatteryStateUnknown) {
         result(nil, [FlutterError errorWithCode:@"UNAVAILABLE"
