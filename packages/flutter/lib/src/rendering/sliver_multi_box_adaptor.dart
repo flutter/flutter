@@ -162,7 +162,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   /// during the call to createChild. No child should be added during that call
   /// either, except for the one that is created and returned by createChild.
   @protected
-  bool addInitialChild({ int index: 0, double scrollOffset: 0.0 }) {
+  bool addInitialChild({ int index: 0, double layoutOffset: 0.0 }) {
     assert(_debugAssertChildListLocked());
     assert(firstChild == null);
     bool result;
@@ -173,7 +173,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         assert(firstChild == lastChild);
         assert(indexOf(firstChild) == index);
         final SliverMultiBoxAdaptorParentData firstChildParentData = firstChild.parentData;
-        firstChildParentData.layoutOffset = scrollOffset;
+        firstChildParentData.layoutOffset = layoutOffset;
         result = true;
       } else {
         childManager.setDidUnderflow(true);
