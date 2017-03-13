@@ -536,7 +536,7 @@ class _TabBarState extends State<TabBar> {
 
   void _handleTabControllerTick() {
     setState(() {
-      // Rebuild the tabs after the possiby animated index change
+      // Rebuild the tabs after a (potentially animated) index change
       // has completed.
     });
   }
