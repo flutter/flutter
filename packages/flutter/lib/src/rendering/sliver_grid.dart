@@ -473,7 +473,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex,
-          scrollOffset: firstChildGridGeometry.scrollOffset)) {
+          layoutOffset: firstChildGridGeometry.scrollOffset)) {
         // There are no children.
         geometry = SliverGeometry.zero;
         return;

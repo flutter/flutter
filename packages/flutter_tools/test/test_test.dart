@@ -25,23 +25,23 @@ void main() {
 
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded', 1, automatedTestsDirectory, flutterTestDirectory);
+      return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
     });
 
     testUsingContext('TestAsyncUtils unguarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded', 1, automatedTestsDirectory, flutterTestDirectory);
+      return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     });
 
     testUsingContext('Missing flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
-      return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
+      return _testFile('trivial', missingDependencyTests, missingDependencyTests);
     });
   }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
 }
 
-Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {
+Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
   final String fullTestName = fs.path.join(testDirectory, '${testName}_test.dart');
   final File testFile = fs.file(fullTestName);
   expect(testFile.existsSync(), true);
@@ -71,7 +71,7 @@ Future<Null> _testFile(String testName, int wantedExitCode, String workingDirect
     testExclusionCompleter.complete();
   }
 
-  expect(exec.exitCode, wantedExitCode);
+  expect(exec.exitCode, isNonZero);
   final List<String> output = exec.stdout.split('\n');
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));

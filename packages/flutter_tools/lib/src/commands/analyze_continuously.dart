@@ -238,7 +238,7 @@ class AnalysisServer {
 
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-    if (statusInfo['analysis'] != null) {
+    if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
       final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'];
       _analyzingController.add(isAnalyzing);
     }

@@ -269,9 +269,10 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 48);
-    }, timeout: const Timeout(const Duration(seconds: 5)));
+    });
 
     testUsingContext('delete dev file system', () async {
+      expect(vmService.messages, isEmpty, reason: 'prior test timeout');
       await devFS.destroy();
       vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
       expect(devFS.assetPathsToEvict, isEmpty);

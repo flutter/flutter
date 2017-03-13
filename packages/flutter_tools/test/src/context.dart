@@ -151,7 +151,10 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  @override
+  List<File> whichAll(String execName) => <File>[];
+}
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 
