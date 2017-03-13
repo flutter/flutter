@@ -90,7 +90,7 @@ void main() {
     ]));
     log.clear();
 
-    await tester.scroll(find.byType(ListView), const Offset(0.0, -300.0));
+    await tester.drag(find.byType(ListView), const Offset(0.0, -300.0));
     await tester.pump();
 
     expect(log, isEmpty);

@@ -251,7 +251,7 @@ void main() {
     expect(find.text('bar1'), findsOneWidget);
     expect(find.text('bar2'), findsNothing);
     await tester.pump(const Duration(milliseconds: 750)); // 0.75s // animation last frame; two second timer starts here
-    await tester.scroll(find.text('bar1'), const Offset(0.0, 50.0));
+    await tester.drag(find.text('bar1'), const Offset(0.0, 50.0));
     await tester.pump(); // bar1 dismissed, bar2 begins animating
     expect(find.text('bar1'), findsNothing);
     expect(find.text('bar2'), findsOneWidget);
@@ -381,7 +381,7 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
     await tester.pump(const Duration(milliseconds: 750));
-    await tester.scroll(find.text('snack'), const Offset(0.0, 50.0));
+    await tester.drag(find.text('snack'), const Offset(0.0, 50.0));
     await tester.pump();
     expect(closedReason, equals(SnackBarClosedReason.swipe));
 

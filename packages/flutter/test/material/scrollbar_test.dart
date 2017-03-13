@@ -41,7 +41,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.byType(ListView), const Offset(0.0, -10.0));
+    await tester.drag(find.byType(ListView), const Offset(0.0, -10.0));
     expect(SchedulerBinding.instance.transientCallbackCount, greaterThan(0));
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));

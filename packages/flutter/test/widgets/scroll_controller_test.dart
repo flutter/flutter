@@ -39,7 +39,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     controller.animateTo(326.0, duration: const Duration(milliseconds: 300), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(controller.offset, equals(326.0));
     expect(realOffset(), equals(controller.offset));
@@ -228,7 +228,6 @@ void main() {
 
     controller.jumpTo(1.0);
     controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
   });
 }

@@ -96,10 +96,10 @@ void main() {
     expect(log, isEmpty);
 
     await tester.tap(find.text('2'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     await tester.tap(find.text('8').last);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     expect(log, <String>['rows-per-page-changed: 8']);
     log.clear();

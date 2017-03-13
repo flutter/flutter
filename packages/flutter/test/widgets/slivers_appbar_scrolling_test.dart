@@ -36,7 +36,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
     position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 10));
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
@@ -62,7 +62,7 @@ void main() {
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.animateTo(RenderBigSliver.height + delegate.maxExtent - 5.0, curve: Curves.linear, duration: const Duration(minutes: 1));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 1000));
+    await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
     final Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
     expect(rect, equals(new Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));

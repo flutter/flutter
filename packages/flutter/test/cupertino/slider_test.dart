@@ -69,8 +69,7 @@ void main() {
     final Point topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
-    await tester.scrollAt(
-        topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
+    await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));
     final Size size = tester.getSize(find.byKey(sliderKey));
     expect(value, equals(delta / (size.width - 2.0 * (8.0 + CupertinoThumbPainter.radius))));
     await tester.pump(); // No animation should start.
