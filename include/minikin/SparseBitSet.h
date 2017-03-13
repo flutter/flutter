@@ -34,7 +34,7 @@ namespace minikin {
 
 class SparseBitSet {
 public:
-    SparseBitSet(): mMaxVal(0) {
+    SparseBitSet(): mMaxVal(0), mOwnIndicesAndBitmaps(false) {
     }
 
     // Clear the set
@@ -45,10 +45,21 @@ public:
     // inclusive of start, exclusive of end, laid out in a uint32 array.
     void initFromRanges(const uint32_t* ranges, size_t nRanges);
 
+    // Initializes the set with pre-calculted data. Returns false if the serialized data is invalid.
+    // Even if this function returns false, the internal data is cleared.
+    bool initFromBuffer(const uint8_t* data, size_t size);
+
+    // Serialize the set and write into out.
+    //
+    // This method returns the number of bytes written to the buffer. By calling the method with
+    // 'out' set to nullptr, the method just returns the size needed, which the caller can then use
+    // for allocating a buffer for a second call.
+    size_t writeToBuffer(uint8_t* out) const;
+
     // Determine whether the value is included in the set
     bool get(uint32_t ch) const {
         if (ch >= mMaxVal) return false;
-        uint32_t *bitmap = &mBitmaps[mIndices[ch >> kLogValuesPerPage]];
+        const uint32_t *bitmap = &mBitmaps[mIndices[ch >> kLogValuesPerPage]];
         uint32_t index = ch & kPageMask;
         return (bitmap[index >> kLogBitsPerEl] & (kElFirst >> (index & kElMask))) != 0;
     }
@@ -80,8 +91,14 @@ private:
     static int CountLeadingZeros(element x);
 
     uint32_t mMaxVal;
-    std::unique_ptr<uint32_t[]> mIndices;
-    std::unique_ptr<element[]> mBitmaps;
+
+    // True if this SparseBitSet is responsible for freeing mIndices and mBitamps.
+    bool mOwnIndicesAndBitmaps;
+
+    uint32_t mIndexSize;
+    const uint32_t* mIndices;
+    uint32_t mBitmapSize;
+    const element* mBitmaps;
     uint32_t mZeroPageIndex;
 };
 
