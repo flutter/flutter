@@ -87,8 +87,9 @@ class AndroidSdk {
         return new AndroidSdk(fs.path.join(androidHomeDir, 'sdk'));
     }
 
-    File aaptBin = os.which('aapt'); // in build-tools/$version/aapt
-    if (aaptBin != null) {
+    // in build-tools/$version/aapt
+    final List<File> aaptBins = os.whichAll('aapt');
+    for (File aaptBin in aaptBins) {
       // Make sure we're using the aapt from the SDK.
       aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
       final String dir = aaptBin.parent.parent.parent.path;
@@ -96,8 +97,9 @@ class AndroidSdk {
         return new AndroidSdk(dir);
     }
 
-    File adbBin = os.which('adb'); // in platform-tools/adb
-    if (adbBin != null) {
+    // in platform-tools/adb
+    final List<File> adbBins = os.whichAll('adb');
+    for (File adbBin in adbBins) {
       // Make sure we're using the adb from the SDK.
       adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
       final String dir = adbBin.parent.parent.path;
