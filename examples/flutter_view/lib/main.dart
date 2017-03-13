@@ -31,7 +31,10 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = "increment";
+  static const String _pong = "pong";
   static const String _emptyMessage = "";
+  static const PlatformMessageChannel<String> platform =
+      const PlatformMessageChannel(_channel, const StringCodec());
 
   int _counter = 0;
 
@@ -47,13 +50,13 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _sendFlutterIncrement() {
-    PlatformMessages.sendString(_channel, _emptyMessage);
+    platform.send(_pong);
   }
 
   @override
   Widget build(BuildContext context) {
-    PlatformMessages.setStringMessageHandler(_channel,
-                                             handlePlatformIncrement);
+    platform.setMessageHandler(handlePlatformIncrement);
+
     return new Scaffold(
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
