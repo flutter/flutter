@@ -202,8 +202,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// the focus change.
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
-  set focusedEditable (EditableTextState editable) {
-    _focusedEditable = editable..requestKeyboard();
+  set focusedEditable(EditableTextState value) {
+    _focusedEditable = value..requestKeyboard();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.

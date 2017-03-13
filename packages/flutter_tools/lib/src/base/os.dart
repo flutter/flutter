@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:archive/archive.dart';
-
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -14,7 +13,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils];
+OperatingSystemUtils get os => context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
@@ -33,6 +32,28 @@ abstract class OperatingSystemUtils {
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
   File which(String execName);
+
+  /// Return a list of all paths to `execName` found on the system. Uses the
+  /// PATH environment variable.
+  List<File> whichAll(String execName) {
+    final List<File> result = <File>[];
+    final String pathEnvironmentVariable = platform.environment['PATH'];
+    for (final String pathComponent in _splitPath(pathEnvironmentVariable)) {
+      final String pathToExecName = fs.path.join(pathComponent, execName);
+      if (processManager.canRun(pathToExecName)) {
+        result.add(fs.file(pathToExecName));
+      }
+    }
+    return result;
+  }
+
+  List<String> _splitPath(String pathEnvironmentVariable) {
+    final String delimiter = platform.isWindows ? ';' : ':';
+    if (pathEnvironmentVariable == null) {
+      return <String>[];
+    }
+    return pathEnvironmentVariable.split(delimiter);
+  }
 
   /// Return the File representing a new pipe.
   File makePipe(String path);

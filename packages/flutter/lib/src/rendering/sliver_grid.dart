@@ -227,6 +227,12 @@ abstract class SliverGridDelegate {
   /// Returns information about the size and position of the tiles in the grid.
   SliverGridLayout getLayout(SliverConstraints constraints);
 
+  /// Override this method to return true when the children need to be
+  /// laid out.
+  ///
+  /// This should compare the fields of the current delegate and the given
+  /// `oldDelegate` and return true if the fields are such that the layout would
+  /// be different.
   bool shouldRelayout(covariant SliverGridDelegate oldDelegate);
 }
 
@@ -401,20 +407,44 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   }
 }
 
+/// Parent data structure used by [RenderSliverGrid].
 class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
+  /// The offset of the child in the non-scrolling axis.
+  ///
+  /// If the scroll axis is vertical, this offset is from the left-most edge of
+  /// the parent to the left-most edge of the child. If the scroll axis is
+  /// horizontal, this offset is from the top-most edge of the parent to the
+  /// top-most edge of the child.
   double crossAxisOffset;
 
   @override
   String toString() => 'crossAxisOffset=$crossAxisOffset; ${super.toString()}';
 }
 
+/// A sliver that contains multiple box children that whose size and position
+/// are determined by a delegate.
+///
+/// [RenderSliverGrid] places its children in arbitrary positions determined by
+/// [gridDelegate]. Each child is forced to have the size specified by the
+/// [gridDelegate].
+///
+/// See also:
+///
+///  * [RenderSliverList], which places its children in a linear
+///    array.
+///  * [RenderSliverFixedExtentList], which places its children in a linear
+///    array with a fixed extent in the main axis.
 class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
+  /// Creates a sliver that contains multiple box children that whose size and
+  /// position are determined by a delegate.
+  ///
+  /// The [childManager] and [gridDelegate] arguments must not be null.
   RenderSliverGrid({
     @required RenderSliverBoxChildManager childManager,
     @required SliverGridDelegate gridDelegate,
   }) : _gridDelegate = gridDelegate,
        super(childManager: childManager) {
-    gridDelegate != null;
+    assert(gridDelegate != null);
   }
 
   @override
@@ -423,17 +453,17 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       child.parentData = new SliverGridParentData();
   }
 
+  /// The delegate that controls the size and position of the children.
   SliverGridDelegate get gridDelegate => _gridDelegate;
   SliverGridDelegate _gridDelegate;
-
-  set gridDelegate(SliverGridDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_gridDelegate == newDelegate)
+  set gridDelegate(SliverGridDelegate value) {
+    assert(value != null);
+    if (_gridDelegate == value)
       return;
-    if (newDelegate.runtimeType != _gridDelegate.runtimeType ||
-        newDelegate.shouldRelayout(_gridDelegate))
+    if (value.runtimeType != _gridDelegate.runtimeType ||
+        value.shouldRelayout(_gridDelegate))
       markNeedsLayout();
-    _gridDelegate = newDelegate;
+    _gridDelegate = value;
   }
 
   @override
@@ -473,7 +503,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex,
-          scrollOffset: firstChildGridGeometry.scrollOffset)) {
+          layoutOffset: firstChildGridGeometry.scrollOffset)) {
         // There are no children.
         geometry = SliverGeometry.zero;
         return;

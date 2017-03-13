@@ -48,6 +48,8 @@ class PackageMap {
     final List<String> pathSegments = packageUri.pathSegments.toList();
     final String packageName = pathSegments.removeAt(0);
     final Uri packageBase = map[packageName];
+    if (packageBase == null)
+      return null;
     final String packageRelativePath = fs.path.joinAll(pathSegments);
     return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
   }

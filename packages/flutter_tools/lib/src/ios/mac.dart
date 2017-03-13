@@ -9,12 +9,14 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
@@ -59,7 +61,7 @@ class Xcode {
   }
 
   /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context[Xcode];
+  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
@@ -126,7 +128,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
 
-  _installCocoaPods(appDirectory, flutterFrameworkDir(mode));
+  _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -311,29 +313,27 @@ bool _checkXcodeVersion() {
       return false;
     }
   } catch (e) {
-    printError('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   return true;
 }
 
-bool _checkCocoaPodsInstalled() {
-  if (!platform.isMacOS)
-    return false;
-  return exitsHappy(<String>['pod', '--version']);
-}
-
-void _installCocoaPods(Directory bundle, String engineDirectory)  {
+void _runPodInstall(Directory bundle, String engineDirectory)  {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!_checkCocoaPodsInstalled()) {
+    if (!doctor.iosWorkflow.hasCocoaPods) {
       printError('Warning: CocoaPods not installed. Not running pod install.');
       return;
     }
-    runCheckedSync(
-        <String>['pod', 'install'],
-        workingDirectory: bundle.path,
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-    );
+    try {
+      runCheckedSync(
+          <String>['pod', 'install'],
+          workingDirectory: bundle.path,
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      );
+    } catch (e) {
+      throwToolExit('Error running pod install: $e');
+    }
   }
 }
 

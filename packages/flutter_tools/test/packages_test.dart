@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
 import 'package:test/test.dart';
@@ -16,6 +17,10 @@ import 'src/context.dart';
 void main() {
   group('packages', () {
     Directory temp;
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
@@ -32,13 +37,18 @@ void main() {
       await runner.run(<String>['create', '--no-pub', temp.path]);
     }
 
-    Future<Null> runCommand(String verb) async {
+    Future<Null> runCommand(String verb, { List<String> args }) async {
       await createProject();
 
       final PackagesCommand command = new PackagesCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['packages', verb, temp.path]);
+      final List<String> commandArgs = <String>['packages', verb];
+      if (args != null)
+        commandArgs.addAll(args);
+      commandArgs.add(temp.path);
+
+      await runner.run(commandArgs);
     }
 
     void expectExists(String relPath) {
@@ -48,6 +58,12 @@ void main() {
     // Verify that we create a project that is well-formed.
     testUsingContext('get', () async {
       await runCommand('get');
+      expectExists('lib/main.dart');
+      expectExists('.packages');
+    });
+
+    testUsingContext('get --offline', () async {
+      await runCommand('get', args: <String>['--offline']);
       expectExists('lib/main.dart');
       expectExists('.packages');
     });

@@ -9,7 +9,7 @@ import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/platform.dart' as p;
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -21,8 +21,9 @@ import '../protocol_discovery.dart';
 import 'mac.dart';
 
 const String _kIdeviceinstallerInstructions =
-    'To work with iOS devices, please install ideviceinstaller.\n'
-    'To install, run \'brew install ideviceinstaller\'.';
+    'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
+    'brew update\n'
+    'brew install ideviceinstaller.';
 
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
@@ -30,7 +31,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
 
   @override
-  bool get supportsPlatform => p.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
@@ -47,10 +48,9 @@ class IOSDevice extends Device {
     _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
         'ios-deploy',
-        'To copy files to iOS devices, please install ios-deploy. '
-        'You can do this using homebrew as follows:\n'
-        '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy');
+        'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
+        'brew update\n'
+        'brew install ios-deploy');
   }
 
   String _installerPath;
@@ -129,7 +129,7 @@ class IOSDevice extends Device {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
     } catch (e) {
-      if (p.platform.isMacOS) {
+      if (platform.isMacOS) {
         printError('$command not found. $macInstructions');
       } else {
         printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
@@ -323,7 +323,7 @@ class IOSDevice extends Device {
   }
 
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
-    if (p.platform.isMacOS) {
+    if (platform.isMacOS) {
       runSync(<String>[
         pusherPath,
         '-t',
@@ -342,7 +342,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   String get sdkNameAndVersion => 'iOS $_sdkVersion ($_buildVersion)';

@@ -82,7 +82,7 @@ class OverlayEntry {
   /// set.
   bool get opaque => _opaque;
   bool _opaque;
-  set opaque (bool value) {
+  set opaque(bool value) {
     if (_opaque == value)
       return;
     _opaque = value;
@@ -106,7 +106,7 @@ class OverlayEntry {
   /// from subsequent routes will be handled properly when they complete.
   bool get maintainState => _maintainState;
   bool _maintainState;
-  set maintainState (bool value) {
+  set maintainState(bool value) {
     assert(_maintainState != null);
     if (_maintainState == value)
       return;

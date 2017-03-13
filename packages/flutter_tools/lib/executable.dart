@@ -18,7 +18,6 @@ import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/os.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
@@ -49,7 +48,6 @@ import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/mac.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
@@ -131,11 +129,8 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Xcode, () => new Xcode());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
-    context.putIfAbsent(Usage, () => new Usage());
 
     // Initialize the system locale.
     await intl.findSystemLocale();
@@ -154,6 +149,16 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
   });
 }
 
+/// Writes the [string] to one of the standard output streams.
+@visibleForTesting
+typedef void WriteCallback([String string]);
+
+/// Writes a line to STDERR.
+///
+/// Overwrite this in tests to avoid spurious test output.
+@visibleForTesting
+WriteCallback writelnStderr = stderr.writeln;
+
 Future<int> _handleToolError(
     dynamic error,
     Chain chain,
@@ -163,9 +168,9 @@ Future<int> _handleToolError(
     String getFlutterVersion(),
 ) async {
   if (error is UsageException) {
-    stderr.writeln(error.message);
-    stderr.writeln();
-    stderr.writeln(
+    writelnStderr(error.message);
+    writelnStderr();
+    writelnStderr(
         "Run 'flutter -h' (or 'flutter <command> -h') for available "
             "flutter commands and options."
     );
@@ -173,11 +178,11 @@ Future<int> _handleToolError(
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null)
-      stderr.writeln(error.message);
+      writelnStderr(error.message);
     if (verbose) {
-      stderr.writeln();
-      stderr.writeln(chain.terse.toString());
-      stderr.writeln();
+      writelnStderr();
+      writelnStderr(chain.terse.toString());
+      writelnStderr();
     }
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
@@ -190,35 +195,35 @@ Future<int> _handleToolError(
     }
   } else {
     // We've crashed; emit a log report.
-    stderr.writeln();
-
-    flutterUsage.sendException(error, chain);
+    writelnStderr();
 
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
-      stderr.writeln('$error');
-      stderr.writeln(chain.terse.toString());
+      writelnStderr('$error');
+      writelnStderr(chain.terse.toString());
       return _exit(1);
     } else {
+      flutterUsage.sendException(error, chain);
+
       if (error is String)
-        stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
+        writelnStderr('Oops; flutter has exited unexpectedly: "$error".');
       else
-        stderr.writeln('Oops; flutter has exited unexpectedly.');
+        writelnStderr('Oops; flutter has exited unexpectedly.');
 
       await CrashReportSender.instance.sendReport(
         error: error,
         stackTrace: chain,
-        flutterVersion: getFlutterVersion(),
+        getFlutterVersion: getFlutterVersion,
       );
       try {
         final File file = await _createLocalCrashReport(args, error, chain);
-        stderr.writeln(
+        writelnStderr(
             'Crash report written to ${file.path};\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
         );
         return _exit(1);
       } catch (error) {
-        stderr.writeln(
+        writelnStderr(
             'Unable to generate crash report due to secondary error: $error\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
         );
@@ -252,7 +257,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain cha
   buffer.writeln('flutter ${args.join(' ')}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('$error\n');
+  buffer.writeln('${error.runtimeType}: $error\n');
   buffer.writeln('```\n${chain.terse}```\n');
 
   buffer.writeln('## flutter doctor\n');

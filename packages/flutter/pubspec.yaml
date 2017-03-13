@@ -6,7 +6,7 @@ homepage: http://flutter.io
 
 dependencies:
   collection: '>=1.9.1 <2.0.0'
-  http: '>=0.11.3+11'
+  http: '>=0.11.3+12'
   intl: '>=0.14.0 <0.15.0'
   meta: ^1.0.4
   typed_data: ^1.1.3

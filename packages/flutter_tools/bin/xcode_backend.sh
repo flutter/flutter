@@ -60,10 +60,12 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
+  RunCommand chmod -R ug+w "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -f -- "${derived_dir}/app.dylib"
   RunCommand rm -f -- "${derived_dir}/app.flx"
   RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
+  RunCommand chmod -R ug-w "${derived_dir}/Flutter.framework"
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
@@ -191,7 +193,7 @@ ThinAppFrameworks() {
   local frameworks_dir="${app_path}/Frameworks"
 
   [[ -d "$frameworks_dir" ]] || return 0
-  for framework_dir in $(find "${app_path}" -type d -name "*.framework"); do
+  find "${app_path}" -type d -name "*.framework" | while read framework_dir; do
     ThinFramework "$framework_dir" "$ARCHS"
   done
 }

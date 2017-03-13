@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/devices.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
@@ -15,12 +14,22 @@ import 'src/context.dart';
 
 void main()  {
   group('DependencyChecker', () {
-    final String basePath = fs.path.dirname(fs.path.fromUri(platform.script));
-    final String dataPath = fs.path.join(basePath, 'data', 'dart_dependencies_test');
+    final String dataPath = fs.path.join(
+        getFlutterRoot(),
+        'packages',
+        'flutter_tools',
+        'test',
+        'data',
+        'dart_dependencies_test',
+    );
+
     FileSystem testFileSystem;
 
-    setUp(() {
+    setUpAll(() {
       Cache.disableLocking();
+    });
+
+    setUp(() {
       testFileSystem = new MemoryFileSystem();
     });
 

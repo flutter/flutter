@@ -9,9 +9,13 @@ import 'package:flutter_driver/src/error.dart';
 import 'package:flutter_driver/src/health.dart';
 import 'package:flutter_driver/src/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:vm_service_client/vm_service_client.dart';
+
+/// Magical timeout value that's different from the default.
+const Duration _kTestTimeout = const Duration(milliseconds: 1234);
+const String _kSerializedTestTimeout = '1234';
 
 void main() {
   group('FlutterDriver.connect', () {
@@ -127,14 +131,14 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, String>{
             'command': 'tap',
-            'timeout': '5000',
+            'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
             'keyValueString': 'foo',
             'keyValueType': 'String'
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.tap(find.byValueKey('foo'));
+        await driver.tap(find.byValueKey('foo'), timeout: _kTestTimeout);
       });
     });
 
@@ -147,13 +151,13 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'tap',
-            'timeout': '5000',
+            'timeout': _kSerializedTestTimeout,
             'finderType': 'ByText',
             'text': 'foo',
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.tap(find.text('foo'));
+        await driver.tap(find.text('foo'), timeout: _kTestTimeout);
       });
     });
 
@@ -166,7 +170,7 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'get_text',
-            'timeout': '5000',
+            'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
             'keyValueString': '123',
             'keyValueType': 'int'
@@ -175,7 +179,7 @@ void main() {
             'text': 'hello'
           });
         });
-        final String result = await driver.getText(find.byValueKey(123));
+        final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
         expect(result, 'hello');
       });
     });
@@ -191,11 +195,11 @@ void main() {
             'command': 'waitFor',
             'finderType': 'ByTooltipMessage',
             'text': 'foo',
-            'timeout': '1000',
+            'timeout': _kSerializedTestTimeout,
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.waitFor(find.byTooltip('foo'), timeout: const Duration(seconds: 1));
+        await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
       });
     });
 
@@ -204,11 +208,11 @@ void main() {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           expect(i.positionalArguments[1], <String, dynamic>{
             'command': 'waitUntilNoTransientCallbacks',
-            'timeout': '1000',
+            'timeout': _kSerializedTestTimeout,
           });
           return makeMockResponse(<String, dynamic>{});
         });
-        await driver.waitUntilNoTransientCallbacks(timeout: const Duration(seconds: 1));
+        await driver.waitUntilNoTransientCallbacks(timeout: _kTestTimeout);
       });
     });
 

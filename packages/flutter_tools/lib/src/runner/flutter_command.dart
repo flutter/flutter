@@ -77,8 +77,8 @@ abstract class FlutterCommand extends Command<Null> {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
-  set defaultBuildMode(BuildMode buildMode) {
-    _defaultBuildMode = buildMode;
+  set defaultBuildMode(BuildMode value) {
+    _defaultBuildMode = value;
   }
 
   BuildMode getBuildMode() {
@@ -176,7 +176,7 @@ abstract class FlutterCommand extends Command<Null> {
     devices = devices.where((Device device) => device.isSupported()).toList();
 
     if (androidOnly)
-      devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
+      devices = devices.where((Device device) => device.targetPlatform == TargetPlatform.android_arm).toList();
 
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');

@@ -4,8 +4,11 @@
 
 import 'dart:async';
 
+import 'package:file/local.dart';
 import 'package:flutter_tools/executable.dart' as tools;
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -24,11 +27,11 @@ void testReplay(
   bool skip,
 }) {
   setUp(() {
-    setExitFunctionForTests();
+    io.setExitFunctionForTests();
   });
 
   tearDown(() {
-    restoreExitFunction();
+    io.restoreExitFunction();
   });
 
   testUsingContext(
@@ -55,7 +58,27 @@ void testReplay(
 ///     '--no-resident',
 ///   ]
 /// ```
-void expectProcessExits(List<String> command, {dynamic exitCode: 0}) {
-  final Future<Null> mainFuture = tools.main(command);
-  expect(mainFuture, throwsProcessExit(exitCode));
+void expectProcessExits(
+  FlutterCommand command, {
+  List<String> args: const <String>[],
+  dynamic exitCode: 0,
+}) {
+  final Future<Null> runFuture = tools.run(
+    <String>[command.name]..addAll(args),
+    <FlutterCommand>[command],
+    reportCrashes: false,
+    flutterVersion: 'test',
+  );
+  expect(runFuture, throwsProcessExit(exitCode));
+}
+
+/// The base path of the replay tests.
+String get replayBase {
+  return const LocalFileSystem().path.joinAll(<String>[
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    'test',
+    'replay',
+  ]);
 }

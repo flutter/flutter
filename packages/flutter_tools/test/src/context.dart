@@ -19,10 +19,11 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
-
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
+
+import 'common.dart';
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
 BufferLogger get testLogger => context[Logger];
@@ -105,32 +106,6 @@ void _printBufferedErrors(AppContext testContext) {
   }
 }
 
-String getFlutterRoot() {
-  Error invalidScript() => new StateError('Invalid script: ${platform.script}');
-
-  String toolsPath;
-  switch (platform.script.scheme) {
-    case 'file':
-      final List<String> parts = fs.path.split(fs.path.fromUri(platform.script));
-      final int toolsIndex = parts.indexOf('flutter_tools');
-      if (toolsIndex == -1)
-        throw invalidScript();
-      toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-      break;
-    case 'data':
-      final RegExp flutterTools = new RegExp(r'(file://[^%]*[/\\]flutter_tools)');
-      final Match match = flutterTools.firstMatch(platform.script.path);
-      if (match == null)
-        throw invalidScript();
-      toolsPath = Uri.parse(match.group(1)).path;
-      break;
-    default:
-      throw invalidScript();
-  }
-
-  return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
-}
-
 class MockDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
@@ -176,7 +151,10 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+  @override
+  List<File> whichAll(String execName) => <File>[];
+}
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
 

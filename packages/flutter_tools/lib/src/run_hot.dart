@@ -5,10 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -66,29 +64,6 @@ class HotRunner extends ResidentRunner {
   bool _runningFromSnapshot = true;
   String kernelFilePath;
 
-  @override
-  Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
-    String route,
-    bool shouldBuild: true
-  }) {
-    // Don't let uncaught errors kill the process.
-    return Chain.capture(() {
-      return _run(
-        connectionInfoCompleter: connectionInfoCompleter,
-        appStartedCompleter: appStartedCompleter,
-        route: route,
-        shouldBuild: shouldBuild
-      );
-    }, onError: (dynamic error, StackTrace stackTrace) {
-      // Actually exit on ToolExit.
-      if (error is ToolExit)
-        throw error;
-      printError('Exception from flutter run: $error', stackTrace);
-    });
-  }
-
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
       // Disabled.
@@ -102,15 +77,18 @@ class HotRunner extends ResidentRunner {
         new DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = new Set<String>.from(dartDependencySetBuilder.build());
-    } catch (error) {
-      printStatus('Error detected in application source code:', emphasis: true);
-      printError('$error');
+    } on DartDependencyException catch (error) {
+      printError(
+        'Your application could not be compiled, because its dependencies could not be established.\n'
+        '$error'
+      );
       return false;
     }
     return true;
   }
 
-  Future<int> _run({
+  @override
+  Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
@@ -124,11 +102,11 @@ class HotRunner extends ResidentRunner {
       return 1;
     }
 
-    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
+    package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
-      String message = 'No application found for ${device.platform}.';
-      final String hint = getMissingPackageHintForPlatform(device.platform);
+      String message = 'No application found for ${device.targetPlatform}.';
+      final String hint = getMissingPackageHintForPlatform(device.targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
