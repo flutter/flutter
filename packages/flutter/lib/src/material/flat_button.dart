@@ -78,29 +78,29 @@ class FlatButton extends StatelessWidget {
   /// Defaults to a color derived from the [Theme].
   final Color disabledTextColor;
 
-  /// The highlight color of the button.
+  /// The primary color of the button, as printed on the [Material], while it
+  /// is in its default (unpressed, enabled) state.
   ///
-  /// Defaults to the highlight color from the [Theme].
-  final Color highlightColor;
+  /// Defaults to null, meaning that the color is automatically derived from the [Theme].
+  final Color color;
 
-  /// The splash color of the button.
+  /// The primary color of the button when the button is in the down state
+  /// (pressed) state. The splash is represented as a circular overlay that appears
+  /// above the [highlightColor] overlay. The splash overlay has a center point that
+  /// matches the hit point of the user touch event. The splash overlay will expand to
+  /// fill the button area if the touch is held for long enough time. If the splash
+  /// color has transparency then the highlight and button color will show through.
   ///
   /// Defaults to the splash color from the [Theme].
   final Color splashColor;
 
-  /// The color of the button, as printed on the [Material]. Defaults to null,
-  /// meaning that the color is automatically derived from the [Theme].
+  /// The secondary color of the button when the button is in the down (pressed)
+  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// button color (if any). If the highlight color has transparency, the button color
+  /// will show through. The highlight fades in quickly as the button is held down.
   ///
-  /// Typically, a material design color will be used, as follows:
-  ///
-  /// ```dart
-  ///  new FlatButton(
-  ///    color: Colors.blue[500],
-  ///    onPressed: _handleTap,
-  ///    child: new Text('DEMO'),
-  ///  ),
-  /// ```
-  final Color color;
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
 
   /// The color of the button when the button is disabled. Buttons are disabled
   /// by default. To enable a button, set its [onPressed] property to a non-null
@@ -126,22 +126,14 @@ class FlatButton extends StatelessWidget {
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
 
-  Color _getHighlightColor(BuildContext context) {
-    return highlightColor ?? Theme.of(context).highlightColor;
-  }
-
-  Color _getSplashColor(BuildContext context) {
-    return splashColor ?? Theme.of(context).splashColor;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new MaterialButton(
       onPressed: onPressed,
       textColor: enabled ? textColor : disabledTextColor,
       color: enabled ? color : disabledColor,
-      highlightColor: _getHighlightColor(context),
-      splashColor: _getSplashColor(context),
+      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+      splashColor: splashColor ?? Theme.of(context).splashColor,
       textTheme: textTheme,
       colorBrightness: colorBrightness,
       child: child

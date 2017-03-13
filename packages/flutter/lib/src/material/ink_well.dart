@@ -218,7 +218,9 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   @override
   Widget build(BuildContext context) {
     assert(config.debugCheckContext(context));
-    _lastHighlight?.color = config.highlightColor ?? Theme.of(context).highlightColor;
+    final ThemeData themeData = Theme.of(context);
+    _lastHighlight?.color = config.highlightColor ?? themeData.highlightColor;
+    _currentSplash?.color = config.splashColor ?? themeData.splashColor;
     final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,

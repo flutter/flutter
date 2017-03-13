@@ -154,18 +154,29 @@ class MaterialButton extends StatefulWidget {
   /// The color to use for this button's text.
   final Color textColor;
 
-  /// The color of the button, as printed on the [Material].
+  /// The primary color of the button, as printed on the [Material], while it
+  /// is in its default (unpressed, enabled) state.
+  ///
+  /// Defaults to null, meaning that the color is automatically derived from the [Theme].
   final Color color;
 
-  /// The highlight color of the button.
-  ///
-  /// Defaults to the highlight color from the [Theme].
-  final Color highlightColor;
-
-  /// The splash color of the button.
+  /// The primary color of the button when the button is in the down state
+  /// (pressed) state. The splash is represented as a circular overlay that appears
+  /// above the [highlightColor] overlay. The splash overlay has a center point that
+  /// matches the hit point of the user touch event. The splash overlay will expand to
+  /// fill the button area if the touch is held for long enough time. If the splash
+  /// color has transparency then the highlight and button color will show through.
   ///
   /// Defaults to the splash color from the [Theme].
   final Color splashColor;
+
+  /// The secondary color of the button when the button is in the down (pressed)
+  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// button color (if any). If the highlight color has transparency, the button color
+  /// will show through. The highlight fades in quickly as the button is held down.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
 
   /// The z-coordinate at which to place this button.
   ///
