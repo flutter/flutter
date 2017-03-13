@@ -55,8 +55,12 @@ class RaisedButton extends StatelessWidget {
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
 
-  /// The color of the button, as printed on the [Material]. Defaults to null,
-  /// meaning that the color is automatically derived from the [Theme].
+  /// The primary color of the button, as printed on the [Material], while it
+  /// is in its default (unpressed, enabled) state.
+  ///
+  /// Defaults to null, meaning that the color is automatically derived from the [Theme].
+  ///
+  /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   ///  new RaisedButton(
@@ -67,10 +71,10 @@ class RaisedButton extends StatelessWidget {
   /// ```
   final Color color;
 
-  /// The primary color of the button when the button is in the down state
-  /// (pressed) state. The splash is represented as a circular overlay that appears
-  /// above the [highlightColor] overlay. The splash overlay has a center point that
-  /// matches the hit point of the user touch event. The splash overlay will expand to
+  /// The primary color of the button when the button is in the down (pressed) state.
+  /// The splash is represented as a circular overlay that appears above the
+  /// [highlightColor] overlay. The splash overlay has a center point that matches
+  /// the hit point of the user touch event. The splash overlay will expand to
   /// fill the button area if the touch is held for long enough time. If the splash
   /// color has transparency then the highlight and button color will show through.
   ///
