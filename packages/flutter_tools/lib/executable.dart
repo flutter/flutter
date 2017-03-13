@@ -257,7 +257,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain cha
   buffer.writeln('flutter ${args.join(' ')}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('$error\n');
+  buffer.writeln('${error.runtimeType}: $error\n');
   buffer.writeln('```\n${chain.terse}```\n');
 
   buffer.writeln('## flutter doctor\n');

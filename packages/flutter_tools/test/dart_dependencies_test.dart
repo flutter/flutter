@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:analyzer/analyzer.dart';
 import 'package:flutter_tools/src/dart/dependencies.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:test/test.dart';
@@ -40,9 +39,38 @@ void main()  {
           new DartDependencySetBuilder(mainPath, packagesPath);
       try {
         builder.build();
-        fail('expect an assertion to be thrown.');
-      } on AnalyzerErrorGroup catch (e) {
-        expect(e.toString(), contains('foo.dart: Expected a string literal'));
+        fail('expect an exception to be thrown.');
+      } on DartDependencyException catch (error) {
+        expect(error.toString(), contains('foo.dart: Expected a string literal'));
+      }
+    });
+
+    testUsingContext('bad_path', () {
+      final String testPath = fs.path.join(dataPath, 'bad_path');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder =
+          new DartDependencySetBuilder(mainPath, packagesPath);
+      try {
+        builder.build();
+        fail('expect an exception to be thrown.');
+      } on DartDependencyException catch (error) {
+        expect(error.toString(), contains('amaze${fs.path.separator}and${fs.path.separator}astonish.dart'));
+      }
+    });
+
+    testUsingContext('bad_package', () {
+      final String testPath = fs.path.join(dataPath, 'bad_package');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder =
+          new DartDependencySetBuilder(mainPath, packagesPath);
+      try {
+        builder.build();
+        fail('expect an exception to be thrown.');
+      } on DartDependencyException catch (error) {
+        expect(error.toString(), contains('rochambeau'));
+        expect(error.toString(), contains('pubspec.yaml'));
       }
     });
   });
