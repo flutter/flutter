@@ -8,7 +8,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
-import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
