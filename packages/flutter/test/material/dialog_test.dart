@@ -131,7 +131,7 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Title'), findsOneWidget);
     await tester.tap(find.text('First option'));
 
@@ -164,13 +164,13 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsOneWidget);
 
     // Tap on the barrier.
     await tester.tapAt(const Point(10.0, 10.0));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsNothing);
 
     showDialog<Null>(
@@ -184,13 +184,13 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
 
     // Tap on the barrier, which shouldn't do anything this time.
     await tester.tapAt(const Point(10.0, 10.0));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
 
   });

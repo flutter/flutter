@@ -191,8 +191,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any transient callbacks scheduled. If no transient callbacks are
-  /// scheduled when the function is called, it returns without calling [pump].
+  /// longer any transient callbacks scheduled. This will call [pump] at least
+  /// once, even if no transient callbacks are scheduled when the function is
+  /// called, in case there are dirty widgets to rebuild which will themselves
+  /// register new transient callbacks.
   ///
   /// This essentially waits for all animations to have completed.
   ///
@@ -209,7 +211,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// Alternatively, one can check that the return value from this function
   /// matches the expected number of pumps.
-  Future<int> pumpUntilNoTransientCallbacks([
+  Future<int> pumpAndSettle([
       Duration duration = const Duration(milliseconds: 100),
       EnginePhase phase = EnginePhase.sendSemanticsTree
     ]) {
@@ -217,10 +219,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(duration > Duration.ZERO);
     int count = 0;
     return TestAsyncUtils.guard(() async {
-      while (binding.transientCallbackCount > 0) {
+      do {
         await binding.pump(duration, phase);
         count += 1;
-      }
+      } while (binding.transientCallbackCount > 0);
     }).then<int>((Null _) => count);
   }
 

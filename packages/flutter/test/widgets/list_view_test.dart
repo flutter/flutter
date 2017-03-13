@@ -31,7 +31,7 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
-    await tester.scroll(find.byType(ListView), const Offset(0.0, -250.0));
+    await tester.drag(find.byType(ListView), const Offset(0.0, -250.0));
     await tester.pump();
 
     expect(find.text('0'), findsNothing);
@@ -42,7 +42,7 @@ void main() {
     expect(find.text('5'), findsNothing);
     expect(find.text('6'), findsNothing);
 
-    await tester.scroll(find.byType(ListView), const Offset(0.0, 200.0));
+    await tester.drag(find.byType(ListView), const Offset(0.0, 200.0));
     await tester.pump();
 
     expect(find.text('0'), findsOneWidget);

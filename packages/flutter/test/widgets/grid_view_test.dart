@@ -47,7 +47,7 @@ void main() {
     expect(find.text(kStates[12]), findsNothing);
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Arkansas'), const Offset(0.0, -200.0));
+    await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
     for (int i = 0; i < 4; ++i)
@@ -59,7 +59,7 @@ void main() {
       log.clear();
     }
 
-    await tester.scroll(find.text('Delaware'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Delaware'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
@@ -72,7 +72,7 @@ void main() {
     expect(log, equals(<String>['Tennessee']));
     log.clear();
 
-    await tester.scroll(find.text('Tennessee'), const Offset(0.0, 200.0));
+    await tester.drag(find.text('Tennessee'), const Offset(0.0, 200.0));
     await tester.pump();
 
     await tester.tap(find.text('Tennessee'));
@@ -114,7 +114,7 @@ void main() {
 
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Arkansas'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Arkansas'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);

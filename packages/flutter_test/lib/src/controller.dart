@@ -248,16 +248,16 @@ class WidgetController {
   // INTERACTION
 
   /// Dispatch a pointer down / pointer up sequence at the center of
-  /// the given widget, assuming it is exposed. If the center of the
-  /// widget is not exposed, this might send events to another
-  /// object.
-  Future<Null> tap(Finder finder, { int pointer: 1 }) {
+  /// the given widget, assuming it is exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<Null> tap(Finder finder, { int pointer }) {
     return tapAt(getCenter(finder), pointer: pointer);
   }
 
-  /// Dispatch a pointer down / pointer up sequence at the given
-  /// location.
-  Future<Null> tapAt(Point location, { int pointer: 1 }) {
+  /// Dispatch a pointer down / pointer up sequence at the given location.
+  Future<Null> tapAt(Point location, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
@@ -267,16 +267,17 @@ class WidgetController {
 
   /// Dispatch a pointer down / pointer up sequence (with a delay of
   /// [kLongPressTimeout] + [kPressTimeout] between the two events) at the
-  /// center of the given widget, assuming it is exposed. If the center of the
-  /// widget is not exposed, this might send events to another
-  /// object.
-  Future<Null> longPress(Finder finder, { int pointer: 1 }) {
+  /// center of the given widget, assuming it is exposed.
+  ///
+  /// If the center of the widget is not exposed, this might send events to
+  /// another object.
+  Future<Null> longPress(Finder finder, { int pointer }) {
     return longPressAt(getCenter(finder), pointer: pointer);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<Null> longPressAt(Point location, { int pointer: 1 }) {
+  Future<Null> longPressAt(Point location, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await pump(kLongPressTimeout + kPressTimeout);
@@ -286,25 +287,33 @@ class WidgetController {
   }
 
   /// Attempts a fling gesture starting from the center of the given
-  /// widget, moving the given distance, reaching the given velocity.
+  /// widget, moving the given distance, reaching the given speed.
   ///
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
   ///
   /// This can pump frames. See [flingFrom] for a discussion of how the
   /// `offset`, `velocity` and `frameInterval` arguments affect this.
-  Future<Null> fling(Finder finder, Offset offset, double velocity, { int pointer: 1, Duration frameInterval: const Duration(milliseconds: 16) }) {
-    return flingFrom(getCenter(finder), offset, velocity, pointer: pointer, frameInterval: frameInterval);
+  ///
+  /// The `speed` is in pixels per second in the direction given by `offset`.
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [drag].
+  Future<Null> fling(Finder finder, Offset offset, double speed, {
+    int pointer,
+    Duration frameInterval: const Duration(milliseconds: 16),
+  }) {
+    return flingFrom(getCenter(finder), offset, speed, pointer: pointer, frameInterval: frameInterval);
   }
 
-  /// Attempts a fling gesture starting from the given location,
-  /// moving the given distance, reaching the given velocity.
+  /// Attempts a fling gesture starting from the given location, moving the
+  /// given distance, reaching the given speed.
   ///
   /// Exactly 50 pointer events are synthesized.
   ///
-  /// The offset and velocity control the interval between each pointer event.
-  /// For example, if the offset is 200 pixels, and the velocity is 800 pixels
-  /// per second, the pointer events will be sent for each increment of 4 pixels
+  /// The offset and speed control the interval between each pointer event. For
+  /// example, if the offset is 200 pixels down, and the speed is 800 pixels per
+  /// second, the pointer events will be sent for each increment of 4 pixels
   /// (200/50), over 250ms (200/800), meaning events will be sent every 1.25ms
   /// (250/200).
   ///
@@ -312,27 +321,30 @@ class WidgetController {
   /// calls to [pump]). If the total duration is longer than `frameInterval`,
   /// then one frame is pumped each time that amount of time elapses while
   /// sending events, or each time an event is synthesised, whichever is rarer.
-  Future<Null> flingFrom(Point startLocation, Offset offset, double velocity, { int pointer: 1, Duration frameInterval: const Duration(milliseconds: 16) }) {
+  ///
+  /// A fling is essentially a drag that ends at a particular speed. If you
+  /// just want to drag and end without a fling, use [dragFrom].
+  Future<Null> flingFrom(Point startLocation, Offset offset, double speed, { int pointer, Duration frameInterval: const Duration(milliseconds: 16) }) {
     assert(offset.distance > 0.0);
-    assert(velocity > 0.0); // velocity is pixels/second
+    assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard(() async {
-      final TestPointer p = new TestPointer(pointer);
+      final TestPointer testPointer = new TestPointer(pointer ?? _getNextPointer());
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
-      final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * velocity);
+      final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
-      await sendEventToBinding(p.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       for (int i = 0; i <= kMoveCount; i += 1) {
         final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
-        await sendEventToBinding(p.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        await sendEventToBinding(testPointer.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
           await pump(new Duration(milliseconds: (timeStamp - lastTimeStamp).truncate()));
           lastTimeStamp = timeStamp;
         }
       }
-      await sendEventToBinding(p.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      await sendEventToBinding(testPointer.up(timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       return null;
     });
   }
@@ -352,13 +364,20 @@ class WidgetController {
   ///
   /// If the middle of the widget is not exposed, this might send
   /// events to another object.
-  Future<Null> scroll(Finder finder, Offset offset, { int pointer: 1 }) {
-    return scrollAt(getCenter(finder), offset, pointer: pointer);
+  ///
+  /// If you want the drag to end with a speed so that the gesture recognition
+  /// system identifies the gesture as a fling, consider using [fling] instead.
+  Future<Null> drag(Finder finder, Offset offset, { int pointer }) {
+    return dragFrom(getCenter(finder), offset, pointer: pointer);
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
   /// the given offset, and a pointer up.
-  Future<Null> scrollAt(Point startLocation, Offset offset, { int pointer: 1 }) {
+  ///
+  /// If you want the drag to end with a speed so that the gesture recognition
+  /// system identifies the gesture as a fling, consider using [flingFrom]
+  /// instead.
+  Future<Null> dragFrom(Point startLocation, Offset offset, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       await gesture.moveBy(offset);
@@ -367,10 +386,27 @@ class WidgetController {
     });
   }
 
+  /// The next available pointer identifier.
+  ///
+  /// This is the default pointer identifier that will be used the next time the
+  /// [startGesture] method is called without an explicit pointer identifier.
+  int nextPointer = 1;
+
+  int _getNextPointer() {
+    final int result = nextPointer;
+    nextPointer += 1;
+    return result;
+  }
+
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
-  Future<TestGesture> startGesture(Point downLocation, { int pointer: 1 }) {
-    return TestGesture.down(downLocation, pointer: pointer, hitTester: hitTestOnBinding, dispatcher: sendEventToBinding);
+  Future<TestGesture> startGesture(Point downLocation, { int pointer }) {
+    return TestGesture.down(
+      downLocation,
+      pointer: pointer ?? _getNextPointer(),
+      hitTester: hitTestOnBinding,
+      dispatcher: sendEventToBinding,
+    );
   }
 
   /// Forwards the given location to the binding's hitTest logic.

@@ -38,7 +38,7 @@ void main() {
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);
     position.animateTo(10000.0, curve: Curves.linear, duration: const Duration(minutes: 1));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 10));
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
     expect(position.pixels, max);
     expect(position.minScrollExtent, 0.0);
     expect(position.maxScrollExtent, max);

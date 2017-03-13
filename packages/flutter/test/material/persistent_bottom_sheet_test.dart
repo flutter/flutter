@@ -56,13 +56,12 @@ void main() {
       );
     });
 
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
 
     expect(find.text('Two'), findsOneWidget);
 
-    await tester.scroll(find.text('Two'), const Offset(0.0, 400.0));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
 
     expect(find.text('Two'), findsNothing);
   });
