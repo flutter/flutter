@@ -523,10 +523,6 @@ class BackdropFilterLayer extends ContainerLayer {
 }
 
 class PhysicalModelLayer extends ContainerLayer {
-  /// Creates a layer with a rounded-rectangular clip.
-  ///
-  /// The [clipRRect] property must be non-null before the compositing phase of
-  /// the pipeline.
   PhysicalModelLayer({
     @required this.clipRRect,
     @required this.elevation,
