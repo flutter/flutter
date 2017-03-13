@@ -255,7 +255,8 @@ class AnalysisServer {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'];
     final List<AnalysisError> errors = issueInfo['errors'].map((Map<String, dynamic> json) => new AnalysisError(json)).toList();
-    _errorsController.add(new FileAnalysisErrors(file, errors));
+    if (!_errorsController.isClosed)
+      _errorsController.add(new FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {
