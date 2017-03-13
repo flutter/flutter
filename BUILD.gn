@@ -22,6 +22,11 @@ group("flutter") {
 
   # If on the host, compile all unittests targets.
   if (current_toolchain == host_toolchain) {
+    if (is_mac) {
+      deps += [
+        "//flutter/shell/platform/darwin:flutter_channels_unittests",
+      ]
+    }
     deps += [
       "//flutter/sky/engine/wtf:wtf_unittests",
       "//flutter/synchronization:synchronization_unittests",

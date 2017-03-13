@@ -9,12 +9,13 @@
 #include <sys/cdefs.h>
 
 #include "FlutterAsyncMessageListener.h"
+#include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
 #include "FlutterMessageListener.h"
 
 FLUTTER_EXPORT
-@interface FlutterViewController : UIViewController
+@interface FlutterViewController : UIViewController<FlutterBinaryMessenger>
 
 - (instancetype)initWithProject:(FlutterDartProject*)project
                         nibName:(NSString*)nibNameOrNil
@@ -37,8 +38,7 @@ FLUTTER_EXPORT
 - (void)removeAsyncMessageListener:
     (NSObject<FlutterAsyncMessageListener>*)listener;
 
-- (void)handleStatusBarTouches:(UIEvent *)event;
-
+- (void)handleStatusBarTouches:(UIEvent*)event;
 @end
 
 __BEGIN_DECLS

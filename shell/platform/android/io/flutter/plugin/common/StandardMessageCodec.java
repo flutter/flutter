@@ -7,6 +7,7 @@ package io.flutter.plugin.common;
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,6 +59,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
         if (message == null || !message.hasRemaining()) {
             return null;
         }
+        message.order(ByteOrder.nativeOrder());
         final Object value = readValue(message);
         if (message.hasRemaining()) {
             throw new IllegalArgumentException("Message corrupted");
@@ -65,6 +67,7 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
         return value;
     }
 
+    private static final boolean LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     private static final Charset UTF8 = Charset.forName("UTF8");
     private static final byte NULL = 0;
     private static final byte TRUE = 1;
@@ -87,30 +90,57 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
             stream.write(value);
         } else if (value <= 0xffff) {
             stream.write(254);
-            stream.write(value >>> 8);
-            stream.write(value);
+            writeChar(stream, value);
         } else {
             stream.write(255);
             writeInt(stream, value);
         }
     }
 
+    private static void writeChar(ByteArrayOutputStream stream, int value) {
+        if (LITTLE_ENDIAN) {
+            stream.write(value);
+            stream.write(value >>> 8);
+        } else {
+            stream.write(value >>> 8);
+            stream.write(value);
+        }
+    }
+
     private static void writeInt(ByteArrayOutputStream stream, int value) {
-        stream.write(value >>> 24);
-        stream.write(value >>> 16);
-        stream.write(value >>> 8);
-        stream.write(value);
+        if (LITTLE_ENDIAN) {
+            stream.write(value);
+            stream.write(value >>> 8);
+            stream.write(value >>> 16);
+            stream.write(value >>> 24);
+        } else {
+            stream.write(value >>> 24);
+            stream.write(value >>> 16);
+            stream.write(value >>> 8);
+            stream.write(value);
+        }
     }
 
     private static void writeLong(ByteArrayOutputStream stream, long value) {
-        stream.write((byte) (value >>> 56));
-        stream.write((byte) (value >>> 48));
-        stream.write((byte) (value >>> 40));
-        stream.write((byte) (value >>> 32));
-        stream.write((byte) (value >>> 24));
-        stream.write((byte) (value >>> 16));
-        stream.write((byte) (value >>> 8));
-        stream.write((byte) value);
+        if (LITTLE_ENDIAN) {
+            stream.write((byte) value);
+            stream.write((byte) (value >>> 8));
+            stream.write((byte) (value >>> 16));
+            stream.write((byte) (value >>> 24));
+            stream.write((byte) (value >>> 32));
+            stream.write((byte) (value >>> 40));
+            stream.write((byte) (value >>> 48));
+            stream.write((byte) (value >>> 56));
+        } else {
+            stream.write((byte) (value >>> 56));
+            stream.write((byte) (value >>> 48));
+            stream.write((byte) (value >>> 40));
+            stream.write((byte) (value >>> 32));
+            stream.write((byte) (value >>> 24));
+            stream.write((byte) (value >>> 16));
+            stream.write((byte) (value >>> 8));
+            stream.write((byte) value);
+        }
     }
 
     private static void writeDouble(ByteArrayOutputStream stream, double value) {
@@ -213,13 +243,9 @@ public final class StandardMessageCodec implements MessageCodec<Object> {
         if (value < 254) {
             return value;
         } else if (value == 254) {
-            return ((buffer.get() & 0xff) << 8)
-                 | ((buffer.get() & 0xff));
+            return buffer.getChar();
         } else {
-            return ((buffer.get() & 0xff) << 24)
-                 | ((buffer.get() & 0xff) << 16)
-                 | ((buffer.get() & 0xff) << 8)
-                 | ((buffer.get() & 0xff));
+            return buffer.getInt();
         }
     }
 

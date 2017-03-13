@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "base/strings/sys_string_conversions.h"
-#include "flutter/shell/platform/darwin/common/string_conversions.h"
+#include "flutter/shell/platform/darwin/common/buffer_conversions.h"
 
 namespace shell {
 
@@ -17,48 +17,32 @@ PlatformMessageRouter::~PlatformMessageRouter() = default;
 
 void PlatformMessageRouter::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  NSString* string = GetNSStringFromVector(message->data());
+  NSData* data = GetNSDataFromVector(message->data());
 
   ftl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
-  {
-    auto it = listeners_.find(message->channel());
-    if (it != listeners_.end()) {
-      NSString* response = [it->second didReceiveString:string];
-      if (completer)
-        completer->Complete(GetVectorFromNSString(response));
-      return;
-    }
-  }
-
-  {
-    auto it = async_listeners_.find(message->channel());
-    if (it != async_listeners_.end()) {
-      [it->second
-          didReceiveString:string
-                  callback:^(NSString* response) {
-                    if (completer)
-                      completer->Complete(GetVectorFromNSString(response));
-                  }];
-    }
+  auto it = message_handlers_.find(message->channel());
+  if (it != message_handlers_.end()) {
+    FlutterBinaryMessageHandler handler = it->second;
+    handler(data, ^(NSData* reply) {
+      if (completer) {
+        completer->Complete(GetVectorFromNSData(reply));
+      }
+    });
   }
 }
 
-void PlatformMessageRouter::SetMessageListener(
+void PlatformMessageRouter::SetMessageHandler(
     const std::string& channel,
-    NSObject<FlutterMessageListener>* listener) {
-  if (listener)
-    listeners_[channel] = listener;
-  else
-    listeners_.erase(channel);
-}
-
-void PlatformMessageRouter::SetAsyncMessageListener(
-    const std::string& channel,
-    NSObject<FlutterAsyncMessageListener>* listener) {
-  if (listener)
-    async_listeners_[channel] = listener;
-  else
-    async_listeners_.erase(channel);
+    FlutterBinaryMessageHandler handler) {
+  if (handler)
+    message_handlers_[channel] = [handler copy];
+  else {
+    auto it = message_handlers_.find(channel);
+    if (it != message_handlers_.end()) {
+      [it->second release];
+      message_handlers_.erase(it);
+    }
+  }
 }
 
 }  // namespace shell

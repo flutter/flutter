@@ -18,3 +18,52 @@ group("darwin") {
     assert(false, "Unknown darwin platform type.")
   }
 }
+
+source_set("flutter_channels") {
+  set_sources_assignment_filter([])
+  sources = [
+    "ios/framework/Headers/FlutterBinaryMessenger.h",
+    "ios/framework/Headers/FlutterChannels.h",
+    "ios/framework/Headers/FlutterCodecs.h",
+    "ios/framework/Source/FlutterChannels.mm",
+    "ios/framework/Source/FlutterCodecs.mm",
+    "ios/framework/Source/FlutterStandardCodec_Internal.h",
+    "ios/framework/Source/FlutterStandardCodec.mm",
+    "common/buffer_conversions.h",
+    "common/buffer_conversions.mm",
+  ]
+  set_sources_assignment_filter(sources_assignment_filter)
+
+  deps = [
+    "//base",
+    "//base:i18n",
+    "//dart/runtime:libdart",
+    "//flutter/common",
+    "//flutter/flow",
+    "//flutter/fml",
+    "//flutter/runtime",
+    "//flutter/shell/common",
+    "//flutter/shell/gpu",
+    "//flutter/shell/testing",
+    "//flutter/sky/engine/wtf",
+    "//lib/ftl",
+    "//third_party/skia",
+  ]
+}
+
+
+executable("flutter_channels_unittests") {
+  testonly = true
+
+  set_sources_assignment_filter([])
+  sources = [
+    "ios/framework/Source/flutter_codecs_unittest.mm",
+    "ios/framework/Source/flutter_standard_codec_unittest.mm",
+  ]
+  set_sources_assignment_filter(sources_assignment_filter)
+
+  deps = [
+    ":flutter_channels",
+    "//flutter/testing",
+  ]
+}
