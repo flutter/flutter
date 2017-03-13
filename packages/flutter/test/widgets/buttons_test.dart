@@ -107,8 +107,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(new Duration(milliseconds: 200));
 
-    final RRect buttonRRect = new RRect.fromLTRBR(0.0, 0.0, 150.0, 60.0, new Radius.circular(2.0));
     // TODO(lukef) - the object returned by renderObject does not contain splash or highlights (??)
+//    final RRect buttonRRect = new RRect.fromLTRBR(0.0, 0.0, 150.0, 60.0, new Radius.circular(2.0));
 //    expect(tester.renderObject(find.byKey(buttonKey)), paints
 //        ..rrect(rrect: buttonRRect, color: buttonColor)
 //    );
@@ -138,8 +138,8 @@ void main() {
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(new Duration(milliseconds: 200));
 
-    final RRect buttonRRect = new RRect.fromLTRBR(0.0, 0.0, 150.0, 60.0, new Radius.circular(2.0));
     // TODO(lukef) - the object returned by renderObject does not contain splash or highlights (??)
+//    final RRect buttonRRect = new RRect.fromLTRBR(0.0, 0.0, 150.0, 60.0, new Radius.circular(2.0));
 //    expect(find.byKey(buttonKey), paints
 //        ..rrect(rrect: buttonRRect, color: buttonColor)
 //    );
