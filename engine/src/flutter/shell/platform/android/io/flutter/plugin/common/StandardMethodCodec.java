@@ -6,6 +6,7 @@ package io.flutter.plugin.common;
 
 import io.flutter.plugin.common.StandardMessageCodec.ExposedByteArrayOutputStream;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 /**
  * A {@link MethodCodec} using the Flutter standard binary encoding.
@@ -26,6 +27,7 @@ public final class StandardMethodCodec implements MethodCodec {
 
     @Override
     public MethodCall decodeMethodCall(ByteBuffer methodCall) {
+        methodCall.order(ByteOrder.nativeOrder());
         final Object method = StandardMessageCodec.readValue(methodCall);
         final Object arguments = StandardMessageCodec.readValue(methodCall);
         if (method instanceof String) {

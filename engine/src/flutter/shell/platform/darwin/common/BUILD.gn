@@ -11,8 +11,8 @@ source_set("common") {
     "platform_mac.mm",
     "process_info_mac.cc",
     "process_info_mac.h",
-    "string_conversions.h",
-    "string_conversions.mm",
+    "buffer_conversions.h",
+    "buffer_conversions.mm",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
 
