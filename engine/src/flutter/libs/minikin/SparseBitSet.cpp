@@ -29,8 +29,13 @@ const uint32_t SparseBitSet::kNotFound;
 
 void SparseBitSet::clear() {
     mMaxVal = 0;
-    mIndices.reset();
-    mBitmaps.reset();
+    if (mOwnIndicesAndBitmaps) {
+        delete[] mIndices;
+        delete[] mBitmaps;
+        mIndexSize = 0;
+        mBitmapSize = 0;
+        mOwnIndicesAndBitmaps = false;
+    }
 }
 
 uint32_t SparseBitSet::calcNumPages(const uint32_t* ranges, size_t nRanges) {
@@ -59,17 +64,17 @@ uint32_t SparseBitSet::calcNumPages(const uint32_t* ranges, size_t nRanges) {
 
 void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     if (nRanges == 0) {
-        mMaxVal = 0;
-        mIndices.reset();
-        mBitmaps.reset();
+        clear();
         return;
     }
     mMaxVal = ranges[nRanges * 2 - 1];
-    size_t indexSize = (mMaxVal + kPageMask) >> kLogValuesPerPage;
-    mIndices.reset(new uint32_t[indexSize]);
+    mIndexSize = (mMaxVal + kPageMask) >> kLogValuesPerPage;
+    uint32_t* indices = new uint32_t[mIndexSize];
     uint32_t nPages = calcNumPages(ranges, nRanges);
-    mBitmaps.reset(new element[nPages << (kLogValuesPerPage - kLogBitsPerEl)]);
-    memset(mBitmaps.get(), 0, nPages << (kLogValuesPerPage - 3));
+    mBitmapSize = nPages << (kLogValuesPerPage - kLogBitsPerEl);
+    element* bitmaps = new element[mBitmapSize];
+    mOwnIndicesAndBitmaps = true;
+    memset(bitmaps, 0, nPages << (kLogValuesPerPage - 3));
     mZeroPageIndex = noZeroPage;
     uint32_t nonzeroPageEnd = 0;
     uint32_t currentPage = 0;
@@ -85,30 +90,99 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
                     mZeroPageIndex = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
                 }
                 for (uint32_t j = nonzeroPageEnd; j < startPage; j++) {
-                    mIndices[j] = mZeroPageIndex;
+                    indices[j] = mZeroPageIndex;
                 }
             }
-            mIndices[startPage] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
+            indices[startPage] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
         }
 
         size_t index = ((currentPage - 1) << (kLogValuesPerPage - kLogBitsPerEl)) +
             ((start & kPageMask) >> kLogBitsPerEl);
         size_t nElements = (end - (start & ~kElMask) + kElMask) >> kLogBitsPerEl;
         if (nElements == 1) {
-            mBitmaps[index] |= (kElAllOnes >> (start & kElMask)) &
+            bitmaps[index] |= (kElAllOnes >> (start & kElMask)) &
                 (kElAllOnes << ((~end + 1) & kElMask));
         } else {
-            mBitmaps[index] |= kElAllOnes >> (start & kElMask);
+            bitmaps[index] |= kElAllOnes >> (start & kElMask);
             for (size_t j = 1; j < nElements - 1; j++) {
-                mBitmaps[index + j] = kElAllOnes;
+                bitmaps[index + j] = kElAllOnes;
             }
-            mBitmaps[index + nElements - 1] |= kElAllOnes << ((~end + 1) & kElMask);
+            bitmaps[index + nElements - 1] |= kElAllOnes << ((~end + 1) & kElMask);
         }
         for (size_t j = startPage + 1; j < endPage + 1; j++) {
-            mIndices[j] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
+            indices[j] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
         }
         nonzeroPageEnd = endPage + 1;
     }
+    mBitmaps = bitmaps;
+    mIndices = indices;
+}
+
+struct SparseBitSetHeader {
+  uint32_t maxValue;
+  uint32_t zeroPageIndex;
+  uint32_t indexSize;
+  uint32_t bitmapSize;
+};
+
+bool SparseBitSet::initFromBuffer(const uint8_t* data, size_t size) {
+    // No need to be concerned about endianness here since Intel x86 CPUs are little-endian. ARM
+    // CPUs are bi-endian but the endianness is only changeable at reset time and is impossible to
+    // change at runtime. Thus incoming data is guaranteed to have the same endianness as when it
+    // was created.
+
+    if (data == nullptr || size < sizeof(SparseBitSetHeader)) {
+        clear();
+        return false;
+    }
+
+    // The serialized data starts with SparseBitSetHeader.
+    const SparseBitSetHeader* header = reinterpret_cast<const SparseBitSetHeader*>(data);
+    mMaxVal = header->maxValue;
+    mZeroPageIndex = header->zeroPageIndex;
+    mIndexSize = header->indexSize;
+    mBitmapSize = header->bitmapSize;
+
+    mOwnIndicesAndBitmaps = false;
+    if (mIndexSize == 0 || mBitmapSize == 0 || mMaxVal == 0) {
+        const bool isValidEmptyBitSet = (mIndexSize == 0 && mBitmapSize == 0 && mMaxVal == 0);
+        if (!isValidEmptyBitSet) {
+            clear();
+        }
+        return isValidEmptyBitSet;
+    }
+
+    const size_t indicesSizeInBytes = sizeof(mIndices[0]) * mIndexSize;
+    const size_t bitmapsSizeInBytes = sizeof(mBitmaps[0]) * mBitmapSize;
+    if (size != sizeof(SparseBitSetHeader) + indicesSizeInBytes + bitmapsSizeInBytes) {
+        clear();
+        return false;
+    }
+    data += sizeof(SparseBitSetHeader);
+    mIndices = reinterpret_cast<decltype(mIndices)>(data);
+    data += indicesSizeInBytes;
+    mBitmaps = reinterpret_cast<decltype(mBitmaps)>(data);
+    return true;
+}
+
+size_t SparseBitSet::writeToBuffer(uint8_t* out) const{
+    // See comments in SparseBitSet::initFromBuffer for the data structure.
+    const size_t indicesSizeInBytes = sizeof(mIndices[0]) * mIndexSize;
+    const size_t bitmapsSizeInBytes = sizeof(mBitmaps[0]) * mBitmapSize;
+    size_t necessarySize = sizeof(SparseBitSetHeader) + indicesSizeInBytes + bitmapsSizeInBytes;
+    if (out != nullptr) {
+        SparseBitSetHeader* header = reinterpret_cast<SparseBitSetHeader*>(out);
+        header->maxValue = mMaxVal;
+        header->zeroPageIndex = mZeroPageIndex;
+        header->indexSize = mIndexSize;
+        header->bitmapSize = mBitmapSize;
+
+        out += sizeof(SparseBitSetHeader);
+        memcpy(out, mIndices, indicesSizeInBytes);
+        out += indicesSizeInBytes;
+        memcpy(out, mBitmaps, bitmapsSizeInBytes);
+    }
+    return necessarySize;
 }
 
 int SparseBitSet::CountLeadingZeros(element x) {

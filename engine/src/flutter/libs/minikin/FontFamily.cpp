@@ -112,6 +112,22 @@ FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
     computeCoverage();
 }
 
+FontFamily::FontFamily(std::vector<Font>&& fonts, const uint8_t* acceleratorTable, size_t tableSize)
+    : FontFamily(0 /* variant */, std::move(fonts), acceleratorTable, tableSize) {
+}
+
+FontFamily::FontFamily(int variant, std::vector<Font>&& fonts, const uint8_t* acceleratorTable,
+        size_t tableSize)
+    : FontFamily(FontLanguageListCache::kEmptyListId, variant, std::move(fonts), acceleratorTable,
+            tableSize) {
+}
+
+FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts,
+        const uint8_t* acceleratorTable, size_t tableSize)
+    : mLangId(langId), mVariant(variant), mFonts(std::move(fonts)), mHasVSTable(false) {
+    readAcceleratorTable(acceleratorTable, tableSize);
+}
+
 FontFamily::~FontFamily() {
 }
 
@@ -247,4 +263,12 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
     return std::shared_ptr<FontFamily>(new FontFamily(mLangId, mVariant, std::move(fonts)));
 }
 
+size_t FontFamily::writeAcceleratorTable(uint8_t* out) const {
+    return mCoverage.writeToBuffer(out);
+}
+
+void FontFamily::readAcceleratorTable(const uint8_t* data, size_t size) {
+    bool result = mCoverage.initFromBuffer(data, size);
+    LOG_ALWAYS_FATAL_IF(!result, "Failed to reconstruct accelerator table from buffer");
+}
 }  // namespace minikin
