@@ -11,9 +11,11 @@
 #include "application/services/application_runner.fidl.h"
 #include "application/services/service_provider.fidl.h"
 #include "apps/mozart/services/views/view_provider.fidl.h"
+#include "dart/runtime/include/dart_api.h"
 #include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/fidl/cpp/bindings/binding_set.h"
 #include "lib/ftl/macros.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 
 namespace flutter_runner {
 class App;
@@ -46,6 +48,9 @@ class ApplicationControllerImpl : public app::ApplicationController,
   void CreateView(
       fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
       fidl::InterfaceRequest<app::ServiceProvider> services) override;
+
+  Dart_Port GetUIIsolateMainPort();
+  std::string GetUIIsolateName();
 
  private:
   void StartRuntimeIfReady();

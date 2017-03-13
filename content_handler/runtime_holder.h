@@ -45,6 +45,9 @@ class RuntimeHolder : public blink::RuntimeDelegate,
                   fidl::InterfaceRequest<mozart::ViewOwner> view_owner_request,
                   fidl::InterfaceRequest<app::ServiceProvider> services);
 
+  Dart_Port GetUIIsolateMainPort();
+  std::string GetUIIsolateName();
+
  private:
   // |blink::RuntimeDelegate| implementation:
   void ScheduleFrame() override;

@@ -79,4 +79,17 @@ void ApplicationControllerImpl::CreateView(
                               std::move(services));
 }
 
+Dart_Port ApplicationControllerImpl::GetUIIsolateMainPort() {
+  if (!runtime_holder_)
+    return ILLEGAL_PORT;
+  return runtime_holder_->GetUIIsolateMainPort();
+}
+
+std::string ApplicationControllerImpl::GetUIIsolateName() {
+  if (!runtime_holder_) {
+    return "";
+  }
+  return runtime_holder_->GetUIIsolateName();
+}
+
 }  // namespace flutter_runner

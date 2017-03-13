@@ -27,6 +27,8 @@ executable("content_handler") {
     "rasterizer.h",
     "runtime_holder.cc",
     "runtime_holder.h",
+    "service_protocol_hooks.cc",
+    "service_protocol_hooks.h",
     "software_rasterizer.cc",
     "software_rasterizer.h",
   ]

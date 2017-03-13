@@ -169,6 +169,19 @@ void RuntimeHolder::CreateView(
   }
 }
 
+Dart_Port RuntimeHolder::GetUIIsolateMainPort() {
+  if (!runtime_)
+    return ILLEGAL_PORT;
+  return runtime_->GetMainPort();
+}
+
+std::string RuntimeHolder::GetUIIsolateName() {
+  if (!runtime_) {
+    return "";
+  }
+  return runtime_->GetIsolateName();
+}
+
 void RuntimeHolder::ScheduleFrame() {
   if (pending_invalidation_ || deferred_invalidation_callback_)
     return;

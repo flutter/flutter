@@ -13,6 +13,7 @@
 #include "flutter/content_handler/application_controller_impl.h"
 #include "flutter/content_handler/content_handler_thread.h"
 #include "lib/ftl/macros.h"
+#include "lib/ftl/synchronization/waitable_event.h"
 
 namespace flutter_runner {
 
@@ -20,6 +21,8 @@ class App : public app::ApplicationRunner {
  public:
   App();
   ~App();
+
+  static App& Shared();
 
   // |app::ApplicationRunner| implementation:
 
@@ -30,7 +33,19 @@ class App : public app::ApplicationRunner {
 
   void Destroy(ApplicationControllerImpl* controller);
 
+  struct PlatformViewInfo {
+    uintptr_t view_id;
+    int64_t isolate_id;
+    std::string isolate_name;
+  };
+
+  void WaitForPlatformViewIds(std::vector<PlatformViewInfo>* platform_view_ids);
+
  private:
+  void WaitForPlatformViewsIdsUIThread(
+    std::vector<PlatformViewInfo>* platform_view_ids,
+    ftl::AutoResetWaitableEvent* latch);
+
   std::unique_ptr<app::ApplicationContext> context_;
   std::unique_ptr<Thread> gpu_thread_;
   std::unique_ptr<Thread> io_thread_;
