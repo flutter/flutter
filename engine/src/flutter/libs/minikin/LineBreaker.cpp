@@ -84,6 +84,7 @@ void LineBreaker::setText() {
     mBestBreak = 0;
     mBestScore = SCORE_INFTY;
     mPreBreak = 0;
+    mLastHyphenation = HyphenEdit::NO_EDIT;
     mFirstTabIndex = INT_MAX;
     mSpaceCount = 0;
 }
@@ -269,24 +270,59 @@ void LineBreaker::addWordBreak(size_t offset, ParaWidth preBreak, ParaWidth post
     addCandidate(cand);
 }
 
+// Helper method for addCandidate()
+void LineBreaker::pushGreedyBreak() {
+    const Candidate& bestCandidate = mCandidates[mBestBreak];
+    pushBreak(bestCandidate.offset, bestCandidate.postBreak - mPreBreak,
+            mLastHyphenation | HyphenEdit::editForThisLine(bestCandidate.hyphenType));
+    mBestScore = SCORE_INFTY;
+#if VERBOSE_DEBUG
+    ALOGD("break: %d %g", mBreaks.back(), mWidths.back());
+#endif
+    mLastBreak = mBestBreak;
+    mPreBreak = bestCandidate.preBreak;
+    mLastHyphenation = HyphenEdit::editForNextLine(bestCandidate.hyphenType);
+}
+
 // TODO performance: could avoid populating mCandidates if greedy only
 void LineBreaker::addCandidate(Candidate cand) {
-    size_t candIndex = mCandidates.size();
+    const size_t candIndex = mCandidates.size();
     mCandidates.push_back(cand);
+
+    // mLastBreak is the index of the last line break we decided to do in mCandidates,
+    // and mPreBreak is its preBreak value. mBestBreak is the index of the best line breaking candidate
+    // we have found since then, and mBestScore is its penalty.
     if (cand.postBreak - mPreBreak > currentLineWidth()) {
         // This break would create an overfull line, pick the best break and break there (greedy)
         if (mBestBreak == mLastBreak) {
+            // No good break has been found since last break. Break here.
             mBestBreak = candIndex;
         }
-        pushBreak(mCandidates[mBestBreak].offset, mCandidates[mBestBreak].postBreak - mPreBreak,
-                HyphenEdit::editForThisLine(mCandidates[mBestBreak].hyphenType));
-        mBestScore = SCORE_INFTY;
-#if VERBOSE_DEBUG
-        ALOGD("break: %d %g", mBreaks.back(), mWidths.back());
-#endif
-        mLastBreak = mBestBreak;
-        mPreBreak = mCandidates[mBestBreak].preBreak;
+        pushGreedyBreak();
     }
+
+    while (mLastBreak != candIndex && cand.postBreak - mPreBreak > currentLineWidth()) {
+        // We should rarely come here. But if we are here, we have broken the line, but the
+        // remaining part still doesn't fit. We now need to break at the second best place after the
+        // last break, but we have not kept that information, so we need to go back and find it.
+        //
+        // In some really rare cases, postBreak - preBreak of a candidate itself may be over the
+        // current line width. We protect ourselves against an infinite loop in that case by
+        // checking that we have not broken the line at this candidate already.
+        for (size_t i = mLastBreak + 1; i < candIndex; i++) {
+            const float penalty = mCandidates[i].penalty;
+            if (penalty <= mBestScore) {
+                mBestBreak = i;
+                mBestScore = penalty;
+            }
+        }
+        if (mBestBreak == mLastBreak) {
+            // We didn't find anything good. Break here.
+            mBestBreak = candIndex;
+        }
+        pushGreedyBreak();
+    }
+
     if (cand.penalty <= mBestScore) {
         mBestBreak = candIndex;
         mBestScore = cand.penalty;
@@ -329,7 +365,7 @@ void LineBreaker::computeBreaksGreedy() {
     size_t nCand = mCandidates.size();
     if (nCand == 1 || mLastBreak != nCand - 1) {
         pushBreak(mCandidates[nCand - 1].offset, mCandidates[nCand - 1].postBreak - mPreBreak,
-                HyphenEdit::NO_EDIT);
+                mLastHyphenation);
         // don't need to update mBestScore, because we're done
 #if VERBOSE_DEBUG
         ALOGD("final break: %d %g", mBreaks.back(), mWidths.back());
