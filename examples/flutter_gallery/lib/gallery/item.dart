@@ -26,7 +26,7 @@ class GalleryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new ListItem(
+    return new ListTile(
       title: new Text(title),
       subtitle: new Text(subtitle),
       onTap: () {

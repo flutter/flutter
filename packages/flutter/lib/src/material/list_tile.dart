@@ -10,78 +10,81 @@ import 'debug.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-/// The kind of list items contained in a material design list.
+/// The kind of list tiles contained in a material design list.
 ///
 /// See also:
 ///
-///  * [ListItem]
-///  * [kListItemExtent]
+///  * [ListTile]
+///  * [kListTileExtent]
 ///  * <https://material.google.com/components/lists.html#lists-specs>
 enum MaterialListType {
-  /// A list item that contains a single line of text.
+  /// A list tile that contains a single line of text.
   oneLine,
 
-  /// A list item that contains a [CircleAvatar] followed by a single line of text.
+  /// A list tile that contains a [CircleAvatar] followed by a single line of text.
   oneLineWithAvatar,
 
-  /// A list item that contains two lines of text.
+  /// A list tile that contains two lines of text.
   twoLine,
 
-  /// A list item that contains three lines of text.
+  /// A list tile that contains three lines of text.
   threeLine
 }
 
-/// The vertical extent of the different types of material list items.
+/// The vertical extent of the different types of material list tiles.
 ///
 /// See also:
 ///
 ///  * [MaterialListType]
-///  * [ListItem]
-///  * [kListItemExtent]
+///  * [ListTile]
+///  * [kListTileExtent]
 ///  * <https://material.google.com/components/lists.html#lists-specs>
-Map<MaterialListType, double> kListItemExtent = const <MaterialListType, double>{
+Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: 48.0,
   MaterialListType.oneLineWithAvatar: 56.0,
   MaterialListType.twoLine: 72.0,
   MaterialListType.threeLine: 88.0,
 };
 
-/// A single row typically containing an icon and some text.
+/// A single fixed-height row that typically contains some text as well as
+/// a leading or trailing icon.
 ///
-/// List items are one to three lines of text optionally flanked by icons or
+/// A list tile contains one to three lines of text optionally flanked by icons or
 /// other widgets, such as check boxes. The icons (or other widgets) for the
-/// item are defined with the [leading] and [trailing] parameters. The first
+/// tile are defined with the [leading] and [trailing] parameters. The first
 /// line of text is not optional and is specified with [title]. The value of
 /// [subtitle], which _is_ optional, will occupy the space allocated for an
 /// additional line of text, or two lines if [isThreeLine] is true. If [dense]
-/// is true then the overall height of this list item and the size of the
+/// is true then the overall height of this tile and the size of the
 /// [DefaultTextStyle]s that wrap the [title] and [subtitle] widget are reduced.
 ///
-/// List items are always a fixed height (which height depends on how
+/// List tiles are always a fixed height (which height depends on how
 /// [isThreeLine], [dense], and [subtitle] are configured); they do not grow in
 /// height based on their contents. If you are looking for a widget that allows
 /// for arbitrary layout in a row, consider [Row].
 ///
-/// List items are typically used in [MaterialList]s or in [Card]s.
+/// List tiles are typically used in [MaterialList]s or in [Card]s.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
-///  * [ListView], which takes a list of [ListItem] widgets and shows them
-///    as a scrolling list.
-///  * [Card], which can be used with [Column] to show a few [ListItem]s.
-///  * [CircleAvatar], which shows an icon representing a person.
-///  * [Divider], which can be used to separate [ListItem]s.
-///  * [ListItem.divideItems], another way to separate [ListItem]s.
+///  * [kListTileExtent], which defines the ListTile sizes.
+///  * [ListView], which can display an arbitrary number of [ListTile]s
+///    in a scrolling list.
+///  * [Card], which can be used with [Column] to show a few [ListTile]s.
+///  * [CircleAvatar], which shows an icon representing a person and is often
+///    used as the [leading] element of a ListTile.
+///  * [Divider], which can be used to separate [ListTile]s.
+///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTiles]s.
 ///  * <https://material.google.com/components/lists.html>
-class ListItem extends StatelessWidget {
-  /// Creates a list item.
+class ListTile extends StatelessWidget {
+  /// Creates a list tile.
   ///
   /// If [isThreeLine] is true, then [subtitle] must not be null.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  ListItem({
+  ListTile({
     Key key,
     this.leading,
     this.title,
@@ -99,7 +102,7 @@ class ListItem extends StatelessWidget {
   /// Typically a [CircleAvatar] widget.
   final Widget leading;
 
-  /// The primary content of the list item.
+  /// The primary content of the list tile.
   ///
   /// Typically a [Text] widget.
   final Widget title;
@@ -114,47 +117,47 @@ class ListItem extends StatelessWidget {
   /// Typically an [Icon] widget.
   final Widget trailing;
 
-  /// Whether this list item is intended to display three lines of text.
+  /// Whether this list tile is intended to display three lines of text.
   ///
-  /// If false, the list item is treated as having one line if the subtitle is
+  /// If false, the list tile is treated as having one line if the subtitle is
   /// null and treated as having two lines if the subtitle is non-null.
   final bool isThreeLine;
 
-  /// Whether this list item is part of a vertically dense list.
+  /// Whether this list tile is part of a vertically dense list.
   final bool dense;
 
-  /// Whether this list item is interactive.
+  /// Whether this list tile is interactive.
   ///
-  /// If false, this list item is styled with the disabled color from the
+  /// If false, this list tile is styled with the disabled color from the
   /// current [Theme] and the [onTap] and [onLongPress] callbacks are
   /// inoperative.
   final bool enabled;
 
-  /// Called when the user taps this list item.
+  /// Called when the user taps this list tile.
   ///
   /// Inoperative if [enabled] is false.
   final GestureTapCallback onTap;
 
-  /// Called when the user long-presses on this list item.
+  /// Called when the user long-presses on this list tile.
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
 
-  /// Add a one pixel border in between each item. If color isn't specified the
+  /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
   ///
   /// See also:
   ///
   /// * [Divider], which you can use to obtain this effect manually.
-  static Iterable<Widget> divideItems({ BuildContext context, @required Iterable<Widget> items, Color color }) sync* {
-    assert(items != null);
+  static Iterable<Widget> divideTiles({ BuildContext context, @required Iterable<Widget> tiles, Color color }) sync* {
+    assert(tiles != null);
     assert(color != null || context != null);
 
     final Color dividerColor = color ?? Theme.of(context).dividerColor;
-    final Iterator<Widget> iterator = items.iterator;
+    final Iterator<Widget> iterator = tiles.iterator;
     final bool isNotEmpty = iterator.moveNext();
 
-    Widget item = iterator.current;
+    Widget tile = iterator.current;
     while (iterator.moveNext()) {
       yield new DecoratedBox(
         position: DecorationPosition.foreground,
@@ -163,12 +166,12 @@ class ListItem extends StatelessWidget {
             bottom: new BorderSide(color: dividerColor),
           ),
         ),
-        child: item,
+        child: tile,
       );
-      item = iterator.current;
+      tile = iterator.current;
     }
     if (isNotEmpty)
-      yield item;
+      yield tile;
   }
 
   TextStyle _primaryTextStyle(BuildContext context) {
@@ -193,15 +196,15 @@ class ListItem extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     final bool isTwoLine = !isThreeLine && subtitle != null;
     final bool isOneLine = !isThreeLine && !isTwoLine;
-    double itemHeight;
+    double tileHeight;
     if (isOneLine)
-      itemHeight = dense ? 48.0 : 56.0;
+      tileHeight = dense ? 48.0 : 56.0;
     else if (isTwoLine)
-      itemHeight = dense ? 60.0 : 72.0;
+      tileHeight = dense ? 60.0 : 72.0;
     else
-      itemHeight = dense ? 76.0 : 88.0;
+      tileHeight = dense ? 76.0 : 88.0;
 
-    // Overall, the list item is a Row() with these children.
+    // Overall, the list tile is a Row() with these children.
     final List<Widget> children = <Widget>[];
 
     if (leading != null) {
@@ -249,7 +252,7 @@ class ListItem extends StatelessWidget {
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
       child: new Container(
-        height: itemHeight,
+        height: tileHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: new Row(
           children: children
