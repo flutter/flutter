@@ -1700,13 +1700,13 @@ class BuildOwner {
 
   final _InactiveElements _inactiveElements = new _InactiveElements();
 
-  final List<BuildableElement> _dirtyElements = <BuildableElement>[];
+  final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.beginFrame] calls [buildScope].
-  void scheduleBuildFor(BuildableElement element) {
+  void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
     assert(() {
@@ -1758,7 +1758,7 @@ class BuildOwner {
   int _debugStateLockLevel = 0;
   bool get _debugStateLocked => _debugStateLockLevel > 0;
   bool _debugBuilding = false;
-  BuildableElement _debugCurrentBuildTarget;
+  Element _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
   /// calls the given `callback`.
@@ -1803,7 +1803,7 @@ class BuildOwner {
   /// Only one [buildScope] can be active at a time.
   ///
   /// A [buildScope] implies a [lockState] scope as well.
-  void buildScope(BuildableElement context, [VoidCallback callback]) {
+  void buildScope(Element context, [VoidCallback callback]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
     assert(context != null);
@@ -1820,9 +1820,8 @@ class BuildOwner {
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
-        assert(context is BuildableElement);
         assert(_debugStateLocked);
-        BuildableElement debugPreviousBuildTarget;
+        Element debugPreviousBuildTarget;
         assert(() {
           context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
           debugPreviousBuildTarget = _debugCurrentBuildTarget;
@@ -1879,7 +1878,7 @@ class BuildOwner {
         }
       }
       assert(() {
-        if (_dirtyElements.any((BuildableElement element) => element._active && element.dirty)) {
+        if (_dirtyElements.any((Element element) => element._active && element.dirty)) {
           throw new FlutterError(
             'buildScope missed some dirty elements.\n'
             'This probably indicates that the dirty list should have been resorted but was not.\n'
@@ -1890,7 +1889,7 @@ class BuildOwner {
         return true;
       });
     } finally {
-      for (BuildableElement element in _dirtyElements) {
+      for (Element element in _dirtyElements) {
         assert(element._inDirtyList);
         element._inDirtyList = false;
       }
@@ -2115,9 +2114,6 @@ abstract class Element implements BuildContext {
   int get depth => _depth;
   int _depth;
 
-  /// Returns true if the element has been marked as needing rebuilding.
-  bool get dirty => false;
-
   static int _sort(Element a, Element b) {
     if (a.depth < b.depth)
       return -1;
@@ -2141,7 +2137,9 @@ abstract class Element implements BuildContext {
 
   bool _active = false;
 
+  @mustCallSuper
   void _reassemble() {
+    markNeedsBuild();
     visitChildren((Element child) {
       child._reassemble();
     });
@@ -2554,6 +2552,7 @@ abstract class Element implements BuildContext {
     assert(owner != null);
     assert(depth != null);
     assert(!_active);
+    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
     _active = true;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -2561,6 +2560,10 @@ abstract class Element implements BuildContext {
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
+    if (_dirty)
+      owner.scheduleBuildFor(this);
+    if (hadDependencies)
+      dependenciesChanged();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -2587,9 +2590,9 @@ abstract class Element implements BuildContext {
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
       // get re-used, it doesn't matter. If we do, then we'll clear the list in
-      // activate(). The benefit of this is that it allows BuildableElement's
-      // activate() implementation to decide whether to rebuild based on whether
-      // we had dependencies here.
+      // activate(). The benefit of this is that it allows Element's activate()
+      // implementation to decide whether to rebuild based on whether we had
+      // dependencies here.
     }
     _inheritedWidgets = null;
     _active = false;
@@ -2787,7 +2790,10 @@ abstract class Element implements BuildContext {
   /// [InheritedWidget.updateShouldNotify] returned true), the framework calls
   /// this function to notify this element of the change.
   @mustCallSuper
-  void dependenciesChanged() { }
+  void dependenciesChanged() {
+    assert(_active); // otherwise markNeedsBuild is a no-op
+    markNeedsBuild();
+  }
 
   /// Returns a description of what caused this element to be created.
   ///
@@ -2838,6 +2844,8 @@ abstract class Element implements BuildContext {
         description.add('${widget.key}');
       widget.debugFillDescription(description);
     }
+    if (dirty)
+      description.add('dirty');
   }
 
   /// A detailed, textual description of this element, includings its children.
@@ -2853,50 +2861,8 @@ abstract class Element implements BuildContext {
     }
     return result;
   }
-}
-
-/// A widget that renders an exception's message.
-///
-/// This widget is used when a build function fails, to help with determining
-/// where the problem lies. Exceptions are also logged to the console, which you
-/// can read using `flutter logs`. The console will also include additional
-/// information such as the stack trace for the exception.
-class ErrorWidget extends LeafRenderObjectWidget {
-  /// Creates a widget that displays the given error message.
-  ErrorWidget(Object exception) : message = _stringify(exception),
-      super(key: new UniqueKey());
-
-  /// The message to display.
-  final String message;
-
-  static String _stringify(Object exception) {
-    try {
-      return exception.toString();
-    } catch (e) { }
-    return 'Error';
-  }
-
-  @override
-  RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('message: ' + _stringify(message));
-  }
-}
-
-/// An [Element] that can be marked dirty and rebuilt.
-///
-/// In practice, all subclasses of [Element] in the Flutter framework are
-/// subclasses of [BuildableElement]. The distinction exists primarily to
-/// segregate unrelated code.
-abstract class BuildableElement extends Element {
-  /// Creates an element that uses the given widget as its configuration.
-  BuildableElement(Widget widget) : super(widget);
 
   /// Returns true if the element has been marked as needing rebuilding.
-  @override
   bool get dirty => _dirty;
   bool _dirty = true;
 
@@ -2991,7 +2957,7 @@ abstract class BuildableElement extends Element {
     });
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(owner._debugStateLocked);
-    BuildableElement debugPreviousBuildTarget;
+    Element debugPreviousBuildTarget;
     assert(() {
       debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
       owner._debugCurrentBuildTarget = this;
@@ -3009,35 +2975,36 @@ abstract class BuildableElement extends Element {
   /// Called by rebuild() after the appropriate checks have been made.
   @protected
   void performRebuild();
+}
 
-  @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    assert(_active); // otherwise markNeedsBuild is a no-op
-    markNeedsBuild();
+/// A widget that renders an exception's message.
+///
+/// This widget is used when a build function fails, to help with determining
+/// where the problem lies. Exceptions are also logged to the console, which you
+/// can read using `flutter logs`. The console will also include additional
+/// information such as the stack trace for the exception.
+class ErrorWidget extends LeafRenderObjectWidget {
+  /// Creates a widget that displays the given error message.
+  ErrorWidget(Object exception) : message = _stringify(exception),
+      super(key: new UniqueKey());
+
+  /// The message to display.
+  final String message;
+
+  static String _stringify(Object exception) {
+    try {
+      return exception.toString();
+    } catch (e) { }
+    return 'Error';
   }
 
   @override
-  void activate() {
-    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
-    super.activate(); // clears _dependencies, and sets active to true
-    if (_dirty)
-      owner.scheduleBuildFor(this);
-    if (hadDependencies)
-      dependenciesChanged();
-  }
-
-  @override
-  void _reassemble() {
-    markNeedsBuild();
-    super._reassemble();
-  }
+  RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dirty)
-      description.add('dirty');
+    description.add('message: ' + _stringify(message));
   }
 }
 
@@ -3059,7 +3026,7 @@ typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 /// [RenderObject]s indirectly by creating other [Element]s.
 ///
 /// Contrast with [RenderObjectElement].
-abstract class ComponentElement extends BuildableElement {
+abstract class ComponentElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
 
@@ -3630,7 +3597,7 @@ class InheritedElement extends ProxyElement {
 /// expose them in its implementation of the [visitChildren] method. This method
 /// is used by many of the framework's internal mechanisms, and so should be
 /// fast. It is also used by the test framework and [debugDumpApp].
-abstract class RenderObjectElement extends BuildableElement {
+abstract class RenderObjectElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 
