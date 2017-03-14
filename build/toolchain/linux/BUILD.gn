@@ -45,6 +45,7 @@ gcc_toolchain("clang_x86") {
   nm = "nm"
   ar = "ar"
   ld = cxx
+  strip = "strip"
 
   toolchain_cpu = "x86"
   toolchain_os = "linux"
