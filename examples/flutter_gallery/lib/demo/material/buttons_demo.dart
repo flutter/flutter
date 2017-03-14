@@ -141,7 +141,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       child: new Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
-          new ListItem(
+          new ListTile(
             title: new Text('Simple dropdown:'),
             trailing: new DropdownButton<String>(
               value: dropdown1Value,
@@ -161,7 +161,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           const SizedBox(
             height: 24.0,
           ),
-          new ListItem(
+          new ListTile(
             title: new Text('Dropdown with a hint:'),
             trailing: new DropdownButton<String>(
               value: dropdown2Value,
@@ -182,7 +182,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
           const SizedBox(
             height: 24.0,
           ),
-          new ListItem(
+          new ListTile(
             title: new Text('Scrollable dropdown:'),
             trailing: new DropdownButton<String>(
               value: dropdown3Value,

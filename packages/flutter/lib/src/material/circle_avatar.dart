@@ -38,8 +38,8 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [Chip], for representing users or concepts in long form.
-///  * [ListItem], which combines an icon (such as a [CircleAvatar]) with some
-///    text in a horizontal row.
+///  * [ListTile], which can combine an icon (such as a [CircleAvatar]) with some
+///    text for a fixed height list entry.
 ///  * <https://material.google.com/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.

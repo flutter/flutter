@@ -241,7 +241,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
 
   @override
   Widget buildChild() {
-    return new ListItem(
+    return new ListTile(
       enabled: config.enabled,
       leading: new FadeTransition(
         opacity: _opacity,

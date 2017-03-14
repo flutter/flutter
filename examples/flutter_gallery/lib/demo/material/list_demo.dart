@@ -43,7 +43,7 @@ class _ListDemoState extends State<ListDemo> {
         child: new ListView(
           shrinkWrap: true,
           children: <Widget>[
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('One-line'),
               trailing: new Radio<MaterialListType>(
@@ -52,7 +52,7 @@ class _ListDemoState extends State<ListDemo> {
                 onChanged: changeItemType,
               )
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Two-line'),
               trailing: new Radio<MaterialListType>(
@@ -61,7 +61,7 @@ class _ListDemoState extends State<ListDemo> {
                 onChanged: changeItemType,
               )
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Three-line'),
               trailing: new Radio<MaterialListType>(
@@ -70,7 +70,7 @@ class _ListDemoState extends State<ListDemo> {
                 onChanged: changeItemType,
               ),
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Show avatar'),
               trailing: new Checkbox(
@@ -83,7 +83,7 @@ class _ListDemoState extends State<ListDemo> {
                 },
               ),
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Show icon'),
               trailing: new Checkbox(
@@ -96,7 +96,7 @@ class _ListDemoState extends State<ListDemo> {
                 },
               ),
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Show dividers'),
               trailing: new Checkbox(
@@ -109,7 +109,7 @@ class _ListDemoState extends State<ListDemo> {
                 },
               ),
             ),
-            new ListItem(
+            new ListTile(
               dense: true,
               title: new Text('Dense layout'),
               trailing: new Checkbox(
@@ -140,7 +140,7 @@ class _ListDemoState extends State<ListDemo> {
     });
   }
 
-  Widget buildListItem(BuildContext context, String item) {
+  Widget buildListTile(BuildContext context, String item) {
     Widget secondary;
     if (_itemType == MaterialListType.twoLine) {
       secondary = new Text("Additional item information.");
@@ -149,7 +149,7 @@ class _ListDemoState extends State<ListDemo> {
         "Even more additional list item information appears on line three.",
       );
     }
-    return new ListItem(
+    return new ListTile(
       isThreeLine: _itemType == MaterialListType.threeLine,
       dense: _dense,
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
@@ -176,9 +176,9 @@ class _ListDemoState extends State<ListDemo> {
         break;
     }
 
-    Iterable<Widget> listItems = items.map((String item) => buildListItem(context, item));
+    Iterable<Widget> listTiles = items.map((String item) => buildListTile(context, item));
     if (_showDividers)
-      listItems = ListItem.divideItems(context: context, items: listItems);
+      listTiles = ListTile.divideTiles(context: context, tiles: listTiles);
 
     return new Scaffold(
       key: scaffoldKey,
@@ -205,7 +205,7 @@ class _ListDemoState extends State<ListDemo> {
       body: new Scrollbar(
         child: new ListView(
           padding: new EdgeInsets.symmetric(vertical: _dense ? 4.0 : 8.0),
-          children: listItems.toList(),
+          children: listTiles.toList(),
         ),
       ),
     );

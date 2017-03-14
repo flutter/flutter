@@ -143,7 +143,7 @@ class SectionDetailView extends StatelessWidget {
         child: image,
       );
     } else {
-      item = new ListItem(
+      item = new ListTile(
         title: new Text(detail.title),
         subtitle: new Text(detail.subtitle),
         leading: new SizedBox(width: 32.0, height: 32.0, child: image),
