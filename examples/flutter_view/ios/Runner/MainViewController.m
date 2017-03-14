@@ -12,20 +12,18 @@
 
 @property (strong, nonatomic) NativeViewController* nativeViewController;
 @property (strong, nonatomic) FlutterViewController* flutterViewController;
+@property FlutterMessageChannel* messageChannel;
 @end
 
 static NSString* const emptyString = @"";
+static NSString* const ping = @"ping";
 static NSString* const channel = @"increment";
+
 
 @implementation MainViewController
 
 - (NSString*) messageName {
   return channel;
-}
-
-- (NSString*)didReceiveString:(NSString*)message {
-  [self.nativeViewController didReceiveIncrement];
-  return emptyString;
 }
 
 - (void)prepareForSegue:(UIStoryboardSegue*)segue sender:(id)sender {
@@ -36,13 +34,22 @@ static NSString* const channel = @"increment";
   }
 
   if ([segue.identifier isEqualToString:@"FlutterViewControllerSegue"]) {
-     self.flutterViewController = segue.destinationViewController;
-    [self.flutterViewController addMessageListener:self];
+    self.flutterViewController = segue.destinationViewController;
+
+    self.messageChannel = [FlutterMessageChannel messageChannelNamed:channel
+                                                     binaryMessenger:self.flutterViewController
+                                                               codec:[FlutterStringCodec sharedInstance]];
+
+    MainViewController*  __weak weakSelf = self;
+    [self.messageChannel setMessageHandler:^(id message, FlutterReplyHandler replyHandler) {
+      [weakSelf.nativeViewController didReceiveIncrement];
+      replyHandler(emptyString);
+    }];
   }
 }
 
 - (void)didTapIncrementButton {
-  [self.flutterViewController sendString:emptyString withMessageName:self.messageName];
+  [self.messageChannel sendMessage:ping replyHandler:nil];
 }
 
 @end

@@ -13,7 +13,6 @@
 
 @protocol NativeViewControllerDelegate;
 
-@interface MainViewController : UIViewController <FlutterMessageListener,
-                                                  NativeViewControllerDelegate>
+@interface MainViewController : UIViewController <NativeViewControllerDelegate>
 @end
 
