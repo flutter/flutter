@@ -17,21 +17,39 @@
 #ifndef MINIKIN_FONT_LANGUAGE_LIST_CACHE_H
 #define MINIKIN_FONT_LANGUAGE_LIST_CACHE_H
 
+#include <unordered_map>
+
+#include <minikin/FontFamily.h>
 #include "FontLanguage.h"
 
 namespace minikin {
 
-// A special ID for the empty language list.
-// This value must be 0 since the empty language list is inserted into mLanguageLists by default.
-const uint32_t kEmptyLanguageListId = 0;
+class FontLanguageListCache {
+public:
+    // A special ID for the empty language list.
+    // This value must be 0 since the empty language list is inserted into mLanguageLists by
+    // default.
+    const static uint32_t kEmptyListId = 0;
 
-// Looks up from internal cache and returns associated ID if FontLanguages constructed from given
-// string is already registered. If it is new to internal cache, put it to internal cache and
-// returns newly assigned ID.
-uint32_t putLanguageListToCacheLocked(const std::string& languages);
+    // Returns language list ID for the given string representation of FontLanguages.
+    // Caller should acquire a lock before calling the method.
+    static uint32_t getId(const std::string& languages);
 
-// Returns FontLanguages associated with given ID.
-const FontLanguages& getFontLanguagesFromCacheLocked(uint32_t id);
+    // Caller should acquire a lock before calling the method.
+    static const FontLanguages& getById(uint32_t id);
+
+private:
+    FontLanguageListCache() {}  // Singleton
+    ~FontLanguageListCache() {}
+
+    // Caller should acquire a lock before calling the method.
+    static FontLanguageListCache* getInstance();
+
+    std::vector<FontLanguages> mLanguageLists;
+
+    // A map from string representation of the font language list to the ID.
+    std::unordered_map<std::string, uint32_t> mLanguageListLookupTable;
+};
 
 }  // namespace minikin
 

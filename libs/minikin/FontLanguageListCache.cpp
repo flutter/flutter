@@ -20,8 +20,6 @@
 
 #include <unicode/uloc.h>
 #include <unordered_set>
-#include <unordered_map>
-#include <minikin/FontFamily.h>
 
 #include <log/log.h>
 
@@ -29,6 +27,8 @@
 #include "MinikinInternal.h"
 
 namespace minikin {
+
+const uint32_t FontLanguageListCache::kEmptyListId;
 
 // Returns the text length of output.
 static size_t toLanguageTag(char* output, size_t outSize, const std::string& locale) {
@@ -111,61 +111,46 @@ static std::vector<FontLanguage> parseLanguageList(const std::string& input) {
     return result;
 }
 
-class FontLanguageListCache {
-public:
-    FontLanguageListCache() {
+// static
+uint32_t FontLanguageListCache::getId(const std::string& languages) {
+    FontLanguageListCache* inst = FontLanguageListCache::getInstance();
+    std::unordered_map<std::string, uint32_t>::const_iterator it =
+            inst->mLanguageListLookupTable.find(languages);
+    if (it != inst->mLanguageListLookupTable.end()) {
+        return it->second;
+    }
+
+    // Given language list is not in cache. Insert it and return newly assigned ID.
+    const uint32_t nextId = inst->mLanguageLists.size();
+    FontLanguages fontLanguages(parseLanguageList(languages));
+    if (fontLanguages.empty()) {
+        return kEmptyListId;
+    }
+    inst->mLanguageLists.push_back(std::move(fontLanguages));
+    inst->mLanguageListLookupTable.insert(std::make_pair(languages, nextId));
+    return nextId;
+}
+
+// static
+const FontLanguages& FontLanguageListCache::getById(uint32_t id) {
+    FontLanguageListCache* inst = FontLanguageListCache::getInstance();
+    LOG_ALWAYS_FATAL_IF(id >= inst->mLanguageLists.size(), "Lookup by unknown language list ID.");
+    return inst->mLanguageLists[id];
+}
+
+// static
+FontLanguageListCache* FontLanguageListCache::getInstance() {
+    assertMinikinLocked();
+    static FontLanguageListCache* instance = nullptr;
+    if (instance == nullptr) {
+        instance = new FontLanguageListCache();
+
         // Insert an empty language list for mapping default language list to kEmptyListId.
         // The default language list has only one FontLanguage and it is the unsupported language.
-        mLanguageLists.emplace(kEmptyLanguageListId, FontLanguages());
-        mLanguageListLookupTable.emplace("", kEmptyLanguageListId);
+        instance->mLanguageLists.push_back(FontLanguages());
+        instance->mLanguageListLookupTable.insert(std::make_pair("", kEmptyListId));
     }
-
-    uint32_t put(const std::string& languages) {
-        assertLocked(gLock);
-
-        const auto& it = mLanguageListLookupTable.find(languages);
-        if (it != mLanguageListLookupTable.end()) {
-            return it->second;
-        }
-
-        // Given language list is not in cache. Insert it and return newly assigned ID.
-        const uint32_t nextId = mLanguageLists.size();
-        FontLanguages fontLanguages(parseLanguageList(languages));
-        if (fontLanguages.empty()) {
-            mLanguageListLookupTable.emplace(languages, kEmptyLanguageListId);
-            return kEmptyLanguageListId;
-        }
-        mLanguageLists.emplace(nextId, std::move(fontLanguages));
-        mLanguageListLookupTable.emplace(languages, nextId);
-        return nextId;
-    }
-
-    const FontLanguages& get(uint32_t id) {
-        assertLocked(gLock);
-
-        return mLanguageLists[id];
-    }
-
-private:
-    std::unordered_map<uint32_t, FontLanguages> mLanguageLists;
-
-    // A map from string representation of the font language list to the ID.
-    std::unordered_map<std::string, uint32_t> mLanguageListLookupTable;
-};
-
-static FontLanguageListCache& getInstance() {
-    static FontLanguageListCache instance;
     return instance;
-}
-
-// static
-uint32_t putLanguageListToCacheLocked(const std::string& languages) {
-    return getInstance().put(languages);
-}
-
-// static
-const FontLanguages& getFontLanguagesFromCacheLocked(uint32_t id) {
-    return getInstance().get(id);
 }
 
 }  // namespace minikin

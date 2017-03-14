@@ -21,7 +21,7 @@
 namespace minikin {
 
 MinikinFont::~MinikinFont() {
-    ScopedLock _l(gLock);
+    android::AutoMutex _l(gMinikinLock);
     purgeHbFontLocked(this);
 }
 

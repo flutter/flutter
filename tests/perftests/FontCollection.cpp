@@ -77,7 +77,7 @@ static void BM_FontCollection_itemize(benchmark::State& state) {
     std::vector<FontCollection::Run> result;
     FontStyle style(FontStyle::registerLanguageList(ITEMIZE_TEST_CASES[testIndex].languageTag));
 
-    ScopedLock _l(gLock);
+    android::AutoMutex _l(gMinikinLock);
     while (state.KeepRunning()) {
         result.clear();
         collection->itemize(buffer, utf16_length, style, &result);
