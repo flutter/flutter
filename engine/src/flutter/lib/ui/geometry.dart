@@ -24,6 +24,9 @@ abstract class OffsetBase {
   /// _both_ dimensions set to [double.INFINITY].
   bool get isInfinite => _dx >= double.INFINITY || _dy >= double.INFINITY;
 
+  /// Whether both dimensions are finite.
+  bool get isFinite => _dx.isFinite && _dy.isFinite;
+
   /// Less-than operator. Compares an [Offset] or [Size] to another [Offset] or
   /// [Size], and returns true if both the horizontal and vertical values of the
   /// left-hand-side operand are smaller than the horizontal and vertical values
