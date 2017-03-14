@@ -26,6 +26,8 @@ analyzer:
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
+    # treat missing returns as a warning
+    missing_return: warning
     # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
     # allow type narrowing
