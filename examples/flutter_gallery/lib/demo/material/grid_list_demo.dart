@@ -130,9 +130,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
             transform: new Matrix4.identity()
               ..translate(_offset.dx, _offset.dy)
               ..scale(_scale),
-            child: new ClipRect(
-              child: new Image.asset(config.photo.assetName, fit: ImageFit.cover),
-            ),
+            child: new Image.asset(config.photo.assetName, fit: ImageFit.cover),
           ),
         );
       }

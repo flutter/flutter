@@ -156,7 +156,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       }
     }
 
-    return new ClipRect(child: new Stack(children: children));
+    return new Stack(children: children);
   }
 }
 
