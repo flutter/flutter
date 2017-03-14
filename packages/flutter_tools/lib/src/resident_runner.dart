@@ -89,6 +89,12 @@ abstract class ResidentRunner {
     return stopApp();
   }
 
+  Future<Null> detach() async {
+    await stopEchoingDeviceLog();
+    await preStop();
+    appFinished();
+  }
+
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
@@ -272,6 +278,9 @@ abstract class ResidentRunner {
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
+      return true;
+    } else if (lower == 'd') {
+      await detach();
       return true;
     }
 

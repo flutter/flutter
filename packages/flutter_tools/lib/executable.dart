@@ -32,6 +32,7 @@ import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
+import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
@@ -74,6 +75,7 @@ Future<Null> main(List<String> args) async {
     new DoctorCommand(),
     new DriveCommand(),
     new FormatCommand(),
+    new FuchsiaReloadCommand(),
     new InstallCommand(),
     new LogsCommand(),
     new PackagesCommand(),
