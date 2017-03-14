@@ -60,12 +60,11 @@ BuildApp() {
   RunCommand mkdir -p -- "$derived_dir"
   AssertExists "$derived_dir"
 
-  RunCommand chmod -R ug+w "${derived_dir}/Flutter.framework"
   RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
   RunCommand rm -f -- "${derived_dir}/app.dylib"
   RunCommand rm -f -- "${derived_dir}/app.flx"
   RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
-  RunCommand chmod -R ug-w "${derived_dir}/Flutter.framework"
+  RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
   RunCommand pushd "${project_path}" > /dev/null
 
   AssertExists "${target_path}"
