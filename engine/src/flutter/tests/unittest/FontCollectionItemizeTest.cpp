@@ -60,7 +60,7 @@ void itemize(const std::shared_ptr<FontCollection>& collection, const char* str,
 
     result->clear();
     ParseUnicode(buf, BUF_SIZE, str, &len, NULL);
-    ScopedLock _l(gLock);
+    android::AutoMutex _l(gMinikinLock);
     collection->itemize(buf, len, style, result);
 }
 
@@ -72,8 +72,8 @@ const std::string& getFontPath(const FontCollection::Run& run) {
 
 // Utility function to obtain FontLanguages from string.
 const FontLanguages& registerAndGetFontLanguages(const std::string& lang_string) {
-    ScopedLock _l(gLock);
-    return getFontLanguagesFromCacheLocked(putLanguageListToCacheLocked(lang_string));
+    android::AutoMutex _l(gMinikinLock);
+    return FontLanguageListCache::getById(FontLanguageListCache::getId(lang_string));
 }
 
 TEST_F(FontCollectionItemizeTest, itemize_latin) {

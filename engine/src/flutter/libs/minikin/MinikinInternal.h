@@ -21,27 +21,20 @@
 
 #include <hb.h>
 
-#include <minikin/MinikinFont.h>
-#include <log/log.h>
+#include <utils/Mutex.h>
 
-#include <mutex>
+#include <minikin/MinikinFont.h>
 
 namespace minikin {
 
 // All external Minikin interfaces are designed to be thread-safe.
-// Presently, that's implemented by a global lock, and having all external interfaces take that
-// lock.
-extern std::unique_lock<std::mutex> gLock;
-typedef std::unique_lock<std::unique_lock<std::mutex>> ScopedLock;
+// Presently, that's implemented by through a global lock, and having
+// all external interfaces take that lock.
 
-#ifdef ENABLE_RACE_DETECTION
-inline void assertLocked(const std::unique_lock<std::mutex>& lock) {
-    LOG_ALWAYS_FATAL_IF(!lock.owns_lock());
-}
-#else
-inline void assertLocked(const std::unique_lock<std::mutex>&) {}
-#endif
+extern android::Mutex gMinikinLock;
 
+// Aborts if gMinikinLock is not acquired. Do nothing on the release build.
+void assertMinikinLocked();
 
 // Returns true if c is emoji.
 bool isEmoji(uint32_t c);

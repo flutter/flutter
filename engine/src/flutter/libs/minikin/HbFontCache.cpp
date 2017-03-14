@@ -62,80 +62,70 @@ private:
     android::LruCache<int32_t, hb_font_t*> mCache;
 };
 
-class HbFontCacheHolder {
-public:
-    HbFontCacheHolder() {}
-
-    hb_font_t* getCachedFont(const MinikinFont* minikinFont) {
-        assertLocked(gLock);
-
-        // TODO: get rid of nullFaceFont
-        static hb_font_t* nullFaceFont = nullptr;
-        if (minikinFont == nullptr) {
-            if (nullFaceFont == nullptr) {
-                nullFaceFont = hb_font_create(nullptr);
-            }
-            return hb_font_reference(nullFaceFont);
-        }
-
-        const int32_t fontId = minikinFont->GetUniqueId();
-        hb_font_t* font = mFontCache.get(fontId);
-        if (font != nullptr) {
-            return hb_font_reference(font);
-        }
-
-        hb_face_t* face;
-        const void* buf = minikinFont->GetFontData();
-        size_t size = minikinFont->GetFontSize();
-        hb_blob_t* blob = hb_blob_create(reinterpret_cast<const char*>(buf), size,
-                HB_MEMORY_MODE_READONLY, nullptr, nullptr);
-        face = hb_face_create(blob, minikinFont->GetFontIndex());
-        hb_blob_destroy(blob);
-
-        hb_font_t* parent_font = hb_font_create(face);
-        hb_ot_font_set_funcs(parent_font);
-
-        unsigned int upem = hb_face_get_upem(face);
-        hb_font_set_scale(parent_font, upem, upem);
-
-        font = hb_font_create_sub_font(parent_font);
-        hb_font_destroy(parent_font);
-        hb_face_destroy(face);
-        mFontCache.put(fontId, font);
-        return hb_font_reference(font);
+HbFontCache* getFontCacheLocked() {
+    assertMinikinLocked();
+    static HbFontCache* cache = nullptr;
+    if (cache == nullptr) {
+        cache = new HbFontCache();
     }
-
-    void clearFontCache() {
-        assertLocked(gLock);
-        mFontCache.clear();
-    }
-
-    void removeFont(const MinikinFont* minikinFont) {
-        assertLocked(gLock);
-        mFontCache.remove(minikinFont->GetUniqueId());
-    }
-
-private:
-    HbFontCache mFontCache;
-};
-
-static HbFontCacheHolder& getInstance() {
-    static HbFontCacheHolder instance;
-    return instance;
+    return cache;
 }
 
 void purgeHbFontCacheLocked() {
-    getInstance().clearFontCache();
+    assertMinikinLocked();
+    getFontCacheLocked()->clear();
 }
 
 void purgeHbFontLocked(const MinikinFont* minikinFont) {
-    getInstance().removeFont(minikinFont);
+    assertMinikinLocked();
+    const int32_t fontId = minikinFont->GetUniqueId();
+    getFontCacheLocked()->remove(fontId);
 }
 
 // Returns a new reference to a hb_font_t object, caller is
 // responsible for calling hb_font_destroy() on it.
 hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
-    return getInstance().getCachedFont(minikinFont);
+    assertMinikinLocked();
+    // TODO: get rid of nullFaceFont
+    static hb_font_t* nullFaceFont = nullptr;
+    if (minikinFont == nullptr) {
+        if (nullFaceFont == nullptr) {
+            nullFaceFont = hb_font_create(nullptr);
+        }
+        return hb_font_reference(nullFaceFont);
+    }
+
+    HbFontCache* fontCache = getFontCacheLocked();
+    const int32_t fontId = minikinFont->GetUniqueId();
+    hb_font_t* font = fontCache->get(fontId);
+    if (font != nullptr) {
+        return hb_font_reference(font);
+    }
+
+    hb_face_t* face;
+    const void* buf = minikinFont->GetFontData();
+    size_t size = minikinFont->GetFontSize();
+    hb_blob_t* blob = hb_blob_create(reinterpret_cast<const char*>(buf), size,
+        HB_MEMORY_MODE_READONLY, nullptr, nullptr);
+    face = hb_face_create(blob, minikinFont->GetFontIndex());
+    hb_blob_destroy(blob);
+
+    hb_font_t* parent_font = hb_font_create(face);
+    hb_ot_font_set_funcs(parent_font);
+
+    unsigned int upem = hb_face_get_upem(face);
+    hb_font_set_scale(parent_font, upem, upem);
+
+    font = hb_font_create_sub_font(parent_font);
+    std::vector<hb_variation_t> variations;
+    for (const FontVariation& variation : minikinFont->GetAxes()) {
+        variations.push_back({variation.axisTag, variation.value});
+    }
+    hb_font_set_variations(font, variations.data(), variations.size());
+    hb_font_destroy(parent_font);
+    hb_face_destroy(face);
+    fontCache->put(fontId, font);
+    return hb_font_reference(font);
 }
 
 }  // namespace minikin
