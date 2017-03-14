@@ -34,6 +34,14 @@ String osName() {
     final ProcessResult result = processManager.runSync(<String>['ver'], runInShell: true);
     if (result.exitCode == 0)
       return result.stdout.trim();
+  } else if (platform.isMacOS) {
+    final List<ProcessResult> results = <ProcessResult>[
+      processManager.runSync(<String>["sw_vers", "-productName"]),
+      processManager.runSync(<String>["sw_vers", "-productVersion"]),
+      processManager.runSync(<String>["sw_vers", "-buildVersion"]),
+    ];
+    if (results.every((ProcessResult result) => result.exitCode == 0))
+      return "${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}";
   }
   final String os = platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
