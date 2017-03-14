@@ -124,6 +124,7 @@ Future<String> _buildAotSnapshot(
   final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
   final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+  final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
   final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
@@ -198,6 +199,7 @@ Future<String> _buildAotSnapshot(
     '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
     '--print_snapshot_sizes',
+    '--dependencies=$dependencies',
   ];
 
   if (!interpreter) {
@@ -248,6 +250,10 @@ Future<String> _buildAotSnapshot(
     printError(results.toString());
     return null;
   }
+
+  // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
+  // the Dart SDK.
+  await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshot\n');
 
   // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.

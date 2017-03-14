@@ -207,9 +207,42 @@ class FlutterTask extends DefaultTask {
         }
     }
 
+    FileCollection readDependencies(File dependenciesFile) {
+        if (dependenciesFile.exists()) {
+            try {
+                // Dependencies file has Makefile syntax:
+                //   <target> <files>: <source> <files> <separated> <by> <space>
+                String depText = dependenciesFile.text
+                return project.files(depText.split(': ')[1].split())
+            } catch (Exception e) {
+                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
+                // Fall through to use source files.
+            }
+        }
+        return null
+    }
+
     @InputFiles
     FileCollection getSourceFiles() {
-        return project.fileTree(dir: sourceDir, exclude: ['android', 'ios'], include: ['**/*.dart', 'pubspec.yaml', 'flutter.yaml'])
+        File dependenciesFile
+        if (buildMode != 'debug') {
+            dependenciesFile = project.file("${intermediateDir}/snapshot.d")
+        } else {
+            dependenciesFile = project.file("${intermediateDir}/snapshot_blob.bin.d")
+        }
+        FileCollection sources = readDependencies(dependenciesFile)
+        if (sources != null) {
+            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
+            if (snapshotter != null) {
+                sources = sources.plus(snapshotter)
+            }
+            return sources.plus(project.files('pubspec.yaml'))
+        }
+        return project.fileTree(
+                dir: sourceDir,
+                exclude: ['android', 'ios'],
+                include: ['**/*.dart', 'pubspec.yaml']
+        )
     }
 
     @TaskAction

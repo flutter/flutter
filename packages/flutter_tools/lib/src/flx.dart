@@ -50,6 +50,7 @@ Future<int> createSnapshot({
   ];
   if (depfilePath != null) {
     args.add('--dependencies=$depfilePath');
+    fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
   }
   args.add(mainPath);
   return runCommandAndStreamOutput(args);
