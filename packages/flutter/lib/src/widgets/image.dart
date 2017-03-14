@@ -217,9 +217,9 @@ class _ImageState extends State<Image> {
   ImageInfo _imageInfo;
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     _resolveImage();
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override

@@ -335,8 +335,8 @@ class _AppBarState extends State<AppBar> {
   bool _canPop = false;
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
     _canPop = ModalRoute.of(context)?.canPop ?? false;
