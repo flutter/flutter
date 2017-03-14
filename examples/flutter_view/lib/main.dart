@@ -38,15 +38,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _counter = 0;
 
-  Future<String> handlePlatformIncrement(String message) async {
-    _incrementCounter();
-    return _emptyMessage;
+  @override
+  void initState() {
+    super.initState();
+    platform.setMessageHandler(_handlePlatformIncrement);
   }
 
-  void _incrementCounter() {
+  Future<String> _handlePlatformIncrement(String message) async {
     setState(() {
       _counter++;
     });
+    return _emptyMessage;
   }
 
   void _sendFlutterIncrement() {
@@ -55,8 +57,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    platform.setMessageHandler(handlePlatformIncrement);
-
     return new Scaffold(
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
