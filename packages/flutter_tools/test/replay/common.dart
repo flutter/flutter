@@ -7,7 +7,9 @@ import 'dart:async';
 import 'package:file/local.dart';
 import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
+import 'package:flutter_tools/src/base/port_scanner.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:test/test.dart';
 
@@ -40,7 +42,9 @@ void testReplay(
     timeout: timeout,
     overrides: overrides,
     skip: skip,
-    initializeContext: (_) {},
+    initializeContext: (AppContext testContext) {
+      testContext.putIfAbsent(PortScanner, () => new MockPortScanner());
+    },
   );
 }
 
