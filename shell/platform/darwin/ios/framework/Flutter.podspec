@@ -3,7 +3,7 @@
 #
 
 Pod::Spec.new do |s|
-  s.name             = 'Flutter Engine'
+  s.name             = 'Flutter'
   s.version          = '1.0.0'
   s.summary          = 'High-performance, high-fidelity mobile apps.'
   s.description      = <<-DESC
