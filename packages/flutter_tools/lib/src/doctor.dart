@@ -12,7 +12,9 @@ import 'android/android_workflow.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -28,6 +30,11 @@ const Map<String, String> _osNames = const <String, String>{
 };
 
 String osName() {
+  if (platform.isWindows) {
+    final ProcessResult result = processManager.runSync(<String>['ver'], runInShell: true);
+    if (result.exitCode == 0)
+      return result.stdout.trim();
+  }
   final String os = platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
 }
