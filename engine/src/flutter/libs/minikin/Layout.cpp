@@ -131,10 +131,11 @@ public:
         mChars = NULL;
     }
 
-    void doLayout(Layout* layout, LayoutContext* ctx) const {
+    void doLayout(Layout* layout, LayoutContext* ctx,
+            const std::shared_ptr<FontCollection>& collection) const {
         layout->mAdvances.resize(mCount, 0);
         ctx->clearHbFonts();
-        layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx);
+        layout->doLayoutRun(mChars, mStart, mCount, mNchars, mIsRtl, ctx, collection);
     }
 
 private:
@@ -173,8 +174,8 @@ public:
         Layout* layout = mCache.get(key);
         if (layout == NULL) {
             key.copyText();
-            layout = new Layout(collection);
-            key.doLayout(layout, ctx);
+            layout = new Layout();
+            key.doLayout(layout, ctx, collection);
             mCache.put(key, layout);
         }
         return layout;
@@ -584,7 +585,8 @@ BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSi
 }
 
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        int bidiFlags, const FontStyle &style, const MinikinPaint &paint) {
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
+        const std::shared_ptr<FontCollection>& collection) {
     android::AutoMutex _l(gMinikinLock);
 
     LayoutContext ctx;
@@ -596,7 +598,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 
     for (const BidiText::Iter::RunInfo& runInfo : BidiText(buf, start, count, bufSize, bidiFlags)) {
         doLayoutRunCached(buf, runInfo.mRunStart, runInfo.mRunLength, bufSize, runInfo.mIsRtl, &ctx,
-                start, mCollection, this, NULL);
+                start, collection, this, NULL);
     }
     ctx.clearHbFonts();
 }
@@ -684,8 +686,8 @@ float Layout::doLayoutWord(const uint16_t* buf, size_t start, size_t count, size
 
     float advance;
     if (ctx->paint.skipCache()) {
-        Layout layoutForWord(collection);
-        key.doLayout(&layoutForWord, ctx);
+        Layout layoutForWord;
+        key.doLayout(&layoutForWord, ctx, collection);
         if (layout) {
             layout->appendLayout(&layoutForWord, bufStart, wordSpacing);
         }
@@ -863,10 +865,10 @@ static inline uint32_t addToHbBuffer(hb_buffer_t* buffer,
 
 
 void Layout::doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx) {
+        bool isRtl, LayoutContext* ctx, const std::shared_ptr<FontCollection>& collection) {
     hb_buffer_t* buffer = LayoutEngine::getInstance().hbBuffer;
     vector<FontCollection::Run> items;
-    mCollection->itemize(buf + start, count, ctx->style, &items);
+    collection->itemize(buf + start, count, ctx->style, &items);
 
     vector<hb_feature_t> features;
     // Disable default-on non-required ligature features if letter-spacing

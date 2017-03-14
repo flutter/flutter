@@ -70,14 +70,15 @@ TEST_F(LayoutTest, doLayoutTest) {
     float advances[kMaxAdvanceLength];
     std::vector<float> expectedValues;
 
-    Layout layout(mCollection);
+    Layout layout;
     std::vector<uint16_t> text;
 
     // The mock implementation returns 10.0f advance and 0,0-10x10 bounds for all glyph.
     {
         SCOPED_TRACE("one word");
         text = utf8ToUtf16("oneword");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(70.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -95,7 +96,8 @@ TEST_F(LayoutTest, doLayoutTest) {
     {
         SCOPED_TRACE("two words");
         text = utf8ToUtf16("two words");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(90.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -113,7 +115,8 @@ TEST_F(LayoutTest, doLayoutTest) {
     {
         SCOPED_TRACE("three words");
         text = utf8ToUtf16("three words test");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(160.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -131,7 +134,8 @@ TEST_F(LayoutTest, doLayoutTest) {
     {
         SCOPED_TRACE("two spaces");
         text = utf8ToUtf16("two  spaces");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(110.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -156,7 +160,7 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     std::vector<float> expectedValues;
     std::vector<uint16_t> text;
 
-    Layout layout(mCollection);
+    Layout layout;
 
     paint.wordSpacing = 5.0f;
 
@@ -164,7 +168,8 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     {
         SCOPED_TRACE("one word");
         text = utf8ToUtf16("oneword");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(70.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -182,7 +187,8 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     {
         SCOPED_TRACE("two words");
         text = utf8ToUtf16("two words");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(95.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -204,7 +210,8 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     {
         SCOPED_TRACE("three words test");
         text = utf8ToUtf16("three words test");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(170.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -224,7 +231,8 @@ TEST_F(LayoutTest, doLayoutTest_wordSpacing) {
     {
         SCOPED_TRACE("two spaces");
         text = utf8ToUtf16("two  spaces");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(120.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -250,7 +258,7 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     float advances[kMaxAdvanceLength];
     std::vector<float> expectedValues;
 
-    Layout layout(mCollection);
+    Layout layout;
     std::vector<uint16_t> text;
 
     // Negative word spacing also should work.
@@ -259,7 +267,8 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     {
         SCOPED_TRACE("one word");
         text = utf8ToUtf16("oneword");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(70.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -277,7 +286,8 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     {
         SCOPED_TRACE("two words");
         text = utf8ToUtf16("two words");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(85.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -296,7 +306,8 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     {
         SCOPED_TRACE("three words");
         text = utf8ToUtf16("three word test");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(140.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -316,7 +327,8 @@ TEST_F(LayoutTest, doLayoutTest_negativeWordSpacing) {
     {
         SCOPED_TRACE("two spaces");
         text = utf8ToUtf16("two  spaces");
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(100.0f, layout.getAdvance());
         layout.getBounds(&rect);
         EXPECT_EQ(0.0f, rect.mLeft);
@@ -340,11 +352,13 @@ TEST_F(LayoutTest, doLayoutTest_rtlTest) {
 
     std::vector<uint16_t> text = parseUnicodeString("'a' 'b' U+3042 U+3043 'c' 'd'");
 
-    Layout ltrLayout(mCollection);
-    ltrLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+    Layout ltrLayout;
+    ltrLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+            mCollection);
 
-    Layout rtlLayout(mCollection);
-    rtlLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_RTL, FontStyle(), paint);
+    Layout rtlLayout;
+    rtlLayout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_RTL, FontStyle(), paint,
+            mCollection);
 
     ASSERT_EQ(ltrLayout.nGlyphs(), rtlLayout.nGlyphs());
     ASSERT_EQ(6u, ltrLayout.nGlyphs());
@@ -357,7 +371,7 @@ TEST_F(LayoutTest, doLayoutTest_rtlTest) {
 }
 
 TEST_F(LayoutTest, hyphenationTest) {
-    Layout layout(mCollection);
+    Layout layout;
     std::vector<uint16_t> text;
 
     // The mock implementation returns 10.0f advance for all glyphs.
@@ -366,7 +380,8 @@ TEST_F(LayoutTest, hyphenationTest) {
         text = utf8ToUtf16("oneword");
         MinikinPaint paint;
         paint.hyphenEdit = HyphenEdit::NO_EDIT;
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(70.0f, layout.getAdvance());
     }
     {
@@ -374,7 +389,8 @@ TEST_F(LayoutTest, hyphenationTest) {
         text = utf8ToUtf16("oneword");
         MinikinPaint paint;
         paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_END;
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(80.0f, layout.getAdvance());
     }
     {
@@ -382,7 +398,8 @@ TEST_F(LayoutTest, hyphenationTest) {
         text = utf8ToUtf16("oneword");
         MinikinPaint paint;
         paint.hyphenEdit = HyphenEdit::REPLACE_WITH_HYPHEN_AT_END;
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(70.0f, layout.getAdvance());
     }
     {
@@ -390,7 +407,8 @@ TEST_F(LayoutTest, hyphenationTest) {
         text = utf8ToUtf16("oneword");
         MinikinPaint paint;
         paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_START;
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(80.0f, layout.getAdvance());
     }
     {
@@ -398,7 +416,8 @@ TEST_F(LayoutTest, hyphenationTest) {
         text = utf8ToUtf16("oneword");
         MinikinPaint paint;
         paint.hyphenEdit = HyphenEdit::INSERT_HYPHEN_AT_START | HyphenEdit::INSERT_HYPHEN_AT_END;
-        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint);
+        layout.doLayout(text.data(), 0, text.size(), text.size(), kBidi_LTR, FontStyle(), paint,
+                mCollection);
         EXPECT_EQ(90.0f, layout.getAdvance());
     }
 }

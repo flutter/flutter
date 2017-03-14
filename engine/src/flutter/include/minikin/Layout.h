@@ -75,8 +75,7 @@ enum {
 class Layout {
 public:
 
-    Layout(const std::shared_ptr<FontCollection>& collection)
-        : mGlyphs(), mAdvances(), mCollection(collection), mFaces(), mAdvance(0), mBounds() {
+    Layout() : mGlyphs(), mAdvances(), mFaces(), mAdvance(0), mBounds() {
         mBounds.setEmpty();
     }
 
@@ -89,7 +88,8 @@ public:
     void dump() const;
 
     void doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        int bidiFlags, const FontStyle &style, const MinikinPaint &paint);
+        int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
+        const std::shared_ptr<FontCollection>& collection);
 
     static float measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
@@ -143,7 +143,7 @@ private:
 
     // Lay out a single bidi run
     void doLayoutRun(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
-        bool isRtl, LayoutContext* ctx);
+        bool isRtl, LayoutContext* ctx, const std::shared_ptr<FontCollection>& collection);
 
     // Append another layout (for example, cached value) into this one
     void appendLayout(Layout* src, size_t start, float extraAdvance);
@@ -151,7 +151,6 @@ private:
     std::vector<LayoutGlyph> mGlyphs;
     std::vector<float> mAdvances;
 
-    std::shared_ptr<FontCollection> mCollection;
     std::vector<FakedFont> mFaces;
     float mAdvance;
     MinikinRect mBounds;
