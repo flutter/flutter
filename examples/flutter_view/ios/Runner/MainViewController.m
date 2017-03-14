@@ -19,7 +19,6 @@ static NSString* const emptyString = @"";
 static NSString* const ping = @"ping";
 static NSString* const channel = @"increment";
 
-
 @implementation MainViewController
 
 - (NSString*) messageName {
