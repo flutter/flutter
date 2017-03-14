@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import 'platform_messages.dart';
+import 'system_channels.dart';
 
 /// Base class for platform specific key event data.
 ///
@@ -182,7 +182,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
 ///  * [RawKeyUpEvent]
 class RawKeyboard {
   RawKeyboard._() {
-    PlatformMessages.setJSONMessageHandler('flutter/keyevent', _handleKeyEvent);
+    flutterKeyEventChannel.setMessageHandler(_handleKeyEvent);
   }
 
   /// The shared instance of [RawKeyboard].

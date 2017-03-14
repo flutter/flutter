@@ -120,8 +120,61 @@ class PlatformMethodChannel {
     assert(method != null);
     return codec.decodeEnvelope(await PlatformMessages.sendBinary(
       name,
-      codec.encodeMethodCall(method, arguments),
+      codec.encodeMethodCall(new MethodCall(method, arguments)),
     ));
+  }
+
+  /// Sets a callback for receiving method calls from the platform plugins on
+  /// this channel.
+  ///
+  /// The given callback will replace the currently registered callback for this
+  /// channel's name.
+  ///
+  /// If the future returned by the handler completes with a result, that value
+  /// is sent back to the platform plugin caller wrapped in a success envelope
+  /// as defined by the [codec] of this channel. If the future completes with
+  /// a [PlatformException], its fields will be used to populate an error
+  /// envelope which is sent back instead.
+  void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    PlatformMessages.setBinaryMessageHandler(
+      name,
+      (ByteData message) async {
+        final MethodCall call = codec.decodeMethodCall(message);
+        try {
+          final dynamic result = await handler(call);
+          return codec.encodeSuccessEnvelope(result);
+        } on PlatformException catch(e) {
+          return codec.encodeErrorEnvelope(code: e.code, message: e.message, details: e.details);
+        }
+      }
+    );
+  }
+
+  /// Sets a mock callback for intercepting method invocations on this channel.
+  ///
+  /// The given callback will replace the currently registered mock callback for
+  /// this channel, if any. To remove the mock handler, pass `null` as the
+  /// `handler` argument.
+  ///
+  /// If the future returned by the handler completes with a result, that value
+  /// is used as the result of the method invocation. If the future completes
+  /// with a [PlatformException], that will be thrown instead.
+  ///
+  /// This is intended for testing. Method calls intercepted in this manner are
+  /// not sent to platform plugins.
+  void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
+    PlatformMessages.setMockBinaryMessageHandler(
+      name,
+        (ByteData message) async {
+        final MethodCall call = codec.decodeMethodCall(message);
+        try {
+          final dynamic result = await handler(call);
+          return codec.encodeSuccessEnvelope(result);
+        } on PlatformException catch(e) {
+          return codec.encodeErrorEnvelope(code: e.code, message: e.message, details: e.details);
+        }
+      }
+    );
   }
 
   /// Sets up a broadcast stream for receiving events on this channel.

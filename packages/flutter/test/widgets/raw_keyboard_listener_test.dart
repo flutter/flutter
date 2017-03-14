@@ -10,10 +10,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void sendFakeKeyEvent(Map<String, dynamic> data) {
-  final String message = JSON.encode(data);
-  final Uint8List encoded = UTF8.encoder.convert(message);
   PlatformMessages.handlePlatformMessage(
-      'flutter/keyevent', encoded.buffer.asByteData(), (_) {});
+    flutterKeyEventChannel.name,
+    flutterKeyEventChannel.codec.encodeMessage(data),
+    (_) {});
 }
 
 void main() {

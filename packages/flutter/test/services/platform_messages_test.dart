@@ -2,39 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('Mock string message handler control test', () async {
-    final List<String> log = <String>[];
+  test('Mock binary message handler control test', () async {
+    final List<ByteData> log = <ByteData>[];
 
-    PlatformMessages.setMockStringMessageHandler('test1', (String message) async {
+    PlatformMessages.setMockBinaryMessageHandler('test1', (ByteData message) async {
       log.add(message);
     });
 
-    await PlatformMessages.sendString('test1', 'hello');
-    expect(log, equals(<String>['hello']));
+    final ByteData message = new ByteData(2)..setUint16(0, 0xABCD);
+    await PlatformMessages.sendBinary('test1', message);
+    expect(log, equals(<ByteData>[message]));
     log.clear();
 
-    PlatformMessages.setMockStringMessageHandler('test1', null);
-    await PlatformMessages.sendString('test1', 'fail');
-    expect(log, isEmpty);
-  });
-
-  test('Mock JSON message handler control test', () async {
-    final List<dynamic> log = <dynamic>[];
-
-    PlatformMessages.setMockJSONMessageHandler('test2', (dynamic message) async {
-      log.add(message);
-    });
-
-    await PlatformMessages.sendString('test2', '{"hello": "world"}');
-    expect(log, equals(<Map<String, String>>[<String, String>{'hello': 'world'}]));
-    log.clear();
-
-    PlatformMessages.setMockStringMessageHandler('test2', null);
-    await PlatformMessages.sendString('test2', '{"fail": "message"}');
+    PlatformMessages.setMockBinaryMessageHandler('test1', null);
+    await PlatformMessages.sendBinary('test1', message);
     expect(log, isEmpty);
   });
 }

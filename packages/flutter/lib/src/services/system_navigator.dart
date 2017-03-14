@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'platform_messages.dart';
+import 'system_channels.dart';
 
 /// Controls specific aspects of the system navigation stack.
 class SystemNavigator {
@@ -20,6 +20,6 @@ class SystemNavigator {
   /// the latter may cause the underlying platform to act as if the application
   /// had crashed.
   static Future<Null> pop() async {
-    await PlatformMessages.invokeMethod('flutter/platform', 'SystemNavigator.pop');
+    await flutterPlatformChannel.invokeMethod('SystemNavigator.pop');
   }
 }
