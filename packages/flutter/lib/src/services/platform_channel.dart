@@ -25,6 +25,8 @@ import 'platform_messages.dart';
 /// with may interfere with this channel's communication. Specifically, at most
 /// one message handler can be registered with the channel name at any given
 /// time.
+///
+/// See: <https://flutter.io/platform-services/>
 class PlatformMessageChannel<T> {
   /// Creates a [PlatformMessageChannel] with the specified [name] and [codec].
   ///
@@ -51,14 +53,19 @@ class PlatformMessageChannel<T> {
   /// channel.
   ///
   /// The given callback will replace the currently registered callback for this
-  /// channel's name.
+  /// channel, if any. To remove the handler, pass `null` as the `handler`
+  /// argument.
   ///
   /// The handler's return value, if non-null, is sent back to the platform
   /// plugins as a response.
   void setMessageHandler(Future<T> handler(T message)) {
-    PlatformMessages.setBinaryMessageHandler(name, (ByteData message) async {
-      return codec.encodeMessage(await handler(codec.decodeMessage(message)));
-    });
+    if (handler == null) {
+      PlatformMessages.setBinaryMessageHandler(name, null);
+    } else {
+      PlatformMessages.setBinaryMessageHandler(name, (ByteData message) async {
+        return codec.encodeMessage(await handler(codec.decodeMessage(message)));
+      });
+    }
   }
 
   /// Sets a mock callback for intercepting messages sent on this channel.
@@ -94,6 +101,8 @@ class PlatformMessageChannel<T> {
 ///
 /// The identity of the channel is given by its name, so other uses of that name
 /// with may interfere with this channel's communication.
+///
+/// See: <https://flutter.io/platform-services/>
 class PlatformMethodChannel {
   /// Creates a [PlatformMethodChannel] with the specified [name].
   ///
@@ -124,30 +133,35 @@ class PlatformMethodChannel {
     ));
   }
 
-  /// Sets a callback for receiving method calls from the platform plugins on
-  /// this channel.
+  /// Sets a callback for receiving method calls on this channel.
   ///
   /// The given callback will replace the currently registered callback for this
-  /// channel's name.
+  /// channel, if any. To remove the handler, pass `null` as the
+  /// `handler` argument.
   ///
   /// If the future returned by the handler completes with a result, that value
   /// is sent back to the platform plugin caller wrapped in a success envelope
   /// as defined by the [codec] of this channel. If the future completes with
-  /// a [PlatformException], its fields will be used to populate an error
-  /// envelope which is sent back instead.
+  /// a [PlatformException], the fields of that exception will be used to
+  /// populate an error envelope which is sent back instead.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    PlatformMessages.setBinaryMessageHandler(
-      name,
-      (ByteData message) async {
-        final MethodCall call = codec.decodeMethodCall(message);
-        try {
-          final dynamic result = await handler(call);
-          return codec.encodeSuccessEnvelope(result);
-        } on PlatformException catch(e) {
-          return codec.encodeErrorEnvelope(code: e.code, message: e.message, details: e.details);
-        }
-      }
-    );
+    if (handler == null) {
+      PlatformMessages.setBinaryMessageHandler(name, null);
+    } else {
+      PlatformMessages.setBinaryMessageHandler(
+        name,
+        (ByteData message) async {
+          final MethodCall call = codec.decodeMethodCall(message);
+          try {
+            final dynamic result = await handler(call);
+            return codec.encodeSuccessEnvelope(result);
+          } on PlatformException catch (e) {
+            return codec.encodeErrorEnvelope(
+              code: e.code, message: e.message, details: e.details);
+          }
+        },
+      );
+    }
   }
 
   /// Sets a mock callback for intercepting method invocations on this channel.
@@ -163,18 +177,23 @@ class PlatformMethodChannel {
   /// This is intended for testing. Method calls intercepted in this manner are
   /// not sent to platform plugins.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    PlatformMessages.setMockBinaryMessageHandler(
-      name,
+    if (handler == null) {
+      PlatformMessages.setMockBinaryMessageHandler(name, null);
+    } else {
+      PlatformMessages.setMockBinaryMessageHandler(
+        name,
         (ByteData message) async {
-        final MethodCall call = codec.decodeMethodCall(message);
-        try {
-          final dynamic result = await handler(call);
-          return codec.encodeSuccessEnvelope(result);
-        } on PlatformException catch(e) {
-          return codec.encodeErrorEnvelope(code: e.code, message: e.message, details: e.details);
-        }
-      }
-    );
+          final MethodCall call = codec.decodeMethodCall(message);
+          try {
+            final dynamic result = await handler(call);
+            return codec.encodeSuccessEnvelope(result);
+          } on PlatformException catch (e) {
+            return codec.encodeErrorEnvelope(
+              code: e.code, message: e.message, details: e.details);
+          }
+        },
+      );
+    }
   }
 
   /// Sets up a broadcast stream for receiving events on this channel.

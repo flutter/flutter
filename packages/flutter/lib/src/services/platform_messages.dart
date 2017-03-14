@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -11,7 +10,15 @@ import 'package:flutter/foundation.dart';
 
 typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
 
-/// Sends message to and receives messages from platform plugins.
+/// Sends binary messages to and receives binary messages from platform plugins.
+///
+/// See also:
+///
+/// * [PlatformMessageChannel], which provides messaging services similar to
+/// PlatformMessages, but with pluggable message codecs in support of sending
+/// strings or semi-structured messages.
+/// * [PlatformMethodChannel], which provides higher-level platform
+/// communication such as method invocations and event streams.
 ///
 /// See: <https://flutter.io/platform-services/>
 class PlatformMessages {
@@ -82,11 +89,15 @@ class PlatformMessages {
   /// given channel, without decoding them.
   ///
   /// The given callback will replace the currently registered callback for that
-  /// channel, if any.
+  /// channel, if any. To remove the handler, pass `null` as the `handler`
+  /// argument.
   ///
   /// The handler's return value, if non-null, is sent as a response, unencoded.
   static void setBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
-    _handlers[channel] = handler;
+    if (handler == null)
+      _handlers.remove(channel);
+    else
+      _handlers[channel] = handler;
   }
 
   /// Set a mock callback for intercepting messages from the `send*` methods on
