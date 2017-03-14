@@ -7,7 +7,7 @@ import 'dart:async';
 import 'context.dart';
 import 'io.dart';
 
-const PortScanner _kLocalPortScanner = const LocalPortScanner();
+const PortScanner _kLocalPortScanner = const HostPortScanner();
 const int _kMaxSearchIterations = 20;
 
 PortScanner get portScanner {
@@ -44,8 +44,8 @@ abstract class PortScanner {
   }
 }
 
-class LocalPortScanner extends PortScanner {
-  const LocalPortScanner();
+class HostPortScanner extends PortScanner {
+  const HostPortScanner();
 
   @override
   Future<bool> isPortAvailable(int port) async {
