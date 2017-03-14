@@ -60,8 +60,14 @@ class BannerPainter extends CustomPainter {
   /// Where to show the banner (e.g., the upper right corder).
   final BannerLocation location;
 
+  /// The color to paint behind the [message].
+  ///
+  /// Defaults to a dark red.
   final Color color;
 
+  /// The text style to use for the [message].
+  ///
+  /// Defaults to bold, white text.
   final TextStyle textStyle;
 
   bool _prepared = false;

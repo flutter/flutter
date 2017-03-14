@@ -50,9 +50,35 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
   return null;
 }
 
+/// Which part of the content inside the viewport should be visible.
+///
+/// The [pixels] value determines the scroll offset that the viewport uses to
+/// select which part of its content to display. As the user scrolls the
+/// viewport, this value changes, which changes the content that is displayed.
+///
+/// This object notifies its listeners when [pixels] changes.
+///
+/// See also:
+///
+///  * [ScrollPosition], which is a commonly used concrete subclass.
+///  * [RenderViewportBase], which is a render object that uses viewport
+///    offsets.
 abstract class ViewportOffset extends ChangeNotifier {
+  /// Default constructor.
+  ///
+  /// Allows subclasses to construct this object directly.
   ViewportOffset();
+
+  /// Creates a viewport offset with the given [pixels] value.
+  ///
+  /// The [pixels] value does not change unless the viewport issues a
+  /// correction.
   factory ViewportOffset.fixed(double value) = _FixedViewportOffset;
+
+  /// Creates a viewport offset with a [pixels] value of 0.0.
+  ///
+  /// The [pixels] value does not change unless the viewport issues a
+  /// correction.
   factory ViewportOffset.zero() = _FixedViewportOffset.zero;
 
   /// The number of pixels to offset the children in the opposite of the axis direction.
@@ -61,6 +87,9 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// represents the number of logical pixels to move the children _up_ the
   /// screen. Similarly, if the axis direction is left, then the pixels value
   /// represents the number of logical pixesl to move the children to _right_.
+  ///
+  /// This object notifies its listeners when this value changes (except when
+  /// the value changes due to [correctBy]).
   double get pixels;
 
   /// Called when the viewport's extents are established.
@@ -139,6 +168,15 @@ abstract class ViewportOffset extends ChangeNotifier {
     return '$runtimeType(${description.join(", ")})';
   }
 
+  /// Add additional information to the given description for use by [toString].
+  ///
+  /// This method makes it easier for subclasses to coordinate to provide a
+  /// high-quality [toString] implementation. The [toString] implementation on
+  /// the [State] base class calls [debugFillDescription] to collect useful
+  /// information from subclasses to incorporate into its return value.
+  ///
+  /// If you override this, make sure to start your method with a call to
+  /// `super.debugFillDescription(description)`.
   @mustCallSuper
   void debugFillDescription(List<String> description) {
     description.add('offset: ${pixels?.toStringAsFixed(1)}');
