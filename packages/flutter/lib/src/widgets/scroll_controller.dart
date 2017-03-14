@@ -5,11 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter/animation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 
 import 'scroll_position.dart';
 
-class ScrollController {
+class ScrollController extends ChangeNotifier {
   ScrollController({
     this.initialScrollOffset: 0.0,
   }) {
@@ -101,6 +102,7 @@ class ScrollController {
   void attach(ScrollPosition position) {
     assert(!_positions.contains(position));
     _positions.add(position);
+    position.addListener(notifyListeners);
   }
 
   /// Unregister the given position with this controller.
@@ -109,7 +111,15 @@ class ScrollController {
   /// controller will not manipulate the given position.
   void detach(ScrollPosition position) {
     assert(_positions.contains(position));
+    position.removeListener(notifyListeners);
     _positions.remove(position);
+  }
+
+  @override
+  void dispose() {
+    for (ScrollPosition position in _positions)
+      position.removeListener(notifyListeners);
+    super.dispose();
   }
 
   static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
