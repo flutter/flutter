@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onMessage(String s, Reply<String> reply) {
                     onFlutterIncrement();
-                    reply.send(EMPTY_MESSAGE );
+                    reply.send(EMPTY_MESSAGE);
 
                 }
             });

@@ -34,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _pong = "pong";
   static const String _emptyMessage = "";
   static const PlatformMessageChannel<String> platform =
-      const PlatformMessageChannel(_channel, const StringCodec());
+      const PlatformMessageChannel<String>(_channel, const StringCodec());
 
   int _counter = 0;
 
