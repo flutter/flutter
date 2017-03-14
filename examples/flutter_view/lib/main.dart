@@ -31,29 +31,32 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const String _channel = "increment";
+  static const String _pong = "pong";
   static const String _emptyMessage = "";
+  static const PlatformMessageChannel<String> platform =
+      const PlatformMessageChannel<String>(_channel, const StringCodec());
 
   int _counter = 0;
 
-  Future<String> handlePlatformIncrement(String message) async {
-    _incrementCounter();
-    return _emptyMessage;
+  @override
+  void initState() {
+    super.initState();
+    platform.setMessageHandler(_handlePlatformIncrement);
   }
 
-  void _incrementCounter() {
+  Future<String> _handlePlatformIncrement(String message) async {
     setState(() {
       _counter++;
     });
+    return _emptyMessage;
   }
 
   void _sendFlutterIncrement() {
-    PlatformMessages.sendString(_channel, _emptyMessage);
+    platform.send(_pong);
   }
 
   @override
   Widget build(BuildContext context) {
-    PlatformMessages.setStringMessageHandler(_channel,
-                                             handlePlatformIncrement);
     return new Scaffold(
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
