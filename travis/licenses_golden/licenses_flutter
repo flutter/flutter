@@ -1829,7 +1829,6 @@ FILE: ../../../flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.cpp
 FILE: ../../../flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h
 FILE: ../../../flutter/sky/engine/platform/text/TextBox.h
 FILE: ../../../flutter/sky/packages/flutter_services/lib/empty.dart
-FILE: ../../../flutter/snapshotter/main.cc
 FILE: ../../../flutter/synchronization/debug_thread_checker.h
 FILE: ../../../flutter/synchronization/pipeline.cc
 FILE: ../../../flutter/synchronization/pipeline.h
