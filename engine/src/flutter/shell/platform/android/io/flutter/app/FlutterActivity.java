@@ -151,4 +151,12 @@ public class FlutterActivity extends Activity {
     public FlutterView getFlutterView() {
       return flutterView;
     }
+
+    @Override
+    public void onTrimMemory(int level) {
+        // Use a trim level delivered while the application is running so the
+        // framework has a chance to react to the notification.
+        if (level == TRIM_MEMORY_RUNNING_LOW)
+            flutterView.onMemoryPressure();
+    }
 }

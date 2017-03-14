@@ -199,6 +199,16 @@ public class FlutterView extends SurfaceView
         sendPlatformMessage("flutter/lifecycle", "AppLifecycleState.resumed", null);
     }
 
+    public void onMemoryPressure() {
+        try {
+            JSONObject message = new JSONObject();
+            message.put("type", "memoryPressure");
+            sendPlatformMessage("flutter/system", message.toString(), null);
+        } catch (JSONException e) {
+            Log.e(TAG, "Failed to serialize system event", e);
+        }
+    }
+
     public void pushRoute(String route) {
         try {
             final JSONArray args = new JSONArray();
