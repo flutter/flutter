@@ -15,8 +15,6 @@ group("flutter") {
       "//flutter/examples",
       "//flutter/flow",
       "//flutter/runtime",
-      "//flutter/snapshotter",
-      "//flutter/snapshotter($host_toolchain)",
     ]
   }
 

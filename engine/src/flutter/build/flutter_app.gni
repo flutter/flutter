@@ -58,9 +58,14 @@ template("flutter_app") {
     bundle_name = "${target_name}.flx"
   }
 
-  flutter_snapshot_label = "//flutter/snapshotter($host_toolchain)"
+  flutter_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
   flutter_snapshot_dir = get_label_info(flutter_snapshot_label, "root_out_dir")
-  flutter_snapshot = "$flutter_snapshot_dir/sky_snapshot"
+  flutter_snapshot = "$flutter_snapshot_dir/gen_snapshot"
+
+  flutter_core_snapshot_label = "//flutter/lib/snapshot:generate_snapshot_bin"
+  flutter_core_snapshot_gen_dir = get_label_info(flutter_core_snapshot_label, "target_gen_dir")
+  flutter_core_snapshot_vm_data = "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
+  flutter_core_snapshot_isolate_data = "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
 
   dart_binary_label = "//dart/runtime/bin:dart($host_toolchain)"
   dart_binary_dir = get_label_info(dart_binary_label, "root_out_dir")
@@ -102,23 +107,26 @@ template("flutter_app") {
     args = [
       "--snapshotter-path",
       rebase_path(flutter_snapshot),
-      "--app-dir",
-      rebase_path("."),
+      "--vm-snapshot-data",
+      rebase_path(flutter_core_snapshot_vm_data),
+      "--isolate-snapshot-data",
+      rebase_path(flutter_core_snapshot_isolate_data),
       "--main-dart",
       rebase_path(main_dart),
       "--packages",
       rebase_path(dot_packages),
       "--snapshot",
-      rebase_path(snapshot_path),
+      rebase_path(snapshot_path, root_build_dir),
       "--depfile",
       rebase_path(depfile_path),
-      "--build-output",
-      rebase_path(snapshot_path, root_build_dir),
+      "--root-build-dir",
+      rebase_path(root_build_dir),
     ]
 
     deps = [
       ":$dart_package_name",
       flutter_snapshot_label,
+      flutter_core_snapshot_label,
     ]
 
     if (defined(invoker.deps)) {
