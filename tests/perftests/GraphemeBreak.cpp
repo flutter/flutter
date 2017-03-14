@@ -38,7 +38,7 @@ static void BM_GraphemeBreak_Ascii(benchmark::State& state) {
     LOG_ALWAYS_FATAL_IF(result_size != 12);
     const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
-        GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
+        GraphemeBreak::isGraphemeBreak(nullptr, buffer, 0, result_size, testIndex);
     }
 }
 BENCHMARK(BM_GraphemeBreak_Ascii)
@@ -53,7 +53,7 @@ static void BM_GraphemeBreak_Emoji(benchmark::State& state) {
     LOG_ALWAYS_FATAL_IF(result_size != 12);
     const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
-        GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
+        GraphemeBreak::isGraphemeBreak(nullptr, buffer, 0, result_size, testIndex);
     }
 }
 BENCHMARK(BM_GraphemeBreak_Emoji)
@@ -68,7 +68,7 @@ static void BM_GraphemeBreak_Emoji_Flags(benchmark::State& state) {
     LOG_ALWAYS_FATAL_IF(result_size != 12);
     const size_t testIndex = state.range(0);
     while (state.KeepRunning()) {
-        GraphemeBreak::isGraphemeBreak(buffer, 0, result_size, testIndex);
+        GraphemeBreak::isGraphemeBreak(nullptr, buffer, 0, result_size, testIndex);
     }
 }
 BENCHMARK(BM_GraphemeBreak_Emoji_Flags)

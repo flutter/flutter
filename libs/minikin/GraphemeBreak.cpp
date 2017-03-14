@@ -55,8 +55,8 @@ bool isPureKiller(uint32_t c) {
             || c == 0xA953 || c == 0xABED || c == 0x11134 || c == 0x112EA || c == 0x1172B);
 }
 
-bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t count,
-        size_t offset) {
+bool GraphemeBreak::isGraphemeBreak(const float* advances, const uint16_t* buf, size_t start,
+        size_t count, const size_t offset) {
     // This implementation closely follows Unicode Standard Annex #29 on
     // Unicode Text Segmentation (http://www.unicode.org/reports/tr29/),
     // implementing a tailored version of extended grapheme clusters.
@@ -73,8 +73,9 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     uint32_t c1 = 0;
     uint32_t c2 = 0;
     size_t offset_back = offset;
+    size_t offset_forward = offset;
     U16_PREV(buf, start, offset_back, c1);
-    U16_NEXT(buf, offset, start + count, c2);
+    U16_NEXT(buf, offset_forward, start + count, c2);
     int32_t p1 = tailoredGraphemeClusterBreak(c1);
     int32_t p2 = tailoredGraphemeClusterBreak(c2);
     // Rule GB3, CR x LF
@@ -117,25 +118,23 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
             }
         }
 
-        // Note that the offset has moved forwared 2 code units by U16_NEXT.
         // The number 4 comes from the number of code units in a whole flag.
-        return (offset - 2 - offset_back) % 4 == 0;
+        return (offset - offset_back) % 4 == 0;
     }
     // Rule GB9, x (Extend | ZWJ); Rule GB9a, x SpacingMark; Rule GB9b, Prepend x
     if (p2 == U_GCB_EXTEND || p2 == U_GCB_ZWJ || p2 == U_GCB_SPACING_MARK || p1 == U_GCB_PREPEND) {
         return false;
     }
-    // Cluster indic syllables together (tailoring of UAX #29)
-    // Known limitation: this is overly conservative, and assumes that the virama may form a
-    // conjunct with the following letter, which doesn't always happen.
-    //
-    // There is no easy solution to do this correctly. Even querying the font does not help (with
-    // the current font technoloies), since the font may be creating the conjunct using multiple
-    // glyphs, while the user may be perceiving that sequence of glyphs as one conjunct or one
-    // letter.
+    // Cluster Indic syllables together (tailoring of UAX #29).
+    // Immediately after each virama (that is not just a pure killer) followed by a letter, we
+    // check to see if the next character has a non-zero width assigned to it in the advances
+    // array. A zero width means a cluster is formed with the virama (so there is no grapheme
+    // break), while a non-zero width means a new cluster is started (so there may be a grapheme
+    // break).
     if (u_getIntPropertyValue(c1, UCHAR_CANONICAL_COMBINING_CLASS) == 9  // virama
             && !isPureKiller(c1)
-            && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER) {
+            && u_getIntPropertyValue(c2, UCHAR_GENERAL_CATEGORY) == U_OTHER_LETTER
+            && (advances == nullptr || advances[offset - start] == 0)) {
         return false;
     }
     // Tailoring: make emoji sequences with ZWJ a single grapheme cluster
@@ -170,8 +169,8 @@ bool GraphemeBreak::isGraphemeBreak(const uint16_t* buf, size_t start, size_t co
     return true;
 }
 
-size_t GraphemeBreak::getTextRunCursor(const uint16_t* buf, size_t start, size_t count,
-        size_t offset, MoveOpt opt) {
+size_t GraphemeBreak::getTextRunCursor(const float* advances, const uint16_t* buf, size_t start,
+        size_t count, size_t offset, MoveOpt opt) {
     switch (opt) {
     case AFTER:
         if (offset < start + count) {
@@ -179,7 +178,7 @@ size_t GraphemeBreak::getTextRunCursor(const uint16_t* buf, size_t start, size_t
         }
         // fall through
     case AT_OR_AFTER:
-        while (!isGraphemeBreak(buf, start, count, offset)) {
+        while (!isGraphemeBreak(advances, buf, start, count, offset)) {
             offset++;
         }
         break;
@@ -189,12 +188,12 @@ size_t GraphemeBreak::getTextRunCursor(const uint16_t* buf, size_t start, size_t
         }
         // fall through
     case AT_OR_BEFORE:
-        while (!isGraphemeBreak(buf, start, count, offset)) {
+        while (!isGraphemeBreak(advances, buf, start, count, offset)) {
             offset--;
         }
         break;
     case AT:
-        if (!isGraphemeBreak(buf, start, count, offset)) {
+        if (!isGraphemeBreak(advances, buf, start, count, offset)) {
             offset = (size_t)-1;
         }
         break;
