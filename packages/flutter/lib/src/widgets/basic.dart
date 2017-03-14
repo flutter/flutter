@@ -1492,8 +1492,8 @@ class SliverPadding extends SingleChildRenderObjectWidget {
   SliverPadding({
     Key key,
     @required this.padding,
-    Widget child,
-  }) : super(key: key, child: child) {
+    Widget sliver,
+  }) : super(key: key, child: sliver) {
     assert(padding != null);
   }
 

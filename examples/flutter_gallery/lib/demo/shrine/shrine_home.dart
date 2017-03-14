@@ -381,7 +381,7 @@ class _ShrineHomeState extends State<ShrineHome> {
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(16.0),
-            child: new SliverGrid(
+            sliver: new SliverGrid(
               gridDelegate: gridDelegate,
               delegate: new SliverChildListDelegate(
                 _products.map((Product product) {
