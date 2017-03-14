@@ -175,6 +175,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 
@@ -232,6 +233,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 
