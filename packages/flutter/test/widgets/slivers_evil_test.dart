@@ -93,7 +93,7 @@ void main() {
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPadding(
                     padding: const EdgeInsets.all(50.0),
-                    child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                    sliver: new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(150.0), floating: true),
@@ -105,7 +105,7 @@ void main() {
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPadding(
                     padding: const EdgeInsets.all(50.0),
-                    child: new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
+                    sliver: new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0), pinned: true),
@@ -146,7 +146,7 @@ void main() {
                   new SliverPersistentHeader(delegate: new TestSliverPersistentHeaderDelegate(250.0)),
                   new SliverPadding(
                     padding: const EdgeInsets.symmetric(horizontal: 50.0),
-                    child: new SliverToBoxAdapter(child: new Container(height: 520.0)),
+                    sliver: new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   ),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),
                   new SliverToBoxAdapter(child: new Container(height: 520.0)),

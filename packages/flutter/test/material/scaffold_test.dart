@@ -145,7 +145,7 @@ void main() {
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
-                child: new SliverList(
+                sliver: new SliverList(
                   delegate: new SliverChildListDelegate(new List<Widget>.generate(
                     10, (int index) => new SizedBox(height: 100.0, child: new Text('B$index')),
                   )),
