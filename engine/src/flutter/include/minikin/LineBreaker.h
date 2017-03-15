@@ -191,8 +191,8 @@ class LineBreaker {
         struct Candidate {
             size_t offset;  // offset to text buffer, in code units
             size_t prev;  // index to previous break
-            ParaWidth preBreak;
-            ParaWidth postBreak;
+            ParaWidth preBreak;  // width of text until this point, if we decide to not break here
+            ParaWidth postBreak;  // width of text until this point, if we decide to break here
             float penalty;  // penalty of this break (for example, hyphen penalty)
             float score;  // best score found for this break
             size_t lineNumber;  // only updated for non-constant line widths
@@ -207,6 +207,7 @@ class LineBreaker {
                 size_t preSpaceCount, size_t postSpaceCount, float penalty, HyphenationType hyph);
 
         void addCandidate(Candidate cand);
+        void pushGreedyBreak();
 
         // push an actual break to the output. Takes care of setting flags for tab
         void pushBreak(int offset, float width, uint8_t hyphenEdit);
@@ -248,6 +249,7 @@ class LineBreaker {
         size_t mBestBreak;
         float mBestScore;
         ParaWidth mPreBreak;  // prebreak of last break
+        uint32_t mLastHyphenation;  // hyphen edit of last break kept for next line
         int mFirstTabIndex;
         size_t mSpaceCount;
 };
