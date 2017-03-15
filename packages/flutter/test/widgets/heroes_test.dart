@@ -76,6 +76,18 @@ class MutatingRoute extends MaterialPageRoute<Null> {
   }
 }
 
+class MyStatefulWidget extends StatefulWidget {
+  MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  final String value;
+  @override
+  MyStatefulWidgetState createState() => new MyStatefulWidgetState();
+}
+
+class MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => new Text(config.value);
+}
+
 void main() {
   testWidgets('Heroes animate', (WidgetTester tester) async {
 
@@ -911,4 +923,86 @@ void main() {
     expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
   });
 
+  testWidgets('Stateful hero state survives flight', (WidgetTester tester) async {
+    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              new Card(
+                child: new Hero(
+                  tag: 'H',
+                  child: new SizedBox(
+                    height: 200.0,
+                    child: new MyStatefulWidget(value: '456'),
+                  ),
+                ),
+              ),
+              new FlatButton(
+                child: new Text('POP'),
+                onPressed: () { Navigator.pop(context); }
+              ),
+            ],
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return new ListView(
+                children: <Widget> [
+                  new Card(
+                    child: new Hero(
+                      tag: 'H',
+                      child: new SizedBox(
+                        height: 100.0,
+                        child: new MyStatefulWidget(value: '456'),
+                      ),
+                    ),
+                  ),
+                  new FlatButton(
+                    child: new Text('PUSH'),
+                    onPressed: () { Navigator.push(context, route); }
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('456'), findsOneWidget);
+
+    // Push route.
+    await tester.tap(find.text('PUSH'));
+    await tester.pump();
+    await tester.pump();
+
+    // Push flight underway.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('456'), findsOneWidget);
+
+    // Push flight finished.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('456'), findsOneWidget);
+
+    // Pop route.
+    await tester.tap(find.text('POP'));
+    await tester.pump();
+    await tester.pump();
+
+    // Pop flight underway.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('456'), findsOneWidget);
+
+    // Pop flight finished
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('456'), findsOneWidget);
+
+  });
 }
