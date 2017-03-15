@@ -889,7 +889,7 @@ class _LiveTestRenderView extends RenderView {
         .keys
         .where((int pointer) => _pointers[pointer].decay == 0)
         .toList()
-        .forEach((int pointer) { _pointers.remove(pointer); });
+        .forEach(_pointers.remove);
       if (dirty)
         scheduleMicrotask(markNeedsPaint);
     }

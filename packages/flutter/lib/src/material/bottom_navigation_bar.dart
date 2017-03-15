@@ -221,9 +221,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // animations such that their resulting flex values will add up to the desired
   // value.
   void _computeWeight() {
-    final Iterable<Animation<double>> animating = _animations.where(
-      (Animation<double> animation) => _isAnimating(animation)
-    );
+    final Iterable<Animation<double>> animating = _animations.where(_isAnimating);
 
     if (animating.isNotEmpty) {
       final double sum = animating.fold(0.0, (double sum, Animation<double> animation) {
@@ -246,11 +244,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   double _xOffset(int index) {
     double weightSum(Iterable<Animation<double>> animations) {
-      return animations.map(
-        // We're adding flex values instead of animation values to have correct
-        // ratios.
-        (Animation<double> animation) => _flex(animation)
-      ).fold(0.0, (double sum, double value) => sum + value);
+      // We're adding flex values instead of animation values to have correct ratios.
+      return animations.map(_flex).fold(0.0, (double sum, double value) => sum + value);
     }
 
     final double allWeights = weightSum(_animations);

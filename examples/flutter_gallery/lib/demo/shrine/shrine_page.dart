@@ -108,9 +108,7 @@ class ShrinePageState extends State<ShrinePage> {
           new IconButton(
             icon: new Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
-            onPressed: () {
-              _showShoppingCart();
-            }
+            onPressed: _showShoppingCart
           ),
           new PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[

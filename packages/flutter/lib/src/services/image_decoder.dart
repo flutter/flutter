@@ -13,8 +13,6 @@ import 'dart:ui' as ui show Image, decodeImageFromList;
 /// resolves to [null].
 Future<ui.Image> decodeImageFromList(Uint8List list) {
   final Completer<ui.Image> completer = new Completer<ui.Image>();
-  ui.decodeImageFromList(list, (ui.Image image) {
-    completer.complete(image);
-  });
+  ui.decodeImageFromList(list, completer.complete);
   return completer.future;
 }
