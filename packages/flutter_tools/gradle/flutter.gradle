@@ -282,6 +282,9 @@ class FlutterTask extends DefaultTask {
             }
             args "build", "flx"
             args "--target", targetPath
+            if (project.hasProperty('kernel')) {
+                args "--kernel", project.property('kernel')
+            }
             args "--output-file", "${intermediateDir}/app.flx"
             args "--no-include-roboto-fonts"
             if (buildMode != "debug") {

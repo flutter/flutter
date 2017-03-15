@@ -13,7 +13,6 @@ import 'base/file_system.dart';
 import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'devfs.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -209,7 +208,7 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false
   });

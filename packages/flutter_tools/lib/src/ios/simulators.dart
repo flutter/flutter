@@ -15,7 +15,6 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../devfs.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -422,7 +421,7 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {

@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../build_info.dart';
-import '../devfs.dart';
 import '../device.dart';
 
 /// Read the log for a particular device.
@@ -67,7 +66,7 @@ class FuchsiaDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool applicationNeedsRebuild: false,
   }) => new Future<Null>.error('unimplemented');
 
