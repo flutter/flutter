@@ -923,7 +923,7 @@ void main() {
     expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
   });
 
-  testWidgets('Stateful hero state survives flight', (WidgetTester tester) async {
+  testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
     final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
         return new Material(
