@@ -60,7 +60,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
   }
 
-  bool get _cocoaPodsInstalledAndMeetsVersionCheck {
+  bool get cocoaPodsInstalledAndMeetsVersionCheck {
     if (!hasCocoaPods)
       return false;
     try {

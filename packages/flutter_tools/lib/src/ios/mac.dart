@@ -321,8 +321,9 @@ bool _checkXcodeVersion() {
 
 void _runPodInstall(Directory bundle, String engineDirectory)  {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!doctor.iosWorkflow.hasCocoaPods) {
-      printError('Warning: CocoaPods not installed. Not running pod install.');
+    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
       return;
     }
     try {
