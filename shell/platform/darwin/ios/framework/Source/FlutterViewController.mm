@@ -174,6 +174,11 @@ void FlutterInit(int argc, const char* argv[]) {
              selector:@selector(onVoiceOverChanged:)
                  name:UIAccessibilityVoiceOverStatusChanged
                object:nil];
+
+  [center addObserver:self
+             selector:@selector(onMemoryWarning:)
+                 name:UIApplicationDidReceiveMemoryWarningNotification
+               object:nil];
 }
 
 #pragma mark - Initializing the engine
@@ -436,6 +441,13 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   bool enabled = UIAccessibilityIsVoiceOverRunning();
 #endif
   _platformView->ToggleAccessibility(self.view, enabled);
+}
+
+#pragma mark - Memory Notifications
+
+- (void)onMemoryWarning:(NSNotification*)notification {
+  NSDictionary* message = @{ @"type" : @"memoryPressure" };
+  [self sendJSON:message withMessageName:@"flutter/system"];
 }
 
 #pragma mark - Locale updates
