@@ -267,6 +267,7 @@ class AnsiTerminal {
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
   static const int _ERROR_INVALID_PARAMETER = 87;
+  static const int _INVALID_HANDLE = 6;
 
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
@@ -275,6 +276,7 @@ class AnsiTerminal {
     _ENOTTY,
     _ENETRESET,
     _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed
+    _INVALID_HANDLE,
   ];
 
   bool supportsColor;
@@ -284,6 +286,9 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
+    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE], 
+    //     we should check beforehand if stdin is connected to a terminal or not
+    //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
     try {
       stdin.lineMode = !value;
     } on StdinException catch (error) {
