@@ -108,6 +108,8 @@ void restoreExitFunction() {
 /// no-op. This is in contrast to [io.ProcessSignal], where listening to
 /// non-existent signals throws an exception.
 class ProcessSignal implements io.ProcessSignal {
+  const ProcessSignal._(this._delegate);
+
   static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
   static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
   static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
@@ -115,17 +117,15 @@ class ProcessSignal implements io.ProcessSignal {
 
   static final ProcessSignal SIGINT = SigintProcessSignal.instance; // ignore: non_constant_identifier_names
 
-  final io.ProcessSignal _wrappedSignal;
-
-  const ProcessSignal._(this._wrappedSignal);
+  final io.ProcessSignal _delegate;
 
   @override
   Stream<ProcessSignal> watch() {
-    return _wrappedSignal.watch().map((io.ProcessSignal signal) => this);
+    return _delegate.watch().map((io.ProcessSignal signal) => this);
   }
 
   @override
-  String toString() => _wrappedSignal.toString();
+  String toString() => _delegate.toString();
 }
 
 /// A [ProcessSignal] that is only available on Posix platforms.
@@ -145,12 +145,12 @@ class _PosixProcessSignal extends ProcessSignal {
 
 // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28995 is resolved.
 class SigintProcessSignal extends ProcessSignal {
-  static final SigintProcessSignal instance = new SigintProcessSignal._(io.ProcessSignal.SIGINT);
+  SigintProcessSignal._() : super._(io.ProcessSignal.SIGINT);
+
+  static final SigintProcessSignal instance = new SigintProcessSignal._();
   bool _isInitialized = false;
 
   final StreamController<ProcessSignal> _controller = new StreamController<ProcessSignal>();
-
-  SigintProcessSignal._(io.ProcessSignal wrappedSignal) : super._(wrappedSignal);
 
   @override
   Stream<ProcessSignal> watch() {
@@ -160,7 +160,7 @@ class SigintProcessSignal extends ProcessSignal {
 
   void init() {
     if (!_isInitialized) {
-      _wrappedSignal.watch().listen(_handleSigInt);
+      _delegate.watch().listen(_handleSigInt);
       _isInitialized = true;
     }
   }
