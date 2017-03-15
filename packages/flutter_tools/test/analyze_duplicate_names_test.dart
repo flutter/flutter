@@ -39,7 +39,8 @@ void main() {
       return createTestCommandRunner(command).run(
         <String>['analyze', '--no-current-package', '--no-current-directory', dartFileA.path, dartFileB.path]
       ).then<Null>((Null value) {
-        expect(testLogger.statusText, startsWith('Analyzing 2 files...\nNo analyzer warnings!'));
+        expect(testLogger.statusText, contains('Analyzing'));
+        expect(testLogger.statusText, contains('No issues found!'));
       });
 
     });

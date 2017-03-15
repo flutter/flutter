@@ -10,6 +10,7 @@ import 'package:yaml/yaml.dart' as yaml;
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart';
@@ -49,34 +50,48 @@ class AnalyzeOnce extends AnalyzeBase {
     final bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
     final bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
-    //TODO (pq): revisit package and directory defaults
+    // Use dartanalyzer directly when possible
+    if (!flutterRepo) {
+      final String dartanalyzer = fs.path.join(
+          Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
+      final List<String> cmd = <String>[dartanalyzer];
+      cmd.addAll(dartFiles.map((FileSystemEntity f) => f.path));
 
-    if (currentDirectory  && !flutterRepo) {
-      // ./*.dart
-      final Directory currentDirectory = fs.directory('.');
-      bool foundOne = false;
-      for (FileSystemEntity entry in currentDirectory.listSync()) {
-        if (isDartFile(entry)) {
-          dartFiles.add(entry);
-          foundOne = true;
+      if (cmd.length < 2 || currentPackage) {
+        final Directory projDir = await projectDirFor(fs.currentDirectory.absolute);
+        if (projDir != null) {
+          cmd.add((projDir).path);
+        }
+      } else if (currentDirectory) {
+        cmd.add('.');
+      } else if (!cmd[1].startsWith(fs.currentDirectory.path)) {
+        final String targetPath = cmd[1];
+        final FileSystemEntity target = await fs.isDirectory(targetPath)
+            ? fs.directory(targetPath) : fs.file(targetPath);
+        final Directory projDir = await projectDirFor(target);
+        if (projDir != null) {
+          final String packagesPath = fs.path.join((projDir).path, '.packages');
+          if (packagesPath != null) {
+            cmd.insert(1, '--packages');
+            cmd.insert(2, packagesPath);
+          }
         }
       }
-      if (foundOne)
-        pubSpecDirectories.add(currentDirectory);
+
+      final int exitCode = await runCommandAndStreamOutput(cmd);
+      stopwatch.stop();
+      final String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+      if (exitCode != 0)
+        throwToolExit('(Ran in ${elapsed}s)');
+      printStatus('Ran in ${elapsed}s');
+      return;
     }
 
-    if (currentPackage && !flutterRepo) {
-      // **/.*dart
-      final Directory currentDirectory = fs.directory('.');
-      _collectDartFiles(currentDirectory, dartFiles);
-      pubSpecDirectories.add(currentDirectory);
-    }
+    //TODO (pq): revisit package and directory defaults
 
-    if (flutterRepo) {
-      for (Directory dir in repoPackages) {
-        _collectDartFiles(dir, dartFiles);
-        pubSpecDirectories.add(dir);
-      }
+    for (Directory dir in repoPackages) {
+      _collectDartFiles(dir, dartFiles);
+      pubSpecDirectories.add(dir);
     }
 
     // determine what all the various .packages files depend on
@@ -145,9 +160,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final DriverOptions options = new DriverOptions();
     options.dartSdkPath = argResults['dart-sdk'];
     options.packageMap = packages;
-    options.analysisOptionsFile = flutterRepo
-        ? fs.path.join(Cache.flutterRoot, '.analysis_options_repo')
-        : fs.path.join(Cache.flutterRoot, 'packages', 'flutter', 'lib', 'analysis_options_user.yaml');
+    options.analysisOptionsFile = fs.path.join(Cache.flutterRoot, '.analysis_options_repo');
     final AnalysisDriver analyzer = new AnalysisDriver(options);
 
     // TODO(pq): consider error handling
@@ -183,18 +196,30 @@ class AnalyzeOnce extends AnalyzeBase {
 
     if (errorCount > 0) {
       // we consider any level of error to be an error exit (we don't report different levels)
-      if (membersMissingDocumentation > 0 && flutterRepo)
+      if (membersMissingDocumentation > 0)
         throwToolExit('[lint] $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation (ran in ${elapsed}s)');
       else
         throwToolExit('(Ran in ${elapsed}s)');
     }
     if (argResults['congratulate']) {
-      if (membersMissingDocumentation > 0 && flutterRepo) {
+      if (membersMissingDocumentation > 0) {
         printStatus('No analyzer warnings! (ran in ${elapsed}s; $membersMissingDocumentation public ${ membersMissingDocumentation == 1 ? "member lacks" : "members lack" } documentation)');
       } else {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');
       }
     }
+  }
+
+  Future<Directory> projectDirFor(FileSystemEntity entity) async {
+    Directory dir = entity is Directory ? entity : entity.parent;
+    dir = dir.absolute;
+    while (!await dir.childFile('pubspec.yaml').exists()) {
+      final Directory parent = dir.parent;
+      if (parent == null || parent.path == dir.path)
+        return null;
+      dir = parent;
+    }
+    return dir;
   }
 
   List<String> flutterRootComponents;
