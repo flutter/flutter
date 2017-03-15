@@ -9,6 +9,7 @@ import 'package:archive/archive.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -67,6 +68,7 @@ class Doctor {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
+      _validators.add(new _HostExecutableValidator());
 
       if (_androidWorkflow.appliesToHostPlatform)
         _validators.add(_androidWorkflow);
@@ -241,6 +243,36 @@ class _FlutterValidator extends DoctorValidator {
 
     return new ValidationResult(valid, messages,
       statusInfo: 'on ${osName()}, channel ${version.channel}');
+  }
+}
+
+class _HostExecutableValidator extends DoctorValidator {
+  _HostExecutableValidator() : super('Host Executable Compatibility');
+
+  bool _genSnapshotRuns(String genSnapshotPath) {
+    final int kExpectedExitCode = 255;
+    try {
+      return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  @override
+  Future<ValidationResult> validate() async {
+    final String genSnapshotPath =
+      artifacts.getArtifactPath(Artifact.genSnapshot);
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final bool hostExecutablesRun = _genSnapshotRuns(genSnapshotPath);
+    final ValidationType valid = hostExecutablesRun ? ValidationType.installed : ValidationType.missing;
+
+    if (hostExecutablesRun) {
+      messages.add(new ValidationMessage('Downloaded executables execute on host'));
+    } else {
+      messages.add(new ValidationMessage.error(
+        'Downloaded executables cannot execute on host. See https://github.com/flutter/flutter/issues/6207 for more information'));
+    }
+    return new ValidationResult(valid, messages);
   }
 }
 
