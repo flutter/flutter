@@ -180,6 +180,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   @override
+  void didHaveMemoryPressure() { }
+
+  @override
   Widget build(BuildContext context) {
     if (config.onLocaleChanged != null && _localeData == null) {
       // If the app expects a locale but we don't yet know the locale, then
