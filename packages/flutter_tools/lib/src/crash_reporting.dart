@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'base/io.dart';
 import 'globals.dart';
@@ -69,7 +68,7 @@ class CrashReportSender {
   /// The report is populated from data in [error] and [stackTrace].
   Future<Null> sendReport({
     @required dynamic error,
-    @required dynamic stackTrace,
+    @required StackTrace stackTrace,
     @required String getFlutterVersion(),
   }) async {
     try {
@@ -98,13 +97,9 @@ class CrashReportSender {
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 
-      final Chain chain = stackTrace is StackTrace
-          ? new Chain.forTrace(stackTrace)
-          : new Chain.parse(stackTrace.toString());
-
       req.files.add(new http.MultipartFile.fromString(
         _kStackTraceFileField,
-        '${chain.terse}',
+        stackTrace.toString(),
         filename: _kStackTraceFilename,
       ));
 

@@ -7,7 +7,6 @@ import 'dart:convert' show ASCII, LineSplitter;
 
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
 import 'platform.dart';
@@ -67,7 +66,7 @@ class StdoutLogger extends Logger {
 
     stderr.writeln(message);
     if (stackTrace != null)
-      stderr.writeln(new Chain.forTrace(stackTrace).terse.toString());
+      stderr.writeln(stackTrace.toString());
   }
 
   @override
@@ -264,6 +263,7 @@ class AnsiTerminal {
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
+  static const int _ENXIO = 6;
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
   static const int _ERROR_INVALID_PARAMETER = 87;
@@ -271,6 +271,7 @@ class AnsiTerminal {
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
   static const List<int> _lineModeIgnorableErrors = const <int>[
+    _ENXIO,
     _ENOTTY,
     _ENETRESET,
     _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed

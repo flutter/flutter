@@ -5,10 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
@@ -40,30 +38,6 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
-    String route,
-    bool shouldBuild: true
-  }) {
-    // Don't let uncaught errors kill the process.
-    return Chain.capture(() {
-      return _run(
-        traceStartup: traceStartup,
-        connectionInfoCompleter: connectionInfoCompleter,
-        appStartedCompleter: appStartedCompleter,
-        route: route,
-        shouldBuild: shouldBuild
-      );
-    }, onError: (dynamic error, StackTrace stackTrace) {
-      // Actually exit on ToolExit.
-      if (error is ToolExit)
-        throw error;
-      printError('Exception from flutter run: $error', stackTrace);
-    });
-  }
-
-  Future<int> _run({
-    bool traceStartup: false,
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String route,
