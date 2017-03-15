@@ -736,12 +736,22 @@ static void addFeatures(const string &str, vector<hb_feature_t>* features) {
     }
 }
 
+static const hb_codepoint_t CHAR_HYPHEN = 0x2010; /* HYPHEN */
+
 static inline hb_codepoint_t determineHyphenChar(hb_codepoint_t preferredHyphen, hb_font_t* font) {
-    if (preferredHyphen == 0x2010 /* HYPHEN */
-                || preferredHyphen == 0x058A /* ARMENIAN_HYPHEN */
+    hb_codepoint_t glyph;
+    if (preferredHyphen == 0x058A /* ARMENIAN_HYPHEN */
                 || preferredHyphen == 0x05BE /* HEBREW PUNCTUATION MAQAF */
                 || preferredHyphen == 0x1400 /* CANADIAN SYLLABIC HYPHEN */) {
-        hb_codepoint_t glyph;
+        if (hb_font_get_nominal_glyph(font, preferredHyphen, &glyph)) {
+            return preferredHyphen;
+        } else {
+            // The original hyphen requested was not supported. Let's try and see if the
+            // Unicode hyphen is supported.
+            preferredHyphen = CHAR_HYPHEN;
+        }
+    }
+    if (preferredHyphen == CHAR_HYPHEN) { /* HYPHEN */
         // Fallback to ASCII HYPHEN-MINUS if the font didn't have a glyph for the preferred hyphen.
         // Note that we intentionally don't do anything special if the font doesn't have a
         // HYPHEN-MINUS either, so a tofu could be shown, hinting towards something missing.
