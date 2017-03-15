@@ -20,8 +20,6 @@ PhysicalModelLayer::~PhysicalModelLayer() {}
 
 void PhysicalModelLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   PrerollChildren(context, matrix);
-  if (!context->child_paint_bounds.intersect(rrect_.getBounds()))
-    context->child_paint_bounds.setEmpty();
 
   // Add some margin to the paint bounds to leave space for the shadow.
   // The margin is hardcoded to an arbitrary maximum for now because Skia
@@ -29,6 +27,8 @@ void PhysicalModelLayer::Preroll(PrerollContext* context, const SkMatrix& matrix
   SkRect bounds(rrect_.getBounds());
   bounds.outset(50.0, 50.0);
   set_paint_bounds(bounds);
+
+  context->child_paint_bounds = bounds;
 }
 
 #if defined(OS_FUCHSIA)
