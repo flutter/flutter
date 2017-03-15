@@ -26,7 +26,16 @@ bool IsBreak(const char* src) {
     size_t offset;
     size_t size;
     ParseUnicode(buf, BUF_SIZE, src, &size, &offset);
-    return GraphemeBreak::isGraphemeBreak(buf, 0, size, offset);
+    return GraphemeBreak::isGraphemeBreak(nullptr, buf, 0, size, offset);
+}
+
+bool IsBreakWithAdvances(const float* advances, const char* src) {
+    const size_t BUF_SIZE = 256;
+    uint16_t buf[BUF_SIZE];
+    size_t offset;
+    size_t size;
+    ParseUnicode(buf, BUF_SIZE, src, &size, &offset);
+    return GraphemeBreak::isGraphemeBreak(advances, buf, 0, size, offset);
 }
 
 TEST(GraphemeBreak, utf16) {
@@ -164,6 +173,31 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_FALSE(IsBreak("U+0E01 | U+0E3A U+0E01"));  // thai phinthu = pure killer
     EXPECT_TRUE(IsBreak("U+0E01 U+0E3A | U+0E01"));  // thai phinthu = pure killer
 
+    // Repetition of above tests, but with a given advances array that implies everything
+    // became just one cluster.
+    const float conjoined[] = {1.0, 0.0, 0.0};
+    EXPECT_FALSE(IsBreakWithAdvances(conjoined,
+            "U+0915 | U+094D U+0915"));  // Devanagari ka+virama+ka
+    EXPECT_FALSE(IsBreakWithAdvances(conjoined,
+            "U+0915 U+094D | U+0915"));  // Devanagari ka+virama+ka
+    EXPECT_FALSE(IsBreakWithAdvances(conjoined,
+            "U+0E01 | U+0E3A U+0E01"));  // thai phinthu = pure killer
+    EXPECT_TRUE(IsBreakWithAdvances(conjoined,
+            "U+0E01 U+0E3A | U+0E01"));  // thai phinthu = pure killer
+
+    // Repetition of above tests, but with a given advances array that the virama did not
+    // form a cluster with the following consonant. The difference is that there is now
+    // a grapheme break after the virama in ka+virama+ka.
+    const float separate[] = {1.0, 0.0, 1.0};
+    EXPECT_FALSE(IsBreakWithAdvances(separate,
+            "U+0915 | U+094D U+0915"));  // Devanagari ka+virama+ka
+    EXPECT_TRUE(IsBreakWithAdvances(separate,
+            "U+0915 U+094D | U+0915"));  // Devanagari ka+virama+ka
+    EXPECT_FALSE(IsBreakWithAdvances(separate,
+            "U+0E01 | U+0E3A U+0E01"));  // thai phinthu = pure killer
+    EXPECT_TRUE(IsBreakWithAdvances(separate,
+            "U+0E01 U+0E3A | U+0E01"));  // thai phinthu = pure killer
+
     // suppress grapheme breaks in zwj emoji sequences, see
     // http://www.unicode.org/emoji/charts/emoji-zwj-sequences.html
     EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468"));
@@ -222,10 +256,10 @@ TEST(GraphemeBreak, genderBalancedEmoji) {
 
 TEST(GraphemeBreak, offsets) {
     uint16_t string[] = { 0x0041, 0x06DD, 0x0045, 0x0301, 0x0049, 0x0301 };
-    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 2));
-    EXPECT_FALSE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 3));
-    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 4));
-    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(string, 2, 3, 5));
+    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(nullptr, string, 2, 3, 2));
+    EXPECT_FALSE(GraphemeBreak::isGraphemeBreak(nullptr, string, 2, 3, 3));
+    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(nullptr, string, 2, 3, 4));
+    EXPECT_TRUE(GraphemeBreak::isGraphemeBreak(nullptr, string, 2, 3, 5));
 }
 
 }  // namespace minikin
