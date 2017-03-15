@@ -265,6 +265,7 @@ class FlutterTask extends DefaultTask {
                     args "--local-engine-src-path", localEngineSrcPath
                 }
                 args "build", "aot"
+                args "--quiet"
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"

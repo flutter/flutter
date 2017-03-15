@@ -20,8 +20,7 @@ import 'android_studio.dart';
 
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
-const String gradleAppOutV2 = 'android/app/build/outputs/apk/app.apk';
-const String gradleAppOutDir = 'android/app/build/outputs/apk';
+const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
 
 enum FlutterPluginVersion {
   none,
@@ -63,9 +62,35 @@ String get gradleAppOut {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return gradleAppOutV2;
+      return '$gradleAppOutDirV2/app.apk';
   }
   return null;
+}
+
+String get gradleAppOutDirV2 {
+  final String gradle = ensureGradle();
+  try {
+    final String properties = runCheckedSync(
+      <String>[gradle, 'app:properties'],
+      workingDirectory: 'android',
+      hideStdout: true,
+    );
+    String buildDir = properties
+        .split('\n')
+        .firstWhere((String s) => s.startsWith('buildDir: '))
+        .substring('buildDir: '.length)
+        .trim();
+    final String currentDirectory = fs.currentDirectory.path;
+    if (buildDir.startsWith(currentDirectory)) {
+      // Relativize path, snip current directory + separating '/'.
+      buildDir = buildDir.substring(currentDirectory.length + 1);
+    }
+    return '$buildDir/outputs/apk';
+  } catch (e) {
+    printError('Error running gradle: $e');
+  }
+  // Fall back to the default
+  return gradleAppOutDirV1;
 }
 
 String locateSystemGradle({ bool ensureExecutable: true }) {
@@ -82,15 +107,16 @@ String locateProjectGradlew({ bool ensureExecutable: true }) {
   final String path = 'android/gradlew';
 
   if (fs.isFileSync(path)) {
+    final File gradle = fs.file(path);
     if (ensureExecutable)
-      os.makeExecutable(fs.file(path));
-    return path;
+      os.makeExecutable(gradle);
+    return gradle.absolute.path;
   } else {
     return null;
   }
 }
 
-Future<String> ensureGradle() async {
+String ensureGradle() {
   String gradle = locateProjectGradlew();
   if (gradle == null) {
     gradle = locateSystemGradle();
@@ -120,7 +146,7 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
   settings.values['flutter.buildMode'] = buildModeName;
   settings.writeContents(localProperties);
 
-  final String gradle = await ensureGradle();
+  final String gradle = ensureGradle();
 
   switch (flutterPluginVersion) {
     case FlutterPluginVersion.none:
@@ -182,14 +208,15 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   if (exitcode != 0)
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
+  final String buildDirectory = gradleAppOutDirV2;
   final String apkFilename = 'app-$buildModeName.apk';
-  final File apkFile = fs.file('$gradleAppOutDir/$apkFilename');
+  final File apkFile = fs.file('$buildDirectory/$apkFilename');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-  apkFile.copySync('$gradleAppOutDir/app.apk');
+  apkFile.copySync('$buildDirectory/app.apk');
 
-  printTrace('calculateSha: $gradleAppOutDir/app.apk');
-  final File apkShaFile = fs.file('$gradleAppOutDir/app.apk.sha1');
+  printTrace('calculateSha: $buildDirectory/app.apk');
+  final File apkShaFile = fs.file('$buildDirectory/app.apk.sha1');
   apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
-  printStatus('Built $apkFilename (${getSizeAsMB(apkFile.lengthSync())}).');
+  printStatus('Built ${apkFile.path} (${getSizeAsMB(apkFile.lengthSync())}).');
 }
