@@ -807,8 +807,8 @@ void main() {
 
   testWidgets('Aborted flight', (WidgetTester tester) async {
     // See https://github.com/flutter/flutter/issues/5798
-    final Key ABHeroKey = const Key('AB hero');
-    final Key BCHeroKey = const Key('BC hero');
+    final Key heroABKey = const Key('AB hero');
+    final Key heroBCKey = const Key('BC hero');
 
     // Show a 150x150 Hero tagged 'BC'
     final MaterialPageRoute<Null> routeC = new MaterialPageRoute<Null>(
@@ -818,7 +818,7 @@ void main() {
             children: <Widget>[
               // This container will appear at Y=0
               new Container(
-                child: new Hero(tag: 'BC', child: new Container(key: BCHeroKey, height: 150.0))
+                child: new Hero(tag: 'BC', child: new Container(key: heroBCKey, height: 150.0))
               ),
               new SizedBox(height: 800.0),
             ],
@@ -836,7 +836,7 @@ void main() {
               new SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
-                child: new Hero(tag: 'AB', child: new Container(key: ABHeroKey, height: 200.0))
+                child: new Hero(tag: 'AB', child: new Container(key: heroABKey, height: 200.0))
               ),
               new FlatButton(
                 child: new Text('PUSH C'),
@@ -852,7 +852,7 @@ void main() {
       },
     );
 
-    // Show a 100x100 Hero tagged 'AB' with key ABHeroKey
+    // Show a 100x100 Hero tagged 'AB' with key heroABKey
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
@@ -882,11 +882,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(ABHeroKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).y;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 200));
-    final double yAt200ms = tester.getTopLeft(find.byKey(ABHeroKey)).y;
+    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).y;
     // Hero AB is mid flight.
     expect(yAt200ms, lessThan(200.0));
     expect(yAt200ms, greaterThan(100.0));
@@ -899,7 +899,7 @@ void main() {
     // Hero AB's aborted flight finishes where it was expected although
     // it's been faded out.
     await tester.pump(const Duration(milliseconds: 100));
-    expect(tester.getTopLeft(find.byKey(ABHeroKey)).y, 100.0);
+    expect(tester.getTopLeft(find.byKey(heroABKey)).y, 100.0);
 
     // One Opacity widget per Hero, only one now has opacity 0.0
     final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
@@ -908,7 +908,7 @@ void main() {
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
-    expect(tester.getTopLeft(find.byKey(BCHeroKey)).y, 0.0);
+    expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
   });
 
 }
