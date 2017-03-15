@@ -76,6 +76,7 @@ LOCAL_SRC_FILES += \
     GraphemeBreakTests.cpp \
     LayoutTest.cpp \
     LayoutUtilsTest.cpp \
+    MeasurementTests.cpp \
     SparseBitSetTest.cpp \
     UnicodeUtilsTest.cpp \
     WordBreakerTests.cpp
