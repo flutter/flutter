@@ -43,8 +43,8 @@ class TestTextInput {
   void updateEditingState(TextEditingState state) {
     expect(_client, isNonZero);
     PlatformMessages.handlePlatformMessage(
-      flutterTextInputClientChannel.name,
-      flutterTextInputClientChannel.codec.encodeMethodCall(
+      flutterTextInputChannel.name,
+      flutterTextInputChannel.codec.encodeMethodCall(
         new MethodCall(
           'TextInputClient.updateEditingState',
           <dynamic>[_client, state.toJSON()]

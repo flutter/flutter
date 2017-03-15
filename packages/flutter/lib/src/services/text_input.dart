@@ -231,7 +231,7 @@ TextInputAction _toTextInputAction(String action) {
 
 class _TextInputClientHandler {
   _TextInputClientHandler() {
-    flutterTextInputClientChannel.setMethodCallHandler(_handleTextInputInvocation);
+    flutterTextInputChannel.setMethodCallHandler(_handleTextInputInvocation);
   }
 
   TextInputConnection _currentConnection;
