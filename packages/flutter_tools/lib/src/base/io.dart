@@ -108,7 +108,8 @@ void restoreExitFunction() {
 /// no-op. This is in contrast to [io.ProcessSignal], where listening to
 /// non-existent signals throws an exception.
 class ProcessSignal implements io.ProcessSignal {
-  const ProcessSignal._(this._delegate);
+  @visibleForTesting
+  const ProcessSignal(this._delegate);
 
   static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
   static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
@@ -133,7 +134,7 @@ class ProcessSignal implements io.ProcessSignal {
 /// Listening to a [_PosixProcessSignal] is a no-op on Windows.
 class _PosixProcessSignal extends ProcessSignal {
 
-  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super._(wrappedSignal);
+  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
 
   @override
   Stream<ProcessSignal> watch() {
@@ -145,7 +146,7 @@ class _PosixProcessSignal extends ProcessSignal {
 
 // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28995 is resolved.
 class SigintProcessSignal extends ProcessSignal {
-  SigintProcessSignal._() : super._(io.ProcessSignal.SIGINT);
+  SigintProcessSignal._() : super(io.ProcessSignal.SIGINT);
 
   static final SigintProcessSignal instance = new SigintProcessSignal._();
   bool _isInitialized = false;
