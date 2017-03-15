@@ -67,36 +67,33 @@ uint32_t FontStyle::pack(int variant, int weight, bool italic) {
 
 Font::Font(const std::shared_ptr<MinikinFont>& typeface, FontStyle style)
     : typeface(typeface), style(style) {
-    loadAxes();
 }
 
 Font::Font(std::shared_ptr<MinikinFont>&& typeface, FontStyle style)
     : typeface(typeface), style(style) {
-    loadAxes();
 }
 
-void Font::loadAxes() {
-    android::AutoMutex _l(gMinikinLock);
+std::unordered_set<AxisTag> Font::getSupportedAxesLocked() const {
     const uint32_t fvarTag = MinikinFont::MakeTag('f', 'v', 'a', 'r');
     HbBlob fvarTable(getFontTable(typeface.get(), fvarTag));
     if (fvarTable.size() == 0) {
-        return;
+        return std::unordered_set<AxisTag>();
     }
 
+    std::unordered_set<AxisTag> supportedAxes;
     analyzeAxes(fvarTable.get(), fvarTable.size(), &supportedAxes);
+    return supportedAxes;
 }
 
 Font::Font(Font&& o) {
     typeface = std::move(o.typeface);
     style = o.style;
     o.typeface = nullptr;
-    supportedAxes = std::move(o.supportedAxes);
 }
 
 Font::Font(const Font& o) {
     typeface = o.typeface;
     style = o.style;
-    supportedAxes = o.supportedAxes;
 }
 
 // static
@@ -201,7 +198,8 @@ void FontFamily::computeCoverage() {
     CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
 
     for (size_t i = 0; i < mFonts.size(); ++i) {
-        mSupportedAxes.insert(mFonts[i].supportedAxes.begin(), mFonts[i].supportedAxes.end());
+        std::unordered_set<AxisTag> supportedAxes = mFonts[i].getSupportedAxesLocked();
+        mSupportedAxes.insert(supportedAxes.begin(), supportedAxes.end());
     }
 }
 
@@ -242,9 +240,11 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
     std::vector<Font> fonts;
     for (const Font& font : mFonts) {
         bool supportedVariations = false;
-        if (!font.supportedAxes.empty()) {
+        android::AutoMutex _l(gMinikinLock);
+        std::unordered_set<AxisTag> supportedAxes = font.getSupportedAxesLocked();
+        if (!supportedAxes.empty()) {
             for (const FontVariation& variation : variations) {
-                if (font.supportedAxes.find(variation.axisTag) != font.supportedAxes.end()) {
+                if (supportedAxes.find(variation.axisTag) != supportedAxes.end()) {
                     supportedVariations = true;
                     break;
                 }
@@ -264,11 +264,46 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
 }
 
 size_t FontFamily::writeAcceleratorTable(uint8_t* out) const {
-    return mCoverage.writeToBuffer(out);
+    const size_t axesTableSize = writeSupportedAxes(out);
+    if (out != nullptr) {
+        out += axesTableSize;
+    }
+    const size_t coverageTableSize = mCoverage.writeToBuffer(out);
+    return axesTableSize + coverageTableSize;
 }
 
 void FontFamily::readAcceleratorTable(const uint8_t* data, size_t size) {
+    const size_t readSize = readSupportedAxes(data, size);
+    data += readSize;
+    size -= readSize;
     bool result = mCoverage.initFromBuffer(data, size);
     LOG_ALWAYS_FATAL_IF(!result, "Failed to reconstruct accelerator table from buffer");
+}
+
+size_t FontFamily::writeSupportedAxes(uint8_t* out) const {
+    LOG_ALWAYS_FATAL_IF(mSupportedAxes.size() > 255, "System fonts may only use up to 255 axes.");
+    const uint8_t axesCount = static_cast<uint8_t>(mSupportedAxes.size());
+    if (out != nullptr) {
+        out[0] = axesCount;
+        AxisTag* axisTags = reinterpret_cast<AxisTag*>(out + 1);
+        for (const auto& tag : mSupportedAxes) {
+            *axisTags++ = tag;
+        }
+    }
+    const size_t axesSizeInbytes = sizeof(AxisTag) * axesCount;
+    return axesSizeInbytes + 1 /* 1 for axes count */;
+}
+
+size_t FontFamily::readSupportedAxes(const uint8_t* in, size_t inSize) {
+    LOG_ALWAYS_FATAL_IF(inSize == 0);
+    const uint8_t axesCount = in[0];
+    const size_t totalSize = sizeof(AxisTag) * axesCount + 1 /* 1 for axes Count */;
+    LOG_ALWAYS_FATAL_IF(inSize < totalSize);
+    const AxisTag* axisTags = reinterpret_cast<const AxisTag*>(in + 1);
+    mSupportedAxes.clear();
+    for (uint8_t i = 0; i < axesCount; ++i) {
+        mSupportedAxes.insert(axisTags[i]);
+    }
+    return totalSize;
 }
 }  // namespace minikin
