@@ -8,12 +8,14 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
+ProcessManager _processManager = new LocalProcessManager();
 
 class ProcessInfo {
   ProcessInfo(this.command, this.process);
@@ -118,7 +120,7 @@ void section(String title) {
 
 Future<String> getDartVersion() async {
   // The Dart VM returns the version text to stderr.
-  final ProcessResult result = Process.runSync(dartBin, <String>['--version']);
+  final ProcessResult result = _processManager.runSync(<String>[dartBin, '--version']);
   String version = result.stderr.trim();
 
   // Convert:
@@ -167,9 +169,8 @@ Future<Process> startProcess(
   print('Executing: $command');
   environment ??= <String, String>{};
   environment['BOT'] = 'true';
-  final Process process = await Process.start(
-    executable,
-    arguments,
+  final Process process = await _processManager.start(
+    <String>[executable]..addAll(arguments),
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
@@ -448,3 +449,5 @@ Future<int> findAvailablePort() async {
     }
   }
 }
+
+bool canRun(String path) => _processManager.canRun(path);
