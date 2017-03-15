@@ -93,14 +93,13 @@ class Table extends RenderObjectWidget {
   /// arguments must not be null.
   Table({
     Key key,
-    List<TableRow> children: const <TableRow>[],
+    this.children: const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth: const FlexColumnWidth(1.0),
     this.border,
     this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
     this.textBaseline
-  }) : children = children,
-       _rowDecorations = children.any((TableRow row) => row.decoration != null)
+  }) : _rowDecorations = children.any((TableRow row) => row.decoration != null)
                          ? children.map<Decoration>((TableRow row) => row.decoration).toList(growable: false)
                          : null,
        super(key: key) {

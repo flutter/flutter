@@ -548,11 +548,10 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
-  RenderSolidColor(Color backgroundColor, {
+  RenderSolidColor(this.backgroundColor, {
     this.desiredDeltaRadius: double.INFINITY,
     this.desiredDeltaTheta: kTwoPi
-  }) : this.backgroundColor = backgroundColor,
-       super(new BoxDecoration(backgroundColor: backgroundColor));
+  }) : super(new BoxDecoration(backgroundColor: backgroundColor));
 
   double desiredDeltaRadius;
   double desiredDeltaTheta;

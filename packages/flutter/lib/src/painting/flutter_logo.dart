@@ -50,10 +50,9 @@ class FlutterLogoDecoration extends Decoration {
   const FlutterLogoDecoration({
     this.swatch: _kDefaultSwatch,
     this.textColor: const Color(0xFF616161),
-    FlutterLogoStyle style: FlutterLogoStyle.markOnly,
+    this.style: FlutterLogoStyle.markOnly,
     this.margin: EdgeInsets.zero,
-  }) : style = style,
-       _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
+  }) : _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 

@@ -66,9 +66,8 @@ enum Operation { Addition, Subtraction, Multiplication, Division }
 
 /// A token that represents an arithmetic operation symbol.
 class OperationToken extends ExpressionToken {
-  OperationToken(Operation operation)
-   : operation = operation,
-     super(opString(operation));
+  OperationToken(this.operation)
+   : super(opString(operation));
 
   Operation operation;
 

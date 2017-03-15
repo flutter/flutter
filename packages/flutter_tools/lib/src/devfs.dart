@@ -298,13 +298,12 @@ class _DevFSHttpWriter {
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
   DevFS(VMService serviceProtocol,
-        String fsName,
+        this.fsName,
         this.rootDirectory, {
         String packagesFilePath
       })
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
-      fsName = fsName {
+      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }

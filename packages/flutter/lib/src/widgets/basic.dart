@@ -826,9 +826,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Both the child and the id arguments must not be null.
   LayoutId({
     Key key,
-    @required Object id,
+    @required this.id,
     @required Widget child
-  }) : id = id, super(key: key ?? new ValueKey<Object>(id), child: child) {
+  }) : super(key: key ?? new ValueKey<Object>(id), child: child) {
     assert(child != null);
     assert(id != null);
   }
@@ -2610,9 +2610,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   ///
   /// The [renderBox] argument must not be null.
   WidgetToRenderBoxAdapter({
-    @required RenderBox renderBox,
+    @required this.renderBox,
     this.onBuild
-  }) : renderBox = renderBox,
+  }) :
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
        // places, which would cause the RenderBox to get inserted in multiple

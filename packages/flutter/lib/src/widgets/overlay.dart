@@ -154,7 +154,7 @@ class OverlayEntry {
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(OverlayEntry entry) : entry = entry, super(key: entry._key) {
+  _OverlayEntry(this.entry) : super(key: entry._key) {
     assert(entry != null);
   }
 
