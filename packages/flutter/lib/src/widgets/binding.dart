@@ -445,9 +445,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
-    RenderObjectWithChildMixin<T> container,
+    this.container,
     this.debugShortDescription
-  }) : container = container, super(key: new GlobalObjectKey(container));
+  }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   final Widget child;

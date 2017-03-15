@@ -9,9 +9,8 @@ class RenderSolidColorBox extends RenderDecoratedBox {
   final Size desiredSize;
   final Color backgroundColor;
 
-  RenderSolidColorBox(Color backgroundColor, { this.desiredSize: Size.infinite })
-      : backgroundColor = backgroundColor,
-        super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
+  RenderSolidColorBox(this.backgroundColor, { this.desiredSize: Size.infinite })
+      : super(decoration: new BoxDecoration(backgroundColor: backgroundColor));
 
   @override
   double computeMinIntrinsicWidth(double height) {

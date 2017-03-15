@@ -184,8 +184,6 @@ class TimedEvent {
   final Duration duration;
 
   /// Creates a timed event given begin and end timestamps in microseconds.
-  TimedEvent(int beginTimeMicros, int endTimeMicros)
-    : this.beginTimeMicros = beginTimeMicros,
-      this.endTimeMicros = endTimeMicros,
-      this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
+  TimedEvent(this.beginTimeMicros, this.endTimeMicros)
+    : this.duration = new Duration(microseconds: endTimeMicros - beginTimeMicros);
 }

@@ -227,11 +227,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 class _TapGesture extends _TapTracker {
 
   _TapGesture({
-    MultiTapGestureRecognizer gestureRecognizer,
+    this.gestureRecognizer,
     PointerEvent event,
     Duration longTapDelay
-  }) : gestureRecognizer = gestureRecognizer,
-       _lastPosition = event.position,
+  }) : _lastPosition = event.position,
        super(
     event: event,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)

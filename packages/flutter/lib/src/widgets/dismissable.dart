@@ -129,8 +129,8 @@ class Dismissable extends StatefulWidget {
 class _DismissableClipper extends CustomClipper<Rect> {
   _DismissableClipper({
     this.axis,
-    Animation<FractionalOffset> moveAnimation
-  }) : moveAnimation = moveAnimation, super(reclip: moveAnimation) {
+    this.moveAnimation
+  }) : super(reclip: moveAnimation) {
     assert(axis != null);
     assert(moveAnimation != null);
   }

@@ -67,7 +67,7 @@ class FixedSizeLayoutDelegate extends SingleChildLayoutDelegate {
 }
 
 class NotifierLayoutDelegate extends SingleChildLayoutDelegate {
-  NotifierLayoutDelegate(ValueNotifier<Size> size) : size = size, super(relayout: size);
+  NotifierLayoutDelegate(this.size) : super(relayout: size);
 
   final ValueNotifier<Size> size;
 
