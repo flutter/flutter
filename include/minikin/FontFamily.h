@@ -110,10 +110,8 @@ struct Font {
 
     std::shared_ptr<MinikinFont> typeface;
     FontStyle style;
-    std::unordered_set<AxisTag> supportedAxes;
 
-private:
-    void loadAxes();
+    std::unordered_set<AxisTag> getSupportedAxesLocked() const;
 };
 
 struct FontVariation {
@@ -180,6 +178,12 @@ public:
 private:
     void computeCoverage();
     void readAcceleratorTable(const uint8_t* data, size_t size);
+
+    size_t writeSupportedAxes(uint8_t* out) const;
+
+    // Reads supported axes values from 'in' buffer. This method reads up to
+    // 'inSize' bytes and returns the number of bytes read.
+    size_t readSupportedAxes(const uint8_t* in, size_t inSize);
 
     uint32_t mLangId;
     int mVariant;
