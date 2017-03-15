@@ -62,11 +62,6 @@ DEF_SWITCH(NonInteractive,
            "non-interactive",
            "Make the shell non-interactive. By default, the shell attempts "
            "to setup a window and create an OpenGL context.")
-DEF_SWITCH(NoRedirectToSyslog,
-           "no-redirect-to-syslog",
-           "On iOS: Don't redirect stdout and stderr to syslog by default. "
-           "This is used by the tools to read device logs. However, this can "
-           "cause logs to not show up when launched from Xcode.")
 DEF_SWITCH(Packages, "packages", "Specify the path to the packages.")
 DEF_SWITCH(StartPaused,
            "start-paused",
