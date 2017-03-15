@@ -36,20 +36,6 @@ static void InitializeLogging() {
                        false);  // Tick count
 }
 
-static void RedirectIOConnectionsToSyslog() {
-#if TARGET_OS_IPHONE
-  if (base::CommandLine::ForCurrentProcess()->HasSwitch(
-          FlagForSwitch(Switch::NoRedirectToSyslog))) {
-    return;
-  }
-
-  asl_log_descriptor(NULL, NULL, ASL_LEVEL_INFO, STDOUT_FILENO,
-                     ASL_LOG_DESCRIPTOR_WRITE);
-  asl_log_descriptor(NULL, NULL, ASL_LEVEL_NOTICE, STDERR_FILENO,
-                     ASL_LOG_DESCRIPTOR_WRITE);
-#endif
-}
-
 static void InitializeCommandLine() {
   base::mac::ScopedNSAutoreleasePool pool;
   base::CommandLine::StringVector vector;
@@ -76,8 +62,6 @@ class EmbedderState {
         << "Embedder initialization must occur on the main platform thread";
 
     InitializeCommandLine();
-
-    RedirectIOConnectionsToSyslog();
 
     InitializeLogging();
 
