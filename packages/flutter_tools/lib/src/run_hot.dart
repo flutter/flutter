@@ -435,7 +435,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload');
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+        reloadMessage = 'Reload done: $loadedLibraryCount of $finalLibraryCount libraries needed reloading';
       }
     } catch (error, st) {
       final int errorCode = error['code'];
