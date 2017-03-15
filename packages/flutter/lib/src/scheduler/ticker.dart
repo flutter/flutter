@@ -268,6 +268,9 @@ class Ticker {
     unscheduleTick();
   }
 
+  /// An optional label can be provided for debugging purposes.
+  ///
+  /// This label will appear in the [toString] output in debug builds.
   final String debugLabel;
   StackTrace _debugCreationStack;
 

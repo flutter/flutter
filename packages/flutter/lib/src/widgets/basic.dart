@@ -1478,7 +1478,28 @@ class Baseline extends SingleChildRenderObjectWidget {
 
 // SLIVERS
 
+/// A sliver that contains a single box widget.
+///
+/// Slivers are special-purpose widgets that can be combined using a
+/// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
+/// is a basic sliver that creates a bridge back to one of the usual box-based
+/// widgets.
+///
+/// Rather than using multiple [SliverToBoxAdapter] widgets to display multiple
+/// box widgets in a [CustomScrollView], consider using [SliverList],
+/// [SliverFixedExtentList], or [SliverGrid], which are more efficient because
+/// they instantiate only those children that are actually visible through the
+/// scroll view's viewport.
+///
+/// See also:
+///
+///  * [CustomScrollView], which displays a scrollable list of slivers.
+///  * [SliverList], which displays multiple box widgets in a linear array.
+///  * [SliverFixedExtentList], which displays multiple box widgets with the
+///    same main-axis extent in a linear array.
+///  * [SliverGrid], which displays multiple box widgets in arbitrary positions.
 class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that contains a single box widget.
   SliverToBoxAdapter({
     Key key,
     Widget child,
@@ -1488,7 +1509,26 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
   RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
 }
 
+/// A sliver that applies padding on each side of another sliver.
+///
+/// Slivers are special-purpose widgets that can be combined using a
+/// [CustomScrollView] to create custom scroll effects. A [SliverPadding]
+/// is a basic sliver that insets another sliver by applying padding on each
+/// side.
+///
+/// Applying padding to anything but the most mundane sliver is likely to have
+/// undesired effects. For example, wrapping a
+/// [SliverPinnedPersistentHeader] will cause the app bar to overlap
+/// earlier slivers (contrary to the normal behavior of pinned app bars), and
+/// while the app bar is pinned, the padding will scroll away.
+///
+/// See also:
+///
+///  * [CustomScrollView], which displays a scrollable list of slivers.
 class SliverPadding extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that applies padding on each side of another sliver.
+  ///
+  /// The [padding] argument must not be null.
   SliverPadding({
     Key key,
     @required this.padding,
@@ -1497,6 +1537,7 @@ class SliverPadding extends SingleChildRenderObjectWidget {
     assert(padding != null);
   }
 
+  /// The amount of space by which to inset the child sliver.
   final EdgeInsets padding;
 
   @override
