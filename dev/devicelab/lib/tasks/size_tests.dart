@@ -36,7 +36,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
           releaseSizeInBytes = await file('${sampleDir.path}/build/app.ipa').length();
         } else {
           await flutter('build', options: <String>['apk', '--release']);
-          releaseSizeInBytes = await file('${sampleDir.path}/android/app/build/outputs/apk/app.apk').length();
+          releaseSizeInBytes = await file('${sampleDir.path}/build/app/outputs/apk/app-release.apk').length();
         }
       });
     });
