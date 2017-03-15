@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
@@ -17,8 +18,9 @@ void main() {
       for (String testName in testNames) {
         options..addAll(<String>['-t', testName]);
       }
+      final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
       final ProcessResult scriptProcess = processManager.runSync(
-        <String>['../../bin/cache/dart-sdk/bin/dart']..addAll(options)
+        <String>[dart]..addAll(options)
       );
       return scriptProcess.exitCode;
     }
