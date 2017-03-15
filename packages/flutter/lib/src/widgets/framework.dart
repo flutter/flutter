@@ -679,7 +679,7 @@ enum _StateLifecycle {
   created,
 
   /// The [State.initState] method has been called but the [State] object is
-  /// not yet ready to build. [State.dependenciesChanged] is called at this time.
+  /// not yet ready to build. [State.didChangeDependencies] is called at this time.
   initialized,
 
   /// The [State] object is ready to build and [State.dispose] has not yet been
@@ -725,10 +725,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    [BuildContext] or the widget, which are available as the [context] and
 ///    [config] properties, respectively, when the [initState] method is
 ///    called.
-///  * The framework calls [dependenciesChanged]. Subclasses of [State] should
-///    override [dependenciesChanged] to perform initialization involving
+///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
+///    override [didChangeDependencies] to perform initialization involving
 ///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
-///    called, the [dependenciesChanged] method will be called again if the
+///    called, the [didChangeDependencies] method will be called again if the
 ///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
@@ -842,7 +842,7 @@ abstract class State<T extends StatefulWidget> {
   /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
-  /// method. However, [dependenciesChanged] will be called immediately
+  /// method. However, [didChangeDependencies] will be called immediately
   /// following this method, and [BuildContext.inheritFromWidgetOfExactType] can
   /// be used there.
   ///
@@ -1090,7 +1090,7 @@ abstract class State<T extends StatefulWidget> {
   /// expensive to do for every build.
   @protected
   @mustCallSuper
-  void dependenciesChanged() { }
+  void didChangeDependencies() { }
 
   @override
   String toString() {
@@ -1556,7 +1556,7 @@ abstract class BuildContext {
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
-  /// from [State.dependenciesChanged].
+  /// from [State.didChangeDependencies].
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1566,7 +1566,7 @@ abstract class BuildContext {
   /// the widget being rebuilt more often.
   ///
   /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.dependenciesChanged] will be
+  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
@@ -1580,7 +1580,7 @@ abstract class BuildContext {
   /// This method does not establish a relationship with the target in the way
   /// that [inheritFromWidgetOfExactType] does. It is normally used by such
   /// widgets to obtain their corresponding [InheritedElement] object so that they
-  /// can call [InheritedElement.dispatchDependenciesChanged] to actually
+  /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
   /// notify the widgets that _did_ register such a relationship.
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
@@ -2563,7 +2563,9 @@ abstract class Element implements BuildContext {
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
-      dependenciesChanged();
+      didChangeDependencies
+      
+      ();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -2790,7 +2792,7 @@ abstract class Element implements BuildContext {
   /// [InheritedWidget.updateShouldNotify] returned true), the framework calls
   /// this function to notify this element of the change.
   @mustCallSuper
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
   }
@@ -3175,7 +3177,7 @@ class StatefulElement extends ComponentElement {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
     assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; });
-    _state.dependenciesChanged();
+    _state.didChangeDependencies();
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     super._firstBuild();
   }
@@ -3244,7 +3246,7 @@ class StatefulElement extends ComponentElement {
           'then the rebuilt dependent widget will not reflect the changes in the '
           'inherited widget.\n'
           'Typically references to to inherited widgets should occur in widget build() methods. Alternatively, '
-          'initialization based on inherited widgets can be placed in the dependenciesChanged method, which '
+          'initialization based on inherited widgets can be placed in the didChangeDependencies method, which '
           'is called after initState and whenever the dependencies change thereafter.'
         );
       }
@@ -3274,9 +3276,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    _state.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _state.didChangeDependencies();
   }
 
   @override
@@ -3405,7 +3407,7 @@ class InheritedElement extends ProxyElement {
   void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-    dispatchDependenciesChanged();
+    dispatchDidChangeDependencies();
   }
 
   /// Notifies all dependent elements that this inherited widget has changed.
@@ -3416,7 +3418,7 @@ class InheritedElement extends ProxyElement {
   /// the build phase. [InheritedWidget] subclasses can also call this directly
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
-  void dispatchDependenciesChanged() {
+  void dispatchDidChangeDependencies() {
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
@@ -3427,7 +3429,7 @@ class InheritedElement extends ProxyElement {
       });
       // check that it really deepends on us
       assert(dependent._dependencies.contains(this));
-      dependent.dependenciesChanged();
+      dependent.didChangeDependencies();
     }
   }
 }

@@ -139,7 +139,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     final EdgeInsets padding = const EdgeInsets.all(8.0);
     return new SliverPadding(
       padding: padding,
-      child: new SliverGrid(
+      sliver: new SliverGrid(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,

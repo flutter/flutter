@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'base/common.dart';
-import 'base/os.dart';
+import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
 
@@ -59,7 +59,7 @@ class ProtocolDiscovery {
     Uri hostUri;
     if (portForwarder != null) {
       final int devicePort = deviceUri.port;
-      hostPort ??= await findPreferredPort(defaultHostPort);
+      hostPort ??= await portScanner.findPreferredPort(defaultHostPort);
       hostPort = await portForwarder
           .forward(devicePort, hostPort: hostPort)
           .timeout(const Duration(seconds: 60), onTimeout: () {

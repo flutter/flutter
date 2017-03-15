@@ -46,8 +46,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   _ScrollbarController _controller;
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _controller ??= new _ScrollbarController(this);
     _controller.color = Theme.of(context).highlightColor;
   }

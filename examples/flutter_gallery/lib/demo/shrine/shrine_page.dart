@@ -61,7 +61,7 @@ class ShrinePageState extends State<ShrinePage> {
       return new ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: config.shoppingCart.values.map((Order order) {
-          return new ListItem(
+          return new ListTile(
             title: new Text(order.product.name),
             leading: new Text('${order.quantity}'),
             subtitle: new Text(order.product.vendor.name)

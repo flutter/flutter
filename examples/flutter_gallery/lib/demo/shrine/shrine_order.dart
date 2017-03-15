@@ -197,7 +197,7 @@ class _OrderPageState extends State<OrderPage> {
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(8.0),
-            child: new SliverGrid(
+            sliver: new SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 8.0,
