@@ -5,11 +5,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:test/test.dart';
 
@@ -18,12 +19,19 @@ import 'src/context.dart';
 import 'src/mocks.dart';
 
 void main() {
-  final String filePath = fs.path.join('lib', 'foo.txt');
-  final String filePath2 = fs.path.join('foo', 'bar.txt');
+  FileSystem fs;
+  String filePath;
+  String filePath2;
   Directory tempDir;
   String basePath;
   DevFS devFS;
   final AssetBundle assetBundle = new AssetBundle();
+
+  setUpAll(() {
+    fs = new MemoryFileSystem();
+    filePath = fs.path.join('lib', 'foo.txt');
+    filePath2 = fs.path.join('foo', 'bar.txt');
+  });
 
   group('DevFSContent', () {
     test('bytes', () {
@@ -59,7 +67,7 @@ void main() {
     final MockDevFSOperations devFSOperations = new MockDevFSOperations();
 
     setUpAll(() {
-      tempDir = _newTempDir();
+      tempDir = _newTempDir(fs);
       basePath = tempDir.path;
     });
     tearDownAll(_cleanupTempDirs);
@@ -72,7 +80,7 @@ void main() {
       _packages['my_project'] = fs.path.toUri('lib');
 
       // simulate package
-      await _createPackage('somepkg', 'somefile.txt');
+      await _createPackage(fs, 'somepkg', 'somefile.txt');
 
       devFS = new DevFS.operations(devFSOperations, 'test', tempDir);
       await devFS.create();
@@ -95,7 +103,10 @@ void main() {
       );
 
       expect(bytes, 48);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add new file to local file system', () async {
       final File file = fs.file(fs.path.join(basePath, filePath2));
       await file.parent.create(recursive: true);
@@ -106,7 +117,10 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 7);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('modify existing file on local file system', () async {
       final File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
@@ -123,7 +137,10 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 6);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('delete a file from the local file system', () async {
       final File file = fs.file(fs.path.join(basePath, filePath));
       await file.delete();
@@ -133,9 +150,12 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 0);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add new package', () async {
-      await _createPackage('newpkg', 'anotherfile.txt');
+      await _createPackage(fs, 'newpkg', 'anotherfile.txt');
       final int bytes = await devFS.update();
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
@@ -143,10 +163,13 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 69);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add new package with double slashes in URI', () async {
       final String packageName = 'doubleslashpkg';
-      await _createPackage(packageName, 'somefile.txt', doubleSlash: true);
+      await _createPackage(fs, packageName, 'somefile.txt', doubleSlash: true);
 
       final Set<String> fileFilter = new Set<String>();
       final List<Uri> pkgUris = <Uri>[fs.path.toUri(basePath)]..addAll(_packages.values);
@@ -168,68 +191,88 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 109);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add an asset bundle', () async {
       assetBundle.entries['a.txt'] = new DevFSStringContent('abc');
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${_inAssetBuildDirectory('a.txt')}',
+        'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['a.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 3);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add a file to the asset bundle - bundleDirty', () async {
       assetBundle.entries['b.txt'] = new DevFSStringContent('abcd');
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       // Expect entire asset bundle written because bundleDirty is true
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${_inAssetBuildDirectory('a.txt')}',
-        'writeFile test ${_inAssetBuildDirectory('b.txt')}',
+        'writeFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
+        'writeFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 7);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('add a file to the asset bundle', () async {
       assetBundle.entries['c.txt'] = new DevFSStringContent('12');
       final int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
-        'writeFile test ${_inAssetBuildDirectory('c.txt')}',
+        'writeFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'c.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 2);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('delete a file from the asset bundle', () async {
       assetBundle.entries.remove('c.txt');
       final int bytes = await devFS.update(bundle: assetBundle);
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${_inAssetBuildDirectory('c.txt')}',
+        'deleteFile test ${_inAssetBuildDirectory(fs, 'c.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>['c.txt']));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 0);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('delete all files from the asset bundle', () async {
       assetBundle.entries.clear();
       final int bytes = await devFS.update(bundle: assetBundle, bundleDirty: true);
       devFSOperations.expectMessages(<String>[
-        'deleteFile test ${_inAssetBuildDirectory('a.txt')}',
-        'deleteFile test ${_inAssetBuildDirectory('b.txt')}',
+        'deleteFile test ${_inAssetBuildDirectory(fs, 'a.txt')}',
+        'deleteFile test ${_inAssetBuildDirectory(fs, 'b.txt')}',
       ]);
       expect(devFS.assetPathsToEvict, unorderedMatches(<String>[
         'a.txt', 'b.txt'
       ]));
       devFS.assetPathsToEvict.clear();
       expect(bytes, 0);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
+
     testUsingContext('delete dev file system', () async {
       await devFS.destroy();
       devFSOperations.expectMessages(<String>['destroy test']);
       expect(devFS.assetPathsToEvict, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
   });
 
@@ -237,7 +280,7 @@ void main() {
     MockVMService vmService;
 
     setUpAll(() async {
-      tempDir = _newTempDir();
+      tempDir = _newTempDir(fs);
       basePath = tempDir.path;
       vmService = new MockVMService();
       await vmService.setUp();
@@ -254,7 +297,7 @@ void main() {
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
       // simulate package
-      await _createPackage('somepkg', 'somefile.txt');
+      await _createPackage(fs, 'somepkg', 'somefile.txt');
 
       devFS = new DevFS(vmService, 'test', tempDir);
       await devFS.create();
@@ -269,6 +312,8 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 48);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
 
     testUsingContext('delete dev file system', () async {
@@ -276,6 +321,8 @@ void main() {
       await devFS.destroy();
       vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
       expect(devFS.assetPathsToEvict, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
   });
 }
@@ -348,7 +395,7 @@ class MockVM implements VM {
 final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
-Directory _newTempDir() {
+Directory _newTempDir(FileSystem fs) {
   final Directory tempDir = fs.systemTempDirectory.createTempSync('devfs${_tempDirs.length}');
   _tempDirs.add(tempDir);
   return tempDir;
@@ -360,8 +407,8 @@ void _cleanupTempDirs() {
   }
 }
 
-Future<Null> _createPackage(String pkgName, String pkgFileName, { bool doubleSlash: false }) async {
-  final Directory pkgTempDir = _newTempDir();
+Future<Null> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash: false }) async {
+  final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
     // Force two separators into the path.
@@ -379,6 +426,6 @@ Future<Null> _createPackage(String pkgName, String pkgFileName, { bool doubleSla
   fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }
 
-String _inAssetBuildDirectory(String filename) {
+String _inAssetBuildDirectory(FileSystem fs, String filename) {
   return '${fs.path.toUri(getAssetBuildDirectory()).path}/$filename';
 }
