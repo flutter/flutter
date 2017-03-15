@@ -32,8 +32,8 @@ class UpgradeCommand extends FlutterCommand {
       throwToolExit('Unable to upgrade Flutter: no upstream repository configured.');
     }
 
-    final FlutterVersion version = new FlutterVersion(Cache.flutterRoot);
-    if (version.channel == 'alpha') {
+    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    if (flutterVersion.channel == 'alpha') {
       // The alpha branch is deprecated. Rather than trying to pull the alpha
       // branch, we should switch upstream to master.
       printStatus('Switching to from alpha to master...');
@@ -66,7 +66,7 @@ class UpgradeCommand extends FlutterCommand {
     );
 
     printStatus('');
-    printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
+    printStatus(flutterVersion.toString());
 
     final String projRoot = findProjectRoot();
     if (projRoot != null) {

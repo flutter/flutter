@@ -254,7 +254,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
+      printStatus(FlutterVersion.instance.toString());
       return;
     }
 

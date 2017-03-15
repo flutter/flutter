@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
+import 'cache.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -228,9 +229,9 @@ class _FlutterValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     final ValidationType valid = ValidationType.installed;
 
-    final FlutterVersion version = FlutterVersion.getVersion();
+    final FlutterVersion version = FlutterVersion.instance;
 
-    messages.add(new ValidationMessage('Flutter at ${version.flutterRoot}'));
+    messages.add(new ValidationMessage('Flutter at ${Cache.flutterRoot}'));
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
