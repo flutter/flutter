@@ -430,9 +430,7 @@ Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
   Chain.capture(() async {
     await callback();
     completer.complete();
-  }, onError: (dynamic error, Chain chain) async {
-    completer.completeError(error, chain);
-  });
+  }, onError: completer.completeError);
   return completer.future;
 }
 

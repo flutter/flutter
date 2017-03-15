@@ -74,7 +74,7 @@ export 'dart:io'
 /// Exits the process with the given [exitCode].
 typedef void ExitFunction(int exitCode);
 
-final ExitFunction _defaultExitFunction = (int exitCode) => io.exit(exitCode);
+final ExitFunction _defaultExitFunction = io.exit;
 
 ExitFunction _exitFunction = _defaultExitFunction;
 

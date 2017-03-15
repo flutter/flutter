@@ -223,9 +223,7 @@ void main() {
   testWidgets('Page changes at halfway point', (WidgetTester tester) async {
     final List<int> log = <int>[];
     await tester.pumpWidget(new PageView(
-      onPageChanged: (int page) {
-        log.add(page);
-      },
+      onPageChanged: log.add,
       children: kStates.map<Widget>((String state) => new Text(state)).toList(),
     ));
 

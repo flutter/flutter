@@ -160,7 +160,7 @@ class TimelineSummary {
 
     return durations
         .map<double>((Duration duration) => duration.inMilliseconds.toDouble())
-        .reduce((double a, double b) => math.max(a, b));
+        .reduce(math.max);
   }
 
   List<TimedEvent> _extractGpuRasterizerDrawEvents() => _extractBeginEndEvents('GPURasterizer::Draw');

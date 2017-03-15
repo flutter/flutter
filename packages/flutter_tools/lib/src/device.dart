@@ -277,7 +277,7 @@ abstract class Device {
   }
 
   static void printDevices(List<Device> devices) {
-    descriptions(devices).forEach((String msg) => printStatus(msg));
+    descriptions(devices).forEach(printStatus);
   }
 }
 

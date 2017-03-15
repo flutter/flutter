@@ -28,9 +28,7 @@ void main() {
 
     await tester.pumpWidget(new RawKeyboardListener(
       focused: true,
-      onKey: (RawKeyEvent event) {
-        events.add(event);
-      },
+      onKey: events.add,
       child: new Container(),
     ));
 
@@ -59,9 +57,7 @@ void main() {
 
     await tester.pumpWidget(new RawKeyboardListener(
       focused: true,
-      onKey: (RawKeyEvent event) {
-        events.add(event);
-      },
+      onKey: events.add,
       child: new Container(),
     ));
 
