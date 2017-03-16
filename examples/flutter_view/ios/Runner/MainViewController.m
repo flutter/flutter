@@ -10,9 +10,9 @@
 
 @interface MainViewController ()
 
-@property (strong, nonatomic) NativeViewController* nativeViewController;
-@property (strong, nonatomic) FlutterViewController* flutterViewController;
-@property FlutterMessageChannel* messageChannel;
+@property (nonatomic) NativeViewController* nativeViewController;
+@property (nonatomic) FlutterViewController* flutterViewController;
+@property (nonatomic) FlutterMessageChannel* messageChannel;
 @end
 
 static NSString* const emptyString = @"";
