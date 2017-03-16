@@ -178,7 +178,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           ));
         }
       }
-      if (_cocoaPodsInstalledAndMeetsVersionCheck) {
+      if (cocoaPodsInstalledAndMeetsVersionCheck) {
         messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
       } else {
         if (!hasCocoaPods) {
