@@ -183,9 +183,7 @@ class CalculationManager {
       onProgressListener: (double completed, double total) {
         sender.send(<double>[ completed, total ]);
       },
-      onResultListener: (String result) {
-        sender.send(result);
-      },
+      onResultListener: sender.send,
       data: message.data
     );
     calculator.run();

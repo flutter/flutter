@@ -60,7 +60,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
   }
 
-  bool get _cocoaPodsInstalledAndMeetsVersionCheck {
+  bool get cocoaPodsInstalledAndMeetsVersionCheck {
     if (!hasCocoaPods)
       return false;
     try {
@@ -178,7 +178,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           ));
         }
       }
-      if (_cocoaPodsInstalledAndMeetsVersionCheck) {
+      if (cocoaPodsInstalledAndMeetsVersionCheck) {
         messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
       } else {
         if (!hasCocoaPods) {

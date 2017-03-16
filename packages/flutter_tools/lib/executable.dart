@@ -9,7 +9,6 @@ import 'package:flutter_tools/src/version.dart';
 import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'src/artifacts.dart';
 import 'src/base/common.dart';
@@ -32,6 +31,7 @@ import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
+import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
@@ -58,6 +58,7 @@ import 'src/usage.dart';
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
+  SigintProcessSignal.instance.init();
   final bool verbose = args.contains('-v') || args.contains('--verbose');
   final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
@@ -74,6 +75,7 @@ Future<Null> main(List<String> args) async {
     new DoctorCommand(),
     new DriveCommand(),
     new FormatCommand(),
+    new FuchsiaReloadCommand(),
     new InstallCommand(),
     new LogsCommand(),
     new PackagesCommand(),
@@ -135,17 +137,14 @@ Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
     // Initialize the system locale.
     await intl.findSystemLocale();
 
-    final Completer<int> runCompleter = new Completer<int>();
-    Chain.capture<Future<Null>>(() async {
+    try {
       await runner.run(args);
       await _exit(0);
-      runCompleter.complete(0);
-    }, onError: (dynamic error, Chain chain) {
+    } catch (error, stackTrace) {
       String getVersion() => flutterVersion ?? FlutterVersion.getVersionString();
-      _handleToolError(error, chain, verbose, args, reportCrashes, getVersion)
-          .then(runCompleter.complete, onError: runCompleter.completeError);
-    });
-    return runCompleter.future;
+      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
+    }
+    return 0;
   });
 }
 
@@ -161,7 +160,7 @@ WriteCallback writelnStderr = stderr.writeln;
 
 Future<int> _handleToolError(
     dynamic error,
-    Chain chain,
+    StackTrace stackTrace,
     bool verbose,
     List<String> args,
     bool reportCrashes,
@@ -181,7 +180,7 @@ Future<int> _handleToolError(
       writelnStderr(error.message);
     if (verbose) {
       writelnStderr();
-      writelnStderr(chain.terse.toString());
+      writelnStderr(stackTrace.toString());
       writelnStderr();
     }
     return _exit(error.exitCode ?? 1);
@@ -200,10 +199,10 @@ Future<int> _handleToolError(
     if (!reportCrashes) {
       // Print the stack trace on the bots - don't write a crash report.
       writelnStderr('$error');
-      writelnStderr(chain.terse.toString());
+      writelnStderr(stackTrace.toString());
       return _exit(1);
     } else {
-      flutterUsage.sendException(error, chain);
+      flutterUsage.sendException(error, stackTrace);
 
       if (error is String)
         writelnStderr('Oops; flutter has exited unexpectedly: "$error".');
@@ -212,11 +211,11 @@ Future<int> _handleToolError(
 
       await CrashReportSender.instance.sendReport(
         error: error,
-        stackTrace: chain,
+        stackTrace: stackTrace,
         getFlutterVersion: getFlutterVersion,
       );
       try {
-        final File file = await _createLocalCrashReport(args, error, chain);
+        final File file = await _createLocalCrashReport(args, error, stackTrace);
         writelnStderr(
             'Crash report written to ${file.path};\n'
                 'please let us know at https://github.com/flutter/flutter/issues.',
@@ -246,7 +245,7 @@ Future<int> _handleToolError(
 FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain chain) async {
+Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   final StringBuffer buffer = new StringBuffer();
@@ -258,7 +257,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, Chain cha
 
   buffer.writeln('## exception\n');
   buffer.writeln('${error.runtimeType}: $error\n');
-  buffer.writeln('```\n${chain.terse}```\n');
+  buffer.writeln('```\n$stackTrace```\n');
 
   buffer.writeln('## flutter doctor\n');
   buffer.writeln('```\n${await _doctorText()}```');

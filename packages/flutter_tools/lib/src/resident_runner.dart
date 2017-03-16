@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -89,6 +88,12 @@ abstract class ResidentRunner {
     return stopApp();
   }
 
+  Future<Null> detach() async {
+    await stopEchoingDeviceLog();
+    await preStop();
+    appFinished();
+  }
+
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
@@ -157,14 +162,11 @@ abstract class ResidentRunner {
   void registerSignalHandlers() {
     assert(stayResident);
     ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    if (!platform.isWindows) // TODO(goderbauer): enable on Windows when https://github.com/dart-lang/sdk/issues/28603 is fixed
-      ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    if (!platform.isWindows) {
-      ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-      ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
-    }
+    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
   Future<Null> _cleanUpAndExit(ProcessSignal signal) async {
@@ -228,9 +230,7 @@ abstract class ResidentRunner {
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(() {
-      appFinished();
-    });
+    vmService.done.whenComplete(appFinished);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -272,6 +272,9 @@ abstract class ResidentRunner {
     } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
       // F10, exit
       await stop();
+      return true;
+    } else if (lower == 'd') {
+      await detach();
       return true;
     }
 
@@ -316,9 +319,7 @@ abstract class ResidentRunner {
         printHelp(details: false);
       }
       terminal.singleCharMode = true;
-      terminal.onCharInput.listen((String code) {
-        processTerminalInput(code);
-      });
+      terminal.onCharInput.listen(processTerminalInput);
     }
   }
 

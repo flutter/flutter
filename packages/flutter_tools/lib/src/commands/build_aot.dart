@@ -33,7 +33,8 @@ class BuildAotCommand extends BuildSubCommand {
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'ios']
       )
-      ..addFlag('interpreter');
+      ..addFlag('interpreter')
+      ..addFlag('quiet', defaultsTo: false);
   }
 
   @override
@@ -51,8 +52,11 @@ class BuildAotCommand extends BuildSubCommand {
       throwToolExit('Unknown platform: $targetPlatform');
 
     final String typeName = artifacts.getEngineType(platform, getBuildMode());
-    final Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-        expectSlowOperation: true);
+    Status status;
+    if (!argResults['quiet']) {
+      status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
+          expectSlowOperation: true);
+    }
     final String outputPath = await buildAotSnapshot(
       findMainDartFile(targetFile),
       platform,
@@ -60,12 +64,17 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter']
     );
-    status.stop();
+    status?.stop();
 
     if (outputPath == null)
       throwToolExit(null);
 
-    printStatus('Built to $outputPath${fs.path.separator}.');
+    final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
+    if (argResults['quiet']) {
+      printTrace(builtMessage);
+    } else {
+      printStatus(builtMessage);
+    }
   }
 }
 
@@ -175,6 +184,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 
@@ -232,6 +242,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 

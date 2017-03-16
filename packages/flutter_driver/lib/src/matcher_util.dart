@@ -22,9 +22,8 @@ class MatchResult {
     : hasMatched = true,
       mismatchDescription = null;
 
-  MatchResult._mismatched(String mismatchDescription)
-    : hasMatched = false,
-      mismatchDescription = mismatchDescription;
+  MatchResult._mismatched(this.mismatchDescription)
+    : hasMatched = false;
 
   /// Whether the match succeeded.
   final bool hasMatched;

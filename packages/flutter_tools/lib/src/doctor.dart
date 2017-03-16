@@ -9,10 +9,14 @@ import 'package:archive/archive.dart';
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
+import 'cache.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
@@ -28,6 +32,19 @@ const Map<String, String> _osNames = const <String, String>{
 };
 
 String osName() {
+  if (platform.isWindows) {
+    final ProcessResult result = processManager.runSync(<String>['ver'], runInShell: true);
+    if (result.exitCode == 0)
+      return result.stdout.trim();
+  } else if (platform.isMacOS) {
+    final List<ProcessResult> results = <ProcessResult>[
+      processManager.runSync(<String>["sw_vers", "-productName"]),
+      processManager.runSync(<String>["sw_vers", "-productVersion"]),
+      processManager.runSync(<String>["sw_vers", "-buildVersion"]),
+    ];
+    if (results.every((ProcessResult result) => result.exitCode == 0))
+      return "${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}";
+  }
   final String os = platform.operatingSystem;
   return _osNames.containsKey(os) ? _osNames[os] : os;
 }
@@ -51,6 +68,7 @@ class Doctor {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
+      _validators.add(new _HostExecutableValidator());
 
       if (_androidWorkflow.appliesToHostPlatform)
         _validators.add(_androidWorkflow);
@@ -213,9 +231,9 @@ class _FlutterValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     final ValidationType valid = ValidationType.installed;
 
-    final FlutterVersion version = FlutterVersion.getVersion();
+    final FlutterVersion version = FlutterVersion.instance;
 
-    messages.add(new ValidationMessage('Flutter at ${version.flutterRoot}'));
+    messages.add(new ValidationMessage('Flutter at ${Cache.flutterRoot}'));
     messages.add(new ValidationMessage(
       'Framework revision ${version.frameworkRevisionShort} '
       '(${version.frameworkAge}), ${version.frameworkDate}'
@@ -225,6 +243,36 @@ class _FlutterValidator extends DoctorValidator {
 
     return new ValidationResult(valid, messages,
       statusInfo: 'on ${osName()}, channel ${version.channel}');
+  }
+}
+
+class _HostExecutableValidator extends DoctorValidator {
+  _HostExecutableValidator() : super('Host Executable Compatibility');
+
+  bool _genSnapshotRuns(String genSnapshotPath) {
+    final int kExpectedExitCode = 255;
+    try {
+      return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  @override
+  Future<ValidationResult> validate() async {
+    final String genSnapshotPath =
+      artifacts.getArtifactPath(Artifact.genSnapshot);
+    final List<ValidationMessage> messages = <ValidationMessage>[];
+    final bool hostExecutablesRun = _genSnapshotRuns(genSnapshotPath);
+    final ValidationType valid = hostExecutablesRun ? ValidationType.installed : ValidationType.missing;
+
+    if (hostExecutablesRun) {
+      messages.add(new ValidationMessage('Downloaded executables execute on host'));
+    } else {
+      messages.add(new ValidationMessage.error(
+        'Downloaded executables cannot execute on host. See https://github.com/flutter/flutter/issues/6207 for more information'));
+    }
+    return new ValidationResult(valid, messages);
   }
 }
 

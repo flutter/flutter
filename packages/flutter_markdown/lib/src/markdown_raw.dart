@@ -134,9 +134,9 @@ class MarkdownBodyRaw extends StatefulWidget {
 class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     _buildMarkdownCache();
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override

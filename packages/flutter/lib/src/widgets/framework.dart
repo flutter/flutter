@@ -679,7 +679,7 @@ enum _StateLifecycle {
   created,
 
   /// The [State.initState] method has been called but the [State] object is
-  /// not yet ready to build. [State.dependenciesChanged] is called at this time.
+  /// not yet ready to build. [State.didChangeDependencies] is called at this time.
   initialized,
 
   /// The [State] object is ready to build and [State.dispose] has not yet been
@@ -725,10 +725,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    [BuildContext] or the widget, which are available as the [context] and
 ///    [config] properties, respectively, when the [initState] method is
 ///    called.
-///  * The framework calls [dependenciesChanged]. Subclasses of [State] should
-///    override [dependenciesChanged] to perform initialization involving
+///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
+///    override [didChangeDependencies] to perform initialization involving
 ///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
-///    called, the [dependenciesChanged] method will be called again if the
+///    called, the [didChangeDependencies] method will be called again if the
 ///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
@@ -842,7 +842,7 @@ abstract class State<T extends StatefulWidget> {
   /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
-  /// method. However, [dependenciesChanged] will be called immediately
+  /// method. However, [didChangeDependencies] will be called immediately
   /// following this method, and [BuildContext.inheritFromWidgetOfExactType] can
   /// be used there.
   ///
@@ -1090,7 +1090,7 @@ abstract class State<T extends StatefulWidget> {
   /// expensive to do for every build.
   @protected
   @mustCallSuper
-  void dependenciesChanged() { }
+  void didChangeDependencies() { }
 
   @override
   String toString() {
@@ -1556,7 +1556,7 @@ abstract class BuildContext {
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
-  /// from [State.dependenciesChanged].
+  /// from [State.didChangeDependencies].
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1566,7 +1566,7 @@ abstract class BuildContext {
   /// the widget being rebuilt more often.
   ///
   /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.dependenciesChanged] will be
+  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
@@ -1580,7 +1580,7 @@ abstract class BuildContext {
   /// This method does not establish a relationship with the target in the way
   /// that [inheritFromWidgetOfExactType] does. It is normally used by such
   /// widgets to obtain their corresponding [InheritedElement] object so that they
-  /// can call [InheritedElement.dispatchDependenciesChanged] to actually
+  /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
   /// notify the widgets that _did_ register such a relationship.
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
@@ -1700,13 +1700,13 @@ class BuildOwner {
 
   final _InactiveElements _inactiveElements = new _InactiveElements();
 
-  final List<BuildableElement> _dirtyElements = <BuildableElement>[];
+  final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.beginFrame] calls [buildScope].
-  void scheduleBuildFor(BuildableElement element) {
+  void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
     assert(() {
@@ -1758,7 +1758,7 @@ class BuildOwner {
   int _debugStateLockLevel = 0;
   bool get _debugStateLocked => _debugStateLockLevel > 0;
   bool _debugBuilding = false;
-  BuildableElement _debugCurrentBuildTarget;
+  Element _debugCurrentBuildTarget;
 
   /// Establishes a scope in which calls to [State.setState] are forbidden, and
   /// calls the given `callback`.
@@ -1803,7 +1803,7 @@ class BuildOwner {
   /// Only one [buildScope] can be active at a time.
   ///
   /// A [buildScope] implies a [lockState] scope as well.
-  void buildScope(BuildableElement context, [VoidCallback callback]) {
+  void buildScope(Element context, [VoidCallback callback]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
     assert(context != null);
@@ -1820,9 +1820,8 @@ class BuildOwner {
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
-        assert(context is BuildableElement);
         assert(_debugStateLocked);
-        BuildableElement debugPreviousBuildTarget;
+        Element debugPreviousBuildTarget;
         assert(() {
           context._debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
           debugPreviousBuildTarget = _debugCurrentBuildTarget;
@@ -1879,7 +1878,7 @@ class BuildOwner {
         }
       }
       assert(() {
-        if (_dirtyElements.any((BuildableElement element) => element._active && element.dirty)) {
+        if (_dirtyElements.any((Element element) => element._active && element.dirty)) {
           throw new FlutterError(
             'buildScope missed some dirty elements.\n'
             'This probably indicates that the dirty list should have been resorted but was not.\n'
@@ -1890,7 +1889,7 @@ class BuildOwner {
         return true;
       });
     } finally {
-      for (BuildableElement element in _dirtyElements) {
+      for (Element element in _dirtyElements) {
         assert(element._inDirtyList);
         element._inDirtyList = false;
       }
@@ -2115,9 +2114,6 @@ abstract class Element implements BuildContext {
   int get depth => _depth;
   int _depth;
 
-  /// Returns true if the element has been marked as needing rebuilding.
-  bool get dirty => false;
-
   static int _sort(Element a, Element b) {
     if (a.depth < b.depth)
       return -1;
@@ -2141,7 +2137,9 @@ abstract class Element implements BuildContext {
 
   bool _active = false;
 
+  @mustCallSuper
   void _reassemble() {
+    markNeedsBuild();
     visitChildren((Element child) {
       child._reassemble();
     });
@@ -2554,6 +2552,7 @@ abstract class Element implements BuildContext {
     assert(owner != null);
     assert(depth != null);
     assert(!_active);
+    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
     _active = true;
     // We unregistered our dependencies in deactivate, but never cleared the list.
     // Since we're going to be reused, let's clear our list now.
@@ -2561,6 +2560,10 @@ abstract class Element implements BuildContext {
     _hadUnsatisfiedDependencies = false;
     _updateInheritance();
     assert(() { _debugLifecycleState = _ElementLifecycle.active; return true; });
+    if (_dirty)
+      owner.scheduleBuildFor(this);
+    if (hadDependencies)
+      didChangeDependencies();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -2587,9 +2590,9 @@ abstract class Element implements BuildContext {
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
       // get re-used, it doesn't matter. If we do, then we'll clear the list in
-      // activate(). The benefit of this is that it allows BuildableElement's
-      // activate() implementation to decide whether to rebuild based on whether
-      // we had dependencies here.
+      // activate(). The benefit of this is that it allows Element's activate()
+      // implementation to decide whether to rebuild based on whether we had
+      // dependencies here.
     }
     _inheritedWidgets = null;
     _active = false;
@@ -2787,7 +2790,10 @@ abstract class Element implements BuildContext {
   /// [InheritedWidget.updateShouldNotify] returned true), the framework calls
   /// this function to notify this element of the change.
   @mustCallSuper
-  void dependenciesChanged() { }
+  void didChangeDependencies() {
+    assert(_active); // otherwise markNeedsBuild is a no-op
+    markNeedsBuild();
+  }
 
   /// Returns a description of what caused this element to be created.
   ///
@@ -2838,6 +2844,8 @@ abstract class Element implements BuildContext {
         description.add('${widget.key}');
       widget.debugFillDescription(description);
     }
+    if (dirty)
+      description.add('dirty');
   }
 
   /// A detailed, textual description of this element, includings its children.
@@ -2853,50 +2861,8 @@ abstract class Element implements BuildContext {
     }
     return result;
   }
-}
-
-/// A widget that renders an exception's message.
-///
-/// This widget is used when a build function fails, to help with determining
-/// where the problem lies. Exceptions are also logged to the console, which you
-/// can read using `flutter logs`. The console will also include additional
-/// information such as the stack trace for the exception.
-class ErrorWidget extends LeafRenderObjectWidget {
-  /// Creates a widget that displays the given error message.
-  ErrorWidget(Object exception) : message = _stringify(exception),
-      super(key: new UniqueKey());
-
-  /// The message to display.
-  final String message;
-
-  static String _stringify(Object exception) {
-    try {
-      return exception.toString();
-    } catch (e) { }
-    return 'Error';
-  }
-
-  @override
-  RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
-
-  @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('message: ' + _stringify(message));
-  }
-}
-
-/// An [Element] that can be marked dirty and rebuilt.
-///
-/// In practice, all subclasses of [Element] in the Flutter framework are
-/// subclasses of [BuildableElement]. The distinction exists primarily to
-/// segregate unrelated code.
-abstract class BuildableElement extends Element {
-  /// Creates an element that uses the given widget as its configuration.
-  BuildableElement(Widget widget) : super(widget);
 
   /// Returns true if the element has been marked as needing rebuilding.
-  @override
   bool get dirty => _dirty;
   bool _dirty = true;
 
@@ -2991,7 +2957,7 @@ abstract class BuildableElement extends Element {
     });
     assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(owner._debugStateLocked);
-    BuildableElement debugPreviousBuildTarget;
+    Element debugPreviousBuildTarget;
     assert(() {
       debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
       owner._debugCurrentBuildTarget = this;
@@ -3009,35 +2975,36 @@ abstract class BuildableElement extends Element {
   /// Called by rebuild() after the appropriate checks have been made.
   @protected
   void performRebuild();
+}
 
-  @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    assert(_active); // otherwise markNeedsBuild is a no-op
-    markNeedsBuild();
+/// A widget that renders an exception's message.
+///
+/// This widget is used when a build function fails, to help with determining
+/// where the problem lies. Exceptions are also logged to the console, which you
+/// can read using `flutter logs`. The console will also include additional
+/// information such as the stack trace for the exception.
+class ErrorWidget extends LeafRenderObjectWidget {
+  /// Creates a widget that displays the given error message.
+  ErrorWidget(Object exception) : message = _stringify(exception),
+      super(key: new UniqueKey());
+
+  /// The message to display.
+  final String message;
+
+  static String _stringify(Object exception) {
+    try {
+      return exception.toString();
+    } catch (e) { }
+    return 'Error';
   }
 
   @override
-  void activate() {
-    final bool hadDependencies = ((_dependencies != null && _dependencies.isNotEmpty) || _hadUnsatisfiedDependencies);
-    super.activate(); // clears _dependencies, and sets active to true
-    if (_dirty)
-      owner.scheduleBuildFor(this);
-    if (hadDependencies)
-      dependenciesChanged();
-  }
-
-  @override
-  void _reassemble() {
-    markNeedsBuild();
-    super._reassemble();
-  }
+  RenderBox createRenderObject(BuildContext context) => new RenderErrorBox(message);
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (dirty)
-      description.add('dirty');
+    description.add('message: ' + _stringify(message));
   }
 }
 
@@ -3059,7 +3026,7 @@ typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 /// [RenderObject]s indirectly by creating other [Element]s.
 ///
 /// Contrast with [RenderObjectElement].
-abstract class ComponentElement extends BuildableElement {
+abstract class ComponentElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   ComponentElement(Widget widget) : super(widget);
 
@@ -3078,9 +3045,9 @@ abstract class ComponentElement extends BuildableElement {
     rebuild();
   }
 
-  /// Calls the `build` method of the [StatelessWidget] object (for
-  /// stateless widgets) or the [State] object (for stateful widgets) and
-  /// then updates the widget tree.
+  /// Calls the [StatelessWidget.build] method of the [StatelessWidget] object
+  /// (for stateless widgets) or the [State.build] method of the [State] object
+  /// (for stateful widgets) and then updates the widget tree.
   ///
   /// Called automatically during [mount] to generate the first build, and by
   /// [rebuild] when the element needs updating.
@@ -3122,6 +3089,9 @@ abstract class ComponentElement extends BuildableElement {
     });
   }
 
+  /// Subclasses should override this function to actually call the appropriate
+  /// `build` function (e.g., [StatelessWidget.build] or [State.build]) for
+  /// their widget.
   @protected
   Widget build();
 
@@ -3208,7 +3178,7 @@ class StatefulElement extends ComponentElement {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
     assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; });
-    _state.dependenciesChanged();
+    _state.didChangeDependencies();
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; });
     super._firstBuild();
   }
@@ -3277,7 +3247,7 @@ class StatefulElement extends ComponentElement {
           'then the rebuilt dependent widget will not reflect the changes in the '
           'inherited widget.\n'
           'Typically references to to inherited widgets should occur in widget build() methods. Alternatively, '
-          'initialization based on inherited widgets can be placed in the dependenciesChanged method, which '
+          'initialization based on inherited widgets can be placed in the didChangeDependencies method, which '
           'is called after initState and whenever the dependencies change thereafter.'
         );
       }
@@ -3307,9 +3277,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
-    _state.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _state.didChangeDependencies();
   }
 
   @override
@@ -3438,7 +3408,7 @@ class InheritedElement extends ProxyElement {
   void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-    dispatchDependenciesChanged();
+    dispatchDidChangeDependencies();
   }
 
   /// Notifies all dependent elements that this inherited widget has changed.
@@ -3449,7 +3419,7 @@ class InheritedElement extends ProxyElement {
   /// the build phase. [InheritedWidget] subclasses can also call this directly
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
-  void dispatchDependenciesChanged() {
+  void dispatchDidChangeDependencies() {
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
@@ -3460,7 +3430,7 @@ class InheritedElement extends ProxyElement {
       });
       // check that it really deepends on us
       assert(dependent._dependencies.contains(this));
-      dependent.dependenciesChanged();
+      dependent.didChangeDependencies();
     }
   }
 }
@@ -3630,7 +3600,7 @@ class InheritedElement extends ProxyElement {
 /// expose them in its implementation of the [visitChildren] method. This method
 /// is used by many of the framework's internal mechanisms, and so should be
 /// fast. It is also used by the test framework and [debugDumpApp].
-abstract class RenderObjectElement extends BuildableElement {
+abstract class RenderObjectElement extends Element {
   /// Creates an element that uses the given widget as its configuration.
   RenderObjectElement(RenderObjectWidget widget) : super(widget);
 

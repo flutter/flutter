@@ -20,7 +20,7 @@ import 'sliver.dart';
 /// its child. Any incoming [SliverConstraints.overlap] is ignored and not
 /// passed on to the child.
 ///
-/// Applying this to anything but the most mundane sliver is likely to have
+/// Applying padding to anything but the most mundane sliver is likely to have
 /// undesired effects. For example, wrapping a
 /// [RenderSliverPinnedPersistentHeader] will cause the app bar to overlap
 /// earlier slivers (contrary to the normal behavior of pinned app bars), and

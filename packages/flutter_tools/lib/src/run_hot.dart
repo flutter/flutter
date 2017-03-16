@@ -87,6 +87,74 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
+  Future<int> attach(Uri observatoryUri, {
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
+  }) async {
+    _observatoryUri = observatoryUri;
+    try {
+      await connectToServiceProtocol(_observatoryUri);
+    } catch (error) {
+      printError('Error connecting to the service protocol: $error');
+      return 2;
+    }
+
+    try {
+      final Uri baseUri = await _initDevFS();
+      if (connectionInfoCompleter != null) {
+        connectionInfoCompleter.complete(
+          new DebugConnectionInfo(
+            httpUri: _observatoryUri,
+            wsUri: vmService.wsAddress,
+            baseUri: baseUri.toString()
+          )
+        );
+      }
+    } catch (error) {
+      printError('Error initializing DevFS: $error');
+      return 3;
+    }
+    final bool devfsResult = await _updateDevFS();
+    if (!devfsResult) {
+      printError('Could not perform initial file synchronization.');
+      return 3;
+    }
+
+    await vmService.vm.refreshViews();
+    printTrace('Connected to ${vmService.vm.mainView}.');
+
+    if (stayResident) {
+      setupTerminal();
+      registerSignalHandlers();
+    }
+
+    appStartedCompleter?.complete();
+
+    if (benchmarkMode) {
+      // We are running in benchmark mode.
+      printStatus('Running in benchmark mode.');
+      // Measure time to perform a hot restart.
+      printStatus('Benchmarking hot restart');
+      await restart(fullRestart: true);
+      await vmService.vm.refreshViews();
+      // TODO(johnmccutchan): Modify script entry point.
+      printStatus('Benchmarking hot reload');
+      // Measure time to perform a hot reload.
+      await restart(fullRestart: false);
+      printStatus('Benchmark completed. Exiting application.');
+      await _cleanupDevFS();
+      await stopEchoingDeviceLog();
+      await stopApp();
+      final File benchmarkOutput = fs.file('hot_benchmark.json');
+      benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
+    }
+
+    if (stayResident)
+      return waitForAppToFinish();
+    await cleanupAtFinish();
+    return 0;
+  }
+
   @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
@@ -152,68 +220,9 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    _observatoryUri = result.observatoryUri;
-    try {
-      await connectToServiceProtocol(_observatoryUri);
-    } catch (error) {
-      printError('Error connecting to the service protocol: $error');
-      return 2;
-    }
-
-    try {
-      final Uri baseUri = await _initDevFS();
-      if (connectionInfoCompleter != null) {
-        connectionInfoCompleter.complete(
-          new DebugConnectionInfo(
-            httpUri: _observatoryUri,
-            wsUri: vmService.wsAddress,
-            baseUri: baseUri.toString()
-          )
-        );
-      }
-    } catch (error) {
-      printError('Error initializing DevFS: $error');
-      return 3;
-    }
-    final bool devfsResult = await _updateDevFS();
-    if (!devfsResult) {
-      printError('Could not perform initial file synchronization.');
-      return 3;
-    }
-
-    await vmService.vm.refreshViews();
-    printTrace('Connected to ${vmService.vm.mainView}.');
-
-    if (stayResident) {
-      setupTerminal();
-      registerSignalHandlers();
-    }
-
-    appStartedCompleter?.complete();
-
-    if (benchmarkMode) {
-      // We are running in benchmark mode.
-      printStatus('Running in benchmark mode.');
-      // Measure time to perform a hot restart.
-      printStatus('Benchmarking hot restart');
-      await restart(fullRestart: true);
-      await vmService.vm.refreshViews();
-      // TODO(johnmccutchan): Modify script entry point.
-      printStatus('Benchmarking hot reload');
-      // Measure time to perform a hot reload.
-      await restart(fullRestart: false);
-      printStatus('Benchmark completed. Exiting application.');
-      await _cleanupDevFS();
-      await stopEchoingDeviceLog();
-      await stopApp();
-      final File benchmarkOutput = fs.file('hot_benchmark.json');
-      benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
-    }
-
-    if (stayResident)
-      return waitForAppToFinish();
-    await cleanupAtFinish();
-    return 0;
+    return attach(result.observatoryUri,
+                  connectionInfoCompleter: connectionInfoCompleter,
+                  appStartedCompleter: appStartedCompleter);
   }
 
   @override
@@ -426,7 +435,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload');
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+        reloadMessage = 'Reload done: $loadedLibraryCount of $finalLibraryCount libraries needed reloading';
       }
     } catch (error, st) {
       final int errorCode = error['code'];

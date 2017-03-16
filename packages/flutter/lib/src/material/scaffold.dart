@@ -679,7 +679,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet = new PersistentBottomSheetController<T>._(
         bottomSheet,
         completer,
-        () => entry.remove(),
+        entry.remove,
         (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); }
       );
     });

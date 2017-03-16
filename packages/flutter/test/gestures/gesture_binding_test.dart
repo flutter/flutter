@@ -41,7 +41,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);
@@ -59,7 +59,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
@@ -85,7 +85,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 3);
@@ -104,7 +104,7 @@ void main() {
     );
 
     final List<PointerEvent> events = <PointerEvent>[];
-    _binding.callback = (PointerEvent event) => events.add(event);
+    _binding.callback = events.add;
 
     ui.window.onPointerDataPacket(packet);
     expect(events.length, 2);

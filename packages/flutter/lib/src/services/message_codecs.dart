@@ -11,6 +11,8 @@ import 'message_codec.dart';
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 class BinaryCodec implements MessageCodec<ByteData> {
+  /// Creates a [MessageCodec] with unencoded binary messages represented using
+  /// [ByteData].
   const BinaryCodec();
 
   @override
@@ -22,6 +24,7 @@ class BinaryCodec implements MessageCodec<ByteData> {
 
 /// [MessageCodec] with UTF-8 encoded String messages.
 class StringCodec implements MessageCodec<String> {
+  /// Creates a [MessageCodec] with UTF-8 encoded String messages.
   const StringCodec();
 
   @override
@@ -54,6 +57,8 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as defined by the JSON codec of the
   // dart:convert package. The format used must match the Android and
   // iOS counterparts.
+
+  /// Creates a [MessageCodec] with UTF-8 encoded JSON messages.
   const JSONMessageCodec();
 
   @override
@@ -72,6 +77,7 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
 }
 
 /// [MethodCodec] with UTF-8 encoded JSON method calls and result envelopes.
+///
 /// Values supported as method arguments and result payloads are those supported
 /// by [JSONMessageCodec].
 class JSONMethodCodec implements MethodCodec {
@@ -87,6 +93,9 @@ class JSONMethodCodec implements MethodCodec {
   //     element, or
   //   * three-element lists containing, in order, an error code String, an
   //     error message String, and an error details value.
+
+  /// Creates a [MethodCodec] with UTF-8 encoded JSON method calls and result
+  /// envelopes.
   const JSONMethodCodec();
 
   @override
@@ -185,6 +194,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   static const int _kList = 12;
   static const int _kMap = 13;
 
+  /// Creates a [MessageCodec] using the Flutter standard binary encoding.
   const StandardMessageCodec();
 
   @override
@@ -379,6 +389,7 @@ class StandardMethodCodec implements MethodCodec {
   //   * In the error case, the concatenation of the encoding of the error code
   //     string, the error message string, and the error details value.
 
+  /// Creates a [MethodCodec] using the Flutter standard binary encoding.
   const StandardMethodCodec();
 
   @override

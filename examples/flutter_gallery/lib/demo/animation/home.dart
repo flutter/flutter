@@ -386,7 +386,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
       backgroundColor: _kAppBackgroundColor,
       body: new Builder(
         // Insert an element so that _buildBody can find the PrimaryScrollController.
-        builder: (BuildContext context) => _buildBody(context),
+        builder: _buildBody,
       ),
     );
   }
@@ -420,7 +420,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final Iterable<Widget> detailItems = section.details.map((SectionDetail detail) {
       return new SectionDetailView(detail: detail);
     });
-    return ListItem.divideItems(context: context, items: detailItems).map((Widget item) {
+    return ListTile.divideTiles(context: context, tiles: detailItems).map((Widget item) {
         return new SliverToBoxAdapter(child: item);
     });
   }

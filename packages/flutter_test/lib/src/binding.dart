@@ -829,10 +829,9 @@ const int _kPointerDecay = -2;
 
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
-    int pointer,
+    this.pointer,
     this.position
-  ) : pointer = pointer,
-      color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+  ) : color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;
   final Color color;
@@ -890,7 +889,7 @@ class _LiveTestRenderView extends RenderView {
         .keys
         .where((int pointer) => _pointers[pointer].decay == 0)
         .toList()
-        .forEach((int pointer) { _pointers.remove(pointer); });
+        .forEach(_pointers.remove);
       if (dirty)
         scheduleMicrotask(markNeedsPaint);
     }

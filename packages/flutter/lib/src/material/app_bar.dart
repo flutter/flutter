@@ -164,7 +164,7 @@ class AppBar extends StatefulWidget {
     this.title,
     this.actions,
     this.flexibleSpace,
-    AppBarBottomWidget bottom,
+    this.bottom,
     this.elevation: 4,
     this.backgroundColor,
     this.brightness,
@@ -174,8 +174,7 @@ class AppBar extends StatefulWidget {
     this.centerTitle,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
-  }) : bottom = bottom,
-       _bottomHeight = bottom?.bottomHeight ?? 0.0,
+  }) : _bottomHeight = bottom?.bottomHeight ?? 0.0,
        super(key: key) {
     assert(elevation != null);
     assert(primary != null);
@@ -335,8 +334,8 @@ class _AppBarState extends State<AppBar> {
   bool _canPop = false;
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     final ScaffoldState scaffold = Scaffold.of(context);
     _hasDrawer = scaffold?.hasDrawer ?? false;
     _canPop = ModalRoute.of(context)?.canPop ?? false;
@@ -497,7 +496,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.title,
     @required this.actions,
     @required this.flexibleSpace,
-    @required AppBarBottomWidget bottom,
+    @required this.bottom,
     @required this.elevation,
     @required this.backgroundColor,
     @required this.brightness,
@@ -510,8 +509,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.topPadding,
     @required this.floating,
     @required this.pinned,
-  }) : bottom = bottom,
-      _bottomHeight = bottom?.bottomHeight ?? 0.0 {
+  }) : _bottomHeight = bottom?.bottomHeight ?? 0.0 {
     assert(primary || topPadding == 0.0);
   }
 

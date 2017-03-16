@@ -10,7 +10,7 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/os.dart';
+import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'devfs.dart';
@@ -277,7 +277,7 @@ abstract class Device {
   }
 
   static void printDevices(List<Device> devices) {
-    descriptions(devices).forEach((String msg) => printStatus(msg));
+    descriptions(devices).forEach(printStatus);
   }
 }
 
@@ -308,7 +308,7 @@ class DebuggingOptions {
   Future<int> findBestObservatoryPort() {
     if (hasObservatoryPort)
       return new Future<int>.value(observatoryPort);
-    return findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
+    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
 
   bool get hasDiagnosticPort => diagnosticPort != null;
@@ -318,7 +318,7 @@ class DebuggingOptions {
   Future<int> findBestDiagnosticPort() {
     if (hasDiagnosticPort)
       return new Future<int>.value(diagnosticPort);
-    return findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
+    return portScanner.findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
   }
 }
 

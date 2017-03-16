@@ -86,8 +86,8 @@ final RRect _kTickFundamentalRRect = new RRect.fromLTRBXY(-10.0, 1.0, -5.0, -1.0
 
 class _CupertinoActivityIndicatorPainter extends CustomPainter {
   _CupertinoActivityIndicatorPainter({
-    Animation<double> position,
-  }) : position = position, super(repaint: position);
+    this.position,
+  }) : super(repaint: position);
 
   final Animation<double> position;
 

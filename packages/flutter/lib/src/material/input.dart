@@ -127,9 +127,7 @@ class _InputFieldState extends State<InputField> {
       new GestureDetector(
         key: focusKey == _focusKey ? _focusKey : null,
         behavior: HitTestBehavior.opaque,
-        onTap: () {
-          requestKeyboard();
-        },
+        onTap: requestKeyboard,
         // Since the focusKey may have been created here, defer building the
         // EditableText until the focusKey's context has been set. This is
         // necessary because the EditableText will check the focus, like

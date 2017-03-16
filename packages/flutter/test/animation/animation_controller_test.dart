@@ -52,9 +52,7 @@ void main() {
     final List<double> valueLog = <double>[];
     final List<AnimationStatus> log = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        log.add(status);
-      })
+      ..addStatusListener(log.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -115,9 +113,7 @@ void main() {
     final List<double> valueLog = <double>[];
     final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        statusLog.add(status);
-      })
+      ..addStatusListener(statusLog.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -143,9 +139,7 @@ void main() {
     final List<double> valueLog = <double>[];
     final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        statusLog.add(status);
-      })
+      ..addStatusListener(statusLog.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -283,4 +277,13 @@ void main() {
     controller.dispose();
     expect(controller.dispose, throwsFlutterError);
   });
+
+  test('AnimationController repeat() throws if period is not specified', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+    expect((){ controller.repeat(); }, throwsFlutterError);
+    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+  });
+
 }

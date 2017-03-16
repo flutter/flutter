@@ -169,7 +169,7 @@ class AnalysisServer {
     _process.exitCode.whenComplete(() => _process = null);
 
     final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
-    errorStream.listen((String error) => printError(error));
+    errorStream.listen(printError);
 
     final Stream<String> inStream = _process.stdout.transform(UTF8.decoder).transform(const LineSplitter());
     inStream.listen(_handleServerResponse);

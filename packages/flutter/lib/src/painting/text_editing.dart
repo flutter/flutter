@@ -94,13 +94,11 @@ class TextSelection extends TextRange {
   ///
   /// The [baseOffset] and [extentOffset] arguments must not be null.
   const TextSelection({
-    @required int baseOffset,
-    @required int extentOffset,
+    @required this.baseOffset,
+    @required this.extentOffset,
     this.affinity: TextAffinity.downstream,
     this.isDirectional: false
-  }) : baseOffset = baseOffset,
-       extentOffset = extentOffset,
-       super(
+  }) : super(
          start: baseOffset < extentOffset ? baseOffset : extentOffset,
          end: baseOffset < extentOffset ? extentOffset : baseOffset
        );

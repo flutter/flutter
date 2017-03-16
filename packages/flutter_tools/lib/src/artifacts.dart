@@ -89,7 +89,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-        assert(mode == null, 'Platform $platform does not support different build modes.');
+      case TargetPlatform.fuchsia:
         return _getHostArtifactPath(artifact, platform);
     }
     assert(false, 'Invalid platform $platform.');
@@ -171,6 +171,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.linux_x64:
       case TargetPlatform.darwin_x64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
@@ -221,7 +222,7 @@ class LocalEngineArtifacts extends Artifacts {
         final String abi = _getAbiDirectory(platform);
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', fs.path.join('android', 'libs', abi, _artifactToFileName(artifact)));
       case Artifact.genSnapshot:
-        return _genSnapshotPath(platform);
+        return _genSnapshotPath(platform, mode);
       case Artifact.skyShell:
         return _skyShellPath(platform);
       case Artifact.isolateSnapshotData:
@@ -240,9 +241,9 @@ class LocalEngineArtifacts extends Artifacts {
     return fs.path.basename(engineOutPath);
   }
 
-  String _genSnapshotPath(TargetPlatform platform) {
+  String _genSnapshotPath(TargetPlatform platform, BuildMode mode) {
     String clang;
-    if (platform == TargetPlatform.ios) {
+    if (platform == TargetPlatform.ios || mode == BuildMode.debug) {
       clang = 'clang_x64';
     } else {
       clang = getCurrentHostPlatform() == HostPlatform.darwin_x64 ? 'clang_i386' : 'clang_x86';

@@ -36,7 +36,7 @@ Future<int> createSnapshot({
   assert(mainPath != null);
   assert(snapshotPath != null);
   assert(packages != null);
-  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot);
+  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, BuildMode.debug);
   final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
   final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
 

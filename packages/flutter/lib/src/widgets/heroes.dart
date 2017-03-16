@@ -222,6 +222,7 @@ class _HeroFlight {
   ProxyAnimation _proxyAnimation;
   _HeroFlightManifest manifest;
   OverlayEntry overlayEntry;
+  bool _aborted = false;
 
   RectTween _doCreateRectTween(Rect begin, Rect end) {
     if (manifest.createRectTween != null)
@@ -237,9 +238,10 @@ class _HeroFlight {
       child: manifest.toHero.config,
       builder: (BuildContext context, Widget child) {
         final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject();
-        if (toHeroBox == null || !toHeroBox.attached) {
-          // The toHero no longer exists. Continue flying while fading out.
-          if (_heroOpacity == kAlwaysCompleteAnimation) {
+        if (_aborted || toHeroBox == null || !toHeroBox.attached) {
+          // The toHero no longer exists or it's no longer the flight's destination.
+          // Continue flying while fading out.
+          if (_heroOpacity.isCompleted) {
             _heroOpacity = new Tween<double>(begin: 1.0, end: 0.0)
               .chain(new CurveTween(curve: new Interval(_proxyAnimation.value, 1.0)))
               .animate(_proxyAnimation);
@@ -294,6 +296,7 @@ class _HeroFlight {
 
   // The simple case: we're either starting a push or a pop animation.
   void start(_HeroFlightManifest initialManifest) {
+    assert(!_aborted);
     assert(() {
       final Animation<double> initial = initialManifest.animation;
       switch (initialManifest.type) {
@@ -305,6 +308,7 @@ class _HeroFlight {
     });
 
     manifest = initialManifest;
+
     if (manifest.type == _HeroFlightType.pop)
       _proxyAnimation.parent = new ReverseAnimation(manifest.animation);
     else
@@ -388,7 +392,12 @@ class _HeroFlight {
       newManifest.toHero.startFlight();
     }
 
+    _aborted = false;
     manifest = newManifest;
+  }
+
+  void abort() {
+    _aborted = true;
   }
 
   @override
@@ -407,10 +416,13 @@ class _HeroFlight {
 class HeroController extends NavigatorObserver {
   /// Creates a hero controller with the given [RectTween] constructor if any.
   ///
-  /// The [createRectTween] argument is optional. If null, a linear
-  /// [RectTween] is used.
+  /// The [createRectTween] argument is optional. If null, the controller uses a
+  /// linear [RectTween].
   HeroController({ this.createRectTween });
 
+  /// Used to create [RectTween]s that interpolate the position of heros in flight.
+  ///
+  /// If null, the controller uses a linear [RectTween].
   final CreateRectTween createRectTween;
 
   // Disable Hero animations while a user gesture is controlling the navigation.
@@ -418,8 +430,7 @@ class HeroController extends NavigatorObserver {
 
   // All of the heroes that are currently in the overlay and in motion.
   // Indexed by the hero tag.
-  // TBD: final?
-  Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
+  final Map<Object, _HeroFlight> _flights = <Object, _HeroFlight>{};
 
   @override
   void didPush(Route<dynamic> to, Route<dynamic> from) {
@@ -506,6 +517,8 @@ class HeroController extends NavigatorObserver {
             _flights[tag].restart(manifest);
         else
           _flights[tag] = new _HeroFlight(_handleFlightEnded)..start(manifest);
+      } else if (_flights[tag] != null) {
+        _flights[tag].abort();
       }
     }
   }

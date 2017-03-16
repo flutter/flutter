@@ -25,10 +25,12 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
-import 'dart:io' as io show exit;
+import 'dart:async';
+import 'dart:io' as io show exit, ProcessSignal;
 
 import 'package:meta/meta.dart';
 
+import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -55,7 +57,7 @@ export 'dart:io'
         Process,
         ProcessException,
         ProcessResult,
-        ProcessSignal,
+        // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
         ServerSocket,
@@ -72,7 +74,7 @@ export 'dart:io'
 /// Exits the process with the given [exitCode].
 typedef void ExitFunction(int exitCode);
 
-final ExitFunction _defaultExitFunction = (int exitCode) => io.exit(exitCode);
+final ExitFunction _defaultExitFunction = io.exit;
 
 ExitFunction _exitFunction = _defaultExitFunction;
 
@@ -98,4 +100,78 @@ void setExitFunctionForTests([ExitFunction exitFunction]) {
 @visibleForTesting
 void restoreExitFunction() {
   _exitFunction = _defaultExitFunction;
+}
+
+/// A portable version of [io.ProcessSignal].
+///
+/// Listening on signals that don't exist on the current platform is just a
+/// no-op. This is in contrast to [io.ProcessSignal], where listening to
+/// non-existent signals throws an exception.
+class ProcessSignal implements io.ProcessSignal {
+  @visibleForTesting
+  const ProcessSignal(this._delegate);
+
+  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
+  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
+  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
+  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2);
+
+  static final ProcessSignal SIGINT = SigintProcessSignal.instance; // ignore: non_constant_identifier_names
+
+  final io.ProcessSignal _delegate;
+
+  @override
+  Stream<ProcessSignal> watch() {
+    return _delegate.watch().map((io.ProcessSignal signal) => this);
+  }
+
+  @override
+  String toString() => _delegate.toString();
+}
+
+/// A [ProcessSignal] that is only available on Posix platforms.
+///
+/// Listening to a [_PosixProcessSignal] is a no-op on Windows.
+class _PosixProcessSignal extends ProcessSignal {
+
+  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+
+  @override
+  Stream<ProcessSignal> watch() {
+    if (platform.isWindows)
+      return new Stream<ProcessSignal>.empty();
+    return super.watch();
+  }
+}
+
+// TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28995 is resolved.
+class SigintProcessSignal extends ProcessSignal {
+  SigintProcessSignal._() : super(io.ProcessSignal.SIGINT);
+
+  static final SigintProcessSignal instance = new SigintProcessSignal._();
+  bool _isInitialized = false;
+
+  final StreamController<ProcessSignal> _controller = new StreamController<ProcessSignal>();
+
+  @override
+  Stream<ProcessSignal> watch() {
+    init();
+    return _controller.stream;
+  }
+
+  void init() {
+    if (!_isInitialized) {
+      _delegate.watch().listen(_handleSigInt);
+      _isInitialized = true;
+    }
+  }
+
+  void _handleSigInt(io.ProcessSignal signal) {
+    if (platform.isWindows && !_controller.hasListener) {
+      // If nobody is listening for SIGINT, we force a clean exit to avoid
+      // https://github.com/dart-lang/sdk/issues/28995.
+      exit(0);
+    }
+    _controller.add(this);
+  }
 }

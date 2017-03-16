@@ -48,6 +48,9 @@ abstract class WidgetsBindingObserver {
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  /// Called when the system is running low on memory.
+  void didHaveMemoryPressure() { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
@@ -60,6 +63,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     ui.window.onLocaleChanged = handleLocaleChanged;
     PlatformMessages.setJSONMessageHandler('flutter/navigation', _handleNavigationMessage);
     PlatformMessages.setStringMessageHandler('flutter/lifecycle', _handleLifecycleMessage);
+    PlatformMessages.setJSONMessageHandler('flutter/system', _handleSystemMessage);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -209,6 +213,15 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       case 'AppLifecycleState.resumed':
         handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         break;
+    }
+    return null;
+  }
+
+  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+    final String type = message['type'];
+    if (type == 'memoryPressure') {
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didHaveMemoryPressure();
     }
     return null;
   }
@@ -432,9 +445,9 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   /// Used by [WidgetsBinding] to attach the root widget to the [RenderView].
   RenderObjectToWidgetAdapter({
     this.child,
-    RenderObjectWithChildMixin<T> container,
+    this.container,
     this.debugShortDescription
-  }) : container = container, super(key: new GlobalObjectKey(container));
+  }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
   final Widget child;

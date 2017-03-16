@@ -8,8 +8,8 @@ import 'dart:convert';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -447,7 +447,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort: null}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
-      hostPort = await findAvailablePort();
+      hostPort = await portScanner.findAvailablePort();
     }
 
     // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID

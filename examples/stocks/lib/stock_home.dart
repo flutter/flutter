@@ -24,7 +24,7 @@ class _NotImplementedDialog extends StatelessWidget {
       content: new Text('This feature has not yet been implemented.'),
       actions: <Widget>[
         new FlatButton(
-          onPressed: () { debugDumpApp(); },
+          onPressed: debugDumpApp,
           child: new Row(
             children: <Widget>[
               new Icon(

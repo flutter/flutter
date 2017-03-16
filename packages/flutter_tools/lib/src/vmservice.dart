@@ -37,9 +37,7 @@ const Duration kLongRequestTimeout = const Duration(minutes: 1);
 class VMService {
   VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
     _vm = new VM._empty(this);
-    _peer.listen().catchError((dynamic e, StackTrace stackTrace) {
-      _connectionError.completeError(e, stackTrace);
-    });
+    _peer.listen().catchError(_connectionError.completeError);
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
@@ -549,7 +547,7 @@ class VM extends ServiceObjectOwner {
         toRemove.add(id);
       }
     });
-    toRemove.forEach((String id) => _isolateCache.remove(id));
+    toRemove.forEach(_isolateCache.remove);
     _buildIsolateList();
   }
 

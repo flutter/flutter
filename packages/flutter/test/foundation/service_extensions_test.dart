@@ -58,9 +58,7 @@ class TestServiceExtensionsBinding extends BindingBase
 
   Future<Null> flushMicrotasks() {
     final Completer<Null> completer = new Completer<Null>();
-    new Timer(const Duration(), () {
-      completer.complete();
-    });
+    new Timer(const Duration(), completer.complete);
     return completer.future;
   }
 }
