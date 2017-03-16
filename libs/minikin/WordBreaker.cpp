@@ -58,14 +58,6 @@ ssize_t WordBreaker::current() const {
     return mCurrent;
 }
 
-enum ScanState {
-    START,
-    SAW_AT,
-    SAW_COLON,
-    SAW_COLON_SLASH,
-    SAW_COLON_SLASH_SLASH,
-};
-
 /**
  * Determine whether a line break at position i within the buffer buf is valid. This
  * represents customization beyond the ICU behavior, because plain ICU provides some
@@ -120,6 +112,22 @@ static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
     return true;
 }
 
+// Customized iteratorNext that takes care of both resets and our modifications
+// to ICU's behavior.
+int32_t WordBreaker::iteratorNext() {
+    int32_t result;
+    do {
+        if (mIteratorWasReset) {
+            result = mBreakIterator->following(mCurrent);
+            mIteratorWasReset = false;
+        } else {
+            result = mBreakIterator->next();
+        }
+    } while (!(result == icu::BreakIterator::DONE || (size_t)result == mTextSize
+            || isBreakValid(mText, mTextSize, result)));
+    return result;
+}
+
 // Chicago Manual of Style recommends breaking after these characters in URLs and email addresses
 static bool breakAfter(uint16_t c) {
     return c == ':' || c == '=' || c == '&';
@@ -131,9 +139,15 @@ static bool breakBefore(uint16_t c) {
             || c == '%' || c == '=' || c == '&';
 }
 
-ssize_t WordBreaker::next() {
-    mLast = mCurrent;
+enum ScanState {
+    START,
+    SAW_AT,
+    SAW_COLON,
+    SAW_COLON_SLASH,
+    SAW_COLON_SLASH_SLASH,
+};
 
+void WordBreaker::detectEmailOrUrl() {
     // scan forward from current ICU position for email address or URL
     if (mLast >= mScanOffset) {
         ScanState state = START;
@@ -158,6 +172,9 @@ ssize_t WordBreaker::next() {
         }
         if (state == SAW_AT || state == SAW_COLON_SLASH_SLASH) {
             if (!mBreakIterator->isBoundary(i)) {
+                // If there are combining marks or such at the end of the URL or the email address,
+                // consider them a part of the URL or the email, and skip to the next actual
+                // boundary.
                 i = mBreakIterator->following(i);
             }
             mInEmailOrUrl = true;
@@ -167,48 +184,46 @@ ssize_t WordBreaker::next() {
         }
         mScanOffset = i;
     }
+}
 
-    if (mInEmailOrUrl) {
-        // special rules for email addresses and URL's as per Chicago Manual of Style (16th ed.)
-        uint16_t lastChar = mText[mLast];
-        ssize_t i;
-        for (i = mLast + 1; i < mScanOffset; i++) {
-            if (breakAfter(lastChar)) {
-                break;
-            }
-            // break after double slash
-            if (lastChar == '/' && i >= mLast + 2 && mText[i - 2] == '/') {
-                break;
-            }
-            uint16_t thisChar = mText[i];
-            // never break after hyphen
-            if (lastChar != '-') {
-                if (breakBefore(thisChar)) {
-                    break;
-                }
-                // break before single slash
-                if (thisChar == '/' && lastChar != '/' &&
-                            !(i + 1 < mScanOffset && mText[i + 1] == '/')) {
-                    break;
-                }
-            }
-            lastChar = thisChar;
+ssize_t WordBreaker::findNextBreakInEmailOrUrl() {
+    // special rules for email addresses and URL's as per Chicago Manual of Style (16th ed.)
+    uint16_t lastChar = mText[mLast];
+    ssize_t i;
+    for (i = mLast + 1; i < mScanOffset; i++) {
+        if (breakAfter(lastChar)) {
+            break;
         }
-        mCurrent = i;
-        return mCurrent;
+        // break after double slash
+        if (lastChar == '/' && i >= mLast + 2 && mText[i - 2] == '/') {
+            break;
+        }
+        const uint16_t thisChar = mText[i];
+        // never break after hyphen
+        if (lastChar != '-') {
+            if (breakBefore(thisChar)) {
+                break;
+            }
+            // break before single slash
+            if (thisChar == '/' && lastChar != '/' &&
+                        !(i + 1 < mScanOffset && mText[i + 1] == '/')) {
+                break;
+            }
+        }
+        lastChar = thisChar;
     }
+    return i;
+}
 
-    int32_t result;
-    do {
-        if (mIteratorWasReset) {
-            result = mBreakIterator->following(mCurrent);
-            mIteratorWasReset = false;
-        } else {
-            result = mBreakIterator->next();
-        }
-    } while (result != icu::BreakIterator::DONE && (size_t)result != mTextSize
-            && !isBreakValid(mText, mTextSize, result));
-    mCurrent = (ssize_t)result;
+ssize_t WordBreaker::next() {
+    mLast = mCurrent;
+
+    detectEmailOrUrl();
+    if (mInEmailOrUrl) {
+        mCurrent = findNextBreakInEmailOrUrl();
+    } else {  // Business as usual
+        mCurrent = (ssize_t) iteratorNext();
+    }
     return mCurrent;
 }
 
@@ -221,7 +236,7 @@ ssize_t WordBreaker::wordStart() const {
         UChar32 c;
         ssize_t ix = result;
         U16_NEXT(mText, ix, mCurrent, c);
-        int32_t lb = u_getIntPropertyValue(c, UCHAR_LINE_BREAK);
+        const int32_t lb = u_getIntPropertyValue(c, UCHAR_LINE_BREAK);
         // strip leading punctuation, defined as OP and QU line breaking classes,
         // see UAX #14
         if (!(lb == U_LB_OPEN_PUNCTUATION || lb == U_LB_QUOTATION)) {
@@ -241,7 +256,7 @@ ssize_t WordBreaker::wordEnd() const {
         UChar32 c;
         ssize_t ix = result;
         U16_PREV(mText, mLast, ix, c);
-        int32_t gc_mask = U_GET_GC_MASK(c);
+        const int32_t gc_mask = U_GET_GC_MASK(c);
         // strip trailing space and punctuation
         if ((gc_mask & (U_GC_ZS_MASK | U_GC_P_MASK)) == 0) {
             break;
