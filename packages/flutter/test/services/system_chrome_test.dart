@@ -23,7 +23,7 @@ void main() {
   test('setPreferredOrientations control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -40,7 +40,7 @@ void main() {
   test('setApplicationSwitcherDescription control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -57,7 +57,7 @@ void main() {
   test('setEnabledSystemUIOverlays control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 

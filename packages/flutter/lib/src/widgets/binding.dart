@@ -61,9 +61,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
-    flutterNavigationChannel.setMethodCallHandler(_handleNavigationInvocation);
-    flutterLifecycleChannel.setMessageHandler(_handleLifecycleMessage);
-    flutterSystemChannel.setMessageHandler(_handleSystemMessage);
+    SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
+    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
+    SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -213,6 +213,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         break;
     }
+    return null;
   }
 
   Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {

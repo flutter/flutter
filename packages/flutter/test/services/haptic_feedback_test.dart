@@ -9,7 +9,7 @@ void main() {
   test('Haptic feedback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
 
-    flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 

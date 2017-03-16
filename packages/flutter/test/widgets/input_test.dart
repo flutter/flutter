@@ -38,7 +38,7 @@ Widget overlay(Widget child) {
 
 void main() {
   final MockClipboard mockClipboard = new MockClipboard();
-  flutterPlatformChannel.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   const String kThreeLines =
     'First line of text is here abcdef ghijkl mnopqrst. ' +

@@ -21,6 +21,6 @@ class HapticFeedback {
   /// On Android, this uses the platform haptic feedback API to simulates a
   /// short tap on a virtual keyboard.
   static Future<Null> vibrate() async {
-    await flutterPlatformChannel.invokeMethod('HapticFeedback.vibrate');
+    await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
   }
 }

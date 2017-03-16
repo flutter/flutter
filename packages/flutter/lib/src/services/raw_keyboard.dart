@@ -182,7 +182,7 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
 ///  * [RawKeyUpEvent]
 class RawKeyboard {
   RawKeyboard._() {
-    flutterKeyEventChannel.setMessageHandler(_handleKeyEvent);
+    SystemChannels.keyEvent.setMessageHandler(_handleKeyEvent);
   }
 
   /// The shared instance of [RawKeyboard].

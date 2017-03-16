@@ -118,7 +118,7 @@ void main() {
     int hapticFeedbackCount;
 
     setUpAll(() {
-      flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) {
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) {
         if (methodCall.method == "HapticFeedback.vibrate")
           hapticFeedbackCount++;
       });

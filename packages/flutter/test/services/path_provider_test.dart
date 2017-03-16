@@ -12,20 +12,20 @@ void main() {
     final List<MethodCall> log = <MethodCall>[];
     String response;
 
-    flutterPlatformChannel.setMockMethodCallHandler((MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
       return response;
     });
 
     Directory directory = await PathProvider.getTemporaryDirectory();
 
-    expect(log, equals([new MethodCall('PathProvider.getTemporaryDirectory')]));
+    expect(log, equals(<MethodCall>[new MethodCall('PathProvider.getTemporaryDirectory')]));
     expect(directory, isNull);
     log.clear();
 
     directory = await PathProvider.getApplicationDocumentsDirectory();
 
-    expect(log, equals([new MethodCall('PathProvider.getApplicationDocumentsDirectory')]));
+    expect(log, equals(<MethodCall>[new MethodCall('PathProvider.getApplicationDocumentsDirectory')]));
     expect(directory, isNull);
 
     final String fakePath = "/foo/bar/baz";

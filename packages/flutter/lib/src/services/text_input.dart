@@ -194,13 +194,13 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    flutterTextInputChannel.invokeMethod('TextInput.show');
+    SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingState state) {
     assert(attached);
-    flutterTextInputChannel.invokeMethod(
+    SystemChannels.textInput.invokeMethod(
       'TextInput.setEditingState',
       state.toJSON(),
     );
@@ -212,7 +212,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      flutterTextInputChannel.invokeMethod('TextInput.clearClient');
+      SystemChannels.textInput.invokeMethod('TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
@@ -231,7 +231,7 @@ TextInputAction _toTextInputAction(String action) {
 
 class _TextInputClientHandler {
   _TextInputClientHandler() {
-    flutterTextInputChannel.setMethodCallHandler(_handleTextInputInvocation);
+    SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
   }
 
   TextInputConnection _currentConnection;
@@ -268,7 +268,7 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        flutterTextInputChannel.invokeMethod('TextInput.hide');
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
     });
   }
 }
@@ -294,7 +294,7 @@ class TextInput {
     assert(configuration != null);
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    flutterTextInputChannel.invokeMethod(
+    SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJSON() ],
     );

@@ -105,7 +105,7 @@ class SystemChrome {
   /// The `orientation` argument is a list of [DeviceOrientation] enum values.
   /// The empty list is synonymous with having all options enabled.
   static Future<Null> setPreferredOrientations(List<DeviceOrientation> orientations) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setPreferredOrientations',
       _stringify(orientations),
     );
@@ -117,7 +117,7 @@ class SystemChrome {
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
   static Future<Null> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setApplicationSwitcherDescription',
       <String, dynamic>{
         'label': description.label,
@@ -135,7 +135,7 @@ class SystemChrome {
   /// If a particular overlay is unsupported on the platform, enabling or
   /// disabling that overlay will be ignored.
   static Future<Null> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setEnabledSystemUIOverlays',
       _stringify(overlays),
     );
@@ -170,7 +170,7 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        flutterPlatformChannel.invokeMethod(
+        SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
           _pendingStyle.toString(),
         );

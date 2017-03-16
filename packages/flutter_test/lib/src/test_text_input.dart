@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -23,7 +21,7 @@ const String _kTextInputClientChannel = 'flutter/textinputclient';
 ///   popup keyboard and initializing its text.
 class TestTextInput {
   void register() {
-    flutterTextInputChannel.setMockMethodCallHandler(handleTextInputCall);
+    SystemChannels.textInput.setMockMethodCallHandler(handleTextInputCall);
   }
 
   int _client = 0;
@@ -43,14 +41,14 @@ class TestTextInput {
   void updateEditingState(TextEditingState state) {
     expect(_client, isNonZero);
     PlatformMessages.handlePlatformMessage(
-      flutterTextInputChannel.name,
-      flutterTextInputChannel.codec.encodeMethodCall(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
         new MethodCall(
           'TextInputClient.updateEditingState',
-          <dynamic>[_client, state.toJSON()]
+          <dynamic>[_client, state.toJSON()],
         ),
       ),
-      (_) {}
+      (_) {},
     );
   }
 

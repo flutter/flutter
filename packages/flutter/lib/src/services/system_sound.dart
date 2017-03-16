@@ -20,7 +20,7 @@ class SystemSound {
   /// Play the specified system sound. If that sound is not present on the
   /// system, the call is ignored.
   static Future<Null> play(SystemSoundType type) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'SystemSound.play',
       type.toString(),
     );

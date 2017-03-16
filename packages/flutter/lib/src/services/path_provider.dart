@@ -22,7 +22,7 @@ class PathProvider {
   ///
   /// On Android, this uses the `getCacheDir` API on the context.
   static Future<Directory> getTemporaryDirectory() async {
-    final String path = await flutterPlatformChannel.invokeMethod('PathProvider.getTemporaryDirectory');
+    final String path = await SystemChannels.platform.invokeMethod('PathProvider.getTemporaryDirectory');
     if (path == null)
       return null;
     return new Directory(path);
@@ -36,7 +36,7 @@ class PathProvider {
   ///
   /// On Android, this returns the AppData directory.
   static Future<Directory> getApplicationDocumentsDirectory() async {
-    final String path = await flutterPlatformChannel.invokeMethod('PathProvider.getApplicationDocumentsDirectory');
+    final String path = await SystemChannels.platform.invokeMethod('PathProvider.getApplicationDocumentsDirectory');
     if (path == null)
       return null;
     return new Directory(path);

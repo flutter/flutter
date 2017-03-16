@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
+import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
@@ -28,23 +29,32 @@ abstract class MessageCodec<T> {
 
 /// An command object representing the invocation of a named method.
 class MethodCall {
-  final String method;
-  final dynamic arguments;
-  
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
   MethodCall(this.method, [this.arguments]) {
     assert(method != null);
   }
+
+  /// The name of the method to be called.
+  final String method;
+
+  /// The arguments for the method.
+  ///
+  /// Must be a valid value for the [MethodCodec] used.
+  final dynamic arguments;
   
   @override
-  bool operator== (dynamic o) {
-    if (o is! MethodCall)
+  bool operator== (dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
       return false;
-    final MethodCall other = o;
     return method == other.method && _deepEquals(arguments, other.arguments);
   }
-  
+
+  @override
+  int get hashCode => hashValues(method, arguments);
+
   bool _deepEquals(dynamic a, dynamic b) {
     if (a == b)
       return true;
@@ -76,10 +86,7 @@ class MethodCall {
   }
   
   @override
-  int get hashCode => method.hashCode ^ (arguments?.hashCode ?? 0);
-  
-  @override
-  String toString() => 'MethodCall($method, $arguments)';
+  String toString() => '$runtimeType($method, $arguments)';
 }
 
 /// A codec for method calls and enveloped results.

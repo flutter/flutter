@@ -14,7 +14,7 @@ class UrlLauncher {
   /// Parse the specified URL string and delegate handling of the same to the
   /// underlying platform.
   static Future<Null> launch(String urlString) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'UrlLauncher.launch',
       urlString,
     );

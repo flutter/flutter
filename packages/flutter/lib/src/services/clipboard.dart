@@ -31,7 +31,7 @@ class Clipboard {
 
   /// Stores the given clipboard data on the clipboard.
   static Future<Null> setData(ClipboardData data) async {
-    await flutterPlatformChannel.invokeMethod(
+    await SystemChannels.platform.invokeMethod(
       'Clipboard.setData',
       <String, dynamic>{
         'text': data.text,
@@ -47,7 +47,7 @@ class Clipboard {
   /// Returns a future which completes to null if the data could not be
   /// obtained, and to a [ClipboardData] object if it could.
   static Future<ClipboardData> getData(String format) async {
-    final Map<String, dynamic> result = await flutterPlatformChannel.invokeMethod(
+    final Map<String, dynamic> result = await SystemChannels.platform.invokeMethod(
       'Clipboard.getData',
       format,
     );
