@@ -91,7 +91,7 @@ TEST(GraphemeBreak, rules) {
     EXPECT_TRUE(IsBreak("U+11A8 | U+AC00"));  // T x LV
     EXPECT_TRUE(IsBreak("U+11A8 | U+AC01"));  // T x LVT
 
-    // Rule GB8a, Regional_Indicator x Regional_Indicator
+    // Rule GB12 and Rule GB13, Regional_Indicator x Regional_Indicator
     EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8"));
     EXPECT_TRUE(IsBreak("U+1F1FA U+1F1F8 | U+1F1FA U+1F1F8")); // Regional indicator pair (flag)
     EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8 U+1F1FA U+1F1F8")); // Regional indicator pair (flag)
@@ -99,6 +99,17 @@ TEST(GraphemeBreak, rules) {
 
     EXPECT_TRUE(IsBreak("U+1F1FA U+1F1F8 | U+1F1FA"));  // Regional indicator pair (flag)
     EXPECT_FALSE(IsBreak("U+1F1FA | U+1F1F8 U+1F1FA"));  // Regional indicator pair (flag)
+    // Same case as the two above, knowing that the first two characters ligate, which is what
+    // would typically happen.
+    const float firstPairLigated[] = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0}; // Two entries per codepoint
+    EXPECT_TRUE(IsBreakWithAdvances(firstPairLigated, "U+1F1FA U+1F1F8 | U+1F1FA"));
+    EXPECT_FALSE(IsBreakWithAdvances(firstPairLigated, "U+1F1FA | U+1F1F8 U+1F1FA"));
+    // Repeat the tests, But now the font doesn't have a ligature for the first two characters,
+    // while it does have a ligature for the last two. This could happen for fonts that do not
+    // support some (potentially encoded later than they were developed) flags.
+    const float secondPairLigated[] = {1.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+    EXPECT_FALSE(IsBreakWithAdvances(secondPairLigated, "U+1F1FA U+1F1F8 | U+1F1FA"));
+    EXPECT_TRUE(IsBreakWithAdvances(secondPairLigated, "U+1F1FA | U+1F1F8 U+1F1FA"));
 
     EXPECT_TRUE(IsBreak("'a' U+1F1FA U+1F1F8 | U+1F1FA"));  // Regional indicator pair (flag)
     EXPECT_FALSE(IsBreak("'a' U+1F1FA | U+1F1F8 U+1F1FA"));  // Regional indicator pair (flag)
@@ -110,14 +121,15 @@ TEST(GraphemeBreak, rules) {
     EXPECT_FALSE(
             IsBreak("'a' U+1F1FA U+1F1F8 U+1F1FA | U+1F1F8"));  // Regional indicator pair (flag)
 
-    // Rule GB9, x Extend
+    // Rule GB9, x (Extend | ZWJ)
     EXPECT_FALSE(IsBreak("'a' | U+0301"));  // combining accent
+    EXPECT_FALSE(IsBreak("'a' | U+200D"));  // ZWJ
     // Rule GB9a, x SpacingMark
     EXPECT_FALSE(IsBreak("U+0915 | U+093E"));  // KA, AA (spacing mark)
     // Rule GB9b, Prepend x
     // see tailoring test for prepend, as current ICU doesn't have any characters in the class
 
-    // Rule GB10, Any ÷ Any
+    // Rule GB999, Any ÷ Any
     EXPECT_TRUE(IsBreak("'a' | 'b'"));
     EXPECT_TRUE(IsBreak("'f' | 'i'"));  // probable ligature
     EXPECT_TRUE(IsBreak("U+0644 | U+0627"));  // probable ligature, lam + alef
@@ -198,8 +210,7 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_TRUE(IsBreakWithAdvances(separate,
             "U+0E01 U+0E3A | U+0E01"));  // thai phinthu = pure killer
 
-    // suppress grapheme breaks in zwj emoji sequences, see
-    // http://www.unicode.org/emoji/charts/emoji-zwj-sequences.html
+    // suppress grapheme breaks in zwj emoji sequences
     EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+2764 U+FE0F U+200D U+1F48B U+200D U+1F468"));
     EXPECT_FALSE(IsBreak("U+1F469 U+200D U+2764 U+FE0F U+200D | U+1F48B U+200D U+1F468"));
     EXPECT_FALSE(IsBreak("U+1F469 U+200D U+2764 U+FE0F U+200D U+1F48B U+200D | U+1F468"));
@@ -228,10 +239,42 @@ TEST(GraphemeBreak, emojiModifiers) {
     EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FF"));  // boy + modifier
     EXPECT_FALSE(IsBreak("U+1F918 | U+1F3FF"));  // sign of the horns + modifier
     EXPECT_FALSE(IsBreak("U+1F933 | U+1F3FF"));  // selfie (Unicode 9) + modifier
+    // Reptition of the tests above, with the knowledge that they are ligated.
+    const float ligated1_2[] = {1.0, 0.0, 0.0};
+    const float ligated2_2[] = {1.0, 0.0, 0.0, 0.0};
+    EXPECT_FALSE(IsBreakWithAdvances(ligated1_2, "U+261D | U+1F3FB"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated1_2, "U+270C | U+1F3FB"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FB"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FC"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FD"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FE"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FF"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F918 | U+1F3FF"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F933 | U+1F3FF"));
+    // Reptition of the tests above, with the knowledge that they are not ligated.
+    const float unligated1_2[] = {1.0, 1.0, 0.0};
+    const float unligated2_2[] = {1.0, 0.0, 1.0, 0.0};
+    EXPECT_TRUE(IsBreakWithAdvances(unligated1_2, "U+261D | U+1F3FB"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated1_2, "U+270C | U+1F3FB"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F466 | U+1F3FB"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F466 | U+1F3FC"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F466 | U+1F3FD"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F466 | U+1F3FE"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F466 | U+1F3FF"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F918 | U+1F3FF"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_2, "U+1F933 | U+1F3FF"));
 
-    // adding emoji style variation selector doesn't affect grapheme cluster
-    EXPECT_TRUE(IsBreak("U+270C U+FE0E | U+1F3FB"));  // victory hand + text style + modifier
+    // adding extend characters between emoji base and modifier doesn't affect grapheme cluster
+    EXPECT_FALSE(IsBreak("U+270C U+FE0E | U+1F3FB"));  // victory hand + text style + modifier
     EXPECT_FALSE(IsBreak("U+270C U+FE0F | U+1F3FB"));  // heart + emoji style + modifier
+    // Reptition of the two tests above, with the knowledge that they are ligated.
+    const float ligated1_1_2[] = {1.0, 0.0, 0.0, 0.0};
+    EXPECT_FALSE(IsBreakWithAdvances(ligated1_1_2, "U+270C U+FE0E | U+1F3FB"));
+    EXPECT_FALSE(IsBreakWithAdvances(ligated1_1_2, "U+270C U+FE0F | U+1F3FB"));
+    // Reptition of the first two tests, with the knowledge that they are not ligated.
+    const float unligated1_1_2[] = {1.0, 0.0, 1.0, 0.0};
+    EXPECT_TRUE(IsBreakWithAdvances(unligated1_1_2, "U+270C U+FE0E | U+1F3FB"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated1_1_2, "U+270C U+FE0F | U+1F3FB"));
 
     // heart is not an emoji base
     EXPECT_TRUE(IsBreak("U+2764 | U+1F3FB"));  // heart + modifier
@@ -241,17 +284,26 @@ TEST(GraphemeBreak, emojiModifiers) {
 
     // rat is not an emoji modifer
     EXPECT_TRUE(IsBreak("U+1F466 | U+1F400"));  // boy + rat
-
 }
 
 TEST(GraphemeBreak, genderBalancedEmoji) {
     // U+1F469 is WOMAN, U+200D is ZWJ, U+1F4BC is BRIEFCASE.
     EXPECT_FALSE(IsBreak("U+1F469 | U+200D U+1F4BC"));
     EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+1F4BC"));
+    // The above two cases, when the ligature is not supported in the font. We now expect a break
+    // between them.
+    const float unligated2_1_2[] = {1.0, 0.0, 0.0, 1.0, 0.0};
+    EXPECT_FALSE(IsBreakWithAdvances(unligated2_1_2, "U+1F469 | U+200D U+1F4BC"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_1_2, "U+1F469 U+200D | U+1F4BC"));
 
     // U+2695 has now emoji property, so should be part of ZWJ sequence.
     EXPECT_FALSE(IsBreak("U+1F469 | U+200D U+2695"));
     EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+2695"));
+    // The above two cases, when the ligature is not supported in the font. We now expect a break
+    // between them.
+    const float unligated2_1_1[] = {1.0, 0.0, 0.0, 1.0};
+    EXPECT_FALSE(IsBreakWithAdvances(unligated2_1_1, "U+1F469 | U+200D U+2695"));
+    EXPECT_TRUE(IsBreakWithAdvances(unligated2_1_1, "U+1F469 U+200D | U+2695"));
 }
 
 TEST(GraphemeBreak, offsets) {
