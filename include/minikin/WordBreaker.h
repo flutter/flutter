@@ -55,6 +55,10 @@ public:
     void finish();
 
 private:
+    int32_t iteratorNext();
+    void detectEmailOrUrl();
+    ssize_t findNextBreakInEmailOrUrl();
+
     std::unique_ptr<icu::BreakIterator> mBreakIterator;
     UText mUText = UTEXT_INITIALIZER;
     const uint16_t* mText = nullptr;
