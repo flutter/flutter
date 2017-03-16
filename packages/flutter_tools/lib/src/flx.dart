@@ -55,26 +55,6 @@ Future<int> createSnapshot({
   return runCommandAndStreamOutput(args);
 }
 
-/// Build the flx in the build directory and return `localBundlePath` on success.
-///
-/// Return `null` on failure.
-Future<String> buildFlx({
-  String mainPath: defaultMainPath,
-  DevFSContent kernelContent,
-  bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true
-}) async {
-  await build(
-    snapshotPath: defaultSnapshotPath,
-    outputPath: defaultFlxOutputPath,
-    mainPath: mainPath,
-    kernelContent: kernelContent,
-    precompiledSnapshot: precompiledSnapshot,
-    includeRobotoFonts: includeRobotoFonts
-  );
-  return defaultFlxOutputPath;
-}
-
 Future<Null> build({
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
@@ -84,7 +64,7 @@ Future<Null> build({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  DevFSContent kernelContent,
+  String kernelPath,
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
@@ -111,6 +91,11 @@ Future<Null> build({
       throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
 
     snapshotFile = fs.file(snapshotPath);
+  }
+
+  DevFSContent kernelContent;
+  if (kernelPath != null) {
+    kernelContent = new DevFSFileContent(fs.file(kernelPath));
   }
 
   return assemble(

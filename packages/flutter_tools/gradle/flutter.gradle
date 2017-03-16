@@ -149,6 +149,11 @@ class FlutterPlugin implements Plugin<Project> {
             project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
         }
 
+        File kernel
+        if (project.hasProperty('kernel')) {
+            kernel = project.file(project.property('kernel'))
+        }
+
         project.android.applicationVariants.all { variant ->
             if (!["debug", "profile", "release"].contains(variant.name)) {
                 throw new GradleException("Build variant must be one of \"debug\", \"profile\", or \"release\" but was \"${variant.name}\"")
@@ -161,6 +166,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                kernelFile kernel
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -189,6 +195,8 @@ class FlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
+    @Optional @InputFile
+    File kernelFile
 
     File sourceDir
 
@@ -282,8 +290,8 @@ class FlutterTask extends DefaultTask {
             }
             args "build", "flx"
             args "--target", targetPath
-            if (project.hasProperty('kernel')) {
-                args "--kernel", project.property('kernel')
+            if (kernelFile != null) {
+                args "--kernel", kernelFile.absolutePath
             }
             args "--output-file", "${intermediateDir}/app.flx"
             args "--no-include-roboto-fonts"
