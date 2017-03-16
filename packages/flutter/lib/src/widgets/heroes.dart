@@ -416,10 +416,13 @@ class _HeroFlight {
 class HeroController extends NavigatorObserver {
   /// Creates a hero controller with the given [RectTween] constructor if any.
   ///
-  /// The [createRectTween] argument is optional. If null, a linear
-  /// [RectTween] is used.
+  /// The [createRectTween] argument is optional. If null, the controller uses a
+  /// linear [RectTween].
   HeroController({ this.createRectTween });
 
+  /// Used to create [RectTween]s that interpolate the position of heros in flight.
+  ///
+  /// If null, the controller uses a linear [RectTween].
   final CreateRectTween createRectTween;
 
   // Disable Hero animations while a user gesture is controlling the navigation.
