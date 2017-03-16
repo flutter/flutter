@@ -69,7 +69,7 @@ TaskFunction createGalleryBackButtonMemoryTest() {
 
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = const Duration(minutes: 2);
+  static const Duration _startupTimeout = const Duration(minutes: 5);
 
   StartupTest(this.testDirectory);
 
@@ -86,6 +86,7 @@ class StartupTest {
       }
 
       await flutter('run', options: <String>[
+        '--verbose',
         '--profile',
         '--trace-startup',
         '-d',
