@@ -81,9 +81,9 @@ class Step {
     this.state: StepState.indexed,
     this.isActive: false,
   }) {
-    assert(this.title != null);
-    assert(this.content != null);
-    assert(this.state != null);
+    assert(title != null);
+    assert(content != null);
+    assert(state != null);
   }
 
   /// The title of the step that typically describes it.
@@ -138,10 +138,10 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
   }) : super(key: key) {
-    assert(this.steps != null);
-    assert(this.type != null);
-    assert(this.currentStep != null);
-    assert(0 <= currentStep && currentStep < this.steps.length);
+    assert(steps != null);
+    assert(type != null);
+    assert(currentStep != null);
+    assert(0 <= currentStep && currentStep < steps.length);
   }
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.

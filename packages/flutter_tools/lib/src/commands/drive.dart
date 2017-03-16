@@ -89,7 +89,7 @@ class DriveCommand extends RunCommandBase {
     if (testFile == null)
       throwToolExit(null);
 
-    this._device = await targetDeviceFinder();
+    _device = await targetDeviceFinder();
     if (device == null)
       throwToolExit(null);
 

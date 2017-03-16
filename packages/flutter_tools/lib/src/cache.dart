@@ -15,11 +15,9 @@ import 'globals.dart';
 /// A wrapper around the `bin/cache/` directory.
 class Cache {
   /// [rootOverride] is configurable for testing.
-  Cache({ Directory rootOverride }) {
-    this._rootOverride = rootOverride;
-  }
+  Cache({ Directory rootOverride }) : _rootOverride = rootOverride;
 
-  Directory _rootOverride;
+  final Directory _rootOverride;
 
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
