@@ -172,7 +172,7 @@ Future<Null> runCommand({
     arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
     await createTestCommandRunner(command).run(arguments);
     expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
-  } on ToolExit catch (_) {
+  } on ToolExit {
     if (!toolExit) {
       testLogger.clear();
       rethrow;
