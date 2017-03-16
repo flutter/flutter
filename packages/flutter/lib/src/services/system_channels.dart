@@ -11,16 +11,22 @@ const PlatformMethodChannel flutterNavigationChannel = const PlatformMethodChann
   const JSONMethodCodec(),
 );
 
-/// A standard [PlatformMethodChannel] for invoking miscellaneous platform methods.
-const PlatformMethodChannel flutterPlatformChannel = const PlatformMethodChannel('flutter/platform');
+/// A JSON [PlatformMethodChannel] for invoking miscellaneous platform methods.
+const PlatformMethodChannel flutterPlatformChannel = const PlatformMethodChannel(
+  'flutter/platform',
+  const JSONMethodCodec(),
+);
 
-/// A standard [PlatformMethodChannel] for handling text input.
-const PlatformMethodChannel flutterTextInputChannel = const PlatformMethodChannel('flutter/textinput');
+/// A JSON [PlatformMethodChannel] for handling text input.
+const PlatformMethodChannel flutterTextInputChannel = const PlatformMethodChannel(
+  'flutter/textinput',
+  const JSONMethodCodec(),
+);
 
-/// A standard [PlatformMessageChannel] for key events.
+/// A JSON [PlatformMessageChannel] for key events.
 const PlatformMessageChannel<dynamic> flutterKeyEventChannel = const PlatformMessageChannel<dynamic>(
   'flutter/keyevent',
-  const StandardMessageCodec(),
+  const JSONMessageCodec(),
 );
 
 /// A string [PlatformMessageChannel] for lifecycle events.
@@ -29,8 +35,8 @@ const PlatformMessageChannel<String> flutterLifecycleChannel = const PlatformMes
   const StringCodec(),
 );
 
-/// A standard [PlatformMessageChannel] for system events.
+/// A JSON [PlatformMessageChannel] for system events.
 const PlatformMessageChannel<dynamic> flutterSystemChannel = const PlatformMessageChannel<dynamic>(
   'flutter/system',
-  const StandardMessageCodec(),
+  const JSONMessageCodec(),
 );

@@ -101,19 +101,21 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   ByteData encodeMethodCall(MethodCall call) {
-    return const JSONMessageCodec().encodeMessage(<dynamic>[
-      call.method,
-      call.arguments,
-    ]);
+    return const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'method': call.method,
+      'args': call.arguments,
+    });
   }
 
   @override
   MethodCall decodeMethodCall(ByteData methodCall) {
     final dynamic decoded = const JSONMessageCodec().decodeMessage(methodCall);
-    if (decoded is! List)
-      throw new FormatException('Expected method call List, got $decoded');
-    if (decoded.length == 2 && decoded[0] is String)
-      return new MethodCall(decoded[0], decoded[1]);
+    if (decoded is! Map)
+      throw new FormatException('Expected method call Map, got $decoded');
+    final dynamic method = decoded['method'];
+    final dynamic arguments = decoded['args'];
+    if (method is String)
+      return new MethodCall(method, arguments);
     throw new FormatException('Invalid method call: $decoded');
   }
 
