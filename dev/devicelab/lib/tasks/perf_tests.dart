@@ -9,6 +9,15 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
+
+TaskFunction createPlatformServiceDriverTest() {
+  return new PerfTest(
+      '${flutterDirectory.path}/examples/platform_services',
+      'test_driver/button_tap.dart',
+      'button_tap',
+  );
+}
+
 TaskFunction createComplexLayoutScrollPerfTest() {
   return new PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
