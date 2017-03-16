@@ -204,7 +204,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       observer.didChangeAppLifecycleState(state);
   }
 
-  Future<dynamic> _handleLifecycleMessage(String message) async {
+  Future<String> _handleLifecycleMessage(String message) async {
     switch (message) {
       case 'AppLifecycleState.paused':
         handleAppLifecycleStateChanged(AppLifecycleState.paused);

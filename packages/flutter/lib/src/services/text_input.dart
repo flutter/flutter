@@ -194,7 +194,7 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    flutterPlatformChannel.invokeMethod('TextInput.show');
+    flutterTextInputChannel.invokeMethod('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.

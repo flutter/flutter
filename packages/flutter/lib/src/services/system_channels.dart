@@ -5,13 +5,13 @@
 import 'platform_channel.dart';
 import 'message_codecs.dart';
 
-/// A standard [PlatformMethodChannel] for localization.
-const PlatformMethodChannel flutterLocalizationChannel = const PlatformMethodChannel('flutter/localization');
+/// A JSON [PlatformMethodChannel] for navigation.
+const PlatformMethodChannel flutterNavigationChannel = const PlatformMethodChannel(
+  'flutter/navigation',
+  const JSONMethodCodec(),
+);
 
-/// A standard [PlatformMethodChannel] for navigation.
-const PlatformMethodChannel flutterNavigationChannel = const PlatformMethodChannel('flutter/navigation');
-
-/// A standard [PlatformMethodChannel] for miscellaneous platform methods.
+/// A standard [PlatformMethodChannel] for invoking miscellaneous platform methods.
 const PlatformMethodChannel flutterPlatformChannel = const PlatformMethodChannel('flutter/platform');
 
 /// A standard [PlatformMethodChannel] for handling text input.
@@ -19,19 +19,18 @@ const PlatformMethodChannel flutterTextInputChannel = const PlatformMethodChanne
 
 /// A standard [PlatformMessageChannel] for key events.
 const PlatformMessageChannel<dynamic> flutterKeyEventChannel = const PlatformMessageChannel<dynamic>(
-    'flutter/keyevent',
-    const StandardMessageCodec(),
+  'flutter/keyevent',
+  const StandardMessageCodec(),
 );
 
-/// A standard [PlatformMessageChannel] for lifecycle events.
-const PlatformMessageChannel<dynamic> flutterLifecycleChannel = const PlatformMessageChannel<dynamic>(
-    'flutter/lifecycle',
-    const StandardMessageCodec(),
+/// A string [PlatformMessageChannel] for lifecycle events.
+const PlatformMessageChannel<String> flutterLifecycleChannel = const PlatformMessageChannel<String>(
+  'flutter/lifecycle',
+  const StringCodec(),
 );
 
 /// A standard [PlatformMessageChannel] for system events.
 const PlatformMessageChannel<dynamic> flutterSystemChannel = const PlatformMessageChannel<dynamic>(
-    'flutter/system',
-        const StandardMessageCodec(),
+  'flutter/system',
+  const StandardMessageCodec(),
 );
-
