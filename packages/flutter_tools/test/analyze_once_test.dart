@@ -21,6 +21,7 @@ void main() {
     File libMain;
 
     setUpAll(() {
+      Cache.disableLocking();
       tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
       libMain = fs.file(fs.path.join(tempDir.path, 'lib', 'main.dart'));
     });
@@ -171,15 +172,11 @@ Future<Null> runCommand({
     arguments.insert(0, '--flutter-root=${Cache.flutterRoot}');
     await createTestCommandRunner(command).run(arguments);
     expect(toolExit, isFalse, reason: 'Expected ToolExit exception');
-  } on ToolExit catch (e) {
+  } on ToolExit catch (_) {
     if (!toolExit) {
       testLogger.clear();
       rethrow;
     }
-  } catch (e) {
-    rethrow;
-  } finally {
-    Cache.releaseLockEarly();
   }
   assertContains(testLogger.statusText, statusTextContains);
   assertContains(testLogger.errorText, errorTextContains);
