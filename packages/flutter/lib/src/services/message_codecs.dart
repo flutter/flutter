@@ -87,8 +87,8 @@ class JSONMethodCodec implements MethodCodec {
   //
   // * Individual values are serialized as defined by the JSON codec of the
   //   dart:convert package.
-  // * Method calls are serialized as two-element lists with the method name
-  //   string as first element and the method call arguments as the second.
+  // * Method calls are serialized as two-element maps, with the method name
+  //   keyed by 'method' and the arguments keyed by 'args'.
   // * Reply envelopes are serialized as either:
   //   * one-element lists containing the successful result as its single
   //     element, or
