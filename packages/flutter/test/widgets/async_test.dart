@@ -255,7 +255,7 @@ void main() {
 }
 
 Future<Null> eventFiring(WidgetTester tester) async {
-  await tester.pump(const Duration());
+  await tester.pump(Duration.ZERO);
 }
 
 class StringCollector extends StreamBuilderBase<String, List<String>> {
