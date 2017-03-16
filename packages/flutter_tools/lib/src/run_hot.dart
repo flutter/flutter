@@ -90,10 +90,12 @@ class HotRunner extends ResidentRunner {
   Future<int> attach(Uri observatoryUri, {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
+    String isolateFilter,
   }) async {
     _observatoryUri = observatoryUri;
     try {
-      await connectToServiceProtocol(_observatoryUri);
+      await connectToServiceProtocol(
+          _observatoryUri, isolateFilter: isolateFilter);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -121,7 +123,7 @@ class HotRunner extends ResidentRunner {
     }
 
     await vmService.vm.refreshViews();
-    printTrace('Connected to ${vmService.vm.mainView}.');
+    printTrace('Connected to $currentView.');
 
     if (stayResident) {
       setupTerminal();
@@ -302,7 +304,7 @@ class HotRunner extends ResidentRunner {
   Future<Null> _launchInView(Uri entryUri,
                              Uri packagesUri,
                              Uri assetsDirectoryUri) async {
-    final FlutterView view = vmService.vm.mainView;
+    final FlutterView view = currentView;
     return view.runFromSource(entryUri, packagesUri, assetsDirectoryUri);
   }
 
