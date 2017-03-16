@@ -115,7 +115,7 @@ class ColdRunner extends ResidentRunner {
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printTrace('Connected to ${vmService.vm.mainView}\.');
+      printTrace('Connected to ${vmService.vm.firstView}\.');
     }
 
     if (vmService != null && traceStartup) {
