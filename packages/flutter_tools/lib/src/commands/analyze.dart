@@ -14,7 +14,10 @@ bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith(
 typedef bool FileFilter(FileSystemEntity entity);
 
 class AnalyzeCommand extends FlutterCommand {
-  AnalyzeCommand({bool verboseHelp: false}) {
+  /// The working directory for testing analysis using dartanalyzer.
+  final Directory workingDirectory;
+
+  AnalyzeCommand({ bool verboseHelp: false, this.workingDirectory }) {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation (only examines files in the Flutter repository).', defaultsTo: false);
@@ -29,7 +32,7 @@ class AnalyzeCommand extends FlutterCommand {
 
     // Not used by analyze --watch
     argParser.addFlag('congratulate', help: 'When analyzing the flutter repository, show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
-    argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
+    argParser.addFlag('preamble', help: 'When analyzing the flutter repository, display the number of files that will be analyzed.', defaultsTo: true);
   }
 
   @override
@@ -56,7 +59,7 @@ class AnalyzeCommand extends FlutterCommand {
     if (argResults['watch']) {
       return new AnalyzeContinuously(argResults, runner.getRepoAnalysisEntryPoints()).analyze();
     } else {
-      return new AnalyzeOnce(argResults, runner.getRepoPackages()).analyze();
+      return new AnalyzeOnce(argResults, runner.getRepoPackages(), workingDirectory: workingDirectory).analyze();
     }
   }
 }
