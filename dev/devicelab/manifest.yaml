@@ -74,6 +74,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  platform_services__build:
+    description: >
+      Collects various performance metrics from AOT builds of the Platform
+      Services app.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -138,6 +145,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  platform_services__start_up:
+    description: >
+      Measures the startup time of the Platform Services app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
 
   # iOS on-device tests
 
@@ -176,5 +188,11 @@ tasks:
   microbenchmarks_ios:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  platform_services_ios__start_up:
+    description: >
+      Measures the startup time of the Platform Services app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
