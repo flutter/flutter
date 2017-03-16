@@ -16,7 +16,6 @@ typedef bool FileFilter(FileSystemEntity entity);
 class AnalyzeCommand extends FlutterCommand {
   AnalyzeCommand({bool verboseHelp: false}) {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
-    argParser.addFlag('current-directory', help: 'Include all the Dart files in the current directory, if any.', defaultsTo: true);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
     argParser.addFlag('dartdocs', help: 'List every public member that is lacking documentation (only examines files in the Flutter repository).', defaultsTo: false);
     argParser.addFlag('watch', help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
@@ -29,7 +28,7 @@ class AnalyzeCommand extends FlutterCommand {
     usesPubOption();
 
     // Not used by analyze --watch
-    argParser.addFlag('congratulate', help: 'Show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
+    argParser.addFlag('congratulate', help: 'When analyzing the flutter repository, show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('preamble', help: 'Display the number of files that will be analyzed.', defaultsTo: true);
   }
 

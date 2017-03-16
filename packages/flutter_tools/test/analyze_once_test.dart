@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -85,8 +84,6 @@ void main() {
       arguments: <String>['analyze'],
       statusTextContains: <String>['No issues found!'],
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(tempDir),
   });
 
   // Analyze a specific file outside the current directory
@@ -97,8 +94,6 @@ void main() {
       arguments: <String>['analyze', libMain.path],
       statusTextContains: <String>['No issues found!'],
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(originalDir),
   });
 
   // Analyze in the current directory - no arguments
@@ -133,8 +128,6 @@ void main() {
       // TODO(danrubel) fix dartanalyzer to have non-zero exit code
       toolExit: false,
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(tempDir),
   });
 
   // Analyze a specific file outside the current directory
@@ -151,8 +144,6 @@ void main() {
       // TODO(danrubel) fix dartanalyzer to have non-zero exit code
       toolExit: false,
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(originalDir),
   });
 
   // Analyze in the current directory - no arguments
@@ -182,8 +173,6 @@ linter:
       // TODO(danrubel) fix dartanalyzer to have non-zero exit code
       toolExit: false,
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(tempDir),
   });
 
   // Analyze a specific file outside the current directory
@@ -203,16 +192,5 @@ linter:
       // TODO(danrubel) fix dartanalyzer to have non-zero exit code
       toolExit: false,
     );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => new TestLocalFileSystem(originalDir),
   });
-}
-
-class TestLocalFileSystem extends LocalFileSystem {
-  final Directory wd;
-
-  TestLocalFileSystem(this.wd);
-
-  @override
-  p.Context get path => new p.Context(current: wd.path);
 }
