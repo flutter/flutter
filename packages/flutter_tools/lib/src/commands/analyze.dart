@@ -14,9 +14,6 @@ bool isDartFile(FileSystemEntity entry) => entry is File && entry.path.endsWith(
 typedef bool FileFilter(FileSystemEntity entity);
 
 class AnalyzeCommand extends FlutterCommand {
-  /// The working directory for testing analysis using dartanalyzer.
-  final Directory workingDirectory;
-
   AnalyzeCommand({ bool verboseHelp: false, this.workingDirectory }) {
     argParser.addFlag('flutter-repo', help: 'Include all the examples and tests from the Flutter repository.', defaultsTo: false);
     argParser.addFlag('current-package', help: 'Include the lib/main.dart file from the current directory, if any.', defaultsTo: true);
@@ -34,6 +31,9 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addFlag('congratulate', help: 'When analyzing the flutter repository, show output even when there are no errors, warnings, hints, or lints.', defaultsTo: true);
     argParser.addFlag('preamble', help: 'When analyzing the flutter repository, display the number of files that will be analyzed.', defaultsTo: true);
   }
+
+  /// The working directory for testing analysis using dartanalyzer.
+  final Directory workingDirectory;
 
   @override
   String get name => 'analyze';

@@ -23,12 +23,12 @@ typedef bool FileFilter(FileSystemEntity entity);
 
 /// An aspect of the [AnalyzeCommand] to perform once time analysis.
 class AnalyzeOnce extends AnalyzeBase {
+  AnalyzeOnce(ArgResults argResults, this.repoPackages, { this.workingDirectory }) : super(argResults);
+
   final List<Directory> repoPackages;
 
   /// The working directory for testing analysis using dartanalyzer
   final Directory workingDirectory;
-
-  AnalyzeOnce(ArgResults argResults, this.repoPackages, { this.workingDirectory }) : super(argResults);
 
   @override
   Future<Null> analyze() async {
