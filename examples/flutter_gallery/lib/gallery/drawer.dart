@@ -31,7 +31,7 @@ class GalleryDrawerHeader extends StatefulWidget {
 class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
   bool _logoHasName = true;
   bool _logoHorizontal = true;
-  Map<int, Color> _swatch = Colors.blue;
+  MaterialColor _logoColor = Colors.blue;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
         style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
                                               : FlutterLogoStyle.stacked
                                               : FlutterLogoStyle.markOnly,
-        swatch: _swatch,
+        swatch: _logoColor.swatch,
         textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
       ),
       duration: const Duration(milliseconds: 750),
@@ -62,22 +62,22 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
         },
         onDoubleTap: () {
           setState(() {
-            final List<Map<int, Color>> options = <Map<int, Color>>[];
-            if (_swatch != Colors.blue)
-              options.addAll(<Map<int, Color>>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
-            if (_swatch != Colors.amber)
-              options.addAll(<Map<int, Color>>[Colors.amber, Colors.amber, Colors.amber]);
-            if (_swatch != Colors.red)
-              options.addAll(<Map<int, Color>>[Colors.red, Colors.red, Colors.red]);
-            if (_swatch != Colors.indigo)
-              options.addAll(<Map<int, Color>>[Colors.indigo, Colors.indigo, Colors.indigo]);
-            if (_swatch != Colors.pink)
-              options.addAll(<Map<int, Color>>[Colors.pink]);
-            if (_swatch != Colors.purple)
-              options.addAll(<Map<int, Color>>[Colors.purple]);
-            if (_swatch != Colors.cyan)
-              options.addAll(<Map<int, Color>>[Colors.cyan]);
-            _swatch = options[new math.Random().nextInt(options.length)];
+            final List<MaterialColor> options = <MaterialColor>[];
+            if (_logoColor != Colors.blue)
+              options.addAll(<MaterialColor>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
+            if (_logoColor != Colors.amber)
+              options.addAll(<MaterialColor>[Colors.amber, Colors.amber, Colors.amber]);
+            if (_logoColor != Colors.red)
+              options.addAll(<MaterialColor>[Colors.red, Colors.red, Colors.red]);
+            if (_logoColor != Colors.indigo)
+              options.addAll(<MaterialColor>[Colors.indigo, Colors.indigo, Colors.indigo]);
+            if (_logoColor != Colors.pink)
+              options.addAll(<MaterialColor>[Colors.pink]);
+            if (_logoColor != Colors.purple)
+              options.addAll(<MaterialColor>[Colors.purple]);
+            if (_logoColor != Colors.cyan)
+              options.addAll(<MaterialColor>[Colors.cyan]);
+            _logoColor = options[new math.Random().nextInt(options.length)];
           });
         }
       )

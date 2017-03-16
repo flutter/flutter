@@ -22,7 +22,7 @@ class FlutterLogo extends StatelessWidget {
   const FlutterLogo({
     Key key,
     this.size,
-    this.swatch: Colors.blue,
+    this.swatch,
     this.textColor: const Color(0xFF616161),
     this.style: FlutterLogoStyle.markOnly,
     this.duration: const Duration(milliseconds: 750),
@@ -81,7 +81,7 @@ class FlutterLogo extends StatelessWidget {
       duration: duration,
       curve: curve,
       decoration: new FlutterLogoDecoration(
-        swatch: swatch,
+        swatch: swatch ?? Colors.blue.swatch,
         style: style,
         textColor: textColor,
       ),

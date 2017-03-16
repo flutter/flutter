@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 const double kColorItemHeight = 48.0;
 
 class ColorSwatch {
-  ColorSwatch({ this.name, this.colors, this.accentColors, this.threshold: 900});
+  ColorSwatch({ this.name, MaterialColor color, MaterialAccentColor accent, this.threshold: 900})
+    : colors = color.swatch, accentColors = accent?.swatch;
+
 
   final String name;
   final Map<int, Color> colors;
@@ -18,25 +20,25 @@ class ColorSwatch {
 }
 
 final List<ColorSwatch> colorSwatches = <ColorSwatch>[
-  new ColorSwatch(name: 'RED', colors: Colors.red, accentColors: Colors.redAccent, threshold: 300),
-  new ColorSwatch(name: 'PINK', colors: Colors.pink, accentColors: Colors.pinkAccent, threshold: 200),
-  new ColorSwatch(name: 'PURPLE', colors: Colors.purple, accentColors: Colors.purpleAccent, threshold: 200),
-  new ColorSwatch(name: 'DEEP PURPLE', colors: Colors.deepPurple, accentColors: Colors.deepPurpleAccent, threshold: 200),
-  new ColorSwatch(name: 'INDIGO', colors: Colors.indigo, accentColors: Colors.indigoAccent, threshold: 200),
-  new ColorSwatch(name: 'BLUE', colors: Colors.blue, accentColors: Colors.blueAccent, threshold: 400),
-  new ColorSwatch(name: 'LIGHT BLUE', colors: Colors.lightBlue, accentColors: Colors.lightBlueAccent, threshold: 500),
-  new ColorSwatch(name: 'CYAN', colors: Colors.cyan, accentColors: Colors.cyanAccent, threshold: 600),
-  new ColorSwatch(name: 'TEAL', colors: Colors.teal, accentColors: Colors.tealAccent, threshold: 400),
-  new ColorSwatch(name: 'GREEN', colors: Colors.green, accentColors: Colors.greenAccent, threshold: 500),
-  new ColorSwatch(name: 'LIGHT GREEN', colors: Colors.lightGreen, accentColors: Colors.lightGreenAccent, threshold: 600),
-  new ColorSwatch(name: 'LIME', colors: Colors.lime, accentColors: Colors.limeAccent, threshold: 800),
-  new ColorSwatch(name: 'YELLOW', colors: Colors.yellow, accentColors: Colors.yellowAccent),
-  new ColorSwatch(name: 'AMBER', colors: Colors.amber, accentColors: Colors.amberAccent),
-  new ColorSwatch(name: 'ORANGE', colors: Colors.orange, accentColors: Colors.orangeAccent, threshold: 700),
-  new ColorSwatch(name: 'DEEP ORANGE', colors: Colors.deepOrange, accentColors: Colors.deepOrangeAccent, threshold: 400),
-  new ColorSwatch(name: 'BROWN', colors: Colors.brown, threshold: 200),
-  new ColorSwatch(name: 'GREY', colors: Colors.grey, threshold: 500),
-  new ColorSwatch(name: 'BLUE GREY', colors: Colors.blueGrey, threshold: 500),
+  new ColorSwatch(name: 'RED', color: Colors.red, accent: Colors.redAccent, threshold: 300),
+  new ColorSwatch(name: 'PINK', color: Colors.pink, accent: Colors.pinkAccent, threshold: 200),
+  new ColorSwatch(name: 'PURPLE', color: Colors.purple, accent: Colors.purpleAccent, threshold: 200),
+  new ColorSwatch(name: 'DEEP PURPLE', color: Colors.deepPurple, accent: Colors.deepPurpleAccent, threshold: 200),
+  new ColorSwatch(name: 'INDIGO', color: Colors.indigo, accent: Colors.indigoAccent, threshold: 200),
+  new ColorSwatch(name: 'BLUE', color: Colors.blue, accent: Colors.blueAccent, threshold: 400),
+  new ColorSwatch(name: 'LIGHT BLUE', color: Colors.lightBlue, accent: Colors.lightBlueAccent, threshold: 500),
+  new ColorSwatch(name: 'CYAN', color: Colors.cyan, accent: Colors.cyanAccent, threshold: 600),
+  new ColorSwatch(name: 'TEAL', color: Colors.teal, accent: Colors.tealAccent, threshold: 400),
+  new ColorSwatch(name: 'GREEN', color: Colors.green, accent: Colors.greenAccent, threshold: 500),
+  new ColorSwatch(name: 'LIGHT GREEN', color: Colors.lightGreen, accent: Colors.lightGreenAccent, threshold: 600),
+  new ColorSwatch(name: 'LIME', color: Colors.lime, accent: Colors.limeAccent, threshold: 800),
+  new ColorSwatch(name: 'YELLOW', color: Colors.yellow, accent: Colors.yellowAccent),
+  new ColorSwatch(name: 'AMBER', color: Colors.amber, accent: Colors.amberAccent),
+  new ColorSwatch(name: 'ORANGE', color: Colors.orange, accent: Colors.orangeAccent, threshold: 700),
+  new ColorSwatch(name: 'DEEP ORANGE', color: Colors.deepOrange, accent: Colors.deepOrangeAccent, threshold: 400),
+  new ColorSwatch(name: 'BROWN', color: Colors.brown, threshold: 200),
+  new ColorSwatch(name: 'GREY', color: Colors.grey, threshold: 500),
+  new ColorSwatch(name: 'BLUE GREY', color: Colors.blueGrey, threshold: 500),
 ];
 
 
@@ -110,6 +112,8 @@ class ColorsDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(Colors.blue);
+    print(Colors.blueAccent);
     return new DefaultTabController(
       length: colorSwatches.length,
       child: new Scaffold(

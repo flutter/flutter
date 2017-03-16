@@ -103,7 +103,7 @@ class ThemeData {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
-    primarySwatch ??= Colors.blue;
+    primarySwatch ??= Colors.blue.swatch;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
     primaryColorBrightness ??= Brightness.dark;
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
