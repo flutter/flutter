@@ -25,7 +25,10 @@ typedef bool FileFilter(FileSystemEntity entity);
 class AnalyzeOnce extends AnalyzeBase {
   final List<Directory> repoPackages;
 
-  AnalyzeOnce(ArgResults argResults, this.repoPackages) : super(argResults);
+  /// The working directory for testing analysis using dartanalyzer
+  final Directory workingDirectory;
+
+  AnalyzeOnce(ArgResults argResults, this.repoPackages, { this.workingDirectory }) : super(argResults);
 
   @override
   Future<Null> analyze() async {
@@ -47,50 +50,58 @@ class AnalyzeOnce extends AnalyzeBase {
     }
 
     final bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
-    final bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
+    final bool flutterRepo = argResults['flutter-repo'] || (workingDirectory == null && inRepo(argResults.rest));
 
     // Use dartanalyzer directly except when analyzing the Flutter repository.
     // Analyzing the repository requires a more complex report than dartanalyzer
     // currently supports (e.g. missing member dartdoc summary).
-    // TODO(danrubel) enhance dartanalyzer to provide this type of summary
+    // TODO(danrubel): enhance dartanalyzer to provide this type of summary
     if (!flutterRepo) {
       final List<String> arguments = <String>[];
       arguments.addAll(dartFiles.map((FileSystemEntity f) => f.path));
 
-      if (arguments.length < 1 || currentPackage) {
-        final Directory projectDirectory = await projectDirectoryContaining(fs.currentDirectory.absolute);
-        if (projectDirectory != null)
+      if (arguments.isEmpty || currentPackage) {
+        // workingDirectory is non-null only when testing flutter analyze
+        final Directory currentDirectory = workingDirectory ?? fs.currentDirectory.absolute;
+        final Directory projectDirectory = await projectDirectoryContaining(currentDirectory);
+        if (projectDirectory != null) {
           arguments.add(projectDirectory.path);
-      } else {
-        String currentDirectoryPath = fs.currentDirectory.path;
-        if (!currentDirectoryPath.endsWith(fs.path.separator))
-          currentDirectoryPath += fs.path.separator;
-
-        // If the files being analyzed are outside of the current directory hierarchy
-        // then dartanalyzer does not yet know how to find the ".packages" file.
-        // In this situation, use the first file as a starting point
-        // to search for a "pubspec.yaml" and ".packages" file.
-        // TODO(danrubel): fix dartanalyzer to find the .packages file
-        if (!arguments[0].startsWith(currentDirectoryPath)) {
-          final String targetPath = arguments[0];
-          final FileSystemEntity target = await fs.isDirectory(targetPath)
-              ? fs.directory(targetPath) : fs.file(targetPath);
-          final Directory projDir = await projectDirectoryContaining(target);
-          if (projDir != null) {
-            final String packagesPath = fs.path.join(projDir.path, '.packages');
-            if (packagesPath != null) {
-              arguments.insert(0, '--packages');
-              arguments.insert(1, packagesPath);
-            }
-          }
+        } else if (arguments.isEmpty) {
+          arguments.add(currentDirectory.path);
         }
+      }
+
+      // If the files being analyzed are outside of the current directory hierarchy
+      // then dartanalyzer does not yet know how to find the ".packages" file.
+      // TODO(danrubel): fix dartanalyzer to find the .packages file
+      final File packagesFile = await packagesFileFor(arguments);
+      if (packagesFile != null) {
+        arguments.insert(0, '--packages');
+        arguments.insert(1, packagesFile.path);
       }
 
       final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
       arguments.insert(0, dartanalyzer);
-      final int exitCode = await runCommandAndStreamOutput(arguments);
+      bool noErrors = false;
+      int exitCode = await runCommandAndStreamOutput(
+          arguments,
+          workingDirectory: workingDirectory?.path,
+          mapFunction: (String line) {
+            // Workaround for the fact that dartanalyzer does not exit with a non-zero exit code
+            // when errors are found.
+            // TODO(danrubel): Fix dartanalyzer to return non-zero exit code
+            if (line == 'No issues found!')
+              noErrors = true;
+            return line;
+          },
+      );
       stopwatch.stop();
       final String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+      // Workaround for the fact that dartanalyzer does not exit with a non-zero exit code
+      // when errors are found.
+      // TODO(danrubel): Fix dartanalyzer to return non-zero exit code
+      if (exitCode == 0 && !noErrors)
+        exitCode = 1;
       if (exitCode != 0)
         throwToolExit('(Ran in ${elapsed}s)', exitCode: exitCode);
       printStatus('Ran in ${elapsed}s');
@@ -218,6 +229,42 @@ class AnalyzeOnce extends AnalyzeBase {
         printStatus('No analyzer warnings! (ran in ${elapsed}s)');
       }
     }
+  }
+
+  /// Return a path to the ".packages" file for use by dartanalyzer when analyzing the specified files.
+  /// Report an error if there are file paths that belong to different projects.
+  Future<File> packagesFileFor(List<String> filePaths) async {
+    String projectPath = await projectPathContaining(filePaths.first);
+    if (projectPath != null) {
+      if (projectPath.endsWith(fs.path.separator))
+        projectPath = projectPath.substring(0, projectPath.length - 1);
+      final String projectPrefix = projectPath + fs.path.separator;
+      // Assert that all file paths are contained in the same project directory
+      for (String filePath in filePaths) {
+        if (!filePath.startsWith(projectPrefix) && filePath != projectPath)
+          throwToolExit('Files in different projects cannot be analyzed at the same time.\n'
+              '  Project: $projectPath\n  File outside project:  $filePath');
+      }
+    } else {
+      // Assert that all file paths are not contained in any project
+      for (String filePath in filePaths) {
+        final String otherProjectPath = await projectPathContaining(filePath);
+        if (otherProjectPath != null)
+          throwToolExit('Files inside a project cannot be analyzed at the same time as files not in any project.\n'
+              '  File inside a project: $filePath');
+      }
+    }
+
+    if (projectPath == null)
+      return null;
+    final File packagesFile = fs.file(fs.path.join(projectPath, '.packages'));
+    return await packagesFile.exists() ? packagesFile : null;
+  }
+
+  Future<String> projectPathContaining(String targetPath) async {
+    final FileSystemEntity target = await fs.isDirectory(targetPath) ? fs.directory(targetPath) : fs.file(targetPath);
+    final Directory projectDirectory = await projectDirectoryContaining(target);
+    return projectDirectory?.path;
   }
 
   Future<Directory> projectDirectoryContaining(FileSystemEntity entity) async {
