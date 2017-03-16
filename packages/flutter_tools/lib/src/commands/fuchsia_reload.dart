@@ -9,12 +9,14 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../cache.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 // Usage:
 // With e.g. flutter_gallery already running, a HotRunner can be attached to it
@@ -62,6 +64,8 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
+    Cache.releaseLockEarly();
+
     _validateArguments();
 
     // Find the network ports used on the device by VM service instances.
@@ -70,24 +74,57 @@ class FuchsiaReloadCommand extends FlutterCommand {
       throwToolExit("Couldn't find any running Observatory instances.");
     }
     for (int port in servicePorts) {
-      printStatus("Fuchsia service port: $port");
+      printTrace("Fuchsia service port: $port");
     }
 
-    // TODO(zra): Check that there are running VM services on the returned
+    // Check that there are running VM services on the returned
     // ports, and find the Isolates that are running the target app.
+    final String isolateName = "$_projectName\$main";
+    final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
+    if (targetPorts.length == 0) {
+      throwToolExit("No VMs found running $_projectName");
+    }
+    for (int port in targetPorts) {
+      printTrace("Found $_projectName at $port");
+    }
 
     // Set up a device and hot runner and attach the hot runner to the first
     // vm service we found.
-    final int firstPort = servicePorts[0];
-    final FuchsiaDevice device = new FuchsiaDevice("$_address:$firstPort");
+    final int firstPort = targetPorts[0];
+    final String fullAddress = "$_address:$firstPort";
+    final FuchsiaDevice device = new FuchsiaDevice(fullAddress);
     final HotRunner hotRunner = new HotRunner(
         device,
         debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
         target: _target,
         projectRootPath: _fuchsiaProjectPath,
         packagesFilePath: _dotPackagesPath);
-    final Uri observatoryUri = Uri.parse("http://$_address:$firstPort");
-    await hotRunner.attach(observatoryUri);
+    final Uri observatoryUri = Uri.parse("http://$fullAddress");
+    printStatus("Connecting to $_projectName at $observatoryUri");
+    await hotRunner.attach(observatoryUri, isolateFilter: isolateName);
+  }
+
+  // Find ports where there is a view isolate with the given name
+  Future<List<int>> _filterPorts(List<int> ports, String isolateFilter) async {
+    final List<int> result = new List<int>();
+    for (int port in ports) {
+      final String addr = "http://$_address:$port";
+      final Uri uri = Uri.parse(addr);
+      final VMService vmService = VMService.connect(uri);
+      await vmService.getVM();
+      await vmService.waitForViews();
+      if (vmService.vm.firstView == null) {
+        printTrace("Found no views at $addr");
+        continue;
+      }
+      for (FlutterView v in vmService.vm.views) {
+        printTrace("At $addr, found view: ${v.uiIsolate.name}");
+        if (v.uiIsolate.name.indexOf(isolateFilter) == 0) {
+          result.add(port);
+        }
+      }
+    }
+    return result;
   }
 
   void _validateArguments() {
