@@ -522,7 +522,16 @@ class BackdropFilterLayer extends ContainerLayer {
   }
 }
 
+/// A composited layer that uses a physical model to producing lighting effects.
+///
+/// For example, the layer casts a shadow according to its geometry and the
+/// relative position of lights and other physically modelled objects in the
+/// scene.
 class PhysicalModelLayer extends ContainerLayer {
+  /// Creates a composited layer that uses a physical model to producing
+  /// lighting effects.
+  ///
+  /// The [clipRRect], [elevation], and [color] arguments must not be null.
   PhysicalModelLayer({
     @required this.clipRRect,
     @required this.elevation,

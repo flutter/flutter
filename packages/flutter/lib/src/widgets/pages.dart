@@ -62,6 +62,10 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
 class PageRouteBuilder<T> extends PageRoute<T> {
+  /// Creates a route that deletates to builder callbacks.
+  ///
+  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissable],
+  /// and [maintainState] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings: const RouteSettings(),
     this.pageBuilder,
@@ -79,7 +83,14 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     assert(maintainState != null);
   }
 
+  /// Used build the route's primary contents.
+  ///
+  /// See [ModalRoute.buildPage] for complete definition of the parameters.
   final RoutePageBuilder pageBuilder;
+
+  /// Used to build the route's transitions.
+  ///
+  /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
   final RouteTransitionsBuilder transitionsBuilder;
 
   @override

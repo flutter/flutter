@@ -2563,9 +2563,7 @@ abstract class Element implements BuildContext {
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
-      didChangeDependencies
-      
-      ();
+      didChangeDependencies();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -3047,9 +3045,9 @@ abstract class ComponentElement extends Element {
     rebuild();
   }
 
-  /// Calls the `build` method of the [StatelessWidget] object (for
-  /// stateless widgets) or the [State] object (for stateful widgets) and
-  /// then updates the widget tree.
+  /// Calls the [StatelessWidget.build] method of the [StatelessWidget] object
+  /// (for stateless widgets) or the [State.build] method of the [State] object
+  /// (for stateful widgets) and then updates the widget tree.
   ///
   /// Called automatically during [mount] to generate the first build, and by
   /// [rebuild] when the element needs updating.
@@ -3091,6 +3089,9 @@ abstract class ComponentElement extends Element {
     });
   }
 
+  /// Subclasses should override this function to actually call the appropriate
+  /// `build` function (e.g., [StatelessWidget.build] or [State.build]) for
+  /// their widget.
   @protected
   Widget build();
 
