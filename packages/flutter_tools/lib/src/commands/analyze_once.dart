@@ -46,43 +46,53 @@ class AnalyzeOnce extends AnalyzeBase {
       }
     }
 
-    final bool currentDirectory = argResults['current-directory'] && (argResults.wasParsed('current-directory') || dartFiles.isEmpty);
     final bool currentPackage = argResults['current-package'] && (argResults.wasParsed('current-package') || dartFiles.isEmpty);
     final bool flutterRepo = argResults['flutter-repo'] || inRepo(argResults.rest);
 
-    // Use dartanalyzer directly when possible
+    // Use dartanalyzer directly except when analyzing the Flutter repository.
+    // Analyzing the repository requires a more complex report than dartanalyzer
+    // currently supports (e.g. missing member dartdoc summary).
+    // TODO(danrubel) enhance dartanalyzer to provide this type of summary
     if (!flutterRepo) {
-      final String dartanalyzer = fs.path.join(
-          Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
-      final List<String> cmd = <String>[dartanalyzer];
-      cmd.addAll(dartFiles.map((FileSystemEntity f) => f.path));
+      final List<String> arguments = <String>[];
+      arguments.addAll(dartFiles.map((FileSystemEntity f) => f.path));
 
-      if (cmd.length < 2 || currentPackage) {
-        final Directory projDir = await projectDirFor(fs.currentDirectory.absolute);
-        if (projDir != null) {
-          cmd.add((projDir).path);
-        }
-      } else if (currentDirectory) {
-        cmd.add('.');
-      } else if (!cmd[1].startsWith(fs.currentDirectory.path)) {
-        final String targetPath = cmd[1];
-        final FileSystemEntity target = await fs.isDirectory(targetPath)
-            ? fs.directory(targetPath) : fs.file(targetPath);
-        final Directory projDir = await projectDirFor(target);
-        if (projDir != null) {
-          final String packagesPath = fs.path.join((projDir).path, '.packages');
-          if (packagesPath != null) {
-            cmd.insert(1, '--packages');
-            cmd.insert(2, packagesPath);
+      if (arguments.length < 1 || currentPackage) {
+        final Directory projectDirectory = await projectDirectoryContaining(fs.currentDirectory.absolute);
+        if (projectDirectory != null)
+          arguments.add(projectDirectory.path);
+      } else {
+        String currentDirectoryPath = fs.currentDirectory.path;
+        if (!currentDirectoryPath.endsWith(fs.path.separator))
+          currentDirectoryPath += fs.path.separator;
+
+        // If the files being analyzed are outside of the current directory hierarchy
+        // then dartanalyzer does not yet know how to find the ".packages" file.
+        // In this situation, use the first file as a starting point
+        // to search for a "pubspec.yaml" and ".packages" file.
+        // TODO(danrubel): fix dartanalyzer to find the .packages file
+        if (!arguments[0].startsWith(currentDirectoryPath)) {
+          final String targetPath = arguments[0];
+          final FileSystemEntity target = await fs.isDirectory(targetPath)
+              ? fs.directory(targetPath) : fs.file(targetPath);
+          final Directory projDir = await projectDirectoryContaining(target);
+          if (projDir != null) {
+            final String packagesPath = fs.path.join(projDir.path, '.packages');
+            if (packagesPath != null) {
+              arguments.insert(0, '--packages');
+              arguments.insert(1, packagesPath);
+            }
           }
         }
       }
 
-      final int exitCode = await runCommandAndStreamOutput(cmd);
+      final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
+      arguments.insert(0, dartanalyzer);
+      final int exitCode = await runCommandAndStreamOutput(arguments);
       stopwatch.stop();
       final String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
       if (exitCode != 0)
-        throwToolExit('(Ran in ${elapsed}s)');
+        throwToolExit('(Ran in ${elapsed}s)', exitCode: exitCode);
       printStatus('Ran in ${elapsed}s');
       return;
     }
@@ -210,7 +220,7 @@ class AnalyzeOnce extends AnalyzeBase {
     }
   }
 
-  Future<Directory> projectDirFor(FileSystemEntity entity) async {
+  Future<Directory> projectDirectoryContaining(FileSystemEntity entity) async {
     Directory dir = entity is Directory ? entity : entity.parent;
     dir = dir.absolute;
     while (!await dir.childFile('pubspec.yaml').exists()) {
