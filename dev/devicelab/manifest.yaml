@@ -178,3 +178,18 @@ tasks:
       Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+
+  # Tests running on Windows host
+
+  flutter_gallery_win__build:
+    description: >
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
+
+  hot_mode_dev_cycle_win__benchmark:
+    description: >
+      Measures the performance of Dart VM hot patching feature on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
