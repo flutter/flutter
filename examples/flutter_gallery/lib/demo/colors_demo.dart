@@ -112,8 +112,6 @@ class ColorsDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(Colors.blue);
-    print(Colors.blueAccent);
     return new DefaultTabController(
       length: colorSwatches.length,
       child: new Scaffold(
