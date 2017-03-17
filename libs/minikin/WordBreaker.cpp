@@ -83,23 +83,13 @@ static bool isBreakValid(const uint16_t* buf, size_t bufEnd, size_t i) {
     size_t next_offset = i;
     U16_NEXT(buf, next_offset, bufEnd, next_codepoint);
 
-    // Proposed change to LB24 from http://www.unicode.org/L2/L2016/16043r-line-break-pr-po.txt
-    // (AL | HL) × (PR | PO)
-    int32_t lineBreak = u_getIntPropertyValue(codePoint, UCHAR_LINE_BREAK);
-    if (lineBreak == U_LB_ALPHABETIC || lineBreak == U_LB_HEBREW_LETTER) {
-        lineBreak = u_getIntPropertyValue(next_codepoint, UCHAR_LINE_BREAK);
-        if (lineBreak == U_LB_PREFIX_NUMERIC || lineBreak == U_LB_POSTFIX_NUMERIC) {
-            return false;
-        }
-    }
-
-    // Emoji ZWJ sequences.
+    // Rule LB8 for Emoji ZWJ sequences. We need to do this ourselves since we may have fresher
+    // emoji data than ICU does.
     if (codePoint == CHAR_ZWJ && isEmoji(next_codepoint)) {
         return false;
     }
 
-    // Proposed Rule LB30b from http://www.unicode.org/L2/L2016/16011r3-break-prop-emoji.pdf
-    // EB x EM
+    // Rule LB30b. We need to this ourselves since we may have fresher emoji data than ICU does.
     if (isEmojiModifier(next_codepoint)) {
         if (codePoint == 0xFE0F && prev_offset > 0) {
             // skip over emoji variation selector
