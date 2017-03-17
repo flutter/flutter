@@ -21,51 +21,42 @@ void main() {
   });
 
   test('setPreferredOrientations control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final List<String> log = <String>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
 
     await SystemChrome.setPreferredOrientations(<DeviceOrientation>[
       DeviceOrientation.portraitUp,
     ]);
 
-    expect(log, equals(<MethodCall>[new MethodCall(
-      'SystemChrome.setPreferredOrientations',
-      <String>["DeviceOrientation.portraitUp"],
-    )]));
+    expect(log, equals(<String>['{"method":"SystemChrome.setPreferredOrientations","args":[["DeviceOrientation.portraitUp"]]}']));
   });
 
   test('setApplicationSwitcherDescription control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final List<String> log = <String>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
 
     await SystemChrome.setApplicationSwitcherDescription(
-      const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
+        const ApplicationSwitcherDescription(label: 'Example label', primaryColor: 0xFF00FF00)
     );
 
-    expect(log, equals(<MethodCall>[new MethodCall(
-      'SystemChrome.setApplicationSwitcherDescription',
-      <String, dynamic>{"label":"Example label","primaryColor":4278255360}
-    )]));
+    expect(log, equals(<String>['{"method":"SystemChrome.setApplicationSwitcherDescription","args":[{"label":"Example label","primaryColor":4278255360}]}']));
   });
 
   test('setEnabledSystemUIOverlays control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final List<String> log = <String>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
 
     await SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[SystemUiOverlay.top]);
 
-    expect(log, equals(<MethodCall>[new MethodCall(
-      'SystemChrome.setEnabledSystemUIOverlays',
-      <String>["SystemUiOverlay.top"],
-    )]));
+    expect(log, equals(<String>['{"method":"SystemChrome.setEnabledSystemUIOverlays","args":[["SystemUiOverlay.top"]]}']));
   });
 }

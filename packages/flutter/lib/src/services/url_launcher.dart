@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'system_channels.dart';
+import 'platform_messages.dart';
 
 /// Allows applications to delegate responsbility of handling certain URLs to
 /// the underlying platform.
@@ -14,9 +14,10 @@ class UrlLauncher {
   /// Parse the specified URL string and delegate handling of the same to the
   /// underlying platform.
   static Future<Null> launch(String urlString) async {
-    await SystemChannels.platform.invokeMethod(
+    await PlatformMessages.invokeMethod(
+      'flutter/platform',
       'UrlLauncher.launch',
-      urlString,
+      <String>[ urlString ],
     );
   }
 }

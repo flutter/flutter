@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 void main() {
   test('Haptic feedback control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final List<String> log = <String>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
 
     await HapticFeedback.vibrate();
 
-    expect(log, equals(<MethodCall>[new MethodCall('HapticFeedback.vibrate')]));
+    expect(log, equals(<String>['{"method":"HapticFeedback.vibrate","args":[]}']));
   });
 }

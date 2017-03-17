@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'system_channels.dart';
+import 'platform_messages.dart';
 
 /// Allows access to the haptic feedback interface on the device.
 ///
@@ -21,6 +21,6 @@ class HapticFeedback {
   /// On Android, this uses the platform haptic feedback API to simulates a
   /// short tap on a virtual keyboard.
   static Future<Null> vibrate() async {
-    await SystemChannels.platform.invokeMethod('HapticFeedback.vibrate');
+    await PlatformMessages.invokeMethod('flutter/platform', 'HapticFeedback.vibrate');
   }
 }

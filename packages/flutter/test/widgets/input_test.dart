@@ -15,12 +15,14 @@ class MockClipboard {
     'text': null
   };
 
-  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
+  Future<dynamic> handleJSONMessage(dynamic message) async {
+    final String method = message['method'];
+    final List<dynamic> args= message['args'];
+    switch (method) {
       case 'Clipboard.getData':
         return _clipboardData;
       case 'Clipboard.setData':
-        _clipboardData = methodCall.arguments;
+        _clipboardData = args[0];
         break;
     }
   }
@@ -38,7 +40,7 @@ Widget overlay(Widget child) {
 
 void main() {
   final MockClipboard mockClipboard = new MockClipboard();
-  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
+  PlatformMessages.setMockJSONMessageHandler('flutter/platform', mockClipboard.handleJSONMessage);
 
   const String kThreeLines =
     'First line of text is here abcdef ghijkl mnopqrst. ' +

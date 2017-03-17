@@ -10,14 +10,13 @@ import 'package:flutter/services.dart';
 
 final Random random = new Random();
 
-final PlatformMethodChannel randomChannel = new PlatformMethodChannel('random');
+Future<dynamic> handleGetRandom(Map<String, dynamic> message) async {
+  final double min = message['min'].toDouble();
+  final double max = message['max'].toDouble();
 
-Future<dynamic> handleGetRandom(MethodCall call) async {
-  if (call.method == 'getRandom') {
-    final int min = call.arguments[0];
-    final int max = call.arguments[1];
-    return random.nextInt(max - min) + min;
-  }
+  return <String, double>{
+    'value': (random.nextDouble() * (max - min)) + min
+  };
 }
 
 class HelloServices extends StatefulWidget {
@@ -26,8 +25,8 @@ class HelloServices extends StatefulWidget {
 }
 
 class _HelloServicesState extends State<HelloServices> {
-  static PlatformMethodChannel locationChannel = new PlatformMethodChannel('location');
-  String _location = 'Press button to get location';
+  double _latitude;
+  double _longitude;
 
   @override
   Widget build(BuildContext context) {
@@ -39,37 +38,32 @@ class _HelloServicesState extends State<HelloServices> {
             new Text('Hello from Flutter!'),
             new RaisedButton(
               child: new Text('Get Location'),
-              onPressed: _getLocation,
+              onPressed: _getLocation
             ),
-            new Text(_location),
-          ],
-        ),
-      ),
+            new Text('Latitude: $_latitude, Longitude: $_longitude'),
+          ]
+        )
+      )
     );
   }
 
   Future<Null> _getLocation() async {
-    String location;
-    try {
-      final List<double> reply = await locationChannel.invokeMethod(
-        'getLocation',
-        'network',
-      );
-      location = 'Latitude: ${reply[0]}, Longitude: ${reply[1]}';
-    } on PlatformException catch(e) {
-      location = 'Error: ' + e.message;
-    }
+    final Map<String, String> message = <String, String>{'provider': 'network'};
+    final Map<String, dynamic> reply = await PlatformMessages.sendJSON('getLocation', message);
     // If the widget was removed from the tree while the message was in flight,
     // we want to discard the reply rather than calling setState to update our
     // non-existent appearance.
-    if (!mounted) return;
+    if (!mounted)
+      return;
     setState(() {
-      _location = location;
+      _latitude = reply['latitude'].toDouble();
+      _longitude = reply['longitude'].toDouble();
     });
   }
 }
 
 void main() {
   runApp(new HelloServices());
-  randomChannel.setMethodCallHandler(handleGetRandom);
+
+  PlatformMessages.setJSONMessageHandler('getRandom', handleGetRandom);
 }

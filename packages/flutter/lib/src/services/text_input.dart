@@ -7,8 +7,7 @@ import 'dart:ui' show TextAffinity;
 
 import 'package:flutter/foundation.dart';
 
-import 'system_channels.dart';
-import 'message_codec.dart';
+import 'platform_messages.dart';
 
 export 'dart:ui' show TextAffinity;
 
@@ -173,6 +172,8 @@ abstract class TextInputClient {
   void performAction(TextInputAction action);
 }
 
+const String _kChannelName = 'flutter/textinput';
+
 /// A interface for interacting with a text input control.
 ///
 /// See also:
@@ -194,15 +195,16 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod('TextInput.show');
+    PlatformMessages.invokeMethod(_kChannelName, 'TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingState state) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod(
+    PlatformMessages.invokeMethod(
+      _kChannelName,
       'TextInput.setEditingState',
-      state.toJSON(),
+      <dynamic>[ state.toJSON() ],
     );
   }
 
@@ -212,7 +214,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod('TextInput.clearClient');
+      PlatformMessages.invokeMethod(_kChannelName, 'TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
@@ -231,16 +233,16 @@ TextInputAction _toTextInputAction(String action) {
 
 class _TextInputClientHandler {
   _TextInputClientHandler() {
-    SystemChannels.textInput.setMethodCallHandler(_handleTextInputInvocation);
+    PlatformMessages.setJSONMessageHandler('flutter/textinputclient', _handleMessage);
   }
 
   TextInputConnection _currentConnection;
 
-  Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
+  Future<Null> _handleMessage(dynamic message) async {
     if (_currentConnection == null)
       return;
-    final String method = methodCall.method;
-    final List<dynamic> args = methodCall.arguments;
+    final String method = message['method'];
+    final List<dynamic> args = message['args'];
     final int client = args[0];
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
@@ -268,7 +270,7 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod('TextInput.hide');
+        PlatformMessages.invokeMethod(_kChannelName, 'TextInput.hide');
     });
   }
 }
@@ -294,7 +296,8 @@ class TextInput {
     assert(configuration != null);
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    SystemChannels.textInput.invokeMethod(
+    PlatformMessages.invokeMethod(
+      _kChannelName,
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJSON() ],
     );

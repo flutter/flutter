@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 void main() {
   test('System navigator control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
+    final List<String> log = <String>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
 
     await SystemNavigator.pop();
 
-    expect(log, equals(<MethodCall>[new MethodCall('SystemNavigator.pop')]));
+    expect(log, equals(<String>['{"method":"SystemNavigator.pop","args":[]}']));
   });
 }

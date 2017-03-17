@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -21,35 +23,34 @@ const String _kTextInputClientChannel = 'flutter/textinputclient';
 ///   popup keyboard and initializing its text.
 class TestTextInput {
   void register() {
-    SystemChannels.textInput.setMockMethodCallHandler(handleTextInputCall);
+    PlatformMessages.setMockJSONMessageHandler('flutter/textinput', handleJSONMessage);
   }
 
   int _client = 0;
   Map<String, dynamic> editingState;
 
-  Future<dynamic> handleTextInputCall(MethodCall methodCall) async {
-    switch (methodCall.method) {
+  Future<dynamic> handleJSONMessage(dynamic message) async {
+    final String method = message['method'];
+    final List<dynamic> args= message['args'];
+    switch (method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0];
+        _client = args[0];
         break;
       case 'TextInput.setEditingState':
-        editingState = methodCall.arguments;
+        editingState = args[0];
         break;
     }
   }
 
   void updateEditingState(TextEditingState state) {
     expect(_client, isNonZero);
+    final String message = JSON.encode(<String, dynamic>{
+      'method': 'TextInputClient.updateEditingState',
+      'args': <dynamic>[_client, state.toJSON()],
+    });
+    final Uint8List encoded = UTF8.encoder.convert(message);
     PlatformMessages.handlePlatformMessage(
-      SystemChannels.textInput.name,
-      SystemChannels.textInput.codec.encodeMethodCall(
-        new MethodCall(
-          'TextInputClient.updateEditingState',
-          <dynamic>[_client, state.toJSON()],
-        ),
-      ),
-      (_) {},
-    );
+        _kTextInputClientChannel, encoded.buffer.asByteData(), (_) {});
   }
 
   void enterText(String text) {

@@ -42,9 +42,9 @@ void main() {
       PlatformMessages.setMockBinaryMessageHandler(
         'ch',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
-          if (methodCall['method'] == 'sayHello')
-            return jsonMessage.encodeMessage(<dynamic>['${methodCall['args']} world']);
+          final List<dynamic> methodCall = jsonMessage.decodeMessage(message);
+          if (methodCall[0] == 'sayHello')
+            return jsonMessage.encodeMessage(<dynamic>['${methodCall[1]} world']);
           else
             return jsonMessage.encodeMessage(<dynamic>['unknown', null, null]);
         },
@@ -84,14 +84,14 @@ void main() {
       PlatformMessages.setMockBinaryMessageHandler(
         'ch',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
-          if (methodCall['method'] == 'listen') {
-            final String argument = methodCall['args'];
+          final List<dynamic> methodCall = jsonMessage.decodeMessage(message);
+          if (methodCall[0] == 'listen') {
+            final String argument = methodCall[1];
             emitEvent(jsonMessage.encodeMessage(<dynamic>[argument + '1']));
             emitEvent(jsonMessage.encodeMessage(<dynamic>[argument + '2']));
             emitEvent(null);
             return jsonMessage.encodeMessage(<dynamic>[null]);
-          } else if (methodCall['method'] == 'cancel') {
+          } else if (methodCall[0] == 'cancel') {
             cancelled = true;
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {
