@@ -1597,7 +1597,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// The [fit] and [alignment] arguments must not be null.
   RenderFittedBox({
     RenderBox child,
-    ImageFit fit: ImageFit.contain,
+    BoxFit fit: BoxFit.contain,
     FractionalOffset alignment: FractionalOffset.center
   }) : _fit = fit, _alignment = alignment, super(child) {
     assert(fit != null);
@@ -1605,9 +1605,9 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   /// How to inscribe the child into the space allocated during layout.
-  ImageFit get fit => _fit;
-  ImageFit _fit;
-  set fit(ImageFit value) {
+  BoxFit get fit => _fit;
+  BoxFit _fit;
+  set fit(BoxFit value) {
     assert(value != null);
     if (_fit == value)
       return;
@@ -1660,7 +1660,7 @@ class RenderFittedBox extends RenderProxyBox {
       _transform = new Matrix4.identity();
     } else {
       final Size childSize = child.size;
-      final FittedSizes sizes = applyImageFit(_fit, childSize, size);
+      final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
       final Rect sourceRect = _alignment.inscribe(sizes.source, Point.origin & childSize);

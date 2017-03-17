@@ -220,7 +220,7 @@ new GridView.count(
       footer: new GridTileBar(
         title: new Text(url)
       ),
-      child: new Image.network(url, fit: ImageFit.cover)
+      child: new Image.network(url, fit: BoxFit.cover)
     );
   }).toList(),
 );

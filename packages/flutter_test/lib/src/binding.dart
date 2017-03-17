@@ -772,7 +772,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
 /// A [ViewConfiguration] that pretends the display is of a particular size. The
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
-/// size onto the actual display using the [ImageFit.contain] algorithm.
+/// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   TestViewConfiguration({ Size size: _kDefaultTestViewportSize })

@@ -8,7 +8,7 @@ import 'box.dart';
 import 'object.dart';
 
 export 'package:flutter/painting.dart' show
-  ImageFit,
+  BoxFit,
   ImageRepeat;
 
 /// An image in the render tree.
@@ -26,7 +26,7 @@ class RenderImage extends RenderBox {
     double height,
     double scale: 1.0,
     Color color,
-    ImageFit fit,
+    BoxFit fit,
     FractionalOffset alignment,
     ImageRepeat repeat: ImageRepeat.noRepeat,
     Rect centerSlice
@@ -118,9 +118,9 @@ class RenderImage extends RenderBox {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  ImageFit get fit => _fit;
-  ImageFit _fit;
-  set fit(ImageFit value) {
+  BoxFit get fit => _fit;
+  BoxFit _fit;
+  set fit(BoxFit value) {
     if (value == _fit)
       return;
     _fit = value;

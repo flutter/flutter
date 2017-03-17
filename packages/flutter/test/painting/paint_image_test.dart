@@ -38,7 +38,7 @@ void main() {
       canvas: canvas,
       rect: new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
-      fit: ImageFit.cover,
+      fit: BoxFit.cover,
       alignment: const FractionalOffset(0.0, 0.5)
     );
 

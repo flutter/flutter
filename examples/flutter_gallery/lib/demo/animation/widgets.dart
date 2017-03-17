@@ -36,7 +36,7 @@ class SectionCard extends StatelessWidget {
           opacity: 0.075,
           child: new Image.asset(
             section.backgroundAsset,
-            fit: ImageFit.cover,
+            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -129,7 +129,7 @@ class SectionDetailView extends StatelessWidget {
         borderRadius: new BorderRadius.circular(6.0),
         backgroundImage: new BackgroundImage(
           image: new AssetImage(detail.imageAsset),
-          fit: ImageFit.cover,
+          fit: BoxFit.cover,
           alignment: FractionalOffset.center,
         ),
       ),
