@@ -121,6 +121,8 @@ class JSONMethodCodec implements MethodCodec {
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
+    if (envelope == null)
+      throw new MissingPluginException();
     final dynamic decoded = const JSONMessageCodec().decodeMessage(envelope);
     if (decoded is! List)
       throw new FormatException('Expected envelope List, got $decoded');
@@ -460,8 +462,10 @@ class StandardMethodCodec implements MethodCodec {
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
+    if (envelope == null)
+      throw new MissingPluginException();
     // First byte is zero in success case, and non-zero otherwise.
-    if (envelope == null || envelope.lengthInBytes == 0)
+    if (envelope.lengthInBytes == 0)
       throw const FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = new ReadBuffer(envelope);
     if (buffer.getUint8() == 0)

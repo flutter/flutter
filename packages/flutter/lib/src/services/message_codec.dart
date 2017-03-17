@@ -42,7 +42,7 @@ class MethodCall {
   ///
   /// Must be a valid value for the [MethodCodec] used.
   final dynamic arguments;
-  
+
   @override
   bool operator== (dynamic other) {
     if (identical(this, other))
@@ -64,7 +64,7 @@ class MethodCall {
       return b is Map && _deepEqualsMap(a, b);
     return false;
   }
-  
+
   bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
     if (a.length != b.length)
       return false;
@@ -84,7 +84,7 @@ class MethodCall {
     }
     return true;
   }
-  
+
   @override
   String toString() => '$runtimeType($method, $arguments)';
 }
@@ -120,7 +120,7 @@ abstract class MethodCodec {
 
   /// Encodes a successful [result] into a binary envelope.
   ByteData encodeSuccessEnvelope(dynamic result);
-  
+
   /// Encodes an error result into a binary envelope.
   ///
   /// The specified error [code], human-readable error [message], and error
@@ -165,4 +165,10 @@ class PlatformException implements Exception {
 
   @override
   String toString() => 'PlatformException($code, $message, $details)';
+}
+
+/// Thrown to indicate that a platform interaction failed to find the plugin.
+class MissingPluginException implements Exception {
+  @override
+  String toString() => 'MissingPluginException';
 }

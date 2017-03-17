@@ -261,3 +261,22 @@ class PlatformMethodChannel {
     return controller.stream;
   }
 }
+
+/// A [PlatformMethodChannel] that ignores missing platform plugins.
+///
+/// When [invokeMethod] fails to find the platform plugin, it returns null
+/// instead of throwing an exception.
+class OptionalPlatformMethodChannel extends PlatformMethodChannel {
+  /// Creates a [PlatformMethodChannel] that ignores missing platform plugins.
+  const OptionalPlatformMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
+    : super(name, codec);
+
+  @override
+  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
+    try {
+      return await super.invokeMethod(method, arguments);
+    } on MissingPluginException {
+      return null;
+    }
+  }
+}
