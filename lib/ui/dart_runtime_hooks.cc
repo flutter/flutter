@@ -28,7 +28,10 @@
 #endif
 
 #if __APPLE__
-#include <asl.h>
+extern "C" {
+// Cannot import the syslog.h header directly because of macro collision
+extern void syslog(int, const char*, ...);
+}
 #endif
 
 using tonic::LogIfError;
@@ -154,7 +157,7 @@ void Logger_PrintString(Dart_NativeArguments args) {
     __android_log_print(ANDROID_LOG_INFO, tag, "%.*s", (int)length,
                         chars);
 #elif __APPLE__
-    asl_log_message(ASL_LEVEL_NOTICE, "%.*s", (int)length, chars);
+    syslog(1 /* LOG_ALERT */, "%.*s", (int)length, chars);
 #endif
   }
   if (dart::bin::ShouldCaptureStdout()) {
