@@ -1781,7 +1781,6 @@ FILE: ../../../flutter/shell/platform/android/android_surface_gl.h
 FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_vulkan.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/ActivityLifecycleListener.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMessageListener.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/InputConnectionAdaptor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/editing/TextInputPlugin.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/platform/PlatformPlugin.java
@@ -1794,17 +1793,13 @@ FILE: ../../../flutter/shell/platform/darwin/common/process_info_mac.h
 FILE: ../../../flutter/shell/platform/darwin/desktop/vsync_waiter_mac.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/Flutter.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterAsyncMessageListener.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterDartProject.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterJSONMessageListener.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterMessageListener.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.mm
-FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterJSONMessageListener.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformPlugin.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h
@@ -1915,7 +1910,8 @@ FILE: ../../../flutter/fml/platform/darwin/cf_utils.cc
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessageCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterException.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMethodChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMessageCodec.java
@@ -1924,7 +1920,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCal
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMethodCodec.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringMessageCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCodec.java
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h

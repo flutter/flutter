@@ -26,7 +26,7 @@ public final class JSONMessageCodec implements MessageCodec<Object> {
         if (message == null) {
             return null;
         }
-        return StringMessageCodec.INSTANCE.encodeMessage(JSONObject.wrap(message).toString());
+        return StringCodec.INSTANCE.encodeMessage(JSONObject.wrap(message).toString());
     }
 
     @Override
@@ -35,7 +35,7 @@ public final class JSONMessageCodec implements MessageCodec<Object> {
             return null;
         }
         try {
-            final String json = StringMessageCodec.INSTANCE.decodeMessage(message);
+            final String json = StringCodec.INSTANCE.decodeMessage(message);
             final JSONTokener tokener = new JSONTokener(json);
             final Object value = tokener.nextValue();
             if (tokener.more()) {

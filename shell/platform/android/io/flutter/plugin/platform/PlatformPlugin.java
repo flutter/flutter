@@ -16,9 +16,12 @@ import android.os.Build;
 import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
+
 import io.flutter.plugin.common.ActivityLifecycleListener;
-import io.flutter.plugin.common.JSONMessageListener;
-import io.flutter.view.FlutterView;
+import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.FlutterMethodChannel.Response;
+import io.flutter.plugin.common.MethodCall;
+
 import org.chromium.base.PathUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,7 +30,7 @@ import org.json.JSONObject;
 /**
  * Android implementation of the platform plugin.
  */
-public class PlatformPlugin extends JSONMessageListener implements ActivityLifecycleListener {
+public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListener {
     private final Activity mActivity;
     public static final int DEFAULT_SYSTEM_UI = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
             | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
@@ -39,38 +42,49 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
     }
 
     @Override
-    public JSONObject onJSONMessage(FlutterView view, JSONObject message) throws JSONException {
-        String method = message.getString("method");
-        JSONArray args = message.getJSONArray("args");
-        if (method.equals("SystemSound.play")) {
-            playSystemSound(args.getString(0));
-        } else if (method.equals("HapticFeedback.vibrate")) {
-            vibrateHapticFeedback();
-        } else if (method.equals("UrlLauncher.launch")) {
-            launchURL(args.getString(0));
-        } else if (method.equals("SystemChrome.setPreferredOrientations")) {
-            setSystemChromePreferredOrientatations(args.getJSONArray(0));
-        } else if (method.equals("SystemChrome.setApplicationSwitcherDescription")) {
-            setSystemChromeApplicationSwitcherDescription(args.getJSONObject(0));
-        } else if (method.equals("SystemChrome.setEnabledSystemUIOverlays")) {
-            setSystemChromeEnabledSystemUIOverlays(args.getJSONArray(0));
-        } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
-            setSystemChromeSystemUIOverlayStyle(args.getString(0));
-        } else if (method.equals("SystemNavigator.pop")) {
-            popSystemNavigator();
-        } else if (method.equals("Clipboard.getData")) {
-            return getClipboardData(args.getString(0));
-        } else if (method.equals("Clipboard.setData")) {
-            setClipboardData(args.getJSONObject(0));
-        } else if (method.equals("PathProvider.getTemporaryDirectory")) {
-            return getPathProviderTemporaryDirectory();
-        } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
-            return getPathProviderApplicationDocumentsDirectory();
-        } else {
-            // TODO(abarth): We should throw an exception here that gets
-            // transmitted back to Dart.
+    public void onMethodCall(MethodCall call, Response response) {
+        String method = call.method;
+        Object arguments = call.arguments;
+        try {
+            if (method.equals("SystemSound.play")) {
+                playSystemSound((String) arguments);
+                response.success(null);
+            } else if (method.equals("HapticFeedback.vibrate")) {
+                vibrateHapticFeedback();
+                response.success(null);
+            } else if (method.equals("UrlLauncher.launch")) {
+                launchURL((String) arguments);
+                response.success(null);
+            } else if (method.equals("SystemChrome.setPreferredOrientations")) {
+                setSystemChromePreferredOrientations((JSONArray) arguments);
+                response.success(null);
+            } else if (method.equals("SystemChrome.setApplicationSwitcherDescription")) {
+                setSystemChromeApplicationSwitcherDescription((JSONObject) arguments);
+                response.success(null);
+            } else if (method.equals("SystemChrome.setEnabledSystemUIOverlays")) {
+                setSystemChromeEnabledSystemUIOverlays((JSONArray) arguments);
+                response.success(null);
+            } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
+                setSystemChromeSystemUIOverlayStyle((String) arguments);
+                response.success(null);
+            } else if (method.equals("SystemNavigator.pop")) {
+                popSystemNavigator();
+                response.success(null);
+            } else if (method.equals("Clipboard.getData")) {
+                response.success(getClipboardData((String) arguments));
+            } else if (method.equals("Clipboard.setData")) {
+                setClipboardData((JSONObject) arguments);
+                response.success(null);
+            } else if (method.equals("PathProvider.getTemporaryDirectory")) {
+                response.success(getPathProviderTemporaryDirectory());
+            } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
+                response.success(getPathProviderApplicationDocumentsDirectory());
+            } else {
+                response.error("unknown", "Unknown method: " + method, null);
+            }
+        } catch (JSONException e) {
+            response.error("error", "JSON error: " + e.getMessage(), null);
         }
-        return null;
     }
 
     private void playSystemSound(String soundType) {
@@ -95,19 +109,19 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         }
     }
 
-    private void setSystemChromePreferredOrientatations(JSONArray orientatations) throws JSONException {
+    private void setSystemChromePreferredOrientations(JSONArray orientations) throws JSONException {
         // Currently the Android implementation only supports masks with zero or one
         // selected device orientations.
         int androidOrientation;
-        if (orientatations.length() == 0) {
+        if (orientations.length() == 0) {
             androidOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-        } else if (orientatations.getString(0).equals("DeviceOrientation.portraitUp")) {
+        } else if (orientations.getString(0).equals("DeviceOrientation.portraitUp")) {
             androidOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        } else if (orientatations.getString(0).equals("DeviceOrientation.landscapeLeft")) {
+        } else if (orientations.getString(0).equals("DeviceOrientation.landscapeLeft")) {
             androidOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        } else if (orientatations.getString(0).equals("DeviceOrientation.portraitDown")) {
+        } else if (orientations.getString(0).equals("DeviceOrientation.portraitDown")) {
             androidOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-        } else if (orientatations.getString(0).equals("DeviceOrientation.landscapeRight")) {
+        } else if (orientations.getString(0).equals("DeviceOrientation.landscapeRight")) {
             androidOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
         } else {
             return;
@@ -127,11 +141,11 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         }
 
         mActivity.setTaskDescription(
-                new android.app.ActivityManager.TaskDescription(
-                        description.getString("label"),
-                        null,
-                        color
-                )
+            new android.app.ActivityManager.TaskDescription(
+                description.getString("label"),
+                null,
+                color
+            )
         );
     }
 
@@ -143,9 +157,9 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
             | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
             | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
-         if (overlays.length() == 0) {
-             enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-         }
+        if (overlays.length() == 0) {
+            enabledOverlays |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        }
 
         for (int i = 0; i < overlays.length(); ++i) {
             String overlay = overlays.getString(i);
@@ -183,9 +197,9 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
 
         if ((format == null || format.equals(kTextPlainFormat)) &&
             clip.getDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
-              JSONObject result = new JSONObject();
-              result.put("text", clip.getItemAt(0).getText().toString());
-              return result;
+            JSONObject result = new JSONObject();
+            result.put("text", clip.getItemAt(0).getText().toString());
+            return result;
         }
 
         return null;
@@ -197,16 +211,12 @@ public class PlatformPlugin extends JSONMessageListener implements ActivityLifec
         clipboard.setPrimaryClip(clip);
     }
 
-    private JSONObject getPathProviderTemporaryDirectory() throws JSONException {
-        JSONObject result = new JSONObject();
-        result.put("path", mActivity.getCacheDir().getPath());
-        return result;
+    private String getPathProviderTemporaryDirectory() {
+        return mActivity.getCacheDir().getPath();
     }
 
-    private JSONObject getPathProviderApplicationDocumentsDirectory() throws JSONException {
-        JSONObject result = new JSONObject();
-        result.put("path", PathUtils.getDataDirectory(mActivity));
-        return result;
+    private String getPathProviderApplicationDocumentsDirectory() {
+        return PathUtils.getDataDirectory(mActivity);
     }
 
     @Override

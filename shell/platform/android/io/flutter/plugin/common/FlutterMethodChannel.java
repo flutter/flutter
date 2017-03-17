@@ -6,6 +6,7 @@ package io.flutter.plugin.common;
 
 import android.util.Log;
 import io.flutter.view.FlutterView;
+import io.flutter.view.FlutterView.BinaryMessageReplyCallback;
 import io.flutter.view.FlutterView.BinaryMessageResponse;
 import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
 import java.nio.ByteBuffer;
@@ -61,6 +62,27 @@ public final class FlutterMethodChannel {
     }
 
     /**
+     * Invokes a method on this channel, expecting no result.
+     *
+     * @param method the name String of the method.
+     * @param arguments the arguments for the invocation, possibly null.
+     */
+    public void invokeMethod(String method, Object arguments) {
+        invokeMethod(method, arguments, null);
+    }
+
+    /**
+     * Invokes a method on this channel.
+     *
+     * @param call a {@link MethodCall}.
+     * @param handler a {@link Response} handler for the invocation result.
+     */
+    public void invokeMethod(String method, Object arguments, Response handler) {
+        view.sendBinaryMessage(name, codec.encodeMethodCall(new MethodCall(method, arguments)),
+            handler == null ? null : new MethodCallResultCallback(handler));
+    }
+
+    /**
      * Registers a method call handler on this channel.
      *
      * Overrides any existing handler registration (for messages, method calls, or streams).
@@ -106,7 +128,8 @@ public final class FlutterMethodChannel {
          * Handles a stream setup request.
          *
          * @param arguments Stream configuration arguments, possibly null.
-         * @param eventSink A {@link EventSink} used to emit events once the stream has been set up.
+         * @param eventSink An {@link EventSink} used to emit events once the stream has been set
+         * up.
          */
         void listen(Object arguments, EventSink eventSink);
 
@@ -150,6 +173,24 @@ public final class FlutterMethodChannel {
         void done();
     }
 
+    private final class MethodCallResultCallback implements BinaryMessageReplyCallback {
+        private final Response handler;
+
+        MethodCallResultCallback(Response handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void onReply(ByteBuffer reply) {
+            try {
+                final Object result = codec.decodeEnvelope(reply);
+                handler.success(result);
+            } catch (FlutterException e) {
+                handler.error(e.code, e.getMessage(), e.details);
+            }
+        }
+    }
+
     private final class MethodCallListener implements OnBinaryMessageListenerAsync {
         private final MethodCallHandler handler;
 
@@ -188,7 +229,7 @@ public final class FlutterMethodChannel {
                 });
             } catch (Exception e) {
                 Log.e(TAG + name, "Failed to handle method call", e);
-                response.send(codec.encodeErrorEnvelope("error", e.getMessage(),null));
+                response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
             }
         }
     }
@@ -236,13 +277,13 @@ public final class FlutterMethodChannel {
                             if (cancelled.get()) {
                                 return;
                             }
-                            FlutterMethodChannel.this.view.sendToFlutter(name,null);
+                            FlutterMethodChannel.this.view.sendBinaryMessage(name, null, null);
                         }
                     });
                     response.send(codec.encodeSuccessEnvelope(null));
                 } catch (Exception e) {
                     Log.e(TAG + name, "Failed to open event stream", e);
-                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(),null));
+                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             } else if (call.method.equals("cancel")) {
                 cancelled.set(true);
@@ -251,7 +292,7 @@ public final class FlutterMethodChannel {
                     response.send(codec.encodeSuccessEnvelope(null));
                 } catch (Exception e) {
                     Log.e(TAG + name, "Failed to close event stream", e);
-                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(),null));
+                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             }
         }

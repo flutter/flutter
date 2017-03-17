@@ -11,7 +11,6 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 
 /**
  * A class to clean up orphaned resource directories after unclean shutdowns.

@@ -68,7 +68,12 @@ void FlutterInit(int argc, const char* argv[]) {
   std::unique_ptr<shell::PlatformViewIOS> _platformView;
   base::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
   base::scoped_nsprotocol<FlutterTextInputPlugin*> _textInputPlugin;
-
+  base::scoped_nsprotocol<FlutterMethodChannel*> _localizationChannel;
+  base::scoped_nsprotocol<FlutterMethodChannel*> _navigationChannel;
+  base::scoped_nsprotocol<FlutterMethodChannel*> _platformChannel;
+  base::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
+  base::scoped_nsprotocol<FlutterMessageChannel*> _lifecycleChannel;
+  base::scoped_nsprotocol<FlutterMessageChannel*> _systemChannel;
   BOOL _initialized;
 }
 
@@ -118,15 +123,49 @@ void FlutterInit(int argc, const char* argv[]) {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
   _platformView = std::make_unique<shell::PlatformViewIOS>(
-      reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+    reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
 
+  _localizationChannel.reset([[FlutterMethodChannel alloc]
+      initWithName:@"flutter/localization"
+      binaryMessenger:self
+      codec:[FlutterJSONMethodCodec sharedInstance]]);
+
+  _navigationChannel.reset([[FlutterMethodChannel alloc]
+      initWithName:@"flutter/navigation"
+      binaryMessenger:self
+      codec:[FlutterJSONMethodCodec sharedInstance]]);
+
+  _platformChannel.reset([[FlutterMethodChannel alloc]
+      initWithName:@"flutter/platform"
+      binaryMessenger:self
+      codec:[FlutterJSONMethodCodec sharedInstance]]);
+
+  _textInputChannel.reset([[FlutterMethodChannel alloc]
+      initWithName:@"flutter/textinput"
+      binaryMessenger:self
+      codec:[FlutterJSONMethodCodec sharedInstance]]);
+
+  _lifecycleChannel.reset([[FlutterMessageChannel alloc]
+      initWithName:@"flutter/lifecycle"
+      binaryMessenger:self
+      codec:[FlutterStringCodec sharedInstance]]);
+
+  _systemChannel.reset([[FlutterMessageChannel alloc]
+      initWithName:@"flutter/system"
+      binaryMessenger:self
+      codec:[FlutterJSONMessageCodec sharedInstance]]);
+
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
-  [self addMessageListener:_platformPlugin.get()];
+  [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
+   [_platformPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
+  }];
 
   _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
   _textInputPlugin.get().textInputDelegate = self;
-  [self addMessageListener:_textInputPlugin.get()];
+  [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
+   [_textInputPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
+  }];
 
   [self setupNotificationCenterObservers];
 
@@ -227,13 +266,11 @@ void FlutterInit(int argc, const char* argv[]) {
 #pragma mark - Application lifecycle notifications
 
 - (void)applicationBecameActive:(NSNotification*)notification {
-  [self sendString:@"AppLifecycleState.resumed"
-      withMessageName:@"flutter/lifecycle"];
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
 }
 
 - (void)applicationWillResignActive:(NSNotification*)notification {
-  [self sendString:@"AppLifecycleState.paused"
-      withMessageName:@"flutter/lifecycle"];
+  [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 }
 
 #pragma mark - Touch event handling
@@ -392,11 +429,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 #pragma mark - Text input delegate
 
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
-  NSDictionary* message = @{
-    @"method" : @"TextInputClient.updateEditingState",
-    @"args" : @[ @(client), state ],
-  };
-  [self sendJSON:message withMessageName:@"flutter/textinputclient"];
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState" arguments:@[ @(client), state ]];
 }
 
 #pragma mark - Orientation updates
@@ -446,8 +479,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 #pragma mark - Memory Notifications
 
 - (void)onMemoryWarning:(NSNotification*)notification {
-  NSDictionary* message = @{ @"type" : @"memoryPressure" };
-  [self sendJSON:message withMessageName:@"flutter/system"];
+  [_systemChannel.get() sendMessage:@{ @"type" : @"memoryPressure" }];
 }
 
 #pragma mark - Locale updates
@@ -456,10 +488,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   NSLocale* currentLocale = [NSLocale currentLocale];
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
-  NSDictionary* message =
-      @{ @"method" : @"setLocale",
-         @"args" : @[ languageCode, countryCode ] };
-  [self sendJSON:message withMessageName:@"flutter/localization"];
+  [_localizationChannel.get() invokeMethod:@"setLocale" arguments: @[ languageCode, countryCode ]];
 }
 
 #pragma mark - Surface creation and teardown updates
@@ -548,79 +577,6 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 }
 
 #pragma mark - Application Messages
-
-- (void)sendString:(NSString*)message withMessageName:(NSString*)channel {
-  NSAssert(message, @"The message must not be null");
-  NSAssert(channel, @"The channel must not be null");
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  [self sendBinaryMessage:[codec encode:message] channelName:channel];
-}
-
-- (void)sendString:(NSString*)message
-    withMessageName:(NSString*)channel
-           callback:(void (^)(NSString*))callback {
-  NSAssert(message, @"The message must not be null");
-  NSAssert(channel, @"The channel must not be null");
-  NSAssert(callback, @"The callback must not be null");
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  [self sendBinaryMessage:[codec encode:message]
-              channelName:channel
-       binaryReplyHandler:^(NSData* data) {
-         callback([codec decode:data]);
-       }];
-}
-
-- (void)sendJSON:(NSDictionary*)message withMessageName:(NSString*)channel {
-  NSData* data = [[FlutterJSONMessageCodec sharedInstance] encode:message];
-  [self sendBinaryMessage:data channelName:channel];
-}
-
-- (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener {
-  NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  [self
-      setBinaryMessageHandlerOnChannel:messageName
-                  binaryMessageHandler:^(
-                      NSData* message, FlutterBinaryReplyHandler replyHandler) {
-                    NSString* reply =
-                        [listener didReceiveString:[codec decode:message]];
-                    replyHandler([codec encode:reply]);
-                  }];
-}
-
-- (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener {
-  NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  [self setBinaryMessageHandlerOnChannel:messageName binaryMessageHandler:nil];
-}
-
-- (void)addAsyncMessageListener:
-    (NSObject<FlutterAsyncMessageListener>*)listener {
-  NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  [self
-      setBinaryMessageHandlerOnChannel:messageName
-                  binaryMessageHandler:^(
-                      NSData* message, FlutterBinaryReplyHandler replyHandler) {
-                    [listener didReceiveString:[codec decode:message]
-                                      callback:^(NSString* reply) {
-                                        replyHandler([codec encode:reply]);
-                                      }];
-                  }];
-}
-
-- (void)removeAsyncMessageListener:
-    (NSObject<FlutterAsyncMessageListener>*)listener {
-  NSAssert(listener, @"The listener must not be null");
-  NSString* messageName = listener.messageName;
-  NSAssert(messageName, @"The messageName must not be null");
-  [self setBinaryMessageHandlerOnChannel:messageName binaryMessageHandler:nil];
-}
 
 - (void)sendBinaryMessage:(NSData*)message channelName:(NSString*)channel {
   NSAssert(message, @"The message must not be null");

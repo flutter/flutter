@@ -17,6 +17,10 @@ FLUTTER_EXPORT
 + (instancetype)messageChannelNamed:(NSString*)name
                     binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
                               codec:(NSObject<FlutterMessageCodec>*)codec;
+- (instancetype)initWithName:(NSString*)name
+             binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+                       codec:(NSObject<FlutterMessageCodec>*)codec;
+- (void)sendMessage:(id)message;
 - (void)sendMessage:(id)message replyHandler:(FlutterReplyHandler)handler;
 - (void)setMessageHandler:(FlutterMessageHandler)handler;
 @end
@@ -37,6 +41,13 @@ FLUTTER_EXPORT
 + (instancetype)methodChannelNamed:(NSString*)name
                    binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
                              codec:(NSObject<FlutterMethodCodec>*)codec;
+- (instancetype)initWithName:(NSString*)name
+                   binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
+                             codec:(NSObject<FlutterMethodCodec>*)codec;
+- (void)invokeMethod:(NSString*)method arguments:(id)arguments;
+- (void)invokeMethod:(NSString*)method
+           arguments:(id)arguments
+      resultReceiver:(FlutterResultReceiver)resultReceiver;
 - (void)setMethodCallHandler:(FlutterMethodCallHandler)handler;
 - (void)setStreamHandler:(FlutterStreamHandler)handler;
 @end

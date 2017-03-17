@@ -5,9 +5,11 @@
 #ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERPLATFORMPLUGIN_H_
 
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterJSONMessageListener.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 
-@interface FlutterPlatformPlugin : FlutterJSONMessageListener
+@interface FlutterPlatformPlugin : NSObject
+
+-(void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver;
 
 @end
 
