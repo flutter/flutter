@@ -19,8 +19,8 @@
 
 #include "MinikinInternal.h"
 #include "HbFontCache.h"
-#include "generated/UnicodeData.h"
 
+#include <unicode/uchar.h>
 #include <log/log.h>
 
 namespace minikin {
@@ -36,7 +36,7 @@ void assertMinikinLocked() {
 bool isEmoji(uint32_t c) {
     // Emoji characters new in Unicode emoji 5.0.
     // From http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
-    // TODO: Remove once emoji-data.text 5.0 is in the tree.
+    // TODO: Remove once emoji-data.text 5.0 is in ICU or update to 6.0.
     if ((0x1F6F7 <= c && c <= 0x1F6F8)
             || c == 0x1F91F
             || (0x1F928 <= c && c <= 0x1F92F)
@@ -47,54 +47,31 @@ bool isEmoji(uint32_t c) {
             || (0x1F9D0 <= c && c <= 0x1F9E6)) {
         return true;
     }
-
-    const size_t length = sizeof(generated::EMOJI_LIST) / sizeof(generated::EMOJI_LIST[0]);
-    return std::binary_search(generated::EMOJI_LIST, generated::EMOJI_LIST + length, c);
+    return u_hasBinaryProperty(c, UCHAR_EMOJI);
 }
 
-// Based on Emoji_Modifier from http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
 bool isEmojiModifier(uint32_t c) {
-    return (0x1F3FB <= c && c <= 0x1F3FF);
+    // Emoji modifier are not expected to change, so there's a small change we need to customize
+    // this.
+    return u_hasBinaryProperty(c, UCHAR_EMOJI_MODIFIER);
 }
 
-// Based on Emoji_Modifier_Base from
-// http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
 bool isEmojiBase(uint32_t c) {
-    if (0x261D <= c && c <= 0x270D) {
-        return (c == 0x261D || c == 0x26F9 || (0x270A <= c && c <= 0x270D));
-    } else if (0x1F385 <= c && c <= 0x1F93E) {
-        return (c == 0x1F385
-                || (0x1F3C2 <= c && c <= 0x1F3C4)
-                || c == 0x1F3C7
-                || (0x1F3CA <= c && c <= 0x1F3CC)
-                || (0x1F442 <= c && c <= 0x1F443)
-                || (0x1F446 <= c && c <= 0x1F450)
-                || (0x1F466 <= c && c <= 0x1F469)
-                || c == 0x1F46E
-                || (0x1F470 <= c && c <= 0x1F478)
-                || c == 0x1F47C
-                || (0x1F481 <= c && c <= 0x1F483)
-                || (0x1F485 <= c && c <= 0x1F487)
-                || c == 0x1F4AA
-                || (0x1F574 <= c && c <= 0x1F575)
-                || c == 0x1F57A
-                || c == 0x1F590
-                || (0x1F595 <= c && c <= 0x1F596)
-                || (0x1F645 <= c && c <= 0x1F647)
-                || (0x1F64B <= c && c <= 0x1F64F)
-                || c == 0x1F6A3
-                || (0x1F6B4 <= c && c <= 0x1F6B6)
-                || c == 0x1F6C0
-                || c == 0x1F6CC
-                || (0x1F918 <= c && c <= 0x1F91C)
-                || (0x1F91E <= c && c <= 0x1F91F)
-                || c == 0x1F926
-                || (0x1F930 <= c && c <= 0x1F939)
-                || (0x1F93D <= c && c <= 0x1F93E)
-                || (0x1F9D1 <= c && c <= 0x1F9DD));
-    } else {
-        return false;
+    // These two characters were removed from Emoji_Modifier_Base in Emoji 4.0, but we need to keep
+    // them as emoji modifier bases since there are fonts and user-generated text out there that
+    // treats these as potential emoji bases.
+    if (c == 0x1F91D || c == 0x1F93C) {
+        return true;
     }
+    // Emoji Modifier Base characters new in Unicode emoji 5.0.
+    // From http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
+    // TODO: Remove once emoji-data.text 5.0 is in ICU or update to 6.0.
+    if (c == 0x1F91F
+            || (0x1F931 <= c && c <= 0x1F932)
+            || (0x1F9D1 <= c && c <= 0x1F9DD)) {
+        return true;
+    }
+    return u_hasBinaryProperty(c, UCHAR_EMOJI_MODIFIER_BASE);
 }
 
 hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag) {
