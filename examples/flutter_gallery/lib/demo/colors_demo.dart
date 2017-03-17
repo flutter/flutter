@@ -6,37 +6,37 @@ import 'package:flutter/material.dart';
 
 const double kColorItemHeight = 48.0;
 
-class ColorSwatch {
-  ColorSwatch({ this.name, this.colors, this.accentColors, this.threshold: 900});
+class Palette {
+  Palette({ this.name, this.primary, this.accent, this.threshold: 900});
 
   final String name;
-  final Map<int, Color> colors;
-  final Map<int, Color> accentColors;
+  final MaterialColor primary;
+  final MaterialAccentColor accent;
   final int threshold; // titles for indices > threshold are white, otherwise black
 
-  bool get isValid => name != null && colors != null && threshold != null;
+  bool get isValid => name != null && primary != null && threshold != null;
 }
 
-final List<ColorSwatch> colorSwatches = <ColorSwatch>[
-  new ColorSwatch(name: 'RED', colors: Colors.red, accentColors: Colors.redAccent, threshold: 300),
-  new ColorSwatch(name: 'PINK', colors: Colors.pink, accentColors: Colors.pinkAccent, threshold: 200),
-  new ColorSwatch(name: 'PURPLE', colors: Colors.purple, accentColors: Colors.purpleAccent, threshold: 200),
-  new ColorSwatch(name: 'DEEP PURPLE', colors: Colors.deepPurple, accentColors: Colors.deepPurpleAccent, threshold: 200),
-  new ColorSwatch(name: 'INDIGO', colors: Colors.indigo, accentColors: Colors.indigoAccent, threshold: 200),
-  new ColorSwatch(name: 'BLUE', colors: Colors.blue, accentColors: Colors.blueAccent, threshold: 400),
-  new ColorSwatch(name: 'LIGHT BLUE', colors: Colors.lightBlue, accentColors: Colors.lightBlueAccent, threshold: 500),
-  new ColorSwatch(name: 'CYAN', colors: Colors.cyan, accentColors: Colors.cyanAccent, threshold: 600),
-  new ColorSwatch(name: 'TEAL', colors: Colors.teal, accentColors: Colors.tealAccent, threshold: 400),
-  new ColorSwatch(name: 'GREEN', colors: Colors.green, accentColors: Colors.greenAccent, threshold: 500),
-  new ColorSwatch(name: 'LIGHT GREEN', colors: Colors.lightGreen, accentColors: Colors.lightGreenAccent, threshold: 600),
-  new ColorSwatch(name: 'LIME', colors: Colors.lime, accentColors: Colors.limeAccent, threshold: 800),
-  new ColorSwatch(name: 'YELLOW', colors: Colors.yellow, accentColors: Colors.yellowAccent),
-  new ColorSwatch(name: 'AMBER', colors: Colors.amber, accentColors: Colors.amberAccent),
-  new ColorSwatch(name: 'ORANGE', colors: Colors.orange, accentColors: Colors.orangeAccent, threshold: 700),
-  new ColorSwatch(name: 'DEEP ORANGE', colors: Colors.deepOrange, accentColors: Colors.deepOrangeAccent, threshold: 400),
-  new ColorSwatch(name: 'BROWN', colors: Colors.brown, threshold: 200),
-  new ColorSwatch(name: 'GREY', colors: Colors.grey, threshold: 500),
-  new ColorSwatch(name: 'BLUE GREY', colors: Colors.blueGrey, threshold: 500),
+final List<Palette> allPalettes = <Palette>[
+  new Palette(name: 'RED', primary: Colors.red, accent: Colors.redAccent, threshold: 300),
+  new Palette(name: 'PINK', primary: Colors.pink, accent: Colors.pinkAccent, threshold: 200),
+  new Palette(name: 'PURPLE', primary: Colors.purple, accent: Colors.purpleAccent, threshold: 200),
+  new Palette(name: 'DEEP PURPLE', primary: Colors.deepPurple, accent: Colors.deepPurpleAccent, threshold: 200),
+  new Palette(name: 'INDIGO', primary: Colors.indigo, accent: Colors.indigoAccent, threshold: 200),
+  new Palette(name: 'BLUE', primary: Colors.blue, accent: Colors.blueAccent, threshold: 400),
+  new Palette(name: 'LIGHT BLUE', primary: Colors.lightBlue, accent: Colors.lightBlueAccent, threshold: 500),
+  new Palette(name: 'CYAN', primary: Colors.cyan, accent: Colors.cyanAccent, threshold: 600),
+  new Palette(name: 'TEAL', primary: Colors.teal, accent: Colors.tealAccent, threshold: 400),
+  new Palette(name: 'GREEN', primary: Colors.green, accent: Colors.greenAccent, threshold: 500),
+  new Palette(name: 'LIGHT GREEN', primary: Colors.lightGreen, accent: Colors.lightGreenAccent, threshold: 600),
+  new Palette(name: 'LIME', primary: Colors.lime, accent: Colors.limeAccent, threshold: 800),
+  new Palette(name: 'YELLOW', primary: Colors.yellow, accent: Colors.yellowAccent),
+  new Palette(name: 'AMBER', primary: Colors.amber, accent: Colors.amberAccent),
+  new Palette(name: 'ORANGE', primary: Colors.orange, accent: Colors.orangeAccent, threshold: 700),
+  new Palette(name: 'DEEP ORANGE', primary: Colors.deepOrange, accent: Colors.deepOrangeAccent, threshold: 400),
+  new Palette(name: 'BROWN', primary: Colors.brown, threshold: 200),
+  new Palette(name: 'GREY', primary: Colors.grey, threshold: 500),
+  new Palette(name: 'BLUE GREY', primary: Colors.blueGrey, threshold: 500),
 ];
 
 
@@ -71,29 +71,33 @@ class ColorItem extends StatelessWidget {
   }
 }
 
-class ColorSwatchTabView extends StatelessWidget {
-  ColorSwatchTabView({ Key key, this.swatch }) : super(key: key) {
-    assert(swatch != null && swatch.isValid);
+class PaletteTabView extends StatelessWidget {
+  static const List<int> primaryKeys = const <int>[50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
+  static const List<int> accentKeys = const <int>[100, 200, 400, 700];
+
+  PaletteTabView({ Key key, this.colors }) : super(key: key) {
+    assert(colors != null && colors.isValid);
   }
 
-  final ColorSwatch swatch;
+  final Palette colors;
+
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     final TextStyle whiteTextStyle = textTheme.body1.copyWith(color: Colors.white);
     final TextStyle blackTextStyle = textTheme.body1.copyWith(color: Colors.black);
-    final List<Widget> colorItems =  swatch.colors.keys.map((int index) {
+    final List<Widget> colorItems =  primaryKeys.map((int index) {
       return new DefaultTextStyle(
-        style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
-        child: new ColorItem(index: index, color: swatch.colors[index]),
+        style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+        child: new ColorItem(index: index, color: colors.primary[index]),
       );
     }).toList();
 
-    if (swatch.accentColors != null) {
-      colorItems.addAll(swatch.accentColors.keys.map((int index) {
+    if (colors.accent != null) {
+      colorItems.addAll(accentKeys.map((int index) {
         return new DefaultTextStyle(
-          style: index > swatch.threshold ? whiteTextStyle : blackTextStyle,
-          child: new ColorItem(index: index, color: swatch.accentColors[index], prefix: 'A'),
+          style: index > colors.threshold ? whiteTextStyle : blackTextStyle,
+          child: new ColorItem(index: index, color: colors.accent[index], prefix: 'A'),
         );
       }).toList());
     }
@@ -111,19 +115,19 @@ class ColorsDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new DefaultTabController(
-      length: colorSwatches.length,
+      length: allPalettes.length,
       child: new Scaffold(
         appBar: new AppBar(
           elevation: 0,
           title: new Text('Colors'),
           bottom: new TabBar(
             isScrollable: true,
-            tabs: colorSwatches.map((ColorSwatch swatch) => new Tab(text: swatch.name)).toList(),
+            tabs: allPalettes.map((Palette swatch) => new Tab(text: swatch.name)).toList(),
           ),
         ),
         body: new TabBarView(
-          children: colorSwatches.map((ColorSwatch swatch) {
-            return new ColorSwatchTabView(swatch: swatch);
+          children: allPalettes.map((Palette colors) {
+            return new PaletteTabView(colors: colors);
           }).toList(),
         ),
       ),

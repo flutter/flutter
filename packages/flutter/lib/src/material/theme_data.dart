@@ -70,7 +70,7 @@ class ThemeData {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
