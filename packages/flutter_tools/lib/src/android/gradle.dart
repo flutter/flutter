@@ -69,6 +69,7 @@ String get gradleAppOut {
 
 String get gradleAppOutDirV2 {
   final String gradle = ensureGradle();
+  ensureLocalProperties();
   try {
     final String properties = runCheckedSync(
       <String>[gradle, 'app:properties'],
@@ -128,8 +129,8 @@ String ensureGradle() {
   return gradle;
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
-  // Create android/local.properties.
+/// Create android/local.properties if needed.
+File ensureLocalProperties() {
   final File localProperties = fs.file('android/local.properties');
   if (!localProperties.existsSync()) {
     localProperties.writeAsStringSync(
@@ -137,6 +138,11 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
         'flutter.sdk=${_escapePath(Cache.flutterRoot)}\n'
     );
   }
+  return localProperties;
+}
+
+Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
+  final File localProperties = ensureLocalProperties();
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
