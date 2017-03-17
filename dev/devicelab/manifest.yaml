@@ -205,10 +205,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
-<<<<<<< HEAD
-=======
-
->>>>>>> a22e9f2d1af10d0311da5428a9fedb1e4007e48a
   platform_services_ios__start_up:
     description: >
       Measures the startup time of the Platform Services app on iOS.
@@ -229,4 +225,3 @@ tasks:
       Measures the performance of Dart VM hot patching feature on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
-
