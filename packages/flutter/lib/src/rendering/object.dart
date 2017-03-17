@@ -442,19 +442,35 @@ class PaintingContext {
   /// * `color` is the background color.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  void pushPhysicalModel(Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
-    _stopRecordingIfNeeded();
-    final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-      clipRRect: offsetClipRRect,
-      elevation: elevation,
-      color: color,
-    );
-    _appendLayer(physicalModel);
-    final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+        clipRRect: offsetClipRRect,
+        elevation: elevation,
+        color: color,
+      );
+      _appendLayer(physicalModel);
+      final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
+    } else {
+      if (elevation != 0) {
+        canvas.drawShadow(
+          new Path()..addRRect(offsetClipRRect),
+          const Color(0xFF000000),
+          elevation,
+          color.alpha != 0xFF,
+        );
+      }
+      canvas.drawRRect(offsetClipRRect, new Paint()..color=color);
+      canvas.saveLayer(offsetBounds, _defaultPaint);
+      canvas.clipRRect(offsetClipRRect);
+      painter(this, offset);
+      canvas.restore();
+    }
   }
 }
 
