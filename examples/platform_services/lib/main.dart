@@ -40,7 +40,7 @@ class _PlatformServicesState extends State<PlatformServices> {
               child: new Text('Get Battery Level'),
               onPressed: _getBatteryLevel,
             ),
-            new Text(_batteryLevel),
+            new Text(_batteryLevel, key: new Key('Battery level label')),
           ],
         ),
       ),
