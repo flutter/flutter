@@ -235,8 +235,8 @@ abstract class ResidentRunner {
 
     printStatus(''); // the key the user tapped might be on this line
 
-    if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
-      // F1, help
+    if (lower == 'h' || lower == '?') {
+      // help
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
@@ -265,8 +265,8 @@ abstract class ResidentRunner {
         print('Switched operating system to: $platform');
         return true;
       }
-    } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
-      // F10, exit
+    } else if (lower == 'q') {
+      // exit
       await stop();
       return true;
     } else if (lower == 'd') {
