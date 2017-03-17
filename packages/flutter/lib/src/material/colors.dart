@@ -46,7 +46,7 @@ class ColorSwatch extends Color {
 ///
 /// See also:
 ///
-///  * [Colors] which defines all of the standard material colors.
+///  * [Colors], which defines all of the standard material colors.
 class MaterialColor extends ColorSwatch {
   const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
   Color get shade50 => swatch[50];
@@ -71,7 +71,7 @@ class MaterialColor extends ColorSwatch {
 ///
 /// See also:
 ///
-///  * [Colors] which defines all of the standard material colors.
+///  * [Colors], which defines all of the standard material colors.
 class MaterialAccentColor extends ColorSwatch {
   const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
   Color get shade100 => swatch[100];
