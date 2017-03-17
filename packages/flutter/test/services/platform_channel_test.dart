@@ -101,7 +101,7 @@ void main() {
       );
       final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
-      await new Future<Null>.delayed(const Duration());
+      await new Future<Null>.delayed(Duration.ZERO);
       expect(cancelled, isTrue);
     });
   });
