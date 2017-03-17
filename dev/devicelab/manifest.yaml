@@ -230,4 +230,3 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
 
-  

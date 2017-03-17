@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/find.dart';
+import 'package:flutter_driver/src/retry.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -22,8 +21,6 @@ void main() {
     });
 
     test('tap on the button, verify result', () async {
-      final Timeline timeline = await driver.traceAction(() async {
-
         SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
         expect(batteryLevelLabel, isNotNull);
 
@@ -31,21 +28,19 @@ void main() {
         await driver.waitFor(button);
         await driver.tap(button);
 
-        driver.waitUntilNoTransientCallbacks();
-
-        String label = await driver.getText(batteryLevelLabel);
-
-        String successPrefix = 'Battery level at';
-        String failPrefix = 'Failed to get battery level';
-        Match match = successPrefix.matchAsPrefix(label) != null
-            ? successPrefix
-            : failPrefix.matchAsPrefix(label);
-        expect(match, isNotNull);
-      });
-
-      new TimelineSummary.summarize(timeline)
-        ..writeSummaryToFile('button_tap', pretty: true)
-        ..writeTimelineToFile('button_tap', pretty: true);
+      expect(
+        retry(
+          () async {
+            return await driver.getText(batteryLevelLabel);
+          },
+          const Duration(milliseconds: 30),
+          const Duration(milliseconds: 10),
+          predicate: (String result) {
+            return 'Battery level at'.matchAsPrefix(result) != null;
+          }
+        ),
+        completion(anything)
+      );
     });
   });
 }
