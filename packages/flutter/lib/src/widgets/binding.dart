@@ -285,7 +285,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
   /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback] and [addFrameCallback], in
+  /// registered with [scheduleFrameCallback], in
   /// registration order. This includes all the [Ticker] instances that are
   /// driving [AnimationController] objects, which means all of the active
   /// [Animation] objects tick at this point.

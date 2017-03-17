@@ -63,7 +63,7 @@ class _FrameCallbackEntry {
         assert(() {
           if (debugCurrentCallbackStack == null) {
             throw new FlutterError(
-              'addFrameCallback or scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
+              'scheduleFrameCallback called with rescheduling true, but no callback is in scope.\n'
               'The "rescheduling" argument should only be set to true if the '
               'callback is being reregistered from within the callback itself, '
               'and only then if the callback itself is entirely synchronous. '
@@ -108,8 +108,7 @@ enum SchedulerPhase {
   idle,
 
   /// The transient callbacks (scheduled by
-  /// [WidgetsBinding.scheduleFrameCallback] and
-  /// [WidgetsBinding.addFrameCallback]) are currently executing.
+  /// [WidgetsBinding.scheduleFrameCallback]) are currently executing.
   ///
   /// Typically, these callbacks handle updating objects to new animation states.
   transientCallbacks,
@@ -262,36 +261,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// [cancelFrameCallbackWithId].
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
     scheduleFrame();
-    return addFrameCallback(callback, rescheduling: rescheduling);
-  }
 
-  /// Adds a transient frame callback.
-  ///
-  /// Frame callbacks are executed at the beginning of a frame (see
-  /// [handleBeginFrame]).
-  ///
-  /// These callbacks are executed in the order in which they have
-  /// been added.
-  ///
-  /// Callbacks registered with this method will not be called until
-  /// a frame is requested. To register a callback and ensure that a
-  /// frame is immediately scheduled, use [scheduleFrameCallback].
-  ///
-  /// If this is a one-off registration, ignore the `rescheduling` argument.
-  ///
-  /// If this is a callback that will be reregistered each time it fires, then
-  /// when you reregister the callback, set the `rescheduling` argument to true.
-  /// This has no effect in release builds, but in debug builds, it ensures that
-  /// the stack trace that is stored for this callback is the original stack
-  /// trace for when the callback was _first_ registered, rather than the stack
-  /// trace for when the callback is reregistered. This makes it easier to track
-  /// down the original reason that a particular callback was called. If
-  /// `rescheduling` is true, the call must be in the context of a frame
-  /// callback.
-  ///
-  /// Callbacks registered with this method can be canceled using
-  /// [cancelFrameCallbackWithId].
-  int addFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = new _FrameCallbackEntry(callback, rescheduling: rescheduling);
     return _nextFrameCallbackId;
@@ -303,7 +273,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// has been requested, this does not also cancel that request.
   ///
   /// Transient frame callbacks are those registered using
-  /// [scheduleFrameCallback] or [addFrameCallback].
+  /// [scheduleFrameCallback].
   void cancelFrameCallbackWithId(int id) {
     assert(id > 0);
     _transientCallbacks.remove(id);
@@ -314,7 +284,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// there are, prints their locations and throws an exception.
   ///
   /// A transient frame callback is one that was registered with
-  /// [scheduleFrameCallback] or [addFrameCallback].
+  /// [scheduleFrameCallback].
   ///
   /// This is expected to be called at the end of tests (the
   /// flutter_test framework does it automatically in normal cases).
@@ -369,12 +339,11 @@ abstract class SchedulerBinding extends BindingBase {
   /// Prints the stack for where the current transient callback was registered.
   ///
   /// A transient frame callback is one that was registered with
-  /// [scheduleFrameCallback] or [addFrameCallback].
+  /// [scheduleFrameCallback].
   ///
   /// When called in debug more and in the context of a transient callback, this
   /// function prints the stack trace from where the current transient callback
-  /// was registered (i.e. where it first called addFrameCallback or
-  /// scheduleFrameCallback).
+  /// was registered (i.e. where it first called [scheduleFrameCallback]).
   ///
   /// When called in debug mode in other contexts, it prints a message saying
   /// that this function was not called in the context a transient callback.
@@ -552,7 +521,7 @@ abstract class SchedulerBinding extends BindingBase {
   /// Called by the engine to produce a new frame.
   ///
   /// This function first calls all the callbacks registered by
-  /// [scheduleFrameCallback]/[addFrameCallback], then calls all the callbacks
+  /// [scheduleFrameCallback], then calls all the callbacks
   /// registered by [addPersistentFrameCallback], which typically drive the
   /// rendering pipeline, and finally calls the callbacks registered by
   /// [addPostFrameCallback].
