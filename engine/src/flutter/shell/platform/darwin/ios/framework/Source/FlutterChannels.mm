@@ -37,6 +37,11 @@
   [super dealloc];
 }
 
+- (void)sendMessage:(id)message {
+  [_messenger sendBinaryMessage:[_codec encode:message]
+                    channelName:_name];
+}
+
 - (void)sendMessage:(id)message replyHandler:(FlutterReplyHandler)handler {
   [_messenger sendBinaryMessage:[_codec encode:message]
                     channelName:_name
@@ -145,6 +150,25 @@
   [_messenger release];
   [_codec release];
   [super dealloc];
+}
+
+- (void)invokeMethod:(NSString*)method arguments:(id)arguments {
+  [_messenger sendBinaryMessage:[_codec encodeMethodCall:[FlutterMethodCall methodCallWithMethodName:method arguments:arguments]]
+                    channelName:_name];
+}
+
+- (void)invokeMethod:(NSString*)method
+           arguments:(id)arguments
+      resultReceiver:(FlutterResultReceiver)resultReceiver {
+        [_messenger sendBinaryMessage:[_codec encodeMethodCall:[FlutterMethodCall methodCallWithMethodName:method arguments:arguments]]
+                          channelName:_name
+                   binaryReplyHandler:^(NSData* reply) {
+                            if (resultReceiver) {
+                              FlutterError* flutterError = nil;
+                              id result = [_codec decodeEnvelope:reply error:&flutterError];
+                              resultReceiver(result, flutterError);
+                            }
+                          }];
 }
 
 - (void)setMethodCallHandler:(FlutterMethodCallHandler)handler {

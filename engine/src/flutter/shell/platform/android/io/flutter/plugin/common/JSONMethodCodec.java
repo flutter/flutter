@@ -11,37 +11,77 @@ import org.json.JSONObject;
  * {@link JSONMessageCodec}.
  */
 public final class JSONMethodCodec implements MethodCodec {
-  public static final JSONMethodCodec INSTANCE = new JSONMethodCodec();
+    public static final JSONMethodCodec INSTANCE = new JSONMethodCodec();
 
-  private JSONMethodCodec() {
-  }
-
-  @Override
-  public MethodCall decodeMethodCall(ByteBuffer message) {
-    try {
-      final Object json = JSONMessageCodec.INSTANCE.decodeMessage(message);
-      if (json instanceof JSONArray) {
-        final JSONArray pair = (JSONArray) json;
-        if (pair.length() == 2 && pair.get(0) instanceof String) {
-          return new MethodCall(pair.getString(0), pair.get(1));
-        }
-      }
-      throw new IllegalArgumentException("Invalid method call: " + json);
-    } catch (JSONException e) {
-      throw new IllegalArgumentException("Invalid JSON", e);
+    private JSONMethodCodec() {
     }
-  }
 
-  @Override
-  public ByteBuffer encodeSuccessEnvelope(Object result) {
-    return JSONMessageCodec.INSTANCE.encodeMessage(new JSONArray().put(JSONObject.wrap(result)));
-  }
+    @Override
+    public ByteBuffer encodeMethodCall(MethodCall methodCall) {
+       try {
+          final JSONObject map = new JSONObject();
+          map.put("method", methodCall.method);
+          map.put("args", JSONObject.wrap(methodCall.arguments));
+          return JSONMessageCodec.INSTANCE.encodeMessage(map);
+       } catch (JSONException e) {
+          throw new IllegalArgumentException("Invalid JSON", e);
+       }
+    }
 
-  @Override
-  public ByteBuffer encodeErrorEnvelope(String errorCode, String errorMessage, Object errorDetails) {
-    return JSONMessageCodec.INSTANCE.encodeMessage(new JSONArray()
-        .put(errorCode)
-        .put(errorMessage)
-        .put(JSONObject.wrap(errorDetails)));
-  }
+    @Override
+    public MethodCall decodeMethodCall(ByteBuffer message) {
+        try {
+            final Object json = JSONMessageCodec.INSTANCE.decodeMessage(message);
+            if (json instanceof JSONObject) {
+                final JSONObject map = (JSONObject) json;
+                final Object method = map.get("method");
+                final Object arguments = map.get("args");
+                if (method instanceof String) {
+                    return new MethodCall((String) method, arguments);
+                }
+            }
+            throw new IllegalArgumentException("Invalid method call: " + json);
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Invalid JSON", e);
+        }
+    }
+
+    @Override
+    public ByteBuffer encodeSuccessEnvelope(Object result) {
+        return JSONMessageCodec.INSTANCE
+            .encodeMessage(new JSONArray().put(JSONObject.wrap(result)));
+    }
+
+    @Override
+    public ByteBuffer encodeErrorEnvelope(String errorCode, String errorMessage,
+        Object errorDetails) {
+        return JSONMessageCodec.INSTANCE.encodeMessage(new JSONArray()
+            .put(errorCode)
+            .put(errorMessage)
+            .put(JSONObject.wrap(errorDetails)));
+    }
+
+    @Override
+    public Object decodeEnvelope(ByteBuffer envelope) {
+        try {
+            final Object json = JSONMessageCodec.INSTANCE.decodeMessage(envelope);
+            if (json instanceof JSONArray) {
+                final JSONArray array = (JSONArray) json;
+                if (array.length() == 1) {
+                    return array.get(0);
+                }
+                if (array.length() == 3) {
+                    final Object code = array.get(0);
+                    final Object message = array.get(1);
+                    final Object details = array.get(2);
+                    if (code instanceof String && (message == null || message instanceof String)) {
+                        throw new FlutterException((String) code, (String) message, details);
+                    }
+                }
+            }
+            throw new IllegalArgumentException("Invalid method call: " + json);
+        } catch (JSONException e) {
+            throw new IllegalArgumentException("Invalid JSON", e);
+        }
+    }
 }

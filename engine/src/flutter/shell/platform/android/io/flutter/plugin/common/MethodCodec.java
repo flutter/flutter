@@ -17,6 +17,15 @@ import java.nio.ByteBuffer;
  */
 public interface MethodCodec {
     /**
+     * Encodes a message call into binary.
+     *
+     * @param methodCall a {@link MethodCall}.
+     * @return a {@link ByteBuffer} containing the encoding between position 0 and
+     * the current position.
+     */
+    ByteBuffer encodeMethodCall(MethodCall methodCall);
+
+    /**
      * Decodes a message call from binary.
      *
      * @param methodCall the binary encoding of the method call as a {@link ByteBuffer}.
@@ -29,7 +38,7 @@ public interface MethodCodec {
      * Encodes a successful result into a binary envelope message.
      *
      * @param result The result value, possibly null.
-     * @return a ByteBuffer containing the encoding between position 0 and
+     * @return a {@link ByteBuffer} containing the encoding between position 0 and
      * the current position.
      */
     ByteBuffer encodeSuccessEnvelope(Object result);
@@ -40,8 +49,17 @@ public interface MethodCodec {
      * @param errorCode An error code String.
      * @param errorMessage An error message String, possibly null.
      * @param errorDetails Error details, possibly null.
-     * @return a ByteBuffer containing the encoding between position 0 and
+     * @return a {@link ByteBuffer} containing the encoding between position 0 and
      * the current position.
      */
     ByteBuffer encodeErrorEnvelope(String errorCode, String errorMessage, Object errorDetails);
+
+    /**
+     * Decodes a result envelope from binary.
+     *
+     * @param envelope the binary encoding of a result envelope as a {@link ByteBuffer}.
+     * @return the enveloped result Object.
+     * @throws FlutterException if the envelope was an error envelope.
+     */
+    Object decodeEnvelope(ByteBuffer envelope);
 }

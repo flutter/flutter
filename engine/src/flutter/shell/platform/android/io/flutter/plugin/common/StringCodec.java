@@ -10,12 +10,12 @@ import java.nio.charset.Charset;
 /**
  * A {@link MessageCodec} using UTF-8 encoded String messages.
  */
-public final class StringMessageCodec implements MessageCodec<String> {
+public final class StringCodec implements MessageCodec<String> {
     // This codec must match the Dart codec of the same name in package flutter/services.
     private static final Charset UTF8 = Charset.forName("UTF8");
-    public static final StringMessageCodec INSTANCE = new StringMessageCodec();
+    public static final StringCodec INSTANCE = new StringCodec();
 
-    private StringMessageCodec() {
+    private StringCodec() {
     }
 
     @Override

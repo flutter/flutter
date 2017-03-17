@@ -56,6 +56,7 @@ UInt8 elementSizeForFlutterStandardDataType(FlutterStandardDataType type) {
 @interface FlutterStandardReader : NSObject
 + (instancetype)readerWithData:(NSData*)data;
 - (BOOL)hasMore;
+- (UInt8)readByte;
 - (id)readValue;
 @end
 

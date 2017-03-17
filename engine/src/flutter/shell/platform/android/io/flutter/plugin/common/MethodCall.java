@@ -4,8 +4,6 @@
 
 package io.flutter.plugin.common;
 
-import java.util.Objects;
-
 /**
  * Command object representing a method call on a {@link FlutterMessageChannel}.
  */

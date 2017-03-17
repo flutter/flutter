@@ -78,20 +78,43 @@
   return _sharedInstance;
 }
 
+- (NSData*)encodeMethodCall:(FlutterMethodCall*)call {
+  return [[FlutterJSONMessageCodec sharedInstance] encode:@{
+    @"method": call.method,
+    @"args": (call.arguments == nil ? [NSNull null] : call.arguments),
+  }];
+}
+
 - (NSData*)encodeSuccessEnvelope:(id)result {
-  return [[FlutterJSONMessageCodec sharedInstance] encode:@[ result ]];
+  return [[FlutterJSONMessageCodec sharedInstance] encode:@[
+    result == nil ? [NSNull null] : result
+  ]];
 }
 
 - (NSData*)encodeErrorEnvelope:(FlutterError*)error {
-  return [[FlutterJSONMessageCodec sharedInstance]
-      encode:@[ error.code, error.message, error.details ]];
+  return [[FlutterJSONMessageCodec sharedInstance] encode:@[
+    error.code,
+    error.message == nil ? [NSNull null] : error.message,
+    error.details == nil ? [NSNull null] : error.details,
+  ]];
 }
 
 - (FlutterMethodCall*)decodeMethodCall:(NSData*)message {
-  NSArray* call = [[FlutterJSONMessageCodec sharedInstance] decode:message];
-  NSAssert(call.count == 2, @"Invalid JSON method call");
-  NSAssert([call[0] isKindOfClass:[NSString class]],
-           @"Invalid JSON method call");
-  return [FlutterMethodCall methodCallWithMethodName:call[0] arguments:call[1]];
+  NSDictionary* dictionary = [[FlutterJSONMessageCodec sharedInstance] decode:message];
+  id method = dictionary[@"method"];
+  id arguments = dictionary[@"args"];
+  NSAssert([method isKindOfClass:[NSString class]], @"Invalid JSON method call");
+  return [FlutterMethodCall methodCallWithMethodName:method arguments:arguments];
+}
+
+- (id)decodeEnvelope:(NSData*)envelope error:(FlutterError**)error {
+  NSArray* array = [[FlutterJSONMessageCodec sharedInstance] decode:envelope];
+  if (array.count == 1)
+    return array[0];
+  NSAssert(array.count == 3, @"Invalid JSON envelope");
+  NSAssert([array[0] isKindOfClass:[NSString class]], @"Invalid JSON envelope");
+  NSAssert(array[1] == nil || [array[1] isKindOfClass:[NSString class]], @"Invalid JSON envelope");
+  *error = [FlutterError errorWithCode:array[0] message:array[1] details:array[2]];
+  return nil;
 }
 @end

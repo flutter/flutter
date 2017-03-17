@@ -35,8 +35,8 @@ FLUTTER_EXPORT
 @interface FlutterMethodCall : NSObject
 + (instancetype)methodCallWithMethodName:(NSString*)method
                                arguments:(id)arguments;
-@property(readonly) NSString* method;
-@property(readonly) id arguments;
+@property(readonly, nonatomic) NSString* method;
+@property(readonly, nonatomic) id arguments;
 @end
 
 FLUTTER_EXPORT
@@ -44,9 +44,9 @@ FLUTTER_EXPORT
 + (instancetype)errorWithCode:(NSString*)code
                       message:(NSString*)message
                       details:(id)details;
-@property(readonly) NSString* code;
-@property(readonly) NSString* message;
-@property(readonly) id details;
+@property(readonly, nonatomic) NSString* code;
+@property(readonly, nonatomic) NSString* message;
+@property(readonly, nonatomic) id details;
 @end
 
 typedef NS_ENUM(NSInteger, FlutterStandardDataType) {
@@ -62,24 +62,26 @@ FLUTTER_EXPORT
 + (instancetype)typedDataWithInt32:(NSData*)data;
 + (instancetype)typedDataWithInt64:(NSData*)data;
 + (instancetype)typedDataWithFloat64:(NSData*)data;
-@property(readonly) NSData* data;
-@property(readonly) FlutterStandardDataType type;
-@property(readonly) UInt32 elementCount;
-@property(readonly) UInt8 elementSize;
+@property(readonly, nonatomic) NSData* data;
+@property(readonly, nonatomic) FlutterStandardDataType type;
+@property(readonly, nonatomic) UInt32 elementCount;
+@property(readonly, nonatomic) UInt8 elementSize;
 @end
 
 FLUTTER_EXPORT
 @interface FlutterStandardBigInteger : NSObject
 + (instancetype)bigIntegerWithHex:(NSString*)hex;
-@property(readonly) NSString* hex;
+@property(readonly, nonatomic) NSString* hex;
 @end
 
 FLUTTER_EXPORT
 @protocol FlutterMethodCodec
 + (instancetype)sharedInstance;
-- (FlutterMethodCall*)decodeMethodCall:(NSData*)message;
+- (NSData*)encodeMethodCall:(FlutterMethodCall*)methodCall;
+- (FlutterMethodCall*)decodeMethodCall:(NSData*)methodCall;
 - (NSData*)encodeSuccessEnvelope:(id)result;
 - (NSData*)encodeErrorEnvelope:(FlutterError*)error;
+- (id)decodeEnvelope:(NSData*)envelope error:(FlutterError**)error;
 @end
 
 FLUTTER_EXPORT

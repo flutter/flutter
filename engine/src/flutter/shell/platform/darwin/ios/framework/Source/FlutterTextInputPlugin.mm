@@ -154,30 +154,27 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   [super dealloc];
 }
 
-- (NSString *)messageName {
-  return @"flutter/textinput";
-}
-
-- (NSDictionary*)didReceiveJSON:(NSDictionary*)message {
-  NSString* method = message[@"method"];
-  NSArray* args = message[@"args"];
-  if (!args)
-    return nil;
+- (void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver {
+  NSString* method = call.method;
+  id args = call.arguments;
   if ([method isEqualToString:@"TextInput.show"]) {
     [self showTextInput];
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"TextInput.hide"]) {
     [self hideTextInput];
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"TextInput.setClient"]) {
     [self setTextInputClient:[args[0] intValue] withConfiguration:args[1]];
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"TextInput.setEditingState"]) {
-    [self setTextInputEditingState:args.firstObject];
+    [self setTextInputEditingState:args];
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"TextInput.clearClient"]) {
     [self clearTextInputClient];
+    resultReceiver(nil, nil);
   } else {
-    // TODO(abarth): We should signal an error here that gets reported back to
-    // Dart.
+    resultReceiver(nil, [FlutterError errorWithCode:@"UNKNOWN" message:@"Unknown method" details: nil]);
   }
-  return nil;
 }
 
 - (void)showTextInput {

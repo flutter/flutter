@@ -6,56 +6,41 @@ package io.flutter.plugin.editing;
 
 import android.text.Editable;
 import android.text.Selection;
-import android.util.Log;
 import android.view.inputmethod.BaseInputConnection;
-import android.view.inputmethod.CompletionInfo;
-import android.view.inputmethod.CorrectionInfo;
-import android.view.inputmethod.EditorInfo;
 import android.view.KeyEvent;
-import android.view.View;
+
+import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.view.FlutterView;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 class InputConnectionAdaptor extends BaseInputConnection {
-    static final String TAG = "FlutterView";
-    static final String MESSAGE_NAME = "flutter/textinputclient";
+    private final int mClient;
+    private final TextInputPlugin mPlugin;
+    private final FlutterMethodChannel mFlutterChannel;
+    private final Map<String, Object> mOutgoingState;
 
-    private FlutterView mView;
-    private int mClient;
-    private TextInputPlugin mPlugin;
-    private JSONObject mOutgoingState;
-
-    public InputConnectionAdaptor(FlutterView view, int client, TextInputPlugin plugin) {
+    public InputConnectionAdaptor(FlutterView view, int client,
+        TextInputPlugin plugin, FlutterMethodChannel flutterChannel) {
         super(view, true);
-        mView = view;
         mClient = client;
         mPlugin = plugin;
-        mOutgoingState = new JSONObject();
+        mFlutterChannel = flutterChannel;
+        mOutgoingState = new HashMap<>();
     }
 
     private void updateEditingState() {
-        try {
-            final Editable content = getEditable();
-            mOutgoingState.put("text", content.toString());
-            mOutgoingState.put("selectionBase", Selection.getSelectionStart(content));
-            mOutgoingState.put("selectionExtent", Selection.getSelectionEnd(content));
-            mOutgoingState.put("composingBase", BaseInputConnection.getComposingSpanStart(content));
-            mOutgoingState.put("composingExtent", BaseInputConnection.getComposingSpanEnd(content));
-
-            final JSONArray args = new JSONArray();
-            args.put(0, mClient);
-            args.put(1, mOutgoingState);
-            final JSONObject message = new JSONObject();
-            message.put("method", "TextInputClient.updateEditingState");
-            message.put("args", args);
-            mView.sendPlatformMessage(MESSAGE_NAME, message.toString(), null);
-
-            mPlugin.setLatestEditingState(mOutgoingState);
-        } catch (JSONException e) {
-            Log.e(TAG, "Unexpected error serializing editing state", e);
-        }
+        final Editable content = getEditable();
+        mOutgoingState.put("text", content.toString());
+        mOutgoingState.put("selectionBase", Selection.getSelectionStart(content));
+        mOutgoingState.put("selectionExtent", Selection.getSelectionEnd(content));
+        mOutgoingState.put("composingBase", BaseInputConnection.getComposingSpanStart(content));
+        mOutgoingState.put("composingExtent", BaseInputConnection.getComposingSpanEnd(content));
+        mFlutterChannel.invokeMethod("TextInputClient.updateEditingState", Arrays
+            .asList(mClient, mOutgoingState));
+        mPlugin.setLatestEditingState(mOutgoingState);
     }
 
     @Override
@@ -103,7 +88,7 @@ class InputConnectionAdaptor extends BaseInputConnection {
             // 2. There is a selection. In that case, we want to delete the selection.
             //    event.getNumber() is 0, and commitText("", 1) will do what we want.
             if (event.getKeyCode() == KeyEvent.KEYCODE_DEL &&
-                mOutgoingState.optInt("selectionBase", -1) == mOutgoingState.optInt("selectionExtent", -1)) {
+                optInt("selectionBase", -1) == optInt("selectionExtent", -1)) {
                 deleteSurroundingText(1, 0);
             } else {
                 String text = event.getNumber() == 0 ? "" : String.valueOf(event.getNumber());
@@ -113,21 +98,15 @@ class InputConnectionAdaptor extends BaseInputConnection {
         return result;
     }
 
+    private int optInt(String key, int defaultValue) {
+        return mOutgoingState.containsKey(key) ? (Integer) mOutgoingState.get(key) : defaultValue;
+    }
+
     @Override
     public boolean performEditorAction(int actionCode) {
-        try {
-            // TODO(abarth): Support more actions.
-            final JSONArray args = new JSONArray();
-            args.put(0, mClient);
-            args.put(1, "TextInputAction.done");
-            final JSONObject message = new JSONObject();
-            message.put("method", "TextInputClient.performAction");
-            message.put("args", args);
-            mView.sendPlatformMessage(MESSAGE_NAME, message.toString(), null);
-            return true;
-        } catch (JSONException e) {
-            Log.e(TAG, "Unexpected error serializing editor action", e);
-            return false;
-        }
+        // TODO(abarth): Support more actions.
+        mFlutterChannel.invokeMethod("TextInputClient.performAction",
+            Arrays.asList(mClient, "TextInputAction.done"));
+        return true;
     }
 }

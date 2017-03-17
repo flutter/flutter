@@ -8,11 +8,9 @@
 #import <UIKit/UIKit.h>
 #include <sys/cdefs.h>
 
-#include "FlutterAsyncMessageListener.h"
 #include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
-#include "FlutterMessageListener.h"
 
 FLUTTER_EXPORT
 @interface FlutterViewController : UIViewController<FlutterBinaryMessenger>
@@ -21,22 +19,6 @@ FLUTTER_EXPORT
                         nibName:(NSString*)nibNameOrNil
                          bundle:(NSBundle*)nibBundleOrNil
     NS_DESIGNATED_INITIALIZER;
-
-- (void)sendString:(NSString*)message withMessageName:(NSString*)messageName;
-
-- (void)sendString:(NSString*)message
-    withMessageName:(NSString*)messageName
-           callback:(void (^)(NSString*))callback;
-
-- (void)addMessageListener:(NSObject<FlutterMessageListener>*)listener;
-
-- (void)removeMessageListener:(NSObject<FlutterMessageListener>*)listener;
-
-- (void)addAsyncMessageListener:
-    (NSObject<FlutterAsyncMessageListener>*)listener;
-
-- (void)removeAsyncMessageListener:
-    (NSObject<FlutterAsyncMessageListener>*)listener;
 
 - (void)handleStatusBarTouches:(UIEvent*)event;
 @end

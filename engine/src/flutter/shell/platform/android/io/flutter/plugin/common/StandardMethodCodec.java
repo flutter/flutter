@@ -26,11 +26,21 @@ public final class StandardMethodCodec implements MethodCodec {
     }
 
     @Override
+    public ByteBuffer encodeMethodCall(MethodCall methodCall) {
+        final ExposedByteArrayOutputStream stream = new ExposedByteArrayOutputStream();
+        StandardMessageCodec.writeValue(stream, methodCall.method);
+        StandardMessageCodec.writeValue(stream, methodCall.arguments);
+        final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
+        buffer.put(stream.buffer(), 0, stream.size());
+        return buffer;
+    }
+
+    @Override
     public MethodCall decodeMethodCall(ByteBuffer methodCall) {
         methodCall.order(ByteOrder.nativeOrder());
         final Object method = StandardMessageCodec.readValue(methodCall);
         final Object arguments = StandardMessageCodec.readValue(methodCall);
-        if (method instanceof String) {
+        if (method instanceof String && !methodCall.hasRemaining()) {
             return new MethodCall((String) method, arguments);
         }
         throw new IllegalArgumentException("Method call corrupted");
@@ -57,5 +67,30 @@ public final class StandardMethodCodec implements MethodCodec {
         final ByteBuffer buffer = ByteBuffer.allocateDirect(stream.size());
         buffer.put(stream.buffer(), 0, stream.size());
         return buffer;
+    }
+
+    @Override
+    public Object decodeEnvelope(ByteBuffer envelope) {
+        envelope.order(ByteOrder.nativeOrder());
+        final byte flag = envelope.get();
+        switch (flag) {
+            case 0: {
+                final Object result = StandardMessageCodec.readValue(envelope);
+                if (!envelope.hasRemaining()) {
+                    return result;
+                }
+            }
+            case 1: {
+                final Object code = StandardMessageCodec.readValue(envelope);
+                final Object message = StandardMessageCodec.readValue(envelope);
+                final Object details = StandardMessageCodec.readValue(envelope);
+                if (code instanceof String
+                    && (message == null || message instanceof String)
+                    && !envelope.hasRemaining()) {
+                    throw new FlutterException((String) code, (String) message, details);
+                }
+            }
+        }
+        throw new IllegalArgumentException("Envelope corrupted");
     }
 }
