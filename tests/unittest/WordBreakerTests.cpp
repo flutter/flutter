@@ -99,7 +99,7 @@ TEST_F(WordBreakerTest, postfixAndPrefix) {
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.wordEnd());
 }
 
-TEST_F(WordBreakerTest, MyanmarKinzi) {
+TEST_F(WordBreakerTest, myanmarKinzi) {
     uint16_t buf[] = {0x1004, 0x103A, 0x1039, 0x1000, 0x102C};  // NGA, ASAT, VIRAMA, KA, UU
     WordBreaker breaker;
     icu::Locale burmese("my");
@@ -156,6 +156,55 @@ TEST_F(WordBreakerTest, emojiWithModifier) {
     EXPECT_EQ((ssize_t)NELEM(buf), breaker.next());  // end
     EXPECT_EQ(4, breaker.wordStart());
     EXPECT_EQ(8, breaker.wordEnd());
+}
+
+TEST_F(WordBreakerTest, unicode10Emoji) {
+    // Should break between emojis.
+    uint16_t buf[] = {
+        // SLED + SLED
+        UTF16(0x1F6F7), UTF16(0x1F6F7),
+        // SLED + VS15 + SLED
+        UTF16(0x1F6F7), 0xFE0E, UTF16(0x1F6F7),
+        // WHITE SMILING FACE + SLED
+        0x263A, UTF16(0x1F6F7),
+        // WHITE SMILING FACE + VS16 + SLED
+        0x263A, 0xFE0F, UTF16(0x1F6F7),
+    };
+    WordBreaker breaker;
+    breaker.setLocale(icu::Locale::getEnglish());
+    breaker.setText(buf, NELEM(buf));
+    EXPECT_EQ(0, breaker.current());
+    EXPECT_EQ(2, breaker.next());
+    EXPECT_EQ(0, breaker.wordStart());
+    EXPECT_EQ(2, breaker.wordEnd());
+
+    EXPECT_EQ(4, breaker.next());
+    EXPECT_EQ(2, breaker.wordStart());
+    EXPECT_EQ(4, breaker.wordEnd());
+
+    EXPECT_EQ(7, breaker.next());
+    EXPECT_EQ(4, breaker.wordStart());
+    EXPECT_EQ(7, breaker.wordEnd());
+
+    EXPECT_EQ(9, breaker.next());
+    EXPECT_EQ(7, breaker.wordStart());
+    EXPECT_EQ(9, breaker.wordEnd());
+
+    EXPECT_EQ(10, breaker.next());
+    EXPECT_EQ(9, breaker.wordStart());
+    EXPECT_EQ(10, breaker.wordEnd());
+
+    EXPECT_EQ(12, breaker.next());
+    EXPECT_EQ(10, breaker.wordStart());
+    EXPECT_EQ(12, breaker.wordEnd());
+
+    EXPECT_EQ(14, breaker.next());
+    EXPECT_EQ(12, breaker.wordStart());
+    EXPECT_EQ(14, breaker.wordEnd());
+
+    EXPECT_EQ(16, breaker.next());
+    EXPECT_EQ(14, breaker.wordStart());
+    EXPECT_EQ(16, breaker.wordEnd());
 }
 
 TEST_F(WordBreakerTest, flagsSequenceSingleFlag) {
