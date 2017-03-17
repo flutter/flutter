@@ -5,6 +5,7 @@
 #import "AppDelegate.h"
 
 #import <Flutter/Flutter.h>
+#import <CoreLocation/CoreLocation.h>
 
 @implementation AppDelegate {
     CLLocationManager* _locationManager;
