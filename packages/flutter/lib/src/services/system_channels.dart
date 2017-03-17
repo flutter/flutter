@@ -16,13 +16,17 @@ class SystemChannels {
   );
 
   /// A JSON [PlatformMethodChannel] for invoking miscellaneous platform methods.
-  static const PlatformMethodChannel platform = const PlatformMethodChannel(
+  ///
+  /// Ignores missing plugins.
+  static const PlatformMethodChannel platform = const OptionalPlatformMethodChannel(
       'flutter/platform',
       const JSONMethodCodec(),
   );
 
   /// A JSON [PlatformMethodChannel] for handling text input.
-  static const PlatformMethodChannel textInput = const PlatformMethodChannel(
+  ///
+  /// Ignores missing plugins.
+  static const PlatformMethodChannel textInput = const OptionalPlatformMethodChannel(
       'flutter/textinput',
       const JSONMethodCodec(),
   );
