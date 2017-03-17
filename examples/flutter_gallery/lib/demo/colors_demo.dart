@@ -14,7 +14,7 @@ class ColorSwatch {
   final Map<int, Color> accentColors;
   final int threshold; // titles for indices > threshold are white, otherwise black
 
-  bool get isValid => this.name != null && this.colors != null && threshold != null;
+  bool get isValid => name != null && colors != null && threshold != null;
 }
 
 final List<ColorSwatch> colorSwatches = <ColorSwatch>[

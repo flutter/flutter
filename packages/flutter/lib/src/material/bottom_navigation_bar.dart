@@ -53,8 +53,8 @@ class BottomNavigationBarItem {
     @required this.title,
     this.backgroundColor
   }) {
-    assert(this.icon != null);
-    assert(this.title != null);
+    assert(icon != null);
+    assert(title != null);
   }
 
   /// The icon of the item.
@@ -492,9 +492,9 @@ class _Circle {
     this.color,
     @required TickerProvider vsync,
   }) {
-    assert(this.state != null);
-    assert(this.index != null);
-    assert(this.color != null);
+    assert(state != null);
+    assert(index != null);
+    assert(color != null);
 
     controller = new AnimationController(
       duration: kThemeAnimationDuration,

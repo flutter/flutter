@@ -592,9 +592,9 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   AnimationStatus _lastStatus;
   void _maybeNotifyStatusListeners(AnimationStatus _) {
-    if (this.status != _lastStatus) {
-      _lastStatus = this.status;
-      notifyStatusListeners(this.status);
+    if (status != _lastStatus) {
+      _lastStatus = status;
+      notifyStatusListeners(status);
     }
   }
 
