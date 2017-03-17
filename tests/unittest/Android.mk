@@ -32,7 +32,7 @@ LOCAL_TEST_DATA := \
     data/NoGlyphFont.ttf \
     data/Regular.ttf \
     data/TextEmojiFont.ttf \
-    data/VarioationSelectorTest-Regular.ttf \
+    data/VariationSelectorTest-Regular.ttf \
     data/ZhHans.ttf \
     data/ZhHant.ttf \
     data/itemize.xml \

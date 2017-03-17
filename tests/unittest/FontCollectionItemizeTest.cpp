@@ -47,7 +47,7 @@ const char kTextEmojiFont[] = kTestFontDir "TextEmojiFont.ttf";
 const char kMixedEmojiFont[] = kTestFontDir "ColorTextMixedEmojiFont.ttf";
 
 const char kHasCmapFormat14Font[] =  kTestFontDir "NoCmapFormat14.ttf";
-const char kNoCmapFormat14Font[] =  kTestFontDir "VarioationSelectorTest-Regular.ttf";
+const char kNoCmapFormat14Font[] =  kTestFontDir "VariationSelectorTest-Regular.ttf";
 
 typedef ICUTestBase FontCollectionItemizeTest;
 
@@ -667,7 +667,7 @@ TEST_F(FontCollectionItemizeTest, itemize_vs_sequence_but_no_base_char) {
     // kVSTestFont supports U+717D U+FE02 but doesn't support U+717D.
     // kVSTestFont should be selected for U+717D U+FE02 even if it does not support the base code
     // point.
-    const std::string kVSTestFont = kTestFontDir "VarioationSelectorTest-Regular.ttf";
+    const std::string kVSTestFont = kTestFontDir "VariationSelectorTest-Regular.ttf";
 
     std::vector<std::shared_ptr<FontFamily>> families;
     std::shared_ptr<MinikinFont> font(new MinikinFontForTest(kLatinFont));
