@@ -34,29 +34,39 @@ void assertMinikinLocked() {
 }
 
 bool isEmoji(uint32_t c) {
-    // U+2695 U+2640 U+2642 are not in emoji category in Unicode 9 but they are now emoji category.
-    // TODO: remove once emoji database is updated.
-    if (c == 0x2695 || c == 0x2640 || c == 0x2642) {
+    // Emoji characters new in Unicode emoji 5.0.
+    // From http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
+    // TODO: Remove once emoji-data.text 5.0 is in the tree.
+    if ((0x1F6F7 <= c && c <= 0x1F6F8)
+            || c == 0x1F91F
+            || (0x1F928 <= c && c <= 0x1F92F)
+            || (0x1F931 <= c && c <= 0x1F932)
+            || c == 0x1F94C
+            || (0x1F95F <= c && c <= 0x1F96B)
+            || (0x1F992 <= c && c <= 0x1F997)
+            || (0x1F9D0 <= c && c <= 0x1F9E6)) {
         return true;
     }
+
     const size_t length = sizeof(generated::EMOJI_LIST) / sizeof(generated::EMOJI_LIST[0]);
     return std::binary_search(generated::EMOJI_LIST, generated::EMOJI_LIST + length, c);
 }
 
-// Based on Modifiers from http://www.unicode.org/L2/L2016/16011-data-file.txt
+// Based on Emoji_Modifier from http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
 bool isEmojiModifier(uint32_t c) {
     return (0x1F3FB <= c && c <= 0x1F3FF);
 }
 
 // Based on Emoji_Modifier_Base from
-// http://www.unicode.org/Public/emoji/3.0/emoji-data.txt
+// http://www.unicode.org/Public/emoji/5.0/emoji-data.txt
 bool isEmojiBase(uint32_t c) {
     if (0x261D <= c && c <= 0x270D) {
         return (c == 0x261D || c == 0x26F9 || (0x270A <= c && c <= 0x270D));
     } else if (0x1F385 <= c && c <= 0x1F93E) {
         return (c == 0x1F385
-                || (0x1F3C3 <= c && c <= 0x1F3C4)
-                || (0x1F3CA <= c && c <= 0x1F3CB)
+                || (0x1F3C2 <= c && c <= 0x1F3C4)
+                || c == 0x1F3C7
+                || (0x1F3CA <= c && c <= 0x1F3CC)
                 || (0x1F442 <= c && c <= 0x1F443)
                 || (0x1F446 <= c && c <= 0x1F450)
                 || (0x1F466 <= c && c <= 0x1F469)
@@ -66,7 +76,7 @@ bool isEmojiBase(uint32_t c) {
                 || (0x1F481 <= c && c <= 0x1F483)
                 || (0x1F485 <= c && c <= 0x1F487)
                 || c == 0x1F4AA
-                || c == 0x1F575
+                || (0x1F574 <= c && c <= 0x1F575)
                 || c == 0x1F57A
                 || c == 0x1F590
                 || (0x1F595 <= c && c <= 0x1F596)
@@ -75,11 +85,13 @@ bool isEmojiBase(uint32_t c) {
                 || c == 0x1F6A3
                 || (0x1F6B4 <= c && c <= 0x1F6B6)
                 || c == 0x1F6C0
-                || (0x1F918 <= c && c <= 0x1F91E)
+                || c == 0x1F6CC
+                || (0x1F918 <= c && c <= 0x1F91C)
+                || (0x1F91E <= c && c <= 0x1F91F)
                 || c == 0x1F926
-                || c == 0x1F930
-                || (0x1F933 <= c && c <= 0x1F939)
-                || (0x1F93B <= c && c <= 0x1F93E));
+                || (0x1F930 <= c && c <= 0x1F939)
+                || (0x1F93D <= c && c <= 0x1F93E)
+                || (0x1F9D1 <= c && c <= 0x1F9DD));
     } else {
         return false;
     }
