@@ -6,41 +6,43 @@ import 'dart:math' as math;
 
 import 'basic_types.dart';
 
-/// How an image should be inscribed into a box.
+/// How a box should be inscribed into another box.
 ///
-/// See also [applyImageFit], which applies the sizing semantics of these values
+/// See also [applyBoxFit], which applies the sizing semantics of these values
 /// (though not the alignment semantics).
-enum ImageFit {
-  /// Fill the box by distorting the image's aspect ratio.
+enum BoxFit {
+  /// Fill the target box by distorting the source's aspect ratio.
   fill,
 
-  /// As large as possible while still containing the image entirely within the box.
+  /// As large as possible while still containing the source entirely within the
+  /// target box.
   contain,
 
-  /// As small as possible while still covering the entire box.
+  /// As small as possible while still covering the entire target box.
   cover,
 
-  /// Make sure the full width of the image is shown, regardless of
-  /// whether this means the image overflows the box vertically.
+  /// Make sure the full width of the source is shown, regardless of
+  /// whether this means the source overflows the target box vertically.
   fitWidth,
 
-  /// Make sure the full height of the image is shown, regardless of
-  /// whether this means the image overflows the box horizontally.
+  /// Make sure the full height of the source is shown, regardless of
+  /// whether this means the source overflows the target box horizontally.
   fitHeight,
 
-  /// Center the image within the box and discard any portions of the image that
-  /// lie outside the box.
+  /// Align the source within the target box (by default, centering) and discard
+  /// any portions of the source that lie outside the box.
   none,
 
-  /// Center the image within the box and, if necessary, scale the image down to
-  /// ensure that the image fits within the box.
+  /// Align the source within the target box (by default, centering) and, if
+  /// necessary, scale the source down to ensure that the source fits within the
+  /// box.
   scaleDown
 }
 
-/// The pair of sizes returned by [applyImageFit].
+/// The pair of sizes returned by [applyBoxFit].
 class FittedSizes {
   /// Creates an object to store a pair of sizes,
-  /// as would be returned by [applyImageFit].
+  /// as would be returned by [applyBoxFit].
   const FittedSizes(this.source, this.destination);
 
   /// The size of the part of the input to show on the output.
@@ -50,62 +52,62 @@ class FittedSizes {
   final Size destination;
 }
 
-/// Apply an [ImageFit] value.
+/// Apply an [BoxFit] value.
 ///
-/// The arguments to this method, in addition to the [ImageFit] value to apply,
-/// are two sizes, ostensibly the sizes of an input image and an output canvas.
-/// Specifically, the `inputSize` argument gives the size of the complete image
+/// The arguments to this method, in addition to the [BoxFit] value to apply,
+/// are two sizes, ostensibly the sizes of an input box and an output box.
+/// Specifically, the `inputSize` argument gives the size of the complete source
 /// that is being fitted, and the `outputSize` gives the size of the rectangle
-/// into which the image is to be drawn.
+/// into which the source is to be drawn.
 ///
 /// This function then returns two sizes, combined into a single [FittedSizes]
 /// object.
 ///
 /// The [FittedSizes.source] size is the subpart of the `inputSize` that is to
-/// be shown. If the entire input image is shown, then this will equal the
-/// `inputSize`, but if the input image is to be cropped down, this may be
+/// be shown. If the entire input source is shown, then this will equal the
+/// `inputSize`, but if the input source is to be cropped down, this may be
 /// smaller.
 ///
 /// The [FittedSizes.destination] size is the subpart of the `outputSize` in
-/// which to paint the (possibly cropped) input image. If the
+/// which to paint the (possibly cropped) source. If the
 /// [FittedSizes.destination] size is smaller than the `outputSize` then the
-/// input image is being letterboxed (or pillarboxed).
+/// source is being letterboxed (or pillarboxed).
 ///
 /// This method does not express an opinion regarding the alignment of the
 /// source and destination sizes within the input and output rectangles.
 /// Typically they are centered (this is what [BoxDecoration] does, for
-/// instance, and is how [ImageFit] is defined). The [FractionalOffset] class
+/// instance, and is how [BoxFit] is defined). The [FractionalOffset] class
 /// provides a convenience function, [FractionalOffset.inscribe], for resolving
 /// the sizes to rects, as shown in the example below.
 ///
 /// == Example ==
 ///
 /// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
-/// [Canvas] `canvas`, using a [Paint] paint, applying the [ImageFit] algorithm
+/// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
 /// `fit`:
 ///
 /// ```dart
 /// final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
-/// final FittedSizes sizes = applyImageFit(fit, imageSize, outputRect.size);
+/// final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
 /// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Point.origin & imageSize);
 /// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
 /// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 /// ```
-FittedSizes applyImageFit(ImageFit fit, Size inputSize, Size outputSize) {
+FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
   Size sourceSize, destinationSize;
   switch (fit) {
-    case ImageFit.fill:
+    case BoxFit.fill:
       sourceSize = inputSize;
       destinationSize = outputSize;
       break;
-    case ImageFit.contain:
+    case BoxFit.contain:
       sourceSize = inputSize;
       if (outputSize.width / outputSize.height > sourceSize.width / sourceSize.height)
         destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       else
         destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
-    case ImageFit.cover:
+    case BoxFit.cover:
       if (outputSize.width / outputSize.height > inputSize.width / inputSize.height) {
         sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
       } else {
@@ -113,20 +115,20 @@ FittedSizes applyImageFit(ImageFit fit, Size inputSize, Size outputSize) {
       }
       destinationSize = outputSize;
       break;
-    case ImageFit.fitWidth:
+    case BoxFit.fitWidth:
       sourceSize = new Size(inputSize.width, inputSize.width * outputSize.height / outputSize.width);
       destinationSize = new Size(outputSize.width, sourceSize.height * outputSize.width / sourceSize.width);
       break;
-    case ImageFit.fitHeight:
+    case BoxFit.fitHeight:
       sourceSize = new Size(inputSize.height * outputSize.width / outputSize.height, inputSize.height);
       destinationSize = new Size(sourceSize.width * outputSize.height / sourceSize.height, outputSize.height);
       break;
-    case ImageFit.none:
+    case BoxFit.none:
       sourceSize = new Size(math.min(inputSize.width, outputSize.width),
                             math.min(inputSize.height, outputSize.height));
       destinationSize = sourceSize;
       break;
-    case ImageFit.scaleDown:
+    case BoxFit.scaleDown:
       sourceSize = inputSize;
       destinationSize = inputSize;
       final double aspectRatio = inputSize.width / inputSize.height;

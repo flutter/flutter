@@ -9,9 +9,9 @@ import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'box_fit.dart';
 import 'decoration.dart';
 import 'fractional_offset.dart';
-import 'image_fit.dart';
 import 'text_editing.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
@@ -395,7 +395,7 @@ class _FlutterLogoPainter extends BoxPainter {
       // only the mark
       logoSize = const Size(202.0, 202.0);
     }
-    final FittedSizes fittedSize = applyImageFit(ImageFit.contain, logoSize, canvasSize);
+    final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
     final Rect rect = FractionalOffset.center.inscribe(fittedSize.destination, offset & canvasSize);
     final double centerSquareHeight = canvasSize.shortestSide;

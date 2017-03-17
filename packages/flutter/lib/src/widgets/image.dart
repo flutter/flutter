@@ -163,7 +163,7 @@ class Image extends StatefulWidget {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the image within its bounds.
   ///

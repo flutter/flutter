@@ -44,7 +44,7 @@ class _GridTitleText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new FittedBox(
-      fit: ImageFit.scaleDown,
+      fit: BoxFit.scaleDown,
       alignment: FractionalOffset.centerLeft,
       child: new Text(text),
     );
@@ -131,7 +131,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
               ..translate(_offset.dx, _offset.dy)
               ..scale(_scale),
             child: new ClipRect(
-              child: new Image.asset(config.photo.assetName, fit: ImageFit.cover),
+              child: new Image.asset(config.photo.assetName, fit: BoxFit.cover),
             ),
           ),
         );
@@ -181,7 +181,7 @@ class GridDemoPhotoItem extends StatelessWidget {
       child: new Hero(
         key: new Key(photo.assetName),
         tag: photo.tag,
-        child: new Image.asset(photo.assetName, fit: ImageFit.cover)
+        child: new Image.asset(photo.assetName, fit: BoxFit.cover)
       )
     );
 

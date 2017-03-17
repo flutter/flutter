@@ -63,7 +63,7 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned.fill(
                     child: new Image.asset(
                       destination.assetName,
-                      fit: ImageFit.cover,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   new Positioned(
@@ -71,7 +71,7 @@ class TravelDestinationItem extends StatelessWidget {
                     left: 16.0,
                     right: 16.0,
                     child: new FittedBox(
-                      fit: ImageFit.scaleDown,
+                      fit: BoxFit.scaleDown,
                       alignment: FractionalOffset.centerLeft,
                       child: new Text(destination.title,
                         style: titleStyle,

@@ -9,10 +9,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'box_fit.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
 import 'fractional_offset.dart';
-import 'image_fit.dart';
 
 export 'edge_insets.dart' show EdgeInsets;
 
@@ -894,7 +894,7 @@ void paintImage({
   @required Rect rect,
   @required ui.Image image,
   ColorFilter colorFilter,
-  ImageFit fit,
+  BoxFit fit,
   ImageRepeat repeat: ImageRepeat.noRepeat,
   Rect centerSlice,
   FractionalOffset alignment
@@ -912,9 +912,9 @@ void paintImage({
     outputSize -= sliceBorder;
     inputSize -= sliceBorder;
   }
-  fit ??= centerSlice == null ? ImageFit.scaleDown : ImageFit.fill;
-  assert(centerSlice == null || (fit != ImageFit.none && fit != ImageFit.cover));
-  final FittedSizes fittedSizes = applyImageFit(fit, inputSize, outputSize);
+  fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
+  assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));
+  final FittedSizes fittedSizes = applyBoxFit(fit, inputSize, outputSize);
   final Size sourceSize = fittedSizes.source;
   Size destinationSize = fittedSizes.destination;
   if (centerSlice != null) {
@@ -984,7 +984,7 @@ class BackgroundImage {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to paint any portions of the box not covered by the background image.
   final ImageRepeat repeat;
