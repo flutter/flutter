@@ -226,7 +226,7 @@ void main() {
     expect(decoraton.backgroundColor, equals(Colors.blue[500]));
 
     setState(() {
-      themeData = new ThemeData(primarySwatch: Colors.green.swatch);
+      themeData = new ThemeData(primarySwatch: Colors.green);
     });
 
     await tester.pump();

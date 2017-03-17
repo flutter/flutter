@@ -24,7 +24,7 @@ final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
 
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
-  primarySwatch: Colors.teal.swatch,
+  primarySwatch: Colors.teal,
   accentColor: Colors.redAccent[200],
 );
 

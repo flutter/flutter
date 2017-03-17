@@ -32,7 +32,7 @@ class CardCollectionState extends State<CardCollection> {
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
 
-  Map<int, Color> _primaryColor = Colors.deepPurple;
+  MaterialColor _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
@@ -148,7 +148,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(Map<int, Color> selection) {
+  void _selectColor(MaterialColor selection) {
     setState(() {
       _primaryColor = selection;
     });
@@ -181,14 +181,14 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: new Icon(icon),
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
           new Expanded(child: new Text(label)),
-          new Radio<Map<int, Color>>(
+          new Radio<MaterialColor>(
             value: itemValue,
             groupValue: currentValue,
             onChanged: enabled ? onChanged : null,

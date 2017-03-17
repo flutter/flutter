@@ -4,10 +4,17 @@
 
 import 'dart:ui' show Color, hashValues;
 
-class _ColorSwatch extends Color {
-  const _ColorSwatch(int primary, this.swatch) : super(primary);
+/// A color that has a small table of related colors called a "swatch".
+///
+/// See also:
+///
+///  * [MaterialColor] and [MaterialAccentColor], which define material design
+///    primary and accent color swatches.
+///  * [Colors], which defines all of the standard material design colors.
+class ColorSwatch extends Color {
+  const ColorSwatch(int primary, this.swatch) : super(primary);
 
-  /// The shades of this color defined by material design.
+  /// The palette of colors based on this one.
   final Map<int, Color> swatch;
 
   /// Returns an element of the [swatch] table.
@@ -17,9 +24,9 @@ class _ColorSwatch extends Color {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! _ColorSwatch)
+    if (other.runtimeType != runtimeType)
       return false;
-    final _ColorSwatch typedOther = other;
+    final ColorSwatch typedOther = other;
     return super==(other) && swatch == typedOther.swatch;
   }
 
@@ -40,7 +47,7 @@ class _ColorSwatch extends Color {
 /// See also:
 ///
 ///  * [Colors] which defines all of the standard material colors.
-class MaterialColor extends _ColorSwatch {
+class MaterialColor extends ColorSwatch {
   const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
   Color get shade50 => swatch[50];
   Color get shade100 => swatch[100];
@@ -65,7 +72,7 @@ class MaterialColor extends _ColorSwatch {
 /// See also:
 ///
 ///  * [Colors] which defines all of the standard material colors.
-class MaterialAccentColor extends _ColorSwatch {
+class MaterialAccentColor extends ColorSwatch {
   const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
   Color get shade100 => swatch[100];
   Color get shade200 => swatch[200];
@@ -88,7 +95,7 @@ class MaterialAccentColor extends _ColorSwatch {
 /// Colors.green[400]  // Selects a mid-range green.
 /// ```
 ///
-/// Each color constant is-a color and can used directly. For example
+/// Each color constant is a color and can used directly. For example
 ///
 /// ```dart
 /// new Container(
@@ -219,7 +226,7 @@ class Colors {
   /// * [redAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const int _redPrimaryValue = 0xFFEF5350;
+  static const int _redPrimaryValue = 0xFFF44336;
   static const MaterialColor red = const MaterialColor(
     _redPrimaryValue,
     const <int, Color>{
@@ -227,8 +234,8 @@ class Colors {
       100: const Color(0xFFFFCDD2),
       200: const Color(0xFFEF9A9A),
       300: const Color(0xFFE57373),
-      400: const Color(_redPrimaryValue),
-      500: const Color(0xFFF44336),
+      400: const Color(0xFFEF5350),
+      500: const Color(_redPrimaryValue),
       600: const Color(0xFFE53935),
       700: const Color(0xFFD32F2F),
       800: const Color(0xFFC62828),
@@ -283,8 +290,8 @@ class Colors {
       100: const Color(0xFFF8BBD0),
       200: const Color(0xFFF48FB1),
       300: const Color(0xFFF06292),
-      400: const Color(_pinkPrimaryValue),
-      500: const Color(0xFFE91E63),
+      400: const Color(0xFFEC407A),
+      500: const Color(_pinkPrimaryValue),
       600: const Color(0xFFD81B60),
       700: const Color(0xFFC2185B),
       800: const Color(0xFFAD1457),
@@ -339,8 +346,8 @@ class Colors {
       100: const Color(0xFFE1BEE7),
       200: const Color(0xFFCE93D8),
       300: const Color(0xFFBA68C8),
-      400: const Color(_purplePrimaryValue),
-      500: const Color(0xFF9C27B0),
+      400: const Color(0xFFAB47BC),
+      500: const Color(_purplePrimaryValue),
       600: const Color(0xFF8E24AA),
       700: const Color(0xFF7B1FA2),
       800: const Color(0xFF6A1B9A),
@@ -368,7 +375,7 @@ class Colors {
     const <int, Color>{
       100: const Color(0xFFEA80FC),
       200: const Color(_purpleAccentPrimaryValue),
-      400: const Color(0xFFD500F9),
+      400: const Color(0xFFE040FB),
       700: const Color(0xFFAA00FF),
     },
   );
@@ -395,8 +402,8 @@ class Colors {
       100: const Color(0xFFD1C4E9),
       200: const Color(0xFFB39DDB),
       300: const Color(0xFF9575CD),
-      400: const Color(_deepPurplePrimaryValue),
-      500: const Color(0xFF673AB7),
+      400: const Color(0xFF7E57C2),
+      500: const Color(_deepPurplePrimaryValue),
       600: const Color(0xFF5E35B1),
       700: const Color(0xFF512DA8),
       800: const Color(0xFF4527A0),
@@ -451,8 +458,8 @@ class Colors {
       100: const Color(0xFFC5CAE9),
       200: const Color(0xFF9FA8DA),
       300: const Color(0xFF7986CB),
-      400: const Color(_indigoPrimaryValue),
-      500: const Color(0xFF3F51B5),
+      400: const Color(0xFF5C6BC0),
+      500: const Color(_indigoPrimaryValue),
       600: const Color(0xFF3949AB),
       700: const Color(0xFF303F9F),
       800: const Color(0xFF283593),
@@ -507,8 +514,8 @@ class Colors {
       100: const Color(0xFFBBDEFB),
       200: const Color(0xFF90CAF9),
       300: const Color(0xFF64B5F6),
-      400: const Color(_bluePrimaryValue),
-      500: const Color(0xFF2196F3),
+      400: const Color(0xFF42A5F5),
+      500: const Color(_bluePrimaryValue),
       600: const Color(0xFF1E88E5),
       700: const Color(0xFF1976D2),
       800: const Color(0xFF1565C0),
@@ -563,8 +570,8 @@ class Colors {
       100: const Color(0xFFB3E5FC),
       200: const Color(0xFF81D4FA),
       300: const Color(0xFF4FC3F7),
-      400: const Color(_lightBluePrimaryValue),
-      500: const Color(0xFF03A9F4),
+      400: const Color(0xFF29B6F6),
+      500: const Color(_lightBluePrimaryValue),
       600: const Color(0xFF039BE5),
       700: const Color(0xFF0288D1),
       800: const Color(0xFF0277BD),
@@ -620,7 +627,7 @@ class Colors {
       200: const Color(0xFF80DEEA),
       300: const Color(0xFF4DD0E1),
       400: const Color(_cyanPrimaryValue),
-      500: const Color(0xFF00BCD4),
+      500: const Color(_cyanPrimaryValue),
       600: const Color(0xFF00ACC1),
       700: const Color(0xFF0097A7),
       800: const Color(0xFF00838F),
@@ -648,7 +655,7 @@ class Colors {
     const <int, Color>{
       100: const Color(0xFF84FFFF),
       200: const Color(_cyanAccentPrimaryValue),
-      400: const Color(0xFF00E5FF),
+      400: const Color(0xFF18FFFF),
       700: const Color(0xFF00B8D4),
     },
   );
@@ -675,8 +682,8 @@ class Colors {
       100: const Color(0xFFB2DFDB),
       200: const Color(0xFF80CBC4),
       300: const Color(0xFF4DB6AC),
-      400: const Color(_tealPrimaryValue),
-      500: const Color(0xFF009688),
+      400: const Color(0xFF26A69A),
+      500: const Color(_tealPrimaryValue),
       600: const Color(0xFF00897B),
       700: const Color(0xFF00796B),
       800: const Color(0xFF00695C),
@@ -731,8 +738,8 @@ class Colors {
       100: const Color(0xFFC8E6C9),
       200: const Color(0xFFA5D6A7),
       300: const Color(0xFF81C784),
-      400: const Color(_greenPrimaryValue),
-      500: const Color(0xFF4CAF50),
+      400: const Color(0xFF66BB6A),
+      500: const Color(_greenPrimaryValue),
       600: const Color(0xFF43A047),
       700: const Color(0xFF388E3C),
       800: const Color(0xFF2E7D32),
@@ -760,7 +767,7 @@ class Colors {
     const <int, Color>{
       100: const Color(0xFFB9F6CA),
       200: const Color(_greenAccentPrimaryValue),
-      400: const Color(0xFF00E676),
+      400: const Color(0xFF69F0AE),
       700: const Color(0xFF00C853),
     },
   );
@@ -787,8 +794,8 @@ class Colors {
       100: const Color(0xFFDCEDC8),
       200: const Color(0xFFC5E1A5),
       300: const Color(0xFFAED581),
-      400: const Color(_lightGreenPrimaryValue),
-      500: const Color(0xFF8BC34A),
+      400: const Color(0xFF9CCC65),
+      500: const Color(_lightGreenPrimaryValue),
       600: const Color(0xFF7CB342),
       700: const Color(0xFF689F38),
       800: const Color(0xFF558B2F),
@@ -843,8 +850,8 @@ class Colors {
       100: const Color(0xFFF0F4C3),
       200: const Color(0xFFE6EE9C),
       300: const Color(0xFFDCE775),
-      400: const Color(_limePrimaryValue),
-      500: const Color(0xFFCDDC39),
+      400: const Color(0xFFD4E157),
+      500: const Color(_limePrimaryValue),
       600: const Color(0xFFC0CA33),
       700: const Color(0xFFAFB42B),
       800: const Color(0xFF9E9D24),
@@ -899,8 +906,8 @@ class Colors {
       100: const Color(0xFFFFF9C4),
       200: const Color(0xFFFFF59D),
       300: const Color(0xFFFFF176),
-      400: const Color(_yellowPrimaryValue),
-      500: const Color(0xFFFFEB3B),
+      400: const Color(0xFFFFEE58),
+      500: const Color(_yellowPrimaryValue),
       600: const Color(0xFFFDD835),
       700: const Color(0xFFFBC02D),
       800: const Color(0xFFF9A825),
@@ -955,8 +962,8 @@ class Colors {
       100: const Color(0xFFFFECB3),
       200: const Color(0xFFFFE082),
       300: const Color(0xFFFFD54F),
-      400: const Color(_amberPrimaryValue),
-      500: const Color(0xFFFFC107),
+      400: const Color(0xFFFFCA28),
+      500: const Color(_amberPrimaryValue),
       600: const Color(0xFFFFB300),
       700: const Color(0xFFFFA000),
       800: const Color(0xFFFF8F00),
@@ -984,7 +991,7 @@ class Colors {
     const <int, Color>{
       100: const Color(0xFFFFE57F),
       200: const Color(_amberAccentPrimaryValue),
-      400: const Color(0xFFFFC400),
+      400: const Color(0xFFFFD740),
       700: const Color(0xFFFFAB00),
     },
   );
@@ -1011,8 +1018,8 @@ class Colors {
       100: const Color(0xFFFFE0B2),
       200: const Color(0xFFFFCC80),
       300: const Color(0xFFFFB74D),
-      400: const Color(_orangePrimaryValue),
-      500: const Color(0xFFFF9800),
+      400: const Color(0xFFFFA726),
+      500: const Color(_orangePrimaryValue),
       600: const Color(0xFFFB8C00),
       700: const Color(0xFFF57C00),
       800: const Color(0xFFEF6C00),
@@ -1067,8 +1074,8 @@ class Colors {
       100: const Color(0xFFFFCCBC),
       200: const Color(0xFFFFAB91),
       300: const Color(0xFFFF8A65),
-      400: const Color(_deepOrangePrimaryValue),
-      500: const Color(0xFFFF5722),
+      400: const Color(0xFFFF7043),
+      500: const Color(_deepOrangePrimaryValue),
       600: const Color(0xFFF4511E),
       700: const Color(0xFFE64A19),
       800: const Color(0xFFD84315),
@@ -1124,8 +1131,8 @@ class Colors {
       100: const Color(0xFFD7CCC8),
       200: const Color(0xFFBCAAA4),
       300: const Color(0xFFA1887F),
-      400: const Color(_brownPrimaryValue),
-      500: const Color(0xFF795548),
+      400: const Color(0xFF8D6E63),
+      500: const Color(_brownPrimaryValue),
       600: const Color(0xFF6D4C41),
       700: const Color(0xFF5D4037),
       800: const Color(0xFF4E342E),
@@ -1162,8 +1169,8 @@ class Colors {
       200: const Color(0xFFEEEEEE),
       300: const Color(0xFFE0E0E0),
       350: const Color(0xFFD6D6D6), // only for raised button while pressed in light theme
-      400: const Color(_greyPrimaryValue),
-      500: const Color(0xFF9E9E9E),
+      400: const Color(0xFFBDBDBD),
+      500: const Color(_greyPrimaryValue),
       600: const Color(0xFF757575),
       700: const Color(0xFF616161),
       800: const Color(0xFF424242),
@@ -1195,8 +1202,8 @@ class Colors {
       100: const Color(0xFFCFD8DC),
       200: const Color(0xFFB0BEC5),
       300: const Color(0xFF90A4AE),
-      400: const Color(_blueGreyPrimaryValue),
-      500: const Color(0xFF607D8B),
+      400: const Color(0xFF78909C),
+      500: const Color(_blueGreyPrimaryValue),
       600: const Color(0xFF546E7A),
       700: const Color(0xFF455A64),
       800: const Color(0xFF37474F),

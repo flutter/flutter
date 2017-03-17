@@ -70,7 +70,7 @@ class ThemeData {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -103,7 +103,7 @@ class ThemeData {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
-    primarySwatch ??= Colors.blue.swatch;
+    primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
     primaryColorBrightness ??= Brightness.dark;
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;

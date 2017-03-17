@@ -43,7 +43,8 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
         style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
                                               : FlutterLogoStyle.stacked
                                               : FlutterLogoStyle.markOnly,
-        swatch: _logoColor.swatch,
+        lightColor: _logoColor.shade400,
+        darkColor: _logoColor.shade900,
         textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
       ),
       duration: const Duration(milliseconds: 750),
