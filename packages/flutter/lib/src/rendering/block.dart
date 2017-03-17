@@ -150,7 +150,7 @@ class RenderBlock extends RenderBox
         break;
     }
 
-    assert(!size.isInfinite);
+    assert(size.isFinite);
   }
 
   @override
