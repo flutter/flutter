@@ -230,7 +230,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<Null> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
-    if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
+    if (lower == 'r') {
       final OperationResult result = await restart(fullRestart: code == 'R');
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
@@ -511,16 +511,16 @@ class HotRunner extends ResidentRunner {
     const String bold = '\u001B[0;1m';
     const String reset = '\u001B[0m';
     printStatus(
-      '$fire  To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".',
+      '$fire  To hot reload your app on the fly, press "r". To restart the app entirely, press "R".',
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       'press "r" or F5. To restart the app entirely, press "R".$reset'
+                       'press "r". To restart the app entirely, press "R".$reset'
     );
     printStatus('The Observatory debugger and profiler is available at: $_observatoryUri');
     if (details) {
       printHelpDetails();
-      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('To repeat this help message, press "h". To quit, press "q".');
     } else {
-      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('For a more detailed help message, press "h". To quit, press "q".');
     }
   }
 
