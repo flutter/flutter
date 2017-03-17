@@ -35,11 +35,12 @@ enum FlutterLogoStyle {
 class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
-  /// The [colors] control the colors used for the logo. The [style] controls
-  /// whether and where to draw the "Flutter" label. If one is shown, the
-  /// [textColor] controls the color of the label.
+  /// The [lightColor] and [darkColor] are used to fill the logo. The [style]
+  /// controls whether and where to draw the "Flutter" label. If one is shown,
+  /// the [textColor] controls the color of the label.
   ///
-  /// The [colors], [textColor], and [style] arguments must not be null.
+  /// The [lightColor], [darkColor], [textColor], and [style] arguments must not
+  /// be null.
   const FlutterLogoDecoration({
     this.lightColor: const Color(0xFF42A5F5), // Colors.blue[400]
     this.darkColor: const Color(0xFF0D47A1), // Colors.blue[900]
@@ -52,7 +53,7 @@ class FlutterLogoDecoration extends Decoration {
 
   FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this._position, this._opacity, this.margin);
 
-  /// The logo graphic is painted with [lightColor] and [darkColor].
+  /// The lighter of the two colors used to paint the logo.
   ///
   /// If possible, the default should be used. It corresponds to the 400 and 900
   /// values of [Colors.blue] from the Material library.
@@ -66,7 +67,9 @@ class FlutterLogoDecoration extends Decoration {
   /// These are Flutter's tertiary colors.
   final Color lightColor;
 
-  /// See [lightColor].
+  /// The darker of the two colors used to paint the logo.
+  ///
+  /// See [lightColor] for more information about selecting the logo's colors.
   final Color darkColor;
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
@@ -210,8 +213,6 @@ class FlutterLogoDecoration extends Decoration {
   @override
   String toString([String prefix = '', String prefixIndent ]) {
     final String extra = _inTransition ? ', transition $_position:$_opacity' : '';
-    if (lightColor == null || darkColor == null)
-      return '$prefix$runtimeType(null, $style$extra)';
     return '$prefix$runtimeType($lightColor/$darkColor on $textColor, $style$extra)';
   }
 }
