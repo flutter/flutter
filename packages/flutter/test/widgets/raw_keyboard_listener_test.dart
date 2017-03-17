@@ -2,18 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void sendFakeKeyEvent(Map<String, dynamic> data) {
-  final String message = JSON.encode(data);
-  final Uint8List encoded = UTF8.encoder.convert(message);
   PlatformMessages.handlePlatformMessage(
-      'flutter/keyevent', encoded.buffer.asByteData(), (_) {});
+    SystemChannels.keyEvent.name,
+    SystemChannels.keyEvent.codec.encodeMessage(data),
+    (_) {});
 }
 
 void main() {

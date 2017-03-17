@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'platform_messages.dart';
+import 'system_channels.dart';
 
 /// Specifies a particular device orientation.
 ///
@@ -87,8 +87,6 @@ enum SystemUiOverlayStyle {
   dark,
 }
 
-const String _kChannelName = 'flutter/platform';
-
 List<String> _stringify(List<dynamic> list) {
   final List<String> result = <String>[];
   for (dynamic item in list)
@@ -107,10 +105,9 @@ class SystemChrome {
   /// The `orientation` argument is a list of [DeviceOrientation] enum values.
   /// The empty list is synonymous with having all options enabled.
   static Future<Null> setPreferredOrientations(List<DeviceOrientation> orientations) async {
-    await PlatformMessages.invokeMethod(
-      _kChannelName,
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setPreferredOrientations',
-      <List<String>>[ _stringify(orientations) ],
+      _stringify(orientations),
     );
   }
 
@@ -120,13 +117,12 @@ class SystemChrome {
   /// Any part of the description that is unsupported on the current platform
   /// will be ignored.
   static Future<Null> setApplicationSwitcherDescription(ApplicationSwitcherDescription description) async {
-    await PlatformMessages.invokeMethod(
-      _kChannelName,
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setApplicationSwitcherDescription',
-      <Map<String, dynamic>>[<String, dynamic>{
+      <String, dynamic>{
         'label': description.label,
         'primaryColor': description.primaryColor,
-      }],
+      },
     );
   }
 
@@ -139,10 +135,9 @@ class SystemChrome {
   /// If a particular overlay is unsupported on the platform, enabling or
   /// disabling that overlay will be ignored.
   static Future<Null> setEnabledSystemUIOverlays(List<SystemUiOverlay> overlays) async {
-    await PlatformMessages.invokeMethod(
-      _kChannelName,
+    await SystemChannels.platform.invokeMethod(
       'SystemChrome.setEnabledSystemUIOverlays',
-      <List<String>>[ _stringify(overlays) ],
+      _stringify(overlays),
     );
  }
 
@@ -175,10 +170,9 @@ class SystemChrome {
     scheduleMicrotask(() {
       assert(_pendingStyle != null);
       if (_pendingStyle != _latestStyle) {
-        PlatformMessages.invokeMethod(
-          _kChannelName,
+        SystemChannels.platform.invokeMethod(
           'SystemChrome.setSystemUIOverlayStyle',
-          <String>[ _pendingStyle.toString() ],
+          _pendingStyle.toString(),
         );
         _latestStyle = _pendingStyle;
       }
