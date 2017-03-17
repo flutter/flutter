@@ -15,6 +15,7 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
+import '../plugins.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -151,6 +152,8 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
   final SettingsFile settings = new SettingsFile.parseFromFile(localProperties);
   settings.values['flutter.buildMode'] = buildModeName;
   settings.writeContents(localProperties);
+
+  writeFlutterPluginsList();
 
   final String gradle = ensureGradle();
 
