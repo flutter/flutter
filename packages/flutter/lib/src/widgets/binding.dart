@@ -61,9 +61,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     _instance = this;
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
-    SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
-    SystemChannels.system.setMessageHandler(_handleSystemMessage);
+    PlatformMessages.setJSONMessageHandler('flutter/navigation', _handleNavigationMessage);
+    PlatformMessages.setStringMessageHandler('flutter/lifecycle', _handleLifecycleMessage);
+    PlatformMessages.setJSONMessageHandler('flutter/system', _handleSystemMessage);
   }
 
   /// The current [WidgetsBinding], if one has been created.
@@ -189,8 +189,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     SystemNavigator.pop();
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) async {
-    if (methodCall.method == 'popRoute')
+  Future<dynamic> _handleNavigationMessage(Map<String, dynamic> message) async {
+    final String method = message['method'];
+    if (method == 'popRoute')
       handlePopRoute();
     // TODO(abarth): Handle 'pushRoute'.
   }

@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 void main() {
   test('System sound control test', () async {
-    final List<MethodCall> log = <MethodCall>[];
-  
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
+    final List<String> log = <String>[];
+
+    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
+      log.add(message);
     });
-  
+
     await SystemSound.play(SystemSoundType.click);
 
-    expect(log, equals(<MethodCall>[new MethodCall('SystemSound.play', "SystemSoundType.click")]));
+    expect(log, equals(<String>['{"method":"SystemSound.play","args":["SystemSoundType.click"]}']));
   });
 }
