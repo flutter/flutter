@@ -12,6 +12,7 @@ import 'dart:ui' show Color, hashValues;
 ///    primary and accent color swatches.
 ///  * [Colors], which defines all of the standard material design colors.
 class ColorSwatch extends Color {
+  // Creates a color that has a small table of related colors called a "swatch".
   const ColorSwatch(int primary, this.swatch) : super(primary);
 
   /// The palette of colors based on this one.
