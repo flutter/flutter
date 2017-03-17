@@ -53,12 +53,12 @@ class TestServiceExtensionsBinding extends BindingBase
   void doFrame() {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(const Duration());
+      ui.window.onBeginFrame(Duration.ZERO);
   }
 
   Future<Null> flushMicrotasks() {
     final Completer<Null> completer = new Completer<Null>();
-    new Timer(const Duration(), completer.complete);
+    Timer.run(completer.complete);
     return completer.future;
   }
 }

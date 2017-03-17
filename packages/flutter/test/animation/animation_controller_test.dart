@@ -277,4 +277,13 @@ void main() {
     controller.dispose();
     expect(controller.dispose, throwsFlutterError);
   });
+
+  test('AnimationController repeat() throws if period is not specified', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+    expect((){ controller.repeat(); }, throwsFlutterError);
+    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+  });
+
 }

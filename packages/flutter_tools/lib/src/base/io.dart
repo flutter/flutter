@@ -115,8 +115,7 @@ class ProcessSignal implements io.ProcessSignal {
   static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
   static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
   static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2);
-
-  static final ProcessSignal SIGINT = SigintProcessSignal.instance; // ignore: non_constant_identifier_names
+  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT);
 
   final io.ProcessSignal _delegate;
 
@@ -141,37 +140,5 @@ class _PosixProcessSignal extends ProcessSignal {
     if (platform.isWindows)
       return new Stream<ProcessSignal>.empty();
     return super.watch();
-  }
-}
-
-// TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28995 is resolved.
-class SigintProcessSignal extends ProcessSignal {
-  SigintProcessSignal._() : super(io.ProcessSignal.SIGINT);
-
-  static final SigintProcessSignal instance = new SigintProcessSignal._();
-  bool _isInitialized = false;
-
-  final StreamController<ProcessSignal> _controller = new StreamController<ProcessSignal>();
-
-  @override
-  Stream<ProcessSignal> watch() {
-    init();
-    return _controller.stream;
-  }
-
-  void init() {
-    if (!_isInitialized) {
-      _delegate.watch().listen(_handleSigInt);
-      _isInitialized = true;
-    }
-  }
-
-  void _handleSigInt(io.ProcessSignal signal) {
-    if (platform.isWindows && !_controller.hasListener) {
-      // If nobody is listening for SIGINT, we force a clean exit to avoid
-      // https://github.com/dart-lang/sdk/issues/28995.
-      exit(0);
-    }
-    _controller.add(this);
   }
 }

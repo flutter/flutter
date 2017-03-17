@@ -73,12 +73,12 @@ class TriggerableState extends State<TriggerableWidget> {
   @override
   void initState() {
     super.initState();
-    config.trigger.callback = this.fire;
+    config.trigger.callback = fire;
   }
 
   @override
   void didUpdateConfig(TriggerableWidget oldConfig) {
-    config.trigger.callback = this.fire;
+    config.trigger.callback = fire;
   }
 
   int _count = 0;

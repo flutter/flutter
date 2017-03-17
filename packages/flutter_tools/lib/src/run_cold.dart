@@ -115,7 +115,7 @@ class ColdRunner extends ResidentRunner {
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printTrace('Connected to ${vmService.vm.mainView}\.');
+      printTrace('Connected to ${vmService.vm.firstView}\.');
     }
 
     if (vmService != null && traceStartup) {
@@ -165,9 +165,9 @@ class ColdRunner extends ResidentRunner {
         printHelpDetails();
     }
     if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('For a more detailed help message, press "h". To quit, press "q".');
     } else {
-      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('To repeat this help message, press "h". To quit, press "q".');
     }
   }
 

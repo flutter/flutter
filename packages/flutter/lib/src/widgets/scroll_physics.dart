@@ -27,6 +27,7 @@ export 'scroll_position.dart' show ScrollPhysics;
 /// * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///   clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent);
 
   @override
@@ -97,6 +98,8 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///   provide the glowing effect that is usually found with this clamping effect
 ///   on Android.
 class ClampingScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that prevent the scroll offset from exceeding the
+  /// bounds of the content..
   const ClampingScrollPhysics({ ScrollPhysics parent }) : super(parent);
 
   @override
@@ -158,6 +161,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 /// * [ClampingScrollPhysics], which provides the clamping overscroll behavior
 ///   found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
+  /// Creates scroll physics that always lets the user scroll.
   const AlwaysScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent);
 
   @override
