@@ -5,24 +5,33 @@
 #import "AppDelegate.h"
 
 #import <Flutter/Flutter.h>
-#import "LocationProvider.h"
 
 @implementation AppDelegate {
-    LocationProvider* _locationProvider;
+    CLLocationManager* _locationManager;
 }
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    FlutterDartProject* project = [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration];
-    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    FlutterViewController* flutterController = [[FlutterViewController alloc] initWithProject:project
-                                                                                      nibName:nil
-                                                                                       bundle:nil];
-    _locationProvider = [[LocationProvider alloc] init];
-    [flutterController addMessageListener:_locationProvider];
-
-    self.window.rootViewController = flutterController;
-    [self.window makeKeyAndVisible];
-    return YES;
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+    (FlutterViewController*)self.window.rootViewController;
+  FlutterMethodChannel* locationChannel = [FlutterMethodChannel
+    methodChannelNamed:@"location"
+       binaryMessenger:controller
+                 codec:[FlutterStandardMethodCodec sharedInstance]];
+  [locationChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver result) {
+    if ([@"getLocation" isEqualToString:call.method]) {
+      if (_locationManager == nil) {
+        _locationManager = [[CLLocationManager alloc] init];
+        [_locationManager startMonitoringSignificantLocationChanges];
+      }
+      CLLocation* location = _locationManager.location;
+      result(@[@(location.coordinate.latitude), @(location.coordinate.longitude)], nil);
+    } else {
+      result(nil, [FlutterError errorWithCode:@"unknown method"
+                                      message:@"Unknown location method called"
+                                      details:nil]);
+    }
+  }];
+  return YES;
 }
 
 @end
