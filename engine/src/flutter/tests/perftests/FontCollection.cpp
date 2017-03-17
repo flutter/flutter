@@ -27,6 +27,16 @@ namespace minikin {
 const char* SYSTEM_FONT_PATH = "/system/fonts/";
 const char* SYSTEM_FONT_XML = "/system/etc/fonts.xml";
 
+static void BM_FontCollection_construct(benchmark::State& state) {
+    std::vector<std::shared_ptr<FontFamily>> families =
+            getFontFamilies(SYSTEM_FONT_PATH, SYSTEM_FONT_XML);
+    while (state.KeepRunning()) {
+        std::make_shared<FontCollection>(families);
+    }
+}
+
+BENCHMARK(BM_FontCollection_construct);
+
 static void BM_FontCollection_hasVariationSelector(benchmark::State& state) {
     std::shared_ptr<FontCollection> collection(
             getFontCollection(SYSTEM_FONT_PATH, SYSTEM_FONT_XML));
