@@ -15,18 +15,6 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-# Generate unicode emoji data from UCD.
-UNICODE_EMOJI_H_GEN_PY := $(LOCAL_PATH)/unicode_emoji_h_gen.py
-UNICODE_EMOJI_DATA := $(TOP)/external/unicode/emoji-data.txt
-
-UNICODE_EMOJI_H := $(intermediates)/generated/UnicodeData.h
-$(UNICODE_EMOJI_H): $(UNICODE_EMOJI_H_GEN_PY) $(UNICODE_EMOJI_DATA)
-$(LOCAL_PATH)/MinikinInternal.cpp: $(UNICODE_EMOJI_H)
-$(UNICODE_EMOJI_H): PRIVATE_CUSTOM_TOOL := python $(UNICODE_EMOJI_H_GEN_PY) \
-    -i $(UNICODE_EMOJI_DATA) \
-    -o $(UNICODE_EMOJI_H)
-$(UNICODE_EMOJI_H):
-		$(transform-generated-source)
 
 include $(CLEAR_VARS)
 minikin_src_files := \
