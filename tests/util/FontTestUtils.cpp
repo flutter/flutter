@@ -28,7 +28,7 @@
 
 namespace minikin {
 
-FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
+std::vector<std::shared_ptr<FontFamily>> getFontFamilies(const char* fontDir, const char* fontXml) {
     xmlDoc* doc = xmlReadFile(fontXml, NULL, 0);
     xmlNode* familySet = xmlDocGetRootElement(doc);
 
@@ -69,11 +69,12 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
             }
 
             if (index == nullptr) {
-                std::shared_ptr<MinikinFont> minikinFont(new MinikinFontForTest(fontPath));
+                std::shared_ptr<MinikinFont> minikinFont =
+                        std::make_shared<MinikinFontForTest>(fontPath);
                 fonts.push_back(Font(minikinFont, FontStyle(weight, italic)));
             } else {
-                std::shared_ptr<MinikinFont> minikinFont(
-                        new MinikinFontForTest(fontPath, atoi((const char*)index)));
+                std::shared_ptr<MinikinFont> minikinFont =
+                        std::make_shared<MinikinFontForTest>(fontPath, atoi((const char*)index));
                 fonts.push_back(Font(minikinFont, FontStyle(weight, italic)));
             }
         }
@@ -81,17 +82,19 @@ FontCollection* getFontCollection(const char* fontDir, const char* fontXml) {
         xmlChar* lang = xmlGetProp(familyNode, (const xmlChar*)"lang");
         std::shared_ptr<FontFamily> family;
         if (lang == nullptr) {
-            family.reset(new FontFamily(variant, std::move(fonts)));
+            family = std::make_shared<FontFamily>(variant, std::move(fonts));
         } else {
             uint32_t langId = FontStyle::registerLanguageList(
                     std::string((const char*)lang, xmlStrlen(lang)));
-            family.reset(new FontFamily(langId, variant, std::move(fonts)));
+            family = std::make_shared<FontFamily>(langId, variant, std::move(fonts));
         }
         families.push_back(family);
     }
     xmlFreeDoc(doc);
-
-    return new FontCollection(families);
+    return families;
+}
+std::shared_ptr<FontCollection> getFontCollection(const char* fontDir, const char* fontXml) {
+    return std::make_shared<FontCollection>(getFontFamilies(fontDir, fontXml));
 }
 
 }  // namespace minikin
