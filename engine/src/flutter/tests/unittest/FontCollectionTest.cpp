@@ -38,7 +38,7 @@ namespace minikin {
 // U+717D U+FE02 (VS3)
 // U+717D U+E0102 (VS19)
 // U+717D U+E0103 (VS20)
-const char kVsTestFont[] = kTestFontDir "/VarioationSelectorTest-Regular.ttf";
+const char kVsTestFont[] = kTestFontDir "/VariationSelectorTest-Regular.ttf";
 
 void expectVSGlyphs(const FontCollection* fc, uint32_t codepoint, const std::set<uint32_t>& vsSet) {
     for (uint32_t vs = 0xFE00; vs <= 0xE01EF; ++vs) {
@@ -64,13 +64,13 @@ TEST(FontCollectionTest, hasVariationSelectorTest) {
   std::shared_ptr<FontCollection> fc(new FontCollection(families));
 
   EXPECT_FALSE(fc->hasVariationSelector(0x82A6, 0));
-  expectVSGlyphs(fc.get(), 0x82A6, std::set<uint32_t>({0xFE00, 0xE0100, 0xE0101, 0xE0102}));
+  expectVSGlyphs(fc.get(), 0x82A6, std::set<uint32_t>({0xFE00, 0xFE0E, 0xE0100, 0xE0101, 0xE0102}));
 
   EXPECT_FALSE(fc->hasVariationSelector(0x845B, 0));
-  expectVSGlyphs(fc.get(), 0x845B, std::set<uint32_t>({0xFE01, 0xE0101, 0xE0102, 0xE0103}));
+  expectVSGlyphs(fc.get(), 0x845B, std::set<uint32_t>({0xFE01, 0xFE0E, 0xE0101, 0xE0102, 0xE0103}));
 
   EXPECT_FALSE(fc->hasVariationSelector(0x537F, 0));
-  expectVSGlyphs(fc.get(), 0x537F, std::set<uint32_t>({}));
+  expectVSGlyphs(fc.get(), 0x537F, std::set<uint32_t>({0xFE0E}));
 
   EXPECT_FALSE(fc->hasVariationSelector(0x717D, 0));
   expectVSGlyphs(fc.get(), 0x717D, std::set<uint32_t>({0xFE02, 0xE0102, 0xE0103}));
@@ -99,10 +99,13 @@ TEST(FontCollectionTest, hasVariationSelectorTest_emoji) {
     EXPECT_TRUE(collection->hasVariationSelector(0x262E, 0xFE0E));
     EXPECT_FALSE(collection->hasVariationSelector(0x262E, 0xFE0F));
 
+    // Text font doesn't support U+1F3FD. Only the color emoji fonts has. So VS15 is not supported.
+    EXPECT_FALSE(collection->hasVariationSelector(0x1F3FD, 0xFE0E));
+
     // Text font doesn't have U+262F U+FE0E or even its base code point U+262F.
     EXPECT_FALSE(collection->hasVariationSelector(0x262F, 0xFE0E));
 
-    // VS15/VS16 is only for emoji, should return false for not an emoji code point.
+    // None of the fonts support U+2229.
     EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0E));
     EXPECT_FALSE(collection->hasVariationSelector(0x2229, 0xFE0F));
 

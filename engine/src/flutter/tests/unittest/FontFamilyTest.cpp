@@ -495,7 +495,7 @@ TEST_F(FontLanguagesTest, registerLanguageListTest) {
 // U+717D U+FE02 (VS3)
 // U+717D U+E0102 (VS19)
 // U+717D U+E0103 (VS20)
-const char kVsTestFont[] = kTestFontDir "VarioationSelectorTest-Regular.ttf";
+const char kVsTestFont[] = kTestFontDir "VariationSelectorTest-Regular.ttf";
 
 class FontFamilyTest : public ICUTestBase {
 public:
