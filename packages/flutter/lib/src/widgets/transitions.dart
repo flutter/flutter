@@ -99,10 +99,10 @@ class _AnimatedState extends State<AnimatedWidget> {
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
-  /// The [position] argument is required.
+  /// The [position] argument must not be null.
   SlideTransition({
     Key key,
-    Animation<FractionalOffset> position,
+    @required Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child,
   }) : super(key: key, listenable: position);
@@ -138,11 +138,11 @@ class SlideTransition extends AnimatedWidget {
 class ScaleTransition extends AnimatedWidget {
   /// Creates a scale transition.
   ///
-  /// The [scale] argument is required. The [alignment] argument defaults to
-  /// [FractionalOffset.center].
+  /// The [scale] argument must not be null. The [alignment] argument defaults
+  /// to [FractionalOffset.center].
   ScaleTransition({
     Key key,
-    Animation<double> scale,
+    @required Animation<double> scale,
     this.alignment: FractionalOffset.center,
     this.child,
   }) : super(key: key, listenable: scale);
@@ -180,10 +180,10 @@ class ScaleTransition extends AnimatedWidget {
 class RotationTransition extends AnimatedWidget {
   /// Creates a rotation transition.
   ///
-  /// The [turns] argument is required.
+  /// The [turns] argument must not be null.
   RotationTransition({
     Key key,
-    Animation<double> turns,
+    @required Animation<double> turns,
     this.child,
   }) : super(key: key, listenable: turns);
 
@@ -215,13 +215,13 @@ class RotationTransition extends AnimatedWidget {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [sizeFactor] argument is required. The [axis] argument defaults to
-  /// [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
+  /// The [sizeFactor] argument must not be null. The [axis] argument defaults
+  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
   /// child along the main axis during the transition.
   SizeTransition({
     Key key,
     this.axis: Axis.vertical,
-    Animation<double> sizeFactor,
+    @required Animation<double> sizeFactor,
     this.axisAlignment: 0.5,
     this.child,
   }) : super(key: key, listenable: sizeFactor) {
@@ -267,10 +267,10 @@ class SizeTransition extends AnimatedWidget {
 class FadeTransition extends AnimatedWidget {
   /// Creates an opacity transition.
   ///
-  /// The [opacity] argument is required.
+  /// The [opacity] argument must not be null.
   FadeTransition({
     Key key,
-    Animation<double> opacity,
+    @required Animation<double> opacity,
     this.child,
   }) : super(key: key, listenable: opacity);
 
@@ -319,10 +319,10 @@ class RelativeRectTween extends Tween<RelativeRect> {
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
-  /// The [rect] argument is required.
+  /// The [rect] argument must not be null.
   PositionedTransition({
     Key key,
-    Animation<RelativeRect> rect,
+    @required Animation<RelativeRect> rect,
     @required this.child,
   }) : super(key: key, listenable: rect);
 
@@ -355,7 +355,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   ///
   /// Each frame, the [Positioned] widget will be configured to represent the
   /// current value of the [rect] argument assuming that the stack has the given
-  /// [size]. Both [rect] and [size] must be non-null.
+  /// [size]. Both [rect] and [size] must not be null.
   RelativePositionedTransition({
     Key key,
     @required Animation<Rect> rect,
