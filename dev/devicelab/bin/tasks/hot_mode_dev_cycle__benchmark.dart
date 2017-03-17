@@ -20,7 +20,7 @@ void main() {
     rm(benchmarkFile);
     await inDirectory(appDir, () async {
       return await flutter('run',
-          options: <String>['--hot', '-d', device.deviceId, '--benchmark'],
+          options: <String>['--hot', '-d', device.deviceId, '--benchmark', '--verbose'],
           canFail: false);
     });
     return new TaskResult.successFromFile(benchmarkFile,
