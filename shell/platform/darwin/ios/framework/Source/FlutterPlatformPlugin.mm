@@ -13,12 +13,12 @@ namespace {
 
 constexpr char kTextPlainFormat[] = "text/plain";
 
-NSDictionary* GetDirectoryOfType(NSSearchPathDirectory dir) {
+NSString* GetDirectoryOfType(NSSearchPathDirectory dir) {
   NSArray* paths =
       NSSearchPathForDirectoriesInDomains(dir, NSUserDomainMask, YES);
   if (paths.count == 0)
     return nil;
-  return @{ @"path": paths.firstObject };
+  return paths.firstObject;
 }
 
 }  // namespaces
@@ -191,11 +191,11 @@ using namespace shell;
   pasteboard.string = data[@"text"];
 }
 
-- (NSDictionary*)getPathProviderTemporaryDirectory {
+- (NSString*)getPathProviderTemporaryDirectory {
   return GetDirectoryOfType(NSCachesDirectory);
 }
 
-- (NSDictionary*)getPathProviderApplicationDocumentsDirectory {
+- (NSString*)getPathProviderApplicationDocumentsDirectory {
   return GetDirectoryOfType(NSDocumentDirectory);
 }
 
