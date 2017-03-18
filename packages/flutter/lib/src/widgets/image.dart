@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io' show File, Platform;
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +15,7 @@ import 'media_query.dart';
 export 'package:flutter/services.dart' show
   AssetImage,
   ExactAssetImage,
+  MemoryImage,
   NetworkImage,
   FileImage;
 
@@ -37,11 +39,12 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 /// Several constructors are provided for the various ways that an image can be
 /// specified:
 ///
-/// * [new Image], for obtaining an image from an [ImageProvider].
-/// * [new Image.asset], for obtaining an image from an [AssetBundle]
-///   using a key.
-/// * [new Image.network], for obtaining an image from a URL.
-/// * [new Image.file], for obtaining an image from a [File].
+///  * [new Image], for obtaining an image from an [ImageProvider].
+///  * [new Image.asset], for obtaining an image from an [AssetBundle]
+///    using a key.
+///  * [new Image.network], for obtaining an image from a URL.
+///  * [new Image.file], for obtaining an image from a [File].
+///  * [new Image.memory], for obtaining an image from a [Uint8List].
 ///
 /// To automatically perform pixel-density-aware asset resolution, specify the
 /// image using an [AssetImage] and make sure that a [MaterialApp], [WidgetsApp],
@@ -139,6 +142,23 @@ class Image extends StatefulWidget {
     this.gaplessPlayback: false
   }) : image = scale != null ? new ExactAssetImage(name, bundle: bundle, scale: scale)
                              : new AssetImage(name, bundle: bundle),
+       super(key: key);
+
+  /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
+  ///
+  /// The [bytes], [scale], and [repeat] arguments must not be null.
+  Image.memory(Uint8List bytes, {
+    Key key,
+    double scale: 1.0,
+    this.width,
+    this.height,
+    this.color,
+    this.fit,
+    this.alignment,
+    this.repeat: ImageRepeat.noRepeat,
+    this.centerSlice,
+    this.gaplessPlayback: false
+  }) : image = new MemoryImage(bytes, scale: scale),
        super(key: key);
 
   /// The image to display.
