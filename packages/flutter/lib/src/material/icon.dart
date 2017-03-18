@@ -114,7 +114,7 @@ class Icon extends StatelessWidget {
                 inherit: false,
                 color: iconColor,
                 fontSize: iconSize,
-                fontFamily: 'MaterialIcons'
+                fontFamily: icon.fontFamily
               )
             )
           )
