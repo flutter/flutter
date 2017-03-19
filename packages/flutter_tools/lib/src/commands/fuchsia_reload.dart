@@ -28,6 +28,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
   String _fuchsiaRoot;
   String _projectRoot;
   String _projectName;
+  String _binaryName;
   String _fuchsiaProjectPath;
   String _target;
   String _address;
@@ -55,6 +56,9 @@ class FuchsiaReloadCommand extends FlutterCommand {
     argParser.addOption('gn-target',
       abbr: 'g',
       help: 'GN target of the application, e.g //path/to/app:app');
+    argParser.addOption('name-override',
+      abbr: 'n',
+      help: 'On-device name of the application binary');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: flx.defaultMainPath,
@@ -79,13 +83,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
     // Check that there are running VM services on the returned
     // ports, and find the Isolates that are running the target app.
-    final String isolateName = "$_projectName\$main";
+    final String isolateName = "$_binaryName\$main";
     final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
     if (targetPorts.length == 0) {
-      throwToolExit("No VMs found running $_projectName");
+      throwToolExit("No VMs found running $_binaryName");
     }
     for (int port in targetPorts) {
-      printTrace("Found $_projectName at $port");
+      printTrace("Found $_binaryName at $port");
     }
 
     // Set up a device and hot runner and attach the hot runner to the first
@@ -100,7 +104,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
         projectRootPath: _fuchsiaProjectPath,
         packagesFilePath: _dotPackagesPath);
     final Uri observatoryUri = Uri.parse("http://$fullAddress");
-    printStatus("Connecting to $_projectName at $observatoryUri");
+    printStatus("Connecting to $_binaryName at $observatoryUri");
     await hotRunner.attach(observatoryUri, isolateFilter: isolateName);
   }
 
@@ -170,6 +174,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
         "$_fuchsiaRoot/out/$buildType/gen/$_projectRoot/$packagesFileName";
     if (!_fileExists(_dotPackagesPath)) {
       throwToolExit("Couldn't find .packages file at $_dotPackagesPath");
+    }
+
+    final String nameOverride = argResults['name-override'];
+    if (nameOverride == null) {
+      _binaryName = _projectName;
+    } else {
+      _binaryName = nameOverride;
     }
   }
 
