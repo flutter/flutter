@@ -135,6 +135,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   Widget build(BuildContext context) {
     final bool enabled = config.enabled;
     final Color backgroundColor = config.color;
+    
     return new Listener(
       onPointerDown: enabled ? _handleTapDown : null,
       onPointerUp: enabled ? _handleTapUp : null,
