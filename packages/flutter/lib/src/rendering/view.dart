@@ -108,7 +108,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       _orientation = configuration.orientation;
     }
     _size = configuration.size;
-    assert(!_size.isInfinite);
+    assert(_size.isFinite);
 
     if (child != null)
       child.layout(new BoxConstraints.tight(_size));
