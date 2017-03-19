@@ -77,7 +77,7 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
+  /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/layout/>
   final double minSize;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
