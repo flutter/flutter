@@ -67,6 +67,12 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   );
 }
 
+TaskFunction createFlutterViewStartupTest() {
+  return new StartupTest(
+      '${flutterDirectory.path}/examples/flutter_view',
+  );
+}
+
 /// Measure application startup performance.
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);

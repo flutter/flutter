@@ -138,6 +138,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  flutter_view__start_up:
+    description: >
+      Measures the startup time of the Flutter View app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
 
   # iOS on-device tests
 
@@ -176,6 +181,12 @@ tasks:
   microbenchmarks_ios:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  flutter_view_ios__start_up:
+    description: >
+      Measures the startup time of the Flutter View app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
