@@ -106,6 +106,7 @@ class AssetBundle {
       assetBasePath,
       excludeDirs: <String>[workingDirPath, getBuildDirectory()]
     );
+    print("asset variants $assetVariants");
 
     if (assetVariants == null)
       return 1;
@@ -122,6 +123,7 @@ class AssetBundle {
         entries[variant.assetEntry] = new DevFSFileContent(variant.assetFile);
       }
     }
+    print("entries after asset variants $entries");
 
     final List<_Asset> materialAssets = <_Asset>[];
     if (usesMaterialDesign && includeDefaultFonts) {
@@ -129,17 +131,21 @@ class AssetBundle {
       if (includeRobotoFonts)
         materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
     }
+    print("material assets $materialAssets");
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
       entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
     }
+    print("entries after material assets $entries");
 
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
+    print("entries after asset manifest $entries");
 
     final DevFSContent fontManifest =
         _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
     if (fontManifest != null)
       entries[_kFontManifestJson] = fontManifest;
+    print("entries after font manifest $entries");
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
