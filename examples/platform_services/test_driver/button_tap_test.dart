@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_driver/flutter_driver.dart';
-import 'package:flutter_driver/src/find.dart';
-import 'package:flutter_driver/src/retry.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -28,19 +26,11 @@ void main() {
         await driver.waitFor(button);
         await driver.tap(button);
 
-      expect(
-        retry(
-          () async {
-            return await driver.getText(batteryLevelLabel);
-          },
-          const Duration(milliseconds: 30),
-          const Duration(milliseconds: 10),
-          predicate: (String result) {
-            return 'Battery level at'.matchAsPrefix(result) != null;
-          }
-        ),
-        completion(anything)
-      );
+        String batteryLevel;
+        while(batteryLevel == null || batteryLevel.isEmpty) {
+          batteryLevel = await driver.getText(batteryLevelLabel);
+        }
+        expect(batteryLevel, isNotEmpty);
     });
   });
 }

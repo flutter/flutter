@@ -14,7 +14,7 @@ class PlatformServices extends StatefulWidget {
 
 class _PlatformServicesState extends State<PlatformServices> {
   static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
-  String _batteryLevel = 'Unknown battery level.';
+  String _batteryLevel = '';
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
