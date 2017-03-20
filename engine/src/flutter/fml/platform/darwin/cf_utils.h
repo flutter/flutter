@@ -6,6 +6,7 @@
 #define FLUTTER_FML_PLATFORM_DARWIN_CF_UTILS_H_
 
 #include <CoreFoundation/CoreFoundation.h>
+
 #include "lib/ftl/macros.h"
 
 namespace fml {
@@ -22,6 +23,14 @@ class CFRef {
       CFRelease(instance_);
     }
     instance_ = nullptr;
+  }
+
+  void Reset(T instance) {
+    if (instance_ != nullptr) {
+      CFRelease(instance_);
+    }
+
+    instance_ = instance;
   }
 
   operator T() const { return instance_; }
