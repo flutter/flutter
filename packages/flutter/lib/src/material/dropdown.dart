@@ -9,6 +9,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
@@ -21,7 +22,6 @@ import 'theme.dart';
 const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
 const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 
 class _DropdownMenuPainter extends CustomPainter {
@@ -49,7 +49,7 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     final Tween<double> top = new Tween<double>(
       begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
       end: 0.0,
@@ -178,7 +178,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             child: new Scrollbar(
               child: new ListView(
                 controller: config.route.scrollController,
-                padding: _kMenuVerticalPadding,
+                padding: kMaterialListPadding,
                 itemExtent: _kMenuItemHeight,
                 shrinkWrap: true,
                 children: children,
@@ -219,7 +219,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     final double buttonTop = buttonRect.top;
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     double top = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     final double topPreferredLimit = _kMenuItemHeight;
     if (top < topPreferredLimit)
