@@ -21,7 +21,6 @@ const String defaultManifestPath = 'pubspec.yaml';
 String get defaultFlxOutputPath => fs.path.join(getBuildDirectory(), 'app.flx');
 String get defaultSnapshotPath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin');
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
-String get defaultKernelPath => fs.path.join(getBuildDirectory(), 'kernel_blob.bin');
 const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
@@ -56,26 +55,6 @@ Future<int> createSnapshot({
   return runCommandAndStreamOutput(args);
 }
 
-/// Build the flx in the build directory and return `localBundlePath` on success.
-///
-/// Return `null` on failure.
-Future<String> buildFlx({
-  String mainPath: defaultMainPath,
-  DevFSContent kernelContent,
-  bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true
-}) async {
-  await build(
-    snapshotPath: defaultSnapshotPath,
-    outputPath: defaultFlxOutputPath,
-    mainPath: mainPath,
-    kernelContent: kernelContent,
-    precompiledSnapshot: precompiledSnapshot,
-    includeRobotoFonts: includeRobotoFonts
-  );
-  return defaultFlxOutputPath;
-}
-
 Future<Null> build({
   String mainPath: defaultMainPath,
   String manifestPath: defaultManifestPath,
@@ -86,27 +65,17 @@ Future<Null> build({
   String workingDirPath,
   String packagesPath,
   String kernelPath,
-  DevFSContent kernelContent,
   bool precompiledSnapshot: false,
   bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
-  kernelPath ??= defaultKernelPath;
   snapshotPath ??= defaultSnapshotPath;
   depfilePath ??= defaultDepfilePath;
   workingDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   File snapshotFile;
 
-  File kernelFile;
-  if (kernelContent != null) {
-    // TODO(danrubel) in the future, call the VM to generate this file
-    kernelFile = fs.file(kernelPath);
-    final IOSink sink = kernelFile.openWrite();
-    await sink.addStream(kernelContent.contentsAsStream());
-    sink.close();
-  }
   if (!precompiledSnapshot) {
     ensureDirectoryExists(snapshotPath);
 
@@ -124,9 +93,13 @@ Future<Null> build({
     snapshotFile = fs.file(snapshotPath);
   }
 
+  DevFSContent kernelContent;
+  if (kernelPath != null)
+    kernelContent = new DevFSFileContent(fs.file(kernelPath));
+
   return assemble(
     manifestPath: manifestPath,
-    kernelFile: kernelFile,
+    kernelContent: kernelContent,
     snapshotFile: snapshotFile,
     outputPath: outputPath,
     privateKeyPath: privateKeyPath,
@@ -139,7 +112,7 @@ Future<Null> build({
 
 Future<Null> assemble({
   String manifestPath,
-  File kernelFile,
+  DevFSContent kernelContent,
   File snapshotFile,
   String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
@@ -172,8 +145,8 @@ Future<Null> assemble({
   // Add all entries from the asset bundle.
   zipBuilder.entries.addAll(assetBundle.entries);
 
-  if (kernelFile != null)
-    zipBuilder.entries[_kKernelKey] = new DevFSFileContent(kernelFile);
+  if (kernelContent != null)
+    zipBuilder.entries[_kKernelKey] = kernelContent;
   if (snapshotFile != null)
     zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
 
