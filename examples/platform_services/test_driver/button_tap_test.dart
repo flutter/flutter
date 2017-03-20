@@ -19,10 +19,10 @@ void main() {
     });
 
     test('tap on the button, verify result', () async {
-        SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
+        final SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
         expect(batteryLevelLabel, isNotNull);
 
-        SerializableFinder button = find.text('Get Battery Level');
+        final SerializableFinder button = find.text('Get Battery Level');
         await driver.waitFor(button);
         await driver.tap(button);
 
