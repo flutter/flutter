@@ -1071,6 +1071,72 @@ abstract class State<T extends StatefulWidget> {
   /// this [State] object and will remain the same for the lifetime of this
   /// object. The [BuildContext] argument is provided redundantly here so that
   /// this method matches the signature for a [WidgetBuilder].
+  ///
+  /// ## Design discussion
+  ///
+  /// ### Why is the [build] method on [State], and not [StatefulWidget]?
+  ///
+  /// Putting a `Widget build(BuildContext context)` method on [State] rather
+  /// putting a `Widget build(BuildContext context, State state)` method on
+  /// [StatefulWidget] gives developers more flexibility when subclassing
+  /// [StatefulWidget].
+  ///
+  /// For example, [AnimatedWidget] is a subclass of [StatefulWidget] that
+  /// introduces an abstract `Widget build(BuildContext context)` method for its
+  /// subclasses to implement.  If [StatefulWidget] already had a [build] method
+  /// that took a [State] argument, [AnimatedWidget] would be forced to provide
+  /// its [State] object to subclasses even though its [State] object is an
+  /// internal implementation detail of [AnimatedWidget].
+  ///
+  /// Conceptually, [StatelessWidget] could also be implemented as a subclass of
+  /// [StatefulWidget] in a similar manner.  If the [build] method were on
+  /// [StatefulWidget] rather than [State], that would not be possible anymore.
+  ///
+  /// Putting the [build] function on [State] rather than [StatefulWidget] also
+  /// helps avoid a category of bugs related to closures implicitly capturing
+  /// `this`. If you defined a closure in a [build] function on a
+  /// [StatefulWidget], that closure would implicitly capture `this`, which is
+  /// the current widget instance, and would have the (immutable) fields of that
+  /// instance in scope:
+  ///
+  /// ```dart
+  /// class MyButton extends StatefulWidget {
+  ///   ...
+  ///   final Color color;
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context, MyButtonState state) {
+  ///     ... () { print("color: $color"); } ...
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// For example, suppose the parent builds `MyButton` with `color` being blue,
+  /// the `$color` in the print function refers to blue, as expected.  Now,
+  /// suppose the parent rebuilds `MyButton` with green.  The closure created by
+  /// the first build still implicitly refers to the original widget and the
+  /// `$color` still prints blue even through the widget has been updated to
+  /// green.
+  ///
+  /// In contrast, with the [build] function on the [State] object, closures
+  /// created during [build] implicitly capture the [State] instance instead of
+  /// the widget instance:
+  ///
+  /// ```dart
+  /// class MyButtonState extends State<MyButton> {
+  ///   ...
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     ... () { print("color: ${config.color}"); } ...
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// Now when the parent rebuilds `MyButton` with green, the closure created by
+  /// the first build still refers to [State] object, which is preserved across
+  /// rebuilds, but the framework has updated that [State] object's [config]
+  /// property to refer to the new `MyButton` instance and `${config.color}`
+  /// prints green, as expected.
   @protected
   Widget build(BuildContext context);
 
