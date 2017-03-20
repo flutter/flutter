@@ -74,13 +74,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  platform_services__build:
-    description: >
-      Collects various performance metrics from AOT builds of the Platform
-      Services app.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -90,10 +83,9 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  platform_services__button_tap:
+  platform_services_test:
     description: >
-      Measures the runtime performance of the Platform Services sample app on
-      Android.
+     Runs a driver test on the Platform Services sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -152,18 +144,11 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  platform_services__start_up:
-    description: >
-      Measures the startup time of the Platform Services app on Android.
-    stage: devicelab
-    required_agent_capabilities: ["has-android-device"]
-
   # iOS on-device tests
 
-  platform_services_ios__button_tap:
+  platform_services_test_ios:
     description: >
-      Measures the runtime performance of the Platform Services sample app on
-      iOS.
+      Runs a driver test on the Platform Services sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
@@ -205,8 +190,17 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
-  platform_services_ios__start_up:
+  # Tests running on Windows host
+
+  flutter_gallery_win__build:
     description: >
-      Measures the startup time of the Platform Services app on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["has-ios-device"]
+      Collects various performance metrics from AOT builds of the Flutter
+      Gallery on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
+
+  hot_mode_dev_cycle_win__benchmark:
+    description: >
+      Measures the performance of Dart VM hot patching feature on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]

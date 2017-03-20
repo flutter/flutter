@@ -170,6 +170,16 @@ class VMService {
   Future<VM> getVM() {
     return _vm.reload();
   }
+
+  Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+    await vm.refreshViews();
+    for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
+      // If the VM doesn't yet have a view, wait for one to show up.
+      printTrace('Waiting for Flutter view');
+      await new Future<Null>.delayed(new Duration(seconds: attemptSeconds));
+      await vm.refreshViews();
+    }
+  }
 }
 
 /// An error that is thrown when constructing/updating a service object.
@@ -743,8 +753,19 @@ class VM extends ServiceObjectOwner {
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
-  FlutterView get mainView {
+  Iterable<FlutterView> get views => _viewCache.values;
+
+  FlutterView get firstView {
     return _viewCache.values.isEmpty ? null : _viewCache.values.first;
+  }
+
+  FlutterView firstViewWithName(String isolateFilter) {
+    if (_viewCache.values.isEmpty) {
+      return null;
+    }
+    return _viewCache.values.firstWhere(
+        (FlutterView v) => v.uiIsolate.name.contains(isolateFilter),
+        orElse: () => null);
   }
 }
 

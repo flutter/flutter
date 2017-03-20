@@ -231,7 +231,7 @@ class KeyRow extends StatelessWidget {
     return new Expanded(
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: this.keys
+        children: keys
       )
     );
   }
@@ -248,10 +248,10 @@ class CalcKey extends StatelessWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Expanded(
       child: new InkResponse(
-        onTap: this.onTap,
+        onTap: onTap,
         child: new Center(
           child: new Text(
-            this.text,
+            text,
             style: new TextStyle(
               fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             )

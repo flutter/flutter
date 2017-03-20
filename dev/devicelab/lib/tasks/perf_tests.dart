@@ -11,10 +11,9 @@ import '../framework/utils.dart';
 
 
 TaskFunction createPlatformServiceDriverTest() {
-  return new PerfTest(
+  return new DriverTest(
       '${flutterDirectory.path}/examples/platform_services',
       'test_driver/button_tap.dart',
-      'button_tap',
   );
 }
 
@@ -76,19 +75,9 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   );
 }
 
-TaskFunction createPlatformServicesStartupTest() {
-  return new StartupTest(
-      '${flutterDirectory.path}/examples/platform_services',
-  );
-}
-
-TaskFunction createPlatformServicesBuildTest() {
-  return new BuildTest('${flutterDirectory.path}/examples/platform_services');
-}
-
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = const Duration(minutes: 2);
+  static const Duration _startupTimeout = const Duration(minutes: 5);
 
   StartupTest(this.testDirectory);
 
@@ -105,6 +94,7 @@ class StartupTest {
       }
 
       await flutter('run', options: <String>[
+        '--verbose',
         '--profile',
         '--trace-startup',
         '-d',
@@ -166,6 +156,39 @@ class PerfTest {
         'worst_frame_rasterizer_time_millis',
         'missed_frame_rasterizer_budget_count',
       ]);
+    });
+  }
+}
+
+
+class DriverTest {
+
+  DriverTest(this.testDirectory, this.testTarget);
+
+  final String testDirectory;
+  final String testTarget;
+
+  Future<TaskResult> call() {
+    return inDirectory(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        // This causes an Xcode project to be created.
+        await flutter('build', options: <String>['ios', '--profile']);
+      }
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '-t',
+        testTarget,
+        '-d',
+        deviceId,
+      ]);
+
+      return new TaskResult.success(null);
     });
   }
 }

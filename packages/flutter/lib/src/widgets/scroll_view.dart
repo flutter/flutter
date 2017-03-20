@@ -26,10 +26,10 @@ abstract class ScrollView extends StatelessWidget {
     this.shrinkWrap: false,
   }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
        super(key: key) {
-    assert(this.reverse != null);
-    assert(this.shrinkWrap != null);
+    assert(reverse != null);
+    assert(shrinkWrap != null);
     assert(this.primary != null);
-    assert(this.controller == null || !this.primary,
+    assert(controller == null || !this.primary,
            'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
            'You cannot both set primary to true and pass an explicit controller.'
     );

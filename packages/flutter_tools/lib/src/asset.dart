@@ -156,11 +156,10 @@ class AssetBundle {
 }
 
 class _Asset {
-  _Asset({ this.base, String assetEntry, this.relativePath, this.source }) {
-    this._assetEntry = assetEntry;
-  }
+  _Asset({ this.base, String assetEntry, this.relativePath, this.source })
+    : _assetEntry = assetEntry;
 
-  String _assetEntry;
+  final String _assetEntry;
 
   final String base;
 

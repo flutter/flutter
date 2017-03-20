@@ -122,7 +122,7 @@ class Test1215DismissableWidget extends StatelessWidget {
       key: new ObjectKey(text),
       child: new AspectRatio(
         aspectRatio: 1.0,
-        child: new Text(this.text),
+        child: new Text(text),
       ),
     );
   }

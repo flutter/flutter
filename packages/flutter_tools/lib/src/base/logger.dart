@@ -249,15 +249,13 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    final String term = platform.environment['TERM'];
-    // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
-    final bool flutterAnsiTerm = platform.environment.containsKey('FLUTTER_ANSI_TERMINAL');
-    supportsColor = (term != null && term != 'dumb') || flutterAnsiTerm;
+    if (platform.isWindows) {
+      supportsColor = platform.ansiSupported;
+    } else {
+      final String term = platform.environment['TERM'];
+      supportsColor = (term != null && term != 'dumb');
+    }
   }
-
-  static const String KEY_F1  = '\u001BOP';
-  static const String KEY_F5  = '\u001B[15~';
-  static const String KEY_F10 = '\u001B[21~';
 
   static const String _bold  = '\u001B[1m';
   static const String _reset = '\u001B[0m';

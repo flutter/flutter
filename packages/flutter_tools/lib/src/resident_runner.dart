@@ -209,7 +209,7 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(Uri uri) async {
+  Future<Null> connectToServiceProtocol(Uri uri, {String isolateFilter}) async {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
@@ -217,15 +217,11 @@ abstract class ResidentRunner {
     printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
-    // Refresh the view list.
-    await vmService.vm.refreshViews();
-    for (int i = 0; vmService.vm.mainView == null && i < 5; i++) {
-      // If the VM doesn't yet have a view, wait for one to show up.
-      printTrace('Waiting for Flutter view');
-      await new Future<Null>.delayed(const Duration(seconds: 1));
-      await vmService.vm.refreshViews();
-    }
-    currentView = vmService.vm.mainView;
+    // Refresh the view list, and wait a bit for the list to populate.
+    await vmService.waitForViews();
+    currentView = (isolateFilter == null)
+                ? vmService.vm.firstView
+                : vmService.vm.firstViewWithName(isolateFilter);
     if (currentView == null)
       throwToolExit('No Flutter view is available');
 
@@ -239,8 +235,8 @@ abstract class ResidentRunner {
 
     printStatus(''); // the key the user tapped might be on this line
 
-    if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
-      // F1, help
+    if (lower == 'h' || lower == '?') {
+      // help
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
@@ -269,8 +265,8 @@ abstract class ResidentRunner {
         print('Switched operating system to: $platform');
         return true;
       }
-    } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
-      // F10, exit
+    } else if (lower == 'q') {
+      // exit
       await stop();
       return true;
     } else if (lower == 'd') {
