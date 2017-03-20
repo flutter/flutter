@@ -86,6 +86,10 @@ abstract class MaterialInkController {
 /// [InkSplash] and [InkHighlight] effects. To trigger a reaction on the
 /// material, use a [MaterialInkController] obtained via [Material.of].
 ///
+/// If a material has a non-zero [elevation], then the material will clip its
+/// contents because content that is conceptually printing on a separate piece
+/// of material cannot be printed beyond the bounds of the material.
+///
 /// If the layout changes (e.g. because there's a list on the paper, and it's
 /// been scrolled), a LayoutChangedNotification must be dispatched at the
 /// relevant subtree. (This in particular means that Transitions should not be
