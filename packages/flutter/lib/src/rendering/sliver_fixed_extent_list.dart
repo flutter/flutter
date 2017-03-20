@@ -120,13 +120,14 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     );
 
     final int firstIndex = getMinChildIndexForScrollOffset(scrollOffset, itemExtent);
-    final int targetLastIndex = getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemExtent);
+    final int targetLastIndex = targetEndScrollOffset.isFinite ?
+        getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemExtent) : null;
 
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild);
       final int oldLastIndex = indexOf(lastChild);
       final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
-      final int trailingGarbage = (oldLastIndex - targetLastIndex).clamp(0, childCount);
+      final int trailingGarbage = targetLastIndex == null ? 0 : (oldLastIndex - targetLastIndex).clamp(0, childCount);
       if (leadingGarbage + trailingGarbage > 0)
         collectGarbage(leadingGarbage, trailingGarbage);
     }
@@ -156,7 +157,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = firstChild;
     }
 
-    while (indexOf(trailingChildWithLayout) < targetLastIndex) {
+    while (targetLastIndex == null || indexOf(trailingChildWithLayout) < targetLastIndex) {
       RenderBox child = childAfter(trailingChildWithLayout);
       if (child == null) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
@@ -180,7 +181,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(firstIndex == 0 || childScrollOffset(firstChild) <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild) == firstIndex);
-    assert(lastIndex <= targetLastIndex);
+    assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
     final double estimatedMaxScrollOffset = estimateMaxScrollOffset(
       constraints,
@@ -201,7 +202,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       paintExtent: paintExtent,
       maxPaintExtent: estimatedMaxScrollOffset,
       // Conservative to avoid flickering away the clip during scroll.
-      hasVisualOverflow: lastIndex >= targetLastIndex || constraints.scrollOffset > 0.0,
+      hasVisualOverflow: (targetLastIndex != null && lastIndex >= targetLastIndex)
+        || constraints.scrollOffset > 0.0,
     );
 
     assert(childManager.debugAssertChildListLocked());

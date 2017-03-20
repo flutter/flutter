@@ -328,6 +328,47 @@ void main() {
     expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
   });
 
+  testWidgets('GridView in zero context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: new GridView.count(
+            crossAxisCount: 4,
+            children: new List<Widget>.generate(20, (int i) {
+              return new Container(
+                child: new Text('$i'),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('GridView in unbounded context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new SingleChildScrollView(
+        child: new GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('19'), findsOneWidget);
+  });
+
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?
   // (try it with the flutter_gallery Grid demo)
 }

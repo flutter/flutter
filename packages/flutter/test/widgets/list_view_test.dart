@@ -144,4 +144,23 @@ void main() {
     expect(find.text('4'), findsOneWidget);
     expect(find.text('5'), findsNothing);
   });
+
+  testWidgets('ListView with itemExtent in unbounded context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new SingleChildScrollView(
+        child: new ListView(
+          itemExtent: 100.0,
+          shrinkWrap: true,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('19'), findsOneWidget);
+  });
 }
