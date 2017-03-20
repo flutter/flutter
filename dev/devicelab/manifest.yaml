@@ -85,8 +85,7 @@ tasks:
 
   platform_services_test:
     description: >
-      Measures the runtime performance of the Platform Services sample app on
-      Android.
+     Runs a driver test on the Platform Services sample app on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -149,8 +148,7 @@ tasks:
 
   platform_services_test_ios:
     description: >
-      Measures the runtime performance of the Platform Services sample app on
-      iOS.
+      Runs a driver test on the Platform Services sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 

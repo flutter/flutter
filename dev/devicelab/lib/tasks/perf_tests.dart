@@ -182,8 +182,6 @@ class DriverTest {
 
       await flutter('drive', options: <String>[
         '-v',
-        '--profile',
-        '--trace-startup', // Enables "endless" timeline event buffering.
         '-t',
         testTarget,
         '-d',
