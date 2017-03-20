@@ -22,7 +22,7 @@ class FlutterLogo extends StatelessWidget {
   const FlutterLogo({
     Key key,
     this.size,
-    this.swatch: Colors.blue,
+    this.colors,
     this.textColor: const Color(0xFF616161),
     this.style: FlutterLogoStyle.markOnly,
     this.duration: const Duration(milliseconds: 750),
@@ -38,20 +38,16 @@ class FlutterLogo extends StatelessWidget {
   /// 24.0.
   final double size;
 
-  /// The colors to use to paint the logo. This map should contain at least two
-  /// values, one for 400 and one for 900.
+  /// The color swatch to use to paint the logo, Colors.blue by default.
   ///
-  /// If possible, the default should be used. It corresponds to the
-  /// [Colors.blue] swatch.
-  ///
-  /// If for some reason that color scheme is impractical, the [Colors.amber],
-  /// [Colors.red], or [Colors.indigo] swatches can be used. These are Flutter's
-  /// secondary colors.
+  /// If for some reason the default colors are impractical, then one
+  /// of [Colors.amber], [Colors.red], or [Colors.indigo] swatches can be used.
+  /// These are Flutter's secondary colors.
   ///
   /// In extreme cases where none of those four color schemes will work,
   /// [Colors.pink], [Colors.purple], or [Colors.cyan] swatches can be used.
   /// These are Flutter's tertiary colors.
-  final Map<int, Color> swatch;
+  final MaterialColor colors;
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
   /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked]. The
@@ -75,13 +71,15 @@ class FlutterLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
+    final MaterialColor logoColors = colors ?? Colors.blue;
     return new AnimatedContainer(
       width: iconSize,
       height: iconSize,
       duration: duration,
       curve: curve,
       decoration: new FlutterLogoDecoration(
-        swatch: swatch,
+        lightColor: logoColors.shade400,
+        darkColor: logoColors.shade900,
         style: style,
         textColor: textColor,
       ),

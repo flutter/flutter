@@ -14,7 +14,7 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsets padding, AxisDi
       new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('before'))),
       new SliverPadding(
         padding: padding,
-        child: new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('padded'))),
+        sliver: new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('padded'))),
       ),
       new SliverToBoxAdapter(child: new SizedBox(width: 400.0, height: 400.0, child: new Text('after'))),
     ],

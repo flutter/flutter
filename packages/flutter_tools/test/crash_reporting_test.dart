@@ -15,26 +15,29 @@ import 'package:flutter_tools/executable.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart' as os;
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'src/context.dart';
 
 void main() {
   group('crash reporting', () {
-    int testPort;
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() async {
       tools.crashFileSystem = new MemoryFileSystem();
+      tools.writelnStderr = ([_]) { };
       setExitFunctionForTests((_) { });
-      testPort = await os.findAvailablePort();
-      overrideBaseCrashUrlForTesting(Uri.parse('http://localhost:$testPort/test-path'));
+      enterTestingMode();
     });
 
     tearDown(() {
-      tools.crashFileSystem = new LocalFileSystem();
+      tools.crashFileSystem = const LocalFileSystem();
+      tools.writelnStderr = stderr.writeln;
       restoreExitFunction();
-      resetBaseCrashUrlForTesting();
+      exitTestingMode();
     });
 
     testUsingContext('should send crash reports', () async {
@@ -62,10 +65,10 @@ void main() {
       // Verify that we sent the crash report.
       expect(method, 'POST');
       expect(uri, new Uri(
-        scheme: 'http',
-        host: 'localhost',
-        port: testPort,
-        path: '/test-path',
+        scheme: 'https',
+        host: 'clients2.google.com',
+        port: 443,
+        path: '/cr/staging_report',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
           'version' : 'test-version',

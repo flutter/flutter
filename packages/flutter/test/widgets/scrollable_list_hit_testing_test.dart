@@ -28,7 +28,7 @@ void main() {
         ),
       ),
     ));
-    await tester.scroll(find.text('2'), const Offset(-280.0, 0.0));
+    await tester.drag(find.text('2'), const Offset(-280.0, 0.0));
     await tester.pump(const Duration(seconds: 1));
     // screen is 800px wide, and has the following items:
     //  -280..10  = 0
@@ -65,7 +65,7 @@ void main() {
         ),
       ),
     ));
-    await tester.scroll(find.text('1'), const Offset(0.0, -280.0));
+    await tester.drag(find.text('1'), const Offset(0.0, -280.0));
     await tester.pump(const Duration(seconds: 1));
     // screen is 600px tall, and has the following items:
     //  -280..10  = 0

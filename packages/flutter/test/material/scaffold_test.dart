@@ -44,7 +44,7 @@ void main() {
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 700.0),
       ),
       child: new Scaffold(
@@ -56,7 +56,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 0.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 500.0),
       ),
       child: new Scaffold(
@@ -67,7 +67,7 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 100.0)));
 
     await tester.pumpWidget(new MediaQuery(
-      data: new MediaQueryData(
+      data: const MediaQueryData(
         padding: const EdgeInsets.only(bottom: 580.0),
       ),
       child: new Scaffold(
@@ -145,7 +145,7 @@ void main() {
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
-                child: new SliverList(
+                sliver: new SliverList(
                   delegate: new SliverChildListDelegate(new List<Widget>.generate(
                     10, (int index) => new SizedBox(height: 100.0, child: new Text('B$index')),
                   )),
@@ -166,7 +166,7 @@ void main() {
     expect(scrollOffset.offset, 0.0);
 
     const double scrollDelta = 80.0;
-    await tester.scroll(find.byKey(drawerKey), const Offset(0.0, -scrollDelta));
+    await tester.drag(find.byKey(drawerKey), const Offset(0.0, -scrollDelta));
     await tester.pump();
 
     expect(scrollOffset.offset, scrollDelta);
@@ -205,8 +205,7 @@ void main() {
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
     await tester.tapAt(const Point(100.0, 10.0));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
   });
 
@@ -289,7 +288,7 @@ void main() {
       ),
     );
 
-    await tester.scroll(find.text('body'), const Offset(0.0, -1000.0));
+    await tester.drag(find.text('body'), const Offset(0.0, -1000.0));
     expect(didPressButton, isFalse);
     await tester.tap(find.text('X'));
     expect(didPressButton, isTrue);

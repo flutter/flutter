@@ -53,9 +53,9 @@ class AnimatedCrossFade extends StatefulWidget {
     @required this.crossFadeState,
     @required this.duration
   }) : super(key: key) {
-    assert(this.firstCurve != null);
-    assert(this.secondCurve != null);
-    assert(this.sizeCurve != null);
+    assert(firstCurve != null);
+    assert(secondCurve != null);
+    assert(sizeCurve != null);
   }
 
   /// The child that is visible when [crossFadeState] is [showFirst]. It fades

@@ -1,3 +1,5 @@
+os:
+  - linux
 sudo: false
 addons:
   apt:

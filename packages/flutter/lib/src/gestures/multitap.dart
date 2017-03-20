@@ -94,7 +94,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
-  final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
+  final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
 
   @override
   void addPointer(PointerEvent event) {
@@ -207,7 +207,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _startDoubleTapTimer() {
-    _doubleTapTimer ??= new Timer(kDoubleTapTimeout, () => _reset());
+    _doubleTapTimer ??= new Timer(kDoubleTapTimeout, _reset);
   }
 
   void _stopDoubleTapTimer() {
@@ -227,11 +227,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 class _TapGesture extends _TapTracker {
 
   _TapGesture({
-    MultiTapGestureRecognizer gestureRecognizer,
+    this.gestureRecognizer,
     PointerEvent event,
     Duration longTapDelay
-  }) : gestureRecognizer = gestureRecognizer,
-       _lastPosition = event.position,
+  }) : _lastPosition = event.position,
        super(
     event: event,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
@@ -341,7 +340,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback onLongTapDown;
 
-  final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
+  final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
   void addPointer(PointerEvent event) {

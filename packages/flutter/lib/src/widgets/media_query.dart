@@ -72,6 +72,8 @@ class MediaQueryData {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
   }
 
+  /// Creates a copy of this media query data but with the given fields replaced
+  /// with the new values.
   MediaQueryData copyWith({
     Size size,
     double devicePixelRatio,

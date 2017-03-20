@@ -53,8 +53,8 @@ class BottomNavigationBarItem {
     @required this.title,
     this.backgroundColor
   }) {
-    assert(this.icon != null);
-    assert(this.title != null);
+    assert(icon != null);
+    assert(title != null);
   }
 
   /// The icon of the item.
@@ -146,12 +146,12 @@ class BottomNavigationBar extends StatefulWidget {
   final double iconSize;
 
   @override
-  BottomNavigationBarState createState() => new BottomNavigationBarState();
+  _BottomNavigationBarState createState() => new _BottomNavigationBarState();
 }
 
-class BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
+class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers;
-  List<CurvedAnimation> animations;
+  List<CurvedAnimation> _animations;
   double _weight;
   final Queue<_Circle> _circles = new Queue<_Circle>();
   Color _backgroundColor; // Last growing circle's color.
@@ -170,7 +170,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
         vsync: this,
       )..addListener(_rebuild);
     });
-    animations = new List<CurvedAnimation>.generate(config.items.length, (int index) {
+    _animations = new List<CurvedAnimation>.generate(config.items.length, (int index) {
       return new CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
@@ -221,9 +221,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
   // animations such that their resulting flex values will add up to the desired
   // value.
   void _computeWeight() {
-    final Iterable<Animation<double>> animating = animations.where(
-      (Animation<double> animation) => _isAnimating(animation)
-    );
+    final Iterable<Animation<double>> animating = _animations.where(_isAnimating);
 
     if (animating.isNotEmpty) {
       final double sum = animating.fold(0.0, (double sum, Animation<double> animation) {
@@ -246,19 +244,16 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
 
   double _xOffset(int index) {
     double weightSum(Iterable<Animation<double>> animations) {
-      return animations.map(
-        // We're adding flex values instead of animation values to have correct
-        // ratios.
-        (Animation<double> animation) => _flex(animation)
-      ).fold(0.0, (double sum, double value) => sum + value);
+      // We're adding flex values instead of animation values to have correct ratios.
+      return animations.map(_flex).fold(0.0, (double sum, double value) => sum + value);
     }
 
-    final double allWeights = weightSum(animations);
+    final double allWeights = weightSum(_animations);
     // This weight corresponds to the left edge of the indexed item.
-    final double leftWeights = weightSum(animations.sublist(0, index));
+    final double leftWeights = weightSum(_animations.sublist(0, index));
 
     // Add half of its flex value in order to get the center.
-    return (leftWeights + _flex(animations[index]) / 2.0) / allWeights;
+    return (leftWeights + _flex(_animations[index]) / 2.0) / allWeights;
   }
 
   FractionalOffset _circleOffset(int index) {
@@ -270,7 +265,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
 
     return new FractionalOffset(
       _xOffset(index),
-      yOffsetTween.evaluate(animations[index])
+      yOffsetTween.evaluate(_animations[index])
     );
   }
 
@@ -337,11 +332,11 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                           top: new Tween<double>(
                             begin: 8.0,
                             end: 6.0,
-                          ).evaluate(animations[i]),
+                          ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
                           data: new IconThemeData(
-                            color: colorTween.evaluate(animations[i]),
+                            color: colorTween.evaluate(_animations[i]),
                             size: config.iconSize,
                           ),
                           child: config.items[i].icon,
@@ -356,14 +351,14 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                           context: context,
                           style: new TextStyle(
                             fontSize: 14.0,
-                            color: colorTween.evaluate(animations[i]),
+                            color: colorTween.evaluate(_animations[i]),
                           ),
                           child: new Transform(
                             transform: new Matrix4.diagonal3(new Vector3.all(
                               new Tween<double>(
                                 begin: 0.85,
                                 end: 1.0,
-                              ).evaluate(animations[i]),
+                              ).evaluate(_animations[i]),
                             )),
                             alignment: FractionalOffset.bottomCenter,
                             child: config.items[i].title,
@@ -391,7 +386,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
             new Expanded(
               // Since Flexible only supports integers, we're using large
               // numbers in order to simulate floating point flex values.
-              flex: (_flex(animations[i]) * 1000.0).round(),
+              flex: (_flex(_animations[i]) * 1000.0).round(),
               child: new InkResponse(
                 onTap: () {
                   if (config.onTap != null)
@@ -407,7 +402,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                           top: new Tween<double>(
                             begin: 18.0,
                             end: 6.0,
-                          ).evaluate(animations[i]),
+                          ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
                           data: new IconThemeData(
@@ -423,7 +418,7 @@ class BottomNavigationBarState extends State<BottomNavigationBar> with TickerPro
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: 10.0),
                         child: new FadeTransition(
-                          opacity: animations[i],
+                          opacity: _animations[i],
                           child: new DefaultTextStyle.merge(
                             context: context,
                             style: const TextStyle(
@@ -497,9 +492,9 @@ class _Circle {
     this.color,
     @required TickerProvider vsync,
   }) {
-    assert(this.state != null);
-    assert(this.index != null);
-    assert(this.color != null);
+    assert(state != null);
+    assert(index != null);
+    assert(color != null);
 
     controller = new AnimationController(
       duration: kThemeAnimationDuration,
@@ -512,7 +507,7 @@ class _Circle {
     controller.forward();
   }
 
-  final BottomNavigationBarState state;
+  final _BottomNavigationBarState state;
   final int index;
   final Color color;
   AnimationController controller;

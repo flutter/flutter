@@ -149,6 +149,11 @@ class FlutterPlugin implements Plugin<Project> {
             project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
         }
 
+        File kernel
+        if (project.hasProperty('kernel')) {
+            kernel = project.file(project.property('kernel'))
+        }
+
         project.android.applicationVariants.all { variant ->
             if (!["debug", "profile", "release"].contains(variant.name)) {
                 throw new GradleException("Build variant must be one of \"debug\", \"profile\", or \"release\" but was \"${variant.name}\"")
@@ -161,6 +166,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngine this.localEngine
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                kernelFile kernel
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -189,6 +195,8 @@ class FlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
+    @Optional @InputFile
+    File kernelFile
 
     File sourceDir
 
@@ -207,9 +215,45 @@ class FlutterTask extends DefaultTask {
         }
     }
 
+    FileCollection readDependencies(File dependenciesFile) {
+        if (dependenciesFile.exists()) {
+            try {
+                // Dependencies file has Makefile syntax:
+                //   <target> <files>: <source> <files> <separated> <by> <space>
+                String depText = dependenciesFile.text
+                return project.files(depText.split(': ')[1].split())
+            } catch (Exception e) {
+                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
+            }
+        }
+        return null
+    }
+
     @InputFiles
     FileCollection getSourceFiles() {
-        return project.fileTree(dir: sourceDir, exclude: ['android', 'ios'], include: ['**/*.dart', 'pubspec.yaml', 'flutter.yaml'])
+        File dependenciesFile
+        if (buildMode != 'debug') {
+            dependenciesFile = project.file("${intermediateDir}/snapshot.d")
+        } else {
+            dependenciesFile = project.file("${intermediateDir}/snapshot_blob.bin.d")
+        }
+        FileCollection sources = readDependencies(dependenciesFile)
+        if (sources != null) {
+            // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
+            // snapshots have to be rebuilt if it changes.
+            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
+            if (snapshotter != null) {
+                sources = sources.plus(snapshotter)
+            }
+            // Finally, add a dependency on pubspec.yaml as well.
+            return sources.plus(project.files('pubspec.yaml'))
+        }
+        // No dependencies file (or problems parsing it). Fall back to source files.
+        return project.fileTree(
+                dir: sourceDir,
+                exclude: ['android', 'ios'],
+                include: ['**/*.dart', 'pubspec.yaml']
+        )
     }
 
     @TaskAction
@@ -229,6 +273,7 @@ class FlutterTask extends DefaultTask {
                     args "--local-engine-src-path", localEngineSrcPath
                 }
                 args "build", "aot"
+                args "--quiet"
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
@@ -245,6 +290,9 @@ class FlutterTask extends DefaultTask {
             }
             args "build", "flx"
             args "--target", targetPath
+            if (kernelFile != null) {
+                args "--kernel", kernelFile.absolutePath
+            }
             args "--output-file", "${intermediateDir}/app.flx"
             args "--no-include-roboto-fonts"
             if (buildMode != "debug") {

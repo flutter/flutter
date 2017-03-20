@@ -270,7 +270,7 @@ class _RenderSwitch extends RenderToggleable {
 
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
-  set configuration (ImageConfiguration value) {
+  set configuration(ImageConfiguration value) {
     assert(value != null);
     if (value == _configuration)
       return;

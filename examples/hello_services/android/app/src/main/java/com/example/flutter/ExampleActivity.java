@@ -6,28 +6,26 @@ package com.example.flutter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 
-import java.io.File;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Arrays;
 
 public class ExampleActivity extends Activity {
     private static final String TAG = "ExampleActivity";
 
     private FlutterView flutterView;
+    private FlutterMethodChannel randomChannel;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,20 +37,24 @@ public class ExampleActivity extends Activity {
         flutterView = (FlutterView) findViewById(R.id.flutter_view);
         flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
 
-        flutterView.addOnMessageListener("getLocation",
-            new FlutterView.OnMessageListener() {
-                @Override
-                public String onMessage(FlutterView view, String message) {
-                    return onGetLocation(message);
+        FlutterMethodChannel locationChannel = new FlutterMethodChannel(flutterView, "location");
+        randomChannel = new FlutterMethodChannel(flutterView, "random");
+
+        locationChannel.setMethodCallHandler(new FlutterMethodChannel.MethodCallHandler() {
+            @Override
+            public void onMethodCall(MethodCall methodCall, FlutterMethodChannel.Response response) {
+                if (methodCall.method.equals("getLocation")) {
+                    getLocation((String) methodCall.arguments, response);
+                } else {
+                    response.error("unknown method", "Unknown method: " + methodCall.method, null);
                 }
-            });
+            }
+        });
 
         Button getRandom = (Button) findViewById(R.id.get_random);
         getRandom.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                sendGetRandom();
-            }
+            public void onClick(View v) { getRandom(); }
         });
     }
 
@@ -76,79 +78,44 @@ public class ExampleActivity extends Activity {
         flutterView.onPostResume();
     }
 
-    private void sendGetRandom() {
-        JSONObject message = new JSONObject();
-        try {
-            message.put("min", 1);
-            message.put("max", 1000);
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return;
-        }
+    private void getRandom() {
+        randomChannel.invokeMethod("getRandom", Arrays.asList(1, 1000), new FlutterMethodChannel.Response() {
+            TextView textView = (TextView) findViewById(R.id.random_value);
 
-        flutterView.sendToFlutter("getRandom", message.toString(),
-            new FlutterView.MessageReplyCallback() {
-                @Override
-                public void onReply(String json) {
-                    onRandomReply(json);
-                }
-            });
+            @Override
+            public void success(Object result) {
+                textView.setText(result.toString());
+            }
+
+            @Override
+            public void error(String code, String message, Object details) {
+                textView.setText("Error: " + message);
+            }
+        });
     }
 
-    private void onRandomReply(String json) {
-        double value;
-        try {
-            JSONObject reply = new JSONObject(json);
-            value = reply.getDouble("value");
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return;
-        }
-
-        TextView randomValue = (TextView) findViewById(R.id.random_value);
-        randomValue.setText(Double.toString(value));
-    }
-
-    private String onGetLocation(String json) {
-        String provider;
-        try {
-            JSONObject message = new JSONObject(json);
-            provider = message.getString("provider");
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
-        }
-
+    private void getLocation(String provider, FlutterMethodChannel.Response response) {
         String locationProvider;
         if (provider.equals("network")) {
             locationProvider = LocationManager.NETWORK_PROVIDER;
         } else if (provider.equals("gps")) {
             locationProvider = LocationManager.GPS_PROVIDER;
         } else {
-            return null;
+            response.error("unknown provider", "Unknown location provider: " + provider, null);
+            return;
         }
 
         String permission = "android.permission.ACCESS_FINE_LOCATION";
-        Location location = null;
         if (checkCallingOrSelfPermission(permission) == PackageManager.PERMISSION_GRANTED) {
             LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            location = locationManager.getLastKnownLocation(locationProvider);
-        }
-
-        JSONObject reply = new JSONObject();
-        try {
+            Location location = locationManager.getLastKnownLocation(locationProvider);
             if (location != null) {
-              reply.put("latitude", location.getLatitude());
-              reply.put("longitude", location.getLongitude());
+                response.success(Arrays.asList(location.getLatitude(), location.getLongitude()));
             } else {
-              reply.put("latitude", 0);
-              reply.put("longitude", 0);
+                response.error("location unavailable", "Location is not available", null);
             }
-        } catch (JSONException e) {
-            Log.e(TAG, "JSON exception", e);
-            return null;
+        } else {
+            response.error("access error", "Location permissions not granted", null);
         }
-
-        return reply.toString();
     }
 }

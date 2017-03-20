@@ -227,6 +227,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         vsync: this,
       )
     );
+
     if (config.type == MaterialType.circle) {
       contents = new PhysicalModel(
         shape: BoxShape.circle,
@@ -252,6 +253,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         child: contents,
       );
     }
+
     if (config.type != MaterialType.transparency) {
       contents = new AnimatedContainer(
         curve: Curves.fastOutSlowIn,

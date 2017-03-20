@@ -26,14 +26,11 @@ const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
-    Color color,
-    int elevation,
+    this.color,
+    this.elevation,
     this.selectedIndex,
-    Animation<double> resize,
-  }) : color = color,
-       elevation = elevation,
-       resize = resize,
-       _painter = new BoxDecoration(
+    this.resize,
+  }) : _painter = new BoxDecoration(
          // If you add a background image here, you must provide a real
          // configuration in the paint() function and you must provide some sort
          // of onChanged callback here.
@@ -95,8 +92,8 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 class _DropdownMenu<T> extends StatefulWidget {
   _DropdownMenu({
     Key key,
-    _DropdownRoute<T> route,
-  }) : route = route, super(key: key);
+    this.route,
+  }) : super(key: key);
 
   final _DropdownRoute<T> route;
 

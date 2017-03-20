@@ -41,7 +41,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   // The height of the status bar
   double get maxHeight => _maxHeight;
   double _maxHeight;
-  set maxHeight (double value) {
+  set maxHeight(double value) {
     assert(maxHeight != null && maxHeight >= 0.0);
     if (_maxHeight == value)
       return;
@@ -53,7 +53,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
   // offset changes.
   double get scrollFactor => _scrollFactor;
   double _scrollFactor;
-  set scrollFactor (double value) {
+  set scrollFactor(double value) {
     assert(scrollFactor != null && scrollFactor >= 1.0);
     if (_scrollFactor == value)
       return;
@@ -386,7 +386,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
       backgroundColor: _kAppBackgroundColor,
       body: new Builder(
         // Insert an element so that _buildBody can find the PrimaryScrollController.
-        builder: (BuildContext context) => _buildBody(context),
+        builder: _buildBody,
       ),
     );
   }
@@ -420,7 +420,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final Iterable<Widget> detailItems = section.details.map((SectionDetail detail) {
       return new SectionDetailView(detail: detail);
     });
-    return ListItem.divideItems(context: context, items: detailItems).map((Widget item) {
+    return ListTile.divideTiles(context: context, tiles: detailItems).map((Widget item) {
         return new SliverToBoxAdapter(child: item);
     });
   }
@@ -446,7 +446,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final List<Widget> headings = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
       headings.add(new Container(
-          decoration: new BoxDecoration(backgroundColor: _kAppBackgroundColor),
+          decoration: const BoxDecoration(backgroundColor: _kAppBackgroundColor),
           child: new ClipRect(
             child: new _AllSectionsView(
               sectionIndex: index,
@@ -526,8 +526,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             top: statusBarHeight,
             left: 0.0,
             child: new IconTheme(
-              data: new IconThemeData(color: Colors.white),
-              child: new BackButton(),
+              data: const IconThemeData(color: Colors.white),
+              child: const BackButton(),
             ),
           ),
         ],

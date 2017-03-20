@@ -80,6 +80,11 @@ GOTO :after_subroutine
   :do_sdk_update_and_snapshot
     ECHO Checking Dart SDK version...
     CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
+    SET exit_code=%ERRORLEVEL%
+    IF %exit_code% NEQ 0 (
+      ECHO Error: Unable to update Dart SDK. Retrying... Press Ctrl+C to abort.
+      GOTO :do_sdk_update_and_snapshot
+    )
 
   :do_snapshot
     ECHO: > "%cache_dir%\.dartignore"

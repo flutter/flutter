@@ -40,10 +40,25 @@ if (Test-Path $dartSdkPath) {
 }
 New-Item $dartSdkPath -force -type directory | Out-Null
 $dartSdkZip = "$cachePath\dart-sdk.zip"
-
+Import-Module BitsTransfer
 Start-BitsTransfer -Source $dartSdkUrl -Destination $dartSdkZip
-Add-Type -assembly "system.io.compression.filesystem"
-[io.compression.zipfile]::ExtractToDirectory($dartSdkZip, $cachePath)
+
+Write-Host "Unzipping Dart SDK..."
+If (Get-Command 7z -errorAction SilentlyContinue) {
+    # The built-in unzippers are painfully slow. Use 7-Zip, if available.
+    & 7z x $dartSdkZip -o"$cachePath" -bd | Out-Null
+} ElseIf (Get-Command Expand-Archive -errorAction SilentlyContinue) {
+    # Use PowerShell's built-in unzipper, if available (requires PowerShell 5+).
+    Expand-Archive $dartSdkZip -DestinationPath $cachePath
+} Else {
+    # As last resort: fall back to the Windows GUI.
+    $shell = New-Object -com shell.application
+    $zip = $shell.NameSpace($dartSdkZip)
+    foreach($item in $zip.items()) {
+        $shell.Namespace($cachePath).copyhere($item)
+    }
+}
+
 Remove-Item $dartSdkZip
 $dartSdkVersion | Out-File $dartSdkStampPath -Encoding ASCII
 

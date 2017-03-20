@@ -154,7 +154,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _valueColor = new ColorTween(
       begin: (config.color ?? theme.accentColor).withOpacity(0.0),
@@ -163,7 +163,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       parent: _positionController,
       curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
     ));
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override

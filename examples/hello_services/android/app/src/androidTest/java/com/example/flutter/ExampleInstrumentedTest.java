@@ -1,44 +1,39 @@
 package com.example.flutter;
 
+import android.app.Instrumentation;
 import android.graphics.Bitmap;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
-import io.flutter.view.FlutterView;
-
-import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.view.FlutterView;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Rule
     public ActivityTestRule<ExampleActivity> activityRule =
-        new ActivityTestRule<>(ExampleActivity.class);
+            new ActivityTestRule<>(ExampleActivity.class);
 
     @Test
     public void testFlutterMessage() {
         final Instrumentation instr = InstrumentationRegistry.getInstrumentation();
 
-        final JSONObject message = new JSONObject();
         final int RANDOM_MIN = 1;
         final int RANDOM_MAX = 1000;
-        try {
-            message.put("min", RANDOM_MIN);
-            message.put("max", RANDOM_MAX);
-        } catch (JSONException e) {
-            fail(e.getMessage());
-        }
 
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicInteger random = new AtomicInteger();
@@ -46,17 +41,18 @@ public class ExampleInstrumentedTest {
         instr.runOnMainSync(new Runnable() {
             public void run() {
                 final FlutterView flutterView = (FlutterView) activityRule.getActivity().findViewById(
-                    R.id.flutter_view);
-                flutterView.sendToFlutter("getRandom", message.toString(), new FlutterView.MessageReplyCallback() {
-                    public void onReply(String json) {
-                        try {
-                            JSONObject reply = new JSONObject(json);
-                            random.set(reply.getInt("value"));
-                        } catch (JSONException e) {
-                            fail(e.getMessage());
-                        } finally {
-                            latch.countDown();
-                        }
+                        R.id.flutter_view);
+                final FlutterMethodChannel randomChannel = new FlutterMethodChannel(flutterView, "random");
+                randomChannel.invokeMethod("getRandom", Arrays.asList(RANDOM_MIN, RANDOM_MAX), new FlutterMethodChannel.Response() {
+                    @Override
+                    public void success(Object o) {
+                        random.set(((Number) o).intValue());
+                        latch.countDown();
+                    }
+
+                    @Override
+                    public void error(String code, String message, Object details) {
+
                     }
                 });
             }
@@ -78,7 +74,7 @@ public class ExampleInstrumentedTest {
         instr.runOnMainSync(new Runnable() {
             public void run() {
                 final FlutterView flutterView = (FlutterView) activityRule.getActivity().findViewById(
-                    R.id.flutter_view);
+                        R.id.flutter_view);
 
                 // Call onPostResume to start the engine's renderer even if the activity
                 // is paused in the test environment.
@@ -105,13 +101,23 @@ public class ExampleInstrumentedTest {
 
     // Waits on a FlutterView until it is able to produce a bitmap.
     private class BitmapPoller {
+        private final int delayMsec = 1000;
         private int triesPending;
         private int waitMsec;
         private FlutterView flutterView;
         private Bitmap bitmap;
         private CountDownLatch latch = new CountDownLatch(1);
-
-        private final int delayMsec = 1000;
+        private Runnable checkBitmap = new Runnable() {
+            public void run() {
+                bitmap = flutterView.getBitmap();
+                triesPending--;
+                if (bitmap != null || triesPending == 0) {
+                    latch.countDown();
+                } else {
+                    flutterView.postDelayed(checkBitmap, delayMsec);
+                }
+            }
+        };
 
         BitmapPoller(int tries) {
             triesPending = tries;
@@ -127,17 +133,5 @@ public class ExampleInstrumentedTest {
             latch.await(waitMsec, TimeUnit.MILLISECONDS);
             return bitmap;
         }
-
-        private Runnable checkBitmap = new Runnable() {
-            public void run() {
-                bitmap = flutterView.getBitmap();
-                triesPending--;
-                if (bitmap != null || triesPending == 0) {
-                    latch.countDown();
-                } else {
-                    flutterView.postDelayed(checkBitmap, delayMsec);
-                }
-            }
-        };
     }
 }

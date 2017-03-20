@@ -442,19 +442,35 @@ class PaintingContext {
   /// * `color` is the background color.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  void pushPhysicalModel(Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
-    _stopRecordingIfNeeded();
-    final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-      clipRRect: offsetClipRRect,
-      elevation: elevation,
-      color: color,
-    );
-    _appendLayer(physicalModel);
-    final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
-    painter(childContext, offset);
-    childContext._stopRecordingIfNeeded();
+    if (needsCompositing) {
+      _stopRecordingIfNeeded();
+      final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+        clipRRect: offsetClipRRect,
+        elevation: elevation,
+        color: color,
+      );
+      _appendLayer(physicalModel);
+      final PaintingContext childContext = new PaintingContext._(physicalModel, offsetBounds);
+      painter(childContext, offset);
+      childContext._stopRecordingIfNeeded();
+    } else {
+      if (elevation != 0) {
+        canvas.drawShadow(
+          new Path()..addRRect(offsetClipRRect),
+          const Color(0xFF000000),
+          elevation,
+          color.alpha != 0xFF,
+        );
+      }
+      canvas.drawRRect(offsetClipRRect, new Paint()..color=color);
+      canvas.saveLayer(offsetBounds, _defaultPaint);
+      canvas.clipRRect(offsetClipRRect);
+      painter(this, offset);
+      canvas.restore();
+    }
   }
 }
 
@@ -2520,7 +2536,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implem
   ChildType _child;
   /// The render object's unique child
   ChildType get child => _child;
-  set child (ChildType value) {
+  set child(ChildType value) {
     if (_child != null)
       dropChild(_child);
     _child = value;
@@ -2668,9 +2684,9 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   /// If `after` is null, then this inserts the child at the start of the list,
   /// and the child becomes the new [firstChild].
   void insert(ChildType child, { ChildType after }) {
-    assert(child != this);
-    assert(after != this);
-    assert(child != after);
+    assert(child != this, 'A RenderObject cannot be inserted into itself.');
+    assert(after != this, 'A RenderObject cannot simultaneously be both the parent and the sibling of another RenderObject.');
+    assert(child != after, 'A RenderObject cannot be inserted after itself.');
     assert(child != _firstChild);
     assert(child != _lastChild);
     adoptChild(child);

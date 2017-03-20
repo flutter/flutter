@@ -63,23 +63,23 @@ void main() {
     await tester.pump(const Duration(seconds: 2));
 
     await tester.tapAt(const Point(380.0, 20.0));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
     await tester.tapAt(const Point(300.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.scroll(find.byKey(_datePickerKey), const Offset(-300.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.drag(find.byKey(_datePickerKey), const Offset(-300.0, 0.0));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
     await tester.tapAt(const Point(45.0, 270.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.scroll(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.drag(find.byKey(_datePickerKey), const Offset(300.0, 0.0));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
     await tester.tapAt(const Point(210.0, 180.0));
@@ -144,7 +144,7 @@ void main() {
       selectableDayPredicate: selectableDayPredicate
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     await callback(date);
   }
 
@@ -173,7 +173,7 @@ void main() {
   testWidgets('Can select a month', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.byTooltip('Previous month'));
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       await tester.tap(find.text('25'));
       await tester.tap(find.text('OK'));
       expect(await date, equals(new DateTime(2015, DateTime.DECEMBER, 25)));
@@ -224,10 +224,10 @@ void main() {
     lastDate = new DateTime(2017, DateTime.FEBRUARY, 20);
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.byTooltip('Next month'));
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       // Shouldn't be possible to keep going into March.
       await tester.tap(find.byTooltip('Next month'));
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       // We're still in February
       await tester.tap(find.text('20'));
       // Days outside bound for new month pages also disabled.
@@ -243,10 +243,10 @@ void main() {
     lastDate = initialDate;
     await preparePicker(tester, (Future<DateTime> date) async {
       await tester.tap(find.byTooltip('Previous month'));
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       // Shouldn't be possible to keep going into November.
       await tester.tap(find.byTooltip('Previous month'));
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       // We're still in December
       await tester.tap(find.text('10'));
       // Days outside bound for new month pages also disabled.
@@ -275,8 +275,8 @@ void main() {
     int hapticFeedbackCount;
 
     setUpAll(() {
-      PlatformMessages.setMockJSONMessageHandler('flutter/platform', (dynamic message) {
-        if (message['method'] == "HapticFeedback.vibrate")
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+        if (methodCall.method == "HapticFeedback.vibrate")
           hapticFeedbackCount++;
       });
     });

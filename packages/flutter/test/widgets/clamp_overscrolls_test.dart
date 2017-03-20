@@ -35,7 +35,7 @@ void main() {
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
     Future<Point> locationAfterScroll(String target, Offset offset) async {
-      await tester.scrollAt(tester.getTopLeft(find.text(target)), offset);
+      await tester.dragFrom(tester.getTopLeft(find.text(target)), offset);
       await tester.pump();
       final RenderBox textBox = tester.renderObject(find.text(target));
       final Point widgetOrigin = textBox.localToGlobal(Point.origin);
@@ -64,12 +64,12 @@ void main() {
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));
     ScrollableState scrollable = tester.state(find.byType(Scrollable));
 
-    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.dragFrom(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
     await tester.pump();
     expect(scrollable.position.pixels, lessThan(0.0));
     await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
 
-    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.dragFrom(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
     await tester.pump();
     expect(scrollable.position.pixels, greaterThan(0.0));
     await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
@@ -79,12 +79,12 @@ void main() {
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
     scrollable = scrollable = tester.state(find.byType(Scrollable));
 
-    await tester.scrollAt(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
+    await tester.dragFrom(tester.getTopLeft(find.text('top')), const Offset(0.0, 400.0));
     await tester.pump();
     expect(scrollable.position.pixels, equals(0.0));
     await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
 
-    await tester.scrollAt(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
+    await tester.dragFrom(tester.getTopLeft(find.text('bottom')), const Offset(0.0, -400.0));
     await tester.pump();
     expect(scrollable.position.pixels, equals(50.0));
   });

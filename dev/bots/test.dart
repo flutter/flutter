@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 String flutterRoot = p.dirname(p.dirname(p.dirname(p.fromUri(Platform.script))));
 String flutter = p.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 String dart = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+String pub = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 
 /// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
@@ -78,9 +79,7 @@ Future<Null> main() async {
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      environment: <String, String>{ 'FLUTTER_ROOT': flutterRoot },
-    );
+    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'));
 
     await _runAllDartTests(p.join(flutterRoot, 'dev', 'devicelab'));
     await _runFlutterTest(p.join(flutterRoot, 'dev', 'manual_tests'));
@@ -91,6 +90,16 @@ Future<Null> main() async {
 
     print('\x1B[32mDONE: All tests successful.\x1B[0m');
   }
+}
+
+Future<Null> _pubRunTest(
+  String workingDirectory, {
+  String testPath,
+}) {
+  final List<String> args = <String>['run', 'test'];
+  if (testPath != null)
+    args.add(testPath);
+  return _runCmd(pub, args, workingDirectory: workingDirectory);
 }
 
 Future<Null> _runCmd(String executable, List<String> arguments, {

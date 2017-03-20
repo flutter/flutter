@@ -13,7 +13,7 @@ import 'theme.dart';
 ///
 /// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
 /// vertically. To create a one-pixel divider between items in a list, consider
-/// using [ListItem.divideItems], which is optimized for this case.
+/// using [ListTile.divideItems], which is optimized for this case.
 ///
 /// The box's total height is controlled by [height]. The appropriate padding is
 /// automatically computed from the height.
@@ -21,7 +21,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
-///  * [ListItem.divideItems], another approach to dividing widgets in a list.
+///  * [ListTile.divideItems], another approach to dividing widgets in a list.
 ///  * <https://material.google.com/components/dividers.html>
 class Divider extends StatelessWidget {
   /// Creates a material design divider.

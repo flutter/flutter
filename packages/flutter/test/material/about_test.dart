@@ -40,14 +40,14 @@ void main() {
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsNothing);
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.text('About Pirate app'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
@@ -60,7 +60,7 @@ void main() {
     });
 
     await tester.tap(find.text('VIEW LICENSES'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Pirate license'), findsOneWidget);
   });

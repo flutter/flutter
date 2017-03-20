@@ -11,11 +11,10 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart' as p;
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../devfs.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
@@ -31,7 +30,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('IOSSimulators');
 
   @override
-  bool get supportsPlatform => p.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSSimulatorUtils.instance.getAttachedDevices();
@@ -366,7 +365,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!p.platform.isMacOS) {
+    if (!platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
@@ -422,7 +421,7 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {
@@ -541,7 +540,7 @@ class IOSSimulator extends Device {
 
   Future<bool> pushFile(
       ApplicationPackage app, String localFile, String targetFile) async {
-    if (p.platform.isMacOS) {
+    if (platform.isMacOS) {
       final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
       runCheckedSync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
       return true;
@@ -554,7 +553,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   String get sdkNameAndVersion => category;
@@ -609,9 +608,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   _IOSSimulatorLogReader(this.device, ApplicationPackage app) {
     _linesController = new StreamController<String>.broadcast(
-      onListen: () {
-        _start();
-      },
+      onListen: _start,
       onCancel: _stop
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');

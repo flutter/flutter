@@ -31,6 +31,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
 
+  bool get hasIDeviceInstaller => exitsHappy(<String>['ideviceinstaller', '-h']);
+
   bool get hasIosDeploy => exitsHappy(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.0';
@@ -41,6 +43,12 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
 
+  bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
+
+  String get cocoaPodsMinimumVersion => '1.0.0';
+
+  String get cocoaPodsVersionText => runSync(<String>['pod', '--version']).trim();
+
   bool get _iosDeployIsInstalledAndMeetsVersionCheck {
     if (!hasIosDeploy)
       return false;
@@ -48,6 +56,17 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       final Version version = new Version.parse(iosDeployVersionText);
       return version >= new Version.parse(iosDeployMinimumVersion);
     } on FormatException catch (_) {
+      return false;
+    }
+  }
+
+  bool get cocoaPodsInstalledAndMeetsVersionCheck {
+    if (!hasCocoaPods)
+      return false;
+    try {
+      final Version installedVersion = new Version.parse(cocoaPodsVersionText);
+      return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
+    } on FormatException {
       return false;
     }
   }
@@ -115,11 +134,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!exitsHappy(<String>['ideviceinstaller', '-h'])) {
+      if (!hasIDeviceInstaller) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
-          'Install via \'brew install ideviceinstaller\'.'
+          'To install, run:\n'
+          'brew update\n'
+          'brew install --HEAD libimobiledevice\n'
+          'brew install ideviceinstaller'
         ));
       }
 
@@ -131,12 +153,15 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         brewStatus = ValidationType.partial;
         if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
-            'ios-deploy out of date ($iosDeployMinimumVersion is required): '
-            'upgrade via \'brew upgrade ios-deploy\'.'
+            'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
+            'brew update\n'
+            'brew upgrade ios-deploy'
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'ios-deploy not installed: install via \'brew install ios-deploy\'.'
+            'ios-deploy not installed. To install:\n'
+            'brew update\n'
+            'brew install ios-deploy'
           ));
         }
       } else {
@@ -147,8 +172,26 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-            'brew uninstall libimobiledevice\n'
+            'brew update\n'
+            'brew uninstall --ignore-dependencies libimobiledevice\n'
             'brew install --HEAD libimobiledevice'
+          ));
+        }
+      }
+      if (cocoaPodsInstalledAndMeetsVersionCheck) {
+        messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+      } else {
+        if (!hasCocoaPods) {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods not installed. To install:\n'
+            'brew update\n'
+            'brew install cocoapods'
+          ));
+        } else {
+          messages.add(new ValidationMessage.error(
+            'CocoaPods out of date ($cocoaPodsMinimumVersion is required). To upgrade:\n'
+            'brew update\n'
+            'brew upgrade cocoapods'
           ));
         }
       }

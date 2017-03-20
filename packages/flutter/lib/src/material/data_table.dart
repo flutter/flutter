@@ -253,13 +253,12 @@ class DataTable extends StatelessWidget {
   /// otherwise it should be false.
   DataTable({
     Key key,
-    List<DataColumn> columns,
+    this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
     this.onSelectAll,
     this.rows
-  }) : columns = columns,
-       _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
+  }) : _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
     assert(columns != null);
     assert(columns.isNotEmpty);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));

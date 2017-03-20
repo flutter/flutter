@@ -306,10 +306,10 @@ class AnimationController extends Animation<double>
     max ??= upperBound;
     period ??= duration;
     assert(() {
-      if (duration == null) {
+      if (period == null) {
         throw new FlutterError(
-          'AnimationController.repeat() called with no explicit Duration and default Duration.\n'
-          'Either the "duration" argument to the repeat() method should be provided, or the '
+          'AnimationController.repeat() called without an explicit period and with no default Duration.\n'
+          'Either the "period" argument to the repeat() method should be provided, or the '
           '"duration" property should be set, either in the constructor or later, before '
           'calling the repeat() function.'
         );

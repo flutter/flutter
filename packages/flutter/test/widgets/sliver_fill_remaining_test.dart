@@ -28,7 +28,7 @@ void main() {
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
 
-    await tester.scroll(find.byType(Scrollable), const Offset(0.0, -700.0));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -700.0));
     await tester.pump();
 
     expect(find.text('0'), findsNothing);
@@ -37,7 +37,7 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
-    await tester.scroll(find.byType(Scrollable), const Offset(0.0, 200.0));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 200.0));
     await tester.pump();
 
     expect(find.text('0'), findsOneWidget);

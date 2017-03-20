@@ -36,7 +36,7 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
       _messages.sort();
 
       final File file = _getManifest(location);
-      final String json = new JsonEncoder.withIndent('  ').convert(_messages);
+      final String json = const JsonEncoder.withIndent('  ').convert(_messages);
       await file.writeAsString(json, flush: true);
     }, ShutdownStage.SERIALIZE_RECORDING);
   }
@@ -157,13 +157,8 @@ class _RecordingStream {
         _recording.add(new _Response.fromString(element));
         _controller.add(element);
       },
-      onError: (dynamic error, StackTrace stackTrace) {
-        // We currently don't support recording of errors.
-        _controller.addError(error, stackTrace);
-      },
-      onDone: () {
-        _controller.close();
-      },
+      onError: _controller.addError, // We currently don't support recording of errors.
+      onDone: _controller.close,
     );
   }
 

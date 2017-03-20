@@ -15,11 +15,9 @@ import 'globals.dart';
 /// A wrapper around the `bin/cache/` directory.
 class Cache {
   /// [rootOverride] is configurable for testing.
-  Cache({ Directory rootOverride }) {
-    this._rootOverride = rootOverride;
-  }
+  Cache({ Directory rootOverride }) : _rootOverride = rootOverride;
 
-  Directory _rootOverride;
+  final Directory _rootOverride;
 
   // Initialized by FlutterCommandRunner on startup.
   static String flutterRoot;
@@ -231,9 +229,7 @@ class MaterialFonts {
     ).then<Null>((Null value) {
       cache.setStampFor(kName, cache.getVersionFor(kName));
       status.stop();
-    }).whenComplete(() {
-      status.cancel();
-    });
+    }).whenComplete(status.cancel);
   }
 }
 
@@ -366,7 +362,7 @@ class FlutterEngine {
     for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
         final String name = fs.path.basename(entity.path);
-        if (name == 'sky_snapshot' || name == 'sky_shell')
+        if (name == 'sky_shell')
           os.makeExecutable(entity);
       }
     }
@@ -376,8 +372,6 @@ class FlutterEngine {
     final Status status = logger.startProgress(message, expectSlowOperation: true);
     return Cache._downloadFileToCache(Uri.parse(url), dest, true).then<Null>((Null value) {
       status.stop();
-    }).whenComplete(() {
-      status.cancel();
-    });
+    }).whenComplete(status.cancel);
   }
 }

@@ -125,7 +125,7 @@ class TextTheme {
   /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title] and [Dialog.title]).
   final TextStyle title;
 
-  /// Used for the primary text in lists (e.g., [ListItem.title]).
+  /// Used for the primary text in lists (e.g., [ListTile.title]).
   final TextStyle subhead;
 
   /// Used for emphasizing text that would otherwise be [body1].

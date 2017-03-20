@@ -83,8 +83,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         hide: !verboseHelp,
         help: 'Path to your ".packages" file.$packagesHelp');
     argParser.addOption('flutter-root',
-        help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).',
-              defaultsTo: _defaultFlutterRoot);
+        help: 'The root directory of the Flutter repository (uses \$$kFlutterRootEnvironmentVariableName if set).');
 
     if (verboseHelp)
       argParser.addSeparator('Local build selection options (not normally required):');
@@ -226,8 +225,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       logger.supportsColor = globalResults['color'];
 
     // We must set Cache.flutterRoot early because other features use it (e.g.
-    // enginePath's initialiser uses it).
-    Cache.flutterRoot = fs.path.normalize(fs.path.absolute(globalResults['flutter-root']));
+    // enginePath's initializer uses it).
+    final String flutterRoot = globalResults['flutter-root'] ?? _defaultFlutterRoot;
+    Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true')
       await Cache.lock();
@@ -250,11 +250,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     }
 
     // The Android SDK could already have been set by tests.
-    context.putIfAbsent(AndroidSdk, () => AndroidSdk.locateAndroidSdk());
+    context.putIfAbsent(AndroidSdk, AndroidSdk.locateAndroidSdk);
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.getVersion(Cache.flutterRoot).toString());
+      printStatus(FlutterVersion.instance.toString());
       return;
     }
 

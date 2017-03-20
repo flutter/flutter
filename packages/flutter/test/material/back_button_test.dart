@@ -24,13 +24,11 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
 
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
 
     await tester.tap(find.byType(BackButton));
 
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
 
     expect(find.text('Home'), findsOneWidget);
   });

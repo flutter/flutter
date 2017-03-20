@@ -37,9 +37,7 @@ const Duration kLongRequestTimeout = const Duration(minutes: 1);
 class VMService {
   VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
     _vm = new VM._empty(this);
-    _peer.listen().catchError((dynamic e, StackTrace stackTrace) {
-      _connectionError.completeError(e, stackTrace);
-    });
+    _peer.listen().catchError(_connectionError.completeError);
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
@@ -171,6 +169,16 @@ class VMService {
   /// Reloads the VM.
   Future<VM> getVM() {
     return _vm.reload();
+  }
+
+  Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+    await vm.refreshViews();
+    for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
+      // If the VM doesn't yet have a view, wait for one to show up.
+      printTrace('Waiting for Flutter view');
+      await new Future<Null>.delayed(new Duration(seconds: attemptSeconds));
+      await vm.refreshViews();
+    }
   }
 }
 
@@ -505,14 +513,14 @@ class VM extends ServiceObjectOwner {
     _removeDeadIsolates(map['isolates']);
   }
 
-  final Map<String, ServiceObject> _cache = new Map<String,ServiceObject>();
-  final Map<String,Isolate> _isolateCache = new Map<String,Isolate>();
+  final Map<String, ServiceObject> _cache = <String,ServiceObject>{};
+  final Map<String,Isolate> _isolateCache = <String,Isolate>{};
 
   /// The list of live isolates, ordered by isolate start time.
-  final List<Isolate> isolates = new List<Isolate>();
+  final List<Isolate> isolates = <Isolate>[];
 
   /// The set of live views.
-  final Map<String, FlutterView> _viewCache = new Map<String, FlutterView>();
+  final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -549,7 +557,7 @@ class VM extends ServiceObjectOwner {
         toRemove.add(id);
       }
     });
-    toRemove.forEach((String id) => _isolateCache.remove(id));
+    toRemove.forEach(_isolateCache.remove);
     _buildIsolateList();
   }
 
@@ -745,8 +753,19 @@ class VM extends ServiceObjectOwner {
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
-  FlutterView get mainView {
+  Iterable<FlutterView> get views => _viewCache.values;
+
+  FlutterView get firstView {
     return _viewCache.values.isEmpty ? null : _viewCache.values.first;
+  }
+
+  FlutterView firstViewWithName(String isolateFilter) {
+    if (_viewCache.values.isEmpty) {
+      return null;
+    }
+    return _viewCache.values.firstWhere(
+        (FlutterView v) => v.uiIsolate.name.contains(isolateFilter),
+        orElse: () => null);
   }
 }
 
@@ -767,7 +786,7 @@ class Isolate extends ServiceObjectOwner {
   DateTime startTime;
   ServiceEvent pauseEvent;
 
-  final Map<String, ServiceObject> _cache = new Map<String, ServiceObject>();
+  final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
 
   @override
   ServiceObject getFromMap(Map<String, dynamic> map) {
@@ -967,7 +986,7 @@ class Isolate extends ServiceObjectOwner {
 class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   ServiceMap._empty(ServiceObjectOwner owner) : super._empty(owner);
 
-  final Map<String, dynamic> _map = new Map<String, dynamic>();
+  final Map<String, dynamic> _map = <String, dynamic>{};
 
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {

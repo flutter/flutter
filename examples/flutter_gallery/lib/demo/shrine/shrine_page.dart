@@ -61,7 +61,7 @@ class ShrinePageState extends State<ShrinePage> {
       return new ListView(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         children: config.shoppingCart.values.map((Order order) {
-          return new ListItem(
+          return new ListTile(
             title: new Text(order.product.name),
             leading: new Text('${order.quantity}'),
             subtitle: new Text(order.product.vendor.name)
@@ -108,9 +108,7 @@ class ShrinePageState extends State<ShrinePage> {
           new IconButton(
             icon: new Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
-            onPressed: () {
-              _showShoppingCart();
-            }
+            onPressed: _showShoppingCart
           ),
           new PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[

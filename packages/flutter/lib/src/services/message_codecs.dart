@@ -6,11 +6,14 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
+import 'package:meta/meta.dart';
 
 import 'message_codec.dart';
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
 class BinaryCodec implements MessageCodec<ByteData> {
+  /// Creates a [MessageCodec] with unencoded binary messages represented using
+  /// [ByteData].
   const BinaryCodec();
 
   @override
@@ -22,6 +25,7 @@ class BinaryCodec implements MessageCodec<ByteData> {
 
 /// [MessageCodec] with UTF-8 encoded String messages.
 class StringCodec implements MessageCodec<String> {
+  /// Creates a [MessageCodec] with UTF-8 encoded String messages.
   const StringCodec();
 
   @override
@@ -54,6 +58,8 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as defined by the JSON codec of the
   // dart:convert package. The format used must match the Android and
   // iOS counterparts.
+
+  /// Creates a [MessageCodec] with UTF-8 encoded JSON messages.
   const JSONMessageCodec();
 
   @override
@@ -72,6 +78,7 @@ class JSONMessageCodec implements MessageCodec<dynamic> {
 }
 
 /// [MethodCodec] with UTF-8 encoded JSON method calls and result envelopes.
+///
 /// Values supported as method arguments and result payloads are those supported
 /// by [JSONMessageCodec].
 class JSONMethodCodec implements MethodCodec {
@@ -80,23 +87,42 @@ class JSONMethodCodec implements MethodCodec {
   //
   // * Individual values are serialized as defined by the JSON codec of the
   //   dart:convert package.
-  // * Method calls are serialized as two-element lists with the method name
-  //   string as first element and the method call arguments as the second.
+  // * Method calls are serialized as two-element maps, with the method name
+  //   keyed by 'method' and the arguments keyed by 'args'.
   // * Reply envelopes are serialized as either:
   //   * one-element lists containing the successful result as its single
   //     element, or
   //   * three-element lists containing, in order, an error code String, an
   //     error message String, and an error details value.
+
+  /// Creates a [MethodCodec] with UTF-8 encoded JSON method calls and result
+  /// envelopes.
   const JSONMethodCodec();
 
   @override
-  ByteData encodeMethodCall(String name, dynamic arguments) {
-    assert(name != null);
-    return const JSONMessageCodec().encodeMessage(<dynamic>[name, arguments]);
+  ByteData encodeMethodCall(MethodCall call) {
+    return const JSONMessageCodec().encodeMessage(<String, dynamic>{
+      'method': call.method,
+      'args': call.arguments,
+    });
+  }
+
+  @override
+  MethodCall decodeMethodCall(ByteData methodCall) {
+    final dynamic decoded = const JSONMessageCodec().decodeMessage(methodCall);
+    if (decoded is! Map)
+      throw new FormatException('Expected method call Map, got $decoded');
+    final dynamic method = decoded['method'];
+    final dynamic arguments = decoded['args'];
+    if (method is String)
+      return new MethodCall(method, arguments);
+    throw new FormatException('Invalid method call: $decoded');
   }
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
+    if (envelope == null)
+      throw new MissingPluginException();
     final dynamic decoded = const JSONMessageCodec().decodeMessage(envelope);
     if (decoded is! List)
       throw new FormatException('Expected envelope List, got $decoded');
@@ -110,7 +136,18 @@ class JSONMethodCodec implements MethodCodec {
         message: decoded[1],
         details: decoded[2],
       );
-    throw new FormatException('Invalid envelope $decoded');
+    throw new FormatException('Invalid envelope: $decoded');
+  }
+
+  @override
+  ByteData encodeSuccessEnvelope(dynamic result) {
+    return const JSONMessageCodec().encodeMessage(<dynamic>[result]);
+  }
+
+  @override
+  ByteData encodeErrorEnvelope({@required String code, String message, dynamic details}) {
+    assert(code != null);
+    return const JSONMessageCodec().encodeMessage(<dynamic>[code, message, details]);
   }
 }
 
@@ -136,21 +173,20 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   // * A single byte with one of the constant values below determines the
   //   type of the value.
   // * The serialization of the value itself follows the type byte.
+  // * Numbers are represented using the host endianness throughout.
   // * Lengths and sizes of serialized parts are encoded using an expanding
   //   format optimized for the common case of small non-negative integers:
   //   * values 0..253 inclusive using one byte with that value;
   //   * values 254..2^16 inclusive using three bytes, the first of which is
-  //     254, the next two the usual big-endian unsigned representation of the
-  //     value;
+  //     254, the next two the usual unsigned representation of the value;
   //   * values 2^16+1..2^32 inclusive using five bytes, the first of which is
-  //     255, the next four the usual big-endian unsigned representation of the
-  //     value.
+  //     255, the next four the usual unsigned representation of the value.
   // * null, true, and false have empty serialization; they are encoded directly
   //   in the type byte (using _kNull, _kTrue, _kFalse)
-  // * Integers representable in 32 bits are encoded using 4 bytes big-endian,
-  //   two's complement representation.
-  // * Larger integers representable in 64 bits are encoded using 8 bytes
-  //   big-endian, two's complement representation.
+  // * Integers representable in 32 bits are encoded using 4 bytes two's
+  //   complement representation.
+  // * Larger integers representable in 64 bits are encoded using 8 bytes two's
+  //   complement representation.
   // * Still larger integers are encoded using their hexadecimal string
   //   representation. First the length of that is encoded in the expanding
   //   format, then follows the UTF-8 representation of the hex string.
@@ -164,8 +200,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   //   smallest number of zero bytes needed to align the position in the full
   //   message with a multiple of the number of bytes per element, then the
   //   encoding of the list elements themselves, end-to-end with no additional
-  //   type information, using big-endian two's complement or IEEE 754 as
-  //   applicable.
+  //   type information, using two's complement or IEEE 754 as applicable.
   // * Lists are encoded by first encoding their length in the expanding format,
   //   then follows the recursive encoding of each element value, including the
   //   type byte (Lists are assumed to be heterogeneous).
@@ -187,6 +222,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
   static const int _kList = 12;
   static const int _kMap = 13;
 
+  /// Creates a [MessageCodec] using the Flutter standard binary encoding.
   const StandardMessageCodec();
 
   @override
@@ -205,7 +241,7 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
     final ReadBuffer buffer = new ReadBuffer(message);
     final dynamic result = _readValue(buffer);
     if (buffer.hasRemaining)
-      throw new FormatException('Message corrupted');
+      throw const FormatException('Message corrupted');
     return result;
   }
 
@@ -215,14 +251,10 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(value);
     } else if (value <= 0xffff) {
       buffer.putUint8(254);
-      buffer.putUint8(value >> 8);
-      buffer.putUint8(value);
+      buffer.putUint16(value);
     } else {
       buffer.putUint8(255);
-      buffer.putUint8(value >> 24);
-      buffer.putUint8(value >> 16);
-      buffer.putUint8(value >> 8);
-      buffer.putUint8(value);
+      buffer.putUint32(value);
     }
   }
 
@@ -288,22 +320,17 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
 
   static int _readSize(ReadBuffer buffer) {
     final int value = buffer.getUint8();
-    if (value < 254) {
+    if (value < 254)
       return value;
-    } else if (value == 254) {
-      return (buffer.getUint8() << 8)
-           |  buffer.getUint8();
-    } else {
-      return (buffer.getUint8() << 24)
-           | (buffer.getUint8() << 16)
-           | (buffer.getUint8() << 8)
-           |  buffer.getUint8();
-    }
+    else if (value == 254)
+      return buffer.getUint16();
+    else
+      return buffer.getUint32();
   }
 
   static dynamic _readValue(ReadBuffer buffer) {
     if (!buffer.hasRemaining)
-      throw throw new FormatException('Message corrupted');
+      throw const FormatException('Message corrupted');
     dynamic result;
     switch (buffer.getUint8()) {
       case _kNull:
@@ -358,12 +385,12 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         break;
       case _kMap:
         final int length = _readSize(buffer);
-        result = new Map<dynamic, dynamic>();
+        result = <dynamic, dynamic>{};
         for (int i = 0; i < length; i++) {
           result[_readValue(buffer)] = _readValue(buffer);
         }
         break;
-      default: throw new FormatException('Message corrupted');
+      default: throw const FormatException('Message corrupted');
     }
     return result;
   }
@@ -390,32 +417,65 @@ class StandardMethodCodec implements MethodCodec {
   //   * In the error case, the concatenation of the encoding of the error code
   //     string, the error message string, and the error details value.
 
+  /// Creates a [MethodCodec] using the Flutter standard binary encoding.
   const StandardMethodCodec();
 
   @override
-  ByteData encodeMethodCall(String name, dynamic arguments) {
-    assert(name != null);
+  ByteData encodeMethodCall(MethodCall call) {
     final WriteBuffer buffer = new WriteBuffer();
-    StandardMessageCodec._writeValue(buffer, name);
-    StandardMessageCodec._writeValue(buffer, arguments);
+    StandardMessageCodec._writeValue(buffer, call.method);
+    StandardMessageCodec._writeValue(buffer, call.arguments);
+    return buffer.done();
+  }
+
+
+  @override
+  MethodCall decodeMethodCall(ByteData methodCall) {
+    final ReadBuffer buffer = new ReadBuffer(methodCall);
+    final dynamic method = StandardMessageCodec._readValue(buffer);
+    final dynamic arguments = StandardMessageCodec._readValue(buffer);
+    if (method is String && !buffer.hasRemaining)
+      return new MethodCall(method, arguments);
+    else
+      throw const FormatException('Invalid method call');
+  }
+
+
+  @override
+  ByteData encodeSuccessEnvelope(dynamic result) {
+    final WriteBuffer buffer = new WriteBuffer();
+    buffer.putUint8(0);
+    StandardMessageCodec._writeValue(buffer, result);
+    return buffer.done();
+  }
+
+
+  @override
+  ByteData encodeErrorEnvelope({@required String code, String message, dynamic details}) {
+    final WriteBuffer buffer = new WriteBuffer();
+    buffer.putUint8(1);
+    StandardMessageCodec._writeValue(buffer, code);
+    StandardMessageCodec._writeValue(buffer, message);
+    StandardMessageCodec._writeValue(buffer, details);
     return buffer.done();
   }
 
   @override
   dynamic decodeEnvelope(ByteData envelope) {
+    if (envelope == null)
+      throw new MissingPluginException();
     // First byte is zero in success case, and non-zero otherwise.
-    if (envelope == null || envelope.lengthInBytes == 0)
-      throw new FormatException('Expected envelope, got nothing');
+    if (envelope.lengthInBytes == 0)
+      throw const FormatException('Expected envelope, got nothing');
     final ReadBuffer buffer = new ReadBuffer(envelope);
     if (buffer.getUint8() == 0)
       return StandardMessageCodec._readValue(buffer);
     final dynamic errorCode = StandardMessageCodec._readValue(buffer);
     final dynamic errorMessage = StandardMessageCodec._readValue(buffer);
     final dynamic errorDetails = StandardMessageCodec._readValue(buffer);
-    if (errorCode is String && (errorMessage == null || errorMessage is String))
+    if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
       throw new PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
     else
-      throw new FormatException('Invalid envelope');
+      throw const FormatException('Invalid envelope');
   }
 }
-

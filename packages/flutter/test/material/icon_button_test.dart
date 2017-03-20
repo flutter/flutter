@@ -33,7 +33,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, new Size(48.0, 48.0));
+    expect(iconButton.size, const Size(48.0, 48.0));
 
     await tester.tap(find.byType(IconButton));
     expect(mockOnPressedFunction.called, 1);
@@ -53,7 +53,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, new Size(48.0, 48.0));
+    expect(iconButton.size, const Size(48.0, 48.0));
   });
 
   testWidgets('test icons can be small when total size is >48dp', (WidgetTester tester) async {
@@ -62,7 +62,7 @@ void main() {
         child: new Center(
           child: new IconButton(
             iconSize: 10.0,
-            padding: new EdgeInsets.all(30.0),
+            padding: const EdgeInsets.all(30.0),
             onPressed: mockOnPressedFunction,
             icon: new Icon(Icons.link),
           ),
@@ -71,7 +71,7 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
-    expect(iconButton.size, new Size(70.0, 70.0));
+    expect(iconButton.size, const Size(70.0, 70.0));
   });
 
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
@@ -89,7 +89,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size, new Size(80.0, 80.0));
+    expect(box.size, const Size(80.0, 80.0));
   });
 
   testWidgets(
@@ -110,7 +110,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size, new Size(48.0, 600.0));
+    expect(box.size, const Size(48.0, 600.0));
   });
 
   testWidgets('test default padding', (WidgetTester tester) async {
@@ -127,7 +127,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(IconButton));
-    expect(box.size, new Size(96.0, 96.0));
+    expect(box.size, const Size(96.0, 96.0));
   });
 
   testWidgets('test tooltip', (WidgetTester tester) async {

@@ -39,7 +39,7 @@ class OrderItem extends StatelessWidget {
                 height: 248.0,
                 child: new Hero(
                   tag: product.tag,
-                  child: new Image.asset(product.imageAsset, fit: ImageFit.contain),
+                  child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
                 ),
               ),
             ),
@@ -197,7 +197,7 @@ class _OrderPageState extends State<OrderPage> {
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(8.0),
-            child: new SliverGrid(
+            sliver: new SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 8.0,
@@ -212,7 +212,7 @@ class _OrderPageState extends State<OrderPage> {
                       elevation: 1,
                       child: new Image.asset(
                         product.imageAsset,
-                        fit: ImageFit.contain,
+                        fit: BoxFit.contain,
                       ),
                     );
                   }).toList(),

@@ -233,7 +233,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = new List<Widget>();
+    final List<Widget> children = <Widget>[];
     if (_previousAnimation.status != AnimationStatus.dismissed) {
       children.add(new ScaleTransition(
         scale: _previousAnimation,
@@ -679,7 +679,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       _currentBottomSheet = new PersistentBottomSheetController<T>._(
         bottomSheet,
         completer,
-        () => entry.remove(),
+        entry.remove,
         (VoidCallback fn) { bottomSheetKey.currentState?.setState(fn); }
       );
     });
@@ -777,7 +777,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       }
     }
 
-    final List<LayoutId> children = new List<LayoutId>();
+    final List<LayoutId> children = <LayoutId>[];
 
     _addIfNonNull(children, config.body, _ScaffoldSlot.body);
 

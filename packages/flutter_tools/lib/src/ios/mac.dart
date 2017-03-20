@@ -9,12 +9,14 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../services.dart';
@@ -59,7 +61,7 @@ class Xcode {
   }
 
   /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context[Xcode];
+  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
@@ -123,8 +125,10 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
+  final Directory appDirectory = fs.directory(app.appDirectory);
+  await _addServicesToBundle(appDirectory);
 
-  await _addServicesToBundle(fs.directory(app.appDirectory));
+  _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -309,10 +313,29 @@ bool _checkXcodeVersion() {
       return false;
     }
   } catch (e) {
-    printError('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   return true;
+}
+
+void _runPodInstall(Directory bundle, String engineDirectory)  {
+  if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
+    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
+      return;
+    }
+    try {
+      runCheckedSync(
+          <String>['pod', 'install'],
+          workingDirectory: bundle.path,
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      );
+    } catch (e) {
+      throwToolExit('Error running pod install: $e');
+    }
+  }
 }
 
 Future<Null> _addServicesToBundle(Directory bundle) async {

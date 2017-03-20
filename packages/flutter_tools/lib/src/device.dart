@@ -10,10 +10,9 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/os.dart';
+import 'base/port_scanner.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'devfs.dart';
 import 'globals.dart';
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
@@ -167,9 +166,7 @@ abstract class Device {
   // supported by Flutter, and, if not, why.
   String supportMessage() => isSupported() ? "Supported" : "Unsupported";
 
-  // TODO(tvolkert): Rename to `targetPlatform`, and remove the "as p"
-  // aliases on the `platform.dart` imports where applicable.
-  TargetPlatform get platform;
+  TargetPlatform get targetPlatform;
 
   String get sdkNameAndVersion;
 
@@ -211,7 +208,7 @@ abstract class Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false
   });
@@ -254,13 +251,13 @@ abstract class Device {
     for (Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       if (device.isLocalEmulator) {
-        final String type = device.platform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = device.targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
         device.name,
         device.id,
-        '${getNameForTargetPlatform(device.platform)}',
+        '${getNameForTargetPlatform(device.targetPlatform)}',
         '${device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
@@ -279,7 +276,7 @@ abstract class Device {
   }
 
   static void printDevices(List<Device> devices) {
-    descriptions(devices).forEach((String msg) => printStatus(msg));
+    descriptions(devices).forEach(printStatus);
   }
 }
 
@@ -310,7 +307,7 @@ class DebuggingOptions {
   Future<int> findBestObservatoryPort() {
     if (hasObservatoryPort)
       return new Future<int>.value(observatoryPort);
-    return findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
+    return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
 
   bool get hasDiagnosticPort => diagnosticPort != null;
@@ -320,7 +317,7 @@ class DebuggingOptions {
   Future<int> findBestDiagnosticPort() {
     if (hasDiagnosticPort)
       return new Future<int>.value(diagnosticPort);
-    return findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
+    return portScanner.findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
   }
 }
 

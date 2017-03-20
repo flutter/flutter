@@ -37,20 +37,20 @@ void main() {
 
     expect(find.text('Alaska'), findsNothing);
 
-    await tester.scroll(find.byType(PageView), const Offset(-10.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-10.0, 0.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
 
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsNothing);
 
-    await tester.scroll(find.byType(PageView), const Offset(-401.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.drag(find.byType(PageView), const Offset(-401.0, 0.0));
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -62,14 +62,14 @@ void main() {
 
     await tester.fling(
         find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
 
     await tester.fling(find.byType(PageView), const Offset(200.0, 0.0), 1000.0);
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -93,19 +93,18 @@ void main() {
     ));
 
     Size sizeOf(int i) => tester.getSize(find.byKey(new ValueKey<int>(i)));
-    double leftOf(int i) =>
-        tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
+    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
 
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
-    await tester.scroll(find.byType(PageView), const Offset(100.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(100.0, 0.0));
     await tester.pump();
 
     expect(leftOf(0), equals(100.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
-    await tester.scroll(find.byType(PageView), const Offset(-200.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
     await tester.pump();
 
     expect(leftOf(0), equals(-100.0));
@@ -121,18 +120,15 @@ void main() {
         height: 400.0,
         child: new PageView(
           controller: controller,
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
 
     expect(find.text('California'), findsOneWidget);
 
-    controller.nextPage(
-        duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester
-        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -142,18 +138,15 @@ void main() {
         height: 400.0,
         child: new PageView(
           controller: controller,
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
 
     expect(find.text('Colorado'), findsOneWidget);
 
-    controller.previousPage(
-        duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester
-        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -164,17 +157,15 @@ void main() {
         width: 600.0,
         height: 400.0,
         child: new PageView(
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
 
     expect(find.text('Alabama'), findsOneWidget);
 
-    await tester.scroll(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester
-        .pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.drag(find.byType(PageView), const Offset(-1250.0, 0.0));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -183,8 +174,7 @@ void main() {
         width: 250.0,
         height: 100.0,
         child: new PageView(
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -196,8 +186,7 @@ void main() {
         width: 450.0,
         height: 400.0,
         child: new PageView(
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -211,8 +200,7 @@ void main() {
         width: 0.0,
         height: 0.0,
         child: new PageView(
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -224,8 +212,7 @@ void main() {
         width: 200.0,
         height: 200.0,
         child: new PageView(
-          children:
-              kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
         ),
       ),
     ));
@@ -236,9 +223,7 @@ void main() {
   testWidgets('Page changes at halfway point', (WidgetTester tester) async {
     final List<int> log = <int>[];
     await tester.pumpWidget(new PageView(
-      onPageChanged: (int page) {
-        log.add(page);
-      },
+      onPageChanged: log.add,
       children: kStates.map<Widget>((String state) => new Text(state)).toList(),
     ));
 
@@ -274,7 +259,7 @@ void main() {
     expect(log, isEmpty);
 
     await gesture.up();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
 
     expect(log, isEmpty);
 
@@ -352,8 +337,7 @@ void main() {
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(
-        tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
     expect(tester.getTopLeft(find.text('Delaware')), const Point(50.0, 0.0));
     expect(tester.getTopLeft(find.text('Florida')), const Point(150.0, 0.0));
     expect(tester.getTopLeft(find.text('Georgia')), const Point(250.0, 0.0));
@@ -387,8 +371,7 @@ void main() {
     await tester.pumpWidget(build(controller));
 
     expect(tester.getTopLeft(find.text('Alabama')), const Point(-100.0, 0.0));
-    expect(
-        tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
+    expect(tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
 
     controller.jumpToPage(10);
     await tester.pump();
@@ -398,8 +381,9 @@ void main() {
 
   testWidgets('PageView does not report page changed on overscroll',
       (WidgetTester tester) async {
-    final PageController controller =
-        new PageController(initialPage: kStates.length - 1);
+    final PageController controller = new PageController(
+      initialPage: kStates.length - 1,
+    );
     int changeIndex = 0;
     Widget build() {
       return new PageView(

@@ -167,7 +167,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// The direction to use as the main axis.
   Axis get direction => _direction;
   Axis _direction;
-  set direction (Axis value) {
+  set direction(Axis value) {
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
@@ -177,7 +177,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// How the children should be placed along the main axis.
   MainAxisAlignment get mainAxisAlignment => _mainAxisAlignment;
   MainAxisAlignment _mainAxisAlignment;
-  set mainAxisAlignment (MainAxisAlignment value) {
+  set mainAxisAlignment(MainAxisAlignment value) {
     assert(value != null);
     if (_mainAxisAlignment != value) {
       _mainAxisAlignment = value;
@@ -197,7 +197,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// value irrelevant to the final layout.
   MainAxisSize get mainAxisSize => _mainAxisSize;
   MainAxisSize _mainAxisSize;
-  set mainAxisSize (MainAxisSize value) {
+  set mainAxisSize(MainAxisSize value) {
     if (_mainAxisSize != value) {
       _mainAxisSize = value;
       markNeedsLayout();
@@ -207,7 +207,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// How the children should be placed along the cross axis.
   CrossAxisAlignment get crossAxisAlignment => _crossAxisAlignment;
   CrossAxisAlignment _crossAxisAlignment;
-  set crossAxisAlignment (CrossAxisAlignment value) {
+  set crossAxisAlignment(CrossAxisAlignment value) {
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
       markNeedsLayout();
@@ -217,7 +217,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If aligning items according to their baseline, which baseline to use.
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
-  set textBaseline (TextBaseline value) {
+  set textBaseline(TextBaseline value) {
     if (_textBaseline != value) {
       _textBaseline = value;
       markNeedsLayout();

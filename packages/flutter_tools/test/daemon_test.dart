@@ -51,7 +51,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
@@ -69,7 +69,7 @@ void main() {
         final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
         daemon = new Daemon(
           commands.stream,
-          (Map<String, dynamic> result) => responses.add(result),
+          responses.add,
           notifyingLogger: notifyingLogger
         );
         printError('daemon.logMessage test');
@@ -95,7 +95,7 @@ void main() {
           final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
           daemon = new Daemon(
             commands.stream,
-            (Map<String, dynamic> result) => responses.add(result),
+            responses.add,
             notifyingLogger: notifyingLogger,
             logToStdout: true
           );
@@ -115,7 +115,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
@@ -134,7 +134,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         daemonCommand: command,
         notifyingLogger: notifyingLogger
       );
@@ -155,7 +155,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         daemonCommand: command,
         notifyingLogger: notifyingLogger
       );
@@ -176,7 +176,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
           commands.stream,
-              (Map<String, dynamic> result) => responses.add(result),
+          responses.add,
           daemonCommand: command,
           notifyingLogger: notifyingLogger
       );
@@ -203,7 +203,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         daemonCommand: command,
         notifyingLogger: notifyingLogger
       );
@@ -221,7 +221,7 @@ void main() {
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
         commands.stream,
-        (Map<String, dynamic> result) => responses.add(result),
+        responses.add,
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});

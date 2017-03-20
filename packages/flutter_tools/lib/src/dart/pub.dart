@@ -29,6 +29,7 @@ Future<Null> pubGet({
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
+  bool offline: false,
   bool checkLastModified: true
 }) async {
   if (directory == null)
@@ -47,8 +48,10 @@ Future<Null> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
-    final int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
+    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'];
+    if (offline)
+      args.add('--offline');
+    final int code = await runCommandAndStreamOutput(args,
       workingDirectory: directory,
       mapFunction: _filterOverrideWarnings,
       environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }

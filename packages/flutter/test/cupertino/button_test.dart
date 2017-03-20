@@ -13,7 +13,7 @@ const TextStyle testStyle = const TextStyle(
 );
 
 void main() {
-  testWidgets('Layout minimum size', (WidgetTester tester) async {
+  testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(
         child: new Text('X', style: testStyle),
@@ -23,8 +23,25 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10px character + 16px * 2 is smaller than the 48px minimum.
-      const Size.square(48.0),
+      // 1 10px character + 16px * 2 is smaller than the default 44px minimum.
+      const Size.square(44.0),
+    );
+  });
+
+  testWidgets('Minimum size parameter', (WidgetTester tester) async {
+    final double minSize = 60.0;
+    await tester.pumpWidget(
+      new Center(child: new CupertinoButton(
+        child: new Text('X', style: testStyle),
+        onPressed: null,
+        minSize: minSize,
+      ))
+    );
+    final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
+    expect(
+      buttonBox.size,
+      // 1 10px character + 16px * 2 is smaller than defined 60.0px minimum
+      new Size.square(minSize),
     );
   });
 
@@ -47,7 +64,7 @@ void main() {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       child: new Text('X', style: testStyle),
       onPressed: null,
-      color: new Color(0xFFFFFFFF),
+      color: const Color(0xFFFFFFFF),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
@@ -61,7 +78,7 @@ void main() {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       child: new Text(' ', style: testStyle),
       onPressed: null,
-      padding: new EdgeInsets.all(100.0),
+      padding: const EdgeInsets.all(100.0),
     )));
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(

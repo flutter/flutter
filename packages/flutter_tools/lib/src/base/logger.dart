@@ -7,7 +7,6 @@ import 'dart:convert' show ASCII, LineSplitter;
 
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
 import 'platform.dart';
@@ -67,7 +66,7 @@ class StdoutLogger extends Logger {
 
     stderr.writeln(message);
     if (stackTrace != null)
-      stderr.writeln(new Chain.forTrace(stackTrace).terse.toString());
+      stderr.writeln(stackTrace.toString());
   }
 
   @override
@@ -166,6 +165,13 @@ class BufferLogger extends Logger {
     printStatus(message);
     return new Status();
   }
+
+  /// Clears all buffers.
+  void clear() {
+    _error.clear();
+    _status.clear();
+    _trace.clear();
+  }
 }
 
 class VerboseLogger extends Logger {
@@ -243,30 +249,30 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    final String term = platform.environment['TERM'];
-    // FLUTTER_ANSI_TERMINAL is a work-around for https://github.com/dart-lang/sdk/issues/28614
-    final bool flutterAnsiTerm = platform.environment.containsKey('FLUTTER_ANSI_TERMINAL');
-    supportsColor = (term != null && term != 'dumb') || flutterAnsiTerm;
+    if (platform.isWindows) {
+      supportsColor = platform.ansiSupported;
+    } else {
+      final String term = platform.environment['TERM'];
+      supportsColor = (term != null && term != 'dumb');
+    }
   }
-
-  static const String KEY_F1  = '\u001BOP';
-  static const String KEY_F5  = '\u001B[15~';
-  static const String KEY_F10 = '\u001B[21~';
 
   static const String _bold  = '\u001B[1m';
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
+  static const int _ENXIO = 6;
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
-  static const int _ERROR_INVALID_PARAMETER = 87;
+  static const int _INVALID_HANDLE = 6;
 
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
   static const List<int> _lineModeIgnorableErrors = const <int>[
+    _ENXIO,
     _ENOTTY,
     _ENETRESET,
-    _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed
+    _INVALID_HANDLE,
   ];
 
   bool supportsColor;
@@ -276,8 +282,18 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
+    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE], 
+    //     we should check beforehand if stdin is connected to a terminal or not
+    //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
     try {
-      stdin.lineMode = !value;
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
     } on StdinException catch (error) {
       if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
         rethrow;

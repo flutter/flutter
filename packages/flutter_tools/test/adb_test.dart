@@ -3,28 +3,37 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/adb.dart';
+import 'package:flutter_tools/src/base/os.dart';
 import 'package:test/test.dart';
 
-void main() {
-  final Adb adb = new Adb('adb');
+import 'src/context.dart';
 
+void main() {
   // We only test the [Adb] class is we're able to locate the adb binary.
-  if (!adb.exists())
+  final String adbPath = new OperatingSystemUtils().which('adb')?.path;
+  if (adbPath == null)
     return;
 
+  Adb adb;
+
+  setUp(() {
+    if (adbPath != null)
+      adb = new Adb(adbPath);
+  });
+
   group('adb', () {
-    test('getVersion', () {
+    testUsingContext('getVersion', () {
       expect(adb.getVersion(), isNotEmpty);
     });
 
-    test('getServerVersion', () async {
+    testUsingContext('getServerVersion', () async {
       adb.startServer();
 
       final String version = await adb.getServerVersion();
       expect(version, isNotEmpty);
     });
 
-    test('listDevices', () async {
+    testUsingContext('listDevices', () async {
       adb.startServer();
 
       final List<AdbDevice> devices = await adb.listDevices();
@@ -32,5 +41,5 @@ void main() {
       // Any result is ok.
       expect(devices, isList);
     });
-  });
+  }, skip: adbPath == null);
 }

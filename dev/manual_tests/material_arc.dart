@@ -393,10 +393,9 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 typedef Widget _DemoBuilder(_ArcDemo demo);
 
 class _ArcDemo {
-  _ArcDemo(String _title, this.builder, TickerProvider vsync)
-    : title = _title,
-      controller = new AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
-      key = new GlobalKey(debugLabel: _title);
+  _ArcDemo(this.title, this.builder, TickerProvider vsync)
+    : controller = new AnimationController(duration: const Duration(milliseconds: 500), vsync: vsync),
+      key = new GlobalKey(debugLabel: title);
 
   final String title;
   final _DemoBuilder builder;

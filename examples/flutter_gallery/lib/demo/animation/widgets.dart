@@ -36,7 +36,7 @@ class SectionCard extends StatelessWidget {
           opacity: 0.075,
           child: new Image.asset(
             section.backgroundAsset,
-            fit: ImageFit.cover,
+            fit: BoxFit.cover,
           ),
         ),
       ),
@@ -129,7 +129,7 @@ class SectionDetailView extends StatelessWidget {
         borderRadius: new BorderRadius.circular(6.0),
         backgroundImage: new BackgroundImage(
           image: new AssetImage(detail.imageAsset),
-          fit: ImageFit.cover,
+          fit: BoxFit.cover,
           alignment: FractionalOffset.center,
         ),
       ),
@@ -143,7 +143,7 @@ class SectionDetailView extends StatelessWidget {
         child: image,
       );
     } else {
-      item = new ListItem(
+      item = new ListTile(
         title: new Text(detail.title),
         subtitle: new Text(detail.subtitle),
         leading: new SizedBox(width: 32.0, height: 32.0, child: image),

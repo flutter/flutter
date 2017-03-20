@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,19 +14,15 @@ class PlatformServices extends StatefulWidget {
 
 class _PlatformServicesState extends State<PlatformServices> {
   static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
-  String _batteryLevel = 'Unknown battery level.';
+  String _batteryLevel = '';
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
-    if (Platform.isIOS) {
-      batteryLevel = "iOS is not supported yet.";
-    } else {
-      try {
-        final int result = await platform.invokeMethod('getBatteryLevel');
-        batteryLevel = 'Battery level at $result. %';
-      } on PlatformException catch (e) {
-        batteryLevel = "Failed to get battery level: '${e.message}'.";
-      }
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
     }
     setState(() {
       _batteryLevel = batteryLevel;
@@ -45,14 +40,14 @@ class _PlatformServicesState extends State<PlatformServices> {
               child: new Text('Get Battery Level'),
               onPressed: _getBatteryLevel,
             ),
-            new Text(_batteryLevel)
+            new Text(_batteryLevel, key: new Key('Battery level label')),
           ],
-        )
-      )
+        ),
+      ),
     );
   }
 }
-  
+
 void main() {
   runApp(new PlatformServices());
 }

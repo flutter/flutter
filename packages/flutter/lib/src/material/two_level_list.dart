@@ -10,7 +10,7 @@ import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'icons.dart';
-import 'list_item.dart';
+import 'list_tile.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
@@ -18,7 +18,7 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 
 /// An item in a [TwoLevelList] or a [TwoLevelSublist].
 ///
-/// A two-level list item is similar to a [ListItem], but a two-level list item
+/// A two-level list item is similar to a [ListTile], but a two-level list item
 /// automatically sizes itself to fit properly within its ancestor
 /// [TwoLevelList].
 ///
@@ -26,7 +26,7 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///
 ///  * [TwoLevelList]
 ///  * [TwoLevelSublist]
-///  * [ListItem]
+///  * [ListTile]
 class TwoLevelListItem extends StatelessWidget {
   /// Creates an item in a two-level list.
   TwoLevelListItem({
@@ -79,8 +79,8 @@ class TwoLevelListItem extends StatelessWidget {
     assert(parentList != null);
 
     return new SizedBox(
-      height: kListItemExtent[parentList.type],
-      child: new ListItem(
+      height: kListTileExtent[parentList.type],
+      child: new ListTile(
         leading: leading,
         title: title,
         trailing: trailing,
@@ -94,14 +94,14 @@ class TwoLevelListItem extends StatelessWidget {
 
 /// An item in a [TwoLevelList] that can expand and collapse.
 ///
-/// A two-level sublist is similar to a [ListItem], but the trailing widget is
+/// A two-level sublist is similar to a [ListTile], but the trailing widget is
 /// a button that expands or collapses a sublist of items.
 ///
 /// See also:
 ///
 ///  * [TwoLevelList]
 ///  * [TwoLevelListItem]
-///  * [ListItem]
+///  * [ListTile]
 class TwoLevelSublist extends StatefulWidget {
   /// Creates an item in a two-level list that can expland and collapse.
   TwoLevelSublist({
@@ -274,7 +274,7 @@ class TwoLevelList extends StatelessWidget {
   /// Typically [TwoLevelListItem] or [TwoLevelSublist] widgets.
   final List<Widget> children;
 
-  /// The kind of [ListItem] contained in this list.
+  /// The kind of [ListTile] contained in this list.
   final MaterialListType type;
 
   /// The amount of space by which to inset the children inside the viewport.

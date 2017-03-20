@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:archive/archive.dart';
-
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -14,7 +11,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils];
+OperatingSystemUtils get os => context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
@@ -33,6 +30,28 @@ abstract class OperatingSystemUtils {
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
   File which(String execName);
+
+  /// Return a list of all paths to `execName` found on the system. Uses the
+  /// PATH environment variable.
+  List<File> whichAll(String execName) {
+    final List<File> result = <File>[];
+    final String pathEnvironmentVariable = platform.environment['PATH'];
+    for (final String pathComponent in _splitPath(pathEnvironmentVariable)) {
+      final String pathToExecName = fs.path.join(pathComponent, execName);
+      if (processManager.canRun(pathToExecName)) {
+        result.add(fs.file(pathToExecName));
+      }
+    }
+    return result;
+  }
+
+  List<String> _splitPath(String pathEnvironmentVariable) {
+    final String delimiter = platform.isWindows ? ';' : ':';
+    if (pathEnvironmentVariable == null) {
+      return <String>[];
+    }
+    return pathEnvironmentVariable.split(delimiter);
+  }
 
   /// Return the File representing a new pipe.
   File makePipe(String path);
@@ -130,41 +149,6 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     throw new UnsupportedError('makePipe is not implemented on Windows.');
-  }
-}
-
-Future<int> findAvailablePort() async {
-  final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
-  final int port = socket.port;
-  await socket.close();
-  return port;
-}
-
-const int _kMaxSearchIterations = 20;
-
-/// This method will attempt to return a port close to or the same as
-/// [defaultPort]. Failing that, it will return any available port.
-Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
-  int iterationCount = 0;
-
-  while (iterationCount < _kMaxSearchIterations) {
-    final int port = defaultPort + iterationCount * searchStep;
-    if (await _isPortAvailable(port))
-      return port;
-    iterationCount++;
-  }
-
-  return findAvailablePort();
-}
-
-Future<bool> _isPortAvailable(int port) async {
-  try {
-    // TODO(ianh): This is super racy.
-    final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, port);
-    await socket.close();
-    return true;
-  } catch (error) {
-    return false;
   }
 }
 

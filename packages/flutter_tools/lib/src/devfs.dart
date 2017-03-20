@@ -113,8 +113,8 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  set bytes(List<int> newBytes) {
-    _bytes = newBytes;
+  set bytes(List<int> value) {
+    _bytes = value;
     _isModified = true;
   }
 
@@ -145,14 +145,14 @@ class DevFSStringContent extends DevFSByteContent {
 
   String get string => _string;
 
-  set string(String newString) {
-    _string = newString;
+  set string(String value) {
+    _string = value;
     super.bytes = UTF8.encode(_string);
   }
 
   @override
-  set bytes(List<int> newBytes) {
-    string = UTF8.decode(newBytes);
+  set bytes(List<int> value) {
+    string = UTF8.decode(value);
   }
 }
 
@@ -199,8 +199,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         '_writeDevFSFile',
         params: <String, dynamic> {
           'fsName': fsName,
-          // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
-          'path': deviceUri.toFilePath(windows: false),
+          'uri': deviceUri.toString(),
           'fileContents': fileContents
         },
       );
@@ -268,9 +267,8 @@ class _DevFSHttpWriter {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
-      // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
-      request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(deviceUri.toFilePath(windows: false))));
+      request.headers.add('dev_fs_uri_b64',
+                          BASE64.encode(UTF8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
@@ -300,13 +298,12 @@ class _DevFSHttpWriter {
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
   DevFS(VMService serviceProtocol,
-        String fsName,
+        this.fsName,
         this.rootDirectory, {
         String packagesFilePath
       })
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
-      fsName = fsName {
+      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
@@ -330,7 +327,7 @@ class DevFS {
   final Set<String> assetPathsToEvict = new Set<String>();
 
   final List<Future<Map<String, dynamic>>> _pendingOperations =
-      new List<Future<Map<String, dynamic>>>();
+      <Future<Map<String, dynamic>>>[];
 
   Uri _baseUri;
   Uri get baseUri => _baseUri;
@@ -376,7 +373,7 @@ class DevFS {
     // Handle deletions.
     printTrace('Scanning for deleted files');
     final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
-    final List<Uri> toRemove = new List<Uri>();
+    final List<Uri> toRemove = <Uri>[];
     _entries.forEach((Uri deviceUri, DevFSContent content) {
       if (!content._exists) {
         final Future<Map<String, dynamic>> operation =

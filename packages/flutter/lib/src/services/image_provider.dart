@@ -9,9 +9,10 @@ import 'dart:ui' as ui show Image;
 import 'dart:ui' show Size, Locale, hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/http.dart' as http;
+import 'package:http/http.dart' as http;
 
 import 'asset_bundle.dart';
+import 'http_client.dart';
 import 'image_cache.dart';
 import 'image_decoder.dart';
 import 'image_stream.dart';
@@ -332,11 +333,13 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
+  static final http.Client _httpClient = createHttpClient();
+
   Future<ImageInfo> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await http.get(resolved);
+    final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
       return null;
 
@@ -421,7 +424,7 @@ class FileImage extends ImageProvider<FileImage> {
     if (other.runtimeType != runtimeType)
       return false;
     final FileImage typedOther = other;
-    return file?.path == file?.path
+    return file?.path == typedOther.file?.path
         && scale == typedOther.scale;
   }
 
@@ -432,6 +435,58 @@ class FileImage extends ImageProvider<FileImage> {
   String toString() => '$runtimeType("${file?.path}", scale: $scale)';
 }
 
+/// Decodes the given [Uint8List] buffer as an image, associating it with the
+/// given scale.
+class MemoryImage extends ImageProvider<MemoryImage> {
+  /// Creates an object that decodes a [Uint8List] buffer as an image.
+  ///
+  /// The arguments must not be null.
+  const MemoryImage(this.bytes, { this.scale: 1.0 });
+
+  /// The bytes to decode into an image.
+  final Uint8List bytes;
+
+  /// The scale to place in the [ImageInfo] object of the image.
+  final double scale;
+
+  @override
+  Future<MemoryImage> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<MemoryImage>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(MemoryImage key) {
+    return new OneFrameImageStreamCompleter(_loadAsync(key));
+  }
+
+  Future<ImageInfo> _loadAsync(MemoryImage key) async {
+    assert(key == this);
+
+    final ui.Image image = await decodeImageFromList(bytes);
+    if (image == null)
+      return null;
+
+    return new ImageInfo(
+      image: image,
+      scale: key.scale,
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final MemoryImage typedOther = other;
+    return bytes == typedOther.bytes
+        && scale == typedOther.scale;
+  }
+
+  @override
+  int get hashCode => hashValues(bytes.hashCode, scale);
+
+  @override
+  String toString() => '$runtimeType(${bytes.runtimeType}#${bytes.hashCode}, scale: $scale)';
+}
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///
 /// This implementation requires an explicit final [name] and [scale] on

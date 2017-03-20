@@ -89,7 +89,7 @@ class DriveCommand extends RunCommandBase {
     if (testFile == null)
       throwToolExit(null);
 
-    this._device = await targetDeviceFinder();
+    _device = await targetDeviceFinder();
     if (device == null)
       throwToolExit(null);
 
@@ -262,7 +262,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 
   printTrace('Installing application package.');
   final ApplicationPackage package = command.applicationPackages
-      .getPackageForPlatform(command.device.platform);
+      .getPackageForPlatform(command.device.targetPlatform);
   if (command.device.isAppInstalled(package))
     command.device.uninstallApp(package);
   command.device.installApp(package);
@@ -335,7 +335,7 @@ void restoreAppStopper() {
 
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  final ApplicationPackage package = command.applicationPackages.getPackageForPlatform(command.device.platform);
+  final ApplicationPackage package = command.applicationPackages.getPackageForPlatform(command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;

@@ -70,9 +70,9 @@ void main() {
     expect(value, equals(0.0));
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(50.0));
-    await tester.scroll(find.byKey(sliderKey), const Offset(5.0, 0.0));
+    await tester.drag(find.byKey(sliderKey), const Offset(5.0, 0.0));
     expect(value, equals(50.0));
-    await tester.scroll(find.byKey(sliderKey), const Offset(40.0, 0.0));
+    await tester.drag(find.byKey(sliderKey), const Offset(40.0, 0.0));
     expect(value, equals(80.0));
 
     await tester.pump(); // Starts animation.

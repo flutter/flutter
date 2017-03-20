@@ -17,12 +17,6 @@ class DependencyChecker {
   /// if it cannot be determined.
   bool check(DateTime threshold) {
     _dependencies.clear();
-    try {
-      _dependencies.add(builder.packagesFilePath);
-    } catch (e, st) {
-      printTrace('DependencyChecker: could not parse .packages file:\n$e\n$st');
-      return true;
-    }
     // Build the set of Dart dependencies.
     try {
       _dependencies.addAll(builder.build());

@@ -132,7 +132,7 @@ class VendorItem extends StatelessWidget {
             width: 24.0,
             child: new ClipRRect(
               borderRadius: new BorderRadius.circular(12.0),
-              child: new Image.asset(vendor.avatarAsset, fit: ImageFit.cover),
+              child: new Image.asset(vendor.avatarAsset, fit: BoxFit.cover),
             ),
           ),
           const SizedBox(width: 8.0),
@@ -260,7 +260,7 @@ class FeatureItem extends StatelessWidget {
                         minHeight: 340.0,
                         maxHeight: 340.0,
                         alignment: FractionalOffset.topRight,
-                        child: new Image.asset(product.imageAsset, fit: ImageFit.cover),
+                        child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
                       ),
                     ),
                   ),
@@ -320,7 +320,7 @@ class ProductItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: new Hero(
                     tag: product.tag,
-                    child: new Image.asset(product.imageAsset, fit: ImageFit.contain),
+                    child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
                   ),
                 ),
               new Padding(
@@ -381,7 +381,7 @@ class _ShrineHomeState extends State<ShrineHome> {
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(16.0),
-            child: new SliverGrid(
+            sliver: new SliverGrid(
               gridDelegate: gridDelegate,
               delegate: new SliverChildListDelegate(
                 _products.map((Product product) {

@@ -59,10 +59,17 @@ by the [luci/recipes-py github project](https://github.com/luci/recipes-py).
 
 The typical cycle for editing a recipe is:
 
-1. Make your edits (probably to files in `//chrome_infra/build/scripts/slave/recipes/flutter`).
-2. Run `build/scripts/slave/recipes.py simulation_test train flutter` to update expected files  (remove the flutter if you need to do a global update).
-3. Run `build/scripts/tools/run_recipe.py flutter/flutter` (or flutter/engine) if something was strange during training and you need to run it locally.
-4. Upload the patch (`git commit`, `git cl upload`) and send it to someone in the `recipes/flutter/OWNERS` file for review.
+1. Make your edits (probably to files in
+   `//chrome_infra/build/scripts/slave/recipes/flutter`).
+2. Run `build/scripts/slave/recipes.py simulation_test train flutter` to update
+   expected files  (remove the flutter if you need to do a global update).
+3. Run `build/scripts/tools/run_recipe.py flutter/<repo> slavename=<slavename>
+   mastername=client.flutter buildername=<buildername>` where `<repo>` is one
+   of `flutter` or `engine`, and `slavename` and `buildername` can be looked up
+   from the *Build Properties* section of a [recent
+   build](https://build.chromium.org/p/client.flutter/one_line_per_build).
+4. Upload the patch (`git commit`, `git cl upload`) and send it to someone in
+   the `recipes/flutter/OWNERS` file for review.
 
 ## Editing the client.flutter buildbot master
 

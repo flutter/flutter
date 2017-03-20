@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -89,6 +88,12 @@ abstract class ResidentRunner {
     return stopApp();
   }
 
+  Future<Null> detach() async {
+    await stopEchoingDeviceLog();
+    await preStop();
+    appFinished();
+  }
+
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
@@ -157,14 +162,11 @@ abstract class ResidentRunner {
   void registerSignalHandlers() {
     assert(stayResident);
     ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    if (!platform.isWindows) // TODO(goderbauer): enable on Windows when https://github.com/dart-lang/sdk/issues/28603 is fixed
-      ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    if (!platform.isWindows) {
-      ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-      ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
-    }
+    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
   Future<Null> _cleanUpAndExit(ProcessSignal signal) async {
@@ -207,7 +209,7 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(Uri uri) async {
+  Future<Null> connectToServiceProtocol(Uri uri, {String isolateFilter}) async {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
@@ -215,22 +217,16 @@ abstract class ResidentRunner {
     printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
-    // Refresh the view list.
-    await vmService.vm.refreshViews();
-    for (int i = 0; vmService.vm.mainView == null && i < 5; i++) {
-      // If the VM doesn't yet have a view, wait for one to show up.
-      printTrace('Waiting for Flutter view');
-      await new Future<Null>.delayed(const Duration(seconds: 1));
-      await vmService.vm.refreshViews();
-    }
-    currentView = vmService.vm.mainView;
+    // Refresh the view list, and wait a bit for the list to populate.
+    await vmService.waitForViews();
+    currentView = (isolateFilter == null)
+                ? vmService.vm.firstView
+                : vmService.vm.firstViewWithName(isolateFilter);
     if (currentView == null)
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(() {
-      appFinished();
-    });
+    vmService.done.whenComplete(appFinished);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -239,8 +235,8 @@ abstract class ResidentRunner {
 
     printStatus(''); // the key the user tapped might be on this line
 
-    if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
-      // F1, help
+    if (lower == 'h' || lower == '?') {
+      // help
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
@@ -269,9 +265,12 @@ abstract class ResidentRunner {
         print('Switched operating system to: $platform');
         return true;
       }
-    } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
-      // F10, exit
+    } else if (lower == 'q') {
+      // exit
       await stop();
+      return true;
+    } else if (lower == 'd') {
+      await detach();
       return true;
     }
 
@@ -316,9 +315,7 @@ abstract class ResidentRunner {
         printHelp(details: false);
       }
       terminal.singleCharMode = true;
-      terminal.onCharInput.listen((String code) {
-        processTerminalInput(code);
-      });
+      terminal.onCharInput.listen(processTerminalInput);
     }
   }
 
@@ -330,8 +327,7 @@ abstract class ResidentRunner {
 
   bool hasDirtyDependencies() {
     final DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(
-            mainPath, projectRootPath, packagesFilePath);
+        new DartDependencySetBuilder(mainPath, packagesFilePath);
     final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
     final String path = package.packagePath;

@@ -127,8 +127,7 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
   for (String routeName in routeNames) {
     final Finder finder = findGalleryItemByRouteName(tester, routeName);
     Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     await smokeDemo(tester, routeName);
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }

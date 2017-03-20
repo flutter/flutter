@@ -8,10 +8,11 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -30,6 +31,10 @@ void main() {
       targetDeviceFinder = () async => mockDevice;
       testDeviceManager.addDevice(mockDevice);
     }
+
+    setUpAll(() {
+      Cache.disableLocking();
+    });
 
     setUp(() {
       command = new DriveCommand();
@@ -243,7 +248,7 @@ void main() {
         expect(device.name, 'mock-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
 
       testUsingContext('uses existing Android device if and there are no simulators', () async {
@@ -256,7 +261,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
 
       testUsingContext('launches emulator', () async {
@@ -270,7 +275,7 @@ void main() {
         expect(device.name, 'new-simulator');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => macOsPlatform(),
+        Platform: macOsPlatform,
       });
     });
 
@@ -283,7 +288,7 @@ void main() {
         expect(await findTargetDevice(), isNull);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => platform(),
+        Platform: platform,
       });
 
       testUsingContext('uses existing Android device', () async {
@@ -295,7 +300,7 @@ void main() {
         expect(device.name, 'mock-android-device');
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        Platform: () => platform(),
+        Platform: platform,
       });
     }
 
