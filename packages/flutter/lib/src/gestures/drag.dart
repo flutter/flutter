@@ -204,12 +204,6 @@ typedef void GestureDragEndCallback(DragEndDetails details);
 /// See [DragGestureRecognizer.onCancel].
 typedef void GestureDragCancelCallback();
 
-bool _isFlingGesture(Velocity velocity) {
-  assert(velocity != null);
-  final double speedSquared = velocity.pixelsPerSecond.distanceSquared;
-  return speedSquared > kMinFlingVelocity * kMinFlingVelocity;
-}
-
 /// Recognizes movement.
 ///
 /// In contrast to [MultiDragGestureRecognizer], [DragGestureRecognizer]
@@ -256,10 +250,15 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The pointer that previously triggered [onDown] did not complete.
   GestureDragCancelCallback onCancel;
 
+  double minFlingDistance;
+  double minFlingVelocity;
+  double maxFlingVelocity;
+
   _DragState _state = _DragState.ready;
   Point _initialPosition;
   Offset _pendingDragOffset;
 
+  bool _isFlingGesture(VelocityEstimate estimate);
   Offset _getDeltaForDetails(Offset delta);
   double _getPrimaryValueFromOffset(Offset value);
   bool get _hasSufficientPendingDragDeltaToAccept;
@@ -345,11 +344,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final VelocityTracker tracker = _velocityTrackers[pointer];
       assert(tracker != null);
 
-      Velocity velocity = tracker.getVelocity();
-      if (velocity != null && _isFlingGesture(velocity)) {
-        final Offset pixelsPerSecond = velocity.pixelsPerSecond;
-        if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
-          velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+      final VelocityEstimate estimate = tracker.getVelocityEstimate();
+      if (estimate != null && _isFlingGesture(estimate)) {
+        final Velocity velocity = new Velocity(pixelsPerSecond: estimate.pixelsPerSecond)
+          .clampMagnitude(minFlingVelocity ?? kMinFlingVelocity, maxFlingVelocity ?? kMaxFlingVelocity);
         invokeCallback<Null>('onEnd', () => onEnd(new DragEndDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           velocity: velocity,
           primaryVelocity: _getPrimaryValueFromOffset(velocity.pixelsPerSecond),
@@ -380,6 +378,13 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 ///  * [VerticalMultiDragGestureRecognizer]
 class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   @override
+  bool _isFlingGesture(VelocityEstimate estimate) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? kTouchSlop;
+    return estimate.pixelsPerSecond.dy.abs() > minVelocity && estimate.offset.dy.abs() > minDistance;
+  }
+
+  @override
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dy.abs() > kTouchSlop;
 
   @override
@@ -401,6 +406,13 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 ///  * [HorizontalMultiDragGestureRecognizer]
 class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   @override
+  bool _isFlingGesture(VelocityEstimate estimate) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? kTouchSlop;
+    return estimate.pixelsPerSecond.dx.abs() > minVelocity && estimate.offset.dx.abs() > minDistance;
+  }
+
+  @override
   bool get _hasSufficientPendingDragDeltaToAccept => _pendingDragOffset.dx.abs() > kTouchSlop;
 
   @override
@@ -420,6 +432,14 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 ///  * [ImmediateMultiDragGestureRecognizer]
 ///  * [DelayedMultiDragGestureRecognizer]
 class PanGestureRecognizer extends DragGestureRecognizer {
+  @override
+  bool _isFlingGesture(VelocityEstimate estimate) {
+    final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
+    final double minDistance = minFlingDistance ?? kTouchSlop;
+    return estimate.pixelsPerSecond.distanceSquared > minVelocity * minVelocity &&
+      estimate.offset.distanceSquared > minDistance * minDistance;
+  }
+
   @override
   bool get _hasSufficientPendingDragDeltaToAccept {
     return _pendingDragOffset.distance > kPanSlop;

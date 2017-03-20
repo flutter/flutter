@@ -106,6 +106,10 @@ abstract class ScrollPhysics {
 
   Tolerance get tolerance => parent?.tolerance ?? _kDefaultTolerance;
 
+  double get minFlingDistance => parent?.minFlingDistance ?? kTouchSlop;
+  double get minFlingVelocity => parent?.minFlingVelocity ?? kMinFlingVelocity;
+  double get maxFlingVelocity => parent?.maxFlingVelocity ?? kMaxFlingVelocity;
+
   @override
   String toString() {
     if (parent == null)

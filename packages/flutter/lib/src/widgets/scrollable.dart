@@ -193,6 +193,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
+      final ScrollPhysics physics = _configuration.getScrollPhysics(context);
       switch (config.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
@@ -201,7 +202,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
+                ..onEnd = _handleDragEnd
+                ..minFlingDistance = physics?.minFlingDistance
+                ..minFlingVelocity = physics?.minFlingVelocity
+                ..maxFlingVelocity = physics?.maxFlingVelocity;
             }
           };
           break;
@@ -212,7 +216,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
+                ..onEnd = _handleDragEnd
+                ..minFlingDistance = physics?.minFlingDistance
+                ..minFlingVelocity = physics?.minFlingVelocity
+                ..maxFlingVelocity = physics?.maxFlingVelocity;
             }
           };
           break;
