@@ -550,14 +550,17 @@ config("runtime_library") {
 
     lib_dirs += [ "$android_libcpp_root/libs/$android_app_abi" ]
 
+    libs += [
+      "$android_libcpp_library",
+      "c++abi",
+      "android_support",
+    ]
+
     if (current_cpu == "arm") {
       libs += [ "unwind" ]
     }
 
     libs += [
-      "$android_libcpp_library",
-      "c++abi",
-      "android_support",
       "gcc",
       "c",
       "dl",
