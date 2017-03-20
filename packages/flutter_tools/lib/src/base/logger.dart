@@ -264,7 +264,6 @@ class AnsiTerminal {
   static const int _ENXIO = 6;
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
-  static const int _ERROR_INVALID_PARAMETER = 87;
   static const int _INVALID_HANDLE = 6;
 
   /// Setting the line mode can throw for some terminals (with "Operation not
@@ -273,7 +272,6 @@ class AnsiTerminal {
     _ENXIO,
     _ENOTTY,
     _ENETRESET,
-    _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed
     _INVALID_HANDLE,
   ];
 
@@ -288,7 +286,14 @@ class AnsiTerminal {
     //     we should check beforehand if stdin is connected to a terminal or not
     //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
     try {
-      stdin.lineMode = !value;
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
     } on StdinException catch (error) {
       if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
         rethrow;
