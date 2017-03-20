@@ -203,9 +203,8 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (kernelPath != null) {
+  if (kernelPath != null)
     command.add('-Pkernel=$kernelPath');
-  }
   command.add(assembleTask);
   final int exitcode = await runCommandAndStreamOutput(
       command,

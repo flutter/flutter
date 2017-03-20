@@ -94,9 +94,8 @@ Future<Null> build({
   }
 
   DevFSContent kernelContent;
-  if (kernelPath != null) {
+  if (kernelPath != null)
     kernelContent = new DevFSFileContent(fs.file(kernelPath));
-  }
 
   return assemble(
     manifestPath: manifestPath,
