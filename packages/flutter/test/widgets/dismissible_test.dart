@@ -16,8 +16,8 @@ Widget background;
 Widget buildTest({ double startToEndThreshold }) {
   return new StatefulBuilder(
     builder: (BuildContext context, StateSetter setState) {
-      Widget buildDismissableItem(int item) {
-        return new Dismissable(
+      Widget buildDismissibleItem(int item) {
+        return new Dismissible(
           key: new ValueKey<int>(item),
           direction: dismissDirection,
           onDismissed: (DismissDirection direction) {
@@ -49,7 +49,7 @@ Widget buildTest({ double startToEndThreshold }) {
           itemExtent: itemExtent,
           children: <int>[0, 1, 2, 3, 4]
             .where((int i) => !dismissedItems.contains(i))
-            .map(buildDismissableItem).toList(),
+            .map(buildDismissibleItem).toList(),
         ),
       );
     },
@@ -66,7 +66,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
   switch (gestureDirection) {
     case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
-      // edge and outside the Dismissable event listener's bounds.
+      // edge and outside the Dismissible event listener's bounds.
       downLocation = tester.getTopRight(finder) + const Offset(-0.1, 0.0);
       upLocation = tester.getTopLeft(finder);
       break;
@@ -77,7 +77,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
       break;
     case DismissDirection.up:
       // getBottomLeft() returns a point that's just below itemWidget's bottom
-      // edge and outside the Dismissable event listener's bounds.
+      // edge and outside the Dismissible event listener's bounds.
       downLocation = tester.getBottomLeft(finder) + const Offset(0.0, -0.1);
       upLocation = tester.getTopLeft(finder);
       break;
@@ -111,14 +111,14 @@ Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestu
   await tester.pump(); // rebuild after the callback removes the entry
 }
 
-class Test1215DismissableWidget extends StatelessWidget {
-  Test1215DismissableWidget(this.text);
+class Test1215DismissibleWidget extends StatelessWidget {
+  Test1215DismissibleWidget(this.text);
 
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return new Dismissable(
+    return new Dismissible(
       key: new ObjectKey(text),
       child: new AspectRatio(
         aspectRatio: 1.0,
@@ -236,7 +236,7 @@ void main() {
     expect(dismissedItems, equals(<int>[0]));
   });
 
-  testWidgets('drag-left has no effect on dismissable with a high dismiss threshold', (WidgetTester tester) async {
+  testWidgets('drag-left has no effect on dismissible with a high dismiss threshold', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
 
@@ -282,7 +282,7 @@ void main() {
   // now-obsolete URL https://github.com/flutter/engine/issues/1215 (the URL
   // died in the migration to the new repo). Don't copy this test; it doesn't
   // actually remove the dismissed widget, which is a violation of the
-  // Dismissable contract. This is not an example of good practice.
+  // Dismissible contract. This is not an example of good practice.
   testWidgets('dismissing bottom then top (smoketest)', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(
       child: new Container(
@@ -290,8 +290,8 @@ void main() {
         height: 1000.0,
         child: new Column(
           children: <Widget>[
-            new Test1215DismissableWidget('1'),
-            new Test1215DismissableWidget('2'),
+            new Test1215DismissibleWidget('1'),
+            new Test1215DismissibleWidget('2'),
           ],
         ),
       ),
@@ -310,7 +310,7 @@ void main() {
     expect(find.text('2'), findsNothing);
   });
 
-  testWidgets('Dismissable starts from the full size when collapsing', (WidgetTester tester) async {
+  testWidgets('Dismissible starts from the full size when collapsing', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
     background = new Text('background');

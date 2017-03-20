@@ -231,8 +231,8 @@ class SnackBar extends StatelessWidget {
         },
         child: new Semantics(
           container: true,
-          child: new Dismissable(
-            key: const Key('dismissable'),
+          child: new Dismissible(
+            key: const Key('dismissible'),
             direction: DismissDirection.down,
             resizeDuration: null,
             onDismissed: (DismissDirection direction) {

@@ -138,7 +138,7 @@ void main() {
     expect(await result, equals(42));
   });
 
-  testWidgets('Barrier dismissable', (WidgetTester tester) async {
+  testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -175,7 +175,7 @@ void main() {
 
     showDialog<Null>(
       context: context,
-      barrierDismissable: false,
+      barrierDismissible: false,
       child: new Container(
         width: 100.0,
         height: 100.0,

@@ -396,7 +396,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kMenuDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => null;
