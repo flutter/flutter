@@ -1210,9 +1210,6 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
       assert(_borderRadius != null);
   }
 
-  @override
-  bool get alwaysNeedsCompositing => true;
-
   /// The shape of the layer.
   BoxShape get shape => _shape;
   BoxShape _shape;
@@ -1285,7 +1282,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushPhysicalModel(offset, _clip.outerRect, _clip, _elevation, _color, super.paint);
+      context.pushPhysicalModel(needsCompositing, offset, _clip.outerRect, _clip, _elevation, _color, super.paint);
     }
   }
 }
