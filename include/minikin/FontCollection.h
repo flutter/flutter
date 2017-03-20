@@ -53,6 +53,10 @@ public:
     std::shared_ptr<FontCollection>
             createCollectionWithVariation(const std::vector<FontVariation>& variations);
 
+    const std::unordered_set<AxisTag>& getSupportedTags() const {
+        return mSupportedAxes;
+    }
+
     uint32_t getId() const;
 
 private:
