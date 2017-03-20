@@ -15,6 +15,7 @@
 #include "lib/tonic/typed_data/float64_list.h"
 #include "lib/tonic/typed_data/int32_list.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/utils/SkShadowUtils.h"
 
 namespace tonic {
 class DartLibraryNatives;
@@ -158,6 +159,11 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
                  const tonic::Int32List& colors,
                  SkBlendMode blend_mode,
                  const tonic::Float32List& cull_rect);
+
+  void drawShadow(const CanvasPath* path,
+                  SkColor color,
+                  int elevation,
+                  bool transparentOccluder);
 
   SkCanvas* canvas() const { return canvas_; }
   void Clear();

@@ -18,6 +18,9 @@ class PhysicalModelLayer : public ContainerLayer {
   void set_elevation(int elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
 
+  static void DrawShadow(SkCanvas* canvas, const SkPath& path,
+                         SkColor color, int elevation, bool transparentOccluder);
+
  protected:
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) override;

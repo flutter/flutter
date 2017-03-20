@@ -1548,6 +1548,18 @@ class Canvas extends NativeFieldWrapperClass2 {
                   Int32List colors,
                   int blendMode,
                   Float32List cullRect) native "Canvas_drawAtlas";
+
+  /// Draws a shadow for a [Path] representing the given material elevation.
+  ///
+  /// transparentOccluder should be true if the occluding object is not opaque.
+  void drawShadow(Path path, Color color, int elevation, bool transparentOccluder) {
+    _drawShadow(path, color.value, elevation, transparentOccluder);
+  }
+
+  void _drawShadow(Path path,
+                   int color,
+                   int elevation,
+                   bool transparentOccluder) native "Canvas_drawShadow";
 }
 
 /// An object representing a sequence of recorded graphical operations.

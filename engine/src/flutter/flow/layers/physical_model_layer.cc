@@ -50,16 +50,8 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
   path.addRRect(rrect_);
 
   if (elevation_ != 0) {
-    SkShadowFlags flags = SkColorGetA(color_) == 0xff ?
-        SkShadowFlags::kNone_ShadowFlag :
-        SkShadowFlags::kTransparentOccluder_ShadowFlag;
-    SkShadowUtils::DrawShadow(&context.canvas, path,
-                              elevation_ * 4,
-                              SkPoint3::Make(0.0f, -700.0f, 2800.0f),
-                              2800.0f,
-                              0.25f, 0.25f,
-                              SK_ColorBLACK,
-                              flags);
+    DrawShadow(&context.canvas, path, SK_ColorBLACK, elevation_,
+               SkColorGetA(color_) != 0xff);
   }
 
   if (needs_system_composite())
@@ -77,6 +69,21 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
   }
   context.canvas.clipRRect(rrect_, true);
   PaintChildren(context);
+}
+
+void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,
+                                    SkColor color, int elevation,
+                                    bool transparentOccluder) {
+    SkShadowFlags flags = transparentOccluder ?
+        SkShadowFlags::kTransparentOccluder_ShadowFlag :
+        SkShadowFlags::kNone_ShadowFlag;
+    SkShadowUtils::DrawShadow(canvas, path,
+                              elevation * 4,
+                              SkPoint3::Make(0.0f, -700.0f, 2800.0f),
+                              2800.0f,
+                              0.25f, 0.25f,
+                              color,
+                              flags);
 }
 
 }  // namespace flow

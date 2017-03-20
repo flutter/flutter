@@ -6,6 +6,7 @@
 
 #include <math.h>
 
+#include "flutter/flow/layers/physical_model_layer.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -53,7 +54,8 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, Canvas);
   V(Canvas, drawPicture)            \
   V(Canvas, drawPoints)             \
   V(Canvas, drawVertices)           \
-  V(Canvas, drawAtlas)
+  V(Canvas, drawAtlas)              \
+  V(Canvas, drawShadow)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -393,6 +395,17 @@ void Canvas::drawAtlas(const Paint& paint,
       rects.num_elements() / 4,  // SkRect have four floats.
       blend_mode, reinterpret_cast<const SkRect*>(cull_rect.data()),
       paint.paint());
+}
+
+void Canvas::drawShadow(const CanvasPath* path,
+                        SkColor color,
+                        int elevation,
+                        bool transparentOccluder) {
+  flow::PhysicalModelLayer::DrawShadow(canvas_,
+                                       path->path(),
+                                       color,
+                                       elevation,
+                                       transparentOccluder);
 }
 
 void Canvas::Clear() {
