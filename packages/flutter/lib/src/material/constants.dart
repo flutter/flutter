@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/painting.dart';
+
 /// The height of the toolbar component of the [AppBar].
 const double kToolbarHeight = 56.0;
 
@@ -25,3 +27,5 @@ const int kRadialReactionAlpha = 0x33;
 
 /// The duration
 const Duration kTabScrollDuration = const Duration(milliseconds: 200);
+
+const EdgeInsets kMaterialListPadding = const EdgeInsets.symmetric(vertical: 8.0);

@@ -84,7 +84,7 @@ class MenuDemoState extends State<MenuDemo> {
         ]
       ),
       body: new ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: kMaterialListPadding,
         children: <Widget>[
           // Pressing the PopupMenuButton on the right of this item shows
           // a simple menu with one disabled item. Typically the contents

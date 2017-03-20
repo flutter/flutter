@@ -59,7 +59,7 @@ class ShrinePageState extends State<ShrinePage> {
         );
       }
       return new ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: kMaterialListPadding,
         children: config.shoppingCart.values.map((Order order) {
           return new ListTile(
             title: new Text(order.product.name),
