@@ -144,11 +144,15 @@ class FlutterPlugin implements Plugin<Project> {
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
         plugins.each { name, _ ->
-            def pluginProject = project.rootProject.project(":$name")
-            project.dependencies {
-                compile pluginProject
+            def pluginProject = project.rootProject.findProject(":$name")
+            if (pluginProject != null) {
+                project.dependencies {
+                    compile pluginProject
+                }
+                pluginProject.afterEvaluate this.&addFlutterJarDependency
+            } else {
+                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
-            pluginProject.afterEvaluate this.&addFlutterJarDependency
         }
     }
 
