@@ -141,7 +141,7 @@ File ensureLocalProperties() {
   return localProperties;
 }
 
-Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
+Future<Null> buildGradleProject(BuildMode buildMode, String target, String kernelPath) async {
   final File localProperties = ensureLocalProperties();
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
@@ -162,7 +162,7 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target) async {
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return buildGradleProjectV2(gradle, buildModeName, target);
+      return buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
   }
 }
 
@@ -185,7 +185,7 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   printStatus('Built $gradleAppOutV1 (${getSizeAsMB(apkFile.lengthSync())}).');
 }
 
-Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target) async {
+Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String target, String kernelPath) async {
   final String assembleTask = "assemble${toTitleCase(buildModeName)}";
 
   // Run 'gradle assemble<BuildMode>'.
@@ -203,6 +203,8 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
+  if (kernelPath != null)
+    command.add('-Pkernel=$kernelPath');
   command.add(assembleTask);
   final int exitcode = await runCommandAndStreamOutput(
       command,

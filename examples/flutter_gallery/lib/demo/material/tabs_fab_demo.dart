@@ -14,7 +14,7 @@ class _Page {
   _Page({ this.label, this.colors, this.icon });
 
   final String label;
-  final Map<int, Color> colors;
+  final MaterialColor colors;
   final IconData icon;
 
   Color get labelColor => colors != null ? colors[300] : Colors.grey[300];

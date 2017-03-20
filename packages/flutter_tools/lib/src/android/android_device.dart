@@ -15,7 +15,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
-import '../devfs.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -263,6 +262,24 @@ class AndroidDevice extends Device {
     return true;
   }
 
+  bool _installLatestApp(ApplicationPackage package) {
+    if (isAppInstalled(package)) {
+      if (isLatestBuildInstalled(package)) {
+        printStatus('Latest build already installed.');
+        return true;
+      }
+      printStatus('Uninstalling old version...');
+      if (!uninstallApp(package))
+        printError('Warning: uninstalling old version failed');
+    }
+    printTrace('Installing APK.');
+    if (!installApp(package)) {
+      printTrace('Error: Failed to install APK.');
+      return false;
+    }
+    return true;
+  }
+
   @override
   Future<LaunchResult> startApp(
     ApplicationPackage package,
@@ -271,7 +288,7 @@ class AndroidDevice extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {
@@ -288,8 +305,7 @@ class AndroidDevice extends Device {
       await buildApk(targetPlatform,
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
-          kernelContent: kernelContent,
-          applicationNeedsRebuild: applicationNeedsRebuild
+          kernelPath: kernelPath,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
@@ -299,21 +315,8 @@ class AndroidDevice extends Device {
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
 
-    if (isLatestBuildInstalled(package)) {
-      printStatus('Latest build already installed.');
-    } else {
-      if (isAppInstalled(package)) {
-        printStatus('Uninstalling old version...');
-        if (!uninstallApp(package))
-          printError('Warning: uninstalling old version failed');
-      }
-
-      printTrace('Installing APK.');
-      if (!installApp(package)) {
-        printTrace('Error: Failed to install APK.');
-        return new LaunchResult.failed();
-      }
-    }
+    if (!_installLatestApp(package))
+      return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
     final AndroidApk apk = package;
@@ -603,8 +606,9 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      _process.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
-      _process.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onLine);
+      final Utf8Decoder decoder = new Utf8Decoder(allowMalformed: true);
+      _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
+      _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener)
           _linesController.close();

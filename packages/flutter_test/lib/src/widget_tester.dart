@@ -222,9 +222,14 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       do {
         await binding.pump(duration, phase);
         count += 1;
-      } while (binding.transientCallbackCount > 0);
+      } while (hasRunningAnimations);
     }).then<int>((Null _) => count);
   }
+
+  /// Whether ther are any any transient callbacks scheduled.
+  ///
+  /// This essentially checks whether all animations have completed.
+  bool get hasRunningAnimations => binding.transientCallbackCount > 0;
 
   @override
   HitTestResult hitTestOnBinding(Point location) {

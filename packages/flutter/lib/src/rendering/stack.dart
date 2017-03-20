@@ -370,7 +370,7 @@ class RenderStack extends RenderBox
       size = constraints.biggest;
     }
 
-    assert(!size.isInfinite);
+    assert(size.isFinite);
 
     child = firstChild;
     while (child != null) {

@@ -124,7 +124,7 @@ Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize) {
             image: new TestAssetImage(image),
             height: imageSize,
             width: imageSize,
-            fit: ImageFit.fill
+            fit: BoxFit.fill
           )
       )
     )

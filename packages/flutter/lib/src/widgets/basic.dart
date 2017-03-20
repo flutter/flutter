@@ -554,7 +554,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// The [fit] and [alignment] arguments must not be null.
   FittedBox({
     Key key,
-    this.fit: ImageFit.contain,
+    this.fit: BoxFit.contain,
     this.alignment: FractionalOffset.center,
     Widget child
   }) : super(key: key, child: child) {
@@ -563,7 +563,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   }
 
   /// How to inscribe the child into the space allocated during layout.
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the child within its parent's bounds.
   ///
@@ -2489,7 +2489,7 @@ class RawImage extends LeafRenderObjectWidget {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the image within its bounds.
   ///

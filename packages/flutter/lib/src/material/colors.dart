@@ -2,9 +2,85 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color;
+import 'dart:ui' show Color, hashValues;
 
-/// [Color] constants which represent Material design's
+/// A color that has a small table of related colors called a "swatch".
+///
+/// See also:
+///
+///  * [MaterialColor] and [MaterialAccentColor], which define material design
+///    primary and accent color swatches.
+///  * [Colors], which defines all of the standard material design colors.
+class ColorSwatch extends Color {
+  // Creates a color that has a small table of related colors called a "swatch".
+  const ColorSwatch(int primary, this._swatch) : super(primary);
+
+  final Map<int, Color> _swatch;
+
+  /// Returns an element of the [swatch] table.
+  Color operator [](int index) => _swatch[index];
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final ColorSwatch typedOther = other;
+    return super==(other) && _swatch == typedOther._swatch;
+  }
+
+  @override
+  int get hashCode => hashValues(runtimeType, value, _swatch);
+
+  @override
+  String toString() => '$runtimeType(primary value: ${super.toString()})';
+
+}
+
+/// Defines a single color as well a color swatch with ten shades of the color.
+///
+/// The color's shades are referred to by index. The greater the index, the
+/// darker the color. There are 10 valid indices: 50, 100, 200, ..., 900.
+/// The value of this color should the same the value of index 500 and [shade500].
+///
+/// See also:
+///
+///  * [Colors], which defines all of the standard material colors.
+class MaterialColor extends ColorSwatch {
+  const MaterialColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  Color get shade50 => _swatch[50];
+  Color get shade100 => _swatch[100];
+  Color get shade200 => _swatch[200];
+  Color get shade300 => _swatch[300];
+  Color get shade400 => _swatch[400];
+  Color get shade500 => _swatch[500];
+  Color get shade600 => _swatch[600];
+  Color get shade700 => _swatch[700];
+  Color get shade800 => _swatch[800];
+  Color get shade900 => _swatch[900];
+}
+
+/// Defines a single accent color as well a swatch of four shades of the
+/// accent color.
+///
+/// The color's shades are referred to by index, the colors with smaller
+/// indices are lighter, larger indices are darker. There are four valid
+/// indices: 100, 200, 400, and 700. The value of this color should be the
+/// same as the value of index 200 and [shade200].
+///
+/// See also:
+///
+///  * [Colors], which defines all of the standard material colors.
+class MaterialAccentColor extends ColorSwatch {
+  const MaterialAccentColor(int primary, Map<int, Color> swatch) : super(primary, swatch);
+  Color get shade100 => _swatch[100];
+  Color get shade200 => _swatch[200];
+  Color get shade400 => _swatch[400];
+  Color get shade700 => _swatch[700];
+}
+
+/// [Color] and [ColorSwatch] constants which represent Material design's
 /// [color palette](http://material.google.com/style/color.html).
 ///
 /// Instead of using an absolute color from these palettes, consider using
@@ -17,6 +93,14 @@ import 'dart:ui' show Color;
 ///
 /// ```dart
 /// Colors.green[400]  // Selects a mid-range green.
+/// ```
+///
+/// Each ColorSwatch constant is a color and can used directly. For example
+///
+/// ```dart
+/// new Container(
+///   color: Colors.blue, // same as Colors.blue[500] or Colors.blue.shade500
+/// )
 /// ```
 ///
 /// Most swatches have colors from 100 to 900 in increments of one hundred, plus
@@ -128,7 +212,7 @@ class Colors {
   static const Color white10 = const Color(0x1AFFFFFF);
 
 
-  /// The red primary swatch.
+  /// The red primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -142,18 +226,22 @@ class Colors {
   /// * [redAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> red = const <int, Color>{
-     50: const Color(0xFFFFEBEE),
-    100: const Color(0xFFFFCDD2),
-    200: const Color(0xFFEF9A9A),
-    300: const Color(0xFFE57373),
-    400: const Color(0xFFEF5350),
-    500: const Color(0xFFF44336),
-    600: const Color(0xFFE53935),
-    700: const Color(0xFFD32F2F),
-    800: const Color(0xFFC62828),
-    900: const Color(0xFFB71C1C),
-  };
+  static const int _redPrimaryValue = 0xFFF44336;
+  static const MaterialColor red = const MaterialColor(
+    _redPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFFEBEE),
+      100: const Color(0xFFFFCDD2),
+      200: const Color(0xFFEF9A9A),
+      300: const Color(0xFFE57373),
+      400: const Color(0xFFEF5350),
+      500: const Color(_redPrimaryValue),
+      600: const Color(0xFFE53935),
+      700: const Color(0xFFD32F2F),
+      800: const Color(0xFFC62828),
+      900: const Color(0xFFB71C1C),
+    },
+  );
 
   /// The red accent swatch.
   ///
@@ -169,14 +257,18 @@ class Colors {
   /// * [red], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> redAccent = const <int, Color>{
-    100: const Color(0xFFFF8A80),
-    200: const Color(0xFFFF5252),
-    400: const Color(0xFFFF1744),
-    700: const Color(0xFFD50000),
-  };
+  static const int _redAccentValue = 0xFFFF5252;
+  static const MaterialAccentColor redAccent = const MaterialAccentColor(
+    _redAccentValue,
+    const <int, Color>{
+      100: const Color(0xFFFF8A80),
+      200: const Color(_redAccentValue),
+      400: const Color(0xFFFF1744),
+      700: const Color(0xFFD50000),
+    },
+  );
 
-  /// The pink primary swatch.
+  /// The pink primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -190,20 +282,24 @@ class Colors {
   /// * [pinkAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> pink = const <int, Color>{
-     50: const Color(0xFFFCE4EC),
-    100: const Color(0xFFF8BBD0),
-    200: const Color(0xFFF48FB1),
-    300: const Color(0xFFF06292),
-    400: const Color(0xFFEC407A),
-    500: const Color(0xFFE91E63),
-    600: const Color(0xFFD81B60),
-    700: const Color(0xFFC2185B),
-    800: const Color(0xFFAD1457),
-    900: const Color(0xFF880E4F),
-  };
+  static const int _pinkPrimaryValue = 0xFFE91E63;
+  static const MaterialColor pink = const MaterialColor(
+    _pinkPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFCE4EC),
+      100: const Color(0xFFF8BBD0),
+      200: const Color(0xFFF48FB1),
+      300: const Color(0xFFF06292),
+      400: const Color(0xFFEC407A),
+      500: const Color(_pinkPrimaryValue),
+      600: const Color(0xFFD81B60),
+      700: const Color(0xFFC2185B),
+      800: const Color(0xFFAD1457),
+      900: const Color(0xFF880E4F),
+    },
+  );
 
-  /// The pink accent swatch.
+  /// The pink accent color swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -217,14 +313,18 @@ class Colors {
   /// * [pink], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> pinkAccent = const <int, Color>{
-    100: const Color(0xFFFF80AB),
-    200: const Color(0xFFFF4081),
-    400: const Color(0xFFF50057),
-    700: const Color(0xFFC51162),
-  };
+  static const int _pinkAccentPrimaryValue = 0xFFFF4081;
+  static const MaterialAccentColor pinkAccent = const MaterialAccentColor(
+    _pinkAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFFF80AB),
+      200: const Color(_pinkAccentPrimaryValue),
+      400: const Color(0xFFF50057),
+      700: const Color(0xFFC51162),
+    },
+  );
 
-  /// The purple primary swatch.
+  /// The purple primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -238,20 +338,24 @@ class Colors {
   /// * [purpleAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> purple = const <int, Color>{
-     50: const Color(0xFFF3E5F5),
-    100: const Color(0xFFE1BEE7),
-    200: const Color(0xFFCE93D8),
-    300: const Color(0xFFBA68C8),
-    400: const Color(0xFFAB47BC),
-    500: const Color(0xFF9C27B0),
-    600: const Color(0xFF8E24AA),
-    700: const Color(0xFF7B1FA2),
-    800: const Color(0xFF6A1B9A),
-    900: const Color(0xFF4A148C),
-  };
+  static const int _purplePrimaryValue = 0xFF9C27B0;
+  static const MaterialColor purple = const MaterialColor(
+    _purplePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFF3E5F5),
+      100: const Color(0xFFE1BEE7),
+      200: const Color(0xFFCE93D8),
+      300: const Color(0xFFBA68C8),
+      400: const Color(0xFFAB47BC),
+      500: const Color(_purplePrimaryValue),
+      600: const Color(0xFF8E24AA),
+      700: const Color(0xFF7B1FA2),
+      800: const Color(0xFF6A1B9A),
+      900: const Color(0xFF4A148C),
+    },
+  );
 
-  /// The purple accent swatch.
+  /// The purple accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -265,14 +369,18 @@ class Colors {
   /// * [purple], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> purpleAccent = const <int, Color>{
-    100: const Color(0xFFEA80FC),
-    200: const Color(0xFFE040FB),
-    400: const Color(0xFFD500F9),
-    700: const Color(0xFFAA00FF),
-  };
+  static const int _purpleAccentPrimaryValue = 0xFFE040FB;
+  static const MaterialAccentColor purpleAccent = const MaterialAccentColor(
+    _purpleAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFEA80FC),
+      200: const Color(_purpleAccentPrimaryValue),
+      400: const Color(0xFFD500F9),
+      700: const Color(0xFFAA00FF),
+    },
+  );
 
-  /// The deep purple primary swatch.
+  /// The deep purple primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -286,20 +394,24 @@ class Colors {
   /// * [deepPurpleAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> deepPurple = const <int, Color>{
-     50: const Color(0xFFEDE7F6),
-    100: const Color(0xFFD1C4E9),
-    200: const Color(0xFFB39DDB),
-    300: const Color(0xFF9575CD),
-    400: const Color(0xFF7E57C2),
-    500: const Color(0xFF673AB7),
-    600: const Color(0xFF5E35B1),
-    700: const Color(0xFF512DA8),
-    800: const Color(0xFF4527A0),
-    900: const Color(0xFF311B92),
-  };
+  static const int _deepPurplePrimaryValue = 0xFF673AB7;
+  static const MaterialColor deepPurple = const MaterialColor(
+    _deepPurplePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFEDE7F6),
+      100: const Color(0xFFD1C4E9),
+      200: const Color(0xFFB39DDB),
+      300: const Color(0xFF9575CD),
+      400: const Color(0xFF7E57C2),
+      500: const Color(_deepPurplePrimaryValue),
+      600: const Color(0xFF5E35B1),
+      700: const Color(0xFF512DA8),
+      800: const Color(0xFF4527A0),
+      900: const Color(0xFF311B92),
+    },
+  );
 
-  /// The deep purple accent swatch.
+  /// The deep purple accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -313,14 +425,18 @@ class Colors {
   /// * [deepPurple], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> deepPurpleAccent = const <int, Color>{
-    100: const Color(0xFFB388FF),
-    200: const Color(0xFF7C4DFF),
-    400: const Color(0xFF651FFF),
-    700: const Color(0xFF6200EA),
-  };
+  static const int _deepPurpleAccentPrimaryValue = 0xFF7C4DFF;
+  static const MaterialAccentColor deepPurpleAccent = const MaterialAccentColor(
+    _deepPurpleAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFB388FF),
+      200: const Color(_deepPurpleAccentPrimaryValue),
+      400: const Color(0xFF651FFF),
+      700: const Color(0xFF6200EA),
+    },
+  );
 
-  /// The indigo primary swatch.
+  /// The indigo primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -334,20 +450,24 @@ class Colors {
   /// * [indigoAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> indigo = const <int, Color>{
-     50: const Color(0xFFE8EAF6),
-    100: const Color(0xFFC5CAE9),
-    200: const Color(0xFF9FA8DA),
-    300: const Color(0xFF7986CB),
-    400: const Color(0xFF5C6BC0),
-    500: const Color(0xFF3F51B5),
-    600: const Color(0xFF3949AB),
-    700: const Color(0xFF303F9F),
-    800: const Color(0xFF283593),
-    900: const Color(0xFF1A237E),
-  };
+  static const int _indigoPrimaryValue = 0xFF3F51B5;
+  static const MaterialColor indigo = const MaterialColor(
+    _indigoPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE8EAF6),
+      100: const Color(0xFFC5CAE9),
+      200: const Color(0xFF9FA8DA),
+      300: const Color(0xFF7986CB),
+      400: const Color(0xFF5C6BC0),
+      500: const Color(_indigoPrimaryValue),
+      600: const Color(0xFF3949AB),
+      700: const Color(0xFF303F9F),
+      800: const Color(0xFF283593),
+      900: const Color(0xFF1A237E),
+    },
+  );
 
-  /// The indigo accent swatch.
+  /// The indigo accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -361,14 +481,18 @@ class Colors {
   /// * [indigo], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> indigoAccent = const <int, Color>{
-    100: const Color(0xFF8C9EFF),
-    200: const Color(0xFF536DFE),
-    400: const Color(0xFF3D5AFE),
-    700: const Color(0xFF304FFE),
-  };
+  static const int _indigoAccentPrimaryValue = 0xFF536DFE;
+  static const MaterialAccentColor indigoAccent = const MaterialAccentColor(
+    _indigoAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFF8C9EFF),
+      200: const Color(_indigoAccentPrimaryValue),
+      400: const Color(0xFF3D5AFE),
+      700: const Color(0xFF304FFE),
+    },
+  );
 
-  /// The blue primary swatch.
+  /// The blue primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -382,20 +506,24 @@ class Colors {
   /// * [blueAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> blue = const <int, Color>{
-     50: const Color(0xFFE3F2FD),
-    100: const Color(0xFFBBDEFB),
-    200: const Color(0xFF90CAF9),
-    300: const Color(0xFF64B5F6),
-    400: const Color(0xFF42A5F5),
-    500: const Color(0xFF2196F3),
-    600: const Color(0xFF1E88E5),
-    700: const Color(0xFF1976D2),
-    800: const Color(0xFF1565C0),
-    900: const Color(0xFF0D47A1),
-  };
+  static const int _bluePrimaryValue = 0xFF2196F3;
+  static const MaterialColor blue = const MaterialColor(
+    _bluePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE3F2FD),
+      100: const Color(0xFFBBDEFB),
+      200: const Color(0xFF90CAF9),
+      300: const Color(0xFF64B5F6),
+      400: const Color(0xFF42A5F5),
+      500: const Color(_bluePrimaryValue),
+      600: const Color(0xFF1E88E5),
+      700: const Color(0xFF1976D2),
+      800: const Color(0xFF1565C0),
+      900: const Color(0xFF0D47A1),
+    },
+  );
 
-  /// The blue accent swatch.
+  /// The blue accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -409,14 +537,18 @@ class Colors {
   /// * [blue], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> blueAccent = const <int, Color>{
-    100: const Color(0xFF82B1FF),
-    200: const Color(0xFF448AFF),
-    400: const Color(0xFF2979FF),
-    700: const Color(0xFF2962FF),
-  };
+  static const int _blueAccentPrimaryValue = 0xFF448AFF;
+  static const MaterialAccentColor blueAccent = const MaterialAccentColor(
+    _blueAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFF82B1FF),
+      200: const Color(_blueAccentPrimaryValue),
+      400: const Color(0xFF2979FF),
+      700: const Color(0xFF2962FF),
+    },
+  );
 
-  /// The light blue primary swatch.
+  /// The light blue primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -430,18 +562,22 @@ class Colors {
   /// * [lightBlueAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> lightBlue = const <int, Color>{
-     50: const Color(0xFFE1F5FE),
-    100: const Color(0xFFB3E5FC),
-    200: const Color(0xFF81D4FA),
-    300: const Color(0xFF4FC3F7),
-    400: const Color(0xFF29B6F6),
-    500: const Color(0xFF03A9F4),
-    600: const Color(0xFF039BE5),
-    700: const Color(0xFF0288D1),
-    800: const Color(0xFF0277BD),
-    900: const Color(0xFF01579B),
-  };
+  static const int _lightBluePrimaryValue = 0xFF03A9F4;
+  static const MaterialColor lightBlue = const MaterialColor(
+    _lightBluePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE1F5FE),
+      100: const Color(0xFFB3E5FC),
+      200: const Color(0xFF81D4FA),
+      300: const Color(0xFF4FC3F7),
+      400: const Color(0xFF29B6F6),
+      500: const Color(_lightBluePrimaryValue),
+      600: const Color(0xFF039BE5),
+      700: const Color(0xFF0288D1),
+      800: const Color(0xFF0277BD),
+      900: const Color(0xFF01579B),
+    },
+  );
 
   /// The light blue accent swatch.
   ///
@@ -457,14 +593,18 @@ class Colors {
   /// * [lightBlue], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> lightBlueAccent = const <int, Color>{
-    100: const Color(0xFF80D8FF),
-    200: const Color(0xFF40C4FF),
-    400: const Color(0xFF00B0FF),
-    700: const Color(0xFF0091EA),
-  };
+  static const int _lightBlueAccentPrimaryValue = 0xFF40C4FF;
+  static const MaterialAccentColor lightBlueAccent = const MaterialAccentColor(
+    _lightBlueAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFF80D8FF),
+      200: const Color(_lightBlueAccentPrimaryValue),
+      400: const Color(0xFF00B0FF),
+      700: const Color(0xFF0091EA),
+    },
+  );
 
-  /// The cyan primary swatch.
+  /// The cyan primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -478,20 +618,24 @@ class Colors {
   /// * [cyanAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> cyan = const <int, Color>{
-     50: const Color(0xFFE0F7FA),
-    100: const Color(0xFFB2EBF2),
-    200: const Color(0xFF80DEEA),
-    300: const Color(0xFF4DD0E1),
-    400: const Color(0xFF26C6DA),
-    500: const Color(0xFF00BCD4),
-    600: const Color(0xFF00ACC1),
-    700: const Color(0xFF0097A7),
-    800: const Color(0xFF00838F),
-    900: const Color(0xFF006064),
-  };
+  static const int _cyanPrimaryValue = 0xFF00BCD4;
+  static const MaterialColor cyan = const MaterialColor(
+    _cyanPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE0F7FA),
+      100: const Color(0xFFB2EBF2),
+      200: const Color(0xFF80DEEA),
+      300: const Color(0xFF4DD0E1),
+      400: const Color(0xFF26C6DA),
+      500: const Color(_cyanPrimaryValue),
+      600: const Color(0xFF00ACC1),
+      700: const Color(0xFF0097A7),
+      800: const Color(0xFF00838F),
+      900: const Color(0xFF006064),
+    },
+  );
 
-  /// The cyan accent swatch.
+  /// The cyan accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -505,14 +649,18 @@ class Colors {
   /// * [cyan], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> cyanAccent = const <int, Color>{
-    100: const Color(0xFF84FFFF),
-    200: const Color(0xFF18FFFF),
-    400: const Color(0xFF00E5FF),
-    700: const Color(0xFF00B8D4),
-  };
+  static const int _cyanAccentPrimaryValue = 0xFF18FFFF;
+  static const MaterialAccentColor cyanAccent = const MaterialAccentColor(
+    _cyanAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFF84FFFF),
+      200: const Color(_cyanAccentPrimaryValue),
+      400: const Color(0xFF00E5FF),
+      700: const Color(0xFF00B8D4),
+    },
+  );
 
-  /// The teal primary swatch.
+  /// The teal primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -526,20 +674,24 @@ class Colors {
   /// * [tealAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> teal = const <int, Color>{
-     50: const Color(0xFFE0F2F1),
-    100: const Color(0xFFB2DFDB),
-    200: const Color(0xFF80CBC4),
-    300: const Color(0xFF4DB6AC),
-    400: const Color(0xFF26A69A),
-    500: const Color(0xFF009688),
-    600: const Color(0xFF00897B),
-    700: const Color(0xFF00796B),
-    800: const Color(0xFF00695C),
-    900: const Color(0xFF004D40),
-  };
+  static const int _tealPrimaryValue = 0xFF009688;
+  static const MaterialColor teal = const MaterialColor(
+    _tealPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE0F2F1),
+      100: const Color(0xFFB2DFDB),
+      200: const Color(0xFF80CBC4),
+      300: const Color(0xFF4DB6AC),
+      400: const Color(0xFF26A69A),
+      500: const Color(_tealPrimaryValue),
+      600: const Color(0xFF00897B),
+      700: const Color(0xFF00796B),
+      800: const Color(0xFF00695C),
+      900: const Color(0xFF004D40),
+    },
+  );
 
-  /// The teal accent swatch.
+  /// The teal accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -553,14 +705,18 @@ class Colors {
   /// * [teal], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> tealAccent = const <int, Color>{
-    100: const Color(0xFFA7FFEB),
-    200: const Color(0xFF64FFDA),
-    400: const Color(0xFF1DE9B6),
-    700: const Color(0xFF00BFA5),
-  };
+  static const int _tealAccentPrimaryValue = 0xFF64FFDA;
+  static const MaterialAccentColor tealAccent = const MaterialAccentColor(
+    _tealAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFA7FFEB),
+      200: const Color(_tealAccentPrimaryValue),
+      400: const Color(0xFF1DE9B6),
+      700: const Color(0xFF00BFA5),
+    },
+  );
 
-  /// The green primary swatch.
+  /// The green primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -574,20 +730,24 @@ class Colors {
   /// * [greenAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> green = const <int, Color>{
-     50: const Color(0xFFE8F5E9),
-    100: const Color(0xFFC8E6C9),
-    200: const Color(0xFFA5D6A7),
-    300: const Color(0xFF81C784),
-    400: const Color(0xFF66BB6A),
-    500: const Color(0xFF4CAF50),
-    600: const Color(0xFF43A047),
-    700: const Color(0xFF388E3C),
-    800: const Color(0xFF2E7D32),
-    900: const Color(0xFF1B5E20),
-  };
+  static const int _greenPrimaryValue = 0xFF4CAF50;
+  static const MaterialColor green = const MaterialColor(
+    _greenPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFE8F5E9),
+      100: const Color(0xFFC8E6C9),
+      200: const Color(0xFFA5D6A7),
+      300: const Color(0xFF81C784),
+      400: const Color(0xFF66BB6A),
+      500: const Color(_greenPrimaryValue),
+      600: const Color(0xFF43A047),
+      700: const Color(0xFF388E3C),
+      800: const Color(0xFF2E7D32),
+      900: const Color(0xFF1B5E20),
+    },
+  );
 
-  /// The green accent swatch.
+  /// The green accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -601,14 +761,18 @@ class Colors {
   /// * [green], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> greenAccent = const <int, Color>{
-    100: const Color(0xFFB9F6CA),
-    200: const Color(0xFF69F0AE),
-    400: const Color(0xFF00E676),
-    700: const Color(0xFF00C853),
-  };
+  static const int _greenAccentPrimaryValue = 0xFF69F0AE;
+  static const MaterialAccentColor greenAccent = const MaterialAccentColor(
+    _greenAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFB9F6CA),
+      200: const Color(_greenAccentPrimaryValue),
+      400: const Color(0xFF00E676),
+      700: const Color(0xFF00C853),
+    },
+  );
 
-  /// The light green primary swatch.
+  /// The light green primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -622,20 +786,24 @@ class Colors {
   /// * [lightGreenAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> lightGreen = const <int, Color>{
-     50: const Color(0xFFF1F8E9),
-    100: const Color(0xFFDCEDC8),
-    200: const Color(0xFFC5E1A5),
-    300: const Color(0xFFAED581),
-    400: const Color(0xFF9CCC65),
-    500: const Color(0xFF8BC34A),
-    600: const Color(0xFF7CB342),
-    700: const Color(0xFF689F38),
-    800: const Color(0xFF558B2F),
-    900: const Color(0xFF33691E),
-  };
+  static const int _lightGreenPrimaryValue = 0xFF8BC34A;
+  static const MaterialColor lightGreen = const MaterialColor(
+    _lightGreenPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFF1F8E9),
+      100: const Color(0xFFDCEDC8),
+      200: const Color(0xFFC5E1A5),
+      300: const Color(0xFFAED581),
+      400: const Color(0xFF9CCC65),
+      500: const Color(_lightGreenPrimaryValue),
+      600: const Color(0xFF7CB342),
+      700: const Color(0xFF689F38),
+      800: const Color(0xFF558B2F),
+      900: const Color(0xFF33691E),
+    },
+  );
 
-  /// The light green accent swatch.
+  /// The light green accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -649,14 +817,18 @@ class Colors {
   /// * [lightGreen], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> lightGreenAccent = const <int, Color>{
-    100: const Color(0xFFCCFF90),
-    200: const Color(0xFFB2FF59),
-    400: const Color(0xFF76FF03),
-    700: const Color(0xFF64DD17),
-  };
+  static const int _lightGreenAccentPrimaryValue = 0xFFB2FF59;
+  static const MaterialAccentColor lightGreenAccent = const MaterialAccentColor(
+    _lightGreenAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFCCFF90),
+      200: const Color(_lightGreenAccentPrimaryValue),
+      400: const Color(0xFF76FF03),
+      700: const Color(0xFF64DD17),
+    },
+  );
 
-  /// The lime primary swatch.
+  /// The lime primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -670,20 +842,24 @@ class Colors {
   /// * [limeAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> lime = const <int, Color>{
-     50: const Color(0xFFF9FBE7),
-    100: const Color(0xFFF0F4C3),
-    200: const Color(0xFFE6EE9C),
-    300: const Color(0xFFDCE775),
-    400: const Color(0xFFD4E157),
-    500: const Color(0xFFCDDC39),
-    600: const Color(0xFFC0CA33),
-    700: const Color(0xFFAFB42B),
-    800: const Color(0xFF9E9D24),
-    900: const Color(0xFF827717),
-  };
+  static const int _limePrimaryValue = 0xFFCDDC39;
+  static const MaterialColor lime = const MaterialColor(
+    _limePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFF9FBE7),
+      100: const Color(0xFFF0F4C3),
+      200: const Color(0xFFE6EE9C),
+      300: const Color(0xFFDCE775),
+      400: const Color(0xFFD4E157),
+      500: const Color(_limePrimaryValue),
+      600: const Color(0xFFC0CA33),
+      700: const Color(0xFFAFB42B),
+      800: const Color(0xFF9E9D24),
+      900: const Color(0xFF827717),
+    },
+  );
 
-  /// The lime accent primary swatch.
+  /// The lime accent primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -697,14 +873,18 @@ class Colors {
   /// * [lime], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> limeAccent = const <int, Color>{
-    100: const Color(0xFFF4FF81),
-    200: const Color(0xFFEEFF41),
-    400: const Color(0xFFC6FF00),
-    700: const Color(0xFFAEEA00),
-  };
+  static const int _limeAccentPrimaryValue = 0xFFEEFF41;
+  static const MaterialAccentColor limeAccent = const MaterialAccentColor(
+    _limeAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFF4FF81),
+      200: const Color(_limeAccentPrimaryValue),
+      400: const Color(0xFFC6FF00),
+      700: const Color(0xFFAEEA00),
+    },
+  );
 
-  /// The yellow primary swatch.
+  /// The yellow primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -718,20 +898,24 @@ class Colors {
   /// * [yellowAccentAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> yellow = const <int, Color>{
-     50: const Color(0xFFFFFDE7),
-    100: const Color(0xFFFFF9C4),
-    200: const Color(0xFFFFF59D),
-    300: const Color(0xFFFFF176),
-    400: const Color(0xFFFFEE58),
-    500: const Color(0xFFFFEB3B),
-    600: const Color(0xFFFDD835),
-    700: const Color(0xFFFBC02D),
-    800: const Color(0xFFF9A825),
-    900: const Color(0xFFF57F17),
-  };
+  static const int _yellowPrimaryValue = 0xFFFFEB3B;
+  static const MaterialColor yellow = const MaterialColor(
+    _yellowPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFFFDE7),
+      100: const Color(0xFFFFF9C4),
+      200: const Color(0xFFFFF59D),
+      300: const Color(0xFFFFF176),
+      400: const Color(0xFFFFEE58),
+      500: const Color(_yellowPrimaryValue),
+      600: const Color(0xFFFDD835),
+      700: const Color(0xFFFBC02D),
+      800: const Color(0xFFF9A825),
+      900: const Color(0xFFF57F17),
+    },
+  );
 
-  /// The yellow accent swatch.
+  /// The yellow accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -745,14 +929,18 @@ class Colors {
   /// * [yellow], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> yellowAccent = const <int, Color>{
-    100: const Color(0xFFFFFF8D),
-    200: const Color(0xFFFFFF00),
-    400: const Color(0xFFFFEA00),
-    700: const Color(0xFFFFD600),
-  };
+  static const int _yellowAccentPrimaryValue = 0xFFFFFF00;
+  static const MaterialAccentColor yellowAccent = const MaterialAccentColor(
+    _yellowAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFFFFF8D),
+      200: const Color(_yellowAccentPrimaryValue),
+      400: const Color(0xFFFFEA00),
+      700: const Color(0xFFFFD600),
+    },
+  );
 
-  /// The amber primary swatch.
+  /// The amber primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -766,20 +954,24 @@ class Colors {
   /// * [amberAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> amber = const <int, Color>{
-     50: const Color(0xFFFFF8E1),
-    100: const Color(0xFFFFECB3),
-    200: const Color(0xFFFFE082),
-    300: const Color(0xFFFFD54F),
-    400: const Color(0xFFFFCA28),
-    500: const Color(0xFFFFC107),
-    600: const Color(0xFFFFB300),
-    700: const Color(0xFFFFA000),
-    800: const Color(0xFFFF8F00),
-    900: const Color(0xFFFF6F00),
-  };
+  static const int _amberPrimaryValue = 0xFFFFC107;
+  static const MaterialColor amber = const MaterialColor(
+    _amberPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFFF8E1),
+      100: const Color(0xFFFFECB3),
+      200: const Color(0xFFFFE082),
+      300: const Color(0xFFFFD54F),
+      400: const Color(0xFFFFCA28),
+      500: const Color(_amberPrimaryValue),
+      600: const Color(0xFFFFB300),
+      700: const Color(0xFFFFA000),
+      800: const Color(0xFFFF8F00),
+      900: const Color(0xFFFF6F00),
+    },
+  );
 
-  /// The amber accent swatch.
+  /// The amber accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -793,14 +985,18 @@ class Colors {
   /// * [amber], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> amberAccent = const <int, Color>{
-    100: const Color(0xFFFFE57F),
-    200: const Color(0xFFFFD740),
-    400: const Color(0xFFFFC400),
-    700: const Color(0xFFFFAB00),
-  };
+  static const int _amberAccentPrimaryValue = 0xFFFFD740;
+  static const MaterialAccentColor amberAccent = const MaterialAccentColor(
+    _amberAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFFFE57F),
+      200: const Color(_amberAccentPrimaryValue),
+      400: const Color(0xFFFFC400),
+      700: const Color(0xFFFFAB00),
+    },
+  );
 
-  /// The orange primary swatch.
+  /// The orange primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -814,20 +1010,24 @@ class Colors {
   /// * [orangeAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> orange = const <int, Color>{
-     50: const Color(0xFFFFF3E0),
-    100: const Color(0xFFFFE0B2),
-    200: const Color(0xFFFFCC80),
-    300: const Color(0xFFFFB74D),
-    400: const Color(0xFFFFA726),
-    500: const Color(0xFFFF9800),
-    600: const Color(0xFFFB8C00),
-    700: const Color(0xFFF57C00),
-    800: const Color(0xFFEF6C00),
-    900: const Color(0xFFE65100),
-  };
+  static const int _orangePrimaryValue = 0xFFFF9800;
+  static const MaterialColor orange = const MaterialColor(
+    _orangePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFFF3E0),
+      100: const Color(0xFFFFE0B2),
+      200: const Color(0xFFFFCC80),
+      300: const Color(0xFFFFB74D),
+      400: const Color(0xFFFFA726),
+      500: const Color(_orangePrimaryValue),
+      600: const Color(0xFFFB8C00),
+      700: const Color(0xFFF57C00),
+      800: const Color(0xFFEF6C00),
+      900: const Color(0xFFE65100),
+    },
+  );
 
-  /// The orange accent swatch.
+  /// The orange accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -841,14 +1041,18 @@ class Colors {
   /// * [orange], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> orangeAccent = const <int, Color>{
-    100: const Color(0xFFFFD180),
-    200: const Color(0xFFFFAB40),
-    400: const Color(0xFFFF9100),
-    700: const Color(0xFFFF6D00),
-  };
+  static const int _orangeAccentPrimaryValue = 0xFFFFAB40;
+  static const MaterialAccentColor orangeAccent = const MaterialAccentColor(
+    _orangeAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFFFD180),
+      200: const Color(_orangeAccentPrimaryValue),
+      400: const Color(0xFFFF9100),
+      700: const Color(0xFFFF6D00),
+    },
+  );
 
-  /// The deep orange primary swatch.
+  /// The deep orange primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -862,20 +1066,24 @@ class Colors {
   /// * [deepOrangeAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> deepOrange = const <int, Color>{
-     50: const Color(0xFFFBE9E7),
-    100: const Color(0xFFFFCCBC),
-    200: const Color(0xFFFFAB91),
-    300: const Color(0xFFFF8A65),
-    400: const Color(0xFFFF7043),
-    500: const Color(0xFFFF5722),
-    600: const Color(0xFFF4511E),
-    700: const Color(0xFFE64A19),
-    800: const Color(0xFFD84315),
-    900: const Color(0xFFBF360C),
-  };
+  static const int _deepOrangePrimaryValue = 0xFFFF5722;
+  static const MaterialColor deepOrange = const MaterialColor(
+    _deepOrangePrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFBE9E7),
+      100: const Color(0xFFFFCCBC),
+      200: const Color(0xFFFFAB91),
+      300: const Color(0xFFFF8A65),
+      400: const Color(0xFFFF7043),
+      500: const Color(_deepOrangePrimaryValue),
+      600: const Color(0xFFF4511E),
+      700: const Color(0xFFE64A19),
+      800: const Color(0xFFD84315),
+      900: const Color(0xFFBF360C),
+    },
+  );
 
-  /// The deep orange accent swatch.
+  /// The deep orange accent color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -889,14 +1097,18 @@ class Colors {
   /// * [deepOrange], the corresponding primary colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> deepOrangeAccent = const <int, Color>{
-    100: const Color(0xFFFF9E80),
-    200: const Color(0xFFFF6E40),
-    400: const Color(0xFFFF3D00),
-    700: const Color(0xFFDD2C00),
-  };
+  static const int _deepOrangeAccentPrimaryValue = 0xFFFF6E40;
+  static const MaterialAccentColor deepOrangeAccent = const MaterialAccentColor(
+    _deepOrangeAccentPrimaryValue,
+    const <int, Color>{
+      100: const Color(0xFFFF9E80),
+      200: const Color(_deepOrangeAccentPrimaryValue),
+      400: const Color(0xFFFF3D00),
+      700: const Color(0xFFDD2C00),
+    },
+  );
 
-  /// The brown primary swatch.
+  /// The brown primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -905,26 +1117,30 @@ class Colors {
   ///  ),
   /// ```
   ///
-  /// This swatch has no corresponding accent swatch.
+  /// This swatch has no corresponding accent color and swatch.
   ///
   /// See also:
   ///
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> brown = const <int, Color>{
-     50: const Color(0xFFEFEBE9),
-    100: const Color(0xFFD7CCC8),
-    200: const Color(0xFFBCAAA4),
-    300: const Color(0xFFA1887F),
-    400: const Color(0xFF8D6E63),
-    500: const Color(0xFF795548),
-    600: const Color(0xFF6D4C41),
-    700: const Color(0xFF5D4037),
-    800: const Color(0xFF4E342E),
-    900: const Color(0xFF3E2723),
-  };
+  static const int _brownPrimaryValue = 0xFF795548;
+  static const MaterialColor brown = const MaterialColor(
+    _brownPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFEFEBE9),
+      100: const Color(0xFFD7CCC8),
+      200: const Color(0xFFBCAAA4),
+      300: const Color(0xFFA1887F),
+      400: const Color(0xFF8D6E63),
+      500: const Color(_brownPrimaryValue),
+      600: const Color(0xFF6D4C41),
+      700: const Color(0xFF5D4037),
+      800: const Color(0xFF4E342E),
+      900: const Color(0xFF3E2723),
+    },
+  );
 
-  /// The grey primary swatch.
+  /// The grey primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -944,22 +1160,26 @@ class Colors {
   ///
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> grey = const <int, Color>{
-     50: const Color(0xFFFAFAFA),
-    100: const Color(0xFFF5F5F5),
-    200: const Color(0xFFEEEEEE),
-    300: const Color(0xFFE0E0E0),
-    350: const Color(0xFFD6D6D6), // only for raised button while pressed in light theme
-    400: const Color(0xFFBDBDBD),
-    500: const Color(0xFF9E9E9E),
-    600: const Color(0xFF757575),
-    700: const Color(0xFF616161),
-    800: const Color(0xFF424242),
-    850: const Color(0xFF303030), // only for background color in dark theme
-    900: const Color(0xFF212121),
-  };
+  static const int _greyPrimaryValue = 0xFF9E9E9E;
+  static const MaterialColor grey = const MaterialColor(
+    _greyPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFFAFAFA),
+      100: const Color(0xFFF5F5F5),
+      200: const Color(0xFFEEEEEE),
+      300: const Color(0xFFE0E0E0),
+      350: const Color(0xFFD6D6D6), // only for raised button while pressed in light theme
+      400: const Color(0xFFBDBDBD),
+      500: const Color(_greyPrimaryValue),
+      600: const Color(0xFF757575),
+      700: const Color(0xFF616161),
+      800: const Color(0xFF424242),
+      850: const Color(0xFF303030), // only for background color in dark theme
+      900: const Color(0xFF212121),
+    },
+  );
 
-  /// The blue-grey primary swatch.
+  /// The blue-grey primary color and swatch.
   ///
   /// ```dart
   ///  new Icon(
@@ -974,21 +1194,25 @@ class Colors {
   ///
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Map<int, Color> blueGrey = const <int, Color>{
-     50: const Color(0xFFECEFF1),
-    100: const Color(0xFFCFD8DC),
-    200: const Color(0xFFB0BEC5),
-    300: const Color(0xFF90A4AE),
-    400: const Color(0xFF78909C),
-    500: const Color(0xFF607D8B),
-    600: const Color(0xFF546E7A),
-    700: const Color(0xFF455A64),
-    800: const Color(0xFF37474F),
-    900: const Color(0xFF263238),
-  };
+  static const int _blueGreyPrimaryValue = 0xFF607D8B;
+  static const MaterialColor blueGrey = const MaterialColor(
+    _blueGreyPrimaryValue,
+    const <int, Color>{
+       50: const Color(0xFFECEFF1),
+      100: const Color(0xFFCFD8DC),
+      200: const Color(0xFFB0BEC5),
+      300: const Color(0xFF90A4AE),
+      400: const Color(0xFF78909C),
+      500: const Color(_blueGreyPrimaryValue),
+      600: const Color(0xFF546E7A),
+      700: const Color(0xFF455A64),
+      800: const Color(0xFF37474F),
+      900: const Color(0xFF263238),
+    },
+  );
 
   /// The material design primary color swatches (except grey).
-  static const List<Map<int, Color>> primaries = const <Map<int, Color>>[
+  static const List<MaterialColor> primaries = const <MaterialColor>[
     red,
     pink,
     purple,
@@ -1011,7 +1235,7 @@ class Colors {
   ];
 
   /// The material design accent color swatches.
-  static const List<Map<int, Color>> accents = const <Map<int, Color>>[
+  static const List<MaterialAccentColor> accents = const <MaterialAccentColor>[
     redAccent,
     pinkAccent,
     purpleAccent,

@@ -76,7 +76,7 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
 ///  * [CircleAvatar], which shows an icon representing a person and is often
 ///    used as the [leading] element of a ListTile.
 ///  * [Divider], which can be used to separate [ListTile]s.
-///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTiles]s.
+///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
 ///  * <https://material.google.com/components/lists.html>
 class ListTile extends StatelessWidget {
   /// Creates a list tile.

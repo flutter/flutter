@@ -83,6 +83,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  platform_services_test:
+    description: >
+     Runs a driver test on the Platform Services sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
   flutter_gallery__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on Android.
@@ -145,6 +151,12 @@ tasks:
     required_agent_capabilities: ["has-android-device"]
 
   # iOS on-device tests
+
+  platform_services_test_ios:
+    description: >
+      Runs a driver test on the Platform Services sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >

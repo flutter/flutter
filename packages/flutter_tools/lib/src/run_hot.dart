@@ -196,11 +196,6 @@ class HotRunner extends ResidentRunner {
     final String modeName = getModeName(debuggingOptions.buildMode);
     printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
 
-    // Include kernel code
-    DevFSContent kernelContent;
-    if (kernelFilePath != null)
-      kernelContent = new DevFSFileContent(fs.file(kernelFilePath));
-
     // Start the application.
     final Future<LaunchResult> futureResult = device.startApp(
       package,
@@ -210,7 +205,7 @@ class HotRunner extends ResidentRunner {
       platformArgs: platformArgs,
       route: route,
       prebuiltApplication: prebuiltMode,
-      kernelContent: kernelContent,
+      kernelPath: kernelFilePath,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
     );
 

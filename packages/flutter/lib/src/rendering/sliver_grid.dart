@@ -172,13 +172,16 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
 
   @override
   int getMinChildIndexForScrollOffset(double scrollOffset) {
-    return crossAxisCount * (scrollOffset ~/ mainAxisStride);
+    return mainAxisStride > 0.0 ? crossAxisCount * (scrollOffset ~/ mainAxisStride) : 0;
   }
 
   @override
   int getMaxChildIndexForScrollOffset(double scrollOffset) {
-    final int mainAxisCount = (scrollOffset / mainAxisStride).ceil();
-    return math.max(0, crossAxisCount * mainAxisCount - 1);
+    if (mainAxisStride > 0.0) {
+      final int mainAxisCount = (scrollOffset / mainAxisStride).ceil();
+      return math.max(0, crossAxisCount * mainAxisCount - 1);
+    }
+    return 0;
   }
 
   @override
@@ -486,13 +489,14 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     final SliverGridLayout layout = _gridDelegate.getLayout(constraints);
 
     final int firstIndex = layout.getMinChildIndexForScrollOffset(scrollOffset);
-    final int targetLastIndex = layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset);
+    final int targetLastIndex = targetEndScrollOffset.isFinite ?
+      layout.getMaxChildIndexForScrollOffset(targetEndScrollOffset) : null;
 
     if (firstChild != null) {
       final int oldFirstIndex = indexOf(firstChild);
       final int oldLastIndex = indexOf(lastChild);
       final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
-      final int trailingGarbage = (oldLastIndex - targetLastIndex).clamp(0, childCount);
+      final int trailingGarbage = targetLastIndex == null ? 0 : (oldLastIndex - targetLastIndex).clamp(0, childCount);
       if (leadingGarbage + trailingGarbage > 0)
         collectGarbage(leadingGarbage, trailingGarbage);
     }
@@ -532,7 +536,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       trailingChildWithLayout = firstChild;
     }
 
-    for (int index = indexOf(trailingChildWithLayout) + 1; index <= targetLastIndex; ++index) {
+    for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       final SliverGridGeometry gridGeometry = layout.getGeometryForChildIndex(index);
       final BoxConstraints childConstraints = gridGeometry.getBoxConstraints(constraints);
       RenderBox child = childAfter(trailingChildWithLayout);
@@ -559,7 +563,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
     assert(childScrollOffset(firstChild) <= scrollOffset);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild) == firstIndex);
-    assert(lastIndex <= targetLastIndex);
+    assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
     final double estimatedTotalExtent = childManager.estimateMaxScrollOffset(
       constraints,

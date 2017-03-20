@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -10,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../services/image_data.dart';
 
 void main() {
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
@@ -299,6 +302,9 @@ void main() {
     expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(_StateLifecycle.defunct; not mounted; stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 0 listeners\); pixels: \[100×100\] @ 1\.0x\)')));
   });
 
+  testWidgets('Image.memory control test', (WidgetTester tester) async {
+    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage)));
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
