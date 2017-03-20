@@ -10,6 +10,5 @@ dev_dependencies:
   flutter_driver:
     path: ../../packages/flutter_driver
 
-
 flutter:
   uses-material-design: true
