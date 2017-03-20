@@ -1917,6 +1917,10 @@ FILE: ../../../flutter/fml/message_loop_impl.h
 FILE: ../../../flutter/fml/message_loop_unittests.cc
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.cc
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.h
+FILE: ../../../flutter/fml/platform/linux/message_loop_linux.cc
+FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
+FILE: ../../../flutter/fml/platform/linux/timerfd.cc
+FILE: ../../../flutter/fml/platform/linux/timerfd.h
 FILE: ../../../flutter/fml/task_runner.cc
 FILE: ../../../flutter/fml/task_runner.h
 FILE: ../../../flutter/fml/thread.cc
