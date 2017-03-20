@@ -185,4 +185,20 @@ void main() {
       );
     });
   });
+
+  testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: const TestVSync()
+    );
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    controller.stop();
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
+  });
 }
