@@ -248,7 +248,7 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget _buildCard(BuildContext context, int index) {
     final CardModel cardModel = _cardModels[index];
-    final Widget card = new Dismissable(
+    final Widget card = new Dismissible(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
@@ -313,7 +313,7 @@ class CardCollectionState extends State<CardCollection> {
     final ThemeData theme = Theme.of(context);
     final TextStyle backgroundTextStyle = theme.primaryTextTheme.title;
 
-    // The background Widget appears behind the Dismissable card when the card
+    // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the

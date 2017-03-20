@@ -19,7 +19,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool get opaque => true;
 
   @override
-  bool get barrierDismissable => false;
+  bool get barrierDismissible => false;
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
@@ -64,7 +64,7 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 class PageRouteBuilder<T> extends PageRoute<T> {
   /// Creates a route that deletates to builder callbacks.
   ///
-  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissable],
+  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// and [maintainState] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings: const RouteSettings(),
@@ -72,14 +72,14 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.transitionsBuilder: _defaultTransitionsBuilder,
     this.transitionDuration: const Duration(milliseconds: 300),
     this.opaque: true,
-    this.barrierDismissable: false,
+    this.barrierDismissible: false,
     this.barrierColor: null,
     this.maintainState: true,
   }) : super(settings: settings) {
     assert(pageBuilder != null);
     assert(transitionsBuilder != null);
     assert(opaque != null);
-    assert(barrierDismissable != null);
+    assert(barrierDismissible != null);
     assert(maintainState != null);
   }
 
@@ -100,7 +100,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool opaque;
 
   @override
-  final bool barrierDismissable;
+  final bool barrierDismissible;
 
   @override
   final Color barrierColor;

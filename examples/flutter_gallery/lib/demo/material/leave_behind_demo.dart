@@ -85,7 +85,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
   Widget buildItem(LeaveBehindItem item) {
     final ThemeData theme = Theme.of(context);
-    return new Dismissable(
+    return new Dismissible(
       key: new ObjectKey(item),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) {

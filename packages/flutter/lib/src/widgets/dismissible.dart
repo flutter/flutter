@@ -17,32 +17,32 @@ const double _kMinFlingVelocityDelta = 400.0;
 const double _kFlingVelocityScale = 1.0 / 300.0;
 const double _kDismissThreshold = 0.4;
 
-/// Signature used by [Dismissable] to indicate that it has been dismissed in
+/// Signature used by [Dismissible] to indicate that it has been dismissed in
 /// the given `direction`.
 ///
-/// Used by [Dismissable.onDismissed].
+/// Used by [Dismissible.onDismissed].
 typedef void DismissDirectionCallback(DismissDirection direction);
 
-/// The direction in which a [Dismissable] can be dismissed.
+/// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {
-  /// The [Dismissable] can be dismissed by dragging either up or down.
+  /// The [Dismissible] can be dismissed by dragging either up or down.
   vertical,
 
-  /// The [Dismissable] can be dismissed by dragging either left or right.
+  /// The [Dismissible] can be dismissed by dragging either left or right.
   horizontal,
 
-  /// The [Dismissable] can be dismissed by dragging in the reverse of the
+  /// The [Dismissible] can be dismissed by dragging in the reverse of the
   /// reading direction (e.g., from right to left in left-to-right languages).
   endToStart,
 
-  /// The [Dismissable] can be dismissed by dragging in the reading direction
+  /// The [Dismissible] can be dismissed by dragging in the reading direction
   /// (e.g., from left to right in left-to-right languages).
   startToEnd,
 
-  /// The [Dismissable] can be dismissed by dragging up only.
+  /// The [Dismissible] can be dismissed by dragging up only.
   up,
 
-  /// The [Dismissable] can be dismissed by dragging down only.
+  /// The [Dismissible] can be dismissed by dragging down only.
   down
 }
 
@@ -50,28 +50,28 @@ enum DismissDirection {
 ///
 /// Dragging or flinging this widget in the [DismissDirection] causes the child
 /// to slide out of view. Following the slide animation, if [resizeDuration] is
-/// non-null, the Dismissable widget animates its height (or width, whichever is
+/// non-null, the Dismissible widget animates its height (or width, whichever is
 /// perpendicular to the dismiss direction) to zero over the [resizeDuration].
 ///
 /// Backgrounds can be used to implement the "leave-behind" idiom. If a background
-/// is specified it is stacked behind the Dismissable's child and is exposed when
+/// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
 ///
 /// The widget calls the [onDimissed] callback either after its size has
 /// collapsed to zero (if [resizeDuration] is non-null) or immediately after
-/// the slide animation (if [resizeDuration] is null). If the Dismissable is a
+/// the slide animation (if [resizeDuration] is null). If the Dismissible is a
 /// list item, it must have a key that distinguishes it from the other items and
 /// its [onDismissed] callback must remove the item from the list.
-class Dismissable extends StatefulWidget {
+class Dismissible extends StatefulWidget {
   /// Creates a widget that can be dismissed.
   ///
-  /// The [key] argument must not be null because [Dismissable]s are commonly
+  /// The [key] argument must not be null because [Dismissible]s are commonly
   /// used in lists and removed from the list when dismissed. Without keys, the
   /// default behavior is to sync widgets based on their index in the list,
   /// which means the item after the dismissed item would be synced with the
   /// state of the dismissed item. Using keys causes the widgets to sync
   /// according to their keys and avoids this pitfall.
-  Dismissable({
+  Dismissible({
     @required Key key,
     @required this.child,
     this.background,
@@ -123,11 +123,11 @@ class Dismissable extends StatefulWidget {
   final Map<DismissDirection, double> dismissThresholds;
 
   @override
-  _DismissableState createState() => new _DismissableState();
+  _DismissibleState createState() => new _DismissibleState();
 }
 
-class _DismissableClipper extends CustomClipper<Rect> {
-  _DismissableClipper({
+class _DismissibleClipper extends CustomClipper<Rect> {
+  _DismissibleClipper({
     this.axis,
     this.moveAnimation
   }) : super(reclip: moveAnimation) {
@@ -160,13 +160,13 @@ class _DismissableClipper extends CustomClipper<Rect> {
   Rect getApproximateClipRect(Size size) => getClip(size);
 
   @override
-  bool shouldReclip(_DismissableClipper oldClipper) {
+  bool shouldReclip(_DismissibleClipper oldClipper) {
     return oldClipper.axis != axis
         || oldClipper.moveAnimation.value != moveAnimation.value;
   }
 }
 
-class _DismissableState extends State<Dismissable> with TickerProviderStateMixin {
+class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -377,8 +377,8 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
           throw new FlutterError(
-            'A dismissed Dismissable widget is still part of the tree.\n' +
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissable\n' +
+            'A dismissed Dismissible widget is still part of the tree.\n' +
+            'Make sure to implement the onDismissed handler and to immediately remove the Dismissible\n' +
             'widget from the application once that handler has fired.'
           );
         }
@@ -407,7 +407,7 @@ class _DismissableState extends State<Dismissable> with TickerProviderStateMixin
       if (!_moveAnimation.isDismissed) {
         children.add(new Positioned.fill(
           child: new ClipRect(
-            clipper: new _DismissableClipper(
+            clipper: new _DismissibleClipper(
               axis: _directionIsXAxis ? Axis.horizontal : Axis.vertical,
               moveAnimation: _moveAnimation,
             ),

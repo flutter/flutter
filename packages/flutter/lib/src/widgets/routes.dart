@@ -613,7 +613,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by this class
 
   /// Whether you can dismiss this route by tapping the modal barrier.
-  bool get barrierDismissable;
+  bool get barrierDismissible;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
@@ -816,10 +816,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       ));
       barrier = new AnimatedModalBarrier(
         color: color,
-        dismissable: barrierDismissable
+        dismissible: barrierDismissible
       );
     } else {
-      barrier = new ModalBarrier(dismissable: barrierDismissable);
+      barrier = new ModalBarrier(dismissible: barrierDismissible);
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(

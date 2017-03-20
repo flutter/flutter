@@ -307,7 +307,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   Duration get transitionDuration => _kDropdownMenuDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => null;
