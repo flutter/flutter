@@ -12,27 +12,27 @@ import 'globals.dart';
 import 'usage.dart';
 
 /// Tells crash backend that the error is from the Flutter CLI.
-String _kProductId = 'Flutter_Tools';
+const String _kProductId = 'Flutter_Tools';
 
 /// Tells crash backend that this is a Dart error as opposed to, say, Java.
-String _kDartTypeId = 'DartError';
+const String _kDartTypeId = 'DartError';
 
 /// Crash backend host.
-String _kCrashServerHost = 'clients2.google.com';
+const String _kCrashServerHost = 'clients2.google.com';
 
 /// Path to the crash servlet.
 // TODO(yjbanov): switch to non-staging when production is ready.
-String _kCrashEndpointPath = '/cr/staging_report';
+const String _kCrashEndpointPath = '/cr/staging_report';
 
 /// The field corresponding to the multipart/form-data file attachment where
 /// crash backend expects to find the Dart stack trace.
-String _kStackTraceFileField = 'DartError';
+const String _kStackTraceFileField = 'DartError';
 
 /// The name of the file attached as [_kStackTraceFileField].
 ///
 /// The precise value is not important. It is ignored by the crash back end, but
 /// it must be supplied in the request.
-String _kStackTraceFilename = 'stacktrace_file';
+const String _kStackTraceFilename = 'stacktrace_file';
 
 /// We only send crash reports in testing mode.
 ///
