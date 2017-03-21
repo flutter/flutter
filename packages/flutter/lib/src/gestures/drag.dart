@@ -251,21 +251,20 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   GestureDragCancelCallback onCancel;
 
   /// The minimum distance an input pointer drag must have moved to
-  /// to be considered a scroll fling gesture.
+  /// to be considered a fling gesture.
   ///
   /// This value is typically compared with the distance traveled along the
   /// scrolling axis. If null then [kTouchSlop] is used.
   double get minFlingDistance;
 
-  /// The minimum velocity for an input pointer drag to be considered a
-  /// scroll fling.
+  /// The minimum velocity for an input pointer drag to be considered fling.
   ///
   /// This value is typically compared with the magnitude of fling gesture's
   /// velocity along the scrolling axis. If null then [kMinFlingVelocity]
   /// is used.
   double maxFlingVelocity;
 
-  /// Scroll fling velocity magnitudes will be clamped to this value.
+  /// Fling velocity magnitudes will be clamped to this value.
   ///
   /// If null then [kMaxFlingVelocity] is used.
   double maxFlingVelocity;
