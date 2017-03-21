@@ -5,9 +5,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
+import 'typography.dart';
 
 /// A circle that represents a user.
 ///
@@ -86,9 +86,9 @@ class CircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color fallbackTextColor = backgroundColor != null ?
-        Colors.white : theme.primaryTextTheme.title.color;
-    final Color textColor = foregroundColor ?? fallbackTextColor;
+    final TextStyle textStyle = backgroundColor != null ?
+        new Typography(platform: theme.platform).white.title :
+        theme.primaryTextTheme.title;
     return new AnimatedContainer(
       width: radius * 2.0,
       height: radius * 2.0,
@@ -102,7 +102,7 @@ class CircleAvatar extends StatelessWidget {
       ),
       child: child != null ? new Center(
         child: new DefaultTextStyle(
-          style: theme.primaryTextTheme.title.copyWith(color: textColor),
+          style: textStyle.copyWith(color: foregroundColor),
           child: child,
         )
       ) : null,
