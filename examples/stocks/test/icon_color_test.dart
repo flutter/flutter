@@ -87,7 +87,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the colour of the icon - dark mode
-    checkIconColor(tester, 'Stock List', Colors.redAccent.shade200); // theme accent color
+    checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
     checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });

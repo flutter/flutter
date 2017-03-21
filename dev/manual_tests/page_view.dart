@@ -148,7 +148,7 @@ void main() {
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent.shade200,
+      accentColor: Colors.redAccent,
     ),
     home: new PageViewApp(),
   ));
