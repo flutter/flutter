@@ -98,31 +98,31 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
       new NavigationIconView(
         icon: new Icon(Icons.access_alarm),
         title: new Text('Alarm'),
-        color: Colors.deepPurple.shade500,
+        color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new CustomIcon(),
         title: new Text('Box'),
-        color: Colors.deepOrange.shade500,
+        color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.cloud),
         title: new Text('Cloud'),
-        color: Colors.teal.shade500,
+        color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.favorite),
         title: new Text('Favorites'),
-        color: Colors.indigo.shade500,
+        color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new Icon(Icons.event_available),
         title: new Text('Event'),
-        color: Colors.pink.shade500,
+        color: Colors.pink,
         vsync: this,
       )
     ];

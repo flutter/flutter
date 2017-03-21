@@ -217,8 +217,8 @@ class _MaterialAppState extends State<MaterialApp> {
         key: new GlobalObjectKey(this),
         title: config.title,
         textStyle: _errorTextStyle,
-        // blue.shade500 is the primary color of the default theme
-        color: config.color ?? theme?.primaryColor ?? Colors.blue.shade500,
+        // blue is the primary color of the default theme
+        color: config.color ?? theme?.primaryColor ?? Colors.blue,
         navigatorObservers:
             new List<NavigatorObserver>.from(config.navigatorObservers)
               ..add(_heroController),

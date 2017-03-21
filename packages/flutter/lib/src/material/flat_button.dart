@@ -83,7 +83,7 @@ class FlatButton extends StatelessWidget {
   ///
   /// ```dart
   ///  new FlatButton(
-  ///    color: Colors.blue.shade500,
+  ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    child: new Text('DEMO'),
   ///  ),

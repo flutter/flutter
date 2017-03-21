@@ -12,7 +12,7 @@ class MarkdownStyle extends MarkdownStyleRaw{
 
   /// Creates a [MarkdownStyle] from the [TextStyle]s in the provided [theme].
   MarkdownStyle.defaultFromTheme(ThemeData theme) : super(
-    a: new TextStyle(color: Colors.blue.shade500),
+    a: new TextStyle(color: Colors.blue),
     p: theme.textTheme.body1,
     code: new TextStyle(
       color: Colors.grey.shade700,
@@ -46,7 +46,7 @@ class MarkdownStyle extends MarkdownStyleRaw{
   /// This style uses larger fonts for the headings than in
   /// [MarkdownStyle.defaultFromTheme].
   MarkdownStyle.largeFromTheme(ThemeData theme) : super (
-    a: new TextStyle(color: Colors.blue.shade500),
+    a: new TextStyle(color: Colors.blue),
     p: theme.textTheme.body1,
     code: new TextStyle(
       color: Colors.grey.shade700,

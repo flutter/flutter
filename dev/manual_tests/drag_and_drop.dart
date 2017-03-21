@@ -12,7 +12,7 @@ class ExampleDragTarget extends StatefulWidget {
 }
 
 class ExampleDragTargetState extends State<ExampleDragTarget> {
-  Color _color = Colors.grey.shade500;
+  Color _color = Colors.grey;
 
   void _handleAccept(Color data) {
     setState(() {
@@ -31,7 +31,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
           decoration: new BoxDecoration(
             border: new Border.all(
               width: 3.0,
-              color: data.isEmpty ? Colors.white : Colors.blue.shade500
+              color: data.isEmpty ? Colors.white : Colors.blue
             ),
             backgroundColor: data.isEmpty ? _color : Colors.grey.shade200
           )

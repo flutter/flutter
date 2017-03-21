@@ -75,7 +75,7 @@ class _PointDemoPainter extends CustomPainter {
 
     paint
       ..isAntiAlias = false // Work-around for github.com/flutter/flutter/issues/5720
-      ..color = Colors.green.shade500.withOpacity(0.25)
+      ..color = Colors.green.withOpacity(0.25)
       ..strokeWidth = 4.0
       ..style = PaintingStyle.stroke;
     if (arc.center != null && arc.radius != null)
@@ -83,11 +83,11 @@ class _PointDemoPainter extends CustomPainter {
     else
       canvas.drawLine(arc.begin, arc.end, paint);
 
-    drawPoint(canvas, arc.begin, Colors.green.shade500);
-    drawPoint(canvas, arc.end, Colors.red.shade500);
+    drawPoint(canvas, arc.begin, Colors.green);
+    drawPoint(canvas, arc.end, Colors.red);
 
     paint
-      ..color = Colors.green.shade500
+      ..color = Colors.green
       ..style = PaintingStyle.fill;
     canvas.drawCircle(arc.lerp(_repaint.value), _kPointRadius, paint);
   }
@@ -252,9 +252,9 @@ class _RectangleDemoPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRect(canvas, arc.begin, Colors.green.shade500);
-    drawRect(canvas, arc.end, Colors.red.shade500);
-    drawRect(canvas, arc.lerp(_repaint.value), Colors.blue.shade500);
+    drawRect(canvas, arc.begin, Colors.green);
+    drawRect(canvas, arc.end, Colors.red);
+    drawRect(canvas, arc.lerp(_repaint.value), Colors.blue);
   }
 
   @override
