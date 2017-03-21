@@ -13,9 +13,9 @@ target 'Runner' do
   # Flutter Pods
   pod 'Flutter', :path => ENV['FLUTTER_FRAMEWORK_DIR']
 
-  if File.exists? '../flutter-plugins.properties'
+  if File.exists? '../.flutter-plugins'
     flutter_root = File.expand_path('..')
-    File.foreach('../flutter-plugins.properties') { |line|
+    File.foreach('../.flutter-plugins') { |line|
       plugin = line.split(pattern='=')
       if plugin.length == 2
         name = plugin[0].strip()

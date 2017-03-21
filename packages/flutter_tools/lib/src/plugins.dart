@@ -9,7 +9,6 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 
 dynamic _loadYamlFile(String path) {
-  printTrace("Looking for YAML at '$path'");
   if (!fs.isFileSync(path))
     return null;
   final String manifestString = fs.file(path).readAsStringSync();
@@ -31,8 +30,8 @@ String _generatePluginManifest() {
     if (packageConfig != null) {
       final dynamic flutterConfig = packageConfig['flutter'];
       if (flutterConfig != null && flutterConfig.containsKey('plugin')) {
-        printTrace('Found plugin $name at $packageRoot');
-        plugins.add('$name=$packageRoot');
+        printTrace('Found plugin $name at ${packageRoot.path}');
+        plugins.add('$name=${packageRoot.path}');
       }
     }
   });
@@ -40,7 +39,7 @@ String _generatePluginManifest() {
 }
 
 void writeFlutterPluginsList() {
-  final File pluginsProperties = fs.file('flutter-plugins.properties');
+  final File pluginsProperties = fs.file('.flutter-plugins');
 
   final String pluginManifest = _generatePluginManifest();
   if (pluginManifest.isNotEmpty) {

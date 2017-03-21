@@ -140,7 +140,7 @@ class FlutterPlugin implements Plugin<Project> {
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
-        File pluginsFile = new File(project.rootProject.projectDir.parentFile, 'flutter-plugins.properties')
+        File pluginsFile = new File(project.rootProject.projectDir.parentFile, '.flutter-plugins')
         Properties plugins = readPropertiesIfExist(pluginsFile)
 
         plugins.each { name, _ ->
