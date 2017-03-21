@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/devfs.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
+import 'src/context.dart';
 
 void main()  {
   // Create a temporary directory and write a single file into it.
@@ -73,7 +74,7 @@ void main()  {
       expect(await ab.build(), 0);
       expect(ab.entries.length, greaterThan(0));
     });
-    test('strip leading parent', () async {
+    testUsingContext('strip leading parent', () async {
       final String dataPath = fs.path.join(
         getFlutterRoot(),
         'packages',
@@ -93,8 +94,26 @@ void main()  {
       expect(ab.entries.containsKey('font_1.ttf'), true);
       expect(ab.entries.containsKey('../asset_1.txt'), false);
       expect(ab.entries.containsKey('../font_1.ttf'), false);
-      expect(ab.entries['FontManifest.json'] is DevFSStringContent, true);
-      expect(ab.entries['FontManifest.json'].string.contains('../'), false);
+      final DevFSStringContent fontManifest = ab.entries['FontManifest.json'];
+      expect(fontManifest.string.contains('../'), false);
     });
+  });
+  testUsingContext('non-existent files throws error', () async {
+    final String dataPath = fs.path.join(
+      getFlutterRoot(),
+      'packages',
+      'flutter_tools',
+      'test',
+      'data',
+      'asset_bundle',
+      'project_root',
+    );
+
+    final AssetBundle ab = new AssetBundle();
+    expect(await ab.build(
+      manifestPath: fs.path.join(dataPath, 'buggy_pubspec.yaml'),
+      packagesPath: fs.path.join(dataPath, '.packages'),
+    ), 1);
+    expect(ab.entries.length, 0);
   });
 }
