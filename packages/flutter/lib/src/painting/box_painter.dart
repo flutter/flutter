@@ -868,8 +868,8 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 ///    image.
 ///  * `fit`: How the image should be inscribed into `rect`. If null, the
 ///    default behavior depends on `centerSlice`. If `centerSlice` is also null,
-///    the default behavior is [ImageFit.scaleDown]. If `centerSlice` is
-///    non-null, the default behavior is [ImageFit.fill]. See [ImageFit] for
+///    the default behavior is [BoxFit.scaleDown]. If `centerSlice` is
+///    non-null, the default behavior is [BoxFit.fill]. See [BoxFit] for
 ///    details.
 ///  * `repeat`: If the image does not fill `rect`, whether and how the image
 ///    should be repeated to fill `rect`. By default, the image is not repeated.
@@ -885,7 +885,7 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 ///    exactly cover the destination rectangle while maintaining their relative
 ///    positions.
 ///  * `alignment`: How the destination rectangle defined by applying `fit` is
-///    aligned within `rect`. For example, if `fit` is [ImageFit.contain] and
+///    aligned within `rect`. For example, if `fit` is [BoxFit.contain] and
 ///    `alignment` is [FractionalOffset.bottomRight], the image will be as large
 ///    as possible within `rect` and placed with its bottom right corner at the
 ///    bottom right corner of `rect`.
@@ -1043,7 +1043,7 @@ class BackgroundImage {
 ///     backgroundColor: const Color(0xff7c94b6),
 ///     backgroundImage: new BackgroundImage(
 ///       image: new ExactAssetImage('images/flowers.jpeg'),
-///       fit: ImageFit.cover,
+///       fit: BoxFit.cover,
 ///     ),
 ///     border: new Border.all(
 ///       color: Colors.black,
