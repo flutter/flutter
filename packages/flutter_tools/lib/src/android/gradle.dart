@@ -105,7 +105,9 @@ String locateSystemGradle({ bool ensureExecutable: true }) {
 }
 
 String locateProjectGradlew({ bool ensureExecutable: true }) {
-  final String path = 'android/gradlew';
+  final String path = fs.path.join(
+      'android', platform.isWindows ? 'gradlew.bat' : 'gradlew'
+  );
 
   if (fs.isFileSync(path)) {
     final File gradle = fs.file(path);
