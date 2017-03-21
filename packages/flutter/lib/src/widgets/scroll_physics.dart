@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/physics.dart';
 
 import 'overscroll_indicator.dart';
@@ -81,6 +82,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
     }
     return null;
   }
+
+  // The ballistic simulation here decelerates more slowly than the one for
+  // ClampingScrollPhysics so we require a more deliberate input gesture
+  // to trigger a fling.
+  @override
+  double get minFlingVelocity => kMinFlingVelocity * 2.0;
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching
