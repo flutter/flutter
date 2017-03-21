@@ -303,6 +303,8 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   return new DevFSStringContent(JSON.encode(json));
 }
 
+final RegExp _assetJsonLeadingParentRegExp = new RegExp(r'"asset":"(\.\.\/)+');
+
 DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
                              bool includeDefaultFonts,
@@ -317,7 +319,9 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
     fonts.addAll(manifestDescriptor['fonts']);
   if (fonts.isEmpty)
     return null;
-  return new DevFSStringContent(JSON.encode(fonts));
+  String json = JSON.encode(fonts);
+  json = json.replaceAll(_assetJsonLeadingParentRegExp, '"asset":"');
+  return new DevFSStringContent(json);
 }
 
 /// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
@@ -401,6 +405,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   return result;
 }
 
+final RegExp _leadingParentRegExp = new RegExp(r'(\.\.\/)+');
+
 _Asset _resolveAsset(
   PackageMap packageMap,
   String assetBase,
@@ -422,6 +428,12 @@ _Asset _resolveAsset(
       final File file = fs.file(uri);
       return new _Asset(base: file.path, assetEntry: asset, relativePath: relativeAsset);
     }
+  } else if (asset.startsWith('../')) {
+    return new _Asset(
+      base: assetBase,
+      assetEntry: asset.replaceFirst(_leadingParentRegExp, ''),
+      relativePath: asset
+    );
   }
 
   return new _Asset(base: assetBase, relativePath: asset);
