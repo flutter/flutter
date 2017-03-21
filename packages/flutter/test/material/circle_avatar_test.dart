@@ -9,7 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('CircleAvatar with background color', (WidgetTester tester) async {
     final Color backgroundColor = Colors.blue.shade400;
-    final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       new Center(
         child: new CircleAvatar(
@@ -23,14 +22,16 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size.width, equals(100.0));
     expect(box.size.height, equals(100.0));
-    expect(box.child.decoration.backgroundColor, equals(backgroundColor));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.backgroundColor, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(Colors.white));
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {
-    final Color foregroundColor = Colors.grey.shade100;
+    final Color foregroundColor = Colors.red.shade100;
     await tester.pumpWidget(
       new Center(
         child: new CircleAvatar(
@@ -42,10 +43,12 @@ void main() {
 
     final ThemeData fallback = new ThemeData.fallback();
 
-    final RenderBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size.width, equals(40.0));
     expect(box.size.height, equals(40.0));
-    expect(box.child.decoration.backgroundColor, equals(fallback.primaryColor));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.backgroundColor, equals(fallback.primaryColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(foregroundColor));
@@ -67,8 +70,10 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject(find.byType(CircleAvatar));
-    expect(box.child.decoration.backgroundColor, equals(theme.primaryColor));
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.backgroundColor, equals(theme.primaryColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
