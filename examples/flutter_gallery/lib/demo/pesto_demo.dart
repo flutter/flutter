@@ -25,7 +25,7 @@ final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
-  accentColor: Colors.redAccent[200],
+  accentColor: Colors.redAccent.shade200,
 );
 
 class PestoHome extends StatelessWidget {

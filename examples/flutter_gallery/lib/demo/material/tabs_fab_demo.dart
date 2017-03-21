@@ -17,9 +17,9 @@ class _Page {
   final MaterialColor colors;
   final IconData icon;
 
-  Color get labelColor => colors != null ? colors[300] : Colors.grey[300];
+  Color get labelColor => colors != null ? colors.shade300 : Colors.grey.shade300;
   bool get fabDefined => colors != null && icon != null;
-  Color get fabColor => colors[400];
+  Color get fabColor => colors.shade400;
   Icon get fabIcon => new Icon(icon);
   Key get fabKey => new ValueKey<Color>(fabColor);
 }

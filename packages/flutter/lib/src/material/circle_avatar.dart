@@ -30,7 +30,7 @@ import 'theme.dart';
 ///
 /// ```dart
 /// new CircleAvatar(
-///   backgroundColor: Colors.brown[800],
+///   backgroundColor: Colors.brown.shade800,
 ///   child: new Text('AH'),
 /// );
 /// ```

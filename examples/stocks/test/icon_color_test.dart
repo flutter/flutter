@@ -76,7 +76,7 @@ void main() {
     expect(find.text('Account Balance'), findsOneWidget);
 
     // check the colour of the icon - light mode
-    checkIconColor(tester, 'Stock List', Colors.purple[500]); // theme primary color
+    checkIconColor(tester, 'Stock List', Colors.purple.shade500); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.black26); // disabled
     checkIconColor(tester, 'About', Colors.black45); // enabled
 
@@ -87,7 +87,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the colour of the icon - dark mode
-    checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color
+    checkIconColor(tester, 'Stock List', Colors.redAccent.shade200); // theme accent color
     checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });

@@ -12,7 +12,7 @@ class ExampleDragTarget extends StatefulWidget {
 }
 
 class ExampleDragTargetState extends State<ExampleDragTarget> {
-  Color _color = Colors.grey[500];
+  Color _color = Colors.grey.shade500;
 
   void _handleAccept(Color data) {
     setState(() {
@@ -31,9 +31,9 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
           decoration: new BoxDecoration(
             border: new Border.all(
               width: 3.0,
-              color: data.isEmpty ? Colors.white : Colors.blue[500]
+              color: data.isEmpty ? Colors.white : Colors.blue.shade500
             ),
-            backgroundColor: data.isEmpty ? _color : Colors.grey[200]
+            backgroundColor: data.isEmpty ? _color : Colors.grey.shade200
           )
         );
       }
@@ -190,7 +190,7 @@ class MovableBall extends StatelessWidget {
       textAlign: TextAlign.center,
       child: new Dot(
         key: kBallKey,
-        color: Colors.blue[700],
+        color: Colors.blue.shade700,
         size: kBallSize,
         tappable: true,
         child: new Center(child: new Text('BALL'))
@@ -248,19 +248,19 @@ class DragAndDropAppState extends State<DragAndDropApp> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 new ExampleDragSource(
-                  color: Colors.yellow[300],
+                  color: Colors.yellow.shade300,
                   under: true,
                   heavy: false,
                   child: new Text('under')
                 ),
                 new ExampleDragSource(
-                  color: Colors.green[300],
+                  color: Colors.green.shade300,
                   under: false,
                   heavy: true,
                   child: new Text('long-press above')
                 ),
                 new ExampleDragSource(
-                  color: Colors.indigo[300],
+                  color: Colors.indigo.shade300,
                   under: false,
                   heavy: false,
                   child: new Text('above')

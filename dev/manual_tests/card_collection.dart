@@ -378,7 +378,7 @@ class CardCollectionState extends State<CardCollection> {
 
     final Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      color: _primaryColor[50],
+      color: _primaryColor.shade50,
       child: cardCollection,
     );
 

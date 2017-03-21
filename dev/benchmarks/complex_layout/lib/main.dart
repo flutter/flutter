@@ -633,7 +633,7 @@ class FancyDrawerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       decoration: new BoxDecoration(
-        backgroundColor: Colors.purple[500]
+        backgroundColor: Colors.purple.shade500
       ),
       height: 200.0
     );

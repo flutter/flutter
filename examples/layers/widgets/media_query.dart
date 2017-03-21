@@ -18,7 +18,7 @@ class AdaptedListItem extends StatelessWidget {
           height: 32.0,
           margin: const EdgeInsets.all(8.0),
           decoration: new BoxDecoration(
-            backgroundColor: Colors.lightBlueAccent[100]
+            backgroundColor: Colors.lightBlueAccent.shade100
           )
         ),
         new Text(name)
@@ -40,7 +40,7 @@ class AdaptedGridItem extends StatelessWidget {
           new Expanded(
             child: new Container(
               decoration: new BoxDecoration(
-                backgroundColor: Colors.lightBlueAccent[100]
+                backgroundColor: Colors.lightBlueAccent.shade100
               )
             )
           ),
