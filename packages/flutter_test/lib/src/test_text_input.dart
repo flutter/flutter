@@ -38,14 +38,14 @@ class TestTextInput {
     }
   }
 
-  void updateEditingState(TextEditingState state) {
+  void updateEditingValue(TextEditingValue value) {
     expect(_client, isNonZero);
     PlatformMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         new MethodCall(
           'TextInputClient.updateEditingState',
-          <dynamic>[_client, state.toJSON()],
+          <dynamic>[_client, value.toJSON()],
         ),
       ),
       (_) {},
@@ -53,10 +53,9 @@ class TestTextInput {
   }
 
   void enterText(String text) {
-    updateEditingState(new TextEditingState(
+    updateEditingValue(new TextEditingValue(
       text: text,
-      composingBase: 0,
-      composingExtent: text.length,
+      composing: new TextRange(start: 0, end: text.length),
     ));
   }
 }

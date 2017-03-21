@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui show ParagraphBuilder;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'text_editing.dart';
 import 'text_style.dart';
 
 // TODO(abarth): Should this be somewhere more general?

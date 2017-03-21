@@ -17,37 +17,23 @@ import 'scroll_physics.dart';
 import 'scrollable.dart';
 import 'text_selection.dart';
 
-export 'package:flutter/painting.dart' show TextSelection;
-export 'package:flutter/services.dart' show TextInputType;
+export 'package:flutter/services.dart' show TextSelection, TextInputType;
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
-TextSelection _getTextSelectionFromEditingState(TextEditingState state) {
-  return new TextSelection(
-    baseOffset: state.selectionBase,
-    extentOffset: state.selectionExtent,
-    affinity: state.selectionAffinity,
-    isDirectional: state.selectionIsDirectional,
-  );
-}
-
-InputValue _getInputValueFromEditingState(TextEditingState state) {
+InputValue _getInputValueFromEditingValue(TextEditingValue value) {
   return new InputValue(
-    text: state.text,
-    selection: _getTextSelectionFromEditingState(state),
-    composing: new TextRange(start: state.composingBase, end: state.composingExtent),
+    text: value.text,
+    selection: value.selection,
+    composing: value.composing,
   );
 }
 
-TextEditingState _getTextEditingStateFromInputValue(InputValue value) {
-  return new TextEditingState(
+TextEditingValue _getTextEditingValueFromInputValue(InputValue value) {
+  return new TextEditingValue(
     text: value.text,
-    selectionBase: value.selection.baseOffset,
-    selectionExtent: value.selection.extentOffset,
-    selectionAffinity: value.selection.affinity,
-    selectionIsDirectional: value.selection.isDirectional,
-    composingBase: value.composing.start,
-    composingExtent: value.composing.end,
+    selection: value.selection,
+    composing: value.composing,
   );
 }
 
@@ -243,7 +229,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (_currentValue != config.value) {
       _currentValue = config.value;
       if (_isAttachedToKeyboard)
-        _textInputConnection.setEditingState(_getTextEditingStateFromInputValue(_currentValue));
+        _textInputConnection.setEditingState(_getTextEditingValueFromInputValue(_currentValue));
     }
   }
 
@@ -271,7 +257,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   void _attachOrDetachKeyboard(bool focused) {
     if (focused && !_isAttachedToKeyboard && (_requestingFocus || config.autofocus)) {
       _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
-        ..setEditingState(_getTextEditingStateFromInputValue(_currentValue))
+        ..setEditingState(_getTextEditingValueFromInputValue(_currentValue))
         ..show();
     } else if (!focused) {
       if (_isAttachedToKeyboard) {
@@ -308,8 +294,8 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   @override
-  void updateEditingState(TextEditingState state) {
-    _currentValue = _getInputValueFromEditingState(state);
+  void updateEditingValue(TextEditingValue value) {
+    _currentValue = _getInputValueFromEditingValue(value);
     if (config.onChanged != null)
       config.onChanged(_currentValue);
     if (_currentValue.text != config.value.text) {

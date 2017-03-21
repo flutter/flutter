@@ -155,10 +155,9 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
 
     // Try the test again with a nonempty EditableText.
-    tester.testTextInput.updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: 'X',
-      selectionBase: 1,
-      selectionExtent: 1,
+      selection: const TextSelection.collapsed(offset: 1),
     ));
     await checkCursorToggle();
   });
@@ -182,10 +181,9 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
 
     const String testValue = 'ABC';
-    tester.testTextInput.updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: testValue,
-      selectionBase: testValue.length,
-      selectionExtent: testValue.length,
+      selection: const TextSelection.collapsed(offset: testValue.length),
     ));
 
     await tester.pump();

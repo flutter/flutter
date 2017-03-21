@@ -3,11 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show TextAffinity;
+import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
 
 import 'system_channels.dart';
+import 'text_editing.dart';
 import 'message_codec.dart';
 
 export 'dart:ui' show TextAffinity;
@@ -73,72 +74,33 @@ TextAffinity _toTextAffinity(String affinity) {
 }
 
 /// The current text, selection, and composing state for editing a run of text.
-class TextEditingState {
-  /// Creates state for text editing.
+class TextEditingValue {
+  /// Creates information for editing a run of text.
   ///
-  /// The [selectionBase], [selectionExtent], [selectionAffinity],
-  /// [selectionIsDirectional], [selectionIsDirectional], [composingBase], and
-  /// [composingExtent] arguments must not be null.
-  const TextEditingState({
-    this.text,
-    this.selectionBase: -1,
-    this.selectionExtent: -1,
-    this.selectionAffinity: TextAffinity.downstream,
-    this.selectionIsDirectional: false,
-    this.composingBase: -1,
-    this.composingExtent: -1,
+  /// The selection and composing range must be within the text.
+  ///
+  /// The [text], [selection], and [composing] arguments must not be null but
+  /// each have default values.
+  const TextEditingValue({
+    this.text: '',
+    this.selection: const TextSelection.collapsed(offset: -1),
+    this.composing: TextRange.empty
   });
 
-  /// The text that is currently being edited.
-  final String text;
-
-  /// The offset in [text] at which the selection originates.
-  ///
-  /// Might be larger than, smaller than, or equal to [selectionExtent].
-  final int selectionBase;
-
-  /// The offset in [text] at which the selection terminates.
-  ///
-  /// When the user uses the arrow keys to adjust the selection, this is the
-  /// value that changes. Similarly, if the current theme paints a caret on one
-  /// side of the selection, this is the location at which to paint the caret.
-  ///
-  /// Might be larger than, smaller than, or equal to [selectionBase].
-  final int selectionExtent;
-
-  /// If the the text range is collapsed and has more than one visual location
-  /// (e.g., occurs at a line break), which of the two locations to use when
-  /// painting the caret.
-  final TextAffinity selectionAffinity;
-
-  /// Whether this selection has disambiguated its base and extent.
-  ///
-  /// On some platforms, the base and extent are not disambiguated until the
-  /// first time the user adjusts the selection. At that point, either the start
-  /// or the end of the selection becomes the base and the other one becomes the
-  /// extent and is adjusted.
-  final bool selectionIsDirectional;
-
-  /// The offset in [text] at which the composing region originates.
-  ///
-  /// Always smaller than, or equal to, [composingExtent].
-  final int composingBase;
-
-  /// The offset in [text] at which the selection terminates.
-  ///
-  /// Always larger than, or equal to, [composingBase].
-  final int composingExtent;
-
   /// Creates an instance of this class from a JSON object.
-  factory TextEditingState.fromJSON(Map<String, dynamic> encoded) {
-    return new TextEditingState(
+  factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
+    return new TextEditingValue(
       text: encoded['text'],
-      selectionBase: encoded['selectionBase'] ?? -1,
-      selectionExtent: encoded['selectionExtent'] ?? -1,
-      selectionIsDirectional: encoded['selectionIsDirectional'] ?? false,
-      selectionAffinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
-      composingBase: encoded['composingBase'] ?? -1,
-      composingExtent: encoded['composingExtent'] ?? -1,
+      selection: new TextSelection(
+        baseOffset: encoded['selectionBase'] ?? -1,
+        extentOffset: encoded['selectionExtent'] ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] ?? false,
+      ),
+      composing: new TextRange(
+        start: encoded['composingBase'] ?? -1,
+        end: encoded['composingExtent'] ?? -1,
+      ),
     );
   }
 
@@ -146,14 +108,61 @@ class TextEditingState {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'text': text,
-      'selectionBase': selectionBase,
-      'selectionExtent': selectionExtent,
-      'selectionAffinity': selectionAffinity.toString(),
-      'selectionIsDirectional': selectionIsDirectional,
-      'composingBase': composingBase,
-      'composingExtent': composingExtent,
+      'selectionBase': selection.baseOffset,
+      'selectionExtent': selection.extentOffset,
+      'selectionAffinity': selection.affinity.toString(),
+      'selectionIsDirectional': selection.isDirectional,
+      'composingBase': composing.start,
+      'composingExtent': composing.end,
     };
   }
+
+  /// The current text being edited.
+  final String text;
+
+  /// The range of text that is currently selected.
+  final TextSelection selection;
+
+  /// The range of text that is still being composed.
+  final TextRange composing;
+
+  /// A value that corresponds to the empty string with no selection and no composing range.
+  static const TextEditingValue empty = const TextEditingValue();
+
+  /// Creates a copy of this value but with the given fields replaced with the new values.
+  TextEditingValue copyWith({
+    String text,
+    TextSelection selection,
+    TextRange composing
+  }) {
+    return new TextEditingValue(
+      text: text ?? this.text,
+      selection: selection ?? this.selection,
+      composing: composing ?? this.composing
+    );
+  }
+
+  @override
+  String toString() => '$runtimeType(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! TextEditingValue)
+      return false;
+    final TextEditingValue typedOther = other;
+    return typedOther.text == text
+        && typedOther.selection == selection
+        && typedOther.composing == composing;
+  }
+
+  @override
+  int get hashCode => hashValues(
+    text.hashCode,
+    selection.hashCode,
+    composing.hashCode
+  );
 }
 
 /// An interface to receive information from [TextInput].
@@ -167,7 +176,7 @@ abstract class TextInputClient {
   const TextInputClient();
 
   /// Requests that this client update its editing state to the given value.
-  void updateEditingState(TextEditingState state);
+  void updateEditingValue(TextEditingValue value);
 
   /// Requests that this client perform the given action.
   void performAction(TextInputAction action);
@@ -198,11 +207,11 @@ class TextInputConnection {
   }
 
   /// Requests that the text input control change its internal state to match the given state.
-  void setEditingState(TextEditingState state) {
+  void setEditingState(TextEditingValue value) {
     assert(attached);
     SystemChannels.textInput.invokeMethod(
       'TextInput.setEditingState',
-      state.toJSON(),
+      value.toJSON(),
     );
   }
 
@@ -247,7 +256,7 @@ class _TextInputClientHandler {
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingState(new TextEditingState.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(new TextEditingValue.fromJSON(args[1]));
         break;
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
