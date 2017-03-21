@@ -146,7 +146,7 @@ tasks:
 
   flutter_view__start_up:
     description: >
-      Measures the startup time of the Flutter View app on Android.
+      Verifies that Flutter View can be used from an Android project.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -198,7 +198,7 @@ tasks:
 
   flutter_view_ios__start_up:
     description: >
-      Measures the startup time of the Flutter View app on iOS.
+      Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
