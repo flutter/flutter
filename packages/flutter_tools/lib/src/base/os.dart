@@ -47,6 +47,19 @@ abstract class OperatingSystemUtils {
 
   void unzip(File file, Directory targetDirectory);
 
+  /// Returns a pretty name string for the current operating system.
+  ///
+  /// If available, the detailed version of the OS is included.
+  String get name {
+    const Map<String, String> osNames = const <String, String>{
+      'macos': 'Mac OS',
+      'linux': 'Linux',
+      'windows': 'Windows'
+    };
+    final String osName = platform.operatingSystem;
+    return osNames.containsKey(osName) ? osNames[osName] : osName;
+  }
+
   List<File> _which(String execName, {bool all: false});
 }
 
@@ -85,6 +98,28 @@ class _PosixUtils extends OperatingSystemUtils {
   File makePipe(String path) {
     runSync(<String>['mkfifo', path]);
     return fs.file(path);
+  }
+
+  String _name;
+
+  @override
+  String get name {
+    if (_name == null) {
+      if (platform.isMacOS) {
+        final List<ProcessResult> results = <ProcessResult>[
+          processManager.runSync(<String>["sw_vers", "-productName"]),
+          processManager.runSync(<String>["sw_vers", "-productVersion"]),
+          processManager.runSync(<String>["sw_vers", "-buildVersion"]),
+        ];
+        if (results.every((ProcessResult result) => result.exitCode == 0)) {
+          _name = "${results[0].stdout.trim()} ${results[1].stdout
+              .trim()} ${results[2].stdout.trim()}";
+        }
+      }
+      if (_name == null)
+        _name = super.name;
+    }
+    return _name;
   }
 }
 
@@ -143,6 +178,21 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   File makePipe(String path) {
     throw new UnsupportedError('makePipe is not implemented on Windows.');
+  }
+
+  String _name;
+
+  @override
+  String get name {
+    if (_name == null) {
+      final ProcessResult result = processManager.runSync(
+          <String>['ver'], runInShell: true);
+      if (result.exitCode == 0)
+        _name = result.stdout.trim();
+      else
+        _name = super.name;
+    }
+    return _name;
   }
 }
 

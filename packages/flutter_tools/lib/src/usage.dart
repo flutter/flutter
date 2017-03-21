@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
+import 'base/os.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 import 'version.dart';
@@ -22,6 +23,10 @@ class Usage {
   Usage({ String settingsName: 'flutter', String versionOverride }) {
     final String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
+
+    // Report a more detailed OS version string than package:usage does by
+    // default as custom dimension 1 (configured in our analytics account).
+    _analytics.setSessionValue('dimension1', os.name);
 
     bool runningOnCI = false;
 
