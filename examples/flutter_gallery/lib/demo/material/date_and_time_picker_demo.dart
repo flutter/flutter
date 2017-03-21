@@ -35,7 +35,7 @@ class _InputDropdown extends StatelessWidget {
           children: <Widget>[
             new Text(valueText, style: valueStyle),
             new Icon(Icons.arrow_drop_down,
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey[700] : Colors.white70
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
             ),
           ],
         ),

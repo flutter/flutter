@@ -31,7 +31,7 @@ class PageViewAppState extends State<PageViewApp> {
     ];
 
     cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
-      final Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
+      final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
   }
@@ -148,7 +148,7 @@ void main() {
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200],
+      accentColor: Colors.redAccent,
     ),
     home: new PageViewApp(),
   ));

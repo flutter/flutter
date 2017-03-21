@@ -107,7 +107,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   ///  new IconButton(
-  ///    color: Colors.blue[500],
+  ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    icon: Icons.widgets,
   ///  ),

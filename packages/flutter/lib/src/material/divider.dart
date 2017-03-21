@@ -52,7 +52,7 @@ class Divider extends StatelessWidget {
   ///
   /// ```dart
   ///  new Divider(
-  ///    color: Colors.deepOrange[500],
+  ///    color: Colors.deepOrange,
   ///  ),
   /// ```
   final Color color;

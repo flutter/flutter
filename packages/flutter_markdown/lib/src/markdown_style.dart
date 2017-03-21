@@ -12,10 +12,10 @@ class MarkdownStyle extends MarkdownStyleRaw{
 
   /// Creates a [MarkdownStyle] from the [TextStyle]s in the provided [theme].
   MarkdownStyle.defaultFromTheme(ThemeData theme) : super(
-    a: new TextStyle(color: Colors.blue[500]),
+    a: new TextStyle(color: Colors.blue),
     p: theme.textTheme.body1,
     code: new TextStyle(
-      color: Colors.grey[700],
+      color: Colors.grey.shade700,
       fontFamily: "monospace",
       fontSize: theme.textTheme.body1.fontSize * 0.85
     ),
@@ -32,12 +32,12 @@ class MarkdownStyle extends MarkdownStyleRaw{
     listIndent: 32.0,
     blockquotePadding: 8.0,
     blockquoteDecoration: new BoxDecoration(
-      backgroundColor: Colors.blue[100],
+      backgroundColor: Colors.blue.shade100,
       borderRadius: new BorderRadius.circular(2.0)
     ),
     codeblockPadding: 8.0,
     codeblockDecoration: new BoxDecoration(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey.shade100,
       borderRadius: new BorderRadius.circular(2.0)
     )
   );
@@ -46,10 +46,10 @@ class MarkdownStyle extends MarkdownStyleRaw{
   /// This style uses larger fonts for the headings than in
   /// [MarkdownStyle.defaultFromTheme].
   MarkdownStyle.largeFromTheme(ThemeData theme) : super (
-    a: new TextStyle(color: Colors.blue[500]),
+    a: new TextStyle(color: Colors.blue),
     p: theme.textTheme.body1,
     code: new TextStyle(
-      color: Colors.grey[700],
+      color: Colors.grey.shade700,
       fontFamily: "monospace",
       fontSize: theme.textTheme.body1.fontSize * 0.85
     ),
@@ -66,12 +66,12 @@ class MarkdownStyle extends MarkdownStyleRaw{
     listIndent: 32.0,
     blockquotePadding: 8.0,
     blockquoteDecoration: new BoxDecoration(
-      backgroundColor: Colors.blue[100],
+      backgroundColor: Colors.blue.shade100,
       borderRadius: new BorderRadius.circular(2.0)
     ),
     codeblockPadding: 8.0,
     codeblockDecoration: new BoxDecoration(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: Colors.grey.shade100,
       borderRadius: new BorderRadius.circular(2.0)
     )
   );

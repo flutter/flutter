@@ -30,8 +30,8 @@ class _GesturePainter extends CustomPainter {
     final Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = new RadialGradient(
-      colors: forward ? <Color>[swatch[50], swatch[900]]
-                      : <Color>[swatch[900], swatch[50]]
+      colors: forward ? <Color>[swatch.shade50, swatch.shade900]
+                      : <Color>[swatch.shade900, swatch.shade50]
     );
     final Paint paint = new Paint()
       ..shader = gradient.createShader(new Rect.fromLTWH(

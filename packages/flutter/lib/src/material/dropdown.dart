@@ -559,7 +559,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
             new Icon(Icons.arrow_drop_down,
               size: config.iconSize,
               // These colors are not defined in the Material Design spec.
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey[700] : Colors.white70
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
             ),
           ],
         ),
