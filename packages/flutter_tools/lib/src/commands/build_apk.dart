@@ -90,7 +90,7 @@ Future<Null> buildApk(
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
 
-  final List<String> validationResult = androidSdk.validateSdkWellFormed(requireApkSigner: false);
+  final List<String> validationResult = androidSdk.validateSdkWellFormed();
   if (validationResult.isNotEmpty) {
     validationResult.forEach(printError);
     throwToolExit('Try re-installing or updating your Android SDK.');
