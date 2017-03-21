@@ -23,6 +23,9 @@ class UpgradeCommand extends FlutterCommand {
   final String description = 'Upgrade your copy of Flutter.';
 
   @override
+  bool get shouldUpdateCache => false;
+
+  @override
   Future<Null> runCommand() async {
     try {
       runCheckedSync(<String>[

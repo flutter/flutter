@@ -37,6 +37,8 @@ abstract class FlutterCommand extends Command<Null> {
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
+  bool get shouldUpdateCache => true;
+
   BuildMode _defaultBuildMode;
 
   void usesTargetOption() {
@@ -134,7 +136,8 @@ abstract class FlutterCommand extends Command<Null> {
   Future<Null> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    await cache.updateAll();
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub)
       await pubGet();
