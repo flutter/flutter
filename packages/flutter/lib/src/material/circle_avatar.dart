@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
 
@@ -48,7 +49,8 @@ class CircleAvatar extends StatelessWidget {
     this.child,
     this.backgroundColor,
     this.backgroundImage,
-    this.radius: 20.0
+    this.foregroundColor,
+    this.radius: 20.0,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -59,7 +61,15 @@ class CircleAvatar extends StatelessWidget {
 
   /// The color with which to fill the circle. Changing the background
   /// color will cause the avatar to animate to the new color.
+  ///
+  /// If a background color is not specified, the theme's primary color is used.
   final Color backgroundColor;
+
+  /// The default text color for text in the circle.
+  ///
+  /// Falls back to white if a background color is specified, or the primary
+  /// text theme color otherwise.
+  final Color foregroundColor;
 
   /// The background image of the circle. Changing the background
   /// image will cause the avatar to animate to the new image.
@@ -76,13 +86,15 @@ class CircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color color = backgroundColor ?? theme.primaryColor;
+    final Color fallbackTextColor = backgroundColor != null ?
+        Colors.white : theme.primaryTextTheme.title.color;
+    final Color textColor = foregroundColor ?? fallbackTextColor;
     return new AnimatedContainer(
       width: radius * 2.0,
       height: radius * 2.0,
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
-        backgroundColor: color,
+        backgroundColor: backgroundColor ?? theme.primaryColor,
         backgroundImage: backgroundImage != null ? new BackgroundImage(
           image: backgroundImage
         ) : null,
@@ -90,7 +102,7 @@ class CircleAvatar extends StatelessWidget {
       ),
       child: child != null ? new Center(
         child: new DefaultTextStyle(
-          style: theme.primaryTextTheme.title,
+          style: theme.primaryTextTheme.title.copyWith(color: textColor),
           child: child,
         )
       ) : null,
