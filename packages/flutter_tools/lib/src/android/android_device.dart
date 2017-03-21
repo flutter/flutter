@@ -263,18 +263,28 @@ class AndroidDevice extends Device {
   }
 
   bool _installLatestApp(ApplicationPackage package) {
-    if (isAppInstalled(package)) {
+    final bool wasInstalled = isAppInstalled(package);
+    if (wasInstalled) {
       if (isLatestBuildInstalled(package)) {
-        printStatus('Latest build already installed.');
+        printTrace('Latest build already installed.');
         return true;
       }
-      printStatus('Uninstalling old version...');
-      if (!uninstallApp(package))
-        printError('Warning: uninstalling old version failed');
     }
     printTrace('Installing APK.');
     if (!installApp(package)) {
-      printTrace('Error: Failed to install APK.');
+      printTrace('Warning: Failed to install APK.');
+      if (wasInstalled) {
+        printStatus('Uninstalling old version...');
+        if (!uninstallApp(package)) {
+          printError('Error: Uninstalling old version failed.');
+          return false;
+        }
+        if (!installApp(package)) {
+          printError('Error: Failed to install APK again.');
+          return false;
+        }
+        return true;
+      }
       return false;
     }
     return true;
