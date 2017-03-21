@@ -29,29 +29,16 @@ abstract class OperatingSystemUtils {
 
   /// Return the path (with symlinks resolved) to the given executable, or `null`
   /// if `which` was not able to locate the binary.
-  File which(String execName);
+  File which(String execName) {
+    final List<File> result = _which(execName);
+    if (result == null || result.isEmpty)
+      return null;
+    return result.first;
+  }
 
   /// Return a list of all paths to `execName` found on the system. Uses the
   /// PATH environment variable.
-  List<File> whichAll(String execName) {
-    final List<File> result = <File>[];
-    final String pathEnvironmentVariable = platform.environment['PATH'];
-    for (final String pathComponent in _splitPath(pathEnvironmentVariable)) {
-      final String pathToExecName = fs.path.join(pathComponent, execName);
-      if (processManager.canRun(pathToExecName)) {
-        result.add(fs.file(pathToExecName));
-      }
-    }
-    return result;
-  }
-
-  List<String> _splitPath(String pathEnvironmentVariable) {
-    final String delimiter = platform.isWindows ? ';' : ':';
-    if (pathEnvironmentVariable == null) {
-      return <String>[];
-    }
-    return pathEnvironmentVariable.split(delimiter);
-  }
+  List<File> whichAll(String execName) => _which(execName, all: true);
 
   /// Return the File representing a new pipe.
   File makePipe(String path);
@@ -59,6 +46,8 @@ abstract class OperatingSystemUtils {
   void zip(Directory data, File zipFile);
 
   void unzip(File file, Directory targetDirectory);
+
+  List<File> _which(String execName, {bool all: false});
 }
 
 class _PosixUtils extends OperatingSystemUtils {
@@ -69,15 +58,16 @@ class _PosixUtils extends OperatingSystemUtils {
     return processManager.runSync(<String>['chmod', 'a+x', file.path]);
   }
 
-  /// Return the path to the given executable, or `null` if `which` was not able
-  /// to locate the binary.
   @override
-  File which(String execName) {
-    final ProcessResult result = processManager.runSync(<String>['which', execName]);
+  List<File> _which(String execName, {bool all: false}) {
+    final List<String> command = <String>['which'];
+    if (all)
+      command.add('-a');
+    command.add(execName);
+    final ProcessResult result = processManager.runSync(command);
     if (result.exitCode != 0)
-      return null;
-    final String path = result.stdout.trim().split('\n').first.trim();
-    return fs.file(path);
+      return const <File>[];
+    return result.stdout.trim().split('\n').map((String path) => fs.file(path.trim())).toList();
   }
 
   @override
@@ -108,11 +98,15 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   @override
-  File which(String execName) {
+  List<File> _which(String execName, {bool all: false}) {
+    // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0)
-      return null;
-    return fs.file(result.stdout.trim().split('\n').first.trim());
+      return const <File>[];
+    final List<String> lines = result.stdout.trim().split('\n');
+    if (all)
+      return lines.map((String path) => fs.file(path.trim())).toList();
+    return  <File>[fs.file(lines.first.trim())];
   }
 
   @override
