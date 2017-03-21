@@ -61,7 +61,7 @@ BuildApp() {
   AssertExists "$derived_dir"
 
   RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
-  RunCommand rm -f -- "${derived_dir}/app.dylib"
+  RunCommand rm -rf -- "${derived_dir}/App.framework"
   RunCommand rm -f -- "${derived_dir}/app.flx"
   RunCommand cp -r -- "${framework_path}/Flutter.framework" "${derived_dir}"
   RunCommand find "${derived_dir}/Flutter.framework" -type f -exec chmod a-w "{}" \;
@@ -95,10 +95,17 @@ BuildApp() {
       exit -1
     fi
 
-    RunCommand cp -f -- "${build_dir}/aot/app.dylib" "${derived_dir}/app.dylib"
+    RunCommand cp -r -- "${build_dir}/aot/App.framework" "${derived_dir}"
   else
-    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c --shared -o "${derived_dir}/app.dylib" -)"
+    RunCommand mkdir -p -- "${derived_dir}/App.framework"
+    RunCommand eval "$(echo "static const int Moo = 88;" | xcrun clang -x c \
+        -dynamiclib \
+        -Xlinker -rpath -Xlinker '@executable_path/Frameworks' \
+        -Xlinker -rpath -Xlinker '@loader_path/Frameworks' \
+        -install_name '@rpath/App.framework/App' \
+        -o "${derived_dir}/App.framework/App" -)"
   fi
+  RunCommand cp -- "${derived_dir}/AppFrameworkInfo.plist" "${derived_dir}/App.framework/Info.plist"
 
   local precompilation_flag=""
   if [[ "$CURRENT_ARCH" != "x86_64" ]] && [[ "$build_mode" != "debug" ]]; then
