@@ -23,10 +23,10 @@ export 'scroll_position.dart' show ScrollPhysics;
 ///
 /// See also:
 ///
-/// * [ViewportScrollBehavior], which uses this to provide the iOS component of
-///   its scroll behavior.
-/// * [ClampingScrollPhysics], which is the analogous physics for Android's
-///   clamping behavior.
+///  * [ViewportScrollBehavior], which uses this to provide the iOS component of
+///    its scroll behavior.
+///  * [ClampingScrollPhysics], which is the analogous physics for Android's
+///    clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent);
@@ -97,13 +97,13 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-/// * [ViewportScrollBehavior], which uses this to provide the Android component
-///   of its scroll behavior.
-/// * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
-///   behavior.
-/// * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
-///   provide the glowing effect that is usually found with this clamping effect
-///   on Android.
+///  * [ViewportScrollBehavior], which uses this to provide the Android component
+///    of its scroll behavior.
+///  * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
+///    behavior.
+///  * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
+///    provide the glowing effect that is usually found with this clamping effect
+///    on Android.
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content..
@@ -163,10 +163,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-/// * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
-///   found on iOS.
-/// * [ClampingScrollPhysics], which provides the clamping overscroll behavior
-///   found on Android.
+///  * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
+///    found on iOS.
+///  * [ClampingScrollPhysics], which provides the clamping overscroll behavior
+///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
   const AlwaysScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent);

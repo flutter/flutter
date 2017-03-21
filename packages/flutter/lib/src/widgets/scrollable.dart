@@ -118,13 +118,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollPosition _position;
 
   ScrollBehavior _configuration;
+  ScrollPhysics _physics;
 
-  // only call this from places that will definitely trigger a rebuild
+  // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
-    ScrollPhysics physics = _configuration.getScrollPhysics(context);
+    _physics = _configuration.getScrollPhysics(context);
     if (config.physics != null)
-      physics = config.physics.applyTo(physics);
+      _physics = config.physics.applyTo(_physics);
     final ScrollController controller = config.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
@@ -135,8 +136,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller?.createScrollPosition(physics, this, oldPosition)
-      ?? ScrollController.createDefaultScrollPosition(physics, this, oldPosition);
+    _position = controller?.createScrollPosition(_physics, this, oldPosition)
+      ?? ScrollController.createDefaultScrollPosition(_physics, this, oldPosition);
     assert(position != null);
     controller?.attach(position);
   }
@@ -193,7 +194,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
-      final ScrollPhysics physics = _configuration.getScrollPhysics(context);
       switch (config.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
@@ -203,9 +203,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
-                ..minFlingDistance = physics?.minFlingDistance
-                ..minFlingVelocity = physics?.minFlingVelocity
-                ..maxFlingVelocity = physics?.maxFlingVelocity;
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
             }
           };
           break;
@@ -217,9 +217,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
-                ..minFlingDistance = physics?.minFlingDistance
-                ..minFlingVelocity = physics?.minFlingVelocity
-                ..maxFlingVelocity = physics?.maxFlingVelocity;
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
             }
           };
           break;

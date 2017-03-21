@@ -20,10 +20,10 @@ enum _DragState {
 ///
 /// See also:
 ///
-/// * [DragGestureRecognizer.onDown], which uses [GestureDragDownCallback].
-/// * [DragStartDetails], the details for [GestureDragStartCallback].
-/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
-/// * [DragEndDetails], the details for [GestureDragEndCallback].
+///  * [DragGestureRecognizer.onDown], which uses [GestureDragDownCallback].
+///  * [DragStartDetails], the details for [GestureDragStartCallback].
+///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
+///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
@@ -53,10 +53,10 @@ typedef void GestureDragDownCallback(DragDownDetails details);
 ///
 /// See also:
 ///
-/// * [DragGestureRecognizer.onStart], which uses [GestureDragStartCallback].
-/// * [DragDownDetails], the details for [GestureDragDownCallback].
-/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
-/// * [DragEndDetails], the details for [GestureDragEndCallback].
+///  * [DragGestureRecognizer.onStart], which uses [GestureDragStartCallback].
+///  * [DragDownDetails], the details for [GestureDragDownCallback].
+///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
+///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
@@ -86,10 +86,10 @@ typedef void GestureDragStartCallback(DragStartDetails details);
 ///
 /// See also:
 ///
-/// * [DragGestureRecognizer.onUpdate], which uses [GestureDragUpdateCallback].
-/// * [DragDownDetails], the details for [GestureDragDownCallback].
-/// * [DragStartDetails], the details for [GestureDragStartCallback].
-/// * [DragEndDetails], the details for [GestureDragEndCallback].
+///  * [DragGestureRecognizer.onUpdate], which uses [GestureDragUpdateCallback].
+///  * [DragDownDetails], the details for [GestureDragDownCallback].
+///  * [DragStartDetails], the details for [GestureDragStartCallback].
+///  * [DragEndDetails], the details for [GestureDragEndCallback].
 class DragUpdateDetails {
   /// Creates details for a [DragUpdateDetails].
   ///
@@ -150,10 +150,10 @@ typedef void GestureDragUpdateCallback(DragUpdateDetails details);
 ///
 /// See also:
 ///
-/// * [DragGestureRecognizer.onEnd], which uses [GestureDragEndCallback].
-/// * [DragDownDetails], the details for [GestureDragDownCallback].
-/// * [DragStartDetails], the details for [GestureDragStartCallback].
-/// * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
+///  * [DragGestureRecognizer.onEnd], which uses [GestureDragEndCallback].
+///  * [DragDownDetails], the details for [GestureDragDownCallback].
+///  * [DragStartDetails], the details for [GestureDragStartCallback].
+///  * [DragUpdateDetails], the details for [GestureDragUpdateCallback].
 class DragEndDetails {
   /// Creates details for a [GestureDragEndCallback].
   ///
@@ -255,14 +255,14 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// This value is typically compared with the distance traveled along the
   /// scrolling axis. If null then [kTouchSlop] is used.
-  double get minFlingDistance;
+  double minFlingDistance;
 
   /// The minimum velocity for an input pointer drag to be considered fling.
   ///
   /// This value is typically compared with the magnitude of fling gesture's
   /// velocity along the scrolling axis. If null then [kMinFlingVelocity]
   /// is used.
-  double maxFlingVelocity;
+  double minFlingVelocity;
 
   /// Fling velocity magnitudes will be clamped to this value.
   ///

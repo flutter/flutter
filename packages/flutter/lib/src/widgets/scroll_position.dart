@@ -114,8 +114,8 @@ abstract class ScrollPhysics {
   ///
   /// See also:
   ///
-  /// * [VelocityTracker.getVelocityEstimate], which computes the velocity
-  ///   of a press-drag-release gesture.
+  ///  * [VelocityTracker.getVelocityEstimate], which computes the velocity
+  ///    of a press-drag-release gesture.
   double get minFlingDistance => parent?.minFlingDistance ?? kTouchSlop;
 
   /// The minimum velocity for an input pointer drag to be considered a
@@ -126,8 +126,8 @@ abstract class ScrollPhysics {
   ///
   /// See also:
   ///
-  /// * [VelocityTracker.getVelocityEstimate], which computes the velocity
-  ///   of a press-drag-release gesture.
+  ///  * [VelocityTracker.getVelocityEstimate], which computes the velocity
+  ///    of a press-drag-release gesture.
   double get minFlingVelocity => parent?.minFlingVelocity ?? kMinFlingVelocity;
 
   /// Scroll fling velocity magnitudes will be clamped to this value.
