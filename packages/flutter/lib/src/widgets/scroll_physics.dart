@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/physics.dart';
 
 import 'overscroll_indicator.dart';
@@ -22,10 +23,10 @@ export 'scroll_position.dart' show ScrollPhysics;
 ///
 /// See also:
 ///
-/// * [ViewportScrollBehavior], which uses this to provide the iOS component of
-///   its scroll behavior.
-/// * [ClampingScrollPhysics], which is the analogous physics for Android's
-///   clamping behavior.
+///  * [ViewportScrollBehavior], which uses this to provide the iOS component of
+///    its scroll behavior.
+///  * [ClampingScrollPhysics], which is the analogous physics for Android's
+///    clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that bounce back from the edge.
   const BouncingScrollPhysics({ ScrollPhysics parent }) : super(parent);
@@ -81,6 +82,12 @@ class BouncingScrollPhysics extends ScrollPhysics {
     }
     return null;
   }
+
+  // The ballistic simulation here decelerates more slowly than the one for
+  // ClampingScrollPhysics so we require a more deliberate input gesture
+  // to trigger a fling.
+  @override
+  double get minFlingVelocity => kMinFlingVelocity * 2.0;
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching
@@ -90,13 +97,13 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-/// * [ViewportScrollBehavior], which uses this to provide the Android component
-///   of its scroll behavior.
-/// * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
-///   behavior.
-/// * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
-///   provide the glowing effect that is usually found with this clamping effect
-///   on Android.
+///  * [ViewportScrollBehavior], which uses this to provide the Android component
+///    of its scroll behavior.
+///  * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
+///    behavior.
+///  * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
+///    provide the glowing effect that is usually found with this clamping effect
+///    on Android.
 class ClampingScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that prevent the scroll offset from exceeding the
   /// bounds of the content..
@@ -156,10 +163,10 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-/// * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
-///   found on iOS.
-/// * [ClampingScrollPhysics], which provides the clamping overscroll behavior
-///   found on Android.
+///  * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
+///    found on iOS.
+///  * [ClampingScrollPhysics], which provides the clamping overscroll behavior
+///    found on Android.
 class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   /// Creates scroll physics that always lets the user scroll.
   const AlwaysScrollableScrollPhysics({ ScrollPhysics parent }) : super(parent);
