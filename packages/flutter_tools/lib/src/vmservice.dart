@@ -96,7 +96,7 @@ class VMService {
   final Map<String, StreamController<ServiceEvent>> _eventControllers =
       <String, StreamController<ServiceEvent>>{};
 
-  Set<String> _listeningFor = new Set<String>();
+  final Set<String> _listeningFor = new Set<String>();
 
   /// Whether our connection to the VM service has been closed;
   bool get isClosed => _peer.isClosed;

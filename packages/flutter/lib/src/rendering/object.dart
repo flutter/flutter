@@ -1020,7 +1020,7 @@ class PipelineOwner {
     }
   }
 
-  List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
+  final List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
   /// Updates the [needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before

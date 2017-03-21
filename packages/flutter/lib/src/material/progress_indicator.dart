@@ -455,7 +455,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
 }
 
 class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
-  static double _kIndicatorSize = 40.0;
+  static const double _kIndicatorSize = 40.0;
 
   // Always show the indeterminate version of the circular progress indicator.
   // When value is non-null the sweep of the progress indicator arrow's arc

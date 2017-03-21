@@ -48,7 +48,7 @@ class TestAsyncUtils {
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
 
-  static List<_AsyncScope> _scopeStack = <_AsyncScope>[];
+  static final List<_AsyncScope> _scopeStack = <_AsyncScope>[];
 
   /// Calls the given callback in a new async scope. The callback argument is
   /// the asynchronous body of the calling method. The calling method is said to

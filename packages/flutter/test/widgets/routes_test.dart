@@ -18,7 +18,7 @@ class TestRoute extends LocalHistoryRoute<String> {
   @override
   List<OverlayEntry> get overlayEntries => _entries;
 
-  List<OverlayEntry> _entries = <OverlayEntry>[];
+  final List<OverlayEntry> _entries = <OverlayEntry>[];
 
   void log(String s) {
     results.add('$name: $s');

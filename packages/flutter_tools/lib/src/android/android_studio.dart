@@ -55,7 +55,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   String _gradlePath;
   bool _isValid = false;
-  List<String> _validationMessages = <String>[];
+  final List<String> _validationMessages = <String>[];
 
   factory AndroidStudio.fromMacOSBundle(String bundlePath) {
     final String studioPath = fs.path.join(bundlePath, 'Contents');

@@ -61,7 +61,7 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
   ///
   /// The state of hovering pointers is not tracked because that would require
   /// hit-testing on every frame.
-  Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
+  final Map<int, HitTestResult> _hitTests = <int, HitTestResult>{};
 
   void _handlePointerEvent(PointerEvent event) {
     HitTestResult result;

@@ -278,7 +278,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   double _getPrimaryValueFromOffset(Offset value);
   bool get _hasSufficientPendingDragDeltaToAccept;
 
-  Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
+  final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   @override
   void addPointer(PointerEvent event) {

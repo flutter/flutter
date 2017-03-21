@@ -369,7 +369,7 @@ class _LicensePageState extends State<LicensePage> {
     _initLicenses();
   }
 
-  List<Widget> _licenses = <Widget>[];
+  final List<Widget> _licenses = <Widget>[];
   bool _loaded = false;
 
   Future<Null> _initLicenses() async {
