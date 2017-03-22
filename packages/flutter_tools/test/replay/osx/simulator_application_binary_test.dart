@@ -22,5 +22,5 @@ void main() {
         '--replay-from=$replay',
       ],
     );
-  });
+  }, skip: true /* TODO(#8947): Document how to update this test. */);
 }

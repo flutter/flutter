@@ -124,14 +124,14 @@ class AndroidSdk {
 
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+  List<String> validateSdkWellFormed() {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
-    return latestVersion.validateSdkWellFormed(requireApkSigner: requireApkSigner);
+    return latestVersion.validateSdkWellFormed();
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -227,31 +227,12 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get aaptPath => getBuildToolsPath('aapt');
 
-  String get dxPath => getBuildToolsPath('dx');
-
-  String get zipalignPath => getBuildToolsPath('zipalign');
-
-  String get apksignerPath => getBuildToolsPath('apksigner');
-
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
-    if (buildToolsVersion.major < minimumAndroidSdkVersion) {
-      return <String>['Minimum supported Android SDK version is $minimumAndroidSdkVersion '
-                      'but this system has ${buildToolsVersion.major}. Please upgrade.'];
-    }
+  List<String> validateSdkWellFormed() {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 
     if (_canRun(aaptPath) != null)
       return <String>[_canRun(aaptPath)];
-
-    if (_canRun(dxPath) != null)
-      return <String>[_canRun(dxPath)];
-
-    if (_canRun(zipalignPath) != null)
-      return <String>[_canRun(zipalignPath)];
-
-    if (requireApkSigner && _canRun(apksignerPath) != null)
-      return <String>[_canRun(apksignerPath) + '\napksigner requires Android SDK Build Tools 24.0.3 or newer.'];
 
     return <String>[];
   }
