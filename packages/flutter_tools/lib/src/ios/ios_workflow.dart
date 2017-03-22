@@ -113,7 +113,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       } else {
         messages.add(new ValidationMessage.error(
             'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
-            'Download at https://developer.apple.com/xcode/download/.'
+            'Download at: https://developer.apple.com/xcode/download/\n'
             'Once installed, run \'sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\'.'
         ));
       }
