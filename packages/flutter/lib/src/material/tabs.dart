@@ -248,7 +248,6 @@ class _IndicatorPainter extends CustomPainter {
   TabController controller;
   List<double> tabOffsets;
   Color color;
-  Animatable<Rect> indicatorTween;
   Rect currentRect;
 
   // tabOffsets[index] is the offset of the left edge of the tab at index, and
@@ -267,7 +266,7 @@ class _IndicatorPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (controller.indexIsChanging) {
       final Rect targetRect = indicatorRect(size, controller.index);
-      currentRect = Rect.lerp(currentRect ?? targetRect, targetRect, _indexChangeProgress(controller));
+      currentRect = Rect.lerp(targetRect, currentRect ?? targetRect, _indexChangeProgress(controller));
     } else {
       final int currentIndex = controller.index;
       final Rect left = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
@@ -304,7 +303,8 @@ class _IndicatorPainter extends CustomPainter {
   bool shouldRepaint(_IndicatorPainter old) {
     return controller != old.controller ||
       tabOffsets?.length != old.tabOffsets?.length ||
-      tabOffsetsNotEqual(tabOffsets, old.tabOffsets);
+      tabOffsetsNotEqual(tabOffsets, old.tabOffsets) ||
+      currentRect != old.currentRect;
   }
 }
 

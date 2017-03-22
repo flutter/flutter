@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/recording_canvas.dart';
+
 class StateMarker extends StatefulWidget {
   StateMarker({ Key key, this.child }) : super(key: key);
 
@@ -26,7 +28,13 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
-Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, Key tabBarKey }) {
+Widget buildFrame({
+    Key tabBarKey,
+    List<String> tabs,
+    String value,
+    bool isScrollable: false,
+    Color indicatorColor,
+  }) {
   return new Material(
     child: new DefaultTabController(
       initialIndex: tabs.indexOf(value),
@@ -35,6 +43,7 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
         key: tabBarKey,
         tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
         isScrollable: isScrollable,
+        indicatorColor: indicatorColor,
       ),
     ),
   );
@@ -100,6 +109,19 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
       )
     )
   );
+}
+
+class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
+  TabIndicatorRecordingCanvas(this.indicatorColor);
+
+  final Color indicatorColor;
+  Rect indicatorRect;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    if (paint.color == indicatorColor)
+      indicatorRect = rect;
+  }
 }
 
 void main() {
@@ -672,5 +694,40 @@ void main() {
     expect(controller.index, equals(0));
     expect(find.text('First'), findsOneWidget);
     expect(find.text('Second'), findsNothing);
+  });
+
+  testWidgets('TabBar tap animates the selection indicator', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/7479
+
+    final List<String> tabs = <String>['A', 'B'];
+
+    const Color indicatorColor = const Color(0xFFFF0000);
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', indicatorColor: indicatorColor));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = new TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect0 = canvas.indicatorRect;
+    expect(indicatorRect0.left, 0.0);
+    expect(indicatorRect0.width, 400.0);
+    expect(indicatorRect0.height, 2.0);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect1 = canvas.indicatorRect;
+    expect(indicatorRect1.left, greaterThan(indicatorRect0.left));
+    expect(indicatorRect1.right, lessThan(800.0));
+    expect(indicatorRect1.height, 2.0);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect2 = canvas.indicatorRect;
+    expect(indicatorRect2.left, 400.0);
+    expect(indicatorRect2.width, 400.0);
+    expect(indicatorRect2.height, 2.0);
   });
 }
