@@ -17,6 +17,7 @@ import 'package:flutter/rendering.dart';
 /// // Now test the expected canvas.invocations.
 /// ```
 class TestRecordingCanvas implements Canvas {
+  /// All of the method calls on this canvas.
   final List<Invocation> invocations = <Invocation>[];
 
   int _saveCount = 0;
@@ -45,6 +46,7 @@ class TestRecordingCanvas implements Canvas {
 
 /// A [PaintingContext] for tests that use [TestRecordingCanvas].
 class TestRecordingPaintingContext implements PaintingContext {
+  /// Creates a [PaintingContext] for tests that use [TestRecordingCanvas].
   TestRecordingPaintingContext(this.canvas);
 
   @override
