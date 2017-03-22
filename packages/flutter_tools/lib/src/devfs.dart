@@ -521,7 +521,7 @@ class DevFS {
         if (!_shouldIgnore(deviceUri))
           _scanFile(deviceUri, file);
       }
-    } catch (e) {
+    } on FileSystemException catch (e) {
       printError(
           'Error while scanning directory ${directory.path}.\n'
           'Hot Reload might not work until the following error is resolved:\n'
