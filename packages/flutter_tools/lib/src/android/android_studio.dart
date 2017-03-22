@@ -38,7 +38,9 @@ String get gradleExecutable {
   if (gradleDir != null) {
     if (fs.isFileSync(gradleDir))
       return gradleDir;
-    return fs.path.join(gradleDir, 'bin', 'gradle');
+    return fs.path.join(
+        gradleDir, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle'
+    );
   }
   return androidStudio?.gradleExecutable ?? os.which('gradle')?.path;
 }
