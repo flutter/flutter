@@ -107,10 +107,10 @@ Future<Null> build({
     packagesPath: packagesPath,
     includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
-  );
+  ).then((_) => null);
 }
 
-Future<Null> assemble({
+Future<List<String>> assemble({
   String manifestPath,
   DevFSContent kernelContent,
   File snapshotFile,
@@ -145,6 +145,10 @@ Future<Null> assemble({
   // Add all entries from the asset bundle.
   zipBuilder.entries.addAll(assetBundle.entries);
 
+  final List<String> fileDependencies = assetBundle.entries.values
+      .expand((DevFSContent content) => content.fileDependencies)
+      .toList();
+
   if (kernelContent != null)
     zipBuilder.entries[_kKernelKey] = kernelContent;
   if (snapshotFile != null)
@@ -156,4 +160,6 @@ Future<Null> assemble({
   await zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
 
   printTrace('Built $outputPath.');
+
+  return fileDependencies;
 }
