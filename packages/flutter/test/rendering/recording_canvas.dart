@@ -16,6 +16,10 @@ import 'package:flutter/rendering.dart';
 /// box.paint(context, Offset.zero);
 /// // Now test the expected canvas.invocations.
 /// ```
+///
+/// In some cases it may be useful to define a subclass that overrides the
+/// Canvas methods the test is checking and squirrels away the parameters
+/// that the test requires.
 class TestRecordingCanvas implements Canvas {
   /// All of the method calls on this canvas.
   final List<Invocation> invocations = <Invocation>[];
