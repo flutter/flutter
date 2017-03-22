@@ -189,10 +189,12 @@ Future<Null> downloadStartupTrace(VMService observatory) async {
   final int firstFrameTimestampMicros = extractInstantEventTimestamp(kFirstUsefulFrameEventName);
 
   if (engineEnterTimestampMicros == null) {
+    printTrace('Engine start event is missing in the timeline: $timeline');
     throw 'Engine start event is missing in the timeline. Cannot compute startup time.';
   }
 
   if (firstFrameTimestampMicros == null) {
+    printTrace('First frame event is missing in the timeline: $timeline');
     throw 'First frame event is missing in the timeline. Cannot compute startup time.';
   }
 
