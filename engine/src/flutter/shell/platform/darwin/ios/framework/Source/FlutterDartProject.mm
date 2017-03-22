@@ -4,19 +4,20 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 
-#include "base/command_line.h"
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/common/threads.h"
+#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 
 static NSURL* URLForSwitch(const char* name) {
-  auto cmd = *base::CommandLine::ForCurrentProcess();
+  const auto& cmd = shell::Shell::Shared().GetCommandLine();
   NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
 
-  if (cmd.HasSwitch(name)) {
-    auto url = [NSURL fileURLWithPath:@(cmd.GetSwitchValueASCII(name).c_str())];
+  std::string switch_value;
+  if (cmd.GetOptionValue(name, &switch_value)) {
+    auto url = [NSURL fileURLWithPath:@(switch_value.c_str())];
     [defaults setURL:url forKey:@(name)];
     [defaults synchronize];
     return url;

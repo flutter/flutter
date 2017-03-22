@@ -10,7 +10,7 @@
 #import <OpenGLES/ES2/glext.h>
 #import <QuartzCore/CAEAGLLayer.h>
 
-#include "base/mac/scoped_nsobject.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "lib/ftl/macros.h"
 
@@ -35,9 +35,9 @@ class IOSGLContext {
   bool ResourceMakeCurrent();
 
  private:
-  base::scoped_nsobject<CAEAGLLayer> layer_;
-  base::scoped_nsobject<EAGLContext> context_;
-  base::scoped_nsobject<EAGLContext> resource_context_;
+  fml::scoped_nsobject<CAEAGLLayer> layer_;
+  fml::scoped_nsobject<EAGLContext> context_;
+  fml::scoped_nsobject<EAGLContext> resource_context_;
   GLuint framebuffer_;
   GLuint colorbuffer_;
   GLuint depthbuffer_;

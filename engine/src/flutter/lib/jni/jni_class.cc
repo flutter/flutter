@@ -9,7 +9,7 @@
 namespace blink {
 
 using tonic::ToDart;
-using base::android::ScopedJavaLocalRef;
+using fml::jni::ScopedJavaLocalRef;
 
 IMPLEMENT_WRAPPERTYPEINFO(jni, JniClass);
 

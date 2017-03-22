@@ -159,7 +159,7 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
   bool current = ResourceContextMakeCurrent();
 
   if (!current) {
-    LOG(WARNING)
+    FTL_LOG(WARNING)
         << "WARNING: Could not setup an OpenGL context on the resource loader.";
     latch->Signal();
     return;

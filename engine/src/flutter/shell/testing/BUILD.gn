@@ -13,7 +13,6 @@ source_set("testing") {
   ]
 
   deps = [
-    "//base",
     "//flutter/common",
     "//flutter/shell/common",
     "//lib/ftl",

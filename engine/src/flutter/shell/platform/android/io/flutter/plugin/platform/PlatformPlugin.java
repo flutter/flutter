@@ -17,12 +17,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
 
+import io.flutter.util.PathUtils;
+
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 
-import org.chromium.base.PathUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

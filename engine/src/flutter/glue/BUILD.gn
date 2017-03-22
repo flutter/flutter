@@ -19,12 +19,8 @@ source_set("glue") {
       "//apps/tracing/lib/trace",
     ]
   } else {
-    sources += [
-      "stack_trace_base.cc",
-      "task_runner_adaptor.cc",
-      "task_runner_adaptor.h",
-    ]
+    sources += [ "stack_trace_base.cc" ]
 
-    deps += [ "//base" ]
+    deps += [ "//flutter/fml" ]
   }
 }

@@ -4,12 +4,8 @@
 
 #include "flutter/glue/stack_trace.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace glue {
 
-void PrintStackTrace() {
-  base::debug::StackTrace().Print();
-}
+void PrintStackTrace() {}
 
 }  // namespace glue

@@ -14,7 +14,6 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 import java.util.ArrayList;
-import org.chromium.base.TraceEvent;
 
 
 /**
@@ -106,8 +105,6 @@ public class FlutterActivity extends Activity {
       * Override this function to customize startup behavior.
       */
     protected void onFlutterReady() {
-        TraceEvent.instant("FlutterActivity.onFlutterReady");
-
         if (loadIntent(getIntent())) {
             return;
         }

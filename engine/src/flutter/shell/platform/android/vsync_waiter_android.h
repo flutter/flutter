@@ -5,7 +5,7 @@
 #ifndef SHELL_PLATFORM_ANDROID_VSYNC_WAITER_ANDROID_H_
 #define SHELL_PLATFORM_ANDROID_VSYNC_WAITER_ANDROID_H_
 
-#include "base/android/jni_android.h"
+#include <jni.h>
 #include "flutter/shell/common/vsync_waiter.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -15,6 +15,7 @@ namespace shell {
 class VsyncWaiterAndroid : public VsyncWaiter {
  public:
   VsyncWaiterAndroid();
+
   ~VsyncWaiterAndroid() override;
 
   static bool Register(JNIEnv* env);

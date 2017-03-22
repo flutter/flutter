@@ -7,14 +7,13 @@
 
 #include <vector>
 
-#include "base/android/jni_android.h"
-#include "base/android/jni_utils.h"
+#include "flutter/fml/platform/android/jni_util.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/dart_wrappable.h"
 
-#define ENTER_JNI()                                   \
-  JNIEnv* env = base::android::AttachCurrentThread(); \
-  base::android::ScopedJavaLocalFrame java_frame(env);
+#define ENTER_JNI()                              \
+  JNIEnv* env = fml::jni::AttachCurrentThread(); \
+  fml::jni::ScopedJavaLocalFrame java_frame(env);
 
 namespace blink {
 
@@ -36,8 +35,8 @@ class DartJni {
   static bool InitJni();
   static void OnThreadExit();
 
-  static base::android::ScopedJavaLocalRef<jclass> GetClass(JNIEnv* env,
-                                                            const char* name);
+  static fml::jni::ScopedJavaLocalRef<jclass> GetClass(JNIEnv* env,
+                                                       const char* name);
 
   static std::string GetObjectClassName(JNIEnv* env, jobject obj);
 

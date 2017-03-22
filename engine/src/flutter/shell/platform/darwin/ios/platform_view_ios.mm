@@ -8,9 +8,8 @@
 
 #include <utility>
 
-#include "base/mac/scoped_nsautorelease_pool.h"
-#include "base/trace_event/trace_event.h"
 #include "flutter/common/threads.h"
+#include "flutter/fml/trace_event.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/darwin/common/process_info_mac.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h"
@@ -24,12 +23,6 @@ PlatformViewIOS::PlatformViewIOS(CALayer* layer)
       ios_surface_(IOSSurface::Create(surface_config_, layer)),
       weak_factory_(this) {
   CreateEngine();
-
-  NSArray* paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                       NSUserDomainMask, YES);
-  shell::Shell::Shared().tracing_controller().set_traces_base_path(
-      [paths.firstObject UTF8String]);
-
   PostAddToShellTask();
 }
 

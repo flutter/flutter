@@ -6,10 +6,9 @@
 
 #include <memory>
 
-#include "base/mac/scoped_block.h"
-#include "base/mac/scoped_nsobject.h"
-#include "base/strings/sys_string_conversions.h"
 #include "flutter/common/threads.h"
+#include "flutter/fml/platform/darwin/scoped_block.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
@@ -44,9 +43,9 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
  private:
   explicit PlatformMessageResponseDarwin(
       PlatformMessageResponseCallback callback)
-      : callback_(callback, base::scoped_policy::RETAIN) {}
+      : callback_(callback, fml::OwnershipPolicy::Retain) {}
 
-  base::mac::ScopedBlock<PlatformMessageResponseCallback> callback_;
+  fml::ScopedBlock<PlatformMessageResponseCallback> callback_;
 };
 
 }  // namespace
@@ -60,20 +59,20 @@ void FlutterInit(int argc, const char* argv[]) {
 }
 
 @implementation FlutterViewController {
-  base::scoped_nsprotocol<FlutterDartProject*> _dartProject;
+  fml::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;
   UIStatusBarStyle _statusBarStyle;
   blink::ViewportMetrics _viewportMetrics;
   shell::TouchMapper _touchMapper;
   std::unique_ptr<shell::PlatformViewIOS> _platformView;
-  base::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
-  base::scoped_nsprotocol<FlutterTextInputPlugin*> _textInputPlugin;
-  base::scoped_nsprotocol<FlutterMethodChannel*> _localizationChannel;
-  base::scoped_nsprotocol<FlutterMethodChannel*> _navigationChannel;
-  base::scoped_nsprotocol<FlutterMethodChannel*> _platformChannel;
-  base::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
-  base::scoped_nsprotocol<FlutterMessageChannel*> _lifecycleChannel;
-  base::scoped_nsprotocol<FlutterMessageChannel*> _systemChannel;
+  fml::scoped_nsprotocol<FlutterPlatformPlugin*> _platformPlugin;
+  fml::scoped_nsprotocol<FlutterTextInputPlugin*> _textInputPlugin;
+  fml::scoped_nsprotocol<FlutterMethodChannel*> _localizationChannel;
+  fml::scoped_nsprotocol<FlutterMethodChannel*> _navigationChannel;
+  fml::scoped_nsprotocol<FlutterMethodChannel*> _platformChannel;
+  fml::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
+  fml::scoped_nsprotocol<FlutterMessageChannel*> _lifecycleChannel;
+  fml::scoped_nsprotocol<FlutterMessageChannel*> _systemChannel;
   BOOL _initialized;
 }
 
@@ -123,49 +122,54 @@ void FlutterInit(int argc, const char* argv[]) {
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
   _platformView = std::make_unique<shell::PlatformViewIOS>(
-    reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+      reinterpret_cast<CAEAGLLayer*>(self.view.layer));
   _platformView->SetupResourceContextOnIOThread();
 
   _localizationChannel.reset([[FlutterMethodChannel alloc]
-      initWithName:@"flutter/localization"
+         initWithName:@"flutter/localization"
       binaryMessenger:self
-      codec:[FlutterJSONMethodCodec sharedInstance]]);
+                codec:[FlutterJSONMethodCodec sharedInstance]]);
 
   _navigationChannel.reset([[FlutterMethodChannel alloc]
-      initWithName:@"flutter/navigation"
+         initWithName:@"flutter/navigation"
       binaryMessenger:self
-      codec:[FlutterJSONMethodCodec sharedInstance]]);
+                codec:[FlutterJSONMethodCodec sharedInstance]]);
 
   _platformChannel.reset([[FlutterMethodChannel alloc]
-      initWithName:@"flutter/platform"
+         initWithName:@"flutter/platform"
       binaryMessenger:self
-      codec:[FlutterJSONMethodCodec sharedInstance]]);
+                codec:[FlutterJSONMethodCodec sharedInstance]]);
 
   _textInputChannel.reset([[FlutterMethodChannel alloc]
-      initWithName:@"flutter/textinput"
+         initWithName:@"flutter/textinput"
       binaryMessenger:self
-      codec:[FlutterJSONMethodCodec sharedInstance]]);
+                codec:[FlutterJSONMethodCodec sharedInstance]]);
 
   _lifecycleChannel.reset([[FlutterMessageChannel alloc]
-      initWithName:@"flutter/lifecycle"
+         initWithName:@"flutter/lifecycle"
       binaryMessenger:self
-      codec:[FlutterStringCodec sharedInstance]]);
+                codec:[FlutterStringCodec sharedInstance]]);
 
   _systemChannel.reset([[FlutterMessageChannel alloc]
-      initWithName:@"flutter/system"
+         initWithName:@"flutter/system"
       binaryMessenger:self
-      codec:[FlutterJSONMessageCodec sharedInstance]]);
+                codec:[FlutterJSONMessageCodec sharedInstance]]);
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
-  [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
-   [_platformPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
+  [_platformChannel.get() setMethodCallHandler:^(
+                              FlutterMethodCall* call,
+                              FlutterResultReceiver resultReceiver) {
+    [_platformPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
   }];
 
   _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
   _textInputPlugin.get().textInputDelegate = self;
-  [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
-   [_textInputPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
-  }];
+  [_textInputChannel.get()
+      setMethodCallHandler:^(FlutterMethodCall* call,
+                             FlutterResultReceiver resultReceiver) {
+        [_textInputPlugin.get() handleMethodCall:call
+                                  resultReceiver:resultReceiver];
+      }];
 
   [self setupNotificationCenterObservers];
 
@@ -333,7 +337,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
         break;
     }
 
-    DCHECK(device_id != 0);
+    FTL_DCHECK(device_id != 0);
     CGPoint windowCoordinates = [touch locationInView:nil];
 
     blink::PointerData pointer_data;
@@ -429,7 +433,8 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
 #pragma mark - Text input delegate
 
 - (void)updateEditingClient:(int)client withState:(NSDictionary*)state {
-  [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState" arguments:@[ @(client), state ]];
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.updateEditingState"
+                              arguments:@[ @(client), state ]];
 }
 
 #pragma mark - Orientation updates
@@ -488,13 +493,14 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(
   NSLocale* currentLocale = [NSLocale currentLocale];
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
-  [_localizationChannel.get() invokeMethod:@"setLocale" arguments: @[ languageCode, countryCode ]];
+  [_localizationChannel.get() invokeMethod:@"setLocale"
+                                 arguments:@[ languageCode, countryCode ]];
 }
 
 #pragma mark - Surface creation and teardown updates
 
 - (void)surfaceUpdated:(BOOL)appeared {
-  CHECK(_platformView != nullptr);
+  FTL_CHECK(_platformView != nullptr);
 
   if (appeared) {
     _platformView->NotifyCreated();

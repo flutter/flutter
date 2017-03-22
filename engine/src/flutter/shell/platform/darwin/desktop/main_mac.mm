@@ -6,48 +6,34 @@
 
 #include <iostream>
 
-#include "base/bind.h"
-#include "base/command_line.h"
-#include "base/message_loop/message_loop.h"
+#include "flutter/fml/message_loop.h"
+#include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/desktop/flutter_application.h"
 #include "flutter/shell/testing/testing.h"
-
-namespace shell {
-namespace {
-
-void AttachMessageLoopToMainRunLoop(void) {
-  // We want to call Run() on the MessageLoopForUI but after NSApplicationMain.
-  // If called before this point, the call is blocking and will prevent the
-  // NSApplicationMain invocation.
-  dispatch_async(dispatch_get_main_queue(), ^() {
-    base::MessageLoopForUI::current()->Run();
-  });
-}
-
-}  // namespace
-}  // namespace shell
 
 int main(int argc, const char* argv[]) {
   [FlutterApplication sharedApplication];
 
   shell::PlatformMacMain("", "");
 
-  base::CommandLine& command_line = *base::CommandLine::ForCurrentProcess();
-  if (command_line.HasSwitch(shell::FlagForSwitch(shell::Switch::Help))) {
+  const auto& command_line = shell::Shell::Shared().GetCommandLine();
+
+  // Print help.
+  if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
     shell::PrintUsage([NSProcessInfo processInfo].processName.UTF8String);
     return EXIT_SUCCESS;
   }
 
-  if (command_line.HasSwitch(
+  // Decide between interactive and non-interactive modes.
+  if (command_line.HasOption(
           shell::FlagForSwitch(shell::Switch::NonInteractive))) {
-    if (!shell::InitForTesting())
+    if (!shell::InitForTesting(std::move(command_line)))
       return 1;
-    base::MessageLoop::current()->Run();
+    fml::MessageLoop::GetCurrent().Run();
     return EXIT_SUCCESS;
+  } else {
+    return NSApplicationMain(argc, argv);
   }
-
-  shell::AttachMessageLoopToMainRunLoop();
-  return NSApplicationMain(argc, argv);
 }

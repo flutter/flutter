@@ -7,7 +7,6 @@
 #include <GLFW/glfw3.h>
 
 #include "base/auto_reset.h"
-#include "base/logging.h"
 #include "base/time/time.h"
 
 namespace shell {

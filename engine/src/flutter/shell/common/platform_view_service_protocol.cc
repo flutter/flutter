@@ -9,13 +9,13 @@
 #include <string>
 #include <vector>
 
-#include "base/base64.h"
 #include "flutter/common/threads.h"
 #include "flutter/shell/common/picture_serializer.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell.h"
 #include "lib/ftl/memory/weak_ptr.h"
 #include "third_party/skia/include/core/SkSurface.h"
+#include "third_party/skia/src/utils/SkBase64.h"
 
 namespace shell {
 namespace {
@@ -271,14 +271,14 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
   if (!png)
     return ErrorServer(json_object, "can not encode screenshot");
 
-  std::string base64;
-  base::Base64Encode(
-      base::StringPiece(static_cast<const char*>(png->data()), png->size()),
-      &base64);
+  size_t b64_size = SkBase64::Encode(png->data(), png->size(), nullptr);
+  SkAutoTMalloc<char> b64_data(b64_size);
+  SkBase64::Encode(png->data(), png->size(), b64_data.get());
 
   std::stringstream response;
   response << "{\"type\":\"Screenshot\","
-           << "\"screenshot\":\"" << base64 << "\"}";
+           << "\"screenshot\":\"" << std::string{b64_data.get(), b64_size}
+           << "\"}";
   *json_object = strdup(response.str().c_str());
   return true;
 }

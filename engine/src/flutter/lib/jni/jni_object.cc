@@ -4,7 +4,7 @@
 
 #include "flutter/lib/jni/jni_object.h"
 
-#include "base/strings/string_util.h"
+#include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/lib/jni/dart_jni.h"
 #include "flutter/lib/jni/jni_array.h"
 #include "flutter/lib/jni/jni_class.h"
@@ -30,7 +30,7 @@ ftl::RefPtr<JniObject> JniObject::Create(JNIEnv* env, jobject object) {
     result = ftl::MakeRefCounted<JniString>(env, static_cast<jstring>(object));
   } else if (class_name == "java.lang.Class") {
     result = ftl::MakeRefCounted<JniClass>(env, static_cast<jclass>(object));
-  } else if (base::StartsWith(class_name, "[L", base::CompareCase::SENSITIVE)) {
+  } else if (::strncmp(class_name.c_str(), "[L", ::strlen("[L")) == 0) {
     result = ftl::MakeRefCounted<JniObjectArray>(
         env, static_cast<jobjectArray>(object));
   } else if (class_name == "[Z") {

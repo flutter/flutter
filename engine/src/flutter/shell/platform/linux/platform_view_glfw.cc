@@ -132,7 +132,7 @@ void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {
       change = blink::PointerData::Change::kMove;
     }
   } else {
-    DLOG(INFO) << "Unknown mouse action: " << action;
+    FTL_DLOG(INFO) << "Unknown mouse action: " << action;
     return;
   }
 
@@ -140,11 +140,10 @@ void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {
   double y = 0.0;
   glfwGetCursorPos(glfw_window_, &x, &y);
 
-  base::TimeDelta time_stamp = base::TimeTicks::Now() - base::TimeTicks();
-
   blink::PointerData pointer_data;
   pointer_data.Clear();
-  pointer_data.time_stamp = time_stamp.InMicroseconds();
+  pointer_data.time_stamp =
+      ftl::TimePoint::Now().ToEpochDelta().ToMicroseconds();
   pointer_data.change = change;
   pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
   pointer_data.physical_x = x;
@@ -164,11 +163,10 @@ void PlatformViewGLFW::OnMouseButtonChanged(int button, int action, int mods) {
 }
 
 void PlatformViewGLFW::OnCursorPosChanged(double x, double y) {
-  base::TimeDelta time_stamp = base::TimeTicks::Now() - base::TimeTicks();
-
   blink::PointerData pointer_data;
   pointer_data.Clear();
-  pointer_data.time_stamp = time_stamp.InMicroseconds();
+  pointer_data.time_stamp =
+      ftl::TimePoint::Now().ToEpochDelta().ToMicroseconds();
   pointer_data.change = blink::PointerData::Change::kMove;
   pointer_data.kind = blink::PointerData::DeviceKind::kMouse;
   pointer_data.physical_x = x;

@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "base/mac/scoped_nsautorelease_pool.h"
 #include "flutter/shell/platform/darwin/ios/ios_gl_context.h"
 
 namespace shell {
@@ -28,8 +27,6 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
       storage_size_width_(0),
       storage_size_height_(0),
       valid_(false) {
-  base::mac::ScopedNSAutoreleasePool pool;
-
   VERIFY(layer_ != nullptr);
   VERIFY(context_ != nullptr);
   VERIFY(resource_context_ != nullptr);
@@ -120,7 +117,7 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
 }
 
 IOSGLContext::~IOSGLContext() {
-  DCHECK(glGetError() == GL_NO_ERROR);
+  FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
   // Deletes on GL_NONEs are ignored
   glDeleteFramebuffers(1, &framebuffer_);
@@ -130,7 +127,7 @@ IOSGLContext::~IOSGLContext() {
   glDeleteRenderbuffers(1, &stencilbuffer_);
   glDeleteRenderbuffers(1, &depth_stencil_packed_buffer_);
 
-  DCHECK(glGetError() == GL_NO_ERROR);
+  FTL_DCHECK(glGetError() == GL_NO_ERROR);
 }
 
 bool IOSGLContext::IsValid() const {
@@ -138,8 +135,6 @@ bool IOSGLContext::IsValid() const {
 }
 
 bool IOSGLContext::PresentRenderBuffer() const {
-  base::mac::ScopedNSAutoreleasePool pool;
-
   const GLenum discards[] = {
       GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT,
   };
@@ -167,12 +162,12 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
     return false;
   }
 
-  DCHECK(glGetError() == GL_NO_ERROR);
+  FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
   glBindFramebuffer(GL_FRAMEBUFFER, framebuffer_);
 
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
-  DCHECK(glGetError() == GL_NO_ERROR);
+  FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
   if (![context_.get() renderbufferStorage:GL_RENDERBUFFER
                               fromDrawable:layer_.get()]) {
@@ -189,11 +184,11 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
     // so that backing of the attachments can be updated
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH,
                                  &width);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
     glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT,
                                  &height);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
     rebind_color_buffer = true;
   }
@@ -202,44 +197,41 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_packed_buffer_);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, width,
                           height);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
   }
 
   if (depthbuffer_ != GL_NONE) {
     glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer_);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width, height);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
   }
 
   if (stencilbuffer_ != GL_NONE) {
     glBindRenderbuffer(GL_RENDERBUFFER, stencilbuffer_);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_STENCIL_INDEX8, width, height);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
   }
 
   if (rebind_color_buffer) {
     glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
-    DCHECK(glGetError() == GL_NO_ERROR);
+    FTL_DCHECK(glGetError() == GL_NO_ERROR);
   }
 
   storage_size_width_ = width;
   storage_size_height_ = height;
 
-  DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+  FTL_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) ==
+             GL_FRAMEBUFFER_COMPLETE);
 
   return true;
 }
 
 bool IOSGLContext::MakeCurrent() {
-  base::mac::ScopedNSAutoreleasePool pool;
-
   return UpdateStorageSizeIfNecessary() &&
          [EAGLContext setCurrentContext:context_.get()];
 }
 
 bool IOSGLContext::ResourceMakeCurrent() {
-  base::mac::ScopedNSAutoreleasePool pool;
-
   return [EAGLContext setCurrentContext:resource_context_.get()];
 }
 
