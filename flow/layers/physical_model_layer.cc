@@ -78,10 +78,10 @@ void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,
         SkShadowFlags::kTransparentOccluder_ShadowFlag :
         SkShadowFlags::kNone_ShadowFlag;
     SkShadowUtils::DrawShadow(canvas, path,
-                              elevation * 4,
-                              SkPoint3::Make(0.0f, -700.0f, 2800.0f),
-                              2800.0f,
-                              0.25f, 0.25f,
+                              elevation * 2,
+                              SkPoint3::Make(0.0f, 0.0f, 600.0f),
+                              800.0f,
+                              0.2f, 0.2f,
                               color,
                               flags);
 }
