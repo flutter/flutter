@@ -484,52 +484,59 @@ class DevFS {
         directoryUriOnDevice = fs.path.toUri(relativeRootPath);
       }
     }
+    Stream<FileSystemEntity> files;
     try {
-      final Stream<FileSystemEntity> files =
-          directory.list(recursive: recursive, followLinks: false);
-      await for (FileSystemEntity file in files) {
-        if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
-          // Check if this is a symlink to a directory and skip it.
-          final String linkPath = file.resolveSymbolicLinksSync();
-          final FileSystemEntityType linkType =
-              fs.statSync(linkPath).type;
-          if (linkType == FileSystemEntityType.DIRECTORY) {
-            continue;
-          }
-        }
-        if (file is Directory) {
-          // Skip non-files.
-          continue;
-        }
-        assert((file is Link) || (file is File));
-        if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-          // Skip dot files.
-          continue;
-        }
-        final String relativePath =
-            fs.path.relative(file.path, from: directory.path);
-        final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
-        if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
-          // Skip files that are not included in the filter.
-          continue;
-        }
-        if (ignoreDotFiles && deviceUri.path.startsWith('.')) {
-          // Skip directories that start with a dot.
-          continue;
-        }
-        if (!_shouldIgnore(deviceUri))
-          _scanFile(deviceUri, file);
-      }
+      files = directory.list(recursive: recursive, followLinks: false);
     } on FileSystemException catch (e) {
-      printError(
-          'Error while scanning directory ${directory.path}.\n'
-          'Hot Reload might not work until the following error is resolved:\n'
-          '$e\n'
-      );
+      _printScanDirectoryError(directory.path, e);
       return false;
     }
+    await for (FileSystemEntity file in files) {
+      // Check if this is a symlink to a directory and skip it.
+      if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
+        try {
+          final FileSystemEntityType linkType =
+              fs.statSync(file.resolveSymbolicLinksSync()).type;
+          if (linkType == FileSystemEntityType.DIRECTORY)
+            continue;
+        } on FileSystemException catch (e) {
+          _printScanDirectoryError(file.path, e);
+          continue;
+        }
+      }
+      if (file is Directory) {
+        // Skip non-files.
+        continue;
+      }
+      assert((file is Link) || (file is File));
+      if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
+        // Skip dot files.
+        continue;
+      }
+      final String relativePath =
+          fs.path.relative(file.path, from: directory.path);
+      final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
+      final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
+      if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
+        // Skip files that are not included in the filter.
+        continue;
+      }
+      if (ignoreDotFiles && deviceUri.path.startsWith('.')) {
+        // Skip directories that start with a dot.
+        continue;
+      }
+      if (!_shouldIgnore(deviceUri))
+        _scanFile(deviceUri, file);
+    }
     return true;
+  }
+
+  void _printScanDirectoryError(String path, Exception e) {
+    printError(
+        'Error while scanning $path.\n'
+        'Hot Reload might not work until the following error is resolved:\n'
+        '$e\n'
+    );
   }
 
   Future<Null> _scanPackages(Set<String> fileFilter) async {
