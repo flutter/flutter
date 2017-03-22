@@ -6,6 +6,10 @@ import 'dart:ui';
 
 import 'package:test/test.dart';
 
+class NotAColor extends Color {
+  const NotAColor(int value) : super(value);
+}
+
 void main() {
   test("color accessors should work", () {
     Color foo = const Color(0x12345678);
@@ -41,4 +45,14 @@ void main() {
       expect(e != null, equals(true));
     }
   });
+
+  test("two colors are only == if they have the same runtime type", () {
+    expect(const Color(123), equals(const Color(123)));
+    expect(const Color(123), equals(new Color(123)));
+    expect(const Color(123), isNot(equals(const Color(321))));
+    expect(const Color(123), isNot(equals(const NotAColor(123))));
+    expect(const NotAColor(123), isNot(equals(const Color(123))));
+    expect(const NotAColor(123), equals(const NotAColor(123)));
+  });
+
 }
