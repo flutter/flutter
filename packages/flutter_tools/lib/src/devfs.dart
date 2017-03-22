@@ -490,10 +490,13 @@ class DevFS {
       await for (FileSystemEntity file in files) {
         if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
           // Check if this is a symlink to a directory and skip it.
-          final String linkPath = file.resolveSymbolicLinksSync();
-          final FileSystemEntityType linkType =
-              fs.statSync(linkPath).type;
-          if (linkType == FileSystemEntityType.DIRECTORY) {
+          try {
+            final FileSystemEntityType linkType =
+                fs.statSync(file.resolveSymbolicLinksSync()).type;
+            if (linkType == FileSystemEntityType.DIRECTORY)
+              continue;
+          } on FileSystemException catch (e) {
+            _printScanDirectoryError(file.path, e);
             continue;
           }
         }
@@ -521,11 +524,19 @@ class DevFS {
         if (!_shouldIgnore(deviceUri))
           _scanFile(deviceUri, file);
       }
-    } catch (e) {
-      // Ignore directory and error.
+    } on FileSystemException catch (e) {
+      _printScanDirectoryError(directory.path, e);
       return false;
     }
     return true;
+  }
+
+  void _printScanDirectoryError(String path, Exception e) {
+    printError(
+        'Error while scanning $path.\n'
+        'Hot Reload might not work until the following error is resolved:\n'
+        '$e\n'
+    );
   }
 
   Future<Null> _scanPackages(Set<String> fileFilter) async {
