@@ -8,12 +8,8 @@ import android.support.test.runner.AndroidJUnit4;
 import io.flutter.view.FlutterView;
 
 import android.app.Instrumentation;
-import android.support.test.InstrumentationRegistry;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,8 +19,8 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Rule
-    public ActivityTestRule<ExampleActivity> activityRule =
-        new ActivityTestRule<>(ExampleActivity.class);
+    public ActivityTestRule<MainActivity> activityRule =
+        new ActivityTestRule<>(MainActivity.class);
 
 
     @Test

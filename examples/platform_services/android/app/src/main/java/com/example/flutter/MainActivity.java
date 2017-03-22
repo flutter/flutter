@@ -18,7 +18,7 @@ import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 
-public class ExampleActivity extends FlutterActivity {
+public class MainActivity extends FlutterActivity {
   private static final String CHANNEL = "battery";
 
   @Override
@@ -30,7 +30,13 @@ public class ExampleActivity extends FlutterActivity {
           @Override
           public void onMethodCall(MethodCall call, Response response) {
             if (call.method.equals("getBatteryLevel")) {
-              getBatteryLevel(response);
+              int batteryLevel = getBatteryLevel();
+
+              if (batteryLevel != -1) {
+                response.success(batteryLevel);
+              } else {
+                response.error("UNAVAILABLE", "Battery level not available.", null);
+              }
             } else {
               throw new IllegalArgumentException("Unknown method " + call.method);
             }
@@ -38,7 +44,7 @@ public class ExampleActivity extends FlutterActivity {
     });
   }
 
-  private void getBatteryLevel(Response response) {
+  private int getBatteryLevel() {
     int batteryLevel = -1;
     if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
       BatteryManager batteryManager = (BatteryManager) getSystemService(BATTERY_SERVICE);
@@ -50,10 +56,6 @@ public class ExampleActivity extends FlutterActivity {
           intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
     }
 
-    if (batteryLevel != -1) {
-      response.success(batteryLevel);
-    } else {
-      response.error("UNAVAILABLE", "Battery level not available.", null);
-    }
+    return batteryLevel;
   }
 }
