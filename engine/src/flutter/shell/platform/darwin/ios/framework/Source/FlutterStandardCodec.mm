@@ -89,19 +89,20 @@
     case 0: {
       result = [reader readValue];
       NSAssert(![reader hasMore], @"Corrupted standard envelope");
-    }
-    break;
+    } break;
     case 1: {
       id code = [reader readValue];
       id message = [reader readValue];
       id details = [reader readValue];
       NSAssert(![reader hasMore], @"Corrupted standard envelope");
-      NSAssert([code isKindOfClass:[NSString class]], @"Invalid standard envelope");
-      NSAssert(message == nil || [message isKindOfClass:[NSString class]], @"Invalid standard envelope");
-      *error = [FlutterError errorWithCode:code message:message details:details];
+      NSAssert([code isKindOfClass:[NSString class]],
+               @"Invalid standard envelope");
+      NSAssert(message == nil || [message isKindOfClass:[NSString class]],
+               @"Invalid standard envelope");
+      *error =
+          [FlutterError errorWithCode:code message:message details:details];
       result = nil;
-    }
-    break;
+    } break;
   }
   return result;
 }
@@ -144,6 +145,7 @@ using namespace shell;
 
 - (instancetype)initWithData:(NSData*)data type:(FlutterStandardDataType)type {
   UInt8 elementSize = elementSizeForFlutterStandardDataType(type);
+  NSAssert(data, @"Data cannot be nil");
   NSAssert(data.length % elementSize == 0,
            @"Data must contain integral number of elements");
   if (self = [super init]) {
@@ -159,6 +161,20 @@ using namespace shell;
   [_data release];
   [super dealloc];
 }
+
+- (BOOL)isEqual:(id)object {
+  if (self == object)
+    return YES;
+  if (![object isKindOfClass:[FlutterStandardTypedData class]])
+    return NO;
+  FlutterStandardTypedData* other = (FlutterStandardTypedData*)object;
+  return self.type == other.type && self.elementCount == other.elementCount &&
+         [self.data isEqual:other.data];
+}
+
+- (NSUInteger)hash {
+  return [self.data hash] ^ self.type;
+}
 @end
 
 @implementation FlutterStandardBigInteger
@@ -167,6 +183,7 @@ using namespace shell;
 }
 
 - (instancetype)initWithHex:(NSString*)hex {
+  NSAssert(hex, @"Hex cannot be nil");
   if (self = [super init]) {
     _hex = [hex retain];
   }
@@ -176,6 +193,19 @@ using namespace shell;
 - (void)dealloc {
   [_hex release];
   [super dealloc];
+}
+
+- (BOOL)isEqual:(id)object {
+  if (self == object)
+    return YES;
+  if (![object isKindOfClass:[FlutterStandardBigInteger class]])
+    return NO;
+  FlutterStandardBigInteger* other = (FlutterStandardBigInteger*)object;
+  return [self.hex isEqual:other.hex];
+}
+
+- (NSUInteger)hash {
+  return [self.hex hash];
 }
 @end
 
@@ -242,24 +272,37 @@ using namespace shell;
   } else if ([value isKindOfClass:[NSNumber class]]) {
     NSNumber* number = value;
     const char* type = [number objCType];
-    if (strcmp(type, @encode(BOOL)) == 0) {
+    if ([self isBool:number type:type]) {
       BOOL b = number.boolValue;
       [self
           writeByte:(b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse)];
-    } else if (strcmp(type, @encode(int)) == 0) {
+    } else if (strcmp(type, @encode(signed int)) == 0 ||
+               strcmp(type, @encode(signed short)) == 0 ||
+               strcmp(type, @encode(unsigned short)) == 0 ||
+               strcmp(type, @encode(signed char)) == 0 ||
+               strcmp(type, @encode(unsigned char)) == 0) {
       SInt32 n = number.intValue;
       [self writeByte:FlutterStandardFieldInt32];
       [_data appendBytes:(UInt8*)&n length:4];
-    } else if (strcmp(type, @encode(long)) == 0) {
+    } else if (strcmp(type, @encode(signed long)) == 0 ||
+               strcmp(type, @encode(unsigned int)) == 0) {
       SInt64 n = number.longValue;
       [self writeByte:FlutterStandardFieldInt64];
       [_data appendBytes:(UInt8*)&n length:8];
-    } else if (strcmp(type, @encode(double)) == 0) {
+    } else if (strcmp(type, @encode(double)) == 0 ||
+               strcmp(type, @encode(float)) == 0) {
       Float64 f = number.doubleValue;
       [self writeByte:FlutterStandardFieldFloat64];
       [_data appendBytes:(UInt8*)&f length:8];
+    } else if (strcmp(type, @encode(unsigned long)) == 0 ||
+               strcmp(type, @encode(signed long long)) == 0 ||
+               strcmp(type, @encode(unsigned long long)) == 0) {
+      NSString* hex =
+          [NSString stringWithFormat:@"%llx", number.unsignedLongLongValue];
+      [self writeByte:FlutterStandardFieldIntHex];
+      [self writeUTF8:hex];
     } else {
-      NSLog(@"Unsupported value: %@", value);
+      NSLog(@"Unsupported value: %@ of type %s", value, type);
       NSAssert(NO, @"Unsupported value for standard codec");
     }
   } else if ([value isKindOfClass:[NSString class]]) {
@@ -292,9 +335,14 @@ using namespace shell;
       [self writeValue:[dict objectForKey:key]];
     }
   } else {
-    NSLog(@"Unsupported value: %@", value);
+    NSLog(@"Unsupported value: %@ of type %@", value, [value class]);
     NSAssert(NO, @"Unsupported value for standard codec");
   }
+}
+
+- (BOOL)isBool:(NSNumber*)number type:(const char*)type {
+  return strcmp(type, @encode(signed char)) == 0 &&
+         [NSStringFromClass([number class]) isEqual:@"__NSCFBoolean"];
 }
 @end
 
