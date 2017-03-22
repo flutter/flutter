@@ -37,8 +37,6 @@ public class MainActivity extends FlutterActivity {
               } else {
                 response.error("UNAVAILABLE", "Battery level not available.", null);
               }
-            } else {
-              throw new IllegalArgumentException("Unknown method " + call.method);
             }
           }
     });
