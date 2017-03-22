@@ -170,7 +170,9 @@ class Color {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! Color)
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
       return false;
     final Color typedOther = other;
     return value == typedOther.value;
