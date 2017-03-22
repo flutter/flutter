@@ -227,12 +227,6 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get aaptPath => getBuildToolsPath('aapt');
 
-  String get dxPath => getBuildToolsPath('dx');
-
-  String get zipalignPath => getBuildToolsPath('zipalign');
-
-  String get apksignerPath => getBuildToolsPath('apksigner');
-
   List<String> validateSdkWellFormed() {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
