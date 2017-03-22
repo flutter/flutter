@@ -522,7 +522,11 @@ class DevFS {
           _scanFile(deviceUri, file);
       }
     } catch (e) {
-      // Ignore directory and error.
+      printError(
+          'Error while scanning directory ${directory.path}.\n'
+          'Hot Reload might not work until the following error is resolved:\n'
+          '$e\n'
+      );
       return false;
     }
     return true;
