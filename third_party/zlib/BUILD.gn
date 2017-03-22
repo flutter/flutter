@@ -139,6 +139,5 @@ static_library("zip") {
   ]
   deps = [
     ":minizip",
-    "//base",
   ]
 }
