@@ -40,7 +40,7 @@ class TravelDestinationItem extends StatelessWidget {
     assert(destination != null && destination.isValid);
   }
 
-  static final double height = 328.0;
+  static final double height = 366.0;
   final TravelDestination destination;
 
   @override
@@ -49,7 +49,8 @@ class TravelDestinationItem extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    return new SizedBox(
+    return new Container(
+      padding: const EdgeInsets.all(8.0),
       height: height,
       child: new Card(
         child: new Column(
@@ -93,7 +94,13 @@ class TravelDestinationItem extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       // three line description
-                      new Text(destination.description[0]),
+                      new Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: new Text(
+                          destination.description[0],
+                          style: descriptionStyle.copyWith(color: Colors.black54),
+                        ),
+                      ),
                       new Text(destination.description[1]),
                       new Text(destination.description[2]),
                     ],
@@ -109,10 +116,12 @@ class TravelDestinationItem extends StatelessWidget {
                 children: <Widget>[
                   new FlatButton(
                     child: new Text('SHARE'),
+                    textColor: Colors.amber.shade500,
                     onPressed: () { /* do nothing */ },
                   ),
                   new FlatButton(
                     child: new Text('EXPLORE'),
+                    textColor: Colors.amber.shade500,
                     onPressed: () { /* do nothing */ },
                   ),
                 ],
