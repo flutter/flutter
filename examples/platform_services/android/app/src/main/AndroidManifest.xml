@@ -10,7 +10,7 @@
 
     <application android:name="io.flutter.app.FlutterApplication" android:label="@string/app_name" >
         <activity
-            android:name=".ExampleActivity"
+            android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@android:style/Theme.Black.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
