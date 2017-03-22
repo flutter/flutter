@@ -5,12 +5,15 @@
 package io.flutter.view;
 
 import android.content.Context;
-import android.util.Log;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.util.Log;
 
+import io.flutter.util.PathUtils;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,16 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.chromium.base.JNINamespace;
-import org.chromium.base.PathUtils;
-import org.chromium.base.library_loader.LibraryLoader;
-import org.chromium.base.library_loader.LibraryProcessType;
-import org.chromium.base.library_loader.ProcessInitException;
-
 /**
  * A class to intialize the Flutter engine.
  */
-@JNINamespace("shell")
 public class FlutterMain {
     private static final String TAG = "FlutterMain";
 
@@ -141,9 +137,8 @@ public class FlutterMain {
 
         long initStartTimestampMillis = SystemClock.uptimeMillis();
         initConfig(applicationContext);
-        initJavaUtils(applicationContext);
         initResources(applicationContext);
-        initNative(applicationContext);
+        System.loadLibrary("sky_shell");
         initAot(applicationContext);
 
         // We record the initialization time using SystemClock because at the start of the
@@ -168,6 +163,8 @@ public class FlutterMain {
             sResourceExtractor.waitForCompletion();
 
             List<String> shellArgs = new ArrayList<>();
+            shellArgs.add("--icu-data-file-path=" +
+                new File(PathUtils.getDataDirectory(applicationContext), "icudtl.dat"));
             if (args != null) {
                 Collections.addAll(shellArgs, args);
             }
@@ -219,11 +216,6 @@ public class FlutterMain {
         }
     }
 
-    private static void initJavaUtils(Context applicationContext) {
-        PathUtils.setPrivateDataDirectorySuffix(PRIVATE_DATA_DIRECTORY_SUFFIX,
-            applicationContext);
-    }
-
     private static void initResources(Context applicationContext) {
         Context context = applicationContext;
         new ResourceCleaner(context).start();
@@ -235,16 +227,6 @@ public class FlutterMain {
             .addResource(sAotIsolateSnapshotInstr)
             .addResource(sFlx)
             .start();
-    }
-
-    private static void initNative(Context applicationContext) {
-        try {
-            LibraryLoader.get(LibraryProcessType.PROCESS_BROWSER)
-                .ensureInitialized(applicationContext);
-        } catch (ProcessInitException e) {
-            Log.e(TAG, "Unable to load Sky Engine binary.", e);
-            throw new RuntimeException(e);
-        }
     }
 
     /**

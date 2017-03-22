@@ -7,7 +7,6 @@
 
 #include <jni.h>
 
-#include "base/android/jni_android.h"
 #include "flutter/lib/jni/jni_object.h"
 #include "lib/tonic/dart_wrappable.h"
 

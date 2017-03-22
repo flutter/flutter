@@ -37,8 +37,6 @@ import io.flutter.plugin.common.StringCodec;
 import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.plugin.platform.PlatformPlugin;
 
-import org.chromium.base.CalledByNative;
-import org.chromium.base.JNINamespace;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -55,7 +53,6 @@ import java.util.Map;
 /**
  * An Android view containing a Flutter app.
  */
-@JNINamespace("shell")
 public class FlutterView extends SurfaceView
     implements AccessibilityManager.AccessibilityStateChangeListener {
 
@@ -599,7 +596,6 @@ public class FlutterView extends SurfaceView
     }
 
     // Called by native to send us a platform message.
-    @CalledByNative
     private void handlePlatformMessage(String channel, ByteBuffer message, final int responseId) {
         OnBinaryMessageListenerAsync listener = mMessageListeners.get(channel);
         if (listener != null) {
@@ -626,7 +622,6 @@ public class FlutterView extends SurfaceView
     private final Map<Integer, BinaryMessageReplyCallback> mPendingResponses = new HashMap<>();
 
     // Called by native to respond to a platform message that we sent.
-    @CalledByNative
     private void handlePlatformMessageResponse(int responseId, ByteBuffer response) {
         BinaryMessageReplyCallback callback = mPendingResponses.remove(responseId);
         if (callback != null) {
@@ -638,7 +633,6 @@ public class FlutterView extends SurfaceView
         }
     }
 
-    @CalledByNative
     private void updateSemantics(ByteBuffer buffer, String[] strings) {
         if (mAccessibilityNodeProvider != null) {
             buffer.order(ByteOrder.LITTLE_ENDIAN);

@@ -6,17 +6,6 @@ import("//flutter/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
-generate_jni("jni_headers") {
-  visibility = [ ":*" ]
-
-  sources = [
-    "io/flutter/view/FlutterMain.java",
-    "io/flutter/view/FlutterView.java",
-    "io/flutter/view/VsyncWaiter.java",
-  ]
-  jni_package = "shell"
-}
-
 shared_library("sky_shell") {
   visibility = [ ":*" ]
 
@@ -36,16 +25,17 @@ shared_library("sky_shell") {
     "library_loader.cc",
     "platform_view_android.cc",
     "platform_view_android.h",
+    "platform_view_android_jni.cc",
+    "platform_view_android_jni.h",
     "vsync_waiter_android.cc",
     "vsync_waiter_android.h",
   ]
 
   deps = [
-    ":jni_headers",
-    "//base",
     "//dart/runtime:libdart",
     "//flutter/common",
     "//flutter/flow",
+    "//flutter/fml",
     "//flutter/lib/jni",
     "//flutter/lib/ui",
     "//flutter/runtime",
@@ -89,14 +79,15 @@ android_library("java") {
     "io/flutter/plugin/common/JSONMessageCodec.java",
     "io/flutter/plugin/common/JSONMethodCodec.java",
     "io/flutter/plugin/common/MessageCodec.java",
-    "io/flutter/plugin/common/MethodCodec.java",
     "io/flutter/plugin/common/MethodCall.java",
+    "io/flutter/plugin/common/MethodCodec.java",
     "io/flutter/plugin/common/StandardMessageCodec.java",
     "io/flutter/plugin/common/StandardMethodCodec.java",
     "io/flutter/plugin/common/StringCodec.java",
     "io/flutter/plugin/editing/InputConnectionAdaptor.java",
     "io/flutter/plugin/editing/TextInputPlugin.java",
     "io/flutter/plugin/platform/PlatformPlugin.java",
+    "io/flutter/util/PathUtils.java",
     "io/flutter/view/AccessibilityBridge.java",
     "io/flutter/view/FlutterMain.java",
     "io/flutter/view/FlutterView.java",
@@ -104,10 +95,6 @@ android_library("java") {
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
     "io/flutter/view/VsyncWaiter.java",
-  ]
-
-  deps = [
-    "//base:base_java",
   ]
 }
 
@@ -139,6 +126,5 @@ android_apk("android") {
     ":assets",
     ":java",
     ":sky_shell",
-    "//base:base_java",
   ]
 }

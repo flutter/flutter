@@ -4,71 +4,81 @@
 
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 
-#include "base/trace_event/trace_event.h"
+#define TRACE_EVENT_HIDE_MACROS
+#include "flutter/fml/trace_event.h"
+
+#include <vector>
+
+#include "lib/ftl/logging.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
+#include "third_party/skia/src/core/SkTraceEventCommon.h"
 
 namespace skia {
 
-class SkChromiumEventTracer: public SkEventTracer {
-  const uint8_t* getCategoryGroupEnabled(const char* name) override;
-  const char* getCategoryGroupName(const uint8_t* categoryEnabledFlag) override;
+class FlutterEventTracer : public SkEventTracer {
+ public:
+  static constexpr const char* kSkiaTag = "skia";
+
+  FlutterEventTracer() = default;
+
   SkEventTracer::Handle addTraceEvent(char phase,
-                                      const uint8_t* categoryEnabledFlag,
+                                      const uint8_t* category_enabled_flag,
                                       const char* name,
                                       uint64_t id,
-                                      int32_t numArgs,
-                                      const char** argNames,
-                                      const uint8_t* argTypes,
-                                      const uint64_t* argValues,
-                                      uint8_t flags) override;
-  void updateTraceEventDuration(const uint8_t* categoryEnabledFlag,
+                                      int num_args,
+                                      const char** p_arg_names,
+                                      const uint8_t* p_arg_types,
+                                      const uint64_t* p_arg_values,
+                                      uint8_t flags) override {
+    switch (phase) {
+      case TRACE_EVENT_PHASE_BEGIN:
+      case TRACE_EVENT_PHASE_COMPLETE:
+        fml::tracing::TraceEvent0(kSkiaTag, name);
+        break;
+      case TRACE_EVENT_PHASE_END:
+        fml::tracing::TraceEventEnd(name);
+        break;
+      case TRACE_EVENT_PHASE_INSTANT:
+        fml::tracing::TraceEventInstant0(kSkiaTag, name);
+        break;
+      case TRACE_EVENT_PHASE_ASYNC_BEGIN:
+        fml::tracing::TraceEventAsyncBegin0(kSkiaTag, name, id);
+        break;
+      case TRACE_EVENT_PHASE_ASYNC_END:
+        fml::tracing::TraceEventAsyncEnd0(kSkiaTag, name, id);
+        break;
+      default:
+        break;
+    }
+    return 0;
+  }
+
+  void updateTraceEventDuration(const uint8_t* category_enabled_flag,
                                 const char* name,
-                                SkEventTracer::Handle handle) override;
+                                SkEventTracer::Handle handle) override {
+    // This is only ever called from a scoped trace event so we will just end
+    // the section.
+    fml::tracing::TraceEventEnd(name);
+  }
+
+  const uint8_t* getCategoryGroupEnabled(const char* name) override {
+    static const uint8_t kYes = 1;
+    return &kYes;
+  }
+
+  const char* getCategoryGroupName(
+      const uint8_t* category_enabled_flag) override {
+    return kSkiaTag;
+  }
+
+ private:
+  FTL_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
-
-const uint8_t*
-  SkChromiumEventTracer::getCategoryGroupEnabled(const char* name) {
-    return TRACE_EVENT_API_GET_CATEGORY_GROUP_ENABLED(name);
-}
-
-const char* SkChromiumEventTracer::getCategoryGroupName(
-      const uint8_t* categoryEnabledFlag) {
-  return base::trace_event::TraceLog::GetCategoryGroupName(categoryEnabledFlag);
-}
-
-SkEventTracer::Handle
-    SkChromiumEventTracer::addTraceEvent(char phase,
-                                         const uint8_t* categoryEnabledFlag,
-                                         const char* name,
-                                         uint64_t id,
-                                         int32_t numArgs,
-                                         const char** argNames,
-                                         const uint8_t* argTypes,
-                                         const uint64_t* argValues,
-                                         uint8_t flags) {
-  base::trace_event::TraceEventHandle handle = TRACE_EVENT_API_ADD_TRACE_EVENT(
-      phase, categoryEnabledFlag, name, id, numArgs, argNames, argTypes,
-      (const long long unsigned int*)argValues, NULL, flags);
-      SkEventTracer::Handle result;
-      memcpy(&result, &handle, sizeof(result));
-      return result;
-}
-
-void
-    SkChromiumEventTracer::updateTraceEventDuration(
-        const uint8_t* categoryEnabledFlag,
-        const char *name,
-        SkEventTracer::Handle handle) {
-  base::trace_event::TraceEventHandle traceEventHandle;
-      memcpy(&traceEventHandle, &handle, sizeof(handle));
-      TRACE_EVENT_API_UPDATE_TRACE_EVENT_DURATION(
-          categoryEnabledFlag, name, traceEventHandle);
-}
 
 }  // namespace skia
 
 void InitSkiaEventTracer() {
   // Initialize the binding to Skia's tracing events. Skia will
   // take ownership of and clean up the memory allocated here.
-  SkEventTracer::SetInstance(new skia::SkChromiumEventTracer());
+  SkEventTracer::SetInstance(new skia::FlutterEventTracer());
 }

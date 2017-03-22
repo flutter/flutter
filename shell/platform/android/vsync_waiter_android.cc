@@ -6,11 +6,16 @@
 
 #include <utility>
 
-#include "jni/VsyncWaiter_jni.h"
-#include "lib/ftl/logging.h"
 #include "flutter/common/threads.h"
+#include "flutter/fml/platform/android/jni_util.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "lib/ftl/arraysize.h"
+#include "lib/ftl/logging.h"
 
 namespace shell {
+
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_vsync_waiter_class = nullptr;
+static jmethodID g_async_wait_for_vsync_method_ = nullptr;
 
 VsyncWaiterAndroid::VsyncWaiterAndroid() : weak_factory_(this) {}
 
@@ -24,8 +29,10 @@ void VsyncWaiterAndroid::AsyncWaitForVsync(Callback callback) {
   *weak = weak_factory_.GetWeakPtr();
 
   blink::Threads::Platform()->PostTask([weak] {
-    JNIEnv* env = base::android::AttachCurrentThread();
-    Java_VsyncWaiter_asyncWaitForVsync(env, reinterpret_cast<intptr_t>(weak));
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    env->CallStaticVoidMethod(g_vsync_waiter_class->obj(),
+                              g_async_wait_for_vsync_method_,
+                              reinterpret_cast<jlong>(weak));
   });
 }
 
@@ -39,10 +46,10 @@ void VsyncWaiterAndroid::OnVsync(long frameTimeNanos) {
   });
 }
 
-static void OnVsync(JNIEnv* env,
-                    jclass jcaller,
-                    jlong frameTimeNanos,
-                    jlong cookie) {
+static void OnNativeVsync(JNIEnv* env,
+                          jclass jcaller,
+                          jlong frameTimeNanos,
+                          jlong cookie) {
   ftl::WeakPtr<VsyncWaiterAndroid>* weak =
       reinterpret_cast<ftl::WeakPtr<VsyncWaiterAndroid>*>(cookie);
   VsyncWaiterAndroid* waiter = weak->get();
@@ -52,7 +59,28 @@ static void OnVsync(JNIEnv* env,
 }
 
 bool VsyncWaiterAndroid::Register(JNIEnv* env) {
-  return RegisterNativesImpl(env);
+  static const JNINativeMethod methods[] = {{
+      .name = "nativeOnVsync",
+      .signature = "(JJ)V",
+      .fnPtr = reinterpret_cast<void*>(&OnNativeVsync),
+  }};
+
+  jclass clazz = env->FindClass("io/flutter/view/VsyncWaiter");
+
+  if (clazz == nullptr) {
+    return false;
+  }
+
+  g_vsync_waiter_class = new fml::jni::ScopedJavaGlobalRef<jclass>(env, clazz);
+
+  FTL_CHECK(!g_vsync_waiter_class->is_null());
+
+  g_async_wait_for_vsync_method_ = env->GetStaticMethodID(
+      g_vsync_waiter_class->obj(), "asyncWaitForVsync", "(J)V");
+
+  FTL_CHECK(g_async_wait_for_vsync_method_ != nullptr);
+
+  return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
 }
 
 }  // namespace shell

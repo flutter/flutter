@@ -1701,8 +1701,6 @@ FILE: ../../../flutter/flow/scene_update_context.h
 FILE: ../../../flutter/glue/stack_trace.h
 FILE: ../../../flutter/glue/stack_trace_base.cc
 FILE: ../../../flutter/glue/stack_trace_fuchsia.cc
-FILE: ../../../flutter/glue/task_runner_adaptor.cc
-FILE: ../../../flutter/glue/task_runner_adaptor.h
 FILE: ../../../flutter/glue/trace_event.h
 FILE: ../../../flutter/lib/jni/dart_jni.cc
 FILE: ../../../flutter/lib/jni/dart_jni.h
@@ -1927,8 +1925,13 @@ FILE: ../../../flutter/fml/platform/darwin/cf_utils.cc
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.mm
+FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.h
+FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.mm
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.mm
+FILE: ../../../flutter/fml/platform/darwin/scoped_block.mm
+FILE: ../../../flutter/fml/platform/darwin/scoped_nsobject.h
+FILE: ../../../flutter/fml/platform/darwin/scoped_nsobject.mm
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.cc
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
 FILE: ../../../flutter/fml/platform/linux/timerfd.cc
@@ -1958,6 +1961,9 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCod
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java
+FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.cc
+FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h
@@ -2151,6 +2157,41 @@ FILE: ../../../flutter/shell/platform/linux/main_linux.cc
 FILE: ../../../flutter/sky/engine/wtf/MakeUnique.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2015 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: engine
+ORIGIN: ../../../flutter/fml/platform/darwin/scoped_block.h + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../flutter/fml/platform/darwin/scoped_block.h
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2013 The Chromium Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -9330,4 +9371,4 @@ OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 207
+Total license count: 208

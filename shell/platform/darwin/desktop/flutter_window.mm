@@ -54,7 +54,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 }
 
 - (void)setupPlatformView {
-  DCHECK(_platformView == nullptr)
+  FTL_DCHECK(_platformView == nullptr)
       << "The platform view must not already be set.";
 
   _platformView.reset(new shell::PlatformViewMac(self.renderSurface));

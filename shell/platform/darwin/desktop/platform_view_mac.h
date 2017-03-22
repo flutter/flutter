@@ -5,7 +5,7 @@
 #ifndef SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 #define SHELL_PLATFORM_MAC_PLATFORM_VIEW_MAC_H_
 
-#include "base/mac/scoped_nsobject.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "lib/ftl/memory/weak_ptr.h"
@@ -40,8 +40,8 @@ class PlatformViewMac : public PlatformView, public GPUSurfaceGLDelegate {
                      const std::string& packages) override;
 
  private:
-  base::scoped_nsobject<NSOpenGLView> opengl_view_;
-  base::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
+  fml::scoped_nsobject<NSOpenGLView> opengl_view_;
+  fml::scoped_nsobject<NSOpenGLContext> resource_loading_context_;
 
   bool IsValid() const;
 

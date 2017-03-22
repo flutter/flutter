@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "base/android/jni_android.h"
-#include "base/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/jni_weak_ref.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/ui/window/platform_message.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/android/android_native_window.h"
@@ -28,31 +28,22 @@ class PlatformViewAndroid : public PlatformView {
 
   ~PlatformViewAndroid() override;
 
-  void Detach(JNIEnv* env, jobject obj);
+  void Detach();
 
-  void SurfaceCreated(JNIEnv* env,
-                      jobject obj,
-                      jobject jsurface,
-                      jint backgroundColor);
+  void SurfaceCreated(JNIEnv* env, jobject jsurface, jint backgroundColor);
 
-  void SurfaceChanged(JNIEnv* env, jobject obj, jint width, jint height);
+  void SurfaceChanged(jint width, jint height);
 
-  void RunBundleAndSnapshot(JNIEnv* env,
-                            jobject obj,
-                            jstring bundle_path,
-                            jstring snapshot_override);
+  void SurfaceDestroyed();
 
-  void RunBundleAndSource(JNIEnv* env,
-                          jobject obj,
-                          jstring bundle_path,
-                          jstring main,
-                          jstring packages);
+  void RunBundleAndSnapshot(std::string bundle_path,
+                            std::string snapshot_override);
 
-  void SurfaceDestroyed(JNIEnv* env, jobject obj);
+  void RunBundleAndSource(std::string bundle_path,
+                          std::string main,
+                          std::string packages);
 
-  void SetViewportMetrics(JNIEnv* env,
-                          jobject obj,
-                          jfloat device_pixel_ratio,
+  void SetViewportMetrics(jfloat device_pixel_ratio,
                           jint physical_width,
                           jint physical_height,
                           jint physical_padding_top,
@@ -61,29 +52,23 @@ class PlatformViewAndroid : public PlatformView {
                           jint physical_padding_left);
 
   void DispatchPlatformMessage(JNIEnv* env,
-                               jobject obj,
-                               jstring name,
+                               std::string name,
                                jobject message_data,
                                jint message_position,
                                jint response_id);
 
-  void DispatchPointerDataPacket(JNIEnv* env,
-                                 jobject obj,
-                                 jobject buffer,
-                                 jint position);
+  void DispatchPointerDataPacket(JNIEnv* env, jobject buffer, jint position);
 
   void InvokePlatformMessageResponseCallback(JNIEnv* env,
-                                             jobject obj,
                                              jint response_id,
-                                             jobject response_data,
-                                             jint response_position);
+                                             jobject java_response_data,
+                                             jint java_response_position);
 
-  void DispatchSemanticsAction(JNIEnv* env, jobject obj, jint id, jint action);
+  void DispatchSemanticsAction(jint id, jint action);
 
-  void SetSemanticsEnabled(JNIEnv* env, jobject obj, jboolean enabled);
+  void SetSemanticsEnabled(jboolean enabled);
 
-  base::android::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env,
-                                                       jobject obj);
+  fml::jni::ScopedJavaLocalRef<jobject> GetBitmap(JNIEnv* env);
 
   VsyncWaiter* GetVsyncWaiter() override;
 
@@ -101,13 +86,13 @@ class PlatformViewAndroid : public PlatformView {
                      const std::string& main,
                      const std::string& packages) override;
 
-  void set_flutter_view(const JavaObjectWeakGlobalRef& flutter_view) {
+  void set_flutter_view(const fml::jni::JavaObjectWeakGlobalRef& flutter_view) {
     flutter_view_ = flutter_view;
   }
 
  private:
   const std::unique_ptr<AndroidSurface> android_surface_;
-  JavaObjectWeakGlobalRef flutter_view_;
+  fml::jni::JavaObjectWeakGlobalRef flutter_view_;
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
   std::unordered_map<int, ftl::RefPtr<blink::PlatformMessageResponse>>
@@ -117,8 +102,7 @@ class PlatformViewAndroid : public PlatformView {
 
   void ReleaseSurface();
 
-  void GetBitmapGpuTask(jobject* pixels_out,
-                        SkISize* size_out);
+  void GetBitmapGpuTask(jobject* pixels_out, SkISize* size_out);
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformViewAndroid);
 };

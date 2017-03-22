@@ -11,8 +11,6 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import org.chromium.base.PathUtils;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -23,6 +21,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+
+import io.flutter.util.PathUtils;
 
 /**
  * A class to intialize the native code.

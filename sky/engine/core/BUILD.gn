@@ -45,10 +45,6 @@ static_library("core") {
     "//third_party/zlib",
   ]
 
-  if (!is_fuchsia) {
-    public_deps += [ "//base" ]
-  }
-
   if (flutter_runtime_mode != "release") {
     public_deps += [ "//lib/tonic/debugger" ]
   }

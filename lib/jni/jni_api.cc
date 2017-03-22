@@ -14,7 +14,8 @@ int64_t JniApi::FromReflectedField(const JniObject* field) {
     ENTER_JNI();
 
     jfieldID result = env->FromReflectedField(field->java_object());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<int64_t>(result);
   }
@@ -30,7 +31,8 @@ int64_t JniApi::FromReflectedMethod(const JniObject* method) {
     ENTER_JNI();
 
     jmethodID result = env->FromReflectedMethod(method->java_object());
-    if (CheckJniException(env, &exception)) goto fail;
+    if (CheckJniException(env, &exception))
+      goto fail;
 
     return reinterpret_cast<int64_t>(result);
   }
@@ -42,7 +44,7 @@ fail:
 
 ftl::RefPtr<JniObject> JniApi::GetApplicationContext() {
   ENTER_JNI();
-  return JniObject::Create(env, base::android::GetApplicationContext());
+  return JniObject::Create(env, fml::jni::GetAndroidApplicationContext());
 }
 
 ftl::RefPtr<JniObject> JniApi::GetClassLoader() {
@@ -50,4 +52,4 @@ ftl::RefPtr<JniObject> JniApi::GetClassLoader() {
   return JniObject::Create(env, DartJni::class_loader());
 }
 
-} // namespace blink
+}  // namespace blink

@@ -6,12 +6,7 @@ package io.flutter.view;
 
 import android.view.Choreographer;
 
-import org.chromium.base.CalledByNative;
-import org.chromium.base.JNINamespace;
-
-@JNINamespace("shell")
 public class VsyncWaiter {
-    @CalledByNative
     public static void asyncWaitForVsync(final long cookie) {
         Choreographer.getInstance().postFrameCallback(new Choreographer.FrameCallback() {
             @Override

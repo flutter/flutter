@@ -27,6 +27,7 @@ group("flutter") {
       ]
     }
     deps += [
+      "//flutter/fml:fml_unittests",
       "//flutter/sky/engine/wtf:wtf_unittests",
       "//flutter/synchronization:synchronization_unittests",
       "//lib/ftl:ftl_unittests",

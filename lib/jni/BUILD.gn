@@ -19,7 +19,7 @@ source_set("jni") {
   ]
 
   deps = [
-    "//base",
+    "//flutter/fml",
     "//lib/tonic",
   ]
 }

@@ -7,8 +7,9 @@
 #include <UIKit/UIKit.h>
 #include <unicode/utf16.h>
 
-#include "base/strings/sys_string_conversions.h"
-#include "base/strings/utf_string_conversions.h"
+#include <string>
+
+#include "flutter/fml/platform/darwin/nsstring_utils.h"
 
 static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
 static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
@@ -34,7 +35,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   int _selectionBase;
   int _selectionExtent;
   const char* _selectionAffinity;
-  base::string16 _text;
+  std::u16string _text;
 }
 
 @synthesize keyboardType = _keyboardType;
@@ -62,7 +63,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   _selectionAffinity = _kTextAffinityDownstream;
   if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
     _selectionAffinity = _kTextAffinityUpstream;
-  _text = base::SysNSStringToUTF16(state[@"text"]);
+  _text = fml::StringFromNSString(state[@"text"]);
 }
 
 - (UITextAutocorrectionType)autocorrectionType {
@@ -80,13 +81,13 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 - (void)updateEditingState {
   [_textInputDelegate updateEditingClient:_textInputClient
                                 withState:@{
-                                  @"selectionBase": @(_selectionBase),
-                                  @"selectionExtent": @(_selectionExtent),
-                                  @"selectionAffinity": @(_selectionAffinity),
-                                  @"selectionIsDirectional": @(false),
-                                  @"composingBase": @(0),
-                                  @"composingExtent": @(0),
-                                  @"text": base::SysUTF16ToNSString(_text),
+                                  @"selectionBase" : @(_selectionBase),
+                                  @"selectionExtent" : @(_selectionExtent),
+                                  @"selectionAffinity" : @(_selectionAffinity),
+                                  @"selectionIsDirectional" : @(false),
+                                  @"composingBase" : @(0),
+                                  @"composingExtent" : @(0),
+                                  @"text" : fml::StringToNSString(_text),
                                 }];
 }
 
@@ -98,7 +99,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   int start = std::max(0, std::min(_selectionBase, _selectionExtent));
   int end = std::max(0, std::max(_selectionBase, _selectionExtent));
   int len = end - start;
-  _text.replace(start, len, base::SysNSStringToUTF16(text));
+  _text.replace(start, len, fml::StringFromNSString(text));
   int caret = start + text.length;
   _selectionBase = caret;
   _selectionExtent = caret;
@@ -115,8 +116,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   } else if (start > 0) {
     start -= 1;
     len = 1;
-    if (start > 0 &&
-        UTF16_IS_LEAD(_text[start - 1]) &&
+    if (start > 0 && UTF16_IS_LEAD(_text[start - 1]) &&
         UTF16_IS_TRAIL(_text[start])) {
       start -= 1;
       len += 1;
@@ -154,7 +154,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   [super dealloc];
 }
 
-- (void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver {
+- (void)handleMethodCall:(FlutterMethodCall*)call
+          resultReceiver:(FlutterResultReceiver)resultReceiver {
   NSString* method = call.method;
   id args = call.arguments;
   if ([method isEqualToString:@"TextInput.show"]) {
@@ -173,7 +174,9 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
     [self clearTextInputClient];
     resultReceiver(nil, nil);
   } else {
-    resultReceiver(nil, [FlutterError errorWithCode:@"UNKNOWN" message:@"Unknown method" details: nil]);
+    resultReceiver(nil, [FlutterError errorWithCode:@"UNKNOWN"
+                                            message:@"Unknown method"
+                                            details:nil]);
   }
 }
 
@@ -191,7 +194,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   [_view removeFromSuperview];
 }
 
-- (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
+- (void)setTextInputClient:(int)client
+         withConfiguration:(NSDictionary*)configuration {
   _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
   [_view setTextInputClient:client];
   [_view reloadInputViews];

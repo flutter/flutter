@@ -35,9 +35,9 @@
 #include "flutter/sky/engine/public/platform/Platform.h"
 #include "flutter/sky/engine/wtf/Assertions.h"
 #include "flutter/sky/engine/wtf/MainThread.h"
+#include "flutter/sky/engine/wtf/WTF.h"
 #include "flutter/sky/engine/wtf/text/AtomicString.h"
 #include "flutter/sky/engine/wtf/text/TextEncoding.h"
-#include "flutter/sky/engine/wtf/WTF.h"
 #include "lib/ftl/build_config.h"
 #include "lib/tonic/dart_microtask_queue.h"
 
@@ -47,7 +47,7 @@
 
 #else  // defined(OS_FUCHSIA)
 
-#include "base/message_loop/message_loop.h"
+#include "flutter/fml/message_loop.h"
 
 #endif  // defined(OS_FUCHSIA)
 
@@ -72,29 +72,12 @@ void removeMessageLoopObservers() {
 
 #else  // defined(OS_FUCHSIA)
 
-class TaskObserver : public base::MessageLoop::TaskObserver {
- public:
-  void WillProcessTask(const base::PendingTask& pending_task) override {}
-  void DidProcessTask(const base::PendingTask& pending_task) override {
-    didProcessTask();
-  }
-};
-
-static TaskObserver* s_taskObserver = 0;
-
 void addMessageLoopObservers() {
-  ASSERT(!s_taskObserver);
-  s_taskObserver = new TaskObserver;
-
-  base::MessageLoop::current()->AddTaskObserver(s_taskObserver);
+  fml::MessageLoop::GetCurrent().SetTaskObserver(&didProcessTask);
 }
 
 void removeMessageLoopObservers() {
-  base::MessageLoop::current()->RemoveTaskObserver(s_taskObserver);
-
-  ASSERT(s_taskObserver);
-  delete s_taskObserver;
-  s_taskObserver = 0;
+  fml::MessageLoop::GetCurrent().SetTaskObserver(nullptr);
 }
 
 #endif  // defined(OS_FUCHSIA)

@@ -101,13 +101,12 @@ source_set("common") {
 
   deps = [
     ":generate_embedder_diagnostic_server_resources_cc",
-    "//base",
-    "//base:i18n",
     "//dart/runtime:libdart",
     "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//flutter/common",
     "//flutter/flow",
+    "//flutter/fml",
     "//flutter/glue",
     "//flutter/lib/ui",
     "//flutter/runtime",

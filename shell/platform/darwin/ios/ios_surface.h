@@ -5,7 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_IOS_SURFACE_H_
 
-#include "base/mac/scoped_nsobject.h"
+#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "lib/ftl/macros.h"
 
@@ -37,7 +37,7 @@ class IOSSurface {
 
  public:
   PlatformView::SurfaceConfig surface_config_;
-  base::scoped_nsobject<CALayer> layer_;
+  fml::scoped_nsobject<CALayer> layer_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(IOSSurface);
 };

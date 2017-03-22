@@ -7,7 +7,6 @@
 
 #include <memory>
 
-#include "base/mac/scoped_nsobject.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"

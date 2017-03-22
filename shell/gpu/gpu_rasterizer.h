@@ -45,10 +45,6 @@ class GPURasterizer : public Rasterizer {
 
   void DrawToSurface(flow::LayerTree& layer_tree);
 
-  bool ShouldDrawToTrace(flow::LayerTree& layer_tree);
-
-  void DrawToTraceIfNecessary(flow::LayerTree& layer_tree);
-
   FTL_DISALLOW_COPY_AND_ASSIGN(GPURasterizer);
 };
 

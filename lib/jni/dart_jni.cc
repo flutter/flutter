@@ -4,22 +4,20 @@
 
 #include "flutter/lib/jni/dart_jni.h"
 
-#include "base/android/jni_android.h"
-#include "base/android/jni_string.h"
-#include "base/logging.h"
+#include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/lib/jni/jni_api.h"
 #include "flutter/lib/jni/jni_array.h"
 #include "flutter/lib/jni/jni_class.h"
 #include "flutter/lib/jni/jni_object.h"
 #include "flutter/lib/jni/jni_string.h"
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 
 namespace blink {
 
-using base::android::ScopedJavaGlobalRef;
-using base::android::ScopedJavaLocalRef;
+using fml::jni::ScopedJavaGlobalRef;
+using fml::jni::ScopedJavaLocalRef;
 using tonic::DartConverter;
 using tonic::StdStringToDart;
 using tonic::ToDart;
@@ -63,7 +61,7 @@ bool CheckJniException(JNIEnv* env, Dart_Handle* exception) {
 
   jthrowable java_throwable = env->ExceptionOccurred();
   env->ExceptionClear();
-  std::string info = base::android::GetJavaExceptionInfo(env, java_throwable);
+  std::string info = fml::jni::GetJavaExceptionInfo(env, java_throwable);
 
   *exception = StdStringToDart(info);
   return true;
@@ -210,7 +208,7 @@ void DartJni::InitForGlobal(DartJniIsolateDataProvider provider) {
 }
 
 void DartJni::InitForIsolate() {
-  DCHECK(g_natives);
+  FTL_DCHECK(g_natives);
 
   Dart_Handle jni_library = Dart_LookupLibrary(ToDart("dart:jni"));
   DART_CHECK_VALID(jni_library)
@@ -232,53 +230,54 @@ void DartJni::InitForIsolate() {
 }
 
 bool DartJni::InitJni() {
-  JNIEnv* env = base::android::AttachCurrentThread();
+  JNIEnv* env = fml::jni::AttachCurrentThread();
 
-  DCHECK(!g_jvm_data);
+  FTL_DCHECK(!g_jvm_data);
   g_jvm_data = new DartJniJvmData();
 
-  g_jvm_data->class_loader.Reset(base::android::GetClassLoader(env));
+  // TODO: The class loader must be set here.
+  // g_jvm_data->class_loader.Reset(class_loader);
 
   ScopedJavaLocalRef<jclass> class_loader_clazz(
       env, env->FindClass("java/lang/ClassLoader"));
-  CHECK(!base::android::ClearException(env));
+  FTL_CHECK(!fml::jni::ClearException(env));
 
   g_jvm_data->class_loader_load_class_method_id =
       env->GetMethodID(class_loader_clazz.obj(), "loadClass",
                        "(Ljava/lang/String;)Ljava/lang/Class;");
-  CHECK(!base::android::ClearException(env));
+  FTL_CHECK(!fml::jni::ClearException(env));
 
   g_jvm_data->class_clazz.Reset(env, env->FindClass("java/lang/Class"));
-  CHECK(!base::android::ClearException(env));
+  FTL_CHECK(!fml::jni::ClearException(env));
 
   g_jvm_data->class_get_name_method_id = env->GetMethodID(
       g_jvm_data->class_clazz.obj(), "getName", "()Ljava/lang/String;");
-  CHECK(!base::android::ClearException(env));
+  FTL_CHECK(!fml::jni::ClearException(env));
 
   return true;
 }
 
 void DartJni::OnThreadExit() {
-  base::android::DetachFromVM();
+  fml::jni::DetachFromVM();
 }
 
 ScopedJavaLocalRef<jclass> DartJni::GetClass(JNIEnv* env, const char* name) {
-  jobject clazz = env->CallObjectMethod(
-      g_jvm_data->class_loader.obj(),
-      g_jvm_data->class_loader_load_class_method_id,
-      base::android::ConvertUTF8ToJavaString(env, name).obj());
+  jobject clazz =
+      env->CallObjectMethod(g_jvm_data->class_loader.obj(),
+                            g_jvm_data->class_loader_load_class_method_id,
+                            fml::jni::StringToJavaString(env, name).obj());
 
   return ScopedJavaLocalRef<jclass>(env, static_cast<jclass>(clazz));
 }
 
 std::string DartJni::GetObjectClassName(JNIEnv* env, jobject obj) {
   jclass clazz = env->GetObjectClass(obj);
-  DCHECK(clazz);
+  FTL_DCHECK(clazz);
   jstring name = static_cast<jstring>(
       env->CallObjectMethod(clazz, g_jvm_data->class_get_name_method_id));
-  DCHECK(name);
+  FTL_DCHECK(name);
 
-  return base::android::ConvertJavaStringToUTF8(env, name);
+  return fml::jni::JavaStringToString(env, name);
 }
 
 jstring DartJni::DartToJavaString(JNIEnv* env,
@@ -315,14 +314,14 @@ jclass DartJni::class_clazz() {
 Dart_Handle DartJni::jni_object_type() {
   Dart_Handle object_type =
       Dart_HandleFromPersistent(IsolateData()->jni_object_type);
-  DCHECK(!Dart_IsError(object_type));
+  FTL_DCHECK(!Dart_IsError(object_type));
   return object_type;
 }
 
 Dart_Handle DartJni::jni_float_type() {
   Dart_Handle float_type =
       Dart_HandleFromPersistent(IsolateData()->jni_float_type);
-  DCHECK(!Dart_IsError(float_type));
+  FTL_DCHECK(!Dart_IsError(float_type));
   return float_type;
 }
 

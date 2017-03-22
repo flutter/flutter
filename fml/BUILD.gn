@@ -3,9 +3,105 @@
 # found in the LICENSE file.
 
 source_set("fml") {
-  public_deps = []
+  sources = [
+    "icu_util.cc",
+    "icu_util.h",
+    "mapping.cc",
+    "mapping.h",
+    "message_loop.cc",
+    "message_loop.h",
+    "message_loop_impl.cc",
+    "message_loop_impl.h",
+    "task_runner.cc",
+    "task_runner.h",
+    "thread.cc",
+    "thread.h",
+    "thread_checker.cc",
+    "thread_checker.h",
+    "thread_local.h",
+    "trace_event.cc",
+    "trace_event.h",
+  ]
+
+  deps = [
+    "//dart/runtime:libdart",
+    "//lib/ftl",
+
+    # These need to be in sync with the Fuchsia buildroot.
+    "//third_party/icu",
+  ]
+
+  configs += [ "//third_party/icu:icu_config" ]
+
+  libs = []
 
   if (is_ios || is_mac) {
-    public_deps += [ "platform/darwin" ]
+    sources += [
+      "platform/darwin/cf_utils.cc",
+      "platform/darwin/cf_utils.h",
+      "platform/darwin/message_loop_darwin.h",
+      "platform/darwin/message_loop_darwin.mm",
+      "platform/darwin/nsstring_utils.h",
+      "platform/darwin/nsstring_utils.mm",
+      "platform/darwin/resource_mapping_darwin.h",
+      "platform/darwin/resource_mapping_darwin.mm",
+      "platform/darwin/scoped_block.h",
+      "platform/darwin/scoped_block.mm",
+      "platform/darwin/scoped_nsobject.h",
+      "platform/darwin/scoped_nsobject.mm",
+    ]
+
+    libs += [ "Foundation.framework" ]
   }
+
+  if (is_android) {
+    sources += [
+      "platform/android/jni_util.cc",
+      "platform/android/jni_util.h",
+      "platform/android/jni_weak_ref.cc",
+      "platform/android/jni_weak_ref.h",
+      "platform/android/message_loop_android.cc",
+      "platform/android/message_loop_android.h",
+      "platform/android/scoped_java_ref.cc",
+      "platform/android/scoped_java_ref.h",
+    ]
+
+    libs += [ "android" ]
+  }
+
+  if (is_android) {
+    # Don't filter away these Linux sources on Android.
+    set_sources_assignment_filter([])
+    sources += [
+      "platform/linux/timerfd.cc",
+      "platform/linux/timerfd.h",
+    ]
+    set_sources_assignment_filter(sources_assignment_filter)
+  }
+
+  if (is_linux) {
+    sources += [
+      "platform/linux/message_loop_linux.cc",
+      "platform/linux/message_loop_linux.h",
+      "platform/linux/timerfd.cc",
+      "platform/linux/timerfd.h",
+    ]
+  }
+}
+
+executable("fml_unittests") {
+  testonly = true
+
+  sources = [
+    "message_loop_unittests.cc",
+    "thread_checker_unittests.cc",
+    "thread_local_unittests.cc",
+    "thread_unittests.cc",
+  ]
+
+  deps = [
+    "//flutter/fml",
+    "//flutter/testing",
+    "//lib/ftl",
+  ]
 }
