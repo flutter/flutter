@@ -19,7 +19,7 @@ void main() {
       ),
     );
 
-    final RenderBox box = tester.renderObject(find.byType(CircleAvatar));
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     expect(box.size.width, equals(100.0));
     expect(box.size.height, equals(100.0));
     final RenderDecoratedBox child = box.child;
