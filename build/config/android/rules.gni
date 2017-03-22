@@ -899,8 +899,8 @@ template("junit_binary") {
       "//testing/android/junit:junit_test_support",
       "//third_party/junit",
       "//third_party/mockito:mockito_java",
-      "//third_party/robolectric:robolectric_java",
       "//third_party/robolectric:android-all-4.3_r2-robolectric-0",
+      "//third_party/robolectric:robolectric_java",
     ]
     if (defined(invoker.deps)) {
       deps += invoker.deps
@@ -1406,15 +1406,6 @@ template("android_apk") {
         invoker.enable_relocation_packing) {
       _enable_relocation_packing = true
     }
-
-    _native_lib_version_rule = ""
-    if (defined(invoker.native_lib_version_rule)) {
-      _native_lib_version_rule = invoker.native_lib_version_rule
-    }
-    _native_lib_version_arg = "\"\""
-    if (defined(invoker.native_lib_version_arg)) {
-      _native_lib_version_arg = invoker.native_lib_version_arg
-    }
   }
 
   _android_manifest_deps = []
@@ -1476,45 +1467,6 @@ template("android_apk") {
     }
   }
   _srcjar_deps += [ ":$process_resources_target" ]
-
-  if (_native_libs != []) {
-    _enable_chromium_linker_tests = false
-    if (defined(invoker.enable_chromium_linker_tests)) {
-      _enable_chromium_linker_tests = invoker.enable_chromium_linker_tests
-    }
-
-    java_cpp_template("${_template_name}__native_libraries_java") {
-      package_name = "org/chromium/base/library_loader"
-      sources = [
-        "//base/android/java/templates/NativeLibraries.template",
-      ]
-      inputs = [
-        _build_config,
-      ]
-      deps = [
-        ":$build_config_target",
-      ]
-      if (_native_lib_version_rule != "") {
-        deps += [ _native_lib_version_rule ]
-      }
-
-      defines = [
-        "NATIVE_LIBRARIES_LIST=" +
-            "@FileArg($_rebased_build_config:native:java_libraries_list)",
-        "NATIVE_LIBRARIES_VERSION_NUMBER=$_native_lib_version_arg",
-      ]
-      if (_use_chromium_linker) {
-        defines += [ "ENABLE_CHROMIUM_LINKER" ]
-      }
-      if (_load_library_from_apk) {
-        defines += [ "ENABLE_CHROMIUM_LINKER_LIBRARY_IN_ZIP_FILE" ]
-      }
-      if (_enable_chromium_linker_tests) {
-        defines += [ "ENABLE_CHROMIUM_LINKER_TESTS" ]
-      }
-    }
-    _srcjar_deps += [ ":${_template_name}__native_libraries_java" ]
-  }
 
   java_target = "${_template_name}__java"
   final_deps += [ ":$java_target" ]
@@ -1746,8 +1698,8 @@ template("android_apk") {
 
       native_libs_dir = _native_libs_dir
       deps = [
-        ":${_template_name}__prepare_native",
         ":${_manifest_rule}",
+        ":${_template_name}__prepare_native",
       ]
     }
   }
@@ -1785,7 +1737,7 @@ template("android_apk") {
       }
       deps = [
         ":$create_dist_target",
-        ":${_template_name}__prepare_native"
+        ":${_template_name}__prepare_native",
       ]
       if (defined(invoker.deps)) {
         deps += invoker.deps
@@ -1981,7 +1933,9 @@ template("unittest_apk") {
     if (defined(invoker.deps)) {
       deps += invoker.deps
     }
-    data_deps = [ "//tools/android/md5sum" ]
+    data_deps = [
+      "//tools/android/md5sum",
+    ]
     if (host_os == "linux") {
       data_deps += [ "//tools/android/forwarder2" ]
     }
