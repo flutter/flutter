@@ -56,7 +56,7 @@ Future<Null> pubGet({
     final int code = await runCommandAndStreamOutput(args,
       workingDirectory: directory,
       mapFunction: _filterOverrideWarnings,
-      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironment() }
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
     );
     status.stop();
     if (code != 0)
@@ -78,12 +78,12 @@ const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// Returns the environment value that should be used when running pub.
 ///
 /// Includes any existing environment variable, if one exists.
-String _getPubEnvironment() {
+String _getPubEnvironmentValue() {
   final List<String> values = <String>[];
 
   final String existing = platform.environment[_pubEnvironmentKey];
 
-  if (existing != null && existing.isNotEmpty) {
+  if ((existing != null) && existing.isNotEmpty) {
     values.add(existing);
   }
 
