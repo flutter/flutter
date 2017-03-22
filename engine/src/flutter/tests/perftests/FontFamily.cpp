@@ -32,23 +32,4 @@ static void BM_FontFamily_create(benchmark::State& state) {
 
 BENCHMARK(BM_FontFamily_create);
 
-static void BM_FontFamily_create_fromBuffer(benchmark::State& state) {
-    std::shared_ptr<MinikinFontForTest> minikinFont =
-            std::make_shared<MinikinFontForTest>("/system/fonts/NotoSansCJK-Regular.ttc", 0);
-
-    std::shared_ptr<FontFamily> family = std::make_shared<FontFamily>(
-            std::vector<Font>({Font(minikinFont, FontStyle())}));
-
-    size_t bufSize = family->writeAcceleratorTable(nullptr);
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufSize]);
-    family->writeAcceleratorTable(buffer.get());
-
-    while (state.KeepRunning()) {
-        std::shared_ptr<FontFamily> family = std::make_shared<FontFamily>(
-                std::vector<Font>({Font(minikinFont, FontStyle())}), buffer.get(), bufSize);
-    }
-}
-
-BENCHMARK(BM_FontFamily_create_fromBuffer);
-
 }  // namespace minikin

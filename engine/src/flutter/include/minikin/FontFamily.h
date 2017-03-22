@@ -126,23 +126,6 @@ public:
     FontFamily(int variant, std::vector<Font>&& fonts);
     FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts);
 
-    // The accelerator table won't be copied. Do not release the memory until the created FontFamily
-    // is destructed.
-    FontFamily(std::vector<Font>&& fonts, const uint8_t* acceleratorTable, size_t tableSize);
-    FontFamily(int variant, std::vector<Font>&& fonts, const uint8_t* acceleratorTable,
-            size_t tableSize);
-    FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts,
-            const uint8_t* acceleratorTable, size_t tableSize);
-
-    ~FontFamily();
-
-    // Writes internal accelerator tables into the 'out' buffer.
-    //
-    // This method returns the number of bytes written to the buffer. By calling the method with
-    // 'out' set to nullptr, the method just returns the size needed, which the caller can then use
-    // for allocating a buffer for a second call.
-    size_t writeAcceleratorTable(uint8_t* out) const;
-
     // TODO: Good to expose FontUtil.h.
     static bool analyzeStyle(const std::shared_ptr<MinikinFont>& typeface, int* weight,
             bool* italic);
@@ -177,13 +160,6 @@ public:
 
 private:
     void computeCoverage();
-    void readAcceleratorTable(const uint8_t* data, size_t size);
-
-    size_t writeSupportedAxes(uint8_t* out) const;
-
-    // Reads supported axes values from 'in' buffer. This method reads up to
-    // 'inSize' bytes and returns the number of bytes read.
-    size_t readSupportedAxes(const uint8_t* in, size_t inSize);
 
     uint32_t mLangId;
     int mVariant;

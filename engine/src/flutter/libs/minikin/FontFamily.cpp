@@ -109,25 +109,6 @@ FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
     computeCoverage();
 }
 
-FontFamily::FontFamily(std::vector<Font>&& fonts, const uint8_t* acceleratorTable, size_t tableSize)
-    : FontFamily(0 /* variant */, std::move(fonts), acceleratorTable, tableSize) {
-}
-
-FontFamily::FontFamily(int variant, std::vector<Font>&& fonts, const uint8_t* acceleratorTable,
-        size_t tableSize)
-    : FontFamily(FontLanguageListCache::kEmptyListId, variant, std::move(fonts), acceleratorTable,
-            tableSize) {
-}
-
-FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts,
-        const uint8_t* acceleratorTable, size_t tableSize)
-    : mLangId(langId), mVariant(variant), mFonts(std::move(fonts)), mHasVSTable(false) {
-    readAcceleratorTable(acceleratorTable, tableSize);
-}
-
-FontFamily::~FontFamily() {
-}
-
 bool FontFamily::analyzeStyle(const std::shared_ptr<MinikinFont>& typeface, int* weight,
         bool* italic) {
     android::AutoMutex _l(gMinikinLock);
@@ -263,47 +244,4 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
     return std::shared_ptr<FontFamily>(new FontFamily(mLangId, mVariant, std::move(fonts)));
 }
 
-size_t FontFamily::writeAcceleratorTable(uint8_t* out) const {
-    const size_t axesTableSize = writeSupportedAxes(out);
-    if (out != nullptr) {
-        out += axesTableSize;
-    }
-    const size_t coverageTableSize = mCoverage.writeToBuffer(out);
-    return axesTableSize + coverageTableSize;
-}
-
-void FontFamily::readAcceleratorTable(const uint8_t* data, size_t size) {
-    const size_t readSize = readSupportedAxes(data, size);
-    data += readSize;
-    size -= readSize;
-    bool result = mCoverage.initFromBuffer(data, size);
-    LOG_ALWAYS_FATAL_IF(!result, "Failed to reconstruct accelerator table from buffer");
-}
-
-size_t FontFamily::writeSupportedAxes(uint8_t* out) const {
-    LOG_ALWAYS_FATAL_IF(mSupportedAxes.size() > 255, "System fonts may only use up to 255 axes.");
-    const uint8_t axesCount = static_cast<uint8_t>(mSupportedAxes.size());
-    if (out != nullptr) {
-        out[0] = axesCount;
-        AxisTag* axisTags = reinterpret_cast<AxisTag*>(out + 1);
-        for (const auto& tag : mSupportedAxes) {
-            *axisTags++ = tag;
-        }
-    }
-    const size_t axesSizeInbytes = sizeof(AxisTag) * axesCount;
-    return axesSizeInbytes + 1 /* 1 for axes count */;
-}
-
-size_t FontFamily::readSupportedAxes(const uint8_t* in, size_t inSize) {
-    LOG_ALWAYS_FATAL_IF(inSize == 0);
-    const uint8_t axesCount = in[0];
-    const size_t totalSize = sizeof(AxisTag) * axesCount + 1 /* 1 for axes Count */;
-    LOG_ALWAYS_FATAL_IF(inSize < totalSize);
-    const AxisTag* axisTags = reinterpret_cast<const AxisTag*>(in + 1);
-    mSupportedAxes.clear();
-    for (uint8_t i = 0; i < axesCount; ++i) {
-        mSupportedAxes.insert(axisTags[i]);
-    }
-    return totalSize;
-}
 }  // namespace minikin

@@ -45,17 +45,6 @@ public:
     // inclusive of start, exclusive of end, laid out in a uint32 array.
     void initFromRanges(const uint32_t* ranges, size_t nRanges);
 
-    // Initializes the set with pre-calculted data. Returns false if the serialized data is invalid.
-    // Even if this function returns false, the internal data is cleared.
-    bool initFromBuffer(const uint8_t* data, size_t size);
-
-    // Serialize the set and write into out.
-    //
-    // This method returns the number of bytes written to the buffer. By calling the method with
-    // 'out' set to nullptr, the method just returns the size needed, which the caller can then use
-    // for allocating a buffer for a second call.
-    size_t writeToBuffer(uint8_t* out) const;
-
     // Determine whether the value is included in the set
     bool get(uint32_t ch) const {
         if (ch >= mMaxVal) return false;
