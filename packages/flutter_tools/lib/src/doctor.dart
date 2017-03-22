@@ -13,7 +13,7 @@ import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
+import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
 import 'cache.dart';
@@ -24,30 +24,6 @@ import 'ios/plist_utils.dart';
 import 'version.dart';
 
 Doctor get doctor => context[Doctor];
-
-const Map<String, String> _osNames = const <String, String>{
-  'macos': 'Mac OS',
-  'linux': 'Linux',
-  'windows': 'Windows'
-};
-
-String osName() {
-  if (platform.isWindows) {
-    final ProcessResult result = processManager.runSync(<String>['ver'], runInShell: true);
-    if (result.exitCode == 0)
-      return result.stdout.trim();
-  } else if (platform.isMacOS) {
-    final List<ProcessResult> results = <ProcessResult>[
-      processManager.runSync(<String>["sw_vers", "-productName"]),
-      processManager.runSync(<String>["sw_vers", "-productVersion"]),
-      processManager.runSync(<String>["sw_vers", "-buildVersion"]),
-    ];
-    if (results.every((ProcessResult result) => result.exitCode == 0))
-      return "${results[0].stdout.trim()} ${results[1].stdout.trim()} ${results[2].stdout.trim()}";
-  }
-  final String os = platform.operatingSystem;
-  return _osNames.containsKey(os) ? _osNames[os] : os;
-}
 
 class Doctor {
   Doctor() {
@@ -242,7 +218,7 @@ class _FlutterValidator extends DoctorValidator {
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
 
     return new ValidationResult(valid, messages,
-      statusInfo: 'on ${osName()}, channel ${version.channel}');
+      statusInfo: 'on ${os.name}, channel ${version.channel}');
   }
 }
 
