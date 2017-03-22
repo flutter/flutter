@@ -13,6 +13,7 @@ import '../base/process_manager.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
+import 'android_studio.dart' as android_studio;
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
   AndroidWorkflow() : super('Android toolchain - develop for Android devices');
@@ -30,8 +31,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   static const String _kJavaExecutable = 'java';
   static const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
-  /// First sniff JAVA_HOME, then fallback to PATH.
+  /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
   String _findJavaBinary() {
+
+    if (android_studio.javaPath != null)
+      return fs.path.join(android_studio.javaPath, 'bin', 'java');
 
     final String javaHomeEnv = platform.environment[_kJavaHomeEnvironmentVariable];
     if (javaHomeEnv != null) {
