@@ -50,7 +50,23 @@ abstract class RepositoryFile extends RepositoryEntry {
 abstract class RepositoryLicensedFile extends RepositoryFile {
   RepositoryLicensedFile(RepositoryDirectory parent, fs.File io) : super(parent, io);
 
-  bool get isIncludedInBuildProducts => true; // this should be conservative, err on the side of "true" if you're not sure
+  // file names that we are confident won't be included in the final build product
+  static final RegExp _readmeNamePattern = new RegExp(r'\b_*(?:readme|contributing|patents)_*\b', caseSensitive: false);
+  static final RegExp _buildTimePattern = new RegExp(r'^(?!.*gen$)(?:CMakeLists\.txt|(?:pkgdata)?Makefile(?:\.inc)?(?:\.am|\.in|)|configure(?:\.ac|\.in)?|config\.(?:sub|guess)|.+\.m4|install-sh|.+\.sh|.+\.bat|.+\.pyc?|.+\.pl|icu-configure|.+\.gypi?|.*\.gni?|.+\.mk|.+\.cmake|.+\.gradle|.+\.yaml|vms_make\.com|pom\.xml|\.project|source\.properties)$', caseSensitive: false);
+  static final RegExp _docsPattern = new RegExp(r'^(?:INSTALL|NEWS|OWNERS|AUTHORS|ChangeLog(?:\.rst|\.[0-9]+)?|.+\.txt|.+\.md|.+\.log|.+\.css|.+\.1|doxygen\.config|.+\.spec(?:\.in)?)$', caseSensitive: false);
+  static final RegExp _devPattern = new RegExp(r'^(?:codereview\.settings|.+\.~|.+\.~[0-9]+~|\.clang-format|\.gitattributes|\.landmines)$', caseSensitive: false);
+  static final RegExp _testsPattern = new RegExp(r'^(?:tj(?:bench|example)test\.(?:java\.)?in|example\.c)$', caseSensitive: false);
+
+  bool get isIncludedInBuildProducts {
+    return !io.name.contains(_readmeNamePattern)
+        && !io.name.contains(_buildTimePattern)
+        && !io.name.contains(_docsPattern)
+        && !io.name.contains(_devPattern)
+        && !io.name.contains(_testsPattern)
+        && !isShellScript;
+  }
+
+  bool get isShellScript => false;
 }
 
 class RepositorySourceFile extends RepositoryLicensedFile {
@@ -59,26 +75,10 @@ class RepositorySourceFile extends RepositoryLicensedFile {
   @override
   fs.TextFile get io => super.io;
 
-  // file names that we are confident won't be included in the final build product
-  static final RegExp _readmeNamePattern = new RegExp(r'\b_*(?:readme|contributing|patents)_*\b', caseSensitive: false);
-  static final RegExp _buildTimePattern = new RegExp(r'^(?!.*gen$)(?:CMakeLists\.txt|(?:pkgdata)?Makefile(?:\.inc)?(?:\.am|\.in|)|configure(?:\.ac|\.in)?|config\.(?:sub|guess)|.+\.m4|install-sh|.+\.sh|.+\.bat|.+\.pyc?|.+\.pl|icu-configure|.+\.gypi?|.*\.gni?|.+\.mk|.+\.cmake|.+\.gradle|.+\.yaml|vms_make\.com|pom\.xml|\.project|source\.properties)$', caseSensitive: false);
-  static final RegExp _docsPattern = new RegExp(r'^(?:INSTALL|NEWS|OWNERS|AUTHORS|ChangeLog(?:\.rst|\.[0-9]+)?|.+\.txt|.+\.md|.+\.log|.+\.css|.+\.1|doxygen\.config|.+\.spec(?:\.in)?)$', caseSensitive: false);
-  static final RegExp _devPattern = new RegExp(r'^(?:codereview\.settings|.+\.~|.+\.~[0-9]+~|\.clang-format|\.gitattributes|\.landmines)$', caseSensitive: false);
-  static final RegExp _testsPattern = new RegExp(r'^(?:tj(?:bench|example)test\.(?:java\.)?in|example\.c)$', caseSensitive: false);
-
-  @override
-  bool get isIncludedInBuildProducts {
-    return !io.name.contains(_readmeNamePattern)
-        && !io.name.contains(_buildTimePattern)
-        && !io.name.contains(_docsPattern)
-        && !io.name.contains(_devPattern)
-        && !io.name.contains(_testsPattern)
-        && !_isShellScript;
-  }
-
   static final RegExp _hashBangPattern = new RegExp(r'^#! *(?:/bin/sh|/bin/bash|/usr/bin/env +(?:python|bash))\b');
 
-  bool get _isShellScript {
+  @override
+  bool get isShellScript {
     return io.readString().startsWith(_hashBangPattern);
   }
 
