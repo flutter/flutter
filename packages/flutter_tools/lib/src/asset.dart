@@ -303,8 +303,6 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   return new DevFSStringContent(JSON.encode(json));
 }
 
-final RegExp _assetJsonLeadingParentRegExp = new RegExp(r'"asset":"(\.\.\/)+');
-
 DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
                              bool includeDefaultFonts,
@@ -319,9 +317,37 @@ DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
     fonts.addAll(manifestDescriptor['fonts']);
   if (fonts.isEmpty)
     return null;
-  String json = JSON.encode(fonts);
-  json = json.replaceAll(_assetJsonLeadingParentRegExp, '"asset":"');
-  return new DevFSStringContent(json);
+
+  return new DevFSStringContent(JSON.encode(_traverseCloneAsMutableAndRemoveLeadingParent(fonts)));
+}
+
+final RegExp _leadingParentRegExp = new RegExp(r'(\.\.\/)+');
+
+dynamic _traverseCloneAsMutableAndRemoveLeadingParent(dynamic node) {
+  if (node is List) {
+    return node.map<dynamic>(_traverseCloneAsMutableAndRemoveLeadingParent).toList();
+  } else if (node is Map) {
+    Map<String, dynamic> map = node;
+    map = _unwrapYamlMap(map);
+    if (map.containsKey('asset')) {
+      map['asset'] = map['asset'].replaceFirst(_leadingParentRegExp, '');
+    } else {
+      for (String key in map.keys) {
+        map[key] = _traverseCloneAsMutableAndRemoveLeadingParent(map[key]);
+      }
+    }
+    return map;
+  } else {
+    return node;
+  }
+}
+
+Map<String, dynamic> _unwrapYamlMap(Map<String, dynamic> yamlMap) {
+  final Map<String, dynamic> cloneMap = new Map<String, dynamic>();
+  for (String key in yamlMap.keys) {
+    cloneMap[key] = yamlMap[key];
+  }
+  return cloneMap;
 }
 
 /// Given an assetBase location and a pubspec.yaml Flutter manifest, return a
@@ -404,8 +430,6 @@ Map<_Asset, List<_Asset>> _parseAssets(
 
   return result;
 }
-
-final RegExp _leadingParentRegExp = new RegExp(r'(\.\.\/)+');
 
 _Asset _resolveAsset(
   PackageMap packageMap,
