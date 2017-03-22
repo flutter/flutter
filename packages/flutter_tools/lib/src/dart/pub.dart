@@ -7,7 +7,9 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
 import 'sdk.dart';
@@ -54,7 +56,7 @@ Future<Null> pubGet({
     final int code = await runCommandAndStreamOutput(args,
       workingDirectory: directory,
       mapFunction: _filterOverrideWarnings,
-      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
     );
     status.stop();
     if (code != 0)
@@ -69,6 +71,30 @@ Future<Null> pubGet({
 }
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+
+/// The console environment key used by the pub tool.
+const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
+
+/// Returns the environment value that should be used when running pub.
+///
+/// Includes any existing environment variable, if one exists.
+String _getPubEnvironmentValue() {
+  final List<String> values = <String>[];
+
+  final String existing = platform.environment[_pubEnvironmentKey];
+
+  if ((existing != null) && existing.isNotEmpty) {
+    values.add(existing);
+  }
+
+  if (isRunningOnBot) {
+    values.add('flutter_bot');
+  }
+
+  values.add('flutter_cli');
+
+  return values.join(':');
+}
 
 String _filterOverrideWarnings(String message) {
   // This function filters out these three messages:
