@@ -19,7 +19,7 @@
 
 #else  // defined(__Fuchsia__)
 
-#include "flutter/fml/trace_event.h"
+#include "flutter/fml/trace_event.h"  // nogncheck
 
 #endif  // defined(__Fuchsia__)
 
