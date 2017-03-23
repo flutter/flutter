@@ -26,7 +26,7 @@ import 'platform_messages.dart';
 /// one message handler can be registered with the channel name at any given
 /// time.
 ///
-/// See: <https://flutter.io/platform-services/>
+/// See: <https://flutter.io/platform-channels/>
 class PlatformMessageChannel<T> {
   /// Creates a [PlatformMessageChannel] with the specified [name] and [codec].
   ///
@@ -102,7 +102,7 @@ class PlatformMessageChannel<T> {
 /// The identity of the channel is given by its name, so other uses of that name
 /// with may interfere with this channel's communication.
 ///
-/// See: <https://flutter.io/platform-services/>
+/// See: <https://flutter.io/platform-channels/>
 class PlatformMethodChannel {
   /// Creates a [PlatformMethodChannel] with the specified [name].
   ///
