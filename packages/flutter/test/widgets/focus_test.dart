@@ -5,12 +5,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-class TestFocusable extends StatelessWidget {
+class TestFocusable extends StatefulWidget {
   TestFocusable({
-    GlobalKey key,
+    Key key,
     this.no,
     this.yes,
-    this.autofocus: true
+    this.autofocus: true,
   }) : super(key: key);
 
   final String no;
@@ -18,62 +18,90 @@ class TestFocusable extends StatelessWidget {
   final bool autofocus;
 
   @override
+  TestFocusableState createState() => new TestFocusableState();
+}
+
+class TestFocusableState extends State<TestFocusable> {
+  final FocusNode focusNode = new FocusNode();
+  bool _didAutofocus = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didAutofocus && config.autofocus) {
+      _didAutofocus = true;
+      FocusScope.of(context).autofocus(focusNode);
+    }
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bool focused = Focus.at(context, autofocus: autofocus);
     return new GestureDetector(
-      onTap: () { Focus.moveTo(key); },
-      child: new Text(focused ? yes : no)
+      onTap: () { FocusScope.of(context).requestFocus(focusNode); },
+      child: new AnimatedBuilder(
+        animation: focusNode,
+        builder: (BuildContext context, Widget child) {
+          // print('focusNode.hasFocus = ${focusNode.hasFocus} ${focusNode.hashCode} ${focusNode.hasFocus ? config.yes : config.no}');
+          return new Text(focusNode.hasFocus ? config.yes : config.no);
+        },
+      ),
     );
   }
 }
 
 void main() {
   testWidgets('Can have multiple focused children and they update accordingly', (WidgetTester tester) async {
-    final GlobalKey keyFocus = new GlobalKey();
-    final GlobalKey keyA = new GlobalKey();
-    final GlobalKey keyB = new GlobalKey();
     await tester.pumpWidget(
-      new Focus(
-        key: keyFocus,
-        child: new Column(
-          children: <Widget>[
-            new TestFocusable(
-              key: keyA,
-              no: 'a',
-              yes: 'A FOCUSED'
-            ),
-            new TestFocusable(
-              key: keyB,
-              no: 'b',
-              yes: 'B FOCUSED'
-            ),
-          ]
-        )
-      )
+      new Column(
+        children: <Widget>[
+          new TestFocusable(
+            no: 'a',
+            yes: 'A FOCUSED',
+          ),
+          new TestFocusable(
+            no: 'b',
+            yes: 'B FOCUSED',
+          ),
+        ],
+      ),
     );
+
+    // Autofocus is delayed one frame.
+    await tester.pump();
+
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
     await tester.tap(find.text('A FOCUSED'));
+    await tester.idle();
     await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
     await tester.tap(find.text('A FOCUSED'));
+    await tester.idle();
     await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
     expect(find.text('b'), findsOneWidget);
     expect(find.text('B FOCUSED'), findsNothing);
     await tester.tap(find.text('b'));
+    await tester.idle();
     await tester.pump();
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
     expect(find.text('b'), findsNothing);
     expect(find.text('B FOCUSED'), findsOneWidget);
     await tester.tap(find.text('a'));
+    await tester.idle();
     await tester.pump();
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
@@ -82,30 +110,27 @@ void main() {
   });
 
   testWidgets('Can blur', (WidgetTester tester) async {
-    final GlobalKey keyFocus = new GlobalKey();
-    final GlobalKey keyA = new GlobalKey();
     await tester.pumpWidget(
-      new Focus(
-        key: keyFocus,
-        child: new TestFocusable(
-          key: keyA,
-          no: 'a',
-          yes: 'A FOCUSED',
-          autofocus: false
-        )
-      )
+      new TestFocusable(
+        no: 'a',
+        yes: 'A FOCUSED',
+        autofocus: false,
+      ),
     );
 
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
 
-    Focus.moveTo(keyA);
+    final TestFocusableState state = tester.state(find.byType(TestFocusable));
+    FocusScope.of(state.context).requestFocus(state.focusNode);
+    await tester.idle();
     await tester.pump();
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
-    Focus.clear(keyA.currentContext);
+    state.focusNode.unfocus();
+    await tester.idle();
     await tester.pump();
 
     expect(find.text('a'), findsOneWidget);
@@ -113,76 +138,77 @@ void main() {
   });
 
   testWidgets('Can move focus to scope', (WidgetTester tester) async {
-    final GlobalKey keyParentFocus = new GlobalKey();
-    final GlobalKey keyChildFocus = new GlobalKey();
-    final GlobalKey keyA = new GlobalKey();
+    final FocusScopeNode parentFocusScope = new FocusScopeNode();
+    final FocusScopeNode childFocusScope = new FocusScopeNode();
+
     await tester.pumpWidget(
-      new Focus(
-        key: keyParentFocus,
+      new FocusScope(
+        node: parentFocusScope,
+        autofocus: true,
         child: new Row(
           children: <Widget>[
             new TestFocusable(
-              key: keyA,
               no: 'a',
               yes: 'A FOCUSED',
-              autofocus: false
-            )
-          ]
-        )
-      )
+              autofocus: false,
+            ),
+          ],
+        ),
+      ),
     );
 
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
 
-    Focus.moveTo(keyA);
+    final TestFocusableState state = tester.state(find.byType(TestFocusable));
+    FocusScope.of(state.context).requestFocus(state.focusNode);
+    await tester.idle();
     await tester.pump();
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
-    Focus.moveScopeTo(keyChildFocus, context: keyA.currentContext);
+    parentFocusScope.setFirstFocus(childFocusScope);
+    await tester.idle();
 
     await tester.pumpWidget(
-      new Focus(
-        key: keyParentFocus,
+      new FocusScope(
+        node: parentFocusScope,
         child: new Row(
           children: <Widget>[
             new TestFocusable(
-              key: keyA,
               no: 'a',
               yes: 'A FOCUSED',
-              autofocus: false
+              autofocus: false,
             ),
-            new Focus(
-              key: keyChildFocus,
+            new FocusScope(
+              node: childFocusScope,
               child: new Container(
                 width: 50.0,
-                height: 50.0
-              )
-            )
-          ]
-        )
-      )
+                height: 50.0,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
 
     expect(find.text('a'), findsOneWidget);
     expect(find.text('A FOCUSED'), findsNothing);
 
     await tester.pumpWidget(
-      new Focus(
-        key: keyParentFocus,
+      new FocusScope(
+        node: parentFocusScope,
         child: new Row(
           children: <Widget>[
             new TestFocusable(
-              key: keyA,
               no: 'a',
               yes: 'A FOCUSED',
-              autofocus: false
-            )
-          ]
-        )
-      )
+              autofocus: false,
+            ),
+          ],
+        ),
+      ),
     );
 
     // Focus has received the removal notification but we haven't rebuilt yet.
@@ -193,5 +219,7 @@ void main() {
 
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
+
+    parentFocusScope.detach();
   });
 }

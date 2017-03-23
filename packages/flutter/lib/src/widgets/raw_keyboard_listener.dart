@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 
 /// A widget that calls a callback whenever the user presses or releases a key
@@ -29,18 +30,16 @@ class RawKeyboardListener extends StatefulWidget {
   /// on-screen keyboards and input method editors (IMEs).
   RawKeyboardListener({
     Key key,
-    this.focused: false,
-    this.onKey,
+    @required this.focusNode,
+    @required this.onKey,
     @required this.child,
   }) : super(key: key) {
+    assert(focusNode != null);
     assert(child != null);
   }
 
-  /// Whether this widget should actually listen for raw keyboard events.
-  ///
-  /// Typically set to the value returned by [Focus.at] for the [GlobalKey] of
-  /// the widget that builds the raw keyboard listener.
-  final bool focused;
+  /// Controls whether this widget has keyboard focus.
+  final FocusNode focusNode;
 
   /// Called whenever this widget receives a raw keyboard event.
   final ValueChanged<RawKeyEvent> onKey;
@@ -56,22 +55,26 @@ class _RawKeyboardListenerState extends State<RawKeyboardListener> {
   @override
   void initState() {
     super.initState();
-    _attachOrDetachKeyboard();
+    config.focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void didUpdateConfig(RawKeyboardListener oldConfig) {
-    _attachOrDetachKeyboard();
+    if (config.focusNode != oldConfig.focusNode) {
+      oldConfig.focusNode.removeListener(_handleFocusChanged);
+      config.focusNode.addListener(_handleFocusChanged);
+    }
   }
 
   @override
   void dispose() {
+    config.focusNode.removeListener(_handleFocusChanged);
     _detachKeyboardIfAttached();
     super.dispose();
   }
 
-  void _attachOrDetachKeyboard() {
-    if (config.focused)
+  void _handleFocusChanged() {
+    if (config.focusNode.hasFocus)
       _attachKeyboardIfDetached();
     else
       _detachKeyboardIfAttached();

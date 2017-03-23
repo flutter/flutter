@@ -137,7 +137,7 @@ void main() {
                         return new SampleForm(
                           callback: () => new Future<bool>.value(willPopValue),
                         );
-                      }
+                      },
                     ));
                   },
                 ),

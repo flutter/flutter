@@ -7,7 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
-import 'focus.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
@@ -449,8 +450,8 @@ class _ModalScopeState extends State<_ModalScope> {
 
   @override
   Widget build(BuildContext context) {
-    return new Focus(
-      key: config.route.focusKey,
+    return new FocusScope(
+      node: config.route.focusScopeNode,
       child: new Offstage(
         offstage: config.route.offstage,
         child: new IgnorePointer(
@@ -575,8 +576,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return child;
   }
 
-  @override
-  GlobalKey get focusKey => new GlobalObjectKey(this);
+  /// The node this route will use for its root [FocusScope] widget.
+  final FocusScopeNode focusScopeNode = new FocusScopeNode();
 
   @override
   void install(OverlayEntry insertionPoint) {
@@ -587,27 +588,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   @override
   Future<Null> didPush() {
-    if (!settings.isInitialRoute) {
-      final BuildContext overlayContext = navigator.overlay?.context;
-      assert(() {
-        if (overlayContext == null) {
-          throw new FlutterError(
-            'Unable to find the BuildContext for the Navigator\'s overlay.\n'
-            'Did you remember to pass the settings object to the route\'s '
-            'constructor in your onGenerateRoute callback?'
-          );
-        }
-        return true;
-      });
-      Focus.moveScopeTo(focusKey, context: overlayContext);
-    }
+    navigator.focusScopeNode.setFirstFocus(focusScopeNode);
     return super.didPush();
   }
 
   @override
-  void didPopNext(Route<dynamic> nextRoute) {
-    Focus.moveScopeTo(focusKey, context: navigator.overlay.context);
-    super.didPopNext(nextRoute);
+  void dispose() {
+    focusScopeNode.detach();
+    super.dispose();
   }
 
   // The API for subclasses to override - used by this class

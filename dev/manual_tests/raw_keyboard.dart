@@ -5,33 +5,36 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-GlobalKey _key = new GlobalKey();
-
 void main() {
   runApp(new MaterialApp(
-    title: "Hardware Key Demo",
+    title: 'Hardware Key Demo',
     home: new Scaffold(
       appBar: new AppBar(
-        title: new Text("Hardware Key Demo")
+        title: new Text('Hardware Key Demo'),
       ),
       body: new Center(
-        child: new RawKeyboardDemo(
-          key: _key
-        )
-      )
-    )
+        child: new RawKeyboardDemo(),
+      ),
+    ),
   ));
 }
 
 class RawKeyboardDemo extends StatefulWidget {
-  RawKeyboardDemo({ GlobalKey key }) : super(key: key);
+  RawKeyboardDemo({ Key key }) : super(key: key);
 
   @override
   _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();
 }
 
 class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
+  final FocusNode _focusNode = new FocusNode();
   RawKeyEvent _event;
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   void _handleKeyEvent(RawKeyEvent event) {
     setState(() {
@@ -42,44 +45,46 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   @override
   Widget build(BuildContext context)  {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final bool focused = Focus.at(context);
-    Widget child;
-    if (!focused) {
-      child = new GestureDetector(
-        onTap: () {
-          Focus.moveTo(config.key);
-        },
-        child: new Text('Tap to focus', style: textTheme.display1),
-      );
-    } else if (_event == null) {
-      child = new Text('Press a key', style: textTheme.display1);
-    } else {
-      int codePoint;
-      int keyCode;
-      int hidUsage;
-      final RawKeyEventData data = _event.data;
-      if (data is RawKeyEventDataAndroid) {
-        codePoint = data.codePoint;
-        keyCode = data.keyCode;
-      } else if (data is RawKeyEventDataFuchsia) {
-        codePoint = data.codePoint;
-        hidUsage = data.hidUsage;
-      }
-      child = new Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          new Text('${_event.runtimeType}', style: textTheme.body2),
-          new Text('codePoint: $codePoint', style: textTheme.display4),
-          new Text('keyCode: $keyCode', style: textTheme.display4),
-          new Text('hidUsage: $hidUsage', style: textTheme.display4),
-        ],
-      );
-    }
     return new RawKeyboardListener(
-      focused: focused,
+      focusNode: _focusNode,
       onKey: _handleKeyEvent,
-      child: child,
+      child: new AnimatedBuilder(
+        animation: _focusNode,
+        builder: (BuildContext context, Widget child) {
+          if (!_focusNode.hasFocus) {
+            return new GestureDetector(
+              onTap: () {
+                FocusScope.of(context).requestFocus(_focusNode);
+              },
+              child: new Text('Tap to focus', style: textTheme.display1),
+            );
+          }
+
+          if (_event == null)
+            return new Text('Press a key', style: textTheme.display1);
+
+          int codePoint;
+          int keyCode;
+          int hidUsage;
+          final RawKeyEventData data = _event.data;
+          if (data is RawKeyEventDataAndroid) {
+            codePoint = data.codePoint;
+            keyCode = data.keyCode;
+          } else if (data is RawKeyEventDataFuchsia) {
+            codePoint = data.codePoint;
+            hidUsage = data.hidUsage;
+          }
+          return new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Text('${_event.runtimeType}', style: textTheme.body2),
+              new Text('codePoint: $codePoint', style: textTheme.display4),
+              new Text('keyCode: $keyCode', style: textTheme.display4),
+              new Text('hidUsage: $hidUsage', style: textTheme.display4),
+            ],
+          );
+        },
+      ),
     );
   }
 }
-

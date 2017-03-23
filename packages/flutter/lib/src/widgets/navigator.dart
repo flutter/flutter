@@ -9,7 +9,8 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
-import 'focus.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
@@ -27,12 +28,6 @@ abstract class Route<T> {
 
   /// The overlay entries for this route.
   List<OverlayEntry> get overlayEntries => const <OverlayEntry>[];
-
-  /// The key this route will use for its root [Focus] widget, if any.
-  ///
-  /// If this route is the first route shown by the navigator, the navigator
-  /// will initialize its [Focus] to this key.
-  GlobalKey get focusKey => null;
 
   /// A future that completes when this route is popped off the navigator.
   ///
@@ -700,6 +695,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final List<Route<dynamic>> _history = <Route<dynamic>>[];
   final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
 
+  /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
+  final FocusScopeNode focusScopeNode = new FocusScopeNode();
+
   @override
   void initState() {
     super.initState();
@@ -736,6 +734,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.dispose();
     _poppedRoutes.clear();
     _history.clear();
+    focusScopeNode.detach();
     super.dispose();
     assert(() { _debugLocked = false; return true; });
   }
@@ -1112,10 +1111,6 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       WidgetsBinding.instance.cancelPointer(pointer);
   }
 
-  // TODO(abarth): We should be able to take a focusScopeKey as configuration
-  // information in case our parent wants to control whether we are focused.
-  final GlobalKey _focusScopeKey = new GlobalKey();
-
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
@@ -1127,9 +1122,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       onPointerCancel: _handlePointerUpOrCancel,
       child: new AbsorbPointer(
         absorbing: false,
-        child: new Focus(
-          key: _focusScopeKey,
-          initiallyFocusedScope: initialRoute.focusKey,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
           child: new Overlay(
             key: _overlayKey,
             initialEntries: initialRoute.overlayEntries,
