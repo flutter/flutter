@@ -20,7 +20,7 @@ typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
 /// * [PlatformMethodChannel], which provides higher-level platform
 /// communication such as method invocations and event streams.
 ///
-/// See: <https://flutter.io/platform-services/>
+/// See: <https://flutter.io/platform-channels/>
 class PlatformMessages {
   PlatformMessages._();
 
