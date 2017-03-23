@@ -12,6 +12,7 @@ source_set("fml") {
     "message_loop.h",
     "message_loop_impl.cc",
     "message_loop_impl.h",
+    "paths.h",
     "task_runner.cc",
     "task_runner.h",
     "thread.cc",
@@ -43,6 +44,7 @@ source_set("fml") {
       "platform/darwin/message_loop_darwin.mm",
       "platform/darwin/nsstring_utils.h",
       "platform/darwin/nsstring_utils.mm",
+      "platform/darwin/paths_darwin.mm",
       "platform/darwin/resource_mapping_darwin.h",
       "platform/darwin/resource_mapping_darwin.mm",
       "platform/darwin/scoped_block.h",
@@ -62,6 +64,7 @@ source_set("fml") {
       "platform/android/jni_weak_ref.h",
       "platform/android/message_loop_android.cc",
       "platform/android/message_loop_android.h",
+      "platform/android/paths_android.cc",
       "platform/android/scoped_java_ref.cc",
       "platform/android/scoped_java_ref.h",
     ]
@@ -83,6 +86,7 @@ source_set("fml") {
     sources += [
       "platform/linux/message_loop_linux.cc",
       "platform/linux/message_loop_linux.h",
+      "platform/linux/paths_linux.cc",
       "platform/linux/timerfd.cc",
       "platform/linux/timerfd.h",
     ]

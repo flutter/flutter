@@ -8,6 +8,7 @@
 #include <mutex>
 
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/paths.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/logging.h"
 #include "third_party/icu/source/common/unicode/udata.h"
@@ -44,7 +45,16 @@ class ICUContext {
 
     // Check if the mapping can by directly accessed via a file path. In this
     // case, the data file needs to be next to the executable.
-    auto file = std::make_unique<FileMapping>(kIcuDataFileName);
+    auto directory = fml::paths::GetExecutableDirectoryPath();
+
+    if (!directory.first) {
+      return false;
+    }
+
+    // FIXME(chinmaygarde): There is no Path::Join in FTL. So a non-portable
+    // version is used here. Patch FTL and update.
+    auto file = std::make_unique<FileMapping>(directory.second + "/" +
+                                              kIcuDataFileName);
     if (file->GetSize() != 0) {
       mapping_ = std::move(file);
       return true;

@@ -1913,12 +1913,14 @@ FILE: ../../../flutter/fml/message_loop.h
 FILE: ../../../flutter/fml/message_loop_impl.cc
 FILE: ../../../flutter/fml/message_loop_impl.h
 FILE: ../../../flutter/fml/message_loop_unittests.cc
+FILE: ../../../flutter/fml/paths.h
 FILE: ../../../flutter/fml/platform/android/jni_util.cc
 FILE: ../../../flutter/fml/platform/android/jni_util.h
 FILE: ../../../flutter/fml/platform/android/jni_weak_ref.cc
 FILE: ../../../flutter/fml/platform/android/jni_weak_ref.h
 FILE: ../../../flutter/fml/platform/android/message_loop_android.cc
 FILE: ../../../flutter/fml/platform/android/message_loop_android.h
+FILE: ../../../flutter/fml/platform/android/paths_android.cc
 FILE: ../../../flutter/fml/platform/android/scoped_java_ref.cc
 FILE: ../../../flutter/fml/platform/android/scoped_java_ref.h
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.cc
@@ -1927,6 +1929,7 @@ FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.h
 FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.mm
+FILE: ../../../flutter/fml/platform/darwin/paths_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/scoped_block.mm
@@ -1934,6 +1937,7 @@ FILE: ../../../flutter/fml/platform/darwin/scoped_nsobject.h
 FILE: ../../../flutter/fml/platform/darwin/scoped_nsobject.mm
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.cc
 FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
+FILE: ../../../flutter/fml/platform/linux/paths_linux.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.h
 FILE: ../../../flutter/fml/task_runner.cc
