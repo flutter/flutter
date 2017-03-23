@@ -32,6 +32,10 @@ def main():
                       help='Path to application snapshot')
   parser.add_argument('--output-file', type=str, required=True,
                       help='Where to output application bundle')
+  parser.add_argument('--build-root', type=str, required=True,
+                      help='The build\'s root directory')
+  parser.add_argument('--depfile', type=str, required=True,
+                      help='Where to output application bundle dependencies')
   parser.add_argument('--manifest', type=str, help='The application manifest')
 
   args = parser.parse_args()
@@ -49,6 +53,8 @@ def main():
     '--snapshot=%s' % args.snapshot,
     '--output-file=%s' % args.output_file,
     '--header=#!fuchsia file:///system/apps/flutter_runner',
+    '--build-root=%s' % args.build_root,
+    '--depfile=%s' % args.depfile,
   ]
   if 'manifest' in args:
     call_args.append('--manifest=%s' % args.manifest)
