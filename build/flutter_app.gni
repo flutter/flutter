@@ -72,23 +72,25 @@ template("flutter_app") {
   dart_binary = "$dart_binary_dir/dart"
 
   flutter_root = "//lib/flutter"
-  flutter_tools_label = "$flutter_root/packages/flutter_tools"
+  flutter_tools_path = "$flutter_root/packages/flutter_tools"
+  flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
   flutter_tools_gen_dir = get_label_info(flutter_tools_label, "target_gen_dir")
   flutter_tools_name = get_label_info(flutter_tools_label, "name")
   flutter_tools_packages = "$flutter_tools_gen_dir/$flutter_tools_name.packages"
-  flutter_tools_main = "$flutter_tools_label/bin/fuchsia_builder.dart"
+  flutter_tools_main = "$flutter_tools_path/bin/fuchsia_builder.dart"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$root_out_dir/$bundle_name"
+  bundle_depfile = "$target_gen_dir/$bundle_name.d"
   snapshot_path = "$target_gen_dir/${target_name}_snapshot.bin"
-  depfile_path = "${snapshot_path}.d"
+  snapshot_depfile = "${snapshot_path}.d"
 
   main_dart = invoker.main_dart
 
   flutter_snapshot_name = target_name + "_snapshot"
 
   action(flutter_snapshot_name) {
-    depfile = depfile_path
+    depfile = snapshot_depfile
 
     inputs = [
       main_dart,
@@ -118,7 +120,7 @@ template("flutter_app") {
       "--snapshot",
       rebase_path(snapshot_path, root_build_dir),
       "--depfile",
-      rebase_path(depfile_path),
+      rebase_path(snapshot_depfile),
       "--root-build-dir",
       rebase_path(root_build_dir),
     ]
@@ -135,7 +137,10 @@ template("flutter_app") {
   }
 
   action(target_name) {
+    depfile = bundle_depfile
+
     inputs = [
+      flutter_tools_main,
       snapshot_path,
     ]
     if (defined(invoker.manifest)) {
@@ -169,6 +174,10 @@ template("flutter_app") {
       rebase_path(bundle_path),
       "--snapshot",
       rebase_path(snapshot_path),
+      "--build-root",
+      rebase_path(root_build_dir),
+      "--depfile",
+      rebase_path(bundle_depfile),
     ]
     if (defined(invoker.manifest)) {
       args += [
