@@ -42,6 +42,9 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsCompressedStream() {
     return contentsAsStream().transform(GZIP.encoder);
   }
+
+  /// Return the list of files this content depends on.
+  List<String> get fileDependencies => <String>[];
 }
 
 // File content to be copied to the device.
@@ -81,6 +84,9 @@ class DevFSFileContent extends DevFSContent {
       }
     }
   }
+
+  @override
+  List<String> get fileDependencies => <String>[_getFile().path];
 
   @override
   bool get isModified {
