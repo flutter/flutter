@@ -272,8 +272,8 @@ Future<String> _buildAotSnapshot(
     printStatus('Building App.framework...');
 
     // These names are known to from the engine.
-    final String kVmSnapshotData = 'kDartVmSnapshotData';
-    final String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
+    const String kVmSnapshotData = 'kDartVmSnapshotData';
+    const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
 
     final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
     final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
