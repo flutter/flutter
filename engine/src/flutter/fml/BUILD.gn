@@ -13,6 +13,7 @@ source_set("fml") {
     "message_loop_impl.cc",
     "message_loop_impl.h",
     "paths.h",
+    "task_observer.h",
     "task_runner.cc",
     "task_runner.h",
     "thread.cc",

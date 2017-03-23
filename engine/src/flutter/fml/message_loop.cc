@@ -63,8 +63,12 @@ ftl::RefPtr<MessageLoopImpl> MessageLoop::GetLoopImpl() const {
   return loop_;
 }
 
-void MessageLoop::SetTaskObserver(TaskObserver observer) {
-  loop_->SetTaskObserver(std::move(observer));
+void MessageLoop::AddTaskObserver(TaskObserver* observer) {
+  loop_->AddTaskObserver(observer);
+}
+
+void MessageLoop::RemoveTaskObserver(TaskObserver* observer) {
+  loop_->RemoveTaskObserver(observer);
 }
 
 }  // namespace fml

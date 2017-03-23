@@ -8,6 +8,7 @@
 #include <atomic>
 #include <deque>
 #include <queue>
+#include <set>
 #include <utility>
 
 #include "flutter/fml/message_loop.h"
@@ -34,7 +35,9 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
 
   void PostTask(ftl::Closure task, ftl::TimePoint target_time);
 
-  void SetTaskObserver(MessageLoop::TaskObserver observer);
+  void AddTaskObserver(TaskObserver* observer);
+
+  void RemoveTaskObserver(TaskObserver* observer);
 
   void DoRun();
 
@@ -67,7 +70,7 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
   using DelayedTaskQueue = std::
       priority_queue<DelayedTask, std::deque<DelayedTask>, DelayedTaskCompare>;
 
-  MessageLoop::TaskObserver task_observer_;
+  std::set<TaskObserver*> task_observers_;
   ftl::Mutex delayed_tasks_mutex_;
   DelayedTaskQueue delayed_tasks_ FTL_GUARDED_BY(delayed_tasks_mutex_);
   size_t order_ FTL_GUARDED_BY(delayed_tasks_mutex_);

@@ -4,6 +4,9 @@
 
 #include "flutter/fml/message_loop_impl.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "lib/ftl/build_config.h"
 
 #if OS_MACOSX
@@ -46,11 +49,20 @@ void MessageLoopImpl::RunExpiredTasksNow() {
   WakeUp(RunExpiredTasksAndGetNextWake());
 }
 
-void MessageLoopImpl::SetTaskObserver(MessageLoop::TaskObserver observer) {
+void MessageLoopImpl::AddTaskObserver(TaskObserver* observer) {
+  FTL_DCHECK(observer != nullptr);
   FTL_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
-      << "Message loop task observer must be set on the same thread as the "
+      << "Message loop task observer must be added on the same thread as the "
          "loop.";
-  task_observer_ = observer;
+  task_observers_.insert(observer);
+}
+
+void MessageLoopImpl::RemoveTaskObserver(TaskObserver* observer) {
+  FTL_DCHECK(observer != nullptr);
+  FTL_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
+      << "Message loop task observer must be removed from the same thread as "
+         "the loop.";
+  task_observers_.erase(observer);
 }
 
 void MessageLoopImpl::DoRun() {
@@ -121,8 +133,8 @@ ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
 
   for (const auto& invocation : invocations) {
     invocation();
-    if (task_observer_) {
-      task_observer_();
+    for (const auto& observer : task_observers_) {
+      observer->DidProcessTask();
     }
   }
 
