@@ -23,6 +23,4 @@ executable("linux") {
     "//third_party:fontconfig",
     "//third_party/skia",
   ]
-
-  ldflags = [ "-lGL" ]
 }
