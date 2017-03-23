@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Creates a device lab task that runs benchmarks in
@@ -23,6 +24,9 @@ TaskFunction createMicrobenchmarkTask() {
       print('Running $benchmarkPath');
       final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
       final Process flutterProcess = await inDirectory(appDir, () async {
+        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          await prepareProvisioningCertificates(appDir.path);
+        }
         return await _startFlutter(
           options: <String>[
             '--profile',  // --release doesn't work on iOS due to code signing issues
