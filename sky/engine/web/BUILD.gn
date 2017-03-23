@@ -8,7 +8,6 @@ source_set("web") {
   ]
 
   deps = [
-    "//flutter/fml",
     "//flutter/sky/engine/core",
     "//flutter/sky/engine/platform",
   ]
@@ -21,5 +20,7 @@ source_set("web") {
 
   if (is_fuchsia) {
     deps += [ "//lib/mtl/tasks" ]
+  } else {
+    deps += [ "//flutter/fml" ]
   }
 }
