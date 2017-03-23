@@ -289,7 +289,6 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       _validationMessages.add('Java version: $javaVersion');
       _javaPath = javaPath;
     } else {
-      _isValid = false;
       _validationMessages.add('Unable to find bundled Java version.');
     }
   }
