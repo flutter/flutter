@@ -66,7 +66,6 @@ Future<Null> build({
   String packagesPath,
   String kernelPath,
   bool precompiledSnapshot: false,
-  bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
@@ -105,7 +104,6 @@ Future<Null> build({
     privateKeyPath: privateKeyPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
-    includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   ).then((_) => null);
 }
@@ -119,7 +117,6 @@ Future<List<String>> assemble({
   String workingDirPath,
   String packagesPath,
   bool includeDefaultFonts: true,
-  bool includeRobotoFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
@@ -134,7 +131,6 @@ Future<List<String>> assemble({
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
     includeDefaultFonts: includeDefaultFonts,
-    includeRobotoFonts: includeRobotoFonts,
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)

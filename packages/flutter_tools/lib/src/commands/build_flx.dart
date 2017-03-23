@@ -22,7 +22,6 @@ class BuildFlxCommand extends BuildSubCommand {
     argParser.addOption('depfile', defaultsTo: defaultDepfilePath);
     argParser.addOption('kernel');
     argParser.addOption('working-dir', defaultsTo: getAssetBuildDirectory());
-    argParser.addFlag('include-roboto-fonts', defaultsTo: true);
     argParser.addFlag('report-licensed-packages', help: 'Whether to report the names of all the packages that are included in the application\'s LICENSE file.', defaultsTo: false);
     usesPubOption();
   }
@@ -52,7 +51,6 @@ class BuildFlxCommand extends BuildSubCommand {
       workingDirPath: argResults['working-dir'],
       kernelPath: argResults['kernel'],
       precompiledSnapshot: argResults['precompiled'],
-      includeRobotoFonts: argResults['include-roboto-fonts'],
       reportLicensedPackages: argResults['report-licensed-packages']
     );
   }
