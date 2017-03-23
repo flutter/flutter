@@ -10,11 +10,10 @@ executable("linux") {
   ]
 
   deps = [
-    "//base",
     "//dart/runtime/bin:embedded_dart_io",
     "//flutter/common",
+    "//flutter/fml",
     "//flutter/shell/common",
-    "//flutter/shell/gpu",
     "//flutter/shell/testing",
     "//lib/ftl",
     "//lib/tonic",
