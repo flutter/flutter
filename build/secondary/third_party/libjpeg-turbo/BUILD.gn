@@ -9,10 +9,16 @@ config("libjpeg_config") {
 source_set("libjpeg") {
   public_configs = [ ":libjpeg_config" ]
 
-  cflags_c = [
-    "-Wno-unused-variable",
-    "-Wno-unused-function",
-  ]
+  defines = []
+
+  if (!is_win) {
+    cflags_c = [
+      "-Wno-unused-variable",
+      "-Wno-unused-function",
+    ]
+  } else {
+    defines += [ "TURBO_FOR_WINDOWS" ]
+  }
 
   sources = [
     "//third_party/libjpeg-turbo/jcapimin.c",
