@@ -40,4 +40,103 @@ void main() {
 
     semantics.dispose();
   });
+
+
+  Widget _buttonWidget({
+    Key buttonKey,
+    Key materialKey,
+    Color color, Color
+    highlightColor,
+    Color splashColor,
+    double minWidth = 150.0,
+    double height = 60.0,
+    bool useTheme = false
+  }) {
+
+    final Key definedMaterialKey = materialKey ?? new UniqueKey();
+    final Key definedButtonKey = buttonKey ?? new UniqueKey();
+
+    Widget buttonWidget = new Material(
+      key: definedMaterialKey,
+      child: new Center(
+        child: new MaterialButton(
+          key: definedButtonKey,
+          color: color,
+          highlightColor: !useTheme ? highlightColor : null,
+          splashColor: !useTheme ? splashColor : null,
+          minWidth: minWidth,
+          height: height,
+          onPressed: () { },
+        ),
+      ),
+    );
+    if (useTheme) {
+      final ThemeData themeData = new ThemeData(
+        accentColor: color,
+        highlightColor: highlightColor,
+        splashColor: splashColor,
+      );
+      buttonWidget = new Theme(
+        data: themeData,
+        child: buttonWidget,
+      );
+    }
+    return buttonWidget;
+  }
+
+  testWidgets('Does button highlight + splash colors work if set directly', (WidgetTester tester) async {
+    final Color buttonColor = new Color(0xFFFFFF00);
+    final Color highlightColor = new Color(0xDD0000FF);
+    final Color splashColor = new Color(0xAA0000FF);
+
+    final Key materialKey = new UniqueKey();
+    final Key buttonKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      _buttonWidget(
+        materialKey: materialKey,
+        buttonKey: buttonKey,
+        color: buttonColor,
+        highlightColor: highlightColor,
+        splashColor: splashColor,
+      ),
+    );
+
+    final Point center = tester.getCenter(find.byKey(buttonKey));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(new Duration(milliseconds: 200));
+
+    // TODO(ianh) - the object returned by renderObject does not contain splash or highlights (??)
+
+    await gesture.up();
+  });
+
+  testWidgets('Does button highlight color work if set via theme', (WidgetTester tester) async {
+    final Color buttonColor = new Color(0xFFFFFF00);
+    final Color highlightColor = new Color(0xDD0000FF);
+    final Color splashColor = new Color(0xAA0000FF);
+
+    final Key materialKey = new UniqueKey();
+    final Key buttonKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      _buttonWidget(
+        useTheme: true, // use a theme wrapper
+        materialKey: materialKey,
+        buttonKey: buttonKey,
+        color: buttonColor,
+        highlightColor: highlightColor,
+        splashColor: splashColor,
+      ),
+    );
+
+    final Point center = tester.getCenter(find.byKey(buttonKey));
+    final TestGesture gesture = await tester.startGesture(center);
+    await tester.pump(new Duration(milliseconds: 200));
+
+    // TODO(ianh) - the object returned by renderObject does not contain splash or highlights (??)
+
+    await gesture.up();
+  });
+
 }
