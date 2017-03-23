@@ -72,12 +72,31 @@ void removeMessageLoopObservers() {
 
 #else  // defined(OS_FUCHSIA)
 
+class RunMicrotasksTaskObserver : public fml::TaskObserver {
+ public:
+  RunMicrotasksTaskObserver() = default;
+
+  ~RunMicrotasksTaskObserver() override = default;
+
+  void DidProcessTask() override { didProcessTask(); }
+};
+
+// FIXME(chinmaygarde): The awkward use of the global here is be cause we cannot
+// introduce the fml::TaskObserver subclass in common code because Fuchsia does
+// not support the same. Unify the API and remove hack.
+static RunMicrotasksTaskObserver* g_run_microtasks_task_observer = nullptr;
+
 void addMessageLoopObservers() {
-  fml::MessageLoop::GetCurrent().SetTaskObserver(&didProcessTask);
+  g_run_microtasks_task_observer = new RunMicrotasksTaskObserver();
+  fml::MessageLoop::GetCurrent().AddTaskObserver(
+      g_run_microtasks_task_observer);
 }
 
 void removeMessageLoopObservers() {
-  fml::MessageLoop::GetCurrent().SetTaskObserver(nullptr);
+  fml::MessageLoop::GetCurrent().RemoveTaskObserver(
+      g_run_microtasks_task_observer);
+  delete g_run_microtasks_task_observer;
+  g_run_microtasks_task_observer = nullptr;
 }
 
 #endif  // defined(OS_FUCHSIA)

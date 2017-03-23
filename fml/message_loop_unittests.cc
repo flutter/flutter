@@ -238,6 +238,22 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
   ASSERT_EQ(checked, count);
 }
 
+class CustomTaskObserver : public fml::TaskObserver {
+ public:
+  CustomTaskObserver(std::function<void()> lambda) : lambda_(lambda){};
+
+  ~CustomTaskObserver() override = default;
+
+  void DidProcessTask() {
+    if (lambda_) {
+      lambda_();
+    }
+  };
+
+ private:
+  std::function<void()> lambda_;
+};
+
 TEST(MessageLoop, TaskObserverFire) {
   bool started = false;
   bool terminated = false;
@@ -247,7 +263,7 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    loop.SetTaskObserver([&obs_count]() { obs_count++; });
+    CustomTaskObserver obs([&obs_count]() { obs_count++; });
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTask([&terminated, count, i, &task_count]() {
         ASSERT_EQ(task_count, i);
@@ -258,6 +274,7 @@ TEST(MessageLoop, TaskObserverFire) {
         }
       });
     }
+    loop.AddTaskObserver(&obs);
     loop.Run();
     ASSERT_EQ(task_count, count);
     ASSERT_EQ(obs_count, count);

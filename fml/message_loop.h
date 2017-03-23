@@ -5,6 +5,7 @@
 #ifndef FLUTTER_FML_MESSAGE_LOOP_H_
 #define FLUTTER_FML_MESSAGE_LOOP_H_
 
+#include "flutter/fml/task_observer.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/tasks/task_runner.h"
 
@@ -23,9 +24,9 @@ class MessageLoop {
 
   void Terminate();
 
-  using TaskObserver = std::function<void(void)>;
+  void AddTaskObserver(TaskObserver* observer);
 
-  void SetTaskObserver(TaskObserver observer);
+  void RemoveTaskObserver(TaskObserver* observer);
 
   ftl::RefPtr<ftl::TaskRunner> GetTaskRunner() const;
 
