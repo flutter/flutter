@@ -22,7 +22,6 @@ vars = {
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'github_git': 'https://github.com',
-  'base_revision': 'b2412302ed4e45bfb47d7b5c0c3418077009e1ce',
   'skia_revision': '3f81f3703a68755c88f5cc4a87728b98f34c4cd4',
 
   # Note: When updating the Dart revision, ensure that all entries that are
@@ -46,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c5633e135092754836ab7abee5405b8e5b075b2f',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '5f917c696be75dea830c4ef1479f694ee7adcd35',
 
    # Fuchsia compatibility
    #
@@ -73,9 +72,6 @@ deps = {
    #
    # As part of integrating with Fuchsia, we should eventually remove all these
    # Chromium-style dependencies.
-
-  'src/base':
-   Var('github_git') + '/flutter/base.git' + '@' +  Var('base_revision'),
 
   'src/buildtools':
    Var('fuchsia_git') + '/buildtools' + '@' +  Var('buildtools_revision'),
