@@ -9,7 +9,7 @@ import android.widget.TextView;
 import io.flutter.plugin.common.FlutterMessageChannel;
 import io.flutter.plugin.common.FlutterMessageChannel.MessageHandler;
 import io.flutter.plugin.common.FlutterMessageChannel.Reply;
-import io.flutter.plugin.common.StringMessageCodec;
+import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
         flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
 
         messageChannel =
-            new FlutterMessageChannel<String>(flutterView, CHANNEL, StringMessageCodec.INSTANCE);
+            new FlutterMessageChannel<String>(flutterView, CHANNEL, StringCodec.INSTANCE);
         messageChannel.
             setMessageHandler(new MessageHandler<String>() {
                 @Override

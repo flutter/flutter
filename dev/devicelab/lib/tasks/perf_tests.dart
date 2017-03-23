@@ -75,13 +75,21 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   );
 }
 
+TaskFunction createFlutterViewStartupTest() {
+  return new StartupTest(
+      '${flutterDirectory.path}/examples/flutter_view',
+      reportMetrics: false,
+  );
+}
+
 /// Measure application startup performance.
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  StartupTest(this.testDirectory);
+  StartupTest(this.testDirectory, { this.reportMetrics: true });
 
   final String testDirectory;
+  final bool reportMetrics;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
@@ -101,6 +109,9 @@ class StartupTest {
         deviceId,
       ]).timeout(_startupTimeout);
       final Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+
+      if (!reportMetrics) return new TaskResult.success(data);
+
       return new TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
       ]);
