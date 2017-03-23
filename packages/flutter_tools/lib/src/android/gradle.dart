@@ -76,6 +76,7 @@ String get gradleAppOutDirV2 {
       <String>[gradle, 'app:properties'],
       workingDirectory: 'android',
       hideStdout: true,
+      environment: _gradleEnv,
     );
     String buildDir = properties
         .split('\n')
@@ -179,7 +180,8 @@ Future<Null> buildGradleProjectV1(String gradle) async {
   final int exitcode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
     workingDirectory: 'android',
-    allowReentrantFlutter: true
+    allowReentrantFlutter: true,
+    environment: _gradleEnv,
   );
   status.stop();
 
@@ -214,7 +216,8 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   final int exitcode = await runCommandAndStreamOutput(
       command,
       workingDirectory: 'android',
-      allowReentrantFlutter: true
+      allowReentrantFlutter: true,
+      environment: _gradleEnv,
   );
   status.stop();
 
@@ -232,4 +235,13 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   apkShaFile.writeAsStringSync(calculateSha(apkFile));
 
   printStatus('Built ${apkFile.path} (${getSizeAsMB(apkFile.lengthSync())}).');
+}
+
+Map<String, String> get _gradleEnv {
+  final Map<String, String> env = new Map<String, String>.from(platform.environment);
+  if (javaPath != null) {
+    // Use java bundled with Android Studio.
+    env['JAVA_HOME'] = javaPath;
+  }
+  return env;
 }

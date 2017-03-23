@@ -5,6 +5,7 @@
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
@@ -45,6 +46,8 @@ String get gradleExecutable {
   return androidStudio?.gradleExecutable ?? os.which('gradle')?.path;
 }
 
+String get javaPath => androidStudio?.javaPath;
+
 class AndroidStudio implements Comparable<AndroidStudio> {
   AndroidStudio(this.directory, {Version version, this.configured})
       : this.version = version ?? Version.unknown {
@@ -56,6 +59,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   final String configured;
 
   String _gradlePath;
+  String _javaPath;
   bool _isValid = false;
   List<String> _validationMessages = <String>[];
 
@@ -98,6 +102,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   String get gradleExecutable => fs.path
       .join(_gradlePath, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle');
+
+  String get javaPath => _javaPath;
 
   bool get isValid => _isValid;
 
@@ -271,6 +277,19 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     } else {
       _validationMessages.add(
           'Gradle version $latestGradleVersion at $_gradlePath is not executable.');
+    }
+
+    final String javaPath = platform.isMacOS ?
+        fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
+        fs.path.join(directory, 'jre');
+    final ProcessResult result = processManager.runSync(<String>[fs.path.join(javaPath, 'bin', 'java'), '-version']);
+    if (result.exitCode == 0) {
+      final List<String> versionLines = result.stderr.split('\n');
+      final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+      _validationMessages.add('Java version: $javaVersion');
+      _javaPath = javaPath;
+    } else {
+      _validationMessages.add('Unable to find bundled Java version.');
     }
   }
 
