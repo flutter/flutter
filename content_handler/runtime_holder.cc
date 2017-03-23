@@ -138,7 +138,7 @@ void RuntimeHolder::CreateView(
   ConnectToService(view_services.get(), GetProxy(&input_connection_));
   mozart::InputListenerPtr input_listener;
   input_listener_binding_.Bind(GetProxy(&input_listener));
-  input_connection_->SetListener(std::move(input_listener));
+  input_connection_->SetEventListener(std::move(input_listener));
 
 #if FLUTTER_ENABLE_VULKAN
   direct_input_ = std::make_unique<DirectInput>(
