@@ -1814,10 +1814,6 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_messa
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.mm
-FILE: ../../../flutter/shell/platform/linux/message_pump_glfw.cc
-FILE: ../../../flutter/shell/platform/linux/message_pump_glfw.h
-FILE: ../../../flutter/shell/platform/linux/platform_view_glfw.cc
-FILE: ../../../flutter/shell/platform/linux/platform_view_glfw.h
 FILE: ../../../flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.cpp
 FILE: ../../../flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h
 FILE: ../../../flutter/sky/engine/platform/text/TextBox.h

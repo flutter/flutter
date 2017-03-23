@@ -8,11 +8,9 @@
 #include "base/message_loop/message_loop.h"
 #include "dart/runtime/bin/embedded_dart_io.h"
 #include "flutter/common/threads.h"
+#include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
-#include "flutter/shell/gpu/gpu_surface_gl.h"
-#include "flutter/shell/platform/linux/message_pump_glfw.h"
-#include "flutter/shell/platform/linux/platform_view_glfw.h"
 #include "flutter/shell/testing/test_runner.h"
 #include "flutter/shell/testing/testing.h"
 #include "flutter/sky/engine/public/web/Sky.h"
@@ -113,57 +111,6 @@ void RunNonInteractive(ftl::CommandLine initial_command_line,
   exit(ConvertErrorTypeToExitCode(error));
 }
 
-static bool IsDartFile(const std::string& path) {
-  std::string dart_extension = ".dart";
-  return path.rfind(dart_extension) == (path.size() - dart_extension.size());
-}
-
-int RunInteractive(ftl::CommandLine initial_command_line) {
-  base::MessageLoop message_loop(shell::MessagePumpGLFW::Create());
-
-  shell::Shell::InitStandalone(std::move(initial_command_line));
-
-  const auto& command_line = shell::Shell::Shared().GetCommandLine();
-
-  std::string target = command_line.GetOptionValueWithDefault(
-      shell::FlagForSwitch(shell::Switch::FLX), "");
-
-  if (target.empty()) {
-    // Alternatively, use the first positional argument.
-    auto args = command_line.positional_args();
-    if (args.empty())
-      return 1;
-    target = args[0];
-  }
-
-  if (target.empty())
-    return 1;
-
-  std::unique_ptr<shell::PlatformViewGLFW> platform_view(
-      new shell::PlatformViewGLFW());
-
-  platform_view->NotifyCreated(
-      std::make_unique<shell::GPUSurfaceGL>(platform_view.get()));
-
-  blink::Threads::UI()->PostTask(
-      [ engine = platform_view->engine().GetWeakPtr(), target ] {
-        if (engine) {
-          if (IsDartFile(target)) {
-            engine->RunBundleAndSource(std::string(), target, std::string());
-
-          } else {
-            engine->RunBundle(target);
-          }
-        }
-      });
-
-  message_loop.Run();
-
-  platform_view->NotifyDestroyed();
-
-  return 0;
-}
-
 }  // namespace
 
 int main(int argc, char* argv[]) {
@@ -176,16 +123,11 @@ int main(int argc, char* argv[]) {
 
   if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
     shell::PrintUsage("sky_shell");
-    return 0;
+    return EXIT_SUCCESS;
   }
 
-  if (command_line.HasOption(
-          shell::FlagForSwitch(shell::Switch::NonInteractive))) {
-    bool run_forever =
-        command_line.HasOption(shell::FlagForSwitch(shell::Switch::RunForever));
-    RunNonInteractive(std::move(command_line), run_forever);
-    return 0;
-  }
-
-  return RunInteractive(std::move(command_line));
+  bool run_forever =
+      command_line.HasOption(shell::FlagForSwitch(shell::Switch::RunForever));
+  RunNonInteractive(std::move(command_line), run_forever);
+  return EXIT_SUCCESS;
 }
