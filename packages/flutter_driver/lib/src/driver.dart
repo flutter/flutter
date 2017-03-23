@@ -561,7 +561,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
           'Application has not started in 30 seconds. '
           'Giving up.'
         );
-        throw e;
+        rethrow;
       }
     }
   }
