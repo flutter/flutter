@@ -19,6 +19,7 @@ import '../build_info.dart';
 import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../plugins.dart';
 import '../services.dart';
 import 'xcodeproj.dart';
 
@@ -127,6 +128,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
+  writeFlutterPluginsList();
 
   _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 

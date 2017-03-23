@@ -34,13 +34,22 @@ class FlutterPlugin implements Plugin<Project> {
     private String localEngineSrcPath
     private Properties localProperties
 
+    private File flutterJar
+    private File debugFlutterJar
+    private File profileFlutterJar
+    private File releaseFlutterJar
+
+    private Properties readPropertiesIfExist(File propertiesFile) {
+        Properties result = new Properties()
+        if (propertiesFile.exists()) {
+            propertiesFile.withInputStream { stream -> result.load(stream) }
+        }
+        return result
+    }
+
     private String resolveProperty(Project project, String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = new Properties()
-            def localPropertiesFile = project.rootProject.file("local.properties")
-            if (localPropertiesFile.exists()) {
-                localProperties.load(localPropertiesFile.newDataInputStream())
-            }
+            localProperties = readPropertiesIfExist(project.rootProject.file("local.properties"))
         }
         String result
         if (project.hasProperty(name)) {
@@ -82,7 +91,7 @@ class FlutterPlugin implements Plugin<Project> {
             if (!engineOut.isDirectory()) {
                 throw new GradleException('localEngineOut must point to a local engine build')
             }
-            File flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
+            flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
             if (!flutterJar.isFile()) {
                 throw new GradleException('Local engine build does not contain flutter.jar')
             }
@@ -95,9 +104,9 @@ class FlutterPlugin implements Plugin<Project> {
             }
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            File debugFlutterJar = baseEnginePath.resolve("android-arm").resolve("flutter.jar").toFile()
-            File profileFlutterJar = baseEnginePath.resolve("android-arm-profile").resolve("flutter.jar").toFile()
-            File releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
+            debugFlutterJar = baseEnginePath.resolve("android-arm").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("android-arm-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
             if (!debugFlutterJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -130,6 +139,32 @@ class FlutterPlugin implements Plugin<Project> {
 
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
+
+        File pluginsFile = new File(project.rootProject.projectDir.parentFile, '.flutter-plugins')
+        Properties plugins = readPropertiesIfExist(pluginsFile)
+
+        plugins.each { name, _ ->
+            def pluginProject = project.rootProject.findProject(":$name")
+            if (pluginProject != null) {
+                project.dependencies {
+                    compile pluginProject
+                }
+                pluginProject.afterEvaluate this.&addFlutterJarDependency
+            } else {
+                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
+            }
+        }
+    }
+
+    private void addFlutterJarDependency(Project project) {
+        project.dependencies {
+            if (flutterJar != null) {
+                provided project.files(flutterJar)
+            } else {
+                debugProvided project.files(debugFlutterJar)
+                releaseProvided project.files(releaseFlutterJar)
+            }
+        }
     }
 
     private void addFlutterTask(Project project) {
