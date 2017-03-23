@@ -7,10 +7,6 @@ executable("linux") {
 
   sources = [
     "main_linux.cc",
-    "message_pump_glfw.cc",
-    "message_pump_glfw.h",
-    "platform_view_glfw.cc",
-    "platform_view_glfw.h",
   ]
 
   deps = [
@@ -26,7 +22,6 @@ executable("linux") {
     # Required by FontCacheLinux. Not Skia. Skia uses a custom font manager
     # that delegates to us.
     "//third_party:fontconfig",
-    "//third_party/glfw",
     "//third_party/skia",
   ]
 
