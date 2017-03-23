@@ -5,29 +5,29 @@
 // This example shows how to use the ui.Canvas interface to draw various shapes
 // with gradients and transforms.
 
-import 'dart:ui' as ui;
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
-  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  final ui.PictureRecorder recorder = new ui.PictureRecorder();
 
   // Next, we create a canvas from the recorder. The canvas is an interface
   // which can receive drawing commands. The canvas interface is modeled after
   // the SkCanvas interface from Skia. The paintBounds establishes a "cull rect"
   // for the canvas, which lets the implementation discard any commands that
   // are entirely outside this rectangle.
-  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  final ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
-  ui.Paint paint = new ui.Paint();
+  final ui.Paint paint = new ui.Paint();
   canvas.drawPaint(new ui.Paint()..color = const ui.Color(0xFFFFFFFF));
 
-  ui.Size size = paintBounds.size;
-  ui.Point mid = size.center(ui.Point.origin);
-  double radius = size.shortestSide / 2.0;
+  final ui.Size size = paintBounds.size;
+  final ui.Point mid = size.center(ui.Point.origin);
+  final double radius = size.shortestSide / 2.0;
 
   final double devicePixelRatio = ui.window.devicePixelRatio;
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
@@ -41,7 +41,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
   canvas.rotate(math.PI/4.0);
 
-  ui.Gradient yellowBlue = new ui.Gradient.linear(
+  final ui.Gradient yellowBlue = new ui.Gradient.linear(
     <ui.Point>[new ui.Point(-radius, -radius), const ui.Point(0.0, 0.0)],
     <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]
   );
@@ -49,7 +49,7 @@ ui.Picture paint(ui.Rect paintBounds) {
                   new ui.Paint()..shader = yellowBlue);
 
   // Scale x and y by 0.5.
-  Float64List scaleMatrix = new Float64List.fromList(<double>[
+  final Float64List scaleMatrix = new Float64List.fromList(<double>[
       0.5, 0.0, 0.0, 0.0,
       0.0, 0.5, 0.0, 0.0,
       0.0, 0.0, 1.0, 0.0,
@@ -72,12 +72,12 @@ ui.Picture paint(ui.Rect paintBounds) {
 
 ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
-  Float64List deviceTransform = new Float64List(16)
+  final Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
     ..[15] = 1.0;
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
+  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
@@ -85,9 +85,9 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
-  ui.Picture picture = paint(paintBounds);
-  ui.Scene scene = composite(picture, paintBounds);
+  final ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Picture picture = paint(paintBounds);
+  final ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);
 }
 

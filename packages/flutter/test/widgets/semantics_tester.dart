@@ -77,7 +77,7 @@ class TestSemantics {
     if (children.isEmpty)
       return true;
     bool result = true;
-    Iterator<TestSemantics> it = children.iterator;
+    final Iterator<TestSemantics> it = children.iterator;
     node.visitChildren((SemanticsNode node) {
       it.moveNext();
       if (!it.current._matches(node, matchState)) {
@@ -136,8 +136,8 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    TestSemantics testNode = matchState[TestSemantics];
-    SemanticsNode node = matchState[SemanticsNode];
+    final TestSemantics testNode = matchState[TestSemantics];
+    final SemanticsNode node = matchState[SemanticsNode];
     if (node == null)
       return mismatchDescription.add('could not find node with id ${testNode.id}');
     if (testNode.id != node.id)

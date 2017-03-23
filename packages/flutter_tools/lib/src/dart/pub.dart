@@ -7,7 +7,9 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart';
 import 'sdk.dart';
@@ -15,10 +17,10 @@ import 'sdk.dart';
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (!dotPackages.existsSync())
     return true;
-  DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
+  final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
-  File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
       flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
@@ -29,13 +31,14 @@ Future<Null> pubGet({
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
+  bool offline: false,
   bool checkLastModified: true
 }) async {
   if (directory == null)
     directory = fs.currentDirectory.path;
 
-  File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
-  File dotPackages = fs.file(fs.path.join(directory, '.packages'));
+  final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
+  final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
   if (!pubSpecYaml.existsSync()) {
     if (!skipIfAbsent)
@@ -44,14 +47,16 @@ Future<Null> pubGet({
   }
 
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
-    String command = upgrade ? 'upgrade' : 'get';
-    Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
+    final String command = upgrade ? 'upgrade' : 'get';
+    final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
-    int code = await runCommandAndStreamOutput(
-      <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'],
+    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'];
+    if (offline)
+      args.add('--offline');
+    final int code = await runCommandAndStreamOutput(args,
       workingDirectory: directory,
       mapFunction: _filterOverrideWarnings,
-      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot }
+      environment: <String, String>{ 'FLUTTER_ROOT': Cache.flutterRoot, _pubEnvironmentKey: _getPubEnvironmentValue() }
     );
     status.stop();
     if (code != 0)
@@ -66,6 +71,30 @@ Future<Null> pubGet({
 }
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+
+/// The console environment key used by the pub tool.
+const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
+
+/// Returns the environment value that should be used when running pub.
+///
+/// Includes any existing environment variable, if one exists.
+String _getPubEnvironmentValue() {
+  final List<String> values = <String>[];
+
+  final String existing = platform.environment[_pubEnvironmentKey];
+
+  if ((existing != null) && existing.isNotEmpty) {
+    values.add(existing);
+  }
+
+  if (isRunningOnBot) {
+    values.add('flutter_bot');
+  }
+
+  values.add('flutter_cli');
+
+  return values.join(':');
+}
 
 String _filterOverrideWarnings(String message) {
   // This function filters out these three messages:

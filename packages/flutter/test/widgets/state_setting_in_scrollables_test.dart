@@ -82,8 +82,7 @@ void main() {
     await tester.pumpWidget(new Foo());
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 0.0);
     await tester.tap(find.byType(GestureDetector).first);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle();
     expect(tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels, 200.0);
   });
 }

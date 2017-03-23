@@ -41,7 +41,7 @@ class ShrinePageState extends State<ShrinePage> {
   int _appBarElevation = 0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
+    final int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
     if (elevation != _appBarElevation) {
       setState(() {
         _appBarElevation = elevation;
@@ -59,9 +59,9 @@ class ShrinePageState extends State<ShrinePage> {
         );
       }
       return new ListView(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: kMaterialListPadding,
         children: config.shoppingCart.values.map((Order order) {
-          return new ListItem(
+          return new ListTile(
             title: new Text(order.product.name),
             leading: new Text('${order.quantity}'),
             subtitle: new Text(order.product.vendor.name)
@@ -108,9 +108,7 @@ class ShrinePageState extends State<ShrinePage> {
           new IconButton(
             icon: new Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
-            onPressed: () {
-              _showShoppingCart();
-            }
+            onPressed: _showShoppingCart
           ),
           new PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[

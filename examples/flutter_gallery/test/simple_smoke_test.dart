@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.allowAllFrames = true;
 
@@ -16,7 +16,7 @@ void main() {
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 
-    Finder finder = find.byWidgetPredicate((Widget widget) {
+    final Finder finder = find.byWidgetPredicate((Widget widget) {
       return widget is Tooltip && widget.message == 'Open navigation menu';
     });
     expect(finder, findsOneWidget);
@@ -47,17 +47,17 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // end animation
 
     // Scroll it up
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
-    await tester.scroll(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
+    await tester.drag(find.text('(650) 555-1234'), const Offset(0.0, -50.0));
     await tester.pump(const Duration(milliseconds: 200));
 
     await tester.pump(const Duration(hours: 100)); // for testing

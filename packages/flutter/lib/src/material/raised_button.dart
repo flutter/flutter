@@ -58,7 +58,7 @@ class RaisedButton extends StatelessWidget {
   ///
   /// ```dart
   ///  new RaisedButton(
-  ///    color: Colors.blue[500],
+  ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    child: new Text('DEMO'),
   ///  ),
@@ -112,7 +112,7 @@ class RaisedButton extends StatelessWidget {
     } else {
       if (disabledColor != null)
         return disabledColor;
-      Brightness brightness = Theme.of(context).brightness;
+      final Brightness brightness = Theme.of(context).brightness;
       assert(brightness != null);
       switch (brightness) {
         case Brightness.light:

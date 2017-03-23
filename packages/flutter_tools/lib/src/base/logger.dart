@@ -7,7 +7,6 @@ import 'dart:convert' show ASCII, LineSplitter;
 
 import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'io.dart';
 import 'platform.dart';
@@ -67,7 +66,7 @@ class StdoutLogger extends Logger {
 
     stderr.writeln(message);
     if (stackTrace != null)
-      stderr.writeln(new Chain.forTrace(stackTrace).terse.toString());
+      stderr.writeln(stackTrace.toString());
   }
 
   @override
@@ -116,18 +115,19 @@ class StdoutLogger extends Logger {
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
 /// the Windows console with alternative symbols.
 ///
-/// This exists because of https://github.com/dart-lang/sdk/issues/28571.
+/// By default, Windows uses either "Consolas" or "Lucida Console" as fonts to
+/// render text in the console. Both fonts only have a limited character set.
+/// Unicode characters, that are not available in either of the two default
+/// fonts, should be replaced by this class with printable symbols. Otherwise,
+/// they will show up as the unrepresentable character symbol '�'.
 class WindowsStdoutLogger extends StdoutLogger {
 
   @override
   void writeToStdOut(String message) {
     stdout.write(message
         .replaceAll('✗', 'X')
-        .replaceAll('✓', '+')
-        .replaceAll('•', '*')
+        .replaceAll('✓', '√')
     );
-    // TODO(goderbauer): find a way to replace all other non-printable characters
-    //     with the unrepresentable character symbol '�'
   }
 }
 
@@ -164,6 +164,13 @@ class BufferLogger extends Logger {
   Status startProgress(String message, { String progressId, bool expectSlowOperation: false }) {
     printStatus(message);
     return new Status();
+  }
+
+  /// Clears all buffers.
+  void clear() {
+    _error.clear();
+    _status.clear();
+    _trace.clear();
   }
 }
 
@@ -205,7 +212,7 @@ class VerboseLogger extends Logger {
     if (message.trim().isEmpty)
       return;
 
-    int millis = stopwatch.elapsedMilliseconds;
+    final int millis = stopwatch.elapsedMilliseconds;
     stopwatch.reset();
 
     String prefix;
@@ -219,8 +226,8 @@ class VerboseLogger extends Logger {
     }
     prefix = '[$prefix] ';
 
-    String indent = ''.padLeft(prefix.length);
-    String indentMessage = message.replaceAll('\n', '\n$indent');
+    final String indent = ''.padLeft(prefix.length);
+    final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
       stderr.writeln(prefix + terminal.bolden(indentMessage));
@@ -242,29 +249,30 @@ enum _LogType {
 
 class AnsiTerminal {
   AnsiTerminal() {
-    // TODO(devoncarew): This detection does not work for Windows (https://github.com/dart-lang/sdk/issues/28614).
-    String term = platform.environment['TERM'];
-    supportsColor = term != null && term != 'dumb';
+    if (platform.isWindows) {
+      supportsColor = platform.ansiSupported;
+    } else {
+      final String term = platform.environment['TERM'];
+      supportsColor = (term != null && term != 'dumb');
+    }
   }
-
-  static const String KEY_F1  = '\u001BOP';
-  static const String KEY_F5  = '\u001B[15~';
-  static const String KEY_F10 = '\u001B[21~';
 
   static const String _bold  = '\u001B[1m';
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
+  static const int _ENXIO = 6;
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
-  static const int _ERROR_INVALID_PARAMETER = 87;
+  static const int _INVALID_HANDLE = 6;
 
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
   static const List<int> _lineModeIgnorableErrors = const <int>[
+    _ENXIO,
     _ENOTTY,
     _ENETRESET,
-    _ERROR_INVALID_PARAMETER, // TODO(goderbauer): remove when https://github.com/dart-lang/sdk/issues/28599 is fixed
+    _INVALID_HANDLE,
   ];
 
   bool supportsColor;
@@ -274,8 +282,18 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
+    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE], 
+    //     we should check beforehand if stdin is connected to a terminal or not
+    //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
     try {
-      stdin.lineMode = !value;
+      // The order of setting lineMode and echoMode is important on Windows.
+      if (value) {
+        stdin.echoMode = false;
+        stdin.lineMode = false;
+      } else {
+        stdin.lineMode = true;
+        stdin.echoMode = true;
+      }
     } on StdinException catch (error) {
       if (!_lineModeIgnorableErrors.contains(error.osError?.errorCode))
         rethrow;
@@ -324,7 +342,7 @@ class _AnsiStatus extends Status {
     live = false;
 
     if (expectSlowOperation) {
-      double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+      final double seconds = stopwatch.elapsedMilliseconds / Duration.MILLISECONDS_PER_SECOND;
       print('\b\b\b\b\b${secondsFormat.format(seconds).padLeft(4)}s');
     } else {
       print('\b\b\b\b\b${millisecondsFormat.format(stopwatch.elapsedMilliseconds).padLeft(3)}ms');

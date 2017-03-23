@@ -29,7 +29,7 @@ class _CalculatorState extends State<Calculator> {
 
   /// Pop the top expression off of the stack and make it the current expression.
   void popCalcExpression() {
-    if (_expressionStack.length > 0) {
+    if (_expressionStack.isNotEmpty) {
       _expression = _expressionStack.removeLast();
     } else {
       _expression = new CalcExpression.Empty();
@@ -231,7 +231,7 @@ class KeyRow extends StatelessWidget {
     return new Expanded(
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: this.keys
+        children: keys
       )
     );
   }
@@ -248,10 +248,10 @@ class CalcKey extends StatelessWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Expanded(
       child: new InkResponse(
-        onTap: this.onTap,
+        onTap: onTap,
         child: new Center(
           child: new Text(
-            this.text,
+            text,
             style: new TextStyle(
               fontSize: (orientation == Orientation.portrait) ? 32.0 : 24.0
             )

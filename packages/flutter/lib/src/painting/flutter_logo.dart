@@ -2,17 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
+import 'box_fit.dart';
 import 'decoration.dart';
 import 'fractional_offset.dart';
-import 'image_fit.dart';
-import 'text_editing.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
@@ -31,48 +30,46 @@ enum FlutterLogoStyle {
   stacked,
 }
 
-const int _lightShade = 400;
-const int _darkShade = 900;
-const Map<int, Color> _kDefaultSwatch = const <int, Color>{
-  _lightShade: const Color(0xFF42A5F5),
-  _darkShade: const Color(0xFF0D47A1)
-};
-
 /// An immutable description of how to paint Flutter's logo.
 class FlutterLogoDecoration extends Decoration {
   /// Creates a decoration that knows how to paint Flutter's logo.
   ///
-  /// The [swatch] controls the color used for the logo. The [style] controls
-  /// whether and where to draw the "Flutter" label. If one is shown, the
-  /// [textColor] controls the color of the label.
+  /// The [lightColor] and [darkColor] are used to fill the logo. The [style]
+  /// controls whether and where to draw the "Flutter" label. If one is shown,
+  /// the [textColor] controls the color of the label.
   ///
-  /// The [swatch], [textColor], and [style] arguments must not be null.
+  /// The [lightColor], [darkColor], [textColor], and [style] arguments must not
+  /// be null.
   const FlutterLogoDecoration({
-    this.swatch: _kDefaultSwatch,
+    this.lightColor: const Color(0xFF42A5F5), // Colors.blue[400]
+    this.darkColor: const Color(0xFF0D47A1), // Colors.blue[900]
     this.textColor: const Color(0xFF616161),
-    FlutterLogoStyle style: FlutterLogoStyle.markOnly,
+    this.style: FlutterLogoStyle.markOnly,
     this.margin: EdgeInsets.zero,
-  }) : style = style,
-       _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
+  }) : _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 
-  FlutterLogoDecoration._(this.swatch, this.textColor, this.style, this._position, this._opacity, this.margin);
+  FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this._position, this._opacity, this.margin);
 
-  /// The colors to use to paint the logo. This map should contain at least two
-  /// values, one for 400 and one for 900.
+  /// The lighter of the two colors used to paint the logo.
   ///
-  /// If possible, the default should be used. It corresponds to the
-  /// [Colors.blue] swatch from the Material library.
+  /// If possible, the default should be used. It corresponds to the 400 and 900
+  /// values of [Colors.blue] from the Material library.
   ///
-  /// If for some reason that color scheme is impractical, the [Colors.amber],
-  /// [Colors.red], or [Colors.indigo] swatches can be used. These are Flutter's
-  /// secondary colors.
+  /// If for some reason that color scheme is impractical, the same entries from
+  /// [Colors.amber], [Colors.red], or [Colors.indigo] colors can be used. These
+  /// are Flutter's secondary colors.
   ///
   /// In extreme cases where none of those four color schemes will work,
-  /// [Colors.pink], [Colors.purple], or [Colors.cyan] swatches can be used.
+  /// [Colors.pink], [Colors.purple], or [Colors.cyan] can be used.
   /// These are Flutter's tertiary colors.
-  final Map<int, Color> swatch;
+  final Color lightColor;
+
+  /// The darker of the two colors used to paint the logo.
+  ///
+  /// See [lightColor] for more information about selecting the logo's colors.
+  final Color darkColor;
 
   /// The color used to paint the "Flutter" text on the logo, if [style] is
   /// [FlutterLogoStyle.horizontal] or [FlutterLogoStyle.stacked]. The
@@ -98,9 +95,8 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(swatch != null
-        && swatch[_lightShade] != null
-        && swatch[_darkShade] != null
+    assert(lightColor != null
+        && darkColor != null
         && textColor != null
         && style != null
         && _position != null
@@ -127,7 +123,8 @@ class FlutterLogoDecoration extends Decoration {
       return null;
     if (a == null) {
       return new FlutterLogoDecoration._(
-        b.swatch,
+        b.lightColor,
+        b.darkColor,
         b.textColor,
         b.style,
         b._position,
@@ -137,7 +134,8 @@ class FlutterLogoDecoration extends Decoration {
     }
     if (b == null) {
       return new FlutterLogoDecoration._(
-        a.swatch,
+        a.lightColor,
+        a.darkColor,
         a.textColor,
         a.style,
         a._position,
@@ -146,22 +144,14 @@ class FlutterLogoDecoration extends Decoration {
       );
     }
     return new FlutterLogoDecoration._(
-      _lerpSwatch(a.swatch, b.swatch, t),
+      Color.lerp(a.lightColor, b.lightColor, t),
+      Color.lerp(a.darkColor, b.darkColor, t),
       Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
       a._position + (b._position - a._position) * t,
       (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
       EdgeInsets.lerp(a.margin, b.margin, t),
     );
-  }
-
-  static Map<int, Color> _lerpSwatch(Map<int, Color> a, Map<int, Color> b, double t) {
-    assert(a != null);
-    assert(b != null);
-    return <int, Color>{
-      _lightShade: Color.lerp(a[_lightShade], b[_lightShade], t),
-      _darkShade: Color.lerp(a[_darkShade], b[_darkShade], t),
-    };
   }
 
   @override
@@ -200,8 +190,8 @@ class FlutterLogoDecoration extends Decoration {
     if (other is! FlutterLogoDecoration)
       return false;
     final FlutterLogoDecoration typedOther = other;
-    return swatch[_lightShade] == typedOther.swatch[_lightShade]
-        && swatch[_darkShade] == typedOther.swatch[_darkShade]
+    return lightColor == typedOther.lightColor
+        && darkColor == typedOther.darkColor
         && textColor == typedOther.textColor
         && _position == typedOther._position
         && _opacity == typedOther._opacity;
@@ -211,8 +201,8 @@ class FlutterLogoDecoration extends Decoration {
   int get hashCode {
     assert(debugAssertIsValid());
     return hashValues(
-      swatch[_lightShade],
-      swatch[_darkShade],
+      lightColor,
+      darkColor,
       textColor,
       _position,
       _opacity
@@ -222,9 +212,7 @@ class FlutterLogoDecoration extends Decoration {
   @override
   String toString([String prefix = '', String prefixIndent ]) {
     final String extra = _inTransition ? ', transition $_position:$_opacity' : '';
-    if (swatch == null)
-      return '$prefix$runtimeType(null, $style$extra)';
-    return '$prefix$runtimeType(${swatch[_lightShade]}/${swatch[_darkShade]} on $textColor, $style$extra)';
+    return '$prefix$runtimeType($lightColor/$darkColor on $textColor, $style$extra)';
   }
 }
 
@@ -280,11 +268,11 @@ class _FlutterLogoPainter extends BoxPainter {
 
     // Set up the styles.
     final Paint lightPaint = new Paint()
-      ..color = _config.swatch[_lightShade].withOpacity(0.8);
+      ..color = _config.lightColor.withOpacity(0.8);
     final Paint mediumPaint = new Paint()
-      ..color = _config.swatch[_lightShade];
+      ..color = _config.lightColor;
     final Paint darkPaint = new Paint()
-      ..color = _config.swatch[_darkShade];
+      ..color = _config.darkColor;
 
     final ui.Gradient triangleGradient = new ui.Gradient.linear(
       const <Point>[
@@ -384,7 +372,7 @@ class _FlutterLogoPainter extends BoxPainter {
   @override
   void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
     offset += _config.margin.topLeft;
-    Size canvasSize = _config.margin.deflateSize(configuration.size);
+    final Size canvasSize = _config.margin.deflateSize(configuration.size);
     Size logoSize;
     if (_config._position > 0.0) {
       // horizontal style
@@ -396,7 +384,7 @@ class _FlutterLogoPainter extends BoxPainter {
       // only the mark
       logoSize = const Size(202.0, 202.0);
     }
-    final FittedSizes fittedSize = applyImageFit(ImageFit.contain, logoSize, canvasSize);
+    final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
     final Rect rect = FractionalOffset.center.inscribe(fittedSize.destination, offset & canvasSize);
     final double centerSquareHeight = canvasSize.shortestSide;

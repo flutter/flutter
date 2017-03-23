@@ -9,14 +9,17 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../plugins.dart';
 import '../services.dart';
 import 'xcodeproj.dart';
 
@@ -42,7 +45,7 @@ class Xcode {
       } else {
         try {
           printTrace('xcrun clang');
-          ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
+          final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
 
           if (result.stdout != null && result.stdout.contains('license'))
             _eulaSigned = false;
@@ -59,7 +62,7 @@ class Xcode {
   }
 
   /// Returns [Xcode] active in the current app context.
-  static Xcode get instance => context[Xcode];
+  static Xcode get instance => context.putIfAbsent(Xcode, () => new Xcode());
 
   bool get isInstalledAndMeetsVersionCheck => isInstalled && xcodeVersionSatisfactory;
 
@@ -88,8 +91,8 @@ class Xcode {
     if (!xcodeVersionRegex.hasMatch(xcodeVersionText))
       return false;
 
-    String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
-    List<String> components = version.split('.');
+    final String version = xcodeVersionRegex.firstMatch(xcodeVersionText).group(1);
+    final List<String> components = version.split('.');
 
     _xcodeMajorVersion = int.parse(components[0]);
     _xcodeMinorVersion = components.length == 1 ? 0 : int.parse(components[1]);
@@ -115,7 +118,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   bool codesign: true
 }) async {
-  String flutterProjectPath = fs.currentDirectory.path;
+  final String flutterProjectPath = fs.currentDirectory.path;
   updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
 
   if (!_checkXcodeVersion())
@@ -123,10 +126,13 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
+  final Directory appDirectory = fs.directory(app.appDirectory);
+  await _addServicesToBundle(appDirectory);
+  writeFlutterPluginsList();
 
-  await _addServicesToBundle(fs.directory(app.appDirectory));
+  _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
-  List<String> commands = <String>[
+  final List<String> commands = <String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
@@ -136,7 +142,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     'ONLY_ACTIVE_ARCH=YES',
   ];
 
-  List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
+  final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
     if (fs.path.extension(entity.path) == '.xcworkspace') {
       commands.addAll(<String>[
@@ -164,7 +170,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
-  RunResult result = await runAsync(
+  final RunResult result = await runAsync(
     commands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
@@ -192,8 +198,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   } else {
     // Look for 'clean build/Release-iphoneos/Runner.app'.
-    RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
-    Match match = regexp.firstMatch(result.stdout);
+    final RegExp regexp = new RegExp(r' clean (\S*\.app)$', multiLine: true);
+    final Match match = regexp.firstMatch(result.stdout);
     String outputDir;
     if (match != null)
       outputDir = fs.path.join(app.appDirectory, match.group(1));
@@ -202,9 +208,9 @@ Future<XcodeBuildResult> buildXcodeProject({
 }
 
 Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
-  File plistFile = fs.file('ios/Runner/Info.plist');
+  final File plistFile = fs.file('ios/Runner/Info.plist');
   if (plistFile.existsSync()) {
-    String plistContent = plistFile.readAsStringSync();
+    final String plistContent = plistFile.readAsStringSync();
     if (plistContent.contains('com.yourcompany')) {
       printError('');
       printError('It appears that your application still contains the default signing identifier.');
@@ -223,7 +229,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
       printError('');
     }
     printError("Try launching Xcode and selecting 'Product > Build' to fix the problem:");
-    printError("  open ios/Runner.xcodeproj");
+    printError("  open ios/Runner.xcworkspace");
     return;
   }
   if (result.xcodeBuildExecution != null) {
@@ -232,7 +238,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
     assert(result.xcodeBuildExecution.appDirectory != null);
     if (result.xcodeBuildExecution.buildForPhysicalDevice &&
         result.xcodeBuildExecution.buildCommands.contains('build')) {
-      RunResult checkBuildSettings = await runAsync(
+      final RunResult checkBuildSettings = await runAsync(
         result.xcodeBuildExecution.buildCommands..add('-showBuildSettings'),
         workingDirectory: result.xcodeBuildExecution.appDirectory,
         allowReentrantFlutter: true
@@ -247,7 +253,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
 Building an iOS app requires a selected Development Team with a Provisioning Profile
 Please ensure that a Development Team is selected by:
   1- Opening the Flutter project's Xcode target with
-       open ios/Runner.xcodeproj
+       open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
   3- In the 'General' tab, make sure a 'Development Team' is selected\n
@@ -302,21 +308,40 @@ bool _checkXcodeVersion() {
   if (!platform.isMacOS)
     return false;
   try {
-    String version = runCheckedSync(<String>['xcodebuild', '-version']);
-    Match match = _xcodeVersionRegExp.firstMatch(version);
+    final String version = runCheckedSync(<String>['xcodebuild', '-version']);
+    final Match match = _xcodeVersionRegExp.firstMatch(version);
     if (int.parse(match[1]) < 7) {
       printError('Found "${match[0]}". $_xcodeRequirement');
       return false;
     }
   } catch (e) {
-    printError('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   return true;
 }
 
+void _runPodInstall(Directory bundle, String engineDirectory)  {
+  if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
+    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
+      return;
+    }
+    try {
+      runCheckedSync(
+          <String>['pod', 'install'],
+          workingDirectory: bundle.path,
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      );
+    } catch (e) {
+      throwToolExit('Error running pod install: $e');
+    }
+  }
+}
+
 Future<Null> _addServicesToBundle(Directory bundle) async {
-  List<Map<String, String>> services = <Map<String, String>>[];
+  final List<Map<String, String>> services = <Map<String, String>>[];
   printTrace("Trying to resolve native pub services.");
 
   // Step 1: Parse the service configuration yaml files present in the service
@@ -325,12 +350,12 @@ Future<Null> _addServicesToBundle(Directory bundle) async {
   printTrace("Found ${services.length} service definition(s).");
 
   // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
-  Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, "Frameworks"));
+  final Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, "Frameworks"));
   await _copyServiceFrameworks(services, frameworksDirectory);
 
   // Step 3: Copy the service definitions manifest at the correct spot for
   //         xcodebuild to pick up.
-  File manifestFile = fs.file(fs.path.join(bundle.path, "ServiceDefinitions.json"));
+  final File manifestFile = fs.file(fs.path.join(bundle.path, "ServiceDefinitions.json"));
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
@@ -338,8 +363,8 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
   printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {
-    String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
-    File dylib = fs.file(dylibPath);
+    final String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
+    final File dylib = fs.file(dylibPath);
     printTrace("Copying ${dylib.path} into bundle.");
     if (!dylib.existsSync()) {
       printError("The service dylib '${dylib.path}' does not exist.");
@@ -352,12 +377,12 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
 
 void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File manifest) {
   printTrace("Creating service definitions manifest at '${manifest.path}'");
-  List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
+  final List<Map<String, String>> jsonServices = services.map((Map<String, String> service) => <String, String>{
     'name': service['name'],
     // Since we have already moved it to the Frameworks directory. Strip away
     // the directory and basenames.
     'framework': fs.path.basenameWithoutExtension(service['ios-framework'])
   }).toList();
-  Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
+  final Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
 }

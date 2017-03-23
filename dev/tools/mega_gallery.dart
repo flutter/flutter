@@ -17,14 +17,14 @@ void main(List<String> args) {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  ArgParser argParser = new ArgParser();
+  final ArgParser argParser = new ArgParser();
   // ../mega_gallery? dev/benchmarks/mega_gallery?
   argParser.addOption('out', defaultsTo: _normalize('dev/benchmarks/mega_gallery'));
   argParser.addOption('copies');
   argParser.addFlag('delete', negatable: false);
   argParser.addFlag('help', abbr: 'h', negatable: false);
 
-  ArgResults results = argParser.parse(args);
+  final ArgResults results = argParser.parse(args);
 
   if (results['help']) {
     print('Generate n copies of flutter_gallery.\n');
@@ -33,8 +33,8 @@ void main(List<String> args) {
     exit(0);
   }
 
-  Directory source = new Directory(_normalize('examples/flutter_gallery'));
-  Directory out = new Directory(_normalize(results['out']));
+  final Directory source = new Directory(_normalize('examples/flutter_gallery'));
+  final Directory out = new Directory(_normalize(results['out']));
 
   if (results['delete']) {
     if (out.existsSync()) {
@@ -47,7 +47,7 @@ void main(List<String> args) {
 
   int copies;
   if (!results.wasParsed('copies')) {
-    SourceStats stats = getStatsFor(_dir(source, 'lib'));
+    final SourceStats stats = getStatsFor(_dir(source, 'lib'));
     copies = (kTargetLineCount / stats.lines).round();
   } else {
     copies = int.parse(results['copies']);
@@ -59,7 +59,7 @@ void main(List<String> args) {
   print('  packages/flutter            : ${getStatsFor(new Directory("packages/flutter"))}');
   print('  examples/flutter_gallery    : ${getStatsFor(new Directory("examples/flutter_gallery"))}');
 
-  Directory lib = _dir(out, 'lib');
+  final Directory lib = _dir(out, 'lib');
   if (lib.existsSync())
     lib.deleteSync(recursive: true);
 
@@ -86,15 +86,15 @@ void main(List<String> args) {
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.
 void _createEntry(File mainFile, int copies) {
-  StringBuffer imports = new StringBuffer();
-  StringBuffer importRefs = new StringBuffer();
+  final StringBuffer imports = new StringBuffer();
+  final StringBuffer importRefs = new StringBuffer();
 
   for (int i = 1; i < copies; i++) {
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
     importRefs.writeln("  main_$i.main;");
   }
 
-  String contents = '''
+  final String contents = '''
 // Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -116,8 +116,8 @@ void main() {
 }
 
 void _copyGallery(Directory galleryDir, int index) {
-  Directory lib = _dir(galleryDir, 'lib');
-  Directory dest = _dir(lib, 'gallery_$index');
+  final Directory lib = _dir(galleryDir, 'lib');
+  final Directory dest = _dir(lib, 'gallery_$index');
   dest.createSync();
 
   // Copy demo/, gallery/, and main.dart.
@@ -131,7 +131,7 @@ void _copy(Directory source, Directory target) {
     target.createSync();
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
-    String name = path.basename(entity.path);
+    final String name = path.basename(entity.path);
 
     if (entity is Directory) {
       if (name == 'build' || name.startsWith('.'))
@@ -140,7 +140,7 @@ void _copy(Directory source, Directory target) {
     } else if (entity is File) {
       if (name == '.packages' || name == 'pubspec.lock')
         continue;
-      File dest = new File(path.join(target.path, name));
+      final File dest = new File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
@@ -162,7 +162,7 @@ SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
   stats ??= new SourceStats();
 
   for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
-    String name = path.basename(entity.path);
+    final String name = path.basename(entity.path);
     if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;
       stats.lines += _lineCount(entity);
@@ -184,7 +184,7 @@ int _lineCount(File file) {
 }
 
 String _comma(int count) {
-  String str = count.toString();
+  final String str = count.toString();
   if (str.length > 3)
     return str.substring(0, str.length - 3) + ',' + str.substring(str.length - 3);
   return str;

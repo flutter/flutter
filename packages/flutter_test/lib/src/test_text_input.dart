@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -23,41 +21,41 @@ const String _kTextInputClientChannel = 'flutter/textinputclient';
 ///   popup keyboard and initializing its text.
 class TestTextInput {
   void register() {
-    PlatformMessages.setMockJSONMessageHandler('flutter/textinput', handleJSONMessage);
+    SystemChannels.textInput.setMockMethodCallHandler(handleTextInputCall);
   }
 
   int _client = 0;
   Map<String, dynamic> editingState;
 
-  Future<dynamic> handleJSONMessage(dynamic message) async {
-    final String method = message['method'];
-    final List<dynamic> args= message['args'];
-    switch (method) {
+  Future<dynamic> handleTextInputCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = args[0];
+        _client = methodCall.arguments[0];
         break;
       case 'TextInput.setEditingState':
-        editingState = args[0];
+        editingState = methodCall.arguments;
         break;
     }
   }
 
-  void updateEditingState(TextEditingState state) {
+  void updateEditingValue(TextEditingValue value) {
     expect(_client, isNonZero);
-    String message = JSON.encode(<String, dynamic>{
-      'method': 'TextInputClient.updateEditingState',
-      'args': <dynamic>[_client, state.toJSON()],
-    });
-    Uint8List encoded = UTF8.encoder.convert(message);
     PlatformMessages.handlePlatformMessage(
-        _kTextInputClientChannel, encoded.buffer.asByteData(), (_) {});
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        new MethodCall(
+          'TextInputClient.updateEditingState',
+          <dynamic>[_client, value.toJSON()],
+        ),
+      ),
+      (_) {},
+    );
   }
 
   void enterText(String text) {
-    updateEditingState(new TextEditingState(
+    updateEditingValue(new TextEditingValue(
       text: text,
-      composingBase: 0,
-      composingExtent: text.length,
+      composing: new TextRange(start: 0, end: text.length),
     ));
   }
 }

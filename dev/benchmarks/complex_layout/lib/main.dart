@@ -449,7 +449,7 @@ class ItemGalleryBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> tabNames = <String>[
+    final List<String> tabNames = <String>[
       'A', 'B', 'C', 'D'
     ];
 
@@ -633,7 +633,7 @@ class FancyDrawerHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       decoration: new BoxDecoration(
-        backgroundColor: Colors.purple[500]
+        backgroundColor: Colors.purple
       ),
       height: 200.0
     );

@@ -5,8 +5,8 @@
 // This example shows how to put some pixels on the screen using the raw
 // interface to the engine.
 
-import 'dart:ui' as ui;
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 ui.Color color;
 
@@ -14,17 +14,17 @@ ui.Picture paint(ui.Rect paintBounds) {
   // First we create a PictureRecorder to record the commands we're going to
   // feed in the canvas. The PictureRecorder will eventually produce a Picture,
   // which is an immutable record of those commands.
-  ui.PictureRecorder recorder = new ui.PictureRecorder();
+  final ui.PictureRecorder recorder = new ui.PictureRecorder();
 
   // Next, we create a canvas from the recorder. The canvas is an interface
   // which can receive drawing commands. The canvas interface is modeled after
   // the SkCanvas interface from Skia. The paintBounds establishes a "cull rect"
   // for the canvas, which lets the implementation discard any commands that
   // are entirely outside this rectangle.
-  ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
+  final ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
 
   // The commands draw a circle in the center of the screen.
-  ui.Size size = paintBounds.size;
+  final ui.Size size = paintBounds.size;
   canvas.drawCircle(
     size.center(ui.Point.origin),
     size.shortestSide * 0.45,
@@ -46,7 +46,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
 
   // This transform scales the x and y coordinates by the devicePixelRatio.
-  Float64List deviceTransform = new Float64List(16)
+  final Float64List deviceTransform = new Float64List(16)
     ..[0] = devicePixelRatio
     ..[5] = devicePixelRatio
     ..[10] = 1.0
@@ -56,7 +56,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
   // transform that scale its children by the device pixel ratio. This transform
   // lets us paint in "logical" pixels which are converted to device pixels by
   // this scaling operation.
-  ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
+  final ui.SceneBuilder sceneBuilder = new ui.SceneBuilder()
     ..pushTransform(deviceTransform)
     ..addPicture(ui.Offset.zero, picture)
     ..pop();
@@ -67,11 +67,11 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
   // First, record a picture with our painting commands.
-  ui.Picture picture = paint(paintBounds);
+  final ui.Picture picture = paint(paintBounds);
   // Second, include that picture in a scene graph.
-  ui.Scene scene = composite(picture, paintBounds);
+  final ui.Scene scene = composite(picture, paintBounds);
   // Third, instruct the engine to render that scene graph.
   ui.window.render(scene);
 }

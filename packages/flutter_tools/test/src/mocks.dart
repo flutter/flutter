@@ -31,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.android_arm;
+  TargetPlatform get targetPlatform => TargetPlatform.android_arm;
 
   @override
   bool isSupported() => true;
@@ -39,7 +39,7 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
 class MockIOSDevice extends Mock implements IOSDevice {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -47,7 +47,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -77,10 +77,10 @@ void applyMocksToCommand(FlutterCommand command) {
 
 /// Common functionality for tracking mock interaction
 class BasicMock {
-  final List<String> messages = new List<String>();
+  final List<String> messages = <String>[];
 
   void expectMessages(List<String> expectedMessages) {
-    List<String> actualMessages = new List<String>.from(messages);
+    final List<String> actualMessages = new List<String>.from(messages);
     messages.clear();
     expect(actualMessages, unorderedEquals(expectedMessages));
   }
@@ -88,13 +88,15 @@ class BasicMock {
   bool contains(String match) {
     print('Checking for `$match` in:');
     print(messages);
-    bool result = messages.contains(match);
+    final bool result = messages.contains(match);
     messages.clear();
     return result;
   }
 }
 
 class MockDevFSOperations extends BasicMock implements DevFSOperations {
+  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
+
   @override
   Future<Uri> create(String fsName) async {
     messages.add('create $fsName');
@@ -107,12 +109,14 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(String fsName, String devicePath, DevFSContent content) async {
-    messages.add('writeFile $fsName $devicePath');
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
+    messages.add('writeFile $fsName $deviceUri');
+    devicePathToContent[deviceUri] = content;
   }
 
   @override
-  Future<dynamic> deleteFile(String fsName, String devicePath) async {
-    messages.add('deleteFile $fsName $devicePath');
+  Future<dynamic> deleteFile(String fsName, Uri deviceUri) async {
+    messages.add('deleteFile $fsName $deviceUri');
+    devicePathToContent.remove(deviceUri);
   }
 }

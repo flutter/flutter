@@ -21,7 +21,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
       expect(message, contains('Expected: exactly one matching node in the widget tree\n'));
       expect(message, contains('Actual: ?:<zero widgets with text "foo">\n'));
       expect(message, contains('Which: means none were found but one was expected\n'));
@@ -44,7 +44,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo": Text("foo")>\n'));
@@ -62,7 +62,7 @@ void main() {
       }
 
       expect(failure, isNotNull);
-      String message = failure.message;
+      final String message = failure.message;
 
       expect(message, contains('Expected: no matching nodes in the widget tree\n'));
       expect(message, contains('Actual: ?:<exactly one widget with text "foo" (ignoring offstage widgets): Text("foo")>\n'));
@@ -73,15 +73,15 @@ void main() {
       await tester.pumpWidget(new Text('foo'));
       int count;
 
-      AnimationController test = new AnimationController(
+      final AnimationController test = new AnimationController(
         duration: const Duration(milliseconds: 5100),
         vsync: tester,
       );
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
-      expect(count, 0);
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(count, 1); // it always pumps at least one frame
 
       test.forward(from: 0.0);
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       // 1 frame at t=0, starting the animation
       // 1 frame at t=1
       // 1 frame at t=2
@@ -93,13 +93,13 @@ void main() {
 
       test.forward(from: 0.0);
       await tester.pump(); // starts the animation
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
 
       test.forward(from: 0.0);
       await tester.pump(); // starts the animation
       await tester.pump(); // has no effect
-      count = await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      count = await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(count, 6);
     });
   });
@@ -108,7 +108,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(new Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byElementPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -125,7 +125,7 @@ void main() {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
       await tester.pumpWidget(new Text('foo'));
 
-      String customDescription = 'custom description';
+      final String customDescription = 'custom description';
       TestFailure failure;
       try {
         expect(find.byWidgetPredicate((_) => false, description: customDescription), findsOneWidget);
@@ -180,9 +180,25 @@ void main() {
 
       expect(failure, isNotNull);
       expect(
-          failure.message,
-          contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
-        );
+        failure.message,
+        contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
+      );
     });
+  });
+
+  testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(seconds: 1),
+      vsync: const TestVSync()
+    );
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    controller.stop();
+    expect(tester.hasRunningAnimations, isFalse);
+    controller.forward();
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
+    expect(tester.hasRunningAnimations, isFalse);
   });
 }

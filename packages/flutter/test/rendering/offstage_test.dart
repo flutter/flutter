@@ -13,7 +13,7 @@ void main() {
     RenderBox child;
     bool painted = false;
     // incoming constraints are tight 800x600
-    RenderBox root = new RenderPositionedBox(
+    final RenderBox root = new RenderPositionedBox(
       child: new RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(width: 800.0),
         child: new RenderOffstage(

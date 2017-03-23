@@ -18,8 +18,8 @@ class SamplePageState extends State<SamplePage> {
   Future<bool> _callback() async => willPopValue;
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _route?.removeScopedWillPopCallback(_callback);
     _route = ModalRoute.of(context);
     _route?.addScopedWillPopCallback(_callback);
@@ -241,8 +241,8 @@ void main() {
     expect(find.text('Sample Form'), findsOneWidget);
 
     // Do it again. Note that each time the Alert is shown and dismissed
-    // the FormState's dependenciesChanged() method runs. We're making sure
-    // that the dependenciesChanged() method doesn't add an extra willPop
+    // the FormState's didChangeDependencies() method runs. We're making sure
+    // that the didChangeDependencies() method doesn't add an extra willPop
     // callback.
     await tester.tap(find.byTooltip('Back'));
     await tester.pump(); // Start the pop "back" operation.
@@ -269,7 +269,7 @@ void main() {
     StateSetter contentsSetState; // call this to rebuild the route's SampleForm contents
     bool contentsEmpty = false; // when true, don't include the SampleForm in the route
 
-    TestPageRoute<Null> route = new TestPageRoute<Null>(
+    final TestPageRoute<Null> route = new TestPageRoute<Null>(
       builder: (BuildContext context) {
         return new StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {

@@ -290,7 +290,7 @@ class TextStyle {
 
   @override
   String toString([String prefix = '']) {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     result.add('${prefix}inherit: $inherit');
     if (color != null)
       result.add('${prefix}color: $color');

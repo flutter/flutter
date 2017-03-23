@@ -48,18 +48,18 @@ class DaemonCommand extends FlutterCommand {
   Future<Null> runCommand() {
     printStatus('Starting device daemon...');
 
-    AppContext appContext = new AppContext();
-    NotifyingLogger notifyingLogger = new NotifyingLogger();
+    final AppContext appContext = new AppContext();
+    final NotifyingLogger notifyingLogger = new NotifyingLogger();
     appContext.setVariable(Logger, notifyingLogger);
 
     Cache.releaseLockEarly();
 
     return appContext.runInZone(() async {
-      Daemon daemon = new Daemon(
+      final Daemon daemon = new Daemon(
           stdinCommandStream, stdoutCommandResponse,
           daemonCommand: this, notifyingLogger: notifyingLogger);
 
-      int code = await daemon.onExit;
+      final int code = await daemon.onExit;
       if (code != 0)
         throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
     }, onError: _handleError);
@@ -88,7 +88,7 @@ class Daemon {
 
     // Start listening.
     commandStream.listen(
-      (Map<String, dynamic> request) => _handleRequest(request),
+      _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
             _onExitCompleter.complete(0);
@@ -118,7 +118,7 @@ class Daemon {
     // {id, method, params}
 
     // [id] is an opaque type to us.
-    dynamic id = request['id'];
+    final dynamic id = request['id'];
 
     if (id == null) {
       stderr.writeln('no id for request: $request');
@@ -126,12 +126,12 @@ class Daemon {
     }
 
     try {
-      String method = request['method'];
+      final String method = request['method'];
       if (!method.contains('.'))
         throw 'method not understood: $method';
 
-      String prefix = method.substring(0, method.indexOf('.'));
-      String name = method.substring(method.indexOf('.') + 1);
+      final String prefix = method.substring(0, method.indexOf('.'));
+      final String name = method.substring(method.indexOf('.') + 1);
       if (_domainMap[prefix] == null)
         throw 'no domain for method: $method';
 
@@ -183,7 +183,7 @@ abstract class Domain {
   }
 
   void sendEvent(String name, [dynamic args]) {
-    Map<String, dynamic> map = <String, dynamic>{ 'event': name };
+    final Map<String, dynamic> map = <String, dynamic>{ 'event': name };
     if (args != null)
       map['params'] = _toJsonable(args);
     _send(map);
@@ -194,7 +194,7 @@ abstract class Domain {
   String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
-    dynamic val = args[name];
+    final dynamic val = args[name];
     if (val != null && val is! String)
       throw "$name is not a String";
     return val;
@@ -203,7 +203,7 @@ abstract class Domain {
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
-    dynamic val = args[name];
+    final dynamic val = args[name];
     if (val != null && val is! bool)
       throw "$name is not a bool";
     return val;
@@ -212,7 +212,7 @@ abstract class Domain {
   int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
       throw "$name is required";
-    dynamic val = args[name];
+    final dynamic val = args[name];
     if (val != null && val is! int)
       throw "$name is not an int";
     return val;
@@ -264,7 +264,7 @@ class DaemonDomain extends Domain {
   }
 
   Future<Null> shutdown(Map<String, dynamic> args) {
-    Timer.run(() => daemon.shutdown());
+    Timer.run(daemon.shutdown);
     return new Future<Null>.value();
   }
 
@@ -293,24 +293,24 @@ class AppDomain extends Domain {
   List<AppInstance> _apps = <AppInstance>[];
 
   Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
-    String deviceId = _getStringArg(args, 'deviceId', required: true);
-    String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
-    bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
-    String route = _getStringArg(args, 'route');
-    String mode = _getStringArg(args, 'mode');
-    String target = _getStringArg(args, 'target');
-    bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
+    final bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
+    final String route = _getStringArg(args, 'route');
+    final String mode = _getStringArg(args, 'mode');
+    final String target = _getStringArg(args, 'target');
+    final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
 
-    Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
+    final Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
     if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+    final BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
 
-    AppInstance app = await startApp(
+    final AppInstance app = await startApp(
         device, projectDirectory, target, route,
         buildMode, startPaused, enableHotReload);
 
@@ -348,7 +348,7 @@ class AppDomain extends Domain {
       throw '${toTitleCase(getModeName(buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
-    Directory cwd = fs.currentDirectory;
+    final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
     ResidentRunner runner;
@@ -374,7 +374,7 @@ class AppDomain extends Domain {
       );
     }
 
-    AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
+    final AppInstance app = new AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -387,7 +387,7 @@ class AppDomain extends Domain {
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
       connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) {
-        Map<String, dynamic> params = <String, dynamic>{
+        final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
         };
@@ -396,7 +396,7 @@ class AppDomain extends Domain {
         _sendAppEvent(app, 'debugPort', params);
       });
     }
-    Completer<Null> appStartedCompleter = new Completer<Null>();
+    final Completer<Null> appStartedCompleter = new Completer<Null>();
     appStartedCompleter.future.then<Null>((Null value) {
       _sendAppEvent(app, 'started');
     });
@@ -424,11 +424,11 @@ class AppDomain extends Domain {
       enableHotReload && device.supportsHotMode;
 
   Future<OperationResult> restart(Map<String, dynamic> args) async {
-    String appId = _getStringArg(args, 'appId', required: true);
-    bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
-    bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
+    final String appId = _getStringArg(args, 'appId', required: true);
+    final bool fullRestart = _getBoolArg(args, 'fullRestart') ?? false;
+    final bool pauseAfterRestart = _getBoolArg(args, 'pause') ?? false;
 
-    AppInstance app = _getApp(appId);
+    final AppInstance app = _getApp(appId);
     if (app == null)
       throw "app '$appId' not found";
 
@@ -438,16 +438,16 @@ class AppDomain extends Domain {
   }
 
   Future<OperationResult> callServiceExtension(Map<String, dynamic> args) async {
-    String appId = _getStringArg(args, 'appId', required: true);
-    String methodName = _getStringArg(args, 'methodName');
-    Map<String, String> params = args['params'] ?? <String, String>{};
+    final String appId = _getStringArg(args, 'appId', required: true);
+    final String methodName = _getStringArg(args, 'methodName');
+    final Map<String, String> params = args['params'] ?? <String, String>{};
 
-    AppInstance app = _getApp(appId);
+    final AppInstance app = _getApp(appId);
     if (app == null)
       throw "app '$appId' not found";
 
-    Isolate isolate = app.runner.currentView.uiIsolate;
-    Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
+    final Isolate isolate = app.runner.currentView.uiIsolate;
+    final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
     if (result == null)
       return new OperationResult(1, 'method not available: $methodName');
 
@@ -458,9 +458,9 @@ class AppDomain extends Domain {
   }
 
   Future<bool> stop(Map<String, dynamic> args) async {
-    String appId = _getStringArg(args, 'appId', required: true);
+    final String appId = _getStringArg(args, 'appId', required: true);
 
-    AppInstance app = _getApp(appId);
+    final AppInstance app = _getApp(appId);
     if (app == null)
       throw "app '$appId' not found";
 
@@ -475,13 +475,13 @@ class AppDomain extends Domain {
   }
 
   Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
-    String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
 
-    Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
-    List<DiscoveredApp> apps = await device.discoverApps();
+    final List<DiscoveredApp> apps = await device.discoverApps();
     return apps.map((DiscoveredApp app) {
       return <String, dynamic>{
         'id': app.id,
@@ -496,7 +496,7 @@ class AppDomain extends Domain {
   }
 
   void _sendAppEvent(AppInstance app, String name, [Map<String, dynamic> args]) {
-    Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
+    final Map<String, dynamic> eventArgs = <String, dynamic> { 'appId': app.id };
     if (args != null)
       eventArgs.addAll(args);
     sendEvent('app.$name', eventArgs);
@@ -540,7 +540,7 @@ class DeviceDomain extends Domain {
   List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
   Future<List<Device>> getDevices([Map<String, dynamic> args]) {
-    List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
       return discoverer.devices;
     }).toList();
     return new Future<List<Device>>.value(devices);
@@ -562,11 +562,11 @@ class DeviceDomain extends Domain {
 
   /// Forward a host port to a device port.
   Future<Map<String, dynamic>> forward(Map<String, dynamic> args) async {
-    String deviceId = _getStringArg(args, 'deviceId', required: true);
-    int devicePort = _getIntArg(args, 'devicePort', required: true);
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final int devicePort = _getIntArg(args, 'devicePort', required: true);
     int hostPort = _getIntArg(args, 'hostPort');
 
-    Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -577,11 +577,11 @@ class DeviceDomain extends Domain {
 
   /// Removes a forwarded port.
   Future<Null> unforward(Map<String, dynamic> args) async {
-    String deviceId = _getStringArg(args, 'deviceId', required: true);
-    int devicePort = _getIntArg(args, 'devicePort', required: true);
-    int hostPort = _getIntArg(args, 'hostPort', required: true);
+    final String deviceId = _getStringArg(args, 'deviceId', required: true);
+    final int devicePort = _getIntArg(args, 'devicePort', required: true);
+    final int hostPort = _getIntArg(args, 'hostPort', required: true);
 
-    Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -596,7 +596,7 @@ class DeviceDomain extends Domain {
 
   /// Return the device matching the deviceId field in the args.
   Device _getDevice(String deviceId) {
-    List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
+    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
       return discoverer.devices;
     }).toList();
     return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
@@ -605,13 +605,13 @@ class DeviceDomain extends Domain {
   /// Return a known matching device, or scan for devices if no known match is found.
   Device _getOrLocateDevice(String deviceId) {
     // Look for an already known device.
-    Device device = _getDevice(deviceId);
+    final Device device = _getDevice(deviceId);
     if (device != null)
       return device;
 
     // Scan the different device providers for a match.
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      List<Device> devices = discoverer.pollingGetDevices();
+      final List<Device> devices = discoverer.pollingGetDevices();
       for (Device device in devices)
         if (device.id == deviceId)
           return device;
@@ -647,7 +647,7 @@ Map<String, dynamic> _deviceToMap(Device device) {
   return <String, dynamic>{
     'id': device.id,
     'name': device.name,
-    'platform': getNameForTargetPlatform(device.platform),
+    'platform': getNameForTargetPlatform(device.targetPlatform),
     'emulator': device.isLocalEmulator
   };
 }
@@ -727,7 +727,7 @@ class AppInstance {
     if (_logger == null)
       _logger = new _AppRunLogger(domain, this, logToStdout: logToStdout);
 
-    AppContext appContext = new AppContext();
+    final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
     return appContext.runInZone(method);
   }
@@ -787,7 +787,7 @@ class _AppRunLogger extends Logger {
     if (_status != null)
       return new Status();
 
-    int id = _nextProgressId++;
+    final int id = _nextProgressId++;
 
     _sendProgressEvent(<String, dynamic>{
       'id': id.toString(),

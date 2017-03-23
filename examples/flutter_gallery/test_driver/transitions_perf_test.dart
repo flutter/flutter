@@ -18,7 +18,8 @@ final List<String> demoTitles = <String>[
   'Pesto',
   'Shrine',
   'Contact profile',
-  // Components
+  'Animation',
+  // Material Components
   'Bottom navigation',
   'Buttons',
   'Cards',
@@ -46,6 +47,12 @@ final List<String> demoTitles = <String>[
   'Tabs',
   'Text fields',
   'Tooltips',
+  // Cupertino Components
+  'Activity Indicator',
+  'Buttons',
+  'Dialogs',
+  'Sliders',
+  'Switches',
   // Style
   'Colors',
   'Typography'
@@ -54,6 +61,7 @@ final List<String> demoTitles = <String>[
 // Subset of [demoTitles] that needs frameSync turned off.
 final List<String> unsynchedDemoTitles = <String>[
   'Progress indicators',
+  'Activity Indicator',
 ];
 
 final FileSystem _fs = const LocalFileSystem();
@@ -74,7 +82,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
       final String routeName = startEvent['args']['to'];
-      durations[routeName] ??= new List<int>();
+      durations[routeName] ??= <int>[];
       durations[routeName].add(event['dur']);
       startEvent = null;
     }
@@ -83,7 +91,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   // Verify that the durations data is valid.
   if (durations.keys.isEmpty)
     throw 'no "Start Transition" timeline events found';
-  Map<String, int> unexpectedValueCounts = <String, int>{};
+  final Map<String, int> unexpectedValueCounts = <String, int>{};
   durations.forEach((String routeName, List<int> values) {
     if (values.length != 2) {
       unexpectedValueCounts[routeName] = values.length;
@@ -91,21 +99,21 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   });
 
   if (unexpectedValueCounts.isNotEmpty) {
-    StringBuffer error = new StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    final StringBuffer error = new StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
     error.writeln('\nFull event sequence:');
-    Iterator<Map<String, dynamic>> eventIter = events.iterator;
+    final Iterator<Map<String, dynamic>> eventIter = events.iterator;
     String lastEventName = '';
     String lastRouteName = '';
     while(eventIter.moveNext()) {
-      String eventName = eventIter.current['name'];
+      final String eventName = eventIter.current['name'];
 
       if (!<String>['Start Transition', 'Frame'].contains(eventName))
         continue;
 
-      String routeName = eventName == 'Start Transition'
+      final String routeName = eventName == 'Start Transition'
         ? eventIter.current['args']['to']
         : '';
 
@@ -139,12 +147,12 @@ void main() {
     });
 
     test('all demos', () async {
-      Timeline timeline = await driver.traceAction(() async {
+      final Timeline timeline = await driver.traceAction(() async {
         // Scroll each demo menu item into view, launch the demo and
         // return to the demo menu 2x.
         for(String demoTitle in demoTitles) {
           print('Testing "$demoTitle" demo');
-          SerializableFinder menuItem = find.text(demoTitle);
+          final SerializableFinder menuItem = find.text(demoTitle);
           await driver.scrollIntoView(menuItem, alignment: 0.5);
           await new Future<Null>.delayed(kWaitBetweenActions);
 
@@ -172,9 +180,9 @@ void main() {
       // Save the duration (in microseconds) of the first timeline Frame event
       // that follows a 'Start Transition' event. The Gallery app adds a
       // 'Start Transition' event when a demo is launched (see GalleryItem).
-      TimelineSummary summary = new TimelineSummary.summarize(timeline);
+      final TimelineSummary summary = new TimelineSummary.summarize(timeline);
       await summary.writeSummaryToFile('transitions', pretty: true);
-      String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
+      final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(timeline.json['traceEvents'], histogramPath);
     }, timeout: const Timeout(const Duration(minutes: 5)));
   });

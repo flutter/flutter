@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'base/context.dart';
 import 'base/io.dart';
 import 'base/process.dart';
 import 'base/process_manager.dart';
@@ -16,12 +17,12 @@ final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
 ]);
 
 class FlutterVersion {
-  FlutterVersion(this.flutterRoot) {
+  FlutterVersion._() {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
 
-    int slash = _channel.indexOf('/');
+    final int slash = _channel.indexOf('/');
     if (slash != -1) {
-      String remote = _channel.substring(0, slash);
+      final String remote = _channel.substring(0, slash);
       _repositoryUrl = _runGit('git ls-remote --get-url $remote');
       _channel = _channel.substring(slash + 1);
     } else if (_channel.isEmpty) {
@@ -31,8 +32,6 @@ class FlutterVersion {
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
   }
-
-  final String flutterRoot;
 
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
@@ -55,14 +54,14 @@ class FlutterVersion {
   String get engineRevision => Cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
-  String _runGit(String command) => runSync(command.split(' '), workingDirectory: flutterRoot);
+  String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
 
   @override
   String toString() {
-    String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
-    String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
-    String engineText = 'Engine • revision $engineRevisionShort';
-    String toolsText = 'Tools • Dart $dartSdkVersion';
+    final String flutterText = 'Flutter • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
+    final String engineText = 'Engine • revision $engineRevisionShort';
+    final String toolsText = 'Tools • Dart $dartSdkVersion';
 
     // Flutter • channel master • https://github.com/flutter/flutter.git
     // Framework • revision 2259c59be8 • 19 minutes ago • 2016-08-15 22:51:40
@@ -77,9 +76,7 @@ class FlutterVersion {
     return _runSync(<String>['git', 'log', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S'], Cache.flutterRoot);
   }
 
-  static FlutterVersion getVersion([String flutterRoot]) {
-    return new FlutterVersion(flutterRoot != null ? flutterRoot : Cache.flutterRoot);
-  }
+  static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion._());
 
   /// Return a short string for the version (`alpha/a76bc8e22b`).
   static String getVersionString({ bool whitelistBranchName: false }) {
@@ -102,7 +99,7 @@ class FlutterVersion {
 }
 
 String _runSync(List<String> command, String cwd) {
-  ProcessResult results = processManager.runSync(command, workingDirectory: cwd);
+  final ProcessResult results = processManager.runSync(command, workingDirectory: cwd);
   return results.exitCode == 0 ? results.stdout.trim() : '';
 }
 

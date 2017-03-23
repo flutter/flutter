@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
@@ -101,7 +103,7 @@ class RenderPadding extends RenderShiftedBox {
   /// The amount to pad the child in each dimension.
   EdgeInsets get padding => _padding;
   EdgeInsets _padding;
-  set padding (EdgeInsets value) {
+  set padding(EdgeInsets value) {
     assert(value != null);
     assert(value.isNonNegative);
     if (_padding == value)
@@ -156,7 +158,7 @@ class RenderPadding extends RenderShiftedBox {
       ));
       return;
     }
-    BoxConstraints innerConstraints = constraints.deflate(padding);
+    final BoxConstraints innerConstraints = constraints.deflate(padding);
     child.layout(innerConstraints, parentUsesSize: true);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = new Offset(padding.left, padding.top);
@@ -210,11 +212,11 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// Sets the alignment to a new value, and triggers a layout update.
   ///
   /// The new alignment must not be null or have any null properties.
-  set alignment (FractionalOffset newAlignment) {
-    assert(newAlignment != null && newAlignment.dx != null && newAlignment.dy != null);
-    if (_alignment == newAlignment)
+  set alignment(FractionalOffset value) {
+    assert(value != null && value.dx != null && value.dy != null);
+    if (_alignment == value)
       return;
-    _alignment = newAlignment;
+    _alignment = value;
     markNeedsLayout();
   }
 
@@ -271,7 +273,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   /// Can be both greater and less than 1.0 but must be positive.
   double get widthFactor => _widthFactor;
   double _widthFactor;
-  set widthFactor (double value) {
+  set widthFactor(double value) {
     assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
@@ -284,7 +286,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
   /// Can be both greater and less than 1.0 but must be positive.
   double get heightFactor => _heightFactor;
   double _heightFactor;
-  set heightFactor (double value) {
+  set heightFactor(double value) {
     assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
@@ -323,7 +325,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         final BoxParentData childParentData = child.parentData;
         if (childParentData.offset.dy > 0.0) {
           // vertical alignment arrows
-          double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dy * 0.2, 10.0);
           path
             ..moveTo(offset.dx + size.width / 2.0, offset.dy)
             ..relativeLineTo(0.0, childParentData.offset.dy - headSize)
@@ -341,7 +343,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         }
         if (childParentData.offset.dx > 0.0) {
           // horizontal alignment arrows
-          double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
+          final double headSize = math.min(childParentData.offset.dx * 0.2, 10.0);
           path
             ..moveTo(offset.dx, offset.dy + size.height / 2.0)
             ..relativeLineTo(childParentData.offset.dx - headSize, 0.0)
@@ -414,7 +416,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// default) to use the constraint from the parent instead.
   double get minWidth => _minWidth;
   double _minWidth;
-  set minWidth (double value) {
+  set minWidth(double value) {
     if (_minWidth == value)
       return;
     _minWidth = value;
@@ -425,7 +427,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// default) to use the constraint from the parent instead.
   double get maxWidth => _maxWidth;
   double _maxWidth;
-  set maxWidth (double value) {
+  set maxWidth(double value) {
     if (_maxWidth == value)
       return;
     _maxWidth = value;
@@ -436,7 +438,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// default) to use the constraint from the parent instead.
   double get minHeight => _minHeight;
   double _minHeight;
-  set minHeight (double value) {
+  set minHeight(double value) {
     if (_minHeight == value)
       return;
     _minHeight = value;
@@ -447,7 +449,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// default) to use the constraint from the parent instead.
   double get maxHeight => _maxHeight;
   double _maxHeight;
-  set maxHeight (double value) {
+  set maxHeight(double value) {
     if (_maxHeight == value)
       return;
     _maxHeight = value;
@@ -507,7 +509,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// The size this render box should attempt to be.
   Size get requestedSize => _requestedSize;
   Size _requestedSize;
-  set requestedSize (Size value) {
+  set requestedSize(Size value) {
     assert(value != null);
     if (_requestedSize == value)
       return;
@@ -585,7 +587,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
-  set widthFactor (double value) {
+  set widthFactor(double value) {
     assert(value == null || value >= 0.0);
     if (_widthFactor == value)
       return;
@@ -600,7 +602,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
-  set heightFactor (double value) {
+  set heightFactor(double value) {
     assert(value == null || value >= 0.0);
     if (_heightFactor == value)
       return;
@@ -612,14 +614,14 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     double minWidth = constraints.minWidth;
     double maxWidth = constraints.maxWidth;
     if (_widthFactor != null) {
-      double width = maxWidth * _widthFactor;
+      final double width = maxWidth * _widthFactor;
       minWidth = width;
       maxWidth = width;
     }
     double minHeight = constraints.minHeight;
     double maxHeight = constraints.maxHeight;
     if (_heightFactor != null) {
-      double height = maxHeight * _heightFactor;
+      final double height = maxHeight * _heightFactor;
       minHeight = height;
       maxHeight = height;
     }
@@ -699,8 +701,37 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
 }
 
 /// A delegate for computing the layout of a render object with a single child.
+///
+/// Used by [CustomSingleChildLayout] (in the widgets library) and
+/// [RenderCustomSingleChildLayoutBox] (in the rendering library).
+///
+/// When asked to layout, [CustomSingleChildLayout] first calls [getSize] with
+/// its incoming constraints to determine its size. It then calls
+/// [getConstraintsForChild] to determine the constraints to apply to the child.
+/// After the child completes its layout, [RenderCustomSingleChildLayoutBox]
+/// calls [getPositionForChild] to determine the child's position.
+///
+/// The [shouldRelayout] method is called when a new instance of the class
+/// is provided, to check if the new instance actually represents different
+/// information.
+///
+/// The most efficient way to trigger a relayout is to supply a relayout
+/// argument to the constructor of the [SingleChildLayoutDelegate]. The custom
+/// object will listen to this value and relayout whenever the animation
+/// ticks, avoiding both the build phase of the pipeline.
+///
+/// See also:
+///
+///  * [CustomSingleChildLayout], the widget that uses this delegate.
+///  * [RenderCustomSingleChildLayoutBox], render object that uses this
+///    delegate.
 abstract class SingleChildLayoutDelegate {
-  // TODO(abarth): This class should take a Listenable to drive relayout.
+  /// Creates a layout delegate.
+  ///
+  /// The layout will update whenever [relayout] notifies its listeners.
+  const SingleChildLayoutDelegate({ Listenable relayout }) : _relayout = relayout;
+
+  final Listenable _relayout;
 
   /// The size of this object given the incoming constraints.
   ///
@@ -769,13 +800,30 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// A delegate that controls this object's layout.
   SingleChildLayoutDelegate get delegate => _delegate;
   SingleChildLayoutDelegate _delegate;
-  set delegate (SingleChildLayoutDelegate newDelegate) {
+  set delegate(SingleChildLayoutDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    final SingleChildLayoutDelegate oldDelegate = _delegate;
+    if (newDelegate.runtimeType != oldDelegate.runtimeType || newDelegate.shouldRelayout(oldDelegate))
       markNeedsLayout();
     _delegate = newDelegate;
+    if (attached) {
+      oldDelegate?._relayout?.removeListener(markNeedsLayout);
+      newDelegate?._relayout?.addListener(markNeedsLayout);
+    }
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _delegate?._relayout?.addListener(markNeedsLayout);
+  }
+
+  @override
+  void detach() {
+    _delegate?._relayout?.removeListener(markNeedsLayout);
+    super.detach();
   }
 
   Size _getSize(BoxConstraints constraints) {
@@ -822,7 +870,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   void performLayout() {
     size = _getSize(constraints);
     if (child != null) {
-      BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
+      final BoxConstraints childConstraints = delegate.getConstraintsForChild(constraints);
       assert(childConstraints.debugAssertIsValid(isAppliedConstraint: true));
       child.layout(childConstraints, parentUsesSize: !childConstraints.isTight);
       final BoxParentData childParentData = child.parentData;
@@ -866,7 +914,7 @@ class RenderBaseline extends RenderShiftedBox {
   /// the child's baseline.
   double get baseline => _baseline;
   double _baseline;
-  set baseline (double value) {
+  set baseline(double value) {
     assert(value != null);
     if (_baseline == value)
       return;
@@ -877,7 +925,7 @@ class RenderBaseline extends RenderShiftedBox {
   /// The type of baseline to use for positioning the child.
   TextBaseline get baselineType => _baselineType;
   TextBaseline _baselineType;
-  set baselineType (TextBaseline value) {
+  set baselineType(TextBaseline value) {
     assert(value != null);
     if (_baselineType == value)
       return;

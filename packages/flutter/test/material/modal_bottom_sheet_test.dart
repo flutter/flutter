@@ -67,7 +67,7 @@ void main() {
   });
 
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
 
     await tester.pumpWidget(new MaterialApp(
@@ -102,7 +102,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 30.0), 1000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)
 
     expect(showBottomSheetThenCalled, isTrue);
@@ -121,7 +121,7 @@ void main() {
 
   testWidgets('Verify that dragging past the bottom dismisses a persistent BottomSheet', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5528
-    GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+    final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(

@@ -11,7 +11,7 @@ Future<String> mockUpdateUrlFetcher() {
 }
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
@@ -29,7 +29,7 @@ void main() {
     await tester.pump(); // Launch shrine
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    Finder backButton = find.byTooltip('Back');
+    final Finder backButton = find.byTooltip('Back');
     expect(backButton, findsOneWidget);
     await tester.tap(backButton);
     await tester.pump(); // Start the pop "back" operation.

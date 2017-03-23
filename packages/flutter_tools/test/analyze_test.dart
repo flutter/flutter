@@ -2,49 +2,48 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
-import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
 
+const String _kFlutterRoot = '/data/flutter';
+
 void main() {
+  FileSystem fs;
   Directory tempDir;
 
   setUp(() {
-    FlutterCommandRunner.initFlutterRoot();
+    fs = new MemoryFileSystem();
+    fs.directory(_kFlutterRoot).createSync(recursive: true);
+    Cache.flutterRoot = _kFlutterRoot;
     tempDir = fs.systemTempDirectory.createTempSync('analysis_test');
   });
 
-  tearDown(() {
-    tempDir?.deleteSync(recursive: true);
-  });
-
   group('analyze', () {
-
     testUsingContext('inRepo', () {
       // Absolute paths
       expect(inRepo(<String>[tempDir.path]), isFalse);
       expect(inRepo(<String>[fs.path.join(tempDir.path, 'foo')]), isFalse);
       expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
       expect(inRepo(<String>[fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
+
       // Relative paths
-      String oldWorkingDirectory = fs.currentDirectory.path;
-      try {
-        fs.currentDirectory = Cache.flutterRoot;
-        expect(inRepo(<String>['.']), isTrue);
-        expect(inRepo(<String>['foo']), isTrue);
-        fs.currentDirectory = tempDir.path;
-        expect(inRepo(<String>['.']), isFalse);
-        expect(inRepo(<String>['foo']), isFalse);
-      } finally {
-        fs.currentDirectory = oldWorkingDirectory;
-      }
+      fs.currentDirectory = Cache.flutterRoot;
+      expect(inRepo(<String>['.']), isTrue);
+      expect(inRepo(<String>['foo']), isTrue);
+      fs.currentDirectory = tempDir.path;
+      expect(inRepo(<String>['.']), isFalse);
+      expect(inRepo(<String>['foo']), isFalse);
+
       // Ensure no exceptions
       inRepo(null);
       inRepo(<String>[]);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
     });
   });
 }

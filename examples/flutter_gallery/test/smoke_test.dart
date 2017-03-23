@@ -32,16 +32,16 @@ void reportToStringError(String name, String route, int lineNumber, List<String>
   // If you're on line 12, then it has index 11.
   // If you want 1 line before and 1 line after, then you want lines with index 10, 11, and 12.
   // That's (lineNumber-1)-margin .. (lineNumber-1)+margin, or lineNumber-(margin+1) .. lineNumber+(margin-1)
-  int margin = 5;
-  int firstLine = math.max(0, lineNumber - margin);
-  int lastLine = math.min(lines.length, lineNumber + margin);
+  final int margin = 5;
+  final int firstLine = math.max(0, lineNumber - margin);
+  final int lastLine = math.min(lines.length, lineNumber + margin);
   print('$name : $route : line $lineNumber of ${lines.length} : $message; nearby lines were:\n  ${lines.sublist(firstLine, lastLine).join("\n  ")}');
   errors += 1;
 }
 
 void verifyToStringOutput(String name, String route, String testString) {
   int lineNumber = 0;
-  List<String> lines = testString.split('\n');
+  final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n'))
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
   for (String line in lines) {
@@ -103,7 +103,7 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump(const Duration(milliseconds: 400));
 
   // Go back
-  Finder backButton = find.byTooltip('Back');
+  final Finder backButton = find.byTooltip('Back');
   expect(backButton, findsOneWidget);
   await tester.tap(backButton);
   await tester.pump(); // Start the pop "back" operation.
@@ -125,17 +125,16 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
   expect(find.text(kCaption), findsOneWidget);
 
   for (String routeName in routeNames) {
-    Finder finder = findGalleryItemByRouteName(tester, routeName);
+    final Finder finder = findGalleryItemByRouteName(tester, routeName);
     Scrollable.ensureVisible(tester.element(finder), alignment: 0.5);
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     await smokeDemo(tester, routeName);
     tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after leaving route $routeName');
   }
 
   expect(errors, 0);
 
-  Finder navigationMenuButton = find.byTooltip('Open navigation menu');
+  final Finder navigationMenuButton = find.byTooltip('Open navigation menu');
   expect(navigationMenuButton, findsOneWidget);
   await tester.tap(navigationMenuButton);
   await tester.pump(); // Start opening drawer.

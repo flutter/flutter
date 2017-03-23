@@ -54,34 +54,34 @@ class ExpectFailState extends State<ExpectFail> {
 
 void main() {
   testWidgets('Inherited notifies dependents', (WidgetTester tester) async {
-    List<TestInherited> log = <TestInherited>[];
+    final List<TestInherited> log = <TestInherited>[];
 
-    Builder builder = new Builder(
+    final Builder builder = new Builder(
       builder: (BuildContext context) {
         log.add(context.inheritFromWidgetOfExactType(TestInherited));
         return new Container();
       }
     );
 
-    TestInherited first = new TestInherited(child: builder);
+    final TestInherited first = new TestInherited(child: builder);
     await tester.pumpWidget(first);
 
     expect(log, equals(<TestInherited>[first]));
 
-    TestInherited second = new TestInherited(child: builder, shouldNotify: false);
+    final TestInherited second = new TestInherited(child: builder, shouldNotify: false);
     await tester.pumpWidget(second);
 
     expect(log, equals(<TestInherited>[first]));
 
-    TestInherited third = new TestInherited(child: builder, shouldNotify: true);
+    final TestInherited third = new TestInherited(child: builder, shouldNotify: true);
     await tester.pumpWidget(third);
 
     expect(log, equals(<TestInherited>[first, third]));
   });
 
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) async {
-    GlobalKey globalKey = new GlobalKey();
-    List<TestInherited> log = <TestInherited>[];
+    final GlobalKey globalKey = new GlobalKey();
+    final List<TestInherited> log = <TestInherited>[];
 
     TestInherited build() {
       return new TestInherited(
@@ -98,12 +98,12 @@ void main() {
       );
     }
 
-    TestInherited first = build();
+    final TestInherited first = build();
     await tester.pumpWidget(first);
 
     expect(log, equals(<TestInherited>[first]));
 
-    TestInherited second = build();
+    final TestInherited second = build();
     await tester.pumpWidget(second);
 
     expect(log, equals(<TestInherited>[first, second]));
@@ -127,7 +127,7 @@ void main() {
                       child: new Container(
                         child: new Builder(
                           builder: (BuildContext context) {
-                            ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+                            final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                             log.add('a: ${v.value}');
                             return new Text('');
                           }
@@ -144,7 +144,7 @@ void main() {
                     child: new Container(
                       child: new Builder(
                         builder: (BuildContext context) {
-                          ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+                          final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                           log.add('b: ${v.value}');
                           return new Text('');
                         }
@@ -184,7 +184,7 @@ void main() {
 
     final List<String> log = <String>[];
 
-    Key key = new GlobalKey();
+    final Key key = new GlobalKey();
 
     await tester.pumpWidget(
       new Container(
@@ -202,7 +202,7 @@ void main() {
                         key: key,
                         child: new Builder(
                           builder: (BuildContext context) {
-                            ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+                            final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                             log.add('a: ${v.value}');
                             return new Text('');
                           }
@@ -220,7 +220,7 @@ void main() {
                       key: key,
                       child: new Builder(
                         builder: (BuildContext context) {
-                          ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+                          final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
                           log.add('b: ${v.value}');
                           return new Text('');
                         }
@@ -259,11 +259,11 @@ void main() {
   testWidgets('Update inherited when removing node and child has global key with constant child', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    Key key = new GlobalKey();
+    final Key key = new GlobalKey();
 
-    Widget child = new Builder(
+    final Widget child = new Builder(
       builder: (BuildContext context) {
-        ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+        final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
         log.add(v.value);
         return new Text('');
       }
@@ -331,10 +331,10 @@ void main() {
 
     final List<int> log = <int>[];
 
-    Widget child = new Builder(
+    final Widget child = new Builder(
       key: new GlobalKey(),
       builder: (BuildContext context) {
-        ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
+        final ValueInherited v = context.inheritFromWidgetOfExactType(ValueInherited);
         log.add(v.value);
         return new Text('');
       }
@@ -381,7 +381,7 @@ void main() {
       key: new GlobalKey(),
       child: new Builder(
         builder: (BuildContext context) {
-          ValueInherited widget = context.inheritFromWidgetOfExactType(ValueInherited);
+          final ValueInherited widget = context.inheritFromWidgetOfExactType(ValueInherited);
           inheritedValue = widget?.value;
           return new Container();
         }
@@ -465,7 +465,7 @@ void main() {
     // This is a regression test for https://github.com/flutter/flutter/issues/5491
     bool exceptionCaught = false;
 
-    TestInherited parent = new TestInherited(child: new ExpectFail(() {
+    final TestInherited parent = new TestInherited(child: new ExpectFail(() {
       exceptionCaught = true;
     }));
     await tester.pumpWidget(parent);

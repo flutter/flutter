@@ -59,20 +59,20 @@ class TestAsyncUtils {
   /// This method first calls [guardSync].
   static Future<Null> guard(Future<Null> body()) {
     guardSync();
-    Zone zone = Zone.current.fork(
+    final Zone zone = Zone.current.fork(
       zoneValues: <dynamic, dynamic>{
         _scopeStack: true // so we can recognize this as our own zone
       }
     );
-    _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
+    final _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
-    Future<Null> result = scope.zone.run(body);
+    final Future<Null> result = scope.zone.run(body);
     void completionHandler(dynamic error, StackTrace stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
       _AsyncScope closedScope;
-      StringBuffer message = new StringBuffer();
+      final StringBuffer message = new StringBuffer();
       while (_scopeStack.isNotEmpty) {
         closedScope = _scopeStack.removeLast();
         if (closedScope == scope)
@@ -177,7 +177,7 @@ class TestAsyncUtils {
       assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
     assert(scope != null);
-    StringBuffer message = new StringBuffer();
+    final StringBuffer message = new StringBuffer();
     message.writeln('Guarded function conflict. You must use "await" with all Future-returning test APIs.');
     final _StackEntry originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', message);
     final _StackEntry collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', message);
@@ -261,7 +261,7 @@ class TestAsyncUtils {
   /// This is used at the end of tests to ensure that nothing leaks out of the test.
   static void verifyAllScopesClosed() {
     if (_scopeStack.isNotEmpty) {
-      StringBuffer message = new StringBuffer();
+      final StringBuffer message = new StringBuffer();
       message.writeln('Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
       for (_AsyncScope scope in _scopeStack) {
         final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', message);

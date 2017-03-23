@@ -9,7 +9,7 @@ import 'data_table_test_utils.dart';
 
 void main() {
   testWidgets('DataTable control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     Widget buildTable({ int sortColumnIndex, bool sortAscending: true }) {
       return new DataTable(
@@ -77,7 +77,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Material(child: buildTable(sortColumnIndex: 1))
     ));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
     await tester.tap(find.text('Calories'));
 
     expect(log, <String>['column-sort: 1 false']);
@@ -86,7 +86,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Material(child: buildTable(sortColumnIndex: 1, sortAscending: false))
     ));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 200));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
 
     await tester.tap(find.text('375'));
 

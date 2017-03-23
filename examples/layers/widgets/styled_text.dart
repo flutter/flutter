@@ -23,8 +23,8 @@ final List<List<String>> _kNameLines = _kDialogText
   .map((String line) => line.split(':'))
   .toList();
 
-final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo[400], height: 1.8);
-final TextStyle _kHalStyle = new TextStyle(color: Colors.red[400], fontFamily: "monospace");
+final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo.shade400, height: 1.8);
+final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: "monospace");
 final TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
 final TextStyle _kUnderline = const TextStyle(
   decoration: TextDecoration.underline,
@@ -33,7 +33,7 @@ final TextStyle _kUnderline = const TextStyle(
 );
 
 Widget toStyledText(String name, String text) {
-  TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
+  final TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
   return new RichText(
     key: new Key(text),
     text: new TextSpan(
@@ -94,11 +94,11 @@ class _StyledTextDemoState extends State<StyledTextDemo> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> lines = _kNameLines
+    final List<Widget> lines = _kNameLines
       .map<Widget>((List<String> nameAndText) => _toText(nameAndText[0], nameAndText[1]))
       .toList();
 
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
     for (Widget line in lines) {
       children.add(line);
       if (line != lines.last)
@@ -127,7 +127,7 @@ void main() {
         title: new Text('Hal and Dave')
       ),
       body: new Material(
-        color: Colors.grey[50],
+        color: Colors.grey.shade50,
         child: new StyledTextDemo()
       )
     )

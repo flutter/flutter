@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
 
 import 'box.dart';
@@ -302,7 +303,7 @@ class RenderEditable extends RenderBox {
     final Point globalPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
       onSelectionChanged(new TextSelection.fromPosition(position), this, false);
     }
   }

@@ -13,7 +13,6 @@ import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
-import 'base/platform.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/dependencies.dart';
@@ -89,6 +88,12 @@ abstract class ResidentRunner {
     return stopApp();
   }
 
+  Future<Null> detach() async {
+    await stopEchoingDeviceLog();
+    await preStop();
+    appFinished();
+  }
+
   Future<Null> _debugDumpApp() async {
     if (vmService != null)
       await vmService.vm.refreshViews();
@@ -108,8 +113,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> _screenshot() async {
-    Status status = logger.startProgress('Taking screenshot...');
-    File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    final Status status = logger.startProgress('Taking screenshot...');
+    final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {
         if (vmService != null)
@@ -133,7 +138,7 @@ abstract class ResidentRunner {
           }
         }
       }
-      int sizeKB = (await outputFile.length()) ~/ 1024;
+      final int sizeKB = (await outputFile.length()) ~/ 1024;
       status.stop();
       printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
@@ -157,8 +162,7 @@ abstract class ResidentRunner {
   void registerSignalHandlers() {
     assert(stayResident);
     ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    if (!platform.isWindows) // TODO(goderbauer): enable on Windows when https://github.com/dart-lang/sdk/issues/28603 is fixed
-      ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
     ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
@@ -205,7 +209,7 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(Uri uri) async {
+  Future<Null> connectToServiceProtocol(Uri uri, {String isolateFilter}) async {
     if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
     }
@@ -213,22 +217,16 @@ abstract class ResidentRunner {
     printTrace('Connected to service protocol: $uri');
     await vmService.getVM();
 
-    // Refresh the view list.
-    await vmService.vm.refreshViews();
-    for (int i = 0; vmService.vm.mainView == null && i < 5; i++) {
-      // If the VM doesn't yet have a view, wait for one to show up.
-      printTrace('Waiting for Flutter view');
-      await new Future<Null>.delayed(const Duration(seconds: 1));
-      await vmService.vm.refreshViews();
-    }
-    currentView = vmService.vm.mainView;
+    // Refresh the view list, and wait a bit for the list to populate.
+    await vmService.waitForViews();
+    currentView = (isolateFilter == null)
+                ? vmService.vm.firstView
+                : vmService.vm.firstViewWithName(isolateFilter);
     if (currentView == null)
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(() {
-      appFinished();
-    });
+    vmService.done.whenComplete(appFinished);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -237,8 +235,8 @@ abstract class ResidentRunner {
 
     printStatus(''); // the key the user tapped might be on this line
 
-    if (lower == 'h' || lower == '?' || character == AnsiTerminal.KEY_F1) {
-      // F1, help
+    if (lower == 'h' || lower == '?') {
+      // help
       printHelp(details: true);
       return true;
     } else if (lower == 'w') {
@@ -263,13 +261,16 @@ abstract class ResidentRunner {
       }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
-        String platform = await _debugRotatePlatform();
+        final String platform = await _debugRotatePlatform();
         print('Switched operating system to: $platform');
         return true;
       }
-    } else if (lower == 'q' || character == AnsiTerminal.KEY_F10) {
-      // F10, exit
+    } else if (lower == 'q') {
+      // exit
       await stop();
+      return true;
+    } else if (lower == 'd') {
+      await detach();
       return true;
     }
 
@@ -285,7 +286,7 @@ abstract class ResidentRunner {
     }
     _processingTerminalRequest = true;
     try {
-      bool handled = await _commonTerminalInputHandler(command);
+      final bool handled = await _commonTerminalInputHandler(command);
       if (!handled)
         await handleTerminalCommand(command);
     } finally {
@@ -314,25 +315,22 @@ abstract class ResidentRunner {
         printHelp(details: false);
       }
       terminal.singleCharMode = true;
-      terminal.onCharInput.listen((String code) {
-        processTerminalInput(code);
-      });
+      terminal.onCharInput.listen(processTerminalInput);
     }
   }
 
   Future<int> waitForAppToFinish() async {
-    int exitCode = await _finished.future;
+    final int exitCode = await _finished.future;
     await cleanupAtFinish();
     return exitCode;
   }
 
   bool hasDirtyDependencies() {
-    DartDependencySetBuilder dartDependencySetBuilder =
-        new DartDependencySetBuilder(
-            mainPath, projectRootPath, packagesFilePath);
-    DependencyChecker dependencyChecker =
+    final DartDependencySetBuilder dartDependencySetBuilder =
+        new DartDependencySetBuilder(mainPath, packagesFilePath);
+    final DependencyChecker dependencyChecker =
         new DependencyChecker(dartDependencySetBuilder, assetBundle);
-    String path = package.packagePath;
+    final String path = package.packagePath;
     if (path == null) {
       return true;
     }
@@ -400,7 +398,7 @@ class OperationResult {
 String findMainDartFile([String target]) {
   if (target == null)
     target = '';
-  String targetPath = fs.path.absolute(target);
+  final String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))
     return fs.path.join(targetPath, 'lib', 'main.dart');
   else

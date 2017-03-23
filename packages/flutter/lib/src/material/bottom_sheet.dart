@@ -109,7 +109,7 @@ class _BottomSheetState extends State<BottomSheet> {
     if (_dismissUnderway)
       return;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
-      double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
+      final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
       if (config.animationController.value > 0.0)
         config.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
@@ -215,7 +215,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kBottomSheetDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => Colors.black54;

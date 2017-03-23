@@ -19,7 +19,7 @@ void main() {
 
     expect(color.toColor(), const Color(0xb399816b));
 
-    HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
+    final HSVColor result = HSVColor.lerp(color, const HSVColor.fromAHSV(0.3, 128.0, 0.7, 0.2), 0.25);
     expect(result.alpha, 0.6);
     expect(result.hue, 53.0);
     expect(result.saturation, greaterThan(0.3999));

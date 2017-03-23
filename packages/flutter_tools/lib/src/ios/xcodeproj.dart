@@ -2,22 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../artifacts.dart';
 import '../cache.dart';
 import '../globals.dart';
 
 final RegExp _settingExpr = new RegExp(r'(\w+)\s*=\s*(\S+)');
 final RegExp _varExpr = new RegExp(r'\$\((.*)\)');
 
+String flutterFrameworkDir(BuildMode mode) {
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+}
+
 void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
-  StringBuffer localsBuffer = new StringBuffer();
+  final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
 
-  String flutterRoot = fs.path.normalize(Cache.flutterRoot);
+  final String flutterRoot = fs.path.normalize(Cache.flutterRoot);
   localsBuffer.writeln('FLUTTER_ROOT=$flutterRoot');
 
   // This holds because requiresProjectRoot is true for this command
@@ -34,27 +38,26 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  String flutterFrameworkDir = fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$flutterFrameworkDir');
+  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(mode)}');
 
   if (artifacts is LocalEngineArtifacts) {
-    LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
 
-  File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
+  final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);
   localsFile.writeAsStringSync(localsBuffer.toString());
 }
 
 Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
-  String absProjPath = fs.path.absolute(xcodeProjPath);
-  String out = runCheckedSync(<String>[
+  final String absProjPath = fs.path.absolute(xcodeProjPath);
+  final String out = runCheckedSync(<String>[
     '/usr/bin/xcodebuild', '-project', absProjPath, '-target', target, '-showBuildSettings'
   ]);
-  Map<String, String> settings = <String, String>{};
+  final Map<String, String> settings = <String, String>{};
   for (String line in out.split('\n').where(_settingExpr.hasMatch)) {
-    Match match = _settingExpr.firstMatch(line);
+    final Match match = _settingExpr.firstMatch(line);
     settings[match[1]] = match[2];
   }
   return settings;
@@ -64,10 +67,10 @@ Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
 String substituteXcodeVariables(String str, String xcodeProjPath, String target) {
-  Iterable<Match> matches = _varExpr.allMatches(str);
+  final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty)
     return str;
 
-  Map<String, String> settings = getXcodeBuildSettings(xcodeProjPath, target);
+  final Map<String, String> settings = getXcodeBuildSettings(xcodeProjPath, target);
   return str.replaceAllMapped(_varExpr, (Match m) => settings[m[1]] ?? m[0]);
 }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
+import 'base/os.dart';
 import 'base/utils.dart';
 import 'globals.dart';
 import 'version.dart';
@@ -20,8 +21,12 @@ Usage get flutterUsage => Usage.instance;
 class Usage {
   /// Create a new Usage instance; [versionOverride] is used for testing.
   Usage({ String settingsName: 'flutter', String versionOverride }) {
-    String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
+    final String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
+
+    // Report a more detailed OS version string than package:usage does by
+    // default as custom dimension 1 (configured in our analytics account).
+    _analytics.setSessionValue('dimension1', os.name);
 
     bool runningOnCI = false;
 
@@ -38,7 +43,7 @@ class Usage {
   }
 
   /// Returns [Usage] active in the current app context.
-  static Usage get instance => context[Usage];
+  static Usage get instance => context.putIfAbsent(Usage, () => new Usage());
 
   Analytics _analytics;
 

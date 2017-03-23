@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'box.dart';
-import 'object.dart';
 import 'layer.dart';
+import 'object.dart';
 
 /// The options that control whether the performance overlay displays certain
 /// aspects of the compositor.
@@ -77,11 +77,11 @@ class RenderPerformanceOverlay extends RenderBox {
   /// [PerformanceOverlayOption] to enable.
   int get optionsMask => _optionsMask;
   int _optionsMask;
-  set optionsMask(int mask) {
-    assert(mask != null);
-    if (mask == _optionsMask)
+  set optionsMask(int value) {
+    assert(value != null);
+    if (value == _optionsMask)
       return;
-    _optionsMask = mask;
+    _optionsMask = value;
     markNeedsPaint();
   }
 
@@ -90,22 +90,22 @@ class RenderPerformanceOverlay extends RenderBox {
   /// is suitable for capturing an SkPicture trace for further analysis.
   int get rasterizerThreshold => _rasterizerThreshold;
   int _rasterizerThreshold;
-  set rasterizerThreshold (int threshold) {
-    assert(threshold != null);
-    if (threshold == _rasterizerThreshold)
+  set rasterizerThreshold(int value) {
+    assert(value != null);
+    if (value == _rasterizerThreshold)
       return;
-    _rasterizerThreshold = threshold;
+    _rasterizerThreshold = value;
     markNeedsPaint();
   }
 
   /// Whether the raster cache should checkerboard cached entries.
   bool get checkerboardRasterCacheImages => _checkerboardRasterCacheImages;
   bool _checkerboardRasterCacheImages;
-  set checkerboardRasterCacheImages (bool checkerboard) {
-    assert(checkerboard != null);
-    if (checkerboard == _checkerboardRasterCacheImages)
+  set checkerboardRasterCacheImages(bool value) {
+    assert(value != null);
+    if (value == _checkerboardRasterCacheImages)
       return;
-    _checkerboardRasterCacheImages = checkerboard;
+    _checkerboardRasterCacheImages = value;
     markNeedsPaint();
   }
 

@@ -9,6 +9,14 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
+
+TaskFunction createPlatformServiceDriverTest() {
+  return new DriverTest(
+      '${flutterDirectory.path}/examples/platform_services',
+      'test_driver/button_tap.dart',
+  );
+}
+
 TaskFunction createComplexLayoutScrollPerfTest() {
   return new PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -67,17 +75,25 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   );
 }
 
+TaskFunction createFlutterViewStartupTest() {
+  return new StartupTest(
+      '${flutterDirectory.path}/examples/flutter_view',
+      reportMetrics: false,
+  );
+}
+
 /// Measure application startup performance.
 class StartupTest {
-  static const Duration _startupTimeout = const Duration(minutes: 2);
+  static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  StartupTest(this.testDirectory);
+  StartupTest(this.testDirectory, { this.reportMetrics: true });
 
   final String testDirectory;
+  final bool reportMetrics;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
-      String deviceId = (await devices.workingDevice).deviceId;
+      final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
@@ -86,12 +102,16 @@ class StartupTest {
       }
 
       await flutter('run', options: <String>[
+        '--verbose',
         '--profile',
         '--trace-startup',
         '-d',
         deviceId,
       ]).timeout(_startupTimeout);
-      Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+      final Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+
+      if (!reportMetrics) return new TaskResult.success(data);
+
       return new TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
       ]);
@@ -111,9 +131,9 @@ class PerfTest {
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
-      Device device = await devices.workingDevice;
+      final Device device = await devices.workingDevice;
       await device.unlock();
-      String deviceId = device.deviceId;
+      final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
@@ -130,7 +150,7 @@ class PerfTest {
         '-d',
         deviceId,
       ]);
-      Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+      final Map<String, dynamic> data = JSON.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
 
       if (data['frame_count'] < 5) {
         return new TaskResult.failure(
@@ -151,6 +171,39 @@ class PerfTest {
   }
 }
 
+
+class DriverTest {
+
+  DriverTest(this.testDirectory, this.testTarget);
+
+  final String testDirectory;
+  final String testTarget;
+
+  Future<TaskResult> call() {
+    return inDirectory(testDirectory, () async {
+      final Device device = await devices.workingDevice;
+      await device.unlock();
+      final String deviceId = device.deviceId;
+      await flutter('packages', options: <String>['get']);
+
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        // This causes an Xcode project to be created.
+        await flutter('build', options: <String>['ios', '--profile']);
+      }
+
+      await flutter('drive', options: <String>[
+        '-v',
+        '-t',
+        testTarget,
+        '-d',
+        deviceId,
+      ]);
+
+      return new TaskResult.success(null);
+    });
+  }
+}
+
 class BuildTest {
 
   BuildTest(this.testDirectory);
@@ -159,12 +212,12 @@ class BuildTest {
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
-      Device device = await devices.workingDevice;
+      final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      Stopwatch watch = new Stopwatch()..start();
-      String buildLog = await evalFlutter('build', options: <String>[
+      final Stopwatch watch = new Stopwatch()..start();
+      final String buildLog = await evalFlutter('build', options: <String>[
         'aot',
         '-v',
         '--profile',
@@ -173,9 +226,9 @@ class BuildTest {
       ]);
       watch.stop();
 
-      RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
+      final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
 
-      Map<String, dynamic> data = new Map<String, dynamic>.fromIterable(
+      final Map<String, dynamic> data = new Map<String, dynamic>.fromIterable(
         metricExpression.allMatches(buildLog),
         key: (Match m) => _sdkNameToMetricName(m.group(1)),
         value: (Match m) => int.parse(m.group(2)),
@@ -216,9 +269,9 @@ class MemoryTest {
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
-      Device device = await devices.workingDevice;
+      final Device device = await devices.workingDevice;
       await device.unlock();
-      String deviceId = device.deviceId;
+      final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
@@ -226,9 +279,9 @@ class MemoryTest {
         await flutter('build', options: <String>['ios', '--profile']);
       }
 
-      int observatoryPort = await findAvailablePort();
+      final int observatoryPort = await findAvailablePort();
 
-      List<String> runOptions = <String>[
+      final List<String> runOptions = <String>[
         '-v',
         '--profile',
         '--trace-startup', // wait for the first frame to render
@@ -241,9 +294,9 @@ class MemoryTest {
         runOptions.addAll(<String>['-t', testTarget]);
       await flutter('run', options: runOptions);
 
-      Map<String, dynamic> startData = await device.getMemoryStats(packageName);
+      final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 
-      Map<String, dynamic> data = <String, dynamic>{
+      final Map<String, dynamic> data = <String, dynamic>{
          'start_total_kb': startData['total_kb'],
       };
 
@@ -257,7 +310,7 @@ class MemoryTest {
           '--use-existing-app=http://localhost:$observatoryPort',
         ]);
 
-        Map<String, dynamic> endData = await device.getMemoryStats(packageName);
+        final Map<String, dynamic> endData = await device.getMemoryStats(packageName);
         data['end_total_kb'] = endData['total_kb'];
         data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
       }
@@ -283,9 +336,9 @@ class AndroidBackButtonMemoryTest {
         throw 'This test is only supported on Android';
       }
 
-      AndroidDevice device = await devices.workingDevice;
+      final AndroidDevice device = await devices.workingDevice;
       await device.unlock();
-      String deviceId = device.deviceId;
+      final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
       await flutter('run', options: <String>[
@@ -296,9 +349,9 @@ class AndroidBackButtonMemoryTest {
         deviceId,
       ]);
 
-      Map<String, dynamic> startData = await device.getMemoryStats(packageName);
+      final Map<String, dynamic> startData = await device.getMemoryStats(packageName);
 
-      Map<String, dynamic> data = <String, dynamic>{
+      final Map<String, dynamic> data = <String, dynamic>{
          'start_total_kb': startData['total_kb'],
       };
 
@@ -306,14 +359,14 @@ class AndroidBackButtonMemoryTest {
       for (int i = 0; i < 10; i++) {
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
         await new Future<Null>.delayed(const Duration(milliseconds: 1000));
-        String output = await device.shellEval('am', <String>['start', '-n', 'io.flutter.examples.gallery/io.flutter.app.FlutterActivity']);
+        final String output = await device.shellEval('am', <String>['start', '-n', 'io.flutter.examples.gallery/io.flutter.app.FlutterActivity']);
         print(output);
         if (output.contains('Error'))
           return new TaskResult.failure('unable to launch activity');
         await new Future<Null>.delayed(const Duration(milliseconds: 1000));
       }
 
-      Map<String, dynamic> endData = await device.getMemoryStats(packageName);
+      final Map<String, dynamic> endData = await device.getMemoryStats(packageName);
       data['end_total_kb'] = endData['total_kb'];
       data['diff_total_kb'] = endData['total_kb'] - startData['total_kb'];
 

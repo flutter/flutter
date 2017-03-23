@@ -44,7 +44,7 @@ void main() {
 
   testWidgets('SemanticsDebugger reparents subtree',
       (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(
       new SemanticsDebugger(
@@ -156,7 +156,7 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger scroll test', (WidgetTester tester) async {
-    Key childKey = new UniqueKey();
+    final Key childKey = new UniqueKey();
 
     await tester.pumpWidget(
       new SemanticsDebugger(
@@ -165,8 +165,7 @@ void main() {
             new Container(
               key: childKey,
               height: 5000.0,
-              decoration:
-                new BoxDecoration(backgroundColor: Colors.green[500]),
+              color: Colors.green[500],
             ),
           ],
         ),
@@ -238,11 +237,11 @@ void main() {
   });
 
   testWidgets('SemanticsDebugger checkbox', (WidgetTester tester) async {
-    Key keyTop = new UniqueKey();
-    Key keyBottom = new UniqueKey();
+    final Key keyTop = new UniqueKey();
+    final Key keyBottom = new UniqueKey();
 
     bool valueTop = false;
-    bool valueBottom = true;
+    final bool valueBottom = true;
 
     await tester.pumpWidget(
       new SemanticsDebugger(

@@ -68,7 +68,7 @@ void main() {
   test('RenderSliverList basic test - down', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
-    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
       children: <RenderBox>[
         a = new RenderSizedBox(const Size(100.0, 400.0)),
         b = new RenderSizedBox(const Size(100.0, 400.0)),
@@ -77,7 +77,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
@@ -142,7 +142,7 @@ void main() {
   test('RenderSliverList basic test - up', () {
     RenderObject inner;
     RenderBox a, b, c, d, e;
-    TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
       children: <RenderBox>[
         a = new RenderSizedBox(const Size(100.0, 400.0)),
         b = new RenderSizedBox(const Size(100.0, 400.0)),
@@ -151,7 +151,7 @@ void main() {
         e = new RenderSizedBox(const Size(100.0, 400.0)),
       ],
     );
-    RenderViewport root = new RenderViewport(
+    final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[

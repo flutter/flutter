@@ -69,7 +69,7 @@ class Chip extends StatelessWidget {
     double leftPadding = 12.0;
     double rightPadding = 12.0;
 
-    List<Widget> children = <Widget>[];
+    final List<Widget> children = <Widget>[];
 
     if (avatar != null) {
       leftPadding = 0.0;
@@ -112,7 +112,7 @@ class Chip extends StatelessWidget {
         height: _kChipHeight,
         padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
         decoration: new BoxDecoration(
-          backgroundColor: Colors.grey[300],
+          backgroundColor: Colors.grey.shade300,
           borderRadius: new BorderRadius.circular(16.0)
         ),
         child: new Row(

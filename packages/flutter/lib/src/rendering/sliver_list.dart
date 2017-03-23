@@ -9,9 +9,37 @@ import 'box.dart';
 import 'sliver.dart';
 import 'sliver_multi_box_adaptor.dart';
 
+/// A sliver that places multiple box children in a linear array along the main
+/// axis.
+///
+/// Each child is forced to have the [SliverConstraints.crossAxisExtent] in the
+/// cross axis but determines its own main axis extent.
+///
+/// [RenderSliverList] determines its scroll offset by "dead reckoning" because
+/// children outside the visible part of the sliver are not materialized, which
+/// means [RenderSliverList] cannot learn their main axis extent. Instead, newly
+/// materialized children are placed adjacent to existing children. If this dead
+/// reckoning results in a logical inconsistency (e.g., attempting to place the
+/// zeroth child at a scroll offset other than zero), the [RenderSliverList]
+/// generates a [SliverGeometry.scrollOffsetCorrection] to restore consistency.
+///
+/// If the children have a fixed extent in the main axis, consider using
+/// [RenderSliverFixedExtentList] rather than [RenderSliverList] because
+/// does not need to perform layout on its children to obtain their extent in
+/// the main axis and is therefore more efficient.
+///
+/// See also:
+///
+///  * [RenderSliverFixedExtentList], which is more efficient for children with
+///    the same extent in the main axis.
+///  * [RenderSliverGrid], which places its children in arbitrary positions.
 class RenderSliverList extends RenderSliverMultiBoxAdaptor {
+  /// Creates a sliver that places multiple box children in a linear array along
+  /// the main axis.
+  ///
+  /// The [childManager] argument must not be null.
   RenderSliverList({
-    @required RenderSliverBoxChildManager childManager
+    @required RenderSliverBoxChildManager childManager,
   }) : super(childManager: childManager);
 
   @override
@@ -19,12 +47,12 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     assert(childManager.debugAssertChildListLocked());
     childManager.setDidUnderflow(false);
 
-    double scrollOffset = constraints.scrollOffset;
+    final double scrollOffset = constraints.scrollOffset;
     assert(scrollOffset >= 0.0);
-    double remainingPaintExtent = constraints.remainingPaintExtent;
+    final double remainingPaintExtent = constraints.remainingPaintExtent;
     assert(remainingPaintExtent >= 0.0);
-    double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
-    BoxConstraints childConstraints = constraints.asBoxConstraints();
+    final double targetEndScrollOffset = scrollOffset + remainingPaintExtent;
+    final BoxConstraints childConstraints = constraints.asBoxConstraints();
     int leadingGarbage = 0;
     int trailingGarbage = 0;
     bool reachedEnd = false;

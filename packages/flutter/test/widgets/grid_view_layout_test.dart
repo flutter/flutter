@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
-    List<Widget> children = <Widget>[
+    final List<Widget> children = <Widget>[
       new DecoratedBox(decoration: const BoxDecoration()),
       new DecoratedBox(decoration: const BoxDecoration()),
       new DecoratedBox(decoration: const BoxDecoration()),
@@ -26,12 +26,12 @@ void main() {
     ));
 
     children.forEach((Widget child) {
-      RenderBox box = tester.renderObject(find.byConfig(child));
+      final RenderBox box = tester.renderObject(find.byConfig(child));
       expect(box.size.width, equals(100.0), reason: "child width");
       expect(box.size.height, equals(100.0), reason: "child height");
     });
 
-    RenderBox grid = tester.renderObject(find.byType(GridView));
+    final RenderBox grid = tester.renderObject(find.byType(GridView));
     expect(grid.size.width, equals(200.0), reason: "grid width");
     expect(grid.size.height, equals(200.0), reason: "grid height");
 
@@ -49,7 +49,7 @@ void main() {
     ));
 
     children.forEach((Widget child) {
-      RenderBox box = tester.renderObject(find.byConfig(child));
+      final RenderBox box = tester.renderObject(find.byConfig(child));
       expect(box.size.width, equals(50.0), reason: "child width");
       expect(box.size.height, equals(50.0), reason: "child height");
     });

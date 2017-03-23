@@ -9,17 +9,17 @@ import 'package:flutter/widgets.dart';
 import 'test_widgets.dart';
 
 void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
-  MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
+  final MultiChildRenderObjectElement element = tester.element(find.byElementPredicate(
     (Element element) => element is MultiChildRenderObjectElement
   ));
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  RenderStack renderObject = element.renderObject;
+  final RenderStack renderObject = element.renderObject;
   try {
     RenderObject child = renderObject.firstChild;
     for (BoxDecoration decoration in expectedDecorations) {
       expect(child is RenderDecoratedBox, isTrue);
-      RenderDecoratedBox decoratedBox = child;
+      final RenderDecoratedBox decoratedBox = child;
       expect(decoratedBox.decoration, equals(decoration));
       final StackParentData decoratedBoxParentData = decoratedBox.parentData;
       child = decoratedBoxParentData.nextSibling;

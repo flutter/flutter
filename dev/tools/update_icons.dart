@@ -33,26 +33,26 @@ void main(List<String> args) {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
-  ArgParser argParser = new ArgParser();
+  final ArgParser argParser = new ArgParser();
   argParser.addOption(kOptionCodepointsPath, defaultsTo: kDefaultCodepointsPath);
   argParser.addOption(kOptionIconsPath, defaultsTo: kDefaultIconsPath);
   argParser.addFlag(kOptionDryRun, defaultsTo: false);
-  ArgResults argResults = argParser.parse(args);
+  final ArgResults argResults = argParser.parse(args);
 
-  File iconFile = new File(path.absolute(argResults[kOptionIconsPath]));
+  final File iconFile = new File(path.absolute(argResults[kOptionIconsPath]));
   if (!iconFile.existsSync()) {
     stderr.writeln('Icons file not found: ${iconFile.path}');
     exit(1);
   }
-  File codepointsFile = new File(path.absolute(argResults[kOptionCodepointsPath]));
+  final File codepointsFile = new File(path.absolute(argResults[kOptionCodepointsPath]));
   if (!codepointsFile.existsSync()) {
     stderr.writeln('Codepoints file not found: ${codepointsFile.path}');
     exit(1);
   }
 
-  String iconData = iconFile.readAsStringSync();
-  String codepointData = codepointsFile.readAsStringSync();
-  String newIconData = regenerateIconsFile(iconData, codepointData);
+  final String iconData = iconFile.readAsStringSync();
+  final String codepointData = codepointsFile.readAsStringSync();
+  final String newIconData = regenerateIconsFile(iconData, codepointData);
 
   if (argResults[kOptionDryRun])
     stdout.writeln(newIconData);
@@ -61,14 +61,14 @@ void main(List<String> args) {
 }
 
 String regenerateIconsFile(String iconData, String codepointData) {
-  StringBuffer buf = new StringBuffer();
+  final StringBuffer buf = new StringBuffer();
   bool generating = false;
   for (String line in LineSplitter.split(iconData)) {
     if (!generating)
       buf.writeln(line);
     if (line.contains(kBeginGeneratedMark)) {
       generating = true;
-      String iconDeclarations = generateIconDeclarations(codepointData);
+      final String iconDeclarations = generateIconDeclarations(codepointData);
       buf.write(iconDeclarations);
     } else if (line.contains(kEndGeneratedMark)) {
       generating = false;
@@ -87,13 +87,13 @@ String generateIconDeclarations(String codepointData) {
 }
 
 String getIconDeclaration(String line) {
-  List<String> tokens = line.split(' ');
+  final List<String> tokens = line.split(' ');
   if (tokens.length != 2)
     throw new FormatException('Unexpected codepoint data: $line');
-  String name = tokens[0];
-  String codepoint = tokens[1];
-  String identifier = kIdentifierRewrites[name] ?? name;
-  String description = name.replaceAll('_', ' ');
+  final String name = tokens[0];
+  final String codepoint = tokens[1];
+  final String identifier = kIdentifierRewrites[name] ?? name;
+  final String description = name.replaceAll('_', ' ');
   return '''
 
   /// <p><i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".</p>

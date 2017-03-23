@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'recording_canvas.dart';
+
 /// Matches objects or functions that paint a display list that matches the
 /// canvas calls described by the pattern.
 ///
@@ -292,8 +294,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
-    final _TestRecordingCanvas canvas = new _TestRecordingCanvas();
-    final _TestRecordingPaintingContext context = new _TestRecordingPaintingContext(canvas);
+    final TestRecordingCanvas canvas = new TestRecordingCanvas();
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
     if (object is _ContextPainterFunction) {
       final _ContextPainterFunction function = object;
       function(context, Offset.zero);
@@ -315,12 +317,12 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       }
     }
     final StringBuffer description = new StringBuffer();
-    final bool result = _evaluatePredicates(canvas._invocations, description);
+    final bool result = _evaluatePredicates(canvas.invocations, description);
     if (!result) {
       const String indent = '\n            '; // the length of '   Which: ' in spaces, plus two more
-      if (canvas._invocations.isNotEmpty)
+      if (canvas.invocations.isNotEmpty)
         description.write(' The complete display list was:');
-        for (Invocation call in canvas._invocations)
+        for (Invocation call in canvas.invocations)
           description.write('$indent${_describeInvocation(call)}');
     }
     matchState[this] = description.toString();
@@ -355,8 +357,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       description.write('painted nothing.');
       return false;
     }
-    Iterator<_PaintPredicate> predicate = _predicates.iterator;
-    Iterator<Invocation> call = calls.iterator..moveNext();
+    final Iterator<_PaintPredicate> predicate = _predicates.iterator;
+    final Iterator<Invocation> call = calls.iterator..moveNext();
     try {
       while (predicate.moveNext()) {
         if (call.current == null) {
@@ -372,76 +374,6 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
       return false;
     }
     return true;
-  }
-}
-
-class _TestRecordingCanvas implements Canvas {
-  final List<Invocation> _invocations = <Invocation>[];
-
-  int _saveCount = 0;
-
-  @override
-  int getSaveCount() => _saveCount;
-
-  @override
-  void save() {
-    _saveCount += 1;
-    _invocations.add(new _MethodCall(#save));
-  }
-
-  @override
-  void restore() {
-    _saveCount -= 1;
-    assert(_saveCount >= 0);
-    _invocations.add(new _MethodCall(#restore));
-  }
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    _invocations.add(invocation);
-  }
-}
-
-class _MethodCall implements Invocation {
-  _MethodCall(this._name);
-  final Symbol _name;
-  @override
-  bool get isAccessor => false;
-  @override
-  bool get isGetter => false;
-  @override
-  bool get isMethod => true;
-  @override
-  bool get isSetter => false;
-  @override
-  Symbol get memberName => _name;
-  @override
-  Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
-  @override
-  List<dynamic> get positionalArguments => <dynamic>[];
-}
-
-class _TestRecordingPaintingContext implements PaintingContext {
-  _TestRecordingPaintingContext(this.canvas);
-
-  @override
-  final Canvas canvas;
-
-  @override
-  void paintChild(RenderObject child, Offset offset) {
-    child.paint(this, offset);
-  }
-
-  @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter) {
-    canvas.save();
-    canvas.clipRect(clipRect.shift(offset));
-    painter(this, offset);
-    canvas.restore();
-  }
-
-  @override
-  void noSuchMethod(Invocation invocation) {
   }
 }
 
@@ -473,7 +405,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -506,7 +438,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     String result = name;
     if (description.isNotEmpty)
@@ -680,7 +612,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != symbol) {
       others += 1;
       if (!call.moveNext())
@@ -701,7 +633,7 @@ class _FunctionPaintPredicate extends _PaintPredicate {
 
   @override
   String toString() {
-    List<String> adjectives = <String>[];
+    final List<String> adjectives = <String>[];
     for (int index = 0; index < arguments.length; index += 1)
       adjectives.add(arguments[index] != null ? _valueName(arguments[index]) : '...');
     return '${_symbolName(symbol)}(${adjectives.join(", ")})';
@@ -712,7 +644,7 @@ class _SaveRestorePairPaintPredicate extends _PaintPredicate {
   @override
   void match(Iterator<Invocation> call) {
     int others = 0;
-    Invocation firstCall = call.current;
+    final Invocation firstCall = call.current;
     while (!call.current.isMethod || call.current.memberName != #save) {
       others += 1;
       if (!call.moveNext())

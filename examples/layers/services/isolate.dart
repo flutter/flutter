@@ -36,7 +36,7 @@ class Calculator {
   // Run the computation associated with this Calculator.
   void run() {
     int i = 0;
-    JsonDecoder decoder = new JsonDecoder(
+    final JsonDecoder decoder = new JsonDecoder(
       (dynamic key, dynamic value) {
         if (key is int && i++ % _NOTIFY_INTERVAL == 0)
           onProgressListener(i.toDouble(), _NUM_ITEMS.toDouble());
@@ -44,8 +44,8 @@ class Calculator {
       }
     );
     try {
-      List<dynamic> result = decoder.convert(_data);
-      int n = result.length;
+      final List<dynamic> result = decoder.convert(_data);
+      final int n = result.length;
       onResultListener("Decoded $n results");
     } catch (e, stack) {
       print("Invalid JSON file: $e");
@@ -54,7 +54,7 @@ class Calculator {
   }
 
   static String _replicateJson(String data, int count) {
-    StringBuffer buffer = new StringBuffer()..write("[");
+    final StringBuffer buffer = new StringBuffer()..write("[");
     for (int i = 0; i < count; i++) {
       buffer.write(data);
       if (i < count - 1)
@@ -178,14 +178,12 @@ class CalculationManager {
   // Static and global variables are initialized anew in the spawned isolate,
   // in a separate memory space.
   static void _calculate(CalculationMessage message) {
-    SendPort sender = message.sendPort;
-    Calculator calculator = new Calculator(
+    final SendPort sender = message.sendPort;
+    final Calculator calculator = new Calculator(
       onProgressListener: (double completed, double total) {
         sender.send(<double>[ completed, total ]);
       },
-      onResultListener: (String result) {
-        sender.send(result);
-      },
+      onResultListener: sender.send,
       data: message.data
     );
     calculator.run();

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show lerpDouble;
 import 'dart:ui' show Color, hashValues;
+import 'dart:ui' as ui show lerpDouble;
 
 /// Defines the color, opacity, and size of icons.
 ///
@@ -87,7 +87,7 @@ class IconThemeData {
 
   @override
   String toString() {
-    List<String> result = <String>[];
+    final List<String> result = <String>[];
     if (color != null)
       result.add('color: $color');
     if (_opacity != null)

@@ -39,7 +39,7 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    final _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
     return scope?._formState;
   }
 
@@ -62,6 +62,12 @@ class Form extends StatefulWidget {
   FormState createState() => new FormState();
 }
 
+/// State assocated with a [Form] widget.
+///
+/// A [FormState] object can ve used to [save], [reset], and [validate] every
+/// [FormField] that is a descendant of the associated [Form].
+///
+/// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
   Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
@@ -163,9 +169,10 @@ typedef void FormFieldSetter<T>(T newValue);
 /// Used by [FormField.builder].
 typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 
-/// A single form field. This widget maintains the current state of the form
-/// field, so that updates and validation errors are visually reflected in the
-/// UI.
+/// A single form field.
+///
+/// This widget maintains the current state of the form field, so that updates
+/// and validation errors are visually reflected in the UI.
 ///
 /// When used inside a [Form], you can use methods on [FormState] to query or
 /// manipulate the form data as a whole. For example, calling [FormState.save]
@@ -184,6 +191,9 @@ typedef Widget FormFieldBuilder<T>(FormFieldState<T> field);
 ///  * [Form], which is the widget that aggregates the form fields.
 ///  * [TextField], which is a commonly used form field for entering text.
 class FormField<T> extends StatefulWidget {
+  /// Creates a single form field.
+  ///
+  /// The [builder] argument must not be null.
   FormField({
     Key key,
     @required this.builder,

@@ -5,9 +5,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'platform_messages.dart';
-
-const String _kChannelName = 'flutter/platform';
+import 'system_channels.dart';
 
 /// Returns commonly used locations on the filesystem.
 class PathProvider {
@@ -24,11 +22,10 @@ class PathProvider {
   ///
   /// On Android, this uses the `getCacheDir` API on the context.
   static Future<Directory> getTemporaryDirectory() async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
-        _kChannelName, 'PathProvider.getTemporaryDirectory');
-    if (result == null)
+    final String path = await SystemChannels.platform.invokeMethod('PathProvider.getTemporaryDirectory');
+    if (path == null)
       return null;
-    return new Directory(result['path']);
+    return new Directory(path);
   }
 
   /// Path to a directory where the application may place files that are private
@@ -39,10 +36,9 @@ class PathProvider {
   ///
   /// On Android, this returns the AppData directory.
   static Future<Directory> getApplicationDocumentsDirectory() async {
-    Map<String, dynamic> result = await PlatformMessages.invokeMethod(
-        _kChannelName, 'PathProvider.getApplicationDocumentsDirectory');
-    if (result == null)
+    final String path = await SystemChannels.platform.invokeMethod('PathProvider.getApplicationDocumentsDirectory');
+    if (path == null)
       return null;
-    return new Directory(result['path']);
+    return new Directory(path);
   }
 }

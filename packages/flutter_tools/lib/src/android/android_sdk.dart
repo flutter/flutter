@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:pub_semver/pub_semver.dart';
-
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import '../globals.dart';
 
 AndroidSdk get androidSdk => context[AndroidSdk];
@@ -36,6 +35,9 @@ const Map<String, int> _namedVersionMap = const <String, int> {
   'android-stable': 24,
 };
 
+/// The minimum Android SDK version we support.
+const int minimumAndroidSdkVersion = 25;
+
 /// Locate ADB. Prefer to use one from an Android SDK, if we can locate that.
 /// This should be used over accessing androidSdk.adbPath directly because it
 /// will work for those users who have Android Platform Tools installed but
@@ -44,7 +46,7 @@ String getAdbPath([AndroidSdk existingSdk]) {
   if (existingSdk?.adbPath != null)
     return existingSdk.adbPath;
 
-  AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+  final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
 
   if (sdk?.latestVersion == null) {
     return os.which('adb')?.path;
@@ -85,20 +87,22 @@ class AndroidSdk {
         return new AndroidSdk(fs.path.join(androidHomeDir, 'sdk'));
     }
 
-    File aaptBin = os.which('aapt'); // in build-tools/$version/aapt
-    if (aaptBin != null) {
+    // in build-tools/$version/aapt
+    final List<File> aaptBins = os.whichAll('aapt');
+    for (File aaptBin in aaptBins) {
       // Make sure we're using the aapt from the SDK.
       aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
-      String dir = aaptBin.parent.parent.parent.path;
+      final String dir = aaptBin.parent.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
 
-    File adbBin = os.which('adb'); // in platform-tools/adb
-    if (adbBin != null) {
+    // in platform-tools/adb
+    final List<File> adbBins = os.whichAll('adb');
+    for (File adbBin in adbBins) {
       // Make sure we're using the adb from the SDK.
       adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
-      String dir = adbBin.parent.parent.path;
+      final String dir = adbBin.parent.parent.path;
       if (validSdkDirectory(dir))
         return new AndroidSdk(dir);
     }
@@ -120,14 +124,14 @@ class AndroidSdk {
 
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+  List<String> validateSdkWellFormed() {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
-    return latestVersion.validateSdkWellFormed(requireApkSigner: requireApkSigner);
+    return latestVersion.validateSdkWellFormed();
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -137,7 +141,7 @@ class AndroidSdk {
   void _init() {
     List<String> platforms = <String>[]; // android-22, ...
 
-    Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
+    final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
@@ -148,7 +152,7 @@ class AndroidSdk {
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
 
-    Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
+    final Directory buildToolsDir = fs.directory(fs.path.join(directory, 'build-tools'));
     if (buildToolsDir.existsSync()) {
       buildTools = buildToolsDir
         .listSync()
@@ -188,7 +192,7 @@ class AndroidSdk {
       return new AndroidSdkVersion(
         this,
         platformVersionName: platformName,
-        buildToolsVersionName: buildToolsVersion.toString()
+        buildToolsVersion: buildToolsVersion
       );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
@@ -204,12 +208,13 @@ class AndroidSdk {
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion(this.sdk, {
     this.platformVersionName,
-    this.buildToolsVersionName
+    this.buildToolsVersion,
   });
 
   final AndroidSdk sdk;
   final String platformVersionName;
-  final String buildToolsVersionName;
+  final Version buildToolsVersion;
+  String get buildToolsVersionName => buildToolsVersion.toString();
 
   int get sdkLevel {
     if (_namedVersionMap.containsKey(platformVersionName))
@@ -222,27 +227,12 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get aaptPath => getBuildToolsPath('aapt');
 
-  String get dxPath => getBuildToolsPath('dx');
-
-  String get zipalignPath => getBuildToolsPath('zipalign');
-
-  String get apksignerPath => getBuildToolsPath('apksigner');
-
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+  List<String> validateSdkWellFormed() {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 
     if (_canRun(aaptPath) != null)
       return <String>[_canRun(aaptPath)];
-
-    if (_canRun(dxPath) != null)
-      return <String>[_canRun(dxPath)];
-
-    if (_canRun(zipalignPath) != null)
-      return <String>[_canRun(zipalignPath)];
-
-    if (requireApkSigner && _canRun(apksignerPath) != null)
-      return <String>[_canRun(apksignerPath) + '\napksigner requires Android SDK Build Tools 24.0.3 or newer.'];
 
     return <String>[];
   }

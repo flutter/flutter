@@ -21,6 +21,10 @@ void main() {
   group('create', () {
     Directory temp;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });
@@ -42,8 +46,8 @@ void main() {
     testUsingContext('content', () async {
       Cache.flutterRoot = '../..';
 
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
 
@@ -53,14 +57,14 @@ void main() {
       expectExists('lib/main.dart');
       for (FileSystemEntity file in temp.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
-          String original= file.readAsStringSync();
+          final String original= file.readAsStringSync();
 
-          Process process = await Process.start(
+          final Process process = await Process.start(
               sdkBinaryName('dartfmt'),
               <String>[file.path],
               workingDirectory: temp.path,
           );
-          String formatted =
+          final String formatted =
             await process.stdout.transform(UTF8.decoder).join();
 
           expect(original, formatted, reason: file.path);
@@ -68,10 +72,10 @@ void main() {
       }
 
       // Generated Xcode settings
-      String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+      final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
       expectExists(xcodeConfigPath);
-      File xcodeConfigFile = fs.file(fs.path.join(temp.path, xcodeConfigPath));
-      String xcodeConfig = xcodeConfigFile.readAsStringSync();
+      final File xcodeConfigFile = fs.file(fs.path.join(temp.path, xcodeConfigPath));
+      final String xcodeConfig = xcodeConfigFile.readAsStringSync();
       expect(xcodeConfig, contains('FLUTTER_ROOT='));
       expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
       expect(xcodeConfig, contains('FLUTTER_FRAMEWORK_DIR='));
@@ -81,8 +85,8 @@ void main() {
     testUsingContext('can re-gen over existing project', () async {
       Cache.flutterRoot = '../..';
 
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--no-pub', temp.path]);
 
@@ -93,8 +97,8 @@ void main() {
     testUsingContext('produces sensible error message', () async {
       Cache.flutterRoot = '../..';
 
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       try {
         await runner.run(<String>['create', temp.path, '--pub']);
@@ -108,9 +112,9 @@ void main() {
     // Verify that we fail with an error code when the file exists.
     testUsingContext('fails when file exists', () async {
       Cache.flutterRoot = '../..';
-      CreateCommand command = new CreateCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
-      File existingFile = fs.file("${temp.path.toString()}/bad");
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final File existingFile = fs.file("${temp.path.toString()}/bad");
       if (!existingFile.existsSync()) existingFile.createSync();
       try {
         await runner.run(<String>['create', existingFile.path]);
@@ -124,17 +128,17 @@ void main() {
 
 Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) async {
   Cache.flutterRoot = '../..';
-  CreateCommand command = new CreateCommand();
-  CommandRunner<Null> runner = createTestCommandRunner(command);
-  List<String> args = <String>['create'];
+  final CreateCommand command = new CreateCommand();
+  final CommandRunner<Null> runner = createTestCommandRunner(command);
+  final List<String> args = <String>['create'];
   args.addAll(createArgs);
   args.add(dir.path);
   await runner.run(args);
 
-  String mainPath = fs.path.join(dir.path, 'lib', 'main.dart');
+  final String mainPath = fs.path.join(dir.path, 'lib', 'main.dart');
   expect(fs.file(mainPath).existsSync(), true);
-  String flutterToolsPath = fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
-  ProcessResult exec = Process.runSync(
+  final String flutterToolsPath = fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
+  final ProcessResult exec = Process.runSync(
     '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
     workingDirectory: dir.path
   );

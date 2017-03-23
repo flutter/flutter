@@ -7,8 +7,8 @@ import 'package:flutter/painting.dart';
 
 void main() {
   test("BorderSide control test", () {
-    BorderSide side1 = const BorderSide();
-    BorderSide side2 = side1.copyWith(
+    final BorderSide side1 = const BorderSide();
+    final BorderSide side2 = side1.copyWith(
       color: const Color(0xFF00FFFF),
       width: 2.0,
       style: BorderStyle.solid,
@@ -29,7 +29,7 @@ void main() {
       style: BorderStyle.solid,
     )));
 
-    BorderSide side3 = side2.copyWith(style: BorderStyle.none);
+    final BorderSide side3 = side2.copyWith(style: BorderStyle.none);
     BorderSide interpolated = BorderSide.lerp(side2, side3, 0.2);
     expect(interpolated.style, equals(BorderStyle.solid));
     expect(interpolated.color, equals(side2.color.withOpacity(0.8)));
@@ -40,9 +40,9 @@ void main() {
   });
 
   test("Border control test", () {
-    Border border1 = new Border.all(width: 4.0);
-    Border border2 = Border.lerp(null, border1, 0.25);
-    Border border3 = Border.lerp(border1, null, 0.25);
+    final Border border1 = new Border.all(width: 4.0);
+    final Border border2 = Border.lerp(null, border1, 0.25);
+    final Border border3 = Border.lerp(border1, null, 0.25);
 
     expect(border1, hasOneLineDescription);
     expect(border1.hashCode, isNot(equals(border2.hashCode)));
@@ -50,14 +50,14 @@ void main() {
     expect(border2.top.width, equals(1.0));
     expect(border3.bottom.width, equals(3.0));
 
-    Border border4 = Border.lerp(border2, border3, 0.5);
+    final Border border4 = Border.lerp(border2, border3, 0.5);
     expect(border4.left.width, equals(2.0));
   });
 
   test("BoxShadow control test", () {
-    BoxShadow shadow1 = const BoxShadow(blurRadius: 4.0);
-    BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25);
-    BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
+    final BoxShadow shadow1 = const BoxShadow(blurRadius: 4.0);
+    final BoxShadow shadow2 = BoxShadow.lerp(null, shadow1, 0.25);
+    final BoxShadow shadow3 = BoxShadow.lerp(shadow1, null, 0.25);
 
     expect(shadow1, hasOneLineDescription);
     expect(shadow1.hashCode, isNot(equals(shadow2.hashCode)));
@@ -66,7 +66,7 @@ void main() {
     expect(shadow2.blurRadius, equals(1.0));
     expect(shadow3.blurRadius, equals(3.0));
 
-    BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5);
+    final BoxShadow shadow4 = BoxShadow.lerp(shadow2, shadow3, 0.5);
     expect(shadow4.blurRadius, equals(2.0));
 
     List<BoxShadow> shadowList = BoxShadow.lerpList(

@@ -42,10 +42,9 @@ Widget buildFrame({
 
 Future<Null> page(WidgetTester tester, Offset offset) {
   return TestAsyncUtils.guard(() async {
-    String itemText = currentPage != null ? currentPage.toString() : '0';
-    await tester.scroll(find.text(itemText), offset);
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    final String itemText = currentPage != null ? currentPage.toString() : '0';
+    await tester.drag(find.text(itemText), offset);
+    await tester.pumpAndSettle();
   });
 }
 

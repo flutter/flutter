@@ -99,9 +99,6 @@ class RunCommand extends RunCommandBase {
         help: 'Path to a pre-built kernel blob to use when running.\n'
               'This option only exists for testing new kernel code execution on devices\n'
               'and is not needed during normal application development.');
-    argParser.addOption('snapshotter',
-        hide: !verboseHelp,
-        help: 'Specify the path to the sky_snapshot binary.');
     argParser.addOption('packages',
         hide: !verboseHelp,
         help: 'Specify the path to the .packages file.');
@@ -148,13 +145,13 @@ class RunCommand extends RunCommandBase {
 
   @override
   String get usagePath {
-    String command = shouldUseHotMode() ? 'hotrun' : name;
+    final String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
       return command;
 
     // Return 'run/ios'.
-    return '$command/${getNameForTargetPlatform(device.platform)}';
+    return '$command/${getNameForTargetPlatform(device.targetPlatform)}';
   }
 
   @override
@@ -180,7 +177,7 @@ class RunCommand extends RunCommandBase {
   }
 
   bool shouldUseHotMode() {
-    bool hotArg = argResults['hot'] ?? false;
+    final bool hotArg = argResults['hot'] ?? false;
     final bool shouldUseHotMode = hotArg;
     return (getBuildMode() == BuildMode.debug) && shouldUseHotMode;
   }
@@ -209,7 +206,7 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     if (argResults['machine']) {
-      Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
+      final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
@@ -223,7 +220,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      int result = await app.runner.waitForAppToFinish();
+      final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
       return null;
@@ -250,7 +247,7 @@ class RunCommand extends RunCommandBase {
         throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
     }
 
-    String pidFile = argResults['pid-file'];
+    final String pidFile = argResults['pid-file'];
     if (pidFile != null) {
       // Write our pid to the file.
       fs.file(pidFile).writeAsStringSync(pid.toString());
@@ -281,7 +278,7 @@ class RunCommand extends RunCommandBase {
       );
     }
 
-    int result = await runner.run(
+    final int result = await runner.run(
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );

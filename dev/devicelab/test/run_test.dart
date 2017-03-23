@@ -5,18 +5,22 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final ProcessManager processManager = new LocalProcessManager();
+
   group('run.dart script', () {
     Future<int> runScript(List<String> testNames) async {
-      List<String> options = <String>['bin/run.dart'];
+      final List<String> options = <String>['bin/run.dart'];
       for (String testName in testNames) {
         options..addAll(<String>['-t', testName]);
       }
-      ProcessResult scriptProcess = Process.runSync(
-        '../../bin/cache/dart-sdk/bin/dart',
-        options,
+      final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
+      final ProcessResult scriptProcess = processManager.runSync(
+        <String>[dart]..addAll(options)
       );
       return scriptProcess.exitCode;
     }

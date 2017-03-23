@@ -37,7 +37,7 @@ void main() {
       server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
       int errorCount = 0;
-      Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
       server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
@@ -57,25 +57,27 @@ void main() {
     server = new AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
-    Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
-    server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    server.onErrors.listen((FileAnalysisErrors errors) {
+      errorCount += errors.errors.length;
+    });
 
     await server.start();
     await onDone;
 
-    expect(errorCount, 2);
+    expect(errorCount, greaterThan(0));
   }, overrides: <Type, Generator>{
     OperatingSystemUtils: () => os
   });
 }
 
 void _createSampleProject(Directory directory, { bool brokenCode: false }) {
-  File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
+  final File pubspecFile = fs.file(fs.path.join(directory.path, 'pubspec.yaml'));
   pubspecFile.writeAsStringSync('''
 name: foo_project
 ''');
 
-  File dartFile = fs.file(fs.path.join(directory.path, 'lib', 'main.dart'));
+  final File dartFile = fs.file(fs.path.join(directory.path, 'lib', 'main.dart'));
   dartFile.parent.createSync();
   dartFile.writeAsStringSync('''
 void main() {

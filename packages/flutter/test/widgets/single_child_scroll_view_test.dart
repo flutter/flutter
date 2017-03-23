@@ -42,16 +42,16 @@ void main() {
       ),
     ));
 
-    RenderBox box = tester.renderObject(find.byType(Container));
+    final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box.localToGlobal(Point.origin), equals(Point.origin));
 
-    await tester.scroll(find.byType(SingleChildScrollView), const Offset(-200.0, -200.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(-200.0, -200.0));
 
     expect(box.localToGlobal(Point.origin), equals(const Point(0.0, -200.0)));
   });
 
   testWidgets('Changing controllers changes scroll position', (WidgetTester tester) async {
-    TestScrollController controller = new TestScrollController();
+    final TestScrollController controller = new TestScrollController();
 
     await tester.pumpWidget(new SingleChildScrollView(
       child: new Container(
@@ -72,12 +72,32 @@ void main() {
       ),
     ));
 
-    ScrollableState scrollable = tester.state(find.byType(Scrollable));
+    final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position, const isInstanceOf<TestScrollPosition>());
   });
 
+  testWidgets('Sets PrimaryScrollController when primary', (WidgetTester tester) async {
+    final ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new SingleChildScrollView(
+        primary: true,
+        child: new Container(
+          height: 2000.0,
+          decoration: const BoxDecoration(
+            backgroundColor: const Color(0xFF00FF00),
+          ),
+        ),
+      ),
+    ));
+
+    final Scrollable scrollable = tester.widget(find.byType(Scrollable));
+    expect(scrollable.controller, primaryScrollController);
+  });
+
+
   testWidgets('Changing scroll controller inside dirty layout builder does not assert', (WidgetTester tester) async {
-    ScrollController controller = new ScrollController();
+    final ScrollController controller = new ScrollController();
 
     await tester.pumpWidget(new Center(
       child: new SizedBox(
@@ -115,5 +135,46 @@ void main() {
         ),
       ),
     ));
+  });
+
+  testWidgets('Vertical SingleChildScrollViews are primary by default', (WidgetTester tester) async {
+    final SingleChildScrollView view = new SingleChildScrollView(scrollDirection: Axis.vertical);
+    expect(view.primary, isTrue);
+  });
+
+  testWidgets('Horizontal SingleChildScrollViews are non-primary by default', (WidgetTester tester) async {
+    final SingleChildScrollView view = new SingleChildScrollView(scrollDirection: Axis.horizontal);
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('SingleChildScrollViews with controllers are non-primary by default', (WidgetTester tester) async {
+    final SingleChildScrollView view = new SingleChildScrollView(
+      controller: new ScrollController(),
+      scrollDirection: Axis.vertical,
+    );
+    expect(view.primary, isFalse);
+  });
+
+  testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
+    const Key innerKey = const Key('inner');
+    final ScrollController primaryScrollController = new ScrollController();
+    await tester.pumpWidget(new PrimaryScrollController(
+      controller: primaryScrollController,
+      child: new SingleChildScrollView(
+        primary: true,
+        child: new Container(
+          constraints: const BoxConstraints(maxHeight: 200.0),
+          child: new ListView(key: innerKey, primary: true),
+        ),
+      ),
+    ));
+
+    final Scrollable innerScrollable = tester.widget(
+      find.descendant(
+        of: find.byKey(innerKey),
+        matching: find.byType(Scrollable),
+      ),
+    );
+    expect(innerScrollable.controller, isNull);
   });
 }

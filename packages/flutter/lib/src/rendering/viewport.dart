@@ -9,8 +9,8 @@ import 'package:flutter/gestures.dart';
 import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'box.dart';
 import 'binding.dart';
+import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -51,8 +51,6 @@ abstract class RenderAbstractViewport implements RenderObject {
   double getOffsetToReveal(RenderObject target, double alignment);
 }
 
-typedef RenderSliver _Advancer(RenderSliver child);
-
 // ///
 // /// See also:
 // ///
@@ -72,6 +70,11 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(offset != null);
   }
 
+  /// The direction in which the [scrollOffset] increases.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
+  /// offset of zero is at the top of the viewport and increases towards the
+  /// bottom of the viewport.
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
@@ -82,8 +85,18 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     markNeedsLayout();
   }
 
+  /// The axis along which the viewport scrolls.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], then the
+  /// [axis] is [Axis.vertical] and the viewport scrolls vertically.
   Axis get axis => axisDirectionToAxis(axisDirection);
 
+  /// Which part of the content inside the viewport should be visible.
+  ///
+  /// The [ViewportOffset.pixels] value determines the scroll offset that the
+  /// viewport uses to select which part of its content to display. As the user
+  /// scrolls the viewport, this value changes, which changes the content that
+  /// is displayed.
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
@@ -116,41 +129,55 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   bool get isRepaintBoundary => true;
 
+  /// Determines the size and position of some of the children of the viewport.
+  ///
+  /// This function is the workhorse of `performLayout` implementations in
+  /// subclasses.
+  ///
+  /// Layout starts with `child`, proceeds according to the `advance` callback,
+  /// and stops once `advance` returns null.
+  ///
+  ///  * `scrollOffset` is the [SliverConstraints.scrollOffset] to pass the
+  ///    first child. The scroll offset is adjsted by
+  ///    [SliverGeometry.scrollExtent] for subsequent children.
+  ///  * `overlap` is the [SliverConstraints.overlap] to pass the first child.
+  ///    The overlay is adjusted by the [SliverGeometry.paintOrigin] and
+  ///    [SliverGeometry.paintExtent] for subsequent children.
+  ///  * `layoutOffset` is the layout offset at which to place the first child.
+  ///    The layout offset is updated by the [SliverGeometry.layoutExtent] for
+  ///    subsequent children.
+  ///  * `remainingPaintExtent` is [SliverConstraints.remainingPaintExtent] to
+  ///    pass the first child. The remaining paint extent is updated by the
+  ///    [SliverGeometry.layoutExtent] for subsequent children.
+  ///  * `mainAxisExtent` is the [SliverConstraints.mainAxisExtent] to pass to
+  ///    each child.
+  ///  * `crossAxisExtent` is the [SliverConstraints.crossAxisExtent] to pass to
+  ///    each child.
+  ///  * `growthDirection` is the [SliverConstraints.growthDirection] to pass to
+  ///    each child.
+  ///
+  /// Returns the first non-zero [SliverGeometry.scrollOffsetCorrection]
+  /// encountered, if any. Otherwise returns 0.0. Typical callers will call this
+  /// function repeatedly until it returns 0.0.
   @protected
-  double layoutOneSide(
+  double layoutChildSequence(
     RenderSliver child,
     double scrollOffset,
+    double overlap,
     double layoutOffset,
     double remainingPaintExtent,
     double mainAxisExtent,
     double crossAxisExtent,
     GrowthDirection growthDirection,
-    _Advancer advance,
+    RenderSliver advance(RenderSliver child),
   ) {
     assert(scrollOffset.isFinite);
     assert(scrollOffset >= 0.0);
-    ScrollDirection adjustedUserScrollDirection;
-    switch (growthDirection) {
-      case GrowthDirection.forward:
-        adjustedUserScrollDirection = offset.userScrollDirection;
-        break;
-      case GrowthDirection.reverse:
-        switch (offset.userScrollDirection) {
-          case ScrollDirection.forward:
-            adjustedUserScrollDirection = ScrollDirection.reverse;
-            break;
-          case ScrollDirection.reverse:
-            adjustedUserScrollDirection = ScrollDirection.forward;
-            break;
-          case ScrollDirection.idle:
-            adjustedUserScrollDirection = ScrollDirection.idle;
-            break;
-        }
-        break;
-    }
+    final double initialLayoutOffset = layoutOffset;
+    final ScrollDirection adjustedUserScrollDirection =
+        applyGrowthDirecitonToScrollDirection(offset.userScrollDirection, growthDirection);
     assert(adjustedUserScrollDirection != null);
-    double maxPaintOffset = layoutOffset;
-    double initialLayoutOffset = layoutOffset;
+    double maxPaintOffset = layoutOffset + overlap;
     while (child != null) {
       assert(scrollOffset >= 0.0);
       child.layout(new SliverConstraints(
@@ -163,26 +190,26 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         crossAxisExtent: crossAxisExtent,
         viewportMainAxisExtent: mainAxisExtent,
       ), parentUsesSize: true);
-      // collect the child's objects
-      final SliverGeometry childLayoutGeometry = child.geometry;
 
+      final SliverGeometry childLayoutGeometry = child.geometry;
       assert(childLayoutGeometry.debugAssertIsValid);
 
-      // first check that there isn't a correction to apply. If there is we'll
-      // have to start over.
+      // If there is a correction to apply, we'll have to start over.
       if (childLayoutGeometry.scrollOffsetCorrection != 0.0)
         return childLayoutGeometry.scrollOffsetCorrection;
 
-      // geometry
-      updateChildLayoutOffset(child, layoutOffset, growthDirection);
-      maxPaintOffset = math.max(layoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
+      // We use the child's paint origin in our coordinate system as the
+      // layoutOffset we store in the child's parent data.
+      final double effectiveLayoutOffset = layoutOffset + childLayoutGeometry.paintOrigin;
+      updateChildLayoutOffset(child, effectiveLayoutOffset, growthDirection);
+      maxPaintOffset = math.max(effectiveLayoutOffset + childLayoutGeometry.paintExtent, maxPaintOffset);
       scrollOffset -= childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
 
       if (scrollOffset <= 0.0)
         scrollOffset = 0.0;
 
-      updateOutOfBoundsData(growthDirection, childLayoutGeometry);
+      updateOutOfBandData(growthDirection, childLayoutGeometry);
 
       // move on to the next child
       child = advance(child);
@@ -197,14 +224,13 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return;
     if (hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, paintContents);
+      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
     } else {
-      paintContents(context, offset);
+      _paintContents(context, offset);
     }
   }
 
-  @protected
-  void paintContents(PaintingContext context, Offset offset) {
+  void _paintContents(PaintingContext context, Offset offset) {
     for (RenderSliver child in childrenInPaintOrder) {
       if (child.geometry.visible)
         context.paintChild(child, offset + paintOffsetOf(child));
@@ -346,6 +372,14 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
   }
 
+  /// The offset at which the given `child` should be painted.
+  ///
+  /// The returned offset is from the top left corner of the inside of the
+  /// viewport to the top left corner of the paint coordinate system of the
+  /// `child`.
+  ///
+  /// See also [paintOffsetOf], which uses the layout offset and growth
+  /// direction computed for the child during layout.
   @protected
   Offset computeAbsolutePaintOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     assert(hasSize); // this is only usable once we have a size
@@ -379,7 +413,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   String debugDescribeChildren(String prefix) {
     if (firstChild == null)
       return '$prefix\n';
-    int count = indexOfFirstChild();
+    int count = indexOfFirstChild;
     String result = '$prefix \u2502\n';
     RenderSliver child = firstChild;
     while (child != lastChild) {
@@ -398,22 +432,52 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   // performLayout (and optionally sizedByParent and performResize)
 
+  /// Whether the contents of this viewport would paint outside the bounds of
+  /// the viewport if [paint] did not clip.
+  ///
+  /// This property enables an optimization whereby [paint] can skip apply a
+  /// clip of the contents of the viewport are known to paint entirely within
+  /// the bounds of the viewport.
   @protected
   bool get hasVisualOverflow;
 
+  /// Called during [layoutChildSequence] for each child.
+  ///
+  /// Typically used by subclasses to update any out-of-band data, such as the
+  /// max scroll extent, for each child.
   @protected
-  void updateOutOfBoundsData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry);
+  void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry);
 
+  /// Called during [layoutChildSequence] to store the layout offset for the
+  /// given child.
+  ///
+  /// Different subclasses using different representations for their children's
+  /// layout offset (e.g., logical or physical coordinates). This function lets
+  /// subclasses transform the child's layout offset before storing it in the
+  /// child's parent data.
   @protected
   void updateChildLayoutOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection);
 
+  /// The offset at which the given `child` should be painted.
+  ///
+  /// The returned offset is from the top left corner of the inside of the
+  /// viewport to the top left corner of the paint coordinate system of the
+  /// `child`.
+  ///
+  /// See also [computeAbsolutePaintOffset], which computes the paint offset
+  /// from an explict layout offset and growth direction instead of using the
+  /// values computed for the child during layout.
   @protected
   Offset paintOffsetOf(RenderSliver child);
 
+  /// Returns the scroll offset within the viewport for the given
+  /// `scrollOffsetWithinChild` within the given `child`.
+  ///
+  /// The returned value is an estimate that assumes the slivers within the
+  /// viewport do not change the layout extent in response to changes in their
+  /// scroll offset.
   @protected
-  double scrollOffsetOf(RenderSliver child, double scrollOffset);
-
-  // applyPaintTransform
+  double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
   /// Converts the `parentMainAxisPosition` into the child's coordinate system.
   ///
@@ -434,9 +498,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double computeChildMainAxisPosition(RenderSliver child, double parentMainAxisPosition);
 
+  /// The index of the first child of the viewport relative to the center child.
+  ///
+  /// For example, the center child has index zero and the first child in the
+  /// reverse growth direction has index -1.
   @protected
-  int indexOfFirstChild();
+  int get indexOfFirstChild;
 
+  /// A short string to identify the child with the given index.
+  ///
+  /// Used by [debugDescribeChildren] to label the children.
   @protected
   String labelForChild(int index);
 
@@ -494,6 +565,13 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       child.parentData = new SliverPhysicalContainerParentData();
   }
 
+  /// The relative position of the zero scroll offset.
+  ///
+  /// For example, if [anchor] is 0.5 and the [axisDirection] is
+  /// [AxisDirection.down] or [AxisDirection.up], then the zero scroll offset is
+  /// vertically centered within the viewport. If the [anchor] is 1.0, and the
+  /// [axisDirection] is [AxisDirection.right], then the zero scroll offset is
+  /// on the left edge of the viewport.
   double get anchor => _anchor;
   double _anchor;
   set anchor(double value) {
@@ -505,6 +583,13 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     markNeedsLayout();
   }
 
+  /// The first child in the [GrowthDirection.forward] growth direction.
+  ///
+  /// Children after [center] will be placed in the [axisDirection] relative to
+  /// the [center]. Children before [center] will be placed in the opposite of
+  /// the [axisDirection] relative to the [center].
+  ///
+  /// The [center] must be a child of the viewport.
   RenderSliver get center => _center;
   RenderSliver _center;
   set center(RenderSliver value) {
@@ -530,7 +615,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'In this case, a vertical viewport was given an unlimited amount of '
                 'vertical space in which to expand. This situation typically happens '
                 'when a scrollable widget is nested inside another scrollable widget.\n'
-                '\n'
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'vertical space for the children. In this case, consider using a '
@@ -557,7 +641,6 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
                 'In this case, a horizontal viewport was given an unlimited amount of '
                 'horizontal space in which to expand. This situation typically happens '
                 'when a scrollable widget is nested inside another scrollable widget.\n'
-                '\n'
                 'If this widget is always nested in a scrollable widget there '
                 'is no need to use a viewport because there will always be enough '
                 'horizontal space for the children. In this case, consider using a '
@@ -687,24 +770,30 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double clampedForwardCenter = math.max(0.0, math.min(mainAxisExtent, centerOffset));
     final double clampedReverseCenter = math.max(0.0, math.min(mainAxisExtent, mainAxisExtent - centerOffset));
 
-    // negative scroll offsets
-    double result = layoutOneSide(
-      childBefore(center),
-      math.max(mainAxisExtent, mainAxisExtent * anchor - correctedOffset) - mainAxisExtent,
-      clampedReverseCenter,
-      clampedForwardCenter,
-      mainAxisExtent,
-      crossAxisExtent,
-      GrowthDirection.reverse,
-      childBefore,
-    );
-    if (result != 0.0)
-      return -result;
+    final RenderSliver leadingNegativeChild = childBefore(center);
+
+    if (leadingNegativeChild != null) {
+      // negative scroll offsets
+      final double result = layoutChildSequence(
+        leadingNegativeChild,
+        math.max(mainAxisExtent, centerOffset) - mainAxisExtent,
+        0.0,
+        clampedReverseCenter,
+        clampedForwardCenter,
+        mainAxisExtent,
+        crossAxisExtent,
+        GrowthDirection.reverse,
+        childBefore,
+      );
+      if (result != 0.0)
+        return -result;
+    }
 
     // positive scroll offsets
-    return layoutOneSide(
+    return layoutChildSequence(
       center,
-      math.max(0.0, correctedOffset - mainAxisExtent * anchor),
+      math.max(0.0, -centerOffset),
+      leadingNegativeChild == null ? math.min(0.0, -centerOffset) : 0.0,
       clampedForwardCenter,
       clampedReverseCenter,
       mainAxisExtent,
@@ -718,7 +807,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   bool get hasVisualOverflow => _hasVisualOverflow;
 
   @override
-  void updateOutOfBoundsData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
+  void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
     switch (growthDirection) {
       case GrowthDirection.forward:
         _maxScrollExtent += childLayoutGeometry.scrollExtent;
@@ -795,7 +884,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 
   @override
-  int indexOfFirstChild() {
+  int get indexOfFirstChild {
     assert(center != null);
     assert(center.parent == this);
     assert(firstChild != null);
@@ -966,9 +1055,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
     _maxScrollExtent = 0.0;
     _shrinkWrapExtent = 0.0;
     _hasVisualOverflow = false;
-    return layoutOneSide(
+    return layoutChildSequence(
       firstChild,
       math.max(0.0, correctedOffset),
+      math.min(0.0, correctedOffset),
       0.0,
       mainAxisExtent,
       mainAxisExtent,
@@ -982,7 +1072,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   bool get hasVisualOverflow => _hasVisualOverflow;
 
   @override
-  void updateOutOfBoundsData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
+  void updateOutOfBandData(GrowthDirection growthDirection, SliverGeometry childLayoutGeometry) {
     assert(growthDirection == GrowthDirection.forward);
     _maxScrollExtent += childLayoutGeometry.scrollExtent;
     if (childLayoutGeometry.hasVisualOverflow)
@@ -1042,7 +1132,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   @override
-  int indexOfFirstChild() => 0;
+  int get indexOfFirstChild => 0;
 
   @override
   String labelForChild(int index) => 'child $index';

@@ -12,29 +12,44 @@ import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
 
-/// A widget that rebuilds when the given animation changes value.
+/// A widget that rebuilds when the given [Listenable] changes value.
 ///
-/// AnimatedWidget is most useful for stateless animated widgets. To use
-/// AnimatedWidget, simply subclass it and implement the build function.
+/// [AnimatedWidget] is most common used with [Animation] objects, which are
+/// [Listenable], but it can be used with any [Listenable], including
+/// [ChangeNotifier] and [ValueNotifier].
+///
+/// [AnimatedWidget] is most useful for widgets widgets that are otherwise
+/// stateless. To use [AnimatedWidget], simply subclass it and implement the
+/// build function.
 ///
 /// For more complex case involving additional state, consider using
 /// [AnimatedBuilder].
+///
+/// See also:
+///
+///  * [AnimatedBuilder], which is useful for more complex use cases.
+///  * [Animation], which is a [Listenable] object that can be used for
+///    [listenable].
+///  * [ChangeNotifier], which is another [Listenable] object that can be used
+///    for [listenable].
 abstract class AnimatedWidget extends StatefulWidget {
-  /// Creates a widget that rebuilds when the given animation changes value.
+  /// Creates a widget that rebuilds when the given listenable changes.
   ///
-  /// The [animation] argument is required.
+  /// The [listenable] argument is required.
   AnimatedWidget({
     Key key,
-    @required this.animation
+    @required this.listenable
   }) : super(key: key) {
-    assert(animation != null);
+    assert(listenable != null);
   }
 
-  /// The animation to which this widget is listening.
-  final Animation<Object> animation;
+  /// The [Listenable] to which this widget is listening.
+  ///
+  /// Commonly an [Animation] or a [ChangeNotifier].
+  final Listenable listenable;
 
-  /// Override this method to build widgets that depend on the current value
-  /// of the animation.
+  /// Override this method to build widgets that depend on the state of the
+  /// listenable (e.g., the current value of the animation).
   @protected
   Widget build(BuildContext context);
 
@@ -45,7 +60,7 @@ abstract class AnimatedWidget extends StatefulWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('animation: $animation');
+    description.add('animation: $listenable');
   }
 }
 
@@ -53,52 +68,50 @@ class _AnimatedState extends State<AnimatedWidget> {
   @override
   void initState() {
     super.initState();
-    config.animation.addListener(_handleTick);
+    config.listenable.addListener(_handleChange);
   }
 
   @override
   void didUpdateConfig(AnimatedWidget oldConfig) {
-    if (config.animation != oldConfig.animation) {
-      oldConfig.animation.removeListener(_handleTick);
-      config.animation.addListener(_handleTick);
+    if (config.listenable != oldConfig.listenable) {
+      oldConfig.listenable.removeListener(_handleChange);
+      config.listenable.addListener(_handleChange);
     }
   }
 
   @override
   void dispose() {
-    config.animation.removeListener(_handleTick);
+    config.listenable.removeListener(_handleChange);
     super.dispose();
   }
 
-  void _handleTick() {
+  void _handleChange() {
     setState(() {
-      // The animation's state is our build state, and it changed already.
+      // The listenable's state is our build state, and it changed already.
     });
   }
 
   @override
-  Widget build(BuildContext context) {
-    return config.build(context);
-  }
+  Widget build(BuildContext context) => config.build(context);
 }
 
 /// Animates the position of a widget relative to its normal position.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
-  /// The [position] argument is required.
+  /// The [position] argument must not be null.
   SlideTransition({
     Key key,
-    Animation<FractionalOffset> position,
+    @required Animation<FractionalOffset> position,
     this.transformHitTests: true,
     this.child,
-  }) : super(key: key, animation: position);
+  }) : super(key: key, listenable: position);
 
   /// The animation that controls the position of the child.
   ///
   /// If the current value of the position animation is (dx, dy), the child will
   /// be translated horizontally by width * dx and vertically by height * dy.
-  Animation<FractionalOffset> get position => animation;
+  Animation<FractionalOffset> get position => listenable;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -125,20 +138,20 @@ class SlideTransition extends AnimatedWidget {
 class ScaleTransition extends AnimatedWidget {
   /// Creates a scale transition.
   ///
-  /// The [scale] argument is required. The [alignment] argument defaults to
-  /// [FractionalOffset.center].
+  /// The [scale] argument must not be null. The [alignment] argument defaults
+  /// to [FractionalOffset.center].
   ScaleTransition({
     Key key,
-    Animation<double> scale,
+    @required Animation<double> scale,
     this.alignment: FractionalOffset.center,
     this.child,
-  }) : super(key: key, animation: scale);
+  }) : super(key: key, listenable: scale);
 
   /// The animation that controls the scale of the child.
   ///
   /// If the current value of the scale animation is v, the child will be
   /// painted v times its normal size.
-  Animation<double> get scale => animation;
+  Animation<double> get scale => listenable;
 
   /// The alignment of the origin of the coordainte system in which the scale
   /// takes place, relative to the size of the box.
@@ -153,7 +166,7 @@ class ScaleTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final double scaleValue = scale.value;
-    Matrix4 transform = new Matrix4.identity()
+    final Matrix4 transform = new Matrix4.identity()
       ..scale(scaleValue, scaleValue, 1.0);
     return new Transform(
       transform: transform,
@@ -167,26 +180,26 @@ class ScaleTransition extends AnimatedWidget {
 class RotationTransition extends AnimatedWidget {
   /// Creates a rotation transition.
   ///
-  /// The [turns] argument is required.
+  /// The [turns] argument must not be null.
   RotationTransition({
     Key key,
-    Animation<double> turns,
+    @required Animation<double> turns,
     this.child,
-  }) : super(key: key, animation: turns);
+  }) : super(key: key, listenable: turns);
 
   /// The animation that controls the rotation of the child.
   ///
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
-  Animation<double> get turns => animation;
+  Animation<double> get turns => listenable;
 
   /// The widget below this widget in the tree.
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    double turnsValue = turns.value;
-    Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
+    final double turnsValue = turns.value;
+    final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
       alignment: FractionalOffset.center,
@@ -202,16 +215,16 @@ class RotationTransition extends AnimatedWidget {
 class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
-  /// The [sizeFactor] argument is required. The [axis] argument defaults to
-  /// [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
+  /// The [sizeFactor] argument must not be null. The [axis] argument defaults
+  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
   /// child along the main axis during the transition.
   SizeTransition({
     Key key,
     this.axis: Axis.vertical,
-    Animation<double> sizeFactor,
+    @required Animation<double> sizeFactor,
     this.axisAlignment: 0.5,
     this.child,
-  }) : super(key: key, animation: sizeFactor) {
+  }) : super(key: key, listenable: sizeFactor) {
     assert(axis != null);
   }
 
@@ -221,7 +234,7 @@ class SizeTransition extends AnimatedWidget {
   /// The animation that controls the (clipped) size of the child. If the current value
   /// of sizeFactor is v then the width or height of the widget will be its intrinsic
   /// width or height multiplied by v.
-  Animation<double> get sizeFactor => animation;
+  Animation<double> get sizeFactor => listenable;
 
   /// How to align the child along the axis that sizeFactor is modifying.
   final double axisAlignment;
@@ -254,12 +267,12 @@ class SizeTransition extends AnimatedWidget {
 class FadeTransition extends AnimatedWidget {
   /// Creates an opacity transition.
   ///
-  /// The [opacity] argument is required.
+  /// The [opacity] argument must not be null.
   FadeTransition({
     Key key,
-    Animation<double> opacity,
+    @required Animation<double> opacity,
     this.child,
-  }) : super(key: key, animation: opacity);
+  }) : super(key: key, listenable: opacity);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -267,7 +280,7 @@ class FadeTransition extends AnimatedWidget {
   /// painted with an opacity of v. For example, if v is 0.5, the child will be
   /// blended 50% with its background. Similarly, if v is 0.0, the child will be
   /// completely transparent.
-  Animation<double> get opacity => animation;
+  Animation<double> get opacity => listenable;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -306,15 +319,15 @@ class RelativeRectTween extends Tween<RelativeRect> {
 class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
-  /// The [rect] argument is required.
+  /// The [rect] argument must not be null.
   PositionedTransition({
     Key key,
-    Animation<RelativeRect> rect,
+    @required Animation<RelativeRect> rect,
     @required this.child,
-  }) : super(key: key, animation: rect);
+  }) : super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
-  Animation<RelativeRect> get rect => animation;
+  Animation<RelativeRect> get rect => listenable;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -342,18 +355,18 @@ class RelativePositionedTransition extends AnimatedWidget {
   ///
   /// Each frame, the [Positioned] widget will be configured to represent the
   /// current value of the [rect] argument assuming that the stack has the given
-  /// [size]. Both [rect] and [size] must be non-null.
+  /// [size]. Both [rect] and [size] must not be null.
   RelativePositionedTransition({
     Key key,
     @required Animation<Rect> rect,
     @required this.size,
     @required this.child,
-  }) : super(key: key, animation: rect);
+  }) : super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
   ///
   /// See also [size].
-  Animation<Rect> get rect => animation;
+  Animation<Rect> get rect => listenable;
 
   /// The [Positioned] widget's offsets are relative to a box of this
   /// size whose origin is 0,0.
@@ -407,10 +420,10 @@ class AnimatedBuilder extends AnimatedWidget {
   /// The [animation] and [builder] arguments must not be null.
   AnimatedBuilder({
     Key key,
-    @required Animation<Object> animation,
+    @required Listenable animation,
     @required this.builder,
     this.child,
-  }) : super(key: key, animation: animation) {
+  }) : super(key: key, listenable: animation) {
     assert(builder != null);
   }
 

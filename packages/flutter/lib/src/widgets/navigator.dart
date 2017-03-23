@@ -603,7 +603,7 @@ class Navigator extends StatefulWidget {
   /// this function returns true only if popping the navigator would not remove
   /// the initial route.
   static bool canPop(BuildContext context) {
-    NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+    final NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     return navigator != null && navigator.canPop();
   }
 
@@ -626,7 +626,7 @@ class Navigator extends StatefulWidget {
   /// Navigator.popAndPushNamed(context, '/nyc/1776');
   /// ```
   static Future<dynamic> popAndPushNamed(BuildContext context, String routeName, { dynamic result }) {
-    NavigatorState navigator = Navigator.of(context);
+    final NavigatorState navigator = Navigator.of(context);
     navigator.pop(result);
     return navigator.pushNamed(routeName);
   }
@@ -677,7 +677,7 @@ class Navigator extends StatefulWidget {
   ///   ..pushNamed('/settings');
   /// ```
   static NavigatorState of(BuildContext context) {
-    NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+    final NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null) {
         throw new FlutterError(
@@ -697,7 +697,7 @@ class Navigator extends StatefulWidget {
 /// The state for a [Navigator] widget.
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = new GlobalKey<OverlayState>();
-  final List<Route<dynamic>> _history = new List<Route<dynamic>>();
+  final List<Route<dynamic>> _history = <Route<dynamic>>[];
   final Set<Route<dynamic>> _poppedRoutes = new Set<Route<dynamic>>();
 
   @override
@@ -801,7 +801,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(route != null);
     assert(route._navigator == null);
     setState(() {
-      Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
+      final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
       route._navigator = this;
       route.install(_currentOverlayEntry);
       _history.add(route);
@@ -876,7 +876,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute._navigator == null);
     assert(newRoute.overlayEntries.isEmpty);
     setState(() {
-      int index = _history.length - 1;
+      final int index = _history.length - 1;
       assert(index >= 0);
       assert(_history.indexOf(oldRoute) == index);
       newRoute._navigator = this;
@@ -938,15 +938,15 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
     assert(anchorRoute._navigator == this);
-    int index = _history.indexOf(anchorRoute) - 1;
+    final int index = _history.indexOf(anchorRoute) - 1;
     assert(index >= 0);
-    Route<dynamic> targetRoute = _history[index];
+    final Route<dynamic> targetRoute = _history[index];
     assert(targetRoute._navigator == this);
     assert(targetRoute.overlayEntries.isEmpty || !overlay.debugIsVisible(targetRoute.overlayEntries.last));
     setState(() {
       _history.removeAt(index);
-      Route<dynamic> nextRoute = index < _history.length ? _history[index] : null;
-      Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
+      final Route<dynamic> nextRoute = index < _history.length ? _history[index] : null;
+      final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
       if (previousRoute != null)
         previousRoute.didChangeNext(nextRoute);
       if (nextRoute != null)
@@ -993,7 +993,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   bool pop([dynamic result]) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    Route<dynamic> route = _history.last;
+    final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
     assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
@@ -1104,7 +1104,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   void _cancelActivePointers() {
     // TODO(abarth): This mechanism is far from perfect. See https://github.com/flutter/flutter/issues/4770
-    RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+    final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
     setState(() {
       absorber?.absorbing = true;
     });

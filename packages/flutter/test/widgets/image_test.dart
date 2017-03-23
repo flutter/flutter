@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
@@ -11,10 +12,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../services/image_data.dart';
+
 void main() {
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
-    TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
       new Container(
         key: key,
@@ -35,7 +38,7 @@ void main() {
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
-    TestImageProvider imageProvider2 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
     await tester.pumpWidget(
       new Container(
         key: key,
@@ -53,7 +56,7 @@ void main() {
 
   testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
-    TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
       new Container(
         key: key,
@@ -75,7 +78,7 @@ void main() {
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
-    TestImageProvider imageProvider2 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
     await tester.pumpWidget(
       new Container(
         key: key,
@@ -94,7 +97,7 @@ void main() {
 
   testWidgets('Verify Image resets its RenderImage when changing providers if it has a key', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
-    TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
       new Image(
         key: key,
@@ -113,7 +116,7 @@ void main() {
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
-    TestImageProvider imageProvider2 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
     await tester.pumpWidget(
       new Image(
         key: key,
@@ -129,7 +132,7 @@ void main() {
 
   testWidgets('Verify Image doesn\'t reset its RenderImage when changing providers if it has gaplessPlayback set', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
-    TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider1 = new TestImageProvider();
     await tester.pumpWidget(
       new Image(
         key: key,
@@ -149,7 +152,7 @@ void main() {
     renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNotNull);
 
-    TestImageProvider imageProvider2 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
     await tester.pumpWidget(
       new Image(
         key: key,
@@ -288,9 +291,9 @@ void main() {
   });
 
   testWidgets('Verify Image stops listening to ImageStream', (WidgetTester tester) async {
-    TestImageProvider imageProvider = new TestImageProvider();
+    final TestImageProvider imageProvider = new TestImageProvider();
     await tester.pumpWidget(new Image(image: imageProvider));
-    State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
+    final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
     expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(stream: ImageStream\(OneFrameImageStreamCompleter; unresolved; 1 listener\); pixels: null\)')));
     imageProvider.complete();
     await tester.pump();
@@ -299,6 +302,9 @@ void main() {
     expect(image.toString(), matches(new RegExp(r'_ImageState#[0-9]+\(_StateLifecycle.defunct; not mounted; stream: ImageStream\(OneFrameImageStreamCompleter; \[100×100\] @ 1\.0x; 0 listeners\); pixels: \[100×100\] @ 1\.0x\)')));
   });
 
+  testWidgets('Image.memory control test', (WidgetTester tester) async {
+    await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage)));
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

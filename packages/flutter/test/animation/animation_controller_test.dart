@@ -13,7 +13,7 @@ void main() {
   });
 
   test('Can set value during status callback', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -45,16 +45,14 @@ void main() {
   });
 
   test('Receives status callbacks for forward and reverse', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    List<double> valueLog = <double>[];
-    List<AnimationStatus> log = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> log = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        log.add(status);
-      })
+      ..addStatusListener(log.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -108,16 +106,14 @@ void main() {
   });
 
   test('Forward and reverse from values', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    List<double> valueLog = <double>[];
-    List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        statusLog.add(status);
-      })
+      ..addStatusListener(statusLog.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -136,16 +132,14 @@ void main() {
   });
 
   test('Forward only from value', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
-    List<double> valueLog = <double>[];
-    List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final List<double> valueLog = <double>[];
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
     controller
-      ..addStatusListener((AnimationStatus status) {
-        statusLog.add(status);
-      })
+      ..addStatusListener(statusLog.add)
       ..addListener(() {
         valueLog.add(controller.value);
       });
@@ -157,7 +151,7 @@ void main() {
   });
 
   test('Can fling to upper and lower bounds', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -168,7 +162,7 @@ void main() {
     expect(controller.value, 1.0);
     controller.stop();
 
-    AnimationController largeRangeController = new AnimationController(
+    final AnimationController largeRangeController = new AnimationController(
       duration: const Duration(milliseconds: 100),
       lowerBound: -30.0,
       upperBound: 45.0,
@@ -187,7 +181,7 @@ void main() {
   });
 
   test('lastElapsedDuration control test', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -200,7 +194,7 @@ void main() {
   });
 
   test('toString control test', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -219,7 +213,7 @@ void main() {
   });
 
   test('velocity test - linear', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 1000),
       vsync: const TestVSync(),
     );
@@ -262,7 +256,7 @@ void main() {
   });
 
   test('Disposed AnimationController toString works', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       duration: const Duration(milliseconds: 100),
       vsync: const TestVSync(),
     );
@@ -271,7 +265,7 @@ void main() {
   });
 
   test('AnimationController error handling', () {
-    AnimationController controller = new AnimationController(
+    final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
 
@@ -283,4 +277,13 @@ void main() {
     controller.dispose();
     expect(controller.dispose, throwsFlutterError);
   });
+
+  test('AnimationController repeat() throws if period is not specified', () {
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+    );
+    expect((){ controller.repeat(); }, throwsFlutterError);
+    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+  });
+
 }

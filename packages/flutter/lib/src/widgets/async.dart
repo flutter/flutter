@@ -45,9 +45,9 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   StreamBuilderBase({ Key key, this.stream }) : super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
-  /// possibly `null`. When changed, the current summary is updated using
-  /// [afterDisconnecting], if the previous stream was not `null`, followed by
-  /// [afterConnecting], if the new stream is not `null`.
+  /// possibly null. When changed, the current summary is updated using
+  /// [afterDisconnecting], if the previous stream was not null, followed by
+  /// [afterConnecting], if the new stream is not null.
   final Stream<T> stream;
 
   /// Returns the initial summary of stream interaction, typically representing
@@ -189,7 +189,7 @@ class AsyncSnapshot<T> {
     assert(data == null || error == null);
   }
 
-  /// Creates an [AsyncSnapshot] in [ConnectionState.none] with `null` data and error.
+  /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
   AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
@@ -201,19 +201,31 @@ class AsyncSnapshot<T> {
   /// Current state of connection to the asynchronous computation.
   final ConnectionState connectionState;
 
-  /// Latest data received. Is `null`, if [error] is not.
+  /// Latest data received. Is null, if [error] is not.
   final T data;
 
-  /// Latest error object received. Is `null`, if [data] is not.
+  /// Returns latest data received, failing if there is no data.
+  ///
+  /// Throws [error], if [hasError]. Throws [StateError], if neither [hasData]
+  /// nor [hasError].
+  T get requireData {
+    if (hasData)
+      return data;
+    if (hasError)
+      throw error;
+    throw new StateError('Snapshot has neither data nor error');
+  }
+
+  /// Latest error object received. Is null, if [data] is not.
   final Object error;
 
   /// Returns a snapshot like this one, but in the specified [state].
   AsyncSnapshot<T> inState(ConnectionState state) => new AsyncSnapshot<T>._(state, data, error);
 
-  /// Returns whether this snapshot contains a non-`null` data value.
+  /// Returns whether this snapshot contains a non-null data value.
   bool get hasData => data != null;
 
-  /// Returns whether this snapshot contains a non-`null` error value.
+  /// Returns whether this snapshot contains a non-null error value.
   bool get hasError => error != null;
 
   @override
@@ -276,8 +288,8 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// * `new AsyncSnapshot<int>(ConnectionState.none, 5, null)`
 /// * `new AsyncSnapshot<int>(ConnectionState.waiting, 5, null)`
 ///
-/// The latter will be produced only when the new stream is non-`null`. The former
-/// only when the old stream is non-`null`.
+/// The latter will be produced only when the new stream is non-null. The former
+/// only when the old stream is non-null.
 ///
 /// The stream may produce errors, resulting in snapshots of the form
 ///
@@ -302,7 +314,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
     assert(builder != null);
   }
 
-  /// The build strategy currently used by this builder. Cannot be `null`.
+  /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
 
   @override
@@ -362,12 +374,16 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// * `new AsyncSnapshot<String>(ConnectionState.waiting, 'some data', null)`
 ///
 /// In general, the latter will be produced only when the new future is
-/// non-`null`. The former only when the old future is non-`null`.
+/// non-null. The former only when the old future is non-null.
 ///
 /// A [FutureBuilder] behaves identically to a [StreamBuilder] configured with
 /// `future?.asStream()`, except that snapshots with `ConnectionState.active`
 /// may appear for the latter, depending on how the stream is implemented.
 class FutureBuilder<T> extends StatefulWidget {
+  /// Creates a widget that builds itself based on the latest snapshot of
+  /// interaction with a [Future].
+  ///
+  /// The [builder] must not be null.
   FutureBuilder({
     Key key,
     this.future,
@@ -377,10 +393,10 @@ class FutureBuilder<T> extends StatefulWidget {
   }
 
   /// The asynchronous computation to which this builder is currently connected,
-  /// possibly `null`.
+  /// possibly null.
   final Future<T> future;
 
-  /// The build strategy currently used by this builder. Cannot be `null`.
+  /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
 
   @override

@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Radio control test', (WidgetTester tester) async {
-    Key key = new UniqueKey();
-    List<int> log = <int>[];
+    final Key key = new UniqueKey();
+    final List<int> log = <int>[];
 
     await tester.pumpWidget(new Material(
       child: new Center(
@@ -16,9 +16,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: 2,
-          onChanged: (int value) {
-            log.add(value);
-          },
+          onChanged: log.add,
         ),
       ),
     ));
@@ -34,9 +32,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: 1,
-          onChanged: (int value) {
-            log.add(value);
-          },
+          onChanged: log.add,
           activeColor: Colors.green[500],
         ),
       ),

@@ -9,7 +9,7 @@ import 'dart:collection';
 /// Consider using an [ObserverList] instead of a [List] when the number of
 /// [contains] calls dominates the number of [add] and [remove] calls.
 class ObserverList<T> extends Iterable<T> {
-  final List<T> _list = new List<T>();
+  final List<T> _list = <T>[];
   bool _isDirty = false;
   HashSet<T> _set;
 

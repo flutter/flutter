@@ -24,7 +24,7 @@ class _NotImplementedDialog extends StatelessWidget {
       content: new Text('This feature has not yet been implemented.'),
       actions: <Widget>[
         new FlatButton(
-          onPressed: () { debugDumpApp(); },
+          onPressed: debugDumpApp,
           child: new Row(
             children: <Widget>[
               new Icon(
@@ -241,7 +241,7 @@ class StockHomeState extends State<StockHome> {
   Iterable<Stock> _filterBySearchQuery(Iterable<Stock> stocks) {
     if (_searchQuery.text.isEmpty)
       return stocks;
-    RegExp regexp = new RegExp(_searchQuery.text, caseSensitive: false);
+    final RegExp regexp = new RegExp(_searchQuery.text, caseSensitive: false);
     return stocks.where((Stock stock) => stock.symbol.contains(regexp));
   }
 
@@ -312,7 +312,7 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       tooltip: 'Create company',
       child: new Icon(Icons.add),
-      backgroundColor: Colors.redAccent[200],
+      backgroundColor: Colors.redAccent,
       onPressed: _handleCreateCompany
     );
   }

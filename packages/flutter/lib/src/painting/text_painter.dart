@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'text_editing.dart';
 import 'text_span.dart';
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
@@ -137,7 +137,7 @@ class TextPainter {
   double get preferredLineHeight {
     assert(text != null);
     if (_layoutTemplate == null) {
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(new ui.ParagraphStyle());
       if (text.style != null)
         builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
       builder.addText(_kZeroWidthSpace);
@@ -247,7 +247,7 @@ class TextPainter {
         maxLines: maxLines,
         ellipsis: ellipsis,
       );
-      ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
+      final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(paragraphStyle);
       _text.build(builder, textScaleFactor: textScaleFactor);
       _paragraph = builder.build();
     }
@@ -291,30 +291,30 @@ class TextPainter {
   }
 
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
-    int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+    final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
     if (boxes.isEmpty)
       return null;
-    ui.TextBox box = boxes[0];
-    double caretEnd = box.end;
-    double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
+    final ui.TextBox box = boxes[0];
+    final double caretEnd = box.end;
+    final double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
     return new Offset(dx, box.top);
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
     if (nextCodeUnit == null)
       return null;
-    int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+    final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
     if (boxes.isEmpty)
       return null;
-    ui.TextBox box = boxes[0];
-    double caretStart = box.start;
-    double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
+    final ui.TextBox box = boxes[0];
+    final double caretStart = box.start;
+    final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
     return new Offset(dx, box.top);
   }
 
@@ -323,7 +323,7 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
-    int offset = position.offset;
+    final int offset = position.offset;
     // TODO(abarth): Handle the directionality of the text painter itself.
     const Offset emptyOffset = Offset.zero;
     switch (position.affinity) {
@@ -365,7 +365,7 @@ class TextPainter {
   /// <http://www.unicode.org/reports/tr29/#Word_Boundaries>.
   TextRange getWordBoundary(TextPosition position) {
     assert(!_needsLayout);
-    List<int> indices = _paragraph.getWordBoundary(position.offset);
+    final List<int> indices = _paragraph.getWordBoundary(position.offset);
     return new TextRange(start: indices[0], end: indices[1]);
   }
 }

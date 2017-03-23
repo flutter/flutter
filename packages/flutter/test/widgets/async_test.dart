@@ -2,14 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/widgets.dart';
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
 void main() {
-  Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) { 
+  Widget snapshotText(BuildContext context, AsyncSnapshot<String> snapshot) {
     return new Text(snapshot.toString());
   }
+  group('AsyncSnapshot', () {
+    test('requiring data succeeds if data is present', () {
+      expect(
+        new AsyncSnapshot<String>.withData(ConnectionState.done, 'hello').requireData,
+        'hello',
+      );
+    });
+    test('requiring data fails if there is an error', () {
+      expect(
+        () => new AsyncSnapshot<String>.withError(ConnectionState.done, 'error').requireData,
+        throwsA(equals('error')),
+      );
+    });
+    test('requiring data fails if snapshot has neither data nor error', () {
+      expect(
+        () => new AsyncSnapshot<String>.nothing().requireData,
+        throwsStateError,
+      );
+    });
+  });
   group('Async smoke tests', () {
     testWidgets('FutureBuilder', (WidgetTester tester) async {
       await tester.pumpWidget(new FutureBuilder<String>(
@@ -234,7 +255,7 @@ void main() {
 }
 
 Future<Null> eventFiring(WidgetTester tester) async {
-  await tester.pump(const Duration());
+  await tester.pump(Duration.ZERO);
 }
 
 class StringCollector extends StreamBuilderBase<String, List<String>> {

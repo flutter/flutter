@@ -134,9 +134,9 @@ class MarkdownBodyRaw extends StatefulWidget {
 class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     _buildMarkdownCache();
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override
@@ -157,17 +157,17 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
   }
 
   void _buildMarkdownCache() {
-    MarkdownStyleRaw markdownStyle = config.markdownStyle ?? config.createDefaultStyle(context);
-    SyntaxHighlighter syntaxHighlighter = config.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
+    final MarkdownStyleRaw markdownStyle = config.markdownStyle ?? config.createDefaultStyle(context);
+    final SyntaxHighlighter syntaxHighlighter = config.syntaxHighlighter ?? new _DefaultSyntaxHighlighter(markdownStyle.code);
 
     _linkHandler?.dispose();
     _linkHandler = new _LinkHandler(config.onTapLink);
 
     // TODO: This can be optimized by doing the split and removing \r at the same time
-    List<String> lines = config.data.replaceAll('\r\n', '\n').split('\n');
-    md.Document document = new md.Document();
+    final List<String> lines = config.data.replaceAll('\r\n', '\n').split('\n');
+    final md.Document document = new md.Document();
 
-    _Renderer renderer = new _Renderer();
+    final _Renderer renderer = new _Renderer();
     _cachedBlocks = renderer.render(document.parseLines(lines), markdownStyle, syntaxHighlighter, _linkHandler);
   }
 
@@ -176,7 +176,7 @@ class _MarkdownBodyRawState extends State<MarkdownBodyRaw> {
 
   @override
   Widget build(BuildContext context) {
-    List<Widget> blocks = <Widget>[];
+    final List<Widget> blocks = <Widget>[];
     for (_Block block in _cachedBlocks) {
       blocks.add(block.build(context));
     }
@@ -219,13 +219,16 @@ class _Renderer implements md.NodeVisitor {
 
   @override
   void visitText(md.Text text) {
-    _MarkdownNodeList topList = _currentBlock.stack.last;
-    List<_MarkdownNode> top = topList.list;
+    if (_currentBlock != null) { // ignore if no corresponding block
+      final _MarkdownNodeList topList = _currentBlock.stack.last;
+      final List<_MarkdownNode> top = topList.list;
 
-    if (_currentBlock.tag == 'pre')
-      top.add(new _MarkdownNodeTextSpan(_syntaxHighlighter.format(text.text)));
-    else
-      top.add(new _MarkdownNodeString(text.text));
+      if (_currentBlock.tag == 'pre')
+        top.add(
+            new _MarkdownNodeTextSpan(_syntaxHighlighter.format(text.text)));
+      else
+        top.add(new _MarkdownNodeString(text.text));
+    }
   }
 
   @override
@@ -240,7 +243,7 @@ class _Renderer implements md.NodeVisitor {
       else
         blockList = _currentBlock.subBlocks;
 
-      _Block newBlock = new _Block(element.tag, element.attributes, _markdownStyle, new List<String>.from(_listIndents), blockList.length);
+      final _Block newBlock = new _Block(element.tag, element.attributes, _markdownStyle, new List<String>.from(_listIndents), blockList.length);
       blockList.add(newBlock);
     } else {
       _LinkInfo linkInfo;
@@ -248,8 +251,8 @@ class _Renderer implements md.NodeVisitor {
         linkInfo = _linkHandler.createLinkInfo(element.attributes['href']);
       }
 
-      TextStyle style = _markdownStyle.styles[element.tag] ?? const TextStyle();
-      List<_MarkdownNode> styleElement = <_MarkdownNode>[new _MarkdownNodeTextStyle(style, linkInfo)];
+      final TextStyle style = _markdownStyle.styles[element.tag] ?? const TextStyle();
+      final List<_MarkdownNode> styleElement = <_MarkdownNode>[new _MarkdownNodeTextStyle(style, linkInfo)];
       _currentBlock.stack.add(new _MarkdownNodeList(styleElement));
     }
     return true;
@@ -261,8 +264,8 @@ class _Renderer implements md.NodeVisitor {
       _listIndents.removeLast();
 
     if (_isBlockTag(element.tag)) {
-      if (_currentBlock.stack.length > 0) {
-        _MarkdownNodeList stackList = _currentBlock.stack.first;
+      if (_currentBlock.stack.isNotEmpty) {
+        final _MarkdownNodeList stackList = _currentBlock.stack.first;
         _currentBlock.stack = stackList.list;
         _currentBlock.open = false;
       } else {
@@ -270,12 +273,12 @@ class _Renderer implements md.NodeVisitor {
       }
     } else {
       if (_currentBlock.stack.length > 1) {
-        _MarkdownNodeList poppedList = _currentBlock.stack.last;
-        List<_MarkdownNode> popped = poppedList.list;
+        final _MarkdownNodeList poppedList = _currentBlock.stack.last;
+        final List<_MarkdownNode> popped = poppedList.list;
         _currentBlock.stack.removeLast();
 
-        _MarkdownNodeList topList = _currentBlock.stack.last;
-        List<_MarkdownNode> top = topList.list;
+        final _MarkdownNodeList topList = _currentBlock.stack.last;
+        final List<_MarkdownNode> top = topList.list;
         top.add(new _MarkdownNodeList(popped));
       }
     }
@@ -301,7 +304,7 @@ class _Renderer implements md.NodeVisitor {
     if (!blocks.last.open)
       return null;
 
-    _Block childBlock = _currentBlockInList(blocks.last.subBlocks);
+    final _Block childBlock = _currentBlockInList(blocks.last.subBlocks);
     if (childBlock != null)
       return childBlock;
 
@@ -353,9 +356,9 @@ class _Block {
   List<_Block> subBlocks;
 
   bool get open => _open;
-  set open(bool open) {
-    _open = open;
-    if (!open && subBlocks.length > 0)
+  set open(bool value) {
+    _open = value;
+    if (!value && subBlocks.isNotEmpty)
       subBlocks.last.isLast = true;
   }
 
@@ -373,8 +376,8 @@ class _Block {
 
     Widget contents;
 
-    if (subBlocks.length > 0) {
-      List<Widget> subWidgets = <Widget>[];
+    if (subBlocks.isNotEmpty) {
+      final List<Widget> subWidgets = <Widget>[];
       for (_Block subBlock in subBlocks) {
         subWidgets.add(subBlock.build(context));
       }
@@ -384,10 +387,10 @@ class _Block {
         children: subWidgets
       );
     } else {
-      TextSpan span = _stackToTextSpan(new _MarkdownNodeList(stack));
+      final TextSpan span = _stackToTextSpan(new _MarkdownNodeList(stack));
       contents = new RichText(text: span);
 
-      if (listIndents.length > 0) {
+      if (listIndents.isNotEmpty) {
         Widget bullet;
         if (listIndents.last == 'ul') {
           bullet = new Text(
@@ -442,10 +445,10 @@ class _Block {
       return stack.textSpan;
 
     if (stack is _MarkdownNodeList) {
-      List<_MarkdownNode> list = stack.list;
-      _MarkdownNodeTextStyle styleNode = list[0];
-      _LinkInfo linkInfo = styleNode.linkInfo;
-      TextStyle style = styleNode.style;
+      final List<_MarkdownNode> list = stack.list;
+      final _MarkdownNodeTextStyle styleNode = list[0];
+      final _LinkInfo linkInfo = styleNode.linkInfo;
+      final TextStyle style = styleNode.style;
 
       List<TextSpan> children = <TextSpan>[];
       for (int i = 1; i < list.length; i++) {
@@ -458,7 +461,7 @@ class _Block {
         children = null;
       }
 
-      TapGestureRecognizer recognizer = linkInfo?.recognizer;
+      final TapGestureRecognizer recognizer = linkInfo?.recognizer;
 
       return new TextSpan(style: style, children: children, recognizer: recognizer, text: text);
     }
@@ -475,14 +478,14 @@ class _Block {
   }
 
   Widget _buildImage(BuildContext context, String src) {
-    List<String> parts = src.split('#');
-    if (parts.length == 0) return new Container();
+    final List<String> parts = src.split('#');
+    if (parts.isEmpty) return new Container();
 
-    String path = parts.first;
+    final String path = parts.first;
     double width;
     double height;
     if (parts.length == 2) {
-      List<String> dimensions = parts.last.split('x');
+      final List<String> dimensions = parts.last.split('x');
       if (dimensions.length == 2) {
         width = double.parse(dimensions[0]);
         height = double.parse(dimensions[1]);
@@ -507,13 +510,13 @@ class _LinkHandler {
   MarkdownLinkCallback onTapLink;
 
   _LinkInfo createLinkInfo(String href) {
-    TapGestureRecognizer recognizer = new TapGestureRecognizer();
+    final TapGestureRecognizer recognizer = new TapGestureRecognizer();
     recognizer.onTap = () {
       if (onTapLink != null)
         onTapLink(href);
     };
 
-    _LinkInfo linkInfo = new _LinkInfo(href, recognizer);
+    final _LinkInfo linkInfo = new _LinkInfo(href, recognizer);
     links.add(linkInfo);
 
     return linkInfo;

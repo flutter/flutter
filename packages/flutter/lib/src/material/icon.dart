@@ -4,10 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-import 'icons.dart';
 import 'icon_button.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 /// A material design icon.
@@ -83,7 +83,7 @@ class Icon extends StatelessWidget {
   /// ```dart
   ///  new Icon(
   ///    icon: Icons.widgets,
-  ///    color: Colors.blue[400],
+  ///    color: Colors.blue.shade400,
   ///  ),
   /// ```
   final Color color;
@@ -114,7 +114,7 @@ class Icon extends StatelessWidget {
                 inherit: false,
                 color: iconColor,
                 fontSize: iconSize,
-                fontFamily: 'MaterialIcons'
+                fontFamily: icon.fontFamily
               )
             )
           )

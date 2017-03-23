@@ -39,14 +39,14 @@ Future<Null> guardedHelper(WidgetTester tester) {
 
 void main() {
   test('TestAsyncUtils - one class', () async {
-    TestAPI testAPI = new TestAPI();
+    final TestAPI testAPI = new TestAPI();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.'));
       real_test.expect(lines[2], matches(r'Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.'));
@@ -60,14 +60,14 @@ void main() {
   });
 
   test('TestAsyncUtils - two classes, all callers in superclass', () async {
-    TestAPI testAPI = new TestAPISubclass();
+    final TestAPI testAPI = new TestAPISubclass();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard2();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
       real_test.expect(lines[2], matches(r'^Then, the "testGuard2" method \(also from class TestAPI\) was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
@@ -81,14 +81,14 @@ void main() {
   });
 
   test('TestAsyncUtils - two classes, mixed callers', () async {
-    TestAPISubclass testAPI = new TestAPISubclass();
+    final TestAPISubclass testAPI = new TestAPISubclass();
     Future<Null> f1, f2;
     f1 = testAPI.testGuard1();
     try {
       f2 = testAPI.testGuard3();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
       real_test.expect(lines[2], matches(r'^Then, the "testGuard3" method from class TestAPISubclass was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
@@ -102,14 +102,14 @@ void main() {
   });
 
   test('TestAsyncUtils - expect() catches pending async work', () async {
-    TestAPI testAPI = new TestAPISubclass();
+    final TestAPI testAPI = new TestAPISubclass();
     Future<Null> f1;
     f1 = testAPI.testGuard1();
     try {
       flutter_test.expect(0, 0);
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "testGuard1" from class TestAPI was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
       real_test.expect(lines[2], matches(r'^Then, the "expect" function was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
@@ -129,7 +129,7 @@ void main() {
       f2 = tester.pump();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Guarded function conflict. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
       real_test.expect(lines[2], matches(r'^Then, it was called from .*test_async_utils_test.dart on line [0-9]+\.$'));
@@ -149,7 +149,7 @@ void main() {
       TestAsyncUtils.verifyAllScopesClosed();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
       real_test.expect(lines[2], matches(r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));
@@ -165,7 +165,7 @@ void main() {
       TestAsyncUtils.verifyAllScopesClosed();
       throw 'unexpectedly did not throw';
     } on FlutterError catch (e) {
-      List<String> lines = e.message.split('\n');
+      final List<String> lines = e.message.split('\n');
       real_test.expect(lines[0], 'Asynchronous call to guarded function leaked. You must use "await" with all Future-returning test APIs.');
       real_test.expect(lines[1], matches(r'^The guarded method "pump" from class WidgetTester was called from .*test_async_utils_test.dart on line [0-9]+, but never completed before its parent scope closed\.$'));
       real_test.expect(lines[2], matches(r'^The guarded method "pump" from class AutomatedTestWidgetsFlutterBinding was called from [^ ]+ on line [0-9]+, but never completed before its parent scope closed\.'));

@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Slider can move when tapped', (WidgetTester tester) async {
-    Key sliderKey = new UniqueKey();
+    final Key sliderKey = new UniqueKey();
     double value = 0.0;
 
     await tester.pumpWidget(
@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('Slider take on discrete values', (WidgetTester tester) async {
-    Key sliderKey = new UniqueKey();
+    final Key sliderKey = new UniqueKey();
     double value = 0.0;
 
     await tester.pumpWidget(
@@ -70,9 +70,9 @@ void main() {
     expect(value, equals(0.0));
     await tester.tap(find.byKey(sliderKey));
     expect(value, equals(50.0));
-    await tester.scroll(find.byKey(sliderKey), const Offset(5.0, 0.0));
+    await tester.drag(find.byKey(sliderKey), const Offset(5.0, 0.0));
     expect(value, equals(50.0));
-    await tester.scroll(find.byKey(sliderKey), const Offset(40.0, 0.0));
+    await tester.drag(find.byKey(sliderKey), const Offset(40.0, 0.0));
     expect(value, equals(80.0));
 
     await tester.pump(); // Starts animation.
@@ -147,8 +147,8 @@ void main() {
       ),
     ));
 
-    Point center = tester.getCenter(find.byType(Slider));
-    TestGesture gesture = await tester.startGesture(center);
+    final Point center = tester.getCenter(find.byType(Slider));
+    final TestGesture gesture = await tester.startGesture(center);
 
     expect(value, equals(0.5));
 

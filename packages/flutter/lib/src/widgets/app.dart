@@ -153,7 +153,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   Future<bool> didPopRoute() async {
     assert(mounted);
-    NavigatorState navigator = _navigator.currentState;
+    final NavigatorState navigator = _navigator.currentState;
     assert(navigator != null);
     return await navigator.maybePop();
   }
@@ -178,6 +178,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) { }
+
+  @override
+  void didHaveMemoryPressure() { }
 
   @override
   Widget build(BuildContext context) {

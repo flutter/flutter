@@ -1,17 +1,24 @@
-import 'dart:io';
 import 'dart:async';
+import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
 String flutterRoot = p.dirname(p.dirname(p.dirname(p.fromUri(Platform.script))));
 String flutter = p.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 String dart = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+String pub = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 
 /// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script using FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt to
 /// use your own build of the engine.
+///
+/// To run the analysis part, run it with SHARD=analyze
+///
+/// For example:
+/// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+/// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 Future<Null> main() async {
   if (Platform.environment['SHARD'] == 'docs') {
     print('\x1B[32mDONE: test.dart does nothing in the docs shard.\x1B[0m');
@@ -21,6 +28,13 @@ Future<Null> main() async {
       options: <String>['--flutter-repo'],
     );
 
+    // Try with the --watch analyzer, to make sure it returns success also.
+    // The --benchmark argument exits after one run.
+    await _runFlutterAnalyze(flutterRoot,
+      options: <String>['--flutter-repo', '--watch', '--benchmark'],
+    );
+
+    // Try an analysis against a big version of the gallery.
     await _runCmd(dart, <String>[p.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
       workingDirectory: flutterRoot,
     );
@@ -31,7 +45,7 @@ Future<Null> main() async {
     print('\x1B[32mDONE: Analysis successful.\x1B[0m');
   } else {
     // Verify that the tests actually return failure on failure and success on success.
-    String automatedTests = p.join(flutterRoot, 'dev', 'automated_tests');
+    final String automatedTests = p.join(flutterRoot, 'dev', 'automated_tests');
     await _runFlutterTest(automatedTests,
       script: p.join('test_smoke_test', 'fail_test.dart'),
       expectFailure: true,
@@ -67,7 +81,7 @@ Future<Null> main() async {
       printOutput: false,
     );
 
-    List<String> coverageFlags = <String>[];
+    final List<String> coverageFlags = <String>[];
     if (Platform.environment['TRAVIS'] != null && Platform.environment['TRAVIS_PULL_REQUEST'] == 'false')
       coverageFlags.add('--coverage');
 
@@ -75,12 +89,10 @@ Future<Null> main() async {
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter'),
       options: coverageFlags,
     );
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_driver'));
+    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      environment: <String, String>{ 'FLUTTER_ROOT': flutterRoot },
-    );
+    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'));
 
     await _runAllDartTests(p.join(flutterRoot, 'dev', 'devicelab'));
     await _runFlutterTest(p.join(flutterRoot, 'dev', 'manual_tests'));
@@ -93,6 +105,16 @@ Future<Null> main() async {
   }
 }
 
+Future<Null> _pubRunTest(
+  String workingDirectory, {
+  String testPath,
+}) {
+  final List<String> args = <String>['run', 'test'];
+  if (testPath != null)
+    args.add(testPath);
+  return _runCmd(pub, args, workingDirectory: workingDirectory);
+}
+
 Future<Null> _runCmd(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
@@ -100,15 +122,15 @@ Future<Null> _runCmd(String executable, List<String> arguments, {
   bool printOutput: true,
   bool skip: false,
 }) async {
-  String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
-  String relativeWorkingDir = p.relative(workingDirectory);
+  final String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = p.relative(workingDirectory);
   if (skip) {
     _printProgress('SKIPPING', relativeWorkingDir, cmd);
     return null;
   }
   _printProgress('RUNNING', relativeWorkingDir, cmd);
 
-  Process process = await Process.start(executable, arguments,
+  final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
@@ -118,7 +140,7 @@ Future<Null> _runCmd(String executable, List<String> arguments, {
     stderr.addStream(process.stderr);
   }
 
-  int exitCode = await process.exitCode;
+  final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
     print(
       '\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m\n'
@@ -136,7 +158,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     List<String> options: const <String>[],
     bool skip: false,
 }) {
-  List<String> args = <String>['test']..addAll(options);
+  final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null)
     args.add(flutterTestArgs);
   if (script != null)
@@ -152,7 +174,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
 }) {
-  List<String> args = <String>['--checked', p.join('test', 'all.dart')];
+  final List<String> args = <String>['--checked', p.join('test', 'all.dart')];
   return _runCmd(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,

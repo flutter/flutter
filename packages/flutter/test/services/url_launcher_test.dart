@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 void main() {
   test('URL launcher control test', () async {
-    List<String> log = <String>[];
-
-    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
-      log.add(message);
+    final List<MethodCall> log = <MethodCall>[];
+  
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
     });
 
     await UrlLauncher.launch('http://example.com/');
 
-    expect(log, equals(<String>['{"method":"UrlLauncher.launch","args":["http://example.com/"]}']));
+    expect(log, equals(<MethodCall>[new MethodCall('UrlLauncher.launch', 'http://example.com/')]));
   });
 }

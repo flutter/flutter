@@ -25,9 +25,13 @@
 /// about any additional exports that you add to this file, as doing so will
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
-import 'dart:io' as io show exit, exitCode;
+import 'dart:async';
+import 'dart:io' as io show exit, ProcessSignal;
 
 import 'package:meta/meta.dart';
+
+import 'platform.dart';
+import 'process.dart';
 
 export 'dart:io'
     show
@@ -53,7 +57,7 @@ export 'dart:io'
         Process,
         ProcessException,
         ProcessResult,
-        ProcessSignal,
+        // ProcessSignal     NO! Use [ProcessSignal] below.
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
         ServerSocket,
@@ -70,7 +74,7 @@ export 'dart:io'
 /// Exits the process with the given [exitCode].
 typedef void ExitFunction(int exitCode);
 
-final ExitFunction _defaultExitFunction = (int exitCode) => io.exit(exitCode);
+final ExitFunction _defaultExitFunction = io.exit;
 
 ExitFunction _exitFunction = _defaultExitFunction;
 
@@ -88,7 +92,7 @@ ExitFunction get exit => _exitFunction;
 @visibleForTesting
 void setExitFunctionForTests([ExitFunction exitFunction]) {
   _exitFunction = exitFunction ?? (int exitCode) {
-    throw new Exception('Exited with code ${io.exitCode}');
+    throw new ProcessExit(exitCode, immediate: true);
   };
 }
 
@@ -96,4 +100,45 @@ void setExitFunctionForTests([ExitFunction exitFunction]) {
 @visibleForTesting
 void restoreExitFunction() {
   _exitFunction = _defaultExitFunction;
+}
+
+/// A portable version of [io.ProcessSignal].
+///
+/// Listening on signals that don't exist on the current platform is just a
+/// no-op. This is in contrast to [io.ProcessSignal], where listening to
+/// non-existent signals throws an exception.
+class ProcessSignal implements io.ProcessSignal {
+  @visibleForTesting
+  const ProcessSignal(this._delegate);
+
+  static const ProcessSignal SIGWINCH = const _PosixProcessSignal._(io.ProcessSignal.SIGWINCH);
+  static const ProcessSignal SIGTERM = const _PosixProcessSignal._(io.ProcessSignal.SIGTERM);
+  static const ProcessSignal SIGUSR1 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR1);
+  static const ProcessSignal SIGUSR2 = const _PosixProcessSignal._(io.ProcessSignal.SIGUSR2);
+  static const ProcessSignal SIGINT =  const ProcessSignal(io.ProcessSignal.SIGINT);
+
+  final io.ProcessSignal _delegate;
+
+  @override
+  Stream<ProcessSignal> watch() {
+    return _delegate.watch().map((io.ProcessSignal signal) => this);
+  }
+
+  @override
+  String toString() => _delegate.toString();
+}
+
+/// A [ProcessSignal] that is only available on Posix platforms.
+///
+/// Listening to a [_PosixProcessSignal] is a no-op on Windows.
+class _PosixProcessSignal extends ProcessSignal {
+
+  const _PosixProcessSignal._(io.ProcessSignal wrappedSignal) : super(wrappedSignal);
+
+  @override
+  Stream<ProcessSignal> watch() {
+    if (platform.isWindows)
+      return new Stream<ProcessSignal>.empty();
+    return super.watch();
+  }
 }

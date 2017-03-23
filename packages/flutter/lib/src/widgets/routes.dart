@@ -104,7 +104,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// this route from the previous one, and back to the previous route from this
   /// one.
   AnimationController createAnimationController() {
-    Duration duration = transitionDuration;
+    final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.ZERO);
     return new AnimationController(
       duration: duration,
@@ -198,7 +198,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   void _updateForwardAnimation(Route<dynamic> nextRoute) {
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      Animation<double> current = _forwardAnimation.parent;
+      final Animation<double> current = _forwardAnimation.parent;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
@@ -323,7 +323,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   @override
   bool didPop(T result) {
     if (_localHistory != null && _localHistory.isNotEmpty) {
-      LocalHistoryEntry entry = _localHistory.removeLast();
+      final LocalHistoryEntry entry = _localHistory.removeLast();
       assert(entry._owner == this);
       entry._owner = null;
       entry._notifyRemoved();
@@ -506,7 +506,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ModalRoute<dynamic> route = ModalRoute.of(context);
   /// ```
   static ModalRoute<dynamic> of(BuildContext context) {
-    _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
+    final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
   }
 
@@ -588,7 +588,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   Future<Null> didPush() {
     if (!settings.isInitialRoute) {
-      BuildContext overlayContext = navigator.overlay?.context;
+      final BuildContext overlayContext = navigator.overlay?.context;
       assert(() {
         if (overlayContext == null) {
           throw new FlutterError(
@@ -613,7 +613,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by this class
 
   /// Whether you can dismiss this route by tapping the modal barrier.
-  bool get barrierDismissable;
+  bool get barrierDismissible;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
@@ -638,7 +638,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// widgets being animated as part of the transition.
   bool get offstage => _offstage;
   bool _offstage = false;
-  set offstage (bool value) {
+  set offstage(bool value) {
     if (_offstage == value)
       return;
     setState(() {
@@ -710,14 +710,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// case, use the [Form.onWillPop] property to register the callback.
   ///
   /// To register a callback manually, look up the enclosing [ModalRoute] in a
-  /// [State.dependenciesChanged] callback:
+  /// [State.didChangeDependencies] callback:
   ///
   /// ```dart
   /// ModalRoute<dynamic> _route;
   ///
   /// @override
-  /// void dependenciesChanged() {
-  ///  super.dependenciesChanged();
+  /// void didChangeDependencies() {
+  ///  super.didChangeDependencies();
   ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
   ///  _route = ModalRoute.of(context);
   ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
@@ -775,7 +775,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [removeScopedWillPopCallback], which removes a callback.
   @protected
   bool get hasScopedWillPopCallback {
-    return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.length > 0;
+    return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.isNotEmpty;
   }
 
   @override
@@ -807,7 +807,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     Widget barrier;
     if (barrierColor != null) {
       assert(barrierColor != _kTransparent);
-      Animation<Color> color = new ColorTween(
+      final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
         end: barrierColor
       ).animate(new CurvedAnimation(
@@ -816,10 +816,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       ));
       barrier = new AnimatedModalBarrier(
         color: color,
-        dismissable: barrierDismissable
+        dismissible: barrierDismissible
       );
     } else {
-      barrier = new ModalBarrier(dismissable: barrierDismissable);
+      barrier = new ModalBarrier(dismissible: barrierDismissible);
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'arena.dart';
-import 'recognizer.dart';
 import 'constants.dart';
 import 'events.dart';
+import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// The possible states of a [ScaleGestureRecognizer].
@@ -115,7 +115,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   double _initialSpan;
   double _currentSpan;
   Map<int, Point> _pointerLocations;
-  Map<int, VelocityTracker> _velocityTrackers = new Map<int, VelocityTracker>();
+  Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
 
@@ -127,7 +127,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
-      _pointerLocations = new Map<int, Point>();
+      _pointerLocations = <int, Point>{};
     }
   }
 
@@ -136,7 +136,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(_state != ScaleState.ready);
     bool configChanged = false;
     if (event is PointerMoveEvent) {
-      VelocityTracker tracker = _velocityTrackers[event.pointer];
+      final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
@@ -154,7 +154,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   void _update(bool configChanged, int pointer) {
-    int count = _pointerLocations.keys.length;
+    final int count = _pointerLocations.keys.length;
 
     // Compute the focal point
     Point focalPoint = Point.origin;
@@ -172,7 +172,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _initialSpan = _currentSpan;
       if (_state == ScaleState.started) {
         if (onEnd != null) {
-          VelocityTracker tracker = _velocityTrackers[pointer];
+          final VelocityTracker tracker = _velocityTrackers[pointer];
           assert(tracker != null);
 
           Velocity velocity = tracker.getVelocity();

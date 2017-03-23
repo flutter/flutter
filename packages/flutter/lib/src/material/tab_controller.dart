@@ -99,6 +99,7 @@ class TabController extends ChangeNotifier {
     _index = value;
     if (duration != null) {
       _indexIsChangingCount += 1;
+      notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
         ..animateTo(_index.toDouble(), duration: duration, curve: curve).whenComplete(() {
           _indexIsChangingCount -= 1;
@@ -148,13 +149,13 @@ class TabController extends ChangeNotifier {
   /// TabBarView has been dragged to the left. Similarly a value between
   /// 0.0 and 1.0 implies that the TabBarView has been dragged to the right.
   double get offset => _animationController.value - _index.toDouble();
-  set offset(double newOffset) {
-    assert(newOffset != null);
-    assert(newOffset >= -1.0 && newOffset <= 1.0);
+  set offset(double value) {
+    assert(value != null);
+    assert(value >= -1.0 && value <= 1.0);
     assert(!indexIsChanging);
-    if (newOffset == offset)
+    if (value == offset)
       return;
-    _animationController.value = newOffset + _index.toDouble();
+    _animationController.value = value + _index.toDouble();
   }
 
   @override
@@ -244,7 +245,7 @@ class DefaultTabController extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController of(BuildContext context) {
-    _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
     return scope?.controller;
   }
 

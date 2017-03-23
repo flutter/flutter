@@ -129,10 +129,10 @@ class CommandArgs {
     if (other.runtimeType != CommandArgs)
       return false;
 
-    CommandArgs otherCmd = other;
-    return otherCmd.command == this.command &&
-      const ListEquality<String>().equals(otherCmd.arguments, this.arguments) &&
-      const MapEquality<String, String>().equals(otherCmd.environment, this.environment);
+    final CommandArgs otherCmd = other;
+    return otherCmd.command == command &&
+      const ListEquality<String>().equals(otherCmd.arguments, arguments) &&
+      const MapEquality<String, String>().equals(otherCmd.environment, environment);
   }
 
   @override
@@ -188,7 +188,7 @@ class FakeDevice extends AndroidDevice {
       arguments: arguments,
       environment: environment,
     ));
-    dynamic exitError = exitErrorFactory();
+    final dynamic exitError = exitErrorFactory();
     if (exitError != null)
       throw exitError;
   }

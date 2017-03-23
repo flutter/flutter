@@ -6,11 +6,11 @@ import 'package:matcher/matcher.dart';
 
 /// Matches [value] against the [matcher].
 MatchResult match(dynamic value, Matcher matcher) {
-  Map<dynamic, dynamic> matchState = <dynamic, dynamic>{};
+  final Map<dynamic, dynamic> matchState = <dynamic, dynamic>{};
   if (matcher.matches(value, matchState)) {
     return new MatchResult._matched();
   } else {
-    Description description =
+    final Description description =
         matcher.describeMismatch(value, new _TextDescription(), matchState, false);
     return new MatchResult._mismatched(description.toString());
   }
@@ -22,9 +22,8 @@ class MatchResult {
     : hasMatched = true,
       mismatchDescription = null;
 
-  MatchResult._mismatched(String mismatchDescription)
-    : hasMatched = false,
-      mismatchDescription = mismatchDescription;
+  MatchResult._mismatched(this.mismatchDescription)
+    : hasMatched = false;
 
   /// Whether the match succeeded.
   final bool hasMatched;

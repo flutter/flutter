@@ -15,46 +15,66 @@ import 'src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
+Future<Null> _testExclusionLock;
+
 void main() {
   group('test', () {
+
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded', 1, automatedTestsDirectory, flutterTestDirectory);
+      return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
     });
+
     testUsingContext('TestAsyncUtils unguarded function test', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded', 1, automatedTestsDirectory, flutterTestDirectory);
+      return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     });
+
     testUsingContext('Missing flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
-      return _testFile('trivial', 1, missingDependencyTests, missingDependencyTests);
+      return _testFile('trivial', missingDependencyTests, missingDependencyTests);
     });
   }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
 }
 
-Future<Null> _testFile(String testName, int wantedExitCode, String workingDirectory, String testDirectory) async {
+Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
   final String fullTestName = fs.path.join(testDirectory, '${testName}_test.dart');
   final File testFile = fs.file(fullTestName);
   expect(testFile.existsSync(), true);
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
   expect(expectationFile.existsSync(), true);
-  final ProcessResult exec = await Process.run(
-    fs.path.join(dartSdkPath, 'bin', 'dart'),
-    <String>[
-      fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-      'test',
-      '--no-color',
-      fullTestName
-    ],
-    workingDirectory: workingDirectory
-  );
-  expect(exec.exitCode, wantedExitCode);
+
+  while (_testExclusionLock != null)
+    await _testExclusionLock;
+
+  ProcessResult exec;
+  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  _testExclusionLock = testExclusionCompleter.future;
+  try {
+    exec = await Process.run(
+      fs.path.join(dartSdkPath, 'bin', 'dart'),
+      <String>[
+        fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
+        'test',
+        '--no-color',
+        fullTestName,
+      ],
+      workingDirectory: workingDirectory,
+    );
+  } finally {
+    _testExclusionLock = null;
+    testExclusionCompleter.complete();
+  }
+
+  expect(exec.exitCode, isNonZero);
   final List<String> output = exec.stdout.split('\n');
+  if (output.first == 'Waiting for another flutter command to release the startup lock...')
+    output.removeAt(0);
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));
   final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();
@@ -82,7 +102,7 @@ Future<Null> _testFile(String testName, int wantedExitCode, String workingDirect
       expect(haveSeenStdErrMarker, isFalse);
       haveSeenStdErrMarker = true;
     }
-    expect(outputLine, matches(expectationLine), verbose: true, reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
+    expect(outputLine, matches(expectationLine), reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
     expectationLineNumber += 1;
     outputLineNumber += 1;
   }

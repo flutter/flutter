@@ -13,8 +13,21 @@ class PlatformServices extends StatefulWidget {
 }
 
 class _PlatformServicesState extends State<PlatformServices> {
-  double _latitude;
-  double _longitude;
+  static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
+  String _batteryLevel = '';
+
+  Future<Null> _getBatteryLevel() async {
+    String batteryLevel;
+    try {
+      final int result = await platform.invokeMethod('getBatteryLevel');
+      batteryLevel = 'Battery level at $result % .';
+    } on PlatformException catch (e) {
+      batteryLevel = "Failed to get battery level: '${e.message}'.";
+    }
+    setState(() {
+      _batteryLevel = batteryLevel;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,30 +36,15 @@ class _PlatformServicesState extends State<PlatformServices> {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            new Text('Hello from Flutter!'),
             new RaisedButton(
-              child: new Text('Get Location'),
-              onPressed: _getLocation
+              child: new Text('Get Battery Level'),
+              onPressed: _getBatteryLevel,
             ),
-            new Text('Latitude: $_latitude, Longitude: $_longitude'),
-          ]
-        )
-      )
+            new Text(_batteryLevel, key: new Key('Battery level label')),
+          ],
+        ),
+      ),
     );
-  }
-
-  Future<Null> _getLocation() async {
-    final Map<String, String> message = <String, String>{'provider': 'network'};
-    final Map<String, dynamic> reply = await PlatformMessages.sendJSON('getLocation', message);
-    // If the widget was removed from the tree while the message was in flight,
-    // we want to discard the reply rather than calling setState to update our
-    // non-existent appearance.
-    if (!mounted)
-      return;
-    setState(() {
-      _latitude = reply['latitude'].toDouble();
-      _longitude = reply['longitude'].toDouble();
-    });
   }
 }
 

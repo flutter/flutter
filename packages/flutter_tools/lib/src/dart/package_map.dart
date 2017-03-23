@@ -9,7 +9,7 @@ import '../base/file_system.dart';
 const String kPackagesFileName = '.packages';
 
 Map<String, Uri> _parse(String packagesPath) {
-  List<int> source = fs.file(packagesPath).readAsBytesSync();
+  final List<int> source = fs.file(packagesPath).readAsBytesSync();
   return packages_file.parse(source, new Uri.file(packagesPath));
 }
 
@@ -40,20 +40,25 @@ class PackageMap {
   Map<String, Uri> _map;
 
   /// Returns the path to [packageUri].
-  String pathForPackage(Uri packageUri) {
+  String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
+
+  /// Returns the path to [packageUri] as Uri.
+  Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
-    List<String> pathSegments = packageUri.pathSegments.toList();
-    String packageName = pathSegments.removeAt(0);
-    Uri packageBase = map[packageName];
-    String packageRelativePath = fs.path.joinAll(pathSegments);
-    return packageBase.resolve(packageRelativePath).path;
+    final List<String> pathSegments = packageUri.pathSegments.toList();
+    final String packageName = pathSegments.removeAt(0);
+    final Uri packageBase = map[packageName];
+    if (packageBase == null)
+      return null;
+    final String packageRelativePath = fs.path.joinAll(pathSegments);
+    return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
   }
 
   String checkValid() {
     if (fs.isFileSync(packagesPath))
       return null;
     String message = '$packagesPath does not exist.';
-    String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
+    final String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
     if (fs.isFileSync(pubspecPath))
       message += '\nDid you run "flutter packages get" in this directory?';
     else

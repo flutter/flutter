@@ -70,7 +70,7 @@ class ThemeData {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -290,7 +290,7 @@ class ThemeData {
   final Color cardColor;
 
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
-  /// between [ListItem]s, between rows in [DataTable]s, and so forth.
+  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color dividerColor;
 
   /// The highlight color used during ink splash animations or to
@@ -334,7 +334,7 @@ class ThemeData {
 
   /// The background color of [Dialog] elements.
   final Color dialogBackgroundColor;
-  
+
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 
@@ -475,7 +475,7 @@ class ThemeData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    ThemeData otherData = other;
+    final ThemeData otherData = other;
     return (otherData.brightness == brightness) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&

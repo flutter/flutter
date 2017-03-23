@@ -2,44 +2,107 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
+import 'package:analyzer/analyzer.dart' as analyzer;
 
-import '../artifacts.dart';
 import '../base/file_system.dart';
-import '../base/process.dart';
+import '../dart/package_map.dart';
 
 class DartDependencySetBuilder {
-  DartDependencySetBuilder(this.mainScriptPath,
-                           this.projectRootPath,
-                           this.packagesFilePath);
+  DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
+    _mainScriptPath = fs.path.canonicalize(mainScriptPath),
+    _mainScriptUri = fs.path.toUri(mainScriptPath),
+    _packagesFilePath = fs.path.canonicalize(packagesFilePath);
 
-  final String mainScriptPath;
-  final String projectRootPath;
-  final String packagesFilePath;
+  final String _mainScriptPath;
+  final String _packagesFilePath;
+
+  final Uri _mainScriptUri;
 
   Set<String> build() {
-    final String skySnapshotPath =
-        Artifacts.instance.getArtifactPath(Artifact.skySnapshot);
+    final List<String> dependencies = <String>[_mainScriptPath, _packagesFilePath];
+    final List<Uri> toProcess = <Uri>[_mainScriptUri];
+    final PackageMap packageMap = new PackageMap(_packagesFilePath);
 
-    final List<String> args = <String>[
-      skySnapshotPath,
-      '--packages=$packagesFilePath',
-      '--print-deps',
-      mainScriptPath
-    ];
-
-    String output = runSyncAndThrowStdErrOnError(args);
-
-    final List<String> lines = LineSplitter.split(output).toList();
-    final Set<String> minimalDependencies = new Set<String>();
-    for (String line in lines) {
-      if (!line.startsWith('package:')) {
-        // We convert the uris so that they are relative to the project
-        // root.
-        line = fs.path.relative(line, from: projectRootPath);
+    while (toProcess.isNotEmpty) {
+      final Uri currentUri = toProcess.removeLast();
+      final analyzer.CompilationUnit unit = _parse(currentUri.toFilePath());
+      for (analyzer.Directive directive in unit.directives) {
+        if (!(directive is analyzer.UriBasedDirective))
+          continue;
+        final analyzer.UriBasedDirective uriBasedDirective = directive;
+        final String uriAsString = uriBasedDirective.uri.stringValue;
+        Uri resolvedUri = analyzer.resolveRelativeUri(currentUri, Uri.parse(uriAsString));
+        if (resolvedUri.scheme.startsWith('dart'))
+          continue;
+        if (resolvedUri.scheme == 'package') {
+          final Uri newResolvedUri = packageMap.uriForPackage(resolvedUri);
+          if (newResolvedUri == null) {
+            throw new DartDependencyException(
+              'The following Dart file:\n'
+              '  ${currentUri.toFilePath()}\n'
+              '...refers, in an import, to the following library:\n'
+              '  $resolvedUri\n'
+              'That library is in a package that is not known. Maybe you forgot to '
+              'mention it in your pubspec.yaml file?'
+            );
+          }
+          resolvedUri = newResolvedUri;
+        }
+        final String path = fs.path.canonicalize(resolvedUri.toFilePath());
+        if (!dependencies.contains(path)) {
+          if (!fs.isFileSync(path)) {
+            throw new DartDependencyException(
+              'The following Dart file:\n'
+              '  ${currentUri.toFilePath()}\n'
+              '...refers, in an import, to the following library:\n'
+              '  $path\n'
+              'Unfortunately, that library does not appear to exist on your file system.'
+            );
+          }
+          dependencies.add(path);
+          toProcess.add(resolvedUri);
+        }
       }
-      minimalDependencies.add(line);
     }
-    return minimalDependencies;
+    return dependencies.toSet();
   }
+
+  analyzer.CompilationUnit _parse(String path) {
+    String body;
+    try {
+      body = fs.file(path).readAsStringSync();
+    } on FileSystemException catch (error) {
+      throw new DartDependencyException(
+        'Could not read "$path" when determining Dart dependencies.',
+        error,
+      );
+    }
+    try {
+      return analyzer.parseDirectives(body, name: path);
+    } on analyzer.AnalyzerError catch (error) {
+      throw new DartDependencyException(
+        'When trying to parse this Dart file to find its dependencies:\n'
+        '  $path\n'
+        '...the analyzer failed with the following error:\n'
+        '  ${error.toString().trimRight()}',
+        error,
+      );
+    } on analyzer.AnalyzerErrorGroup catch (error) {
+      throw new DartDependencyException(
+        'When trying to parse this Dart file to find its dependencies:\n'
+        '  $path\n'
+        '...the analyzer failed with the following error:\n'
+        '  ${error.toString().trimRight()}',
+        error,
+      );
+    }
+  }
+}
+
+class DartDependencyException implements Exception {
+  DartDependencyException(this.message, [this.parent]);
+  final String message;
+  final Exception parent;
+  @override
+  String toString() => message;
 }

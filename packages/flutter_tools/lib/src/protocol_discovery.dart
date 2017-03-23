@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'base/common.dart';
-import 'base/os.dart';
+import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
 
@@ -50,7 +50,7 @@ class ProtocolDiscovery {
   /// The [Future] returned by this function will complete when the next service
   /// Uri is found.
   Future<Uri> nextUri() async {
-    Uri deviceUri = await _completer.future.timeout(
+    final Uri deviceUri = await _completer.future.timeout(
       const Duration(seconds: 60), onTimeout: () {
         throwToolExit('Timeout while attempting to retrieve Uri for $_serviceName');
       }
@@ -58,8 +58,8 @@ class ProtocolDiscovery {
     printTrace('$_serviceName Uri on device: $deviceUri');
     Uri hostUri;
     if (portForwarder != null) {
-      int devicePort = deviceUri.port;
-      hostPort ??= await findPreferredPort(defaultHostPort);
+      final int devicePort = deviceUri.port;
+      hostPort ??= await portScanner.findPreferredPort(defaultHostPort);
       hostPort = await portForwarder
           .forward(devicePort, hostPort: hostPort)
           .timeout(const Duration(seconds: 60), onTimeout: () {
@@ -79,8 +79,8 @@ class ProtocolDiscovery {
 
   void _onLine(String line) {
     Uri uri;
-    String prefix = '$_serviceName listening on ';
-    int index = line.indexOf(prefix + 'http://');
+    final String prefix = '$_serviceName listening on ';
+    final int index = line.indexOf(prefix + 'http://');
     if (index >= 0) {
       try {
         uri = Uri.parse(line.substring(index + prefix.length));

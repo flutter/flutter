@@ -13,7 +13,7 @@ import '../rendering/mock_canvas.dart';
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
 Future<Null> slowDrag(WidgetTester tester, Point start, Offset offset) async {
-  TestGesture gesture = await tester.startGesture(start);
+  final TestGesture gesture = await tester.startGesture(start);
   for (int index = 0; index < 10; index += 1) {
     await gesture.moveBy(offset);
     await tester.pump(const Duration(milliseconds: 20));
@@ -30,19 +30,19 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
 
     expect(painter, doesNotOverscroll);
 
     // the scroll gesture from tester.scroll happens in zero time, so nothing should appear:
-    await tester.scroll(find.byType(Scrollable), const Offset(0.0, 100.0));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 100.0));
     expect(painter, doesNotOverscroll);
     await tester.pump(); // allow the ticker to register itself
     expect(painter, doesNotOverscroll);
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
 
-    TestGesture gesture = await tester.startGesture(const Point(200.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Point(200.0, 200.0));
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
     await gesture.up();
@@ -51,7 +51,7 @@ void main() {
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
     expect(painter, paints..circle(color: const Color(0x0DFFFFFF)));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
 
@@ -63,7 +63,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
 
     await slowDrag(tester, const Point(400.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..circle(x: 400.0));
@@ -86,7 +86,7 @@ void main() {
       throw 'Dragging on right hand side did not overscroll on right hand side.';
     }));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
 
@@ -98,8 +98,8 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    TestGesture gesture = await tester.startGesture(const Point(300.0, 200.0));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final TestGesture gesture = await tester.startGesture(const Point(300.0, 200.0));
     await gesture.moveBy(const Offset(0.0, 10.0));
     await tester.pump(const Duration(milliseconds: 20));
     double oldX = 0.0;
@@ -118,7 +118,7 @@ void main() {
     }
     await gesture.up();
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
 
@@ -132,11 +132,11 @@ void main() {
           ],
         ),
       );
-      RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..circle()..restore()..save()..scale(y: -1.0)..restore()..restore());
 
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(painter, doesNotOverscroll);
     });
 
@@ -150,11 +150,11 @@ void main() {
           ],
         ),
       );
-      RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+      final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
       await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..scale(y: -1.0)..restore()..save()..circle()..restore()..restore());
 
-      await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+      await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(painter, doesNotOverscroll);
     });
   });
@@ -168,14 +168,14 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
     expect(painter, paints..circle());
     expect(painter, isNot(paints..circle()..circle()));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, -5.0));
     expect(painter, paints..circle()..circle());
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
 
@@ -189,7 +189,7 @@ void main() {
         ],
       ),
     );
-    RenderObject painter = tester.renderObject(find.byType(CustomPaint));
+    final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
     await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
@@ -197,7 +197,7 @@ void main() {
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()
                           ..rotate(angle: math.PI / 2.0)..circle());
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
 
@@ -220,8 +220,8 @@ void main() {
       ),
     );
 
-    await tester.scrollAt(const Point(100.0, 100.0), const Offset(0.0, 2000.0));
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.dragFrom(const Point(100.0, 100.0), const Offset(0.0, 2000.0));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('Changing settings', (WidgetTester tester) async {
@@ -245,7 +245,7 @@ void main() {
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     await tester.pumpWidget(
       new ScrollConfiguration(
         behavior: new TestScrollBehavior2(),

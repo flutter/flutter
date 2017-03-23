@@ -18,7 +18,7 @@ import 'theme.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
-const double kMinButtonSize = 48.0;
+const double _kMinButtonSize = 48.0;
 
 /// A material design icon button.
 ///
@@ -107,7 +107,7 @@ class IconButton extends StatelessWidget {
   ///
   /// ```dart
   ///  new IconButton(
-  ///    color: Colors.blue[500],
+  ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    icon: Icons.widgets,
   ///  ),
@@ -143,7 +143,7 @@ class IconButton extends StatelessWidget {
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
     Widget result = new ConstrainedBox(
-      constraints: new BoxConstraints(minWidth: kMinButtonSize, minHeight: kMinButtonSize),
+      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
       child: new Padding(
         padding: padding,
         child: new SizedBox(

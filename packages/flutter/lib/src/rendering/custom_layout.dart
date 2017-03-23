@@ -170,7 +170,7 @@ abstract class MultiChildLayoutDelegate {
     });
 
     try {
-      _idToChild = new Map<Object, RenderBox>();
+      _idToChild = <Object, RenderBox>{};
       RenderBox child = firstChild;
       while (child != null) {
         final MultiChildLayoutParentData childParentData = child.parentData;
@@ -282,13 +282,13 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The delegate that controls the layout of the children.
   MultiChildLayoutDelegate get delegate => _delegate;
   MultiChildLayoutDelegate _delegate;
-  set delegate (MultiChildLayoutDelegate newDelegate) {
-    assert(newDelegate != null);
-    if (_delegate == newDelegate)
+  set delegate(MultiChildLayoutDelegate value) {
+    assert(value != null);
+    if (_delegate == value)
       return;
-    if (newDelegate.runtimeType != _delegate.runtimeType || newDelegate.shouldRelayout(_delegate))
+    if (value.runtimeType != _delegate.runtimeType || value.shouldRelayout(_delegate))
       markNeedsLayout();
-    _delegate = newDelegate;
+    _delegate = value;
   }
 
   Size _getSize(BoxConstraints constraints) {

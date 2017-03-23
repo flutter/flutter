@@ -18,6 +18,10 @@ void main() {
   group('analytics', () {
     Directory temp;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       Cache.flutterRoot = '../..';
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
@@ -33,7 +37,7 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      CreateCommand command = new CreateCommand();
+      final CreateCommand command = new CreateCommand();
       CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['create', '--no-pub', temp.path]);
       expect(count, 0);
@@ -44,7 +48,7 @@ void main() {
 
       count = 0;
       flutterUsage.enabled = false;
-      DoctorCommand doctorCommand = new DoctorCommand();
+      final DoctorCommand doctorCommand = new DoctorCommand();
       runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
@@ -58,8 +62,8 @@ void main() {
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);
 
       flutterUsage.enabled = false;
-      ConfigCommand command = new ConfigCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ConfigCommand command = new ConfigCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['config']);
       expect(count, 0);
 

@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.allowAllFrames = true;
 
@@ -34,7 +34,7 @@ void main() {
     await tester.pump(); // Launch the recipe page
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
-    await tester.scroll(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
+    await tester.drag(find.text('Pesto Bruschetta'), const Offset(0.0, -300.0));
     await tester.pump();
 
     Navigator.pop(find.byType(Scaffold).evaluate().single);
@@ -51,8 +51,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // transition is complete
 
     await tester.fling(find.text('Pesto Bruschetta'), const Offset(0.0, -200.0), 10000.0);
-    await tester.pump(); // start fling
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle(); // start and finish fling
     expect(find.text('Sicilian-Style sardines'), findsOneWidget);
   });
 }

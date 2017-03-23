@@ -32,7 +32,7 @@ class CardCollectionState extends State<CardCollection> {
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
 
-  Map<int, Color> _primaryColor = Colors.deepPurple;
+  MaterialColor _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
@@ -42,7 +42,7 @@ class CardCollectionState extends State<CardCollection> {
   bool _varyFontSizes = false;
 
   void _initVariableSizedCardModels() {
-    List<double> cardHeights = <double>[
+    final List<double> cardHeights = <double>[
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
@@ -119,7 +119,7 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   String _dismissDirectionText(DismissDirection direction) {
-    String s = direction.toString();
+    final String s = direction.toString();
     return "dismiss ${s.substring(s.indexOf('.') + 1)}";
   }
 
@@ -148,7 +148,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(Map<int, Color> selection) {
+  void _selectColor(MaterialColor selection) {
     setState(() {
       _primaryColor = selection;
     });
@@ -181,14 +181,14 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { IconData icon, bool enabled: true }) {
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled: true }) {
     return new DrawerItem(
       icon: new Icon(icon),
       onPressed: enabled ? () { onChanged(itemValue); } : null,
       child: new Row(
         children: <Widget>[
           new Expanded(child: new Text(label)),
-          new Radio<Map<int, Color>>(
+          new Radio<MaterialColor>(
             value: itemValue,
             groupValue: currentValue,
             onChanged: enabled ? onChanged : null,
@@ -247,8 +247,8 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget _buildCard(BuildContext context, int index) {
-    CardModel cardModel = _cardModels[index];
-    Widget card = new Dismissable(
+    final CardModel cardModel = _cardModels[index];
+    final Widget card = new Dismissible(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
@@ -313,18 +313,18 @@ class CardCollectionState extends State<CardCollection> {
     final ThemeData theme = Theme.of(context);
     final TextStyle backgroundTextStyle = theme.primaryTextTheme.title;
 
-    // The background Widget appears behind the Dismissable card when the card
+    // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
     // background (text and icons) will just be clipped, not resized.
-    Widget background = new Positioned.fill(
+    final Widget background = new Positioned.fill(
       child: new Container(
         margin: const EdgeInsets.all(4.0),
         child: new SingleChildScrollView(
           child: new Container(
             height: cardModel.height,
-            decoration: new BoxDecoration(backgroundColor: theme.primaryColor),
+            color: theme.primaryColor,
             child: new Row(
               children: <Widget>[
                 leftArrowIcon,
@@ -376,9 +376,9 @@ class CardCollectionState extends State<CardCollection> {
       );
     }
 
-    Widget body = new Container(
+    final Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      decoration: new BoxDecoration(backgroundColor: _primaryColor[50]),
+      color: _primaryColor.shade50,
       child: cardCollection,
     );
 

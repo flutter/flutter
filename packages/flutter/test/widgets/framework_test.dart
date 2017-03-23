@@ -13,17 +13,17 @@ class TestState extends State<StatefulWidget> {
 
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
-    Key key = new UniqueKey();
+    final Key key = new UniqueKey();
     expect(key, hasOneLineDescription);
     expect(key, isNot(equals(new UniqueKey())));
   });
 
   testWidgets('ObjectKey control test', (WidgetTester tester) async {
-    Object a = new Object();
-    Object b = new Object();
-    Key keyA = new ObjectKey(a);
-    Key keyA2 = new ObjectKey(a);
-    Key keyB = new ObjectKey(b);
+    final Object a = new Object();
+    final Object b = new Object();
+    final Key keyA = new ObjectKey(a);
+    final Key keyA2 = new ObjectKey(a);
+    final Key keyB = new ObjectKey(b);
 
     expect(keyA, hasOneLineDescription);
     expect(keyA, equals(keyA2));
@@ -32,11 +32,11 @@ void main() {
   });
 
   testWidgets('GlobalObjectKey control test', (WidgetTester tester) async {
-    Object a = new Object();
-    Object b = new Object();
-    Key keyA = new GlobalObjectKey(a);
-    Key keyA2 = new GlobalObjectKey(a);
-    Key keyB = new GlobalObjectKey(b);
+    final Object a = new Object();
+    final Object b = new Object();
+    final Key keyA = new GlobalObjectKey(a);
+    final Key keyA2 = new GlobalObjectKey(a);
+    final Key keyB = new GlobalObjectKey(b);
 
     expect(keyA, hasOneLineDescription);
     expect(keyA, equals(keyA2));
@@ -44,8 +44,25 @@ void main() {
     expect(keyA, isNot(equals(keyB)));
   });
 
-  testWidgets('GlobalKey duplication', (WidgetTester tester) async {
-    Key key = new GlobalKey(debugLabel: 'problematic');
+  testWidgets('GlobalKey duplication 1 - double appearance', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(
+          key: const ValueKey<int>(1),
+          child: new SizedBox(key: key),
+        ),
+        new Container(
+          key: const ValueKey<int>(2),
+          child: new Placeholder(key: key),
+        ),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 2 - splitting and changing type', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
 
     await tester.pumpWidget(new Stack(
       children: <Widget>[
@@ -77,8 +94,317 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
+  testWidgets('GlobalKey duplication 3 - splitting and changing type', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new SizedBox(key: key),
+        new Placeholder(key: key),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 4 - splitting and half changing type', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Placeholder(key: key),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 5 - splitting and half changing type', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Placeholder(key: key),
+        new Container(key: key),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 6 - splitting and not changing type', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Container(key: key),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 7 - appearing later', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(2)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 8 - appearing earlier', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1)),
+        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 9 - moving and appearing later', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(1)),
+        new Container(key: new ValueKey<int>(2)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 10 - moving and appearing earlier', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1)),
+        new Container(key: new ValueKey<int>(2)),
+        new Container(key: new ValueKey<int>(3), child: new Container(key: key)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: new ValueKey<int>(3)),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 11 - double sibling appearance', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Container(key: key),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 12 - all kinds of badness at once', (WidgetTester tester) async {
+    final Key key1 = new GlobalKey(debugLabel: 'problematic');
+    final Key key2 = new GlobalKey(debugLabel: 'problematic'); // intentionally the same label
+    final Key key3 = new GlobalKey(debugLabel: 'also problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key1),
+        new Container(key: key1),
+        new Container(key: key2),
+        new Container(key: key1),
+        new Container(key: key1),
+        new Container(key: key2),
+        new Container(key: key1),
+        new Container(key: key1),
+        new Row(
+          children: <Widget>[
+            new Container(key: key1),
+            new Container(key: key1),
+            new Container(key: key2),
+            new Container(key: key2),
+            new Container(key: key2),
+            new Container(key: key3),
+            new Container(key: key2),
+          ],
+        ),
+        new Row(
+          children: <Widget>[
+            new Container(key: key1),
+            new Container(key: key1),
+            new Container(key: key3),
+          ],
+        ),
+        new Container(key: key3),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 13 - all kinds of badness at once', (WidgetTester tester) async {
+    final Key key1 = new GlobalKey(debugLabel: 'problematic');
+    final Key key2 = new GlobalKey(debugLabel: 'problematic'); // intentionally the same label
+    final Key key3 = new GlobalKey(debugLabel: 'also problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key1),
+        new Container(key: key2),
+        new Container(key: key3),
+      ]),
+    );
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key1),
+        new Container(key: key1),
+        new Container(key: key2),
+        new Container(key: key1),
+        new Container(key: key1),
+        new Container(key: key2),
+        new Container(key: key1),
+        new Container(key: key1),
+        new Row(
+          children: <Widget>[
+            new Container(key: key1),
+            new Container(key: key1),
+            new Container(key: key2),
+            new Container(key: key2),
+            new Container(key: key2),
+            new Container(key: key3),
+            new Container(key: key2),
+          ],
+        ),
+        new Row(
+          children: <Widget>[
+            new Container(key: key1),
+            new Container(key: key1),
+            new Container(key: key3),
+          ],
+        ),
+        new Container(key: key3),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 14 - moving during build - before', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+      ],
+    ));
+  });
+
+  testWidgets('GlobalKey duplication 15 - duplicating during build - before', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1)),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: key),
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+      ],
+    ));
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('GlobalKey duplication 16 - moving during build - after', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1)),
+        new Container(key: key),
+      ],
+    ));
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+      ],
+    ));
+  });
+
+  testWidgets('GlobalKey duplication 17 - duplicating during build - after', (WidgetTester tester) async {
+    final Key key = new GlobalKey(debugLabel: 'problematic');
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1)),
+        new Container(key: key),
+      ],
+    ));
+    int count = 0;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.exception, isFlutterError);
+      count += 1;
+    };
+    await tester.pumpWidget(new Stack(
+      children: <Widget>[
+        new Container(key: new ValueKey<int>(0)),
+        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: key),
+      ],
+    ));
+    FlutterError.onError = oldHandler;
+    expect(count, 2);
+  });
+
   testWidgets('GlobalKey notification exception handling', (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
 
     await tester.pumpWidget(new Container(key: key));
 
@@ -118,7 +444,7 @@ void main() {
   });
 
   testWidgets('State toString', (WidgetTester tester) async {
-    TestState state = new TestState();
+    final TestState state = new TestState();
     expect(state.toString(), contains('no config'));
   });
 
@@ -128,12 +454,12 @@ void main() {
     final DebugPrintCallback oldCallback = debugPrint;
     debugPrintGlobalKeyedWidgetLifecycle = true;
 
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
     debugPrint = (String message, { int wrapWidth }) {
       log.add(message);
     };
 
-    GlobalKey key = new GlobalKey();
+    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new Container(key: key));
     expect(log, isEmpty);
     await tester.pumpWidget(new Placeholder());
@@ -157,7 +483,7 @@ void main() {
         new Container(),
       ],
     ));
-    MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext;
     expect(
       element.children.map((Element element) => element.widget.key), // ignore: INVALID_USE_OF_PROTECTED_MEMBER
       <Key>[null, key1, null, key2, null],

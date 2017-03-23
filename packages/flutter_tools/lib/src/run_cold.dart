@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
 import 'base/file_system.dart';
@@ -43,27 +42,6 @@ class ColdRunner extends ResidentRunner {
     Completer<Null> appStartedCompleter,
     String route,
     bool shouldBuild: true
-  }) {
-    // Don't let uncaught errors kill the process.
-    return Chain.capture(() {
-      return _run(
-        traceStartup: traceStartup,
-        connectionInfoCompleter: connectionInfoCompleter,
-        appStartedCompleter: appStartedCompleter,
-        route: route,
-        shouldBuild: shouldBuild
-      );
-    }, onError: (dynamic error, StackTrace stackTrace) {
-      printError('Exception from flutter run: $error', stackTrace);
-    });
-  }
-
-  Future<int> _run({
-    bool traceStartup: false,
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
-    String route,
-    bool shouldBuild: true
   }) async {
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
@@ -75,18 +53,18 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
+    package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
-      String message = 'No application found for ${device.platform}.';
-      String hint = getMissingPackageHintForPlatform(device.platform);
+      String message = 'No application found for ${device.targetPlatform}.';
+      final String hint = getMissingPackageHintForPlatform(device.targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);
       return 1;
     }
 
-    Stopwatch startTime = new Stopwatch()..start();
+    final Stopwatch startTime = new Stopwatch()..start();
 
     Map<String, dynamic> platformArgs;
     if (traceStartup != null)
@@ -94,7 +72,7 @@ class ColdRunner extends ResidentRunner {
 
     await startEchoingDeviceLog(package);
 
-    String modeName = getModeName(debuggingOptions.buildMode);
+    final String modeName = getModeName(debuggingOptions.buildMode);
     if (mainPath == null) {
       assert(prebuiltMode);
       printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
@@ -137,7 +115,7 @@ class ColdRunner extends ResidentRunner {
 
     if (vmService != null) {
       await vmService.vm.refreshViews();
-      printTrace('Connected to ${vmService.vm.mainView}\.');
+      printTrace('Connected to ${vmService.vm.firstView}\.');
     }
 
     if (vmService != null && traceStartup) {
@@ -187,9 +165,9 @@ class ColdRunner extends ResidentRunner {
         printHelpDetails();
     }
     if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('For a more detailed help message, press "h". To quit, press "q".');
     } else {
-      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('To repeat this help message, press "h". To quit, press "q".');
     }
   }
 

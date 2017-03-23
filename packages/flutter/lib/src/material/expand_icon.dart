@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'icon.dart';
-import 'icons.dart';
 import 'icon_button.dart';
+import 'icons.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
@@ -28,9 +28,9 @@ class ExpandIcon extends StatefulWidget {
     @required this.onPressed,
     this.padding: const EdgeInsets.all(8.0)
   }) : super(key: key) {
-    assert(this.isExpanded != null);
-    assert(this.size != null);
-    assert(this.padding != null);
+    assert(isExpanded != null);
+    assert(size != null);
+    assert(padding != null);
   }
 
   /// Whether the icon is in an expanded state.

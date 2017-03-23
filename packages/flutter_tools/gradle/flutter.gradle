@@ -31,17 +31,27 @@ class FlutterPlugin implements Plugin<Project> {
     private File flutterRoot
     private File flutterExecutable
     private String localEngine
+    private String localEngineSrcPath
     private Properties localProperties
+
+    private File flutterJar
+    private File debugFlutterJar
+    private File profileFlutterJar
+    private File releaseFlutterJar
+
+    private Properties readPropertiesIfExist(File propertiesFile) {
+        Properties result = new Properties()
+        if (propertiesFile.exists()) {
+            propertiesFile.withInputStream { stream -> result.load(stream) }
+        }
+        return result
+    }
 
     private String resolveProperty(Project project, String name, String defaultValue) {
         if (localProperties == null) {
-            localProperties = new Properties()
-            def localPropertiesFile = project.rootProject.file("local.properties")
-            if (localPropertiesFile.exists()) {
-                localProperties.load(localPropertiesFile.newDataInputStream())
-            }
+            localProperties = readPropertiesIfExist(project.rootProject.file("local.properties"))
         }
-        String result;
+        String result
         if (project.hasProperty(name)) {
             result = project.property(name)
         }
@@ -75,20 +85,28 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        String flutterJarPath = localProperties.getProperty("flutter.jar")
-        if (flutterJarPath != null) {
-            File flutterJar = project.file(flutterJarPath)
-            if (!flutterJar.isFile()) {
-                throw new GradleException("flutter.jar must point to a Flutter engine JAR")
+        if (project.hasProperty('localEngineOut')) {
+            String engineOutPath = project.property('localEngineOut')
+            File engineOut = project.file(engineOutPath)
+            if (!engineOut.isDirectory()) {
+                throw new GradleException('localEngineOut must point to a local engine build')
             }
+            flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
+            if (!flutterJar.isFile()) {
+                throw new GradleException('Local engine build does not contain flutter.jar')
+            }
+
+            localEngine = engineOut.name
+            localEngineSrcPath = engineOut.parentFile.parent
+
             project.dependencies {
                 compile project.files(flutterJar)
             }
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            File debugFlutterJar = baseEnginePath.resolve("android-arm").resolve("flutter.jar").toFile()
-            File profileFlutterJar = baseEnginePath.resolve("android-arm-profile").resolve("flutter.jar").toFile()
-            File releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
+            debugFlutterJar = baseEnginePath.resolve("android-arm").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("android-arm-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("android-arm-release").resolve("flutter.jar").toFile()
             if (!debugFlutterJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -119,10 +137,34 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        localEngine = localProperties.getProperty("flutter.localEngine")
-
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
+
+        File pluginsFile = new File(project.rootProject.projectDir.parentFile, '.flutter-plugins')
+        Properties plugins = readPropertiesIfExist(pluginsFile)
+
+        plugins.each { name, _ ->
+            def pluginProject = project.rootProject.findProject(":$name")
+            if (pluginProject != null) {
+                project.dependencies {
+                    compile pluginProject
+                }
+                pluginProject.afterEvaluate this.&addFlutterJarDependency
+            } else {
+                project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
+            }
+        }
+    }
+
+    private void addFlutterJarDependency(Project project) {
+        project.dependencies {
+            if (flutterJar != null) {
+                provided project.files(flutterJar)
+            } else {
+                debugProvided project.files(debugFlutterJar)
+                releaseProvided project.files(releaseFlutterJar)
+            }
+        }
     }
 
     private void addFlutterTask(Project project) {
@@ -134,8 +176,18 @@ class FlutterPlugin implements Plugin<Project> {
         if (target == null) {
             target = 'lib/main.dart'
         }
+        if (project.hasProperty('target')) {
+            target = project.property('target')
+        }
 
-        project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
+        if (project.tasks.findByName('flutterBuildX86Jar')) {
+            project.compileDebugJavaWithJavac.dependsOn project.flutterBuildX86Jar
+        }
+
+        File kernel
+        if (project.hasProperty('kernel')) {
+            kernel = project.file(project.property('kernel'))
+        }
 
         project.android.applicationVariants.all { variant ->
             if (!["debug", "profile", "release"].contains(variant.name)) {
@@ -147,7 +199,9 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterExecutable this.flutterExecutable
                 buildMode variant.name
                 localEngine this.localEngine
+                localEngineSrcPath this.localEngineSrcPath
                 targetPath target
+                kernelFile kernel
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -173,7 +227,11 @@ class FlutterTask extends DefaultTask {
     File flutterExecutable
     String buildMode
     String localEngine
+    String localEngineSrcPath
+    @Input
     String targetPath
+    @Optional @InputFile
+    File kernelFile
 
     File sourceDir
 
@@ -192,9 +250,45 @@ class FlutterTask extends DefaultTask {
         }
     }
 
+    FileCollection readDependencies(File dependenciesFile) {
+        if (dependenciesFile.exists()) {
+            try {
+                // Dependencies file has Makefile syntax:
+                //   <target> <files>: <source> <files> <separated> <by> <space>
+                String depText = dependenciesFile.text
+                return project.files(depText.split(': ')[1].split())
+            } catch (Exception e) {
+                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
+            }
+        }
+        return null
+    }
+
     @InputFiles
     FileCollection getSourceFiles() {
-        return project.fileTree(dir: sourceDir, exclude: ['android', 'ios'], include: ['**/*.dart', 'pubspec.yaml', 'flutter.yaml'])
+        File dependenciesFile
+        if (buildMode != 'debug') {
+            dependenciesFile = project.file("${intermediateDir}/snapshot.d")
+        } else {
+            dependenciesFile = project.file("${intermediateDir}/snapshot_blob.bin.d")
+        }
+        FileCollection sources = readDependencies(dependenciesFile)
+        if (sources != null) {
+            // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
+            // snapshots have to be rebuilt if it changes.
+            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
+            if (snapshotter != null) {
+                sources = sources.plus(snapshotter)
+            }
+            // Finally, add a dependency on pubspec.yaml as well.
+            return sources.plus(project.files('pubspec.yaml'))
+        }
+        // No dependencies file (or problems parsing it). Fall back to source files.
+        return project.fileTree(
+                dir: sourceDir,
+                exclude: ['android', 'ios'],
+                include: ['**/*.dart', 'pubspec.yaml']
+        )
     }
 
     @TaskAction
@@ -211,8 +305,10 @@ class FlutterTask extends DefaultTask {
                 workingDir sourceDir
                 if (localEngine != null) {
                     args "--local-engine", localEngine
+                    args "--local-engine-src-path", localEngineSrcPath
                 }
                 args "build", "aot"
+                args "--quiet"
                 args "--target", targetPath
                 args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
@@ -225,9 +321,13 @@ class FlutterTask extends DefaultTask {
             workingDir sourceDir
             if (localEngine != null) {
                 args "--local-engine", localEngine
+                args "--local-engine-src-path", localEngineSrcPath
             }
             args "build", "flx"
             args "--target", targetPath
+            if (kernelFile != null) {
+                args "--kernel", kernelFile.absolutePath
+            }
             args "--output-file", "${intermediateDir}/app.flx"
             if (buildMode != "debug") {
                 args "--precompiled"

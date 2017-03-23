@@ -4,15 +4,15 @@
 
 import 'dart:io';
 
+import 'package:flutter_devicelab/framework/adb.dart';
+
 import '../framework/framework.dart';
 import '../framework/utils.dart';
-
-import 'package:flutter_devicelab/framework/adb.dart';
 
 TaskFunction createBasicMaterialAppSizeTest() {
   return () async {
     const String sampleAppName = 'sample_flutter_app';
-    Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
 
     if (await sampleDir.exists())
       rmTree(sampleDir);
@@ -36,7 +36,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
           releaseSizeInBytes = await file('${sampleDir.path}/build/app.ipa').length();
         } else {
           await flutter('build', options: <String>['apk', '--release']);
-          releaseSizeInBytes = await file('${sampleDir.path}/android/app/build/outputs/apk/app.apk').length();
+          releaseSizeInBytes = await file('${sampleDir.path}/build/app/outputs/apk/app-release.apk').length();
         }
       });
     });

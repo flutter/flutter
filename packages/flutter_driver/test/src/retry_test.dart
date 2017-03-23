@@ -15,7 +15,7 @@ void main() {
 
     setUp(() {
       fakeAsync = new FakeAsync();
-      Clock fakeClock = fakeAsync.getClock(new DateTime.now());
+      final Clock fakeClock = fakeAsync.getClock(new DateTime.now());
       stopwatchFactory = () {
         return new FakeStopwatch(
           () => fakeClock.now().millisecondsSinceEpoch,

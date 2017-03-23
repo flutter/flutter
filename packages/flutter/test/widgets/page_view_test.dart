@@ -12,7 +12,7 @@ const Duration _frameDuration = const Duration(milliseconds: 100);
 
 void main() {
   testWidgets('PageView control test', (WidgetTester tester) async {
-    List<String> log = <String>[];
+    final List<String> log = <String>[];
 
     await tester.pumpWidget(new PageView(
       children: kStates.map<Widget>((String state) {
@@ -28,7 +28,7 @@ void main() {
             child: new Text(state),
           ),
         );
-      }).toList()
+      }).toList(),
     ));
 
     await tester.tap(find.text('Alabama'));
@@ -37,20 +37,20 @@ void main() {
 
     expect(find.text('Alaska'), findsNothing);
 
-    await tester.scroll(find.byType(PageView), const Offset(-10.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-10.0, 0.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
 
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsOneWidget);
     expect(find.text('Alaska'), findsNothing);
 
-    await tester.scroll(find.byType(PageView), const Offset(-401.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.drag(find.byType(PageView), const Offset(-401.0, 0.0));
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
@@ -60,22 +60,24 @@ void main() {
     expect(log, equals(<String>['Alaska']));
     log.clear();
 
-    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.fling(
+        find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
 
     await tester.fling(find.byType(PageView), const Offset(200.0, 0.0), 1000.0);
-    await tester.pumpUntilNoTransientCallbacks(_frameDuration);
+    await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsNothing);
   });
 
-  testWidgets('PageView does not squish when overscrolled', (WidgetTester tester) async {
+  testWidgets('PageView does not squish when overscrolled',
+      (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       theme: new ThemeData(platform: TargetPlatform.iOS),
       home: new PageView(
@@ -96,13 +98,13 @@ void main() {
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
-    await tester.scroll(find.byType(PageView), const Offset(100.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(100.0, 0.0));
     await tester.pump();
 
     expect(leftOf(0), equals(100.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
 
-    await tester.scroll(find.byType(PageView), const Offset(-200.0, 0.0));
+    await tester.drag(find.byType(PageView), const Offset(-200.0, 0.0));
     await tester.pump();
 
     expect(leftOf(0), equals(-100.0));
@@ -110,7 +112,7 @@ void main() {
   });
 
   testWidgets('PageController control test', (WidgetTester tester) async {
-    PageController controller = new PageController(initialPage: 4);
+    final PageController controller = new PageController(initialPage: 4);
 
     await tester.pumpWidget(new Center(
       child: new SizedBox(
@@ -126,7 +128,7 @@ void main() {
     expect(find.text('California'), findsOneWidget);
 
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Colorado'), findsOneWidget);
 
@@ -144,7 +146,7 @@ void main() {
     expect(find.text('Colorado'), findsOneWidget);
 
     controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('California'), findsOneWidget);
   });
@@ -162,8 +164,8 @@ void main() {
 
     expect(find.text('Alabama'), findsOneWidget);
 
-    await tester.scroll(find.byType(PageView), const Offset(-1250.0, 0.0));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.drag(find.byType(PageView), const Offset(-1250.0, 0.0));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Arizona'), findsOneWidget);
 
@@ -221,13 +223,14 @@ void main() {
   testWidgets('Page changes at halfway point', (WidgetTester tester) async {
     final List<int> log = <int>[];
     await tester.pumpWidget(new PageView(
-      onPageChanged: (int page) { log.add(page); },
+      onPageChanged: log.add,
       children: kStates.map<Widget>((String state) => new Text(state)).toList(),
     ));
 
     expect(log, isEmpty);
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture =
+        await tester.startGesture(const Point(100.0, 100.0));
     // The page view is 800.0 wide, so this move is just short of halfway.
     await gesture.moveBy(const Offset(-380.0, 0.0));
 
@@ -256,7 +259,7 @@ void main() {
     expect(log, isEmpty);
 
     await gesture.up();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
 
     expect(log, isEmpty);
 
@@ -264,4 +267,140 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('PageView viewportFraction', (WidgetTester tester) async {
+    PageController controller = new PageController(viewportFraction: 7/8);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Point(750.0, 0.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(-650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(750.0, 0.0));
+
+    controller = new PageController(viewportFraction: 39/40);
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(-770.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(10.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(790.0, 0.0));
+  });
+
+  testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
+    final PageController controller = new PageController(viewportFraction: 1/8);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Point(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arizona')), const Point(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arkansas')), const Point(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('California')), const Point(750.0, 0.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Delaware')), const Point(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Florida')), const Point(150.0, 0.0));
+    expect(tester.getTopLeft(find.text('Georgia')), const Point(250.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Point(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Illinois')), const Point(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Indiana')), const Point(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Iowa')), const Point(750.0, 0.0));
+  });
+
+  testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
+    final PageController controller =
+        new PageController(viewportFraction: 5/4);
+
+    Widget build(PageController controller) {
+      return new PageView.builder(
+        controller: controller,
+        itemCount: kStates.length,
+        itemBuilder: (BuildContext context, int index) {
+          return new Container(
+            height: 200.0,
+            color: index % 2 == 0
+                ? const Color(0xFF0000FF)
+                : const Color(0xFF00FF00),
+            child: new Text(kStates[index]),
+          );
+        },
+      );
+    }
+
+    await tester.pumpWidget(build(controller));
+
+    expect(tester.getTopLeft(find.text('Alabama')), const Point(-100.0, 0.0));
+    expect(tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
+
+    controller.jumpToPage(10);
+    await tester.pump();
+
+    expect(tester.getTopLeft(find.text('Hawaii')), const Point(-100.0, 0.0));
+  });
+
+  testWidgets('PageView does not report page changed on overscroll',
+      (WidgetTester tester) async {
+    final PageController controller = new PageController(
+      initialPage: kStates.length - 1,
+    );
+    int changeIndex = 0;
+    Widget build() {
+      return new PageView(
+        children:
+            kStates.map<Widget>((String state) => new Text(state)).toList(),
+        controller: controller,
+        onPageChanged: (int page) {
+          changeIndex = page;
+        },
+      );
+    }
+
+    await tester.pumpWidget(build());
+    controller.jumpToPage(kStates.length * 2); // try to move beyond max range
+    // change index should be zero, shouldn't fire onPageChanged
+    expect(changeIndex, 0);
+    await tester.pump();
+    expect(changeIndex, 0);
+  });
 }

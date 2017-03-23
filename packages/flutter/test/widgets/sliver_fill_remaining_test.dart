@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
-    List<Widget> children = new List<Widget>.generate(20, (int i) {
+    final List<Widget> children = new List<Widget>.generate(20, (int i) {
       return new Container(child: new Text('$i'));
     });
 
@@ -21,14 +21,14 @@ void main() {
       ),
     );
 
-    RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
     expect(box.size.height, equals(600.0));
 
     expect(find.text('0'), findsOneWidget);
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
 
-    await tester.scroll(find.byType(Scrollable), const Offset(0.0, -700.0));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, -700.0));
     await tester.pump();
 
     expect(find.text('0'), findsNothing);
@@ -37,7 +37,7 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
 
-    await tester.scroll(find.byType(Scrollable), const Offset(0.0, 200.0));
+    await tester.drag(find.byType(Scrollable), const Offset(0.0, 200.0));
     await tester.pump();
 
     expect(find.text('0'), findsOneWidget);

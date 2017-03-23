@@ -32,17 +32,17 @@ class TestCanvas implements Canvas {
 
 void main() {
   test("Cover and align", () {
-    TestImage image = new TestImage(width: 300, height: 300);
-    TestCanvas canvas = new TestCanvas();
+    final TestImage image = new TestImage(width: 300, height: 300);
+    final TestCanvas canvas = new TestCanvas();
     paintImage(
       canvas: canvas,
       rect: new Rect.fromLTWH(50.0, 75.0, 200.0, 100.0),
       image: image,
-      fit: ImageFit.cover,
+      fit: BoxFit.cover,
       alignment: const FractionalOffset(0.0, 0.5)
     );
 
-    Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
+    final Invocation command = canvas.invocations.firstWhere((Invocation invocation) {
       return invocation.memberName == #drawImageRect;
     });
 

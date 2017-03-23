@@ -39,7 +39,7 @@ class OrderItem extends StatelessWidget {
                 height: 248.0,
                 child: new Hero(
                   tag: product.tag,
-                  child: new Image.asset(product.imageAsset, fit: ImageFit.contain),
+                  child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
                 ),
               ),
             ),
@@ -118,7 +118,7 @@ class OrderItem extends StatelessWidget {
 class OrderPage extends StatefulWidget {
   OrderPage({ Key key, this.order, this.products, this.shoppingCart }) : super(key: key) {
     assert(order != null);
-    assert(products != null && products.length > 0);
+    assert(products != null && products.isNotEmpty);
     assert(shoppingCart != null);
   }
 
@@ -134,7 +134,13 @@ class OrderPage extends StatefulWidget {
 /// arranged in two columns. Enables the user to specify a quantity and add an
 /// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order');
+  GlobalKey<ScaffoldState> scaffoldKey;
+
+  @override
+  void initState() {
+    super.initState();
+    scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order ${config.order}');
+  }
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
 
@@ -143,7 +149,7 @@ class _OrderPageState extends State<OrderPage> {
   }
 
   void updateOrder({ int quantity, bool inCart }) {
-    Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
+    final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
         config.shoppingCart[newOrder.product] = newOrder;
@@ -191,7 +197,7 @@ class _OrderPageState extends State<OrderPage> {
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(8.0),
-            child: new SliverGrid(
+            sliver: new SliverGrid(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 8.0,
@@ -206,7 +212,7 @@ class _OrderPageState extends State<OrderPage> {
                       elevation: 1,
                       child: new Image.asset(
                         product.imageAsset,
-                        fit: ImageFit.contain,
+                        fit: BoxFit.contain,
                       ),
                     );
                   }).toList(),

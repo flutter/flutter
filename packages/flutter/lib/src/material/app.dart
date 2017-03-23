@@ -209,7 +209,7 @@ class _MaterialAppState extends State<MaterialApp> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = config.theme ?? new ThemeData.fallback();
+    final ThemeData theme = config.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
       isMaterialAppTheme: true,
@@ -217,8 +217,8 @@ class _MaterialAppState extends State<MaterialApp> {
         key: new GlobalObjectKey(this),
         title: config.title,
         textStyle: _errorTextStyle,
-        // blue[500] is the primary color of the default theme
-        color: config.color ?? theme?.primaryColor ?? Colors.blue[500],
+        // blue is the primary color of the default theme
+        color: config.color ?? theme?.primaryColor ?? Colors.blue,
         navigatorObservers:
             new List<NavigatorObserver>.from(config.navigatorObservers)
               ..add(_heroController),

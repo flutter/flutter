@@ -5,17 +5,18 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:process/process.dart';
-import 'package:stack_trace/stack_trace.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:intl/intl_standalone.dart' as intl;
+import 'package:meta/meta.dart';
+import 'package:process/process.dart';
 
+import 'src/artifacts.dart';
 import 'src/base/common.dart';
 import 'src/base/config.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
-import 'src/base/os.dart';
 import 'src/base/platform.dart';
 import 'src/base/process.dart';
 import 'src/base/utils.dart';
@@ -30,6 +31,7 @@ import 'src/commands/devices.dart';
 import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
+import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
@@ -41,26 +43,59 @@ import 'src/commands/test.dart';
 import 'src/commands/trace.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
-import 'src/artifacts.dart';
+import 'src/crash_reporting.dart';
 import 'src/devfs.dart';
 import 'src/device.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart';
-import 'src/ios/mac.dart';
 import 'src/ios/simulators.dart';
 import 'src/run_hot.dart';
+import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
-
 
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
 Future<Null> main(List<String> args) async {
-  bool verbose = args.contains('-v') || args.contains('--verbose');
-  bool help = args.contains('-h') || args.contains('--help') ||
+  final bool verbose = args.contains('-v') || args.contains('--verbose');
+  final bool help = args.contains('-h') || args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
-  bool verboseHelp = help && verbose;
+  final bool verboseHelp = help && verbose;
+
+  await run(args, <FlutterCommand>[
+    new AnalyzeCommand(verboseHelp: verboseHelp),
+    new BuildCommand(verboseHelp: verboseHelp),
+    new ChannelCommand(),
+    new ConfigCommand(),
+    new CreateCommand(),
+    new DaemonCommand(hidden: !verboseHelp),
+    new DevicesCommand(),
+    new DoctorCommand(),
+    new DriveCommand(),
+    new FormatCommand(),
+    new FuchsiaReloadCommand(),
+    new InstallCommand(),
+    new LogsCommand(),
+    new PackagesCommand(),
+    new PrecacheCommand(),
+    new RunCommand(verboseHelp: verboseHelp),
+    new ScreenshotCommand(),
+    new StopCommand(),
+    new TestCommand(),
+    new TraceCommand(),
+    new UpdatePackagesCommand(hidden: !verboseHelp),
+    new UpgradeCommand(),
+  ], verbose: verbose, verboseHelp: verboseHelp);
+}
+
+Future<int> run(List<String> args, List<FlutterCommand> subCommands, {
+  bool verbose: false,
+  bool verboseHelp: false,
+  bool reportCrashes,
+  String flutterVersion,
+}) async {
+  reportCrashes ??= !isRunningOnBot;
 
   if (verboseHelp) {
     // Remove the verbose option; for help, users don't need to see verbose logs.
@@ -68,34 +103,14 @@ Future<Null> main(List<String> args) async {
     args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp)
-    ..addCommand(new AnalyzeCommand(verboseHelp: verboseHelp))
-    ..addCommand(new BuildCommand(verboseHelp: verboseHelp))
-    ..addCommand(new ChannelCommand())
-    ..addCommand(new ConfigCommand())
-    ..addCommand(new CreateCommand())
-    ..addCommand(new DaemonCommand(hidden: !verboseHelp))
-    ..addCommand(new DevicesCommand())
-    ..addCommand(new DoctorCommand())
-    ..addCommand(new DriveCommand())
-    ..addCommand(new FormatCommand())
-    ..addCommand(new InstallCommand())
-    ..addCommand(new LogsCommand())
-    ..addCommand(new PackagesCommand())
-    ..addCommand(new PrecacheCommand())
-    ..addCommand(new RunCommand(verboseHelp: verboseHelp))
-    ..addCommand(new ScreenshotCommand())
-    ..addCommand(new StopCommand())
-    ..addCommand(new TestCommand())
-    ..addCommand(new TraceCommand())
-    ..addCommand(new UpdatePackagesCommand(hidden: !verboseHelp))
-    ..addCommand(new UpgradeCommand());
+  final FlutterCommandRunner runner = new FlutterCommandRunner(verboseHelp: verboseHelp);
+  subCommands.forEach(runner.addCommand);
 
   // Construct a context.
-  AppContext _executableContext = new AppContext();
+  final AppContext _executableContext = new AppContext();
 
   // Make the context current.
-  await _executableContext.runInZone(() async {
+  return await _executableContext.runInZone(() async {
     // Initialize the context with some defaults.
     // NOTE: Similar lists also exist in `bin/fuchsia_builder.dart` and
     // `test/src/context.dart`. If you update this list of defaults, look
@@ -115,74 +130,124 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(HotRunnerConfig, () => new HotRunnerConfig());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Artifacts, () => new CachedArtifacts());
-    context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Xcode, () => new Xcode());
     context.putIfAbsent(IOSSimulatorUtils, () => new IOSSimulatorUtils());
     context.putIfAbsent(SimControl, () => new SimControl());
-    context.putIfAbsent(Usage, () => new Usage());
 
     // Initialize the system locale.
     await intl.findSystemLocale();
 
-    return Chain.capture<Future<Null>>(() async {
+    try {
       await runner.run(args);
-      _exit(0);
-    }, onError: (dynamic error, Chain chain) {
-      if (error is UsageException) {
-        stderr.writeln(error.message);
-        stderr.writeln();
-        stderr.writeln(
-            "Run 'flutter -h' (or 'flutter <command> -h') for available "
-                "flutter commands and options."
-        );
-        // Argument error exit code.
-        _exit(64);
-      } else if (error is ToolExit) {
-        if (error.message != null)
-          stderr.writeln(error.message);
-        if (verbose) {
-          stderr.writeln();
-          stderr.writeln(chain.terse.toString());
-          stderr.writeln();
-        }
-        _exit(error.exitCode ?? 1);
-      } else if (error is ProcessExit) {
-        // We've caught an exit code.
-        _exit(error.exitCode);
-      } else {
-        // We've crashed; emit a log report.
-        stderr.writeln();
-
-        flutterUsage.sendException(error, chain);
-
-        if (isRunningOnBot) {
-          // Print the stack trace on the bots - don't write a crash report.
-          stderr.writeln('$error');
-          stderr.writeln(chain.terse.toString());
-          _exit(1);
-        } else {
-          if (error is String)
-            stderr.writeln('Oops; flutter has exited unexpectedly: "$error".');
-          else
-            stderr.writeln('Oops; flutter has exited unexpectedly.');
-
-          _createCrashReport(args, error, chain).then<Null>((File file) {
-            stderr.writeln(
-                'Crash report written to ${file.path};\n'
-                    'please let us know at https://github.com/flutter/flutter/issues.'
-            );
-            _exit(1);
-          });
-        }
-      }
-    });
+      await _exit(0);
+    } catch (error, stackTrace) {
+      String getVersion() => flutterVersion ?? FlutterVersion.getVersionString();
+      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
+    }
+    return 0;
   });
 }
 
-Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) async {
-  File crashFile = getUniqueFile(fs.currentDirectory, 'flutter', 'log');
+/// Writes the [string] to one of the standard output streams.
+@visibleForTesting
+typedef void WriteCallback([String string]);
 
-  StringBuffer buffer = new StringBuffer();
+/// Writes a line to STDERR.
+///
+/// Overwrite this in tests to avoid spurious test output.
+@visibleForTesting
+WriteCallback writelnStderr = stderr.writeln;
+
+Future<int> _handleToolError(
+    dynamic error,
+    StackTrace stackTrace,
+    bool verbose,
+    List<String> args,
+    bool reportCrashes,
+    String getFlutterVersion(),
+) async {
+  if (error is UsageException) {
+    writelnStderr(error.message);
+    writelnStderr();
+    writelnStderr(
+        "Run 'flutter -h' (or 'flutter <command> -h') for available "
+            "flutter commands and options."
+    );
+    // Argument error exit code.
+    return _exit(64);
+  } else if (error is ToolExit) {
+    if (error.message != null)
+      writelnStderr(error.message);
+    if (verbose) {
+      writelnStderr();
+      writelnStderr(stackTrace.toString());
+      writelnStderr();
+    }
+    return _exit(error.exitCode ?? 1);
+  } else if (error is ProcessExit) {
+    // We've caught an exit code.
+    if (error.immediate) {
+      exit(error.exitCode);
+      return error.exitCode;
+    } else {
+      return _exit(error.exitCode);
+    }
+  } else {
+    // We've crashed; emit a log report.
+    writelnStderr();
+
+    if (!reportCrashes) {
+      // Print the stack trace on the bots - don't write a crash report.
+      writelnStderr('$error');
+      writelnStderr(stackTrace.toString());
+      return _exit(1);
+    } else {
+      flutterUsage.sendException(error, stackTrace);
+
+      if (error is String)
+        writelnStderr('Oops; flutter has exited unexpectedly: "$error".');
+      else
+        writelnStderr('Oops; flutter has exited unexpectedly.');
+
+      await CrashReportSender.instance.sendReport(
+        error: error,
+        stackTrace: stackTrace,
+        getFlutterVersion: getFlutterVersion,
+      );
+      try {
+        final File file = await _createLocalCrashReport(args, error, stackTrace);
+        writelnStderr(
+            'Crash report written to ${file.path};\n'
+                'please let us know at https://github.com/flutter/flutter/issues.',
+        );
+        return _exit(1);
+      } catch (error) {
+        writelnStderr(
+            'Unable to generate crash report due to secondary error: $error\n'
+                'please let us know at https://github.com/flutter/flutter/issues.',
+        );
+        // Any exception throw here (including one thrown by `_exit()`) will
+        // get caught by our zone's `onError` handler. In order to avoid an
+        // infinite error loop, we throw an error that is recognized above
+        // and will trigger an immediate exit.
+        throw new ProcessExit(1, immediate: true);
+      }
+    }
+  }
+}
+
+/// File system used by the crash reporting logic.
+///
+/// We do not want to use the file system stored in the context because it may
+/// be recording. Additionally, in the case of a crash we do not trust the
+/// integrity of the [AppContext].
+@visibleForTesting
+FileSystem crashFileSystem = const LocalFileSystem();
+
+/// Saves the crash report to a local file.
+Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
+  File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
+
+  final StringBuffer buffer = new StringBuffer();
 
   buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
@@ -190,19 +255,19 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
   buffer.writeln('flutter ${args.join(' ')}\n');
 
   buffer.writeln('## exception\n');
-  buffer.writeln('$error\n');
-  buffer.writeln('```\n${chain.terse}```\n');
+  buffer.writeln('${error.runtimeType}: $error\n');
+  buffer.writeln('```\n$stackTrace```\n');
 
   buffer.writeln('## flutter doctor\n');
   buffer.writeln('```\n${await _doctorText()}```');
 
   try {
-    crashFile.writeAsStringSync(buffer.toString());
+    await crashFile.writeAsString(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = getUniqueFile(fs.systemTempDirectory, 'flutter', 'log');
+    crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
-      crashFile.writeAsStringSync(buffer.toString());
+      await crashFile.writeAsString(buffer.toString());
     } on FileSystemException catch (e) {
       printError('Could not write crash report to disk: $e');
       printError(buffer.toString());
@@ -214,8 +279,8 @@ Future<File> _createCrashReport(List<String> args, dynamic error, Chain chain) a
 
 Future<String> _doctorText() async {
   try {
-    BufferLogger logger = new BufferLogger();
-    AppContext appContext = new AppContext();
+    final BufferLogger logger = new BufferLogger();
+    final AppContext appContext = new AppContext();
 
     appContext.setVariable(Logger, logger);
 
@@ -227,14 +292,14 @@ Future<String> _doctorText() async {
   }
 }
 
-Future<Null> _exit(int code) async {
+Future<int> _exit(int code) async {
   if (flutterUsage.isFirstRun)
     flutterUsage.printUsage();
 
   // Send any last analytics calls that are in progress without overly delaying
   // the tool's exit (we wait a maximum of 250ms).
   if (flutterUsage.enabled) {
-    Stopwatch stopwatch = new Stopwatch()..start();
+    final Stopwatch stopwatch = new Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
     printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
@@ -242,9 +307,19 @@ Future<Null> _exit(int code) async {
   // Run shutdown hooks before flushing logs
   await runShutdownHooks();
 
+  final Completer<Null> completer = new Completer<Null>();
+
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
-    printTrace('exiting with code $code');
-    exit(code);
+    try {
+      printTrace('exiting with code $code');
+      exit(code);
+      completer.complete();
+    } catch (error, stackTrace) {
+      completer.completeError(error, stackTrace);
+    }
   });
+
+  await completer.future;
+  return code;
 }

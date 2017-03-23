@@ -7,7 +7,7 @@ import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.allowAllFrames = true;
 
@@ -23,7 +23,7 @@ void main() {
     final Point allDemosOrigin = tester.getTopRight(find.text('Demos'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
-      await tester.scrollAt(allDemosOrigin, const Offset(0.0, -100.0));
+      await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));
       await tester.pump(); // start the scroll
       await tester.pump(const Duration(seconds: 1));
     }

@@ -64,7 +64,7 @@ void _debugPrintTask() {
     _debugPrintedCharacters = 0;
   }
   while (_debugPrintedCharacters < _kDebugPrintCapacity && _debugPrintBuffer.isNotEmpty) {
-    String line = _debugPrintBuffer.removeFirst();
+    final String line = _debugPrintBuffer.removeFirst();
     _debugPrintedCharacters += line.length; // TODO(ianh): Use the UTF-8 byte length instead
     print(line);
   }
@@ -108,8 +108,8 @@ Iterable<String> debugWordWrap(String message, int width, { String wrapIndent: '
     yield message;
     return;
   }
-  Match prefixMatch = _indentPattern.matchAsPrefix(message);
-  String prefix = wrapIndent + ' ' * prefixMatch.group(0).length;
+  final Match prefixMatch = _indentPattern.matchAsPrefix(message);
+  final String prefix = wrapIndent + ' ' * prefixMatch.group(0).length;
   int start = 0;
   int startForLengthCalculations = 0;
   bool addPrefix = false;

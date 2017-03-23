@@ -134,7 +134,7 @@ class AlertDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = new List<Widget>();
+    final List<Widget> children = <Widget>[];
 
     if (title != null) {
       children.add(new Padding(
@@ -316,9 +316,12 @@ class SimpleDialog extends StatelessWidget {
 
 class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
-    this.child,
-    this.theme,
-  });
+    @required this.theme,
+    bool barrierDismissible: true,
+    @required this.child,
+  }) : _barrierDismissible = barrierDismissible {
+    assert(barrierDismissible != null);
+  }
 
   final Widget child;
   final ThemeData theme;
@@ -327,7 +330,8 @@ class _DialogRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => const Duration(milliseconds: 150);
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => _barrierDismissible;
+  final bool _barrierDismissible;
 
   @override
   Color get barrierColor => Colors.black54;
@@ -364,10 +368,12 @@ class _DialogRoute<T> extends PopupRoute<T> {
 ///  * <https://material.google.com/components/dialogs.html>
 Future<T> showDialog<T>({
   @required BuildContext context,
-  @required Widget child
+  bool barrierDismissible: true,
+  @required Widget child,
 }) {
   return Navigator.push(context, new _DialogRoute<T>(
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),
+    barrierDismissible: barrierDismissible,
   ));
 }

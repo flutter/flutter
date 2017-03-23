@@ -86,20 +86,20 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
     canvas.drawRect(Point.origin & size, paint);
 
     paint.color = valueColor;
     if (value != null) {
-      double width = value.clamp(0.0, 1.0) * size.width;
+      final double width = value.clamp(0.0, 1.0) * size.width;
       canvas.drawRect(Point.origin & new Size(width, size.height), paint);
     } else {
-      double startX = size.width * (1.5 * animationValue - 0.5);
-      double endX = startX + 0.5 * size.width;
-      double x = startX.clamp(0.0, size.width);
-      double width = endX.clamp(0.0, size.width) - x;
+      final double startX = size.width * (1.5 * animationValue - 0.5);
+      final double endX = startX + 0.5 * size.width;
+      final double x = startX.clamp(0.0, size.width);
+      final double width = endX.clamp(0.0, size.width) - x;
       canvas.drawRect(new Point(x, 0.0) & new Size(width, size.height), paint);
     }
   }
@@ -206,18 +206,13 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   _CircularProgressIndicatorPainter({
     this.valueColor,
-    double value,
-    double headValue,
-    double tailValue,
-    int stepValue,
-    double rotationValue,
+    this.value,
+    this.headValue,
+    this.tailValue,
+    this.stepValue,
+    this.rotationValue,
     this.strokeWidth
-  }) : this.value = value,
-       this.headValue = headValue,
-       this.tailValue = tailValue,
-       this.stepValue = stepValue,
-       this.rotationValue = rotationValue,
-       arcStart = value != null
+  }) : arcStart = value != null
          ? _kStartAngle
          : _kStartAngle + tailValue * 3 / 2 * math.PI + rotationValue * math.PI * 1.7 - stepValue * 0.8 * math.PI,
        arcSweep = value != null
@@ -236,7 +231,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
@@ -409,12 +404,12 @@ class _RefreshProgressIndicatorPainter extends _CircularProgressIndicatorPainter
     final double innerRadius = radius - arrowheadRadius;
     final double outerRadius = radius + arrowheadRadius;
 
-    Path path = new Path()
+    final Path path = new Path()
       ..moveTo(radius + ux * innerRadius, radius + uy * innerRadius)
       ..lineTo(radius + ux * outerRadius, radius + uy * outerRadius)
       ..lineTo(arrowheadPointX, arrowheadPointY)
       ..close();
-    Paint paint = new Paint()
+    final Paint paint = new Paint()
       ..color = valueColor
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.fill;

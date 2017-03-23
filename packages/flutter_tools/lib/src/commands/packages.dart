@@ -40,7 +40,12 @@ class PackagesGetCommand extends FlutterCommand {
 
   final bool upgrade;
 
-  PackagesGetCommand(this.name, this.upgrade);
+  PackagesGetCommand(this.name, this.upgrade) {
+    argParser.addFlag('offline',
+      negatable: false,
+      help: 'Use cached packages instead of accessing the network.'
+    );
+  }
 
   // TODO: implement description
   @override
@@ -56,7 +61,7 @@ class PackagesGetCommand extends FlutterCommand {
     if (argResults.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
-    String target = findProjectRoot(
+    final String target = findProjectRoot(
         argResults.rest.length == 1 ? argResults.rest[0] : null);
     if (target == null)
       throwToolExit(
@@ -68,6 +73,11 @@ class PackagesGetCommand extends FlutterCommand {
 
     // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
 
-    await pubGet(directory: target, upgrade: upgrade, checkLastModified: false);
+    await pubGet(
+      directory: target,
+      upgrade: upgrade,
+      offline: argResults['offline'],
+      checkLastModified: false
+    );
   }
 }

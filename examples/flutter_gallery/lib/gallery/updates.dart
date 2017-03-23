@@ -37,9 +37,9 @@ class UpdaterState extends State<Updater> {
     }
     _lastUpdateCheck = new DateTime.now();
 
-    String updateUrl = await config.updateUrlFetcher();
+    final String updateUrl = await config.updateUrlFetcher();
     if (updateUrl != null) {
-      bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
+      final bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
       if (wantsUpdate != null && wantsUpdate)
         UrlLauncher.launch(updateUrl);
     }

@@ -84,7 +84,7 @@ void main() {
 
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
-        TimelineSummary summary = summarize(<Map<String, dynamic>>[
+        final TimelineSummary summary = summarize(<Map<String, dynamic>>[
           build(1000, 9000),
           build(11000, 1000),
           build(13000, 10000),
@@ -176,7 +176,7 @@ void main() {
 
     group('computeMissedFrameRasterizerBudgetCount', () {
       test('computes the number of missed rasterizer budgets', () {
-        TimelineSummary summary = summarize(<Map<String, dynamic>>[
+        final TimelineSummary summary = summarize(<Map<String, dynamic>>[
           begin(1000), end(10000),
           begin(11000), end(12000),
           begin(13000), end(23000),
@@ -229,7 +229,7 @@ void main() {
       test('writes timeline to JSON file', () async {
         await summarize(<Map<String, String>>[<String, String>{'foo': 'bar'}])
           .writeTimelineToFile('test', destinationDirectory: tempDir.path);
-        String written =
+        final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline.json')).readAsString();
         expect(written, '{"traceEvents":[{"foo":"bar"}]}');
       });
@@ -243,7 +243,7 @@ void main() {
           build(11000, 1000),
           build(13000, 11000),
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
-        String written =
+        final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
         expect(JSON.decode(written), <String, dynamic>{
           'average_frame_build_time_millis': 7.0,

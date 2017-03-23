@@ -253,13 +253,12 @@ class DataTable extends StatelessWidget {
   /// otherwise it should be false.
   DataTable({
     Key key,
-    List<DataColumn> columns,
+    this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
     this.onSelectAll,
     this.rows
-  }) : columns = columns,
-       _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
+  }) : _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
     assert(columns != null);
     assert(columns.isNotEmpty);
     assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length));
@@ -317,7 +316,7 @@ class DataTable extends StatelessWidget {
   static int _initOnlyTextColumn(List<DataColumn> columns) {
     int result;
     for (int index = 0; index < columns.length; index += 1) {
-      DataColumn column = columns[index];
+      final DataColumn column = columns[index];
       if (!column.numeric) {
         if (result != null)
           return null;
@@ -507,8 +506,8 @@ class DataTable extends StatelessWidget {
     final bool showCheckboxColumn = rows.any((DataRow row) => row.onSelectChanged != null);
     final bool allChecked = showCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
-    List<TableColumnWidth> tableColumns = new List<TableColumnWidth>(columns.length + (showCheckboxColumn ? 1 : 0));
-    List<TableRow> tableRows = new List<TableRow>.generate(
+    final List<TableColumnWidth> tableColumns = new List<TableColumnWidth>(columns.length + (showCheckboxColumn ? 1 : 0));
+    final List<TableRow> tableRows = new List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
         return new TableRow(
@@ -544,7 +543,7 @@ class DataTable extends StatelessWidget {
     }
 
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
-      DataColumn column = columns[dataColumnIndex];
+      final DataColumn column = columns[dataColumnIndex];
       final EdgeInsets padding = new EdgeInsets.fromLTRB(
         dataColumnIndex == 0 ? showCheckboxColumn ? _kTablePadding / 2.0 : _kTablePadding : _kColumnSpacing / 2.0,
         0.0,
@@ -568,7 +567,7 @@ class DataTable extends StatelessWidget {
       );
       rowIndex = 1;
       for (DataRow row in rows) {
-        DataCell cell = row.cells[dataColumnIndex];
+        final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
           padding: padding,
@@ -629,22 +628,22 @@ class TableRowInkWell extends InkResponse {
     return () {
       RenderObject cell = referenceBox;
       AbstractNode table = cell.parent;
-      Matrix4 transform = new Matrix4.identity();
+      final Matrix4 transform = new Matrix4.identity();
       while (table is RenderObject && table is! RenderTable) {
-        RenderTable parentBox = table;
+        final RenderTable parentBox = table;
         parentBox.applyPaintTransform(cell, transform);
         assert(table == cell.parent);
         cell = table;
         table = table.parent;
       }
       if (table is RenderTable) {
-        TableCellParentData cellParentData = cell.parentData;
+        final TableCellParentData cellParentData = cell.parentData;
         assert(cellParentData.y != null);
-        Rect rect = table.getRowBox(cellParentData.y);
+        final Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the
         // TableRowInkWell's coordinate space.
         table.applyPaintTransform(cell, transform);
-        Offset offset = MatrixUtils.getAsTranslation(transform);
+        final Offset offset = MatrixUtils.getAsTranslation(transform);
         if (offset != null)
           return rect.shift(-offset);
       }
@@ -734,7 +733,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void didUpdateConfig(_SortArrow oldConfig) {
     super.didUpdateConfig(oldConfig);
     bool skipArrow = false;
-    bool newDown = config.down != null ? config.down : _down;
+    final bool newDown = config.down != null ? config.down : _down;
     if (oldConfig.visible != config.visible) {
       if (config.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();

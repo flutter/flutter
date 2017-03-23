@@ -19,11 +19,11 @@ class TestUniqueWidgetState extends State<TestUniqueWidget> {
 
 void main() {
   testWidgets('Unique widget control test', (WidgetTester tester) async {
-    TestUniqueWidget widget = new TestUniqueWidget(key: new GlobalKey());
+    final TestUniqueWidget widget = new TestUniqueWidget(key: new GlobalKey());
 
     await tester.pumpWidget(widget);
 
-    TestUniqueWidgetState state = widget.currentState;
+    final TestUniqueWidgetState state = widget.currentState;
 
     expect(state, isNotNull);
 

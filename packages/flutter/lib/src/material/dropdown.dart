@@ -9,31 +9,28 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'debug.dart';
 import 'icon.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
-import 'material.dart';
 
 const Duration _kDropdownMenuDuration = const Duration(milliseconds: 300);
 const double _kMenuItemHeight = 48.0;
 const double _kDenseButtonHeight = 24.0;
-const EdgeInsets _kMenuVerticalPadding = const EdgeInsets.symmetric(vertical: 8.0);
 const EdgeInsets _kMenuHorizontalPadding = const EdgeInsets.symmetric(horizontal: 16.0);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({
-    Color color,
-    int elevation,
+    this.color,
+    this.elevation,
     this.selectedIndex,
-    Animation<double> resize,
-  }) : color = color,
-       elevation = elevation,
-       resize = resize,
-       _painter = new BoxDecoration(
+    this.resize,
+  }) : _painter = new BoxDecoration(
          // If you add a background image here, you must provide a real
          // configuration in the paint() function and you must provide some sort
          // of onChanged callback here.
@@ -52,7 +49,7 @@ class _DropdownMenuPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     final Tween<double> top = new Tween<double>(
       begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
       end: 0.0,
@@ -95,8 +92,8 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 class _DropdownMenu<T> extends StatefulWidget {
   _DropdownMenu({
     Key key,
-    _DropdownRoute<T> route,
-  }) : route = route, super(key: key);
+    this.route,
+  }) : super(key: key);
 
   final _DropdownRoute<T> route;
 
@@ -181,7 +178,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             child: new Scrollbar(
               child: new ListView(
                 controller: config.route.scrollController,
-                padding: _kMenuVerticalPadding,
+                padding: kMaterialListPadding,
                 itemExtent: _kMenuItemHeight,
                 shrinkWrap: true,
                 children: children,
@@ -222,7 +219,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     final double buttonTop = buttonRect.top;
-    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + _kMenuVerticalPadding.top;
+    final double selectedItemOffset = selectedIndex * _kMenuItemHeight + kMaterialListPadding.top;
     double top = (buttonTop - selectedItemOffset) - (_kMenuItemHeight - buttonRect.height) / 2.0;
     final double topPreferredLimit = _kMenuItemHeight;
     if (top < topPreferredLimit)
@@ -310,7 +307,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
   Duration get transitionDuration => _kDropdownMenuDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => null;
@@ -562,7 +559,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
             new Icon(Icons.arrow_drop_down,
               size: config.iconSize,
               // These colors are not defined in the Material Design spec.
-              color: Theme.of(context).brightness == Brightness.light ? Colors.grey[700] : Colors.white70
+              color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
             ),
           ],
         ),

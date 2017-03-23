@@ -118,13 +118,14 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   ScrollPosition _position;
 
   ScrollBehavior _configuration;
+  ScrollPhysics _physics;
 
-  // only call this from places that will definitely trigger a rebuild
+  // Only call this from places that will definitely trigger a rebuild.
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
-    ScrollPhysics physics = _configuration.getScrollPhysics(context);
+    _physics = _configuration.getScrollPhysics(context);
     if (config.physics != null)
-      physics = config.physics.applyTo(physics);
+      _physics = config.physics.applyTo(_physics);
     final ScrollController controller = config.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
@@ -135,15 +136,15 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       scheduleMicrotask(oldPosition.dispose);
     }
 
-    _position = controller?.createScrollPosition(physics, this, oldPosition)
-      ?? ScrollController.createDefaultScrollPosition(physics, this, oldPosition);
+    _position = controller?.createScrollPosition(_physics, this, oldPosition)
+      ?? ScrollController.createDefaultScrollPosition(_physics, this, oldPosition);
     assert(position != null);
     controller?.attach(position);
   }
 
   @override
-  void dependenciesChanged() {
-    super.dependenciesChanged();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _updatePosition();
   }
 
@@ -201,7 +202,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
+                ..onEnd = _handleDragEnd
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
             }
           };
           break;
@@ -212,7 +216,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onDown = _handleDragDown
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd;
+                ..onEnd = _handleDragEnd
+                ..minFlingDistance = _physics?.minFlingDistance
+                ..minFlingVelocity = _physics?.minFlingVelocity
+                ..maxFlingVelocity = _physics?.maxFlingVelocity;
             }
           };
           break;
@@ -234,7 +241,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -298,7 +305,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   Widget build(BuildContext context) {
     assert(position != null);
     // TODO(ianh): Having all these global keys is sad.
-    Widget result = new RawGestureDetector(
+    final Widget result = new RawGestureDetector(
       key: _gestureDetectorKey,
       gestures: _gestureRecognizers,
       behavior: HitTestBehavior.opaque,

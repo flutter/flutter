@@ -44,7 +44,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Shown behind the [title] when expanded.
   ///
-  /// Typically an [AssetImage] widget with [AssetImage.fit] set to [ImageFit.cover].
+  /// Typically an [AssetImage] widget with [AssetImage.fit] set to [BoxFit.cover].
   final Widget background;
 
   /// Whether the title should be centered.
@@ -94,7 +94,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
   @override
   Widget build(BuildContext context) {
-    _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
+    final _FlexibleSpaceBarSettings settings = context.inheritFromWidgetOfExactType(_FlexibleSpaceBarSettings);
     assert(settings != null, 'A FlexibleSpaceBar must be wrapped in the widget returned by FlexibleSpaceBar.createSettings().');
 
     final List<Widget> children = <Widget>[];

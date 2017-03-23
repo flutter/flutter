@@ -8,9 +8,10 @@ environment:
   sdk: '>=1.19.0 <2.0.0'
 
 dependencies:
-  file: 2.1.0
+  file: 2.3.1
   json_rpc_2: '^2.0.0'
   matcher: '>=0.12.0 <1.0.0'
+  meta: ^1.0.4
   path: '^1.4.0'
   web_socket_channel: '^1.0.0'
   vm_service_client: '0.2.2+4'
@@ -20,6 +21,6 @@ dependencies:
     sdk: flutter
 
 dev_dependencies:
-  test: 0.12.18+2
-  mockito: ^1.0.0
+  test: 0.12.20
+  mockito: ^2.0.2
   quiver: ^0.24.0

@@ -8,10 +8,12 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/http.dart' as http;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart' as http;
 import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
@@ -119,7 +121,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   @override
   void initInstances() {
     timeDilation = 1.0; // just in case the developer has artificially changed it for development
-    http.Client.clientOverride = () {
+    createHttpClient = () {
       return new http.MockClient((http.BaseRequest request) {
         return new Future<http.Response>.value(
           new http.Response("Mocked: Unavailable.", 404, request: request)
@@ -154,7 +156,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   Future<Null> setLocale(String languageCode, String countryCode) {
     return TestAsyncUtils.guard(() async {
       assert(inTest);
-      Locale locale = new Locale(languageCode, countryCode);
+      final Locale locale = new Locale(languageCode, countryCode);
       dispatchLocaleChanged(locale);
       return null;
     });
@@ -200,8 +202,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// the focus change.
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
-  set focusedEditable (EditableTextState editable) {
-    _focusedEditable = editable..requestKeyboard();
+  set focusedEditable(EditableTextState value) {
+    _focusedEditable = value..requestKeyboard();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -220,7 +222,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// null in that case.
   dynamic takeException() {
     assert(inTest);
-    dynamic result = _pendingExceptionDetails?.exception;
+    final dynamic result = _pendingExceptionDetails?.exception;
     _pendingExceptionDetails = null;
     return result;
   }
@@ -315,7 +317,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     };
     _currentTestCompleter = new Completer<Null>();
-    ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
+    final ZoneSpecification errorHandlingZoneSpecification = new ZoneSpecification(
       handleUncaughtError: (Zone self, ZoneDelegate parent, Zone zone, dynamic exception, StackTrace stack) {
         if (_currentTestCompleter.isCompleted) {
           // Well this is not a good sign.
@@ -388,7 +390,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       }
     );
     _parentZone = Zone.current;
-    Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
+    final Zone testZone = _parentZone.fork(specification: errorHandlingZoneSpecification);
     testZone.runBinaryGuarded(_runTestBody, testBody, invariantTester)
       .whenComplete(_testCompletionHandler);
     asyncBarrier(); // When using AutomatedTestWidgetsFlutterBinding, this flushes the microtasks.
@@ -498,7 +500,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Future<Null> idle() {
-    Future<Null> result = super.idle();
+    final Future<Null> result = super.idle();
     _fakeAsync.flushMicrotasks();
     return result;
   }
@@ -512,26 +514,25 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     try {
       debugBuildingDirtyElements = true;
       buildOwner.buildScope(renderViewElement);
-      if (_phase == EnginePhase.build)
-        return;
-      assert(renderView != null);
-      pipelineOwner.flushLayout();
-      if (_phase == EnginePhase.layout)
-        return;
-      pipelineOwner.flushCompositingBits();
-      if (_phase == EnginePhase.compositingBits)
-        return;
-      pipelineOwner.flushPaint();
-      if (_phase == EnginePhase.paint)
-        return;
-      renderView.compositeFrame(); // this sends the bits to the GPU
-      if (_phase == EnginePhase.composite)
-        return;
-      pipelineOwner.flushSemantics();
-      if (_phase == EnginePhase.flushSemantics)
-        return;
-    } finally {
+      if (_phase != EnginePhase.build) {
+        assert(renderView != null);
+        pipelineOwner.flushLayout();
+        if (_phase != EnginePhase.layout) {
+          pipelineOwner.flushCompositingBits();
+          if (_phase != EnginePhase.compositingBits) {
+            pipelineOwner.flushPaint();
+            if (_phase != EnginePhase.paint) {
+              renderView.compositeFrame(); // this sends the bits to the GPU
+              if (_phase != EnginePhase.composite) {
+                pipelineOwner.flushSemantics();
+                assert(_phase == EnginePhase.flushSemantics || _phase == EnginePhase.sendSemanticsTree);
+              }
+            }
+          }
+        }
+      }
       buildOwner.finalizeTree();
+    } finally {
       debugBuildingDirtyElements = false;
     }
   }
@@ -755,23 +756,23 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   @override
   Point globalToLocal(Point point) {
-    Matrix4 transform = renderView.configuration.toHitTestMatrix();
-    double det = transform.invert();
+    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final double det = transform.invert();
     assert(det != 0.0);
-    Point result = MatrixUtils.transformPoint(transform, point);
+    final Point result = MatrixUtils.transformPoint(transform, point);
     return result;
   }
 
   @override
   Point localToGlobal(Point point) {
-    Matrix4 transform = renderView.configuration.toHitTestMatrix();
+    final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
   }
 }
 
 /// A [ViewConfiguration] that pretends the display is of a particular size. The
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
-/// size onto the actual display using the [ImageFit.contain] algorithm.
+/// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   TestViewConfiguration({ Size size: _kDefaultTestViewportSize })
@@ -828,10 +829,9 @@ const int _kPointerDecay = -2;
 
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
-    int pointer,
+    this.pointer,
     this.position
-  ) : pointer = pointer,
-      color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+  ) : color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;
   final Color color;
@@ -853,8 +853,8 @@ class _LiveTestRenderView extends RenderView {
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
-    Matrix4 transform = configuration.toHitTestMatrix();
-    double det = transform.invert();
+    final Matrix4 transform = configuration.toHitTestMatrix();
+    final double det = transform.invert();
     assert(det != 0.0);
     position = MatrixUtils.transformPoint(transform, position);
     return super.hitTest(result, position: position);
@@ -878,7 +878,7 @@ class _LiveTestRenderView extends RenderView {
         ..style = PaintingStyle.stroke;
       bool dirty = false;
       for (int pointer in _pointers.keys) {
-        _LiveTestPointerRecord record = _pointers[pointer];
+        final _LiveTestPointerRecord record = _pointers[pointer];
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
         canvas.drawPath(path.shift(record.position.toOffset()), paint);
         if (record.decay < 0)
@@ -889,7 +889,7 @@ class _LiveTestRenderView extends RenderView {
         .keys
         .where((int pointer) => _pointers[pointer].decay == 0)
         .toList()
-        .forEach((int pointer) { _pointers.remove(pointer); });
+        .forEach(_pointers.remove);
       if (dirty)
         scheduleMicrotask(markNeedsPaint);
     }

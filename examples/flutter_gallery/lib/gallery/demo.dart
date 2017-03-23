@@ -24,7 +24,7 @@ class ComponentDemoTabData {
   bool operator==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    ComponentDemoTabData typedOther = other;
+    final ComponentDemoTabData typedOther = other;
     return typedOther.tabName == tabName && typedOther.description == description;
   }
 
@@ -42,7 +42,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
   final String title;
 
   void _showExampleCode(BuildContext context) {
-    String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
+    final String tag = demos[DefaultTabController.of(context).index].exampleCodeTag;
     if (tag != null) {
       Navigator.push(context, new MaterialPageRoute<FullScreenCodeDialog>(
         builder: (BuildContext context) => new FullScreenCodeDialog(exampleCodeTag: tag)
@@ -109,7 +109,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
   String _exampleCode;
 
   @override
-  void dependenciesChanged() {
+  void didChangeDependencies() {
     getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
@@ -117,7 +117,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
         });
       }
     });
-    super.dependenciesChanged();
+    super.didChangeDependencies();
   }
 
   @override

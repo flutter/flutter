@@ -11,11 +11,11 @@ void main() {
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
-        child: const Icon(null)
-      )
+        child: const Icon(null),
+      ),
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(24.0)));
   });
 
@@ -24,12 +24,12 @@ void main() {
       new Center(
         child: const Icon(
           null,
-          size: 96.0
-        )
-      )
+          size: 96.0,
+        ),
+      ),
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(96.0)));
   });
 
@@ -38,12 +38,12 @@ void main() {
       new Center(
         child: new IconTheme(
           data: const IconThemeData(size: 36.0),
-          child: const Icon(null)
-        )
-      )
+          child: const Icon(null),
+        ),
+      ),
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(36.0)));
   });
 
@@ -54,13 +54,13 @@ void main() {
           data: const IconThemeData(size: 36.0),
           child: const Icon(
             null,
-            size: 48.0
-          )
-        )
+            size: 48.0,
+          ),
+        ),
       )
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(48.0)));
   });
 
@@ -69,12 +69,24 @@ void main() {
       new Center(
         child: new IconTheme(
           data: const IconThemeData(),
-          child: const Icon(null)
-        )
-      )
+          child: const Icon(null),
+        ),
+      ),
     );
 
-    RenderBox renderObject = tester.renderObject(find.byType(Icon));
+    final RenderBox renderObject = tester.renderObject(find.byType(Icon));
     expect(renderObject.size, equals(const Size.square(24.0)));
+  });
+
+
+  testWidgets('Icon with custom font', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
+      ),
+    );
+
+    final RichText richText = tester.firstWidget(find.byType(RichText));
+    expect(richText.text.style.fontFamily, equals('Roboto'));
   });
 }

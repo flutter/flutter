@@ -7,9 +7,9 @@ import 'dart:convert';
 
 import 'package:yaml/yaml.dart';
 
+import 'android/android_sdk.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
-import 'android/android_sdk.dart';
 import 'globals.dart';
 
 const String _kFlutterManifestPath = 'pubspec.yaml';
@@ -19,7 +19,7 @@ dynamic _loadYamlFile(String path) {
   printTrace("Looking for YAML at '$path'");
   if (!fs.isFileSync(path))
     return null;
-  String manifestString = fs.file(path).readAsStringSync();
+  final String manifestString = fs.file(path).readAsStringSync();
   return loadYaml(manifestString);
 }
 
@@ -51,8 +51,8 @@ Future<Null> parseServiceConfigs(
   }
 
   for (String service in manifest['services']) {
-    String serviceRoot = packageMap[service].path;
-    dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
+    final String serviceRoot = packageMap[service].path;
+    final dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
     if (serviceConfig == null) {
       printStatus('No $_kFlutterServicesManifestPath found for service "$serviceRoot"; skipping.');
       continue;
@@ -99,14 +99,14 @@ Future<String> getServiceFromUrl(
 File generateServiceDefinitions(
   String dir, List<Map<String, String>> servicesIn
 ) {
-  List<Map<String, String>> services =
+  final List<Map<String, String>> services =
       servicesIn.map((Map<String, String> service) => <String, String>{
         'name': service['name'],
         'class': service['android-class']
       }).toList();
 
-  Map<String, dynamic> json = <String, dynamic>{ 'services': services };
-  File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
+  final Map<String, dynamic> json = <String, dynamic>{ 'services': services };
+  final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
   servicesFile.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
   return servicesFile;
 }

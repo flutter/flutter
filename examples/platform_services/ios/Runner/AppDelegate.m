@@ -5,24 +5,35 @@
 #import "AppDelegate.h"
 
 #import <Flutter/Flutter.h>
-#import "LocationProvider.h"
 
-@implementation AppDelegate {
-    LocationProvider* _locationProvider;
-}
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    FlutterDartProject* project = [[FlutterDartProject alloc] initFromDefaultSourceForConfiguration];
-    self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    FlutterViewController* flutterController = [[FlutterViewController alloc] initWithProject:project
-                                                                                      nibName:nil
-                                                                                       bundle:nil];
-    _locationProvider = [[LocationProvider alloc] init];
-    [flutterController addMessageListener:_locationProvider];
-
-    self.window.rootViewController = flutterController;
-    [self.window makeKeyAndVisible];
-    return YES;
+@implementation AppDelegate
+- (BOOL)application:(UIApplication*)application
+    didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
+  FlutterViewController* controller =
+      (FlutterViewController*)self.window.rootViewController;
+  FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
+      methodChannelNamed:@"battery"
+         binaryMessenger:controller
+                   codec:[FlutterStandardMethodCodec sharedInstance]];
+  [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
+                                         FlutterResultReceiver result) {
+    if ([@"getBatteryLevel" isEqualToString:call.method]) {
+      UIDevice* device = UIDevice.currentDevice;
+      device.batteryMonitoringEnabled = YES;
+      if (device.batteryState == UIDeviceBatteryStateUnknown) {
+        result(nil, [FlutterError errorWithCode:@"UNAVAILABLE"
+                                        message:@"Battery info unavailable"
+                                        details:nil]);
+      } else {
+        result([NSNumber numberWithInt:(int)(device.batteryLevel * 100)], nil);
+      }
+    } else {
+      result(nil, [FlutterError errorWithCode:@"UNKNOWN_METHOD"
+                                      message:@"Unknown battery method called"
+                                      details:nil]);
+    }
+  }];
+  return YES;
 }
 
 @end

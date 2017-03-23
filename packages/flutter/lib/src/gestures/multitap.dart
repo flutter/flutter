@@ -60,7 +60,7 @@ class _TapTracker {
   }
 
   bool isWithinTolerance(PointerEvent event, double tolerance) {
-    Offset offset = event.position - _initialPosition;
+    final Offset offset = event.position - _initialPosition;
     return offset.distance <= tolerance;
   }
 }
@@ -94,7 +94,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
-  final Map<int, _TapTracker> _trackers = new Map<int, _TapTracker>();
+  final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
 
   @override
   void addPointer(PointerEvent event) {
@@ -103,7 +103,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
         !_firstTap.isWithinTolerance(event, kDoubleTapSlop))
       return;
     _stopDoubleTapTimer();
-    _TapTracker tracker = new _TapTracker(
+    final _TapTracker tracker = new _TapTracker(
       event: event,
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this)
     );
@@ -112,7 +112,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _handleEvent(PointerEvent event) {
-    _TapTracker tracker = _trackers[event.pointer];
+    final _TapTracker tracker = _trackers[event.pointer];
     assert(tracker != null);
     if (event is PointerUpEvent) {
       if (_firstTap == null)
@@ -166,7 +166,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
     if (_firstTap != null) {
       // Note, order is important below in order for the resolve -> reject logic
       // to work properly.
-      _TapTracker tracker = _firstTap;
+      final _TapTracker tracker = _firstTap;
       _firstTap = null;
       _reject(tracker);
       GestureBinding.instance.gestureArena.release(tracker.pointer);
@@ -196,7 +196,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _clearTrackers() {
-    List<_TapTracker> localTrackers = new List<_TapTracker>.from(_trackers.values);
+    final List<_TapTracker> localTrackers = new List<_TapTracker>.from(_trackers.values);
     for (_TapTracker tracker in localTrackers)
       _reject(tracker);
     assert(_trackers.isEmpty);
@@ -207,7 +207,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _startDoubleTapTimer() {
-    _doubleTapTimer ??= new Timer(kDoubleTapTimeout, () => _reset());
+    _doubleTapTimer ??= new Timer(kDoubleTapTimeout, _reset);
   }
 
   void _stopDoubleTapTimer() {
@@ -227,11 +227,10 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 class _TapGesture extends _TapTracker {
 
   _TapGesture({
-    MultiTapGestureRecognizer gestureRecognizer,
+    this.gestureRecognizer,
     PointerEvent event,
     Duration longTapDelay
-  }) : gestureRecognizer = gestureRecognizer,
-       _lastPosition = event.position,
+  }) : _lastPosition = event.position,
        super(
     event: event,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer)
@@ -341,7 +340,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   /// particular location after [longTapDelay].
   GestureMultiTapDownCallback onLongTapDown;
 
-  final Map<int, _TapGesture> _gestureMap = new Map<int, _TapGesture>();
+  final Map<int, _TapGesture> _gestureMap = <int, _TapGesture>{};
 
   @override
   void addPointer(PointerEvent event) {

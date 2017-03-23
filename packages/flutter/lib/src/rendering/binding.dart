@@ -14,8 +14,8 @@ import 'package:flutter/services.dart';
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'view.dart';
 import 'semantics.dart';
+import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
@@ -74,7 +74,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
         name: 'repaintRainbow',
         getter: () async => debugRepaintRainbowEnabled,
         setter: (bool value) {
-          bool repaint = debugRepaintRainbowEnabled && !value;
+          final bool repaint = debugRepaintRainbowEnabled && !value;
           debugRepaintRainbowEnabled = value;
           if (repaint)
             return _forceRepaint();

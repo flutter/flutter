@@ -9,27 +9,27 @@ import 'package:test/test.dart';
 
 void main() {
   test('Path provider control test', () async {
-    List<String> log = <String>[];
+    final List<MethodCall> log = <MethodCall>[];
     String response;
 
-    PlatformMessages.setMockStringMessageHandler('flutter/platform', (String message) async {
-      log.add(message);
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
       return response;
     });
 
     Directory directory = await PathProvider.getTemporaryDirectory();
 
-    expect(log, equals(<String>['{"method":"PathProvider.getTemporaryDirectory","args":[]}']));
+    expect(log, equals(<MethodCall>[new MethodCall('PathProvider.getTemporaryDirectory')]));
     expect(directory, isNull);
     log.clear();
 
     directory = await PathProvider.getApplicationDocumentsDirectory();
 
-    expect(log, equals(<String>['{"method":"PathProvider.getApplicationDocumentsDirectory","args":[]}']));
+    expect(log, equals(<MethodCall>[new MethodCall('PathProvider.getApplicationDocumentsDirectory')]));
     expect(directory, isNull);
 
-    String fakePath = "/foo/bar/baz";
-    response = '{"path":"$fakePath"}';
+    final String fakePath = "/foo/bar/baz";
+    response = fakePath;
 
     directory = await PathProvider.getTemporaryDirectory();
     expect(directory.path, equals(fakePath));

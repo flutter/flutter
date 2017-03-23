@@ -7,8 +7,8 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import 'framework.dart';
 import 'basic.dart';
+import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
@@ -42,7 +42,7 @@ abstract class SliverChildDelegate {
 
   @override
   String toString() {
-    List<String> description = <String>[];
+    final List<String> description = <String>[];
     debugFillDescription(description);
     return '$runtimeType#$hashCode(${description.join(", ")})';
   }
@@ -247,12 +247,23 @@ class SliverFill extends SliverMultiBoxAdaptorWidget {
   SliverFill({
     Key key,
     @required SliverChildDelegate delegate,
-  }) : super(key: key, delegate: delegate);
+    this.viewportFraction: 1.0,
+  }) : super(key: key, delegate: delegate) {
+    assert(viewportFraction != null);
+    assert(viewportFraction > 0.0);
+  }
+
+  final double viewportFraction;
 
   @override
   RenderSliverFill createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFill(childManager: element);
+    return new RenderSliverFill(childManager: element, viewportFraction: viewportFraction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFill renderObject) {
+    renderObject.viewportFraction = viewportFraction;
   }
 }
 
@@ -300,7 +311,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       // whole widget.
       for (int index = firstIndex; index <= lastIndex; ++index) {
         _currentlyUpdatingChildIndex = index;
-        Element newChild = updateChild(_childElements[index], _build(index), index);
+        final Element newChild = updateChild(_childElements[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
           _currentBeforeChild = newChild.renderObject;
@@ -432,7 +443,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(_currentlyUpdatingChildIndex == slot);
     renderObject.insert(child, after: _currentBeforeChild);
     assert(() {
-      SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       assert(slot == childParentData.index);
       return true;
     });

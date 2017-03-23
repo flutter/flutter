@@ -43,7 +43,7 @@ class RenderBlock extends RenderBox
   /// The direction to use as the main axis.
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
-  set mainAxis (Axis value) {
+  set mainAxis(Axis value) {
     if (_mainAxis != value) {
       _mainAxis = value;
       markNeedsLayout();
@@ -62,10 +62,10 @@ class RenderBlock extends RenderBox
   }
 
   double get _mainAxisExtent {
-    RenderBox child = lastChild;
+    final RenderBox child = lastChild;
     if (child == null)
       return 0.0;
-    BoxParentData parentData = child.parentData;
+    final BoxParentData parentData = child.parentData;
     assert(mainAxis != null);
     switch (mainAxis) {
       case Axis.horizontal:
@@ -122,7 +122,7 @@ class RenderBlock extends RenderBox
         'This is relatively expensive, however.' // (that's why we don't do it automatically)
       );
     });
-    BoxConstraints innerConstraints = _getInnerConstraints(constraints);
+    final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
     RenderBox child = firstChild;
     while (child != null) {
@@ -150,7 +150,7 @@ class RenderBlock extends RenderBox
         break;
     }
 
-    assert(!size.isInfinite);
+    assert(size.isFinite);
   }
 
   @override

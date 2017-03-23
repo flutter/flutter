@@ -93,7 +93,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
     if (_generateSpans()) {
       // Successfully parsed the code
-      List<TextSpan> formattedText = <TextSpan>[];
+      final List<TextSpan> formattedText = <TextSpan>[];
       int currentPosition = 0;
 
       for (_HighlightSpan span in _spans) {
@@ -134,7 +134,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
 
       // Line comments
       if (_scanner.scan("//")) {
-        int startComment = _scanner.lastMatch.start;
+        final int startComment = _scanner.lastMatch.start;
 
         bool eof = false;
         int endComment;
@@ -309,8 +309,8 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   }
 
   bool _firstLetterIsUpperCase(String str) {
-    if (str.length > 0) {
-      String first = str.substring(0, 1);
+    if (str.isNotEmpty) {
+      final String first = str.substring(0, 1);
       return first == first.toUpperCase();
     }
     return false;

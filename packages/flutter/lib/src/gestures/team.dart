@@ -52,7 +52,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
   void _close() {
     assert(!_resolved);
     _resolved = true;
-    _CombiningGestureArenaMember combiner = _owner._combiners.remove(_pointer);
+    final _CombiningGestureArenaMember combiner = _owner._combiners.remove(_pointer);
     assert(combiner == this);
   }
 
@@ -90,7 +90,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 /// To assign a gesture recognizer to a team, see
 /// [OneSequenceGestureRecognizer.team].
 class GestureArenaTeam {
-  final Map<int, _CombiningGestureArenaMember> _combiners = new Map<int, _CombiningGestureArenaMember>();
+  final Map<int, _CombiningGestureArenaMember> _combiners = <int, _CombiningGestureArenaMember>{};
 
   /// Adds a new member to the arena on behalf of this team.
   ///
@@ -100,7 +100,7 @@ class GestureArenaTeam {
   /// To assign a gesture recognizer to a team, see
   /// [OneSequenceGestureRecognizer.team].
   GestureArenaEntry add(int pointer, GestureArenaMember member) {
-    _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
+    final _CombiningGestureArenaMember combiner = _combiners.putIfAbsent(
         pointer, () => new _CombiningGestureArenaMember(this, pointer));
     return combiner._add(pointer, member);
   }

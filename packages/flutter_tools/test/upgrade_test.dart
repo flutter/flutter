@@ -17,6 +17,10 @@ import 'src/context.dart';
 
 void main() {
   group('upgrade', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     bool _match(String line) => UpgradeCommand.matchesGitLine(line);
 
     test('regex match', () {
@@ -47,19 +51,19 @@ void main() {
       });
 
       Future<Null> createProject() async {
-        CreateCommand command = new CreateCommand();
-        CommandRunner<Null> runner = createTestCommandRunner(command);
+        final CreateCommand command = new CreateCommand();
+        final CommandRunner<Null> runner = createTestCommandRunner(command);
         await runner.run(<String>['create', '--no-pub', temp.path]);
       }
 
       testUsingContext('in project', () async {
         await createProject();
 
-        String proj = temp.path;
+        final String proj = temp.path;
         expect(findProjectRoot(proj), proj);
         expect(findProjectRoot(fs.path.join(proj, 'lib')), proj);
 
-        String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        final String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
         expect(findProjectRoot(fs.path.join(hello, 'lib')), hello);
       });

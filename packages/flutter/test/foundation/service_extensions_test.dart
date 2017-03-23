@@ -53,14 +53,12 @@ class TestServiceExtensionsBinding extends BindingBase
   void doFrame() {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
-      ui.window.onBeginFrame(const Duration());
+      ui.window.onBeginFrame(Duration.ZERO);
   }
 
   Future<Null> flushMicrotasks() {
-    Completer<Null> completer = new Completer<Null>();
-    new Timer(const Duration(), () {
-      completer.complete();
-    });
+    final Completer<Null> completer = new Completer<Null>();
+    Timer.run(completer.complete);
     return completer.future;
   }
 }
@@ -82,7 +80,7 @@ Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingRes
 }
 
 void main() {
-  List<String> console = <String>[];
+  final List<String> console = <String>[];
 
   test('Service extensions - pretest', () async {
     binding = new TestServiceExtensionsBinding();

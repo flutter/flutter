@@ -143,7 +143,7 @@ class Focus extends StatefulWidget {
     assert(context.widget != null);
     assert(context.widget.key != null);
     assert(context.widget.key is GlobalKey);
-    _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
+    final _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       if (autofocus)
         focusScope._setFocusedWidgetIfUnset(context.widget.key);
@@ -173,7 +173,7 @@ class Focus extends StatefulWidget {
     assert(context.widget != null);
     assert(context.widget is Focus);
     assert(context.widget.key != null);
-    _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
+    final _FocusScope focusScope = context.inheritFromWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       return focusScope.scopeFocused &&
              focusScope.focusedScope == context.widget.key;
@@ -187,9 +187,9 @@ class Focus extends StatefulWidget {
   /// Don't call moveTo() from your build() functions, it's intended to be
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveTo(GlobalKey key) {
-    BuildContext focusedContext = key.currentContext;
+    final BuildContext focusedContext = key.currentContext;
     assert(focusedContext != null);
-    _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
+    final _FocusScope focusScope = key.currentContext.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null) {
       focusScope.focusState._setFocusedWidget(key);
       Scrollable.ensureVisible(focusedContext);
@@ -199,7 +199,7 @@ class Focus extends StatefulWidget {
   /// Unfocuses the currently focused widget (if any) in the Focus that most
   /// tightly encloses the given context.
   static void clear(BuildContext context) {
-    _FocusScope focusScope = context.ancestorWidgetOfExactType(_FocusScope);
+    final _FocusScope focusScope = context.ancestorWidgetOfExactType(_FocusScope);
     if (focusScope != null)
       focusScope.focusState._clearFocusedWidget();
   }
@@ -210,7 +210,7 @@ class Focus extends StatefulWidget {
   /// called from event listeners, e.g. in response to a finger tap or tab key.
   static void moveScopeTo(GlobalKey key, { BuildContext context }) {
     _FocusScope focusScope;
-    BuildContext searchContext = key.currentContext;
+    final BuildContext searchContext = key.currentContext;
     if (searchContext != null) {
       assert(key.currentWidget is Focus);
       focusScope = searchContext.ancestorWidgetOfExactType(_FocusScope);
@@ -253,7 +253,7 @@ class _FocusState extends State<Focus> {
     assert(() {
       if (!mounted)
         return true;
-      Widget widget = config.initiallyFocusedScope.currentWidget;
+      final Widget widget = config.initiallyFocusedScope.currentWidget;
       if (widget == null) {
         throw new FlutterError(
           'The initially focused scope is not in the tree.\n'
@@ -356,7 +356,7 @@ class _FocusState extends State<Focus> {
   void _ensureVisibleIfFocused() {
     if (!Focus._atScope(context))
       return;
-    BuildContext focusedContext = _focusedWidget?.currentContext;
+    final BuildContext focusedContext = _focusedWidget?.currentContext;
     if (focusedContext == null)
       return;
     Scrollable.ensureVisible(focusedContext);
@@ -364,9 +364,9 @@ class _FocusState extends State<Focus> {
 
   @override
   Widget build(BuildContext context) {
-    MediaQueryData data = MediaQuery.of(context);
-    Size newMediaSize = data.size;
-    EdgeInsets newMediaPadding = data.padding;
+    final MediaQueryData data = MediaQuery.of(context);
+    final Size newMediaSize = data.size;
+    final EdgeInsets newMediaPadding = data.padding;
     if (newMediaSize != _mediaSize || newMediaPadding != _mediaPadding) {
       _mediaSize = newMediaSize;
       _mediaPadding = newMediaPadding;

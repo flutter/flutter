@@ -66,7 +66,9 @@ enum TargetPlatform {
   android_x86,
   ios,
   darwin_x64,
-  linux_x64
+  linux_x64,
+  windows_x64,
+  fuchsia,
 }
 
 String getNameForTargetPlatform(TargetPlatform platform) {
@@ -83,6 +85,10 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'darwin-x64';
     case TargetPlatform.linux_x64:
       return 'linux-x64';
+    case TargetPlatform.windows_x64:
+      return 'windows-x64';
+    case TargetPlatform.fuchsia:
+      return 'fuchsia';
   }
   assert(false);
   return null;
@@ -127,7 +133,7 @@ String getBuildDirectory() {
   if (context == null || config == null)
     return 'build';
 
-  String buildDir = config.getValue('build-dir') ?? 'build';
+  final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
     throw new Exception(
         'build-dir config setting in ${config.configPath} must be relative');

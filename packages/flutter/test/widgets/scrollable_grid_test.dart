@@ -19,7 +19,7 @@ void main() {
   testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
-    Widget testWidget = new Align(
+    final Widget testWidget = new Align(
       child: new SizedBox(
         height: 800.0,
         width: 300.0,  // forces the grid children to be 300..300
@@ -44,7 +44,7 @@ void main() {
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
 
-    await tester.scroll(find.text('1'), const Offset(0.0, -500.0));
+    await tester.drag(find.text('1'), const Offset(0.0, -500.0));
     await tester.pump();
     //  -100..300 = 1
     //   300..600 = 2
@@ -56,7 +56,7 @@ void main() {
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
 
-    await tester.scroll(find.text('1'), const Offset(0.0, 150.0));
+    await tester.drag(find.text('1'), const Offset(0.0, 150.0));
     await tester.pump();
     // Child '0' is now back onscreen, but by less than `padding.top`.
     //  -250..050 = 0

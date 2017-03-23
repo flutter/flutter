@@ -78,7 +78,7 @@ class TestCommand extends FlutterCommand {
   }
 
   Future<int> _runTests(List<String> testArgs, Directory testDirectory) async {
-    Directory currentDirectory = fs.currentDirectory;
+    final Directory currentDirectory = fs.currentDirectory;
     try {
       if (testDirectory != null) {
         printTrace('switching to directory $testDirectory to run tests');
@@ -96,8 +96,8 @@ class TestCommand extends FlutterCommand {
   }
 
   Future<bool> _collectCoverageData(CoverageCollector collector, { bool mergeCoverageData: false }) async {
-    Status status = logger.startProgress('Collecting coverage information...');
-    String coverageData = await collector.finalizeCoverage(
+    final Status status = logger.startProgress('Collecting coverage information...');
+    final String coverageData = await collector.finalizeCoverage(
       timeout: const Duration(seconds: 30),
     );
     status.stop();
@@ -105,13 +105,13 @@ class TestCommand extends FlutterCommand {
     if (coverageData == null)
       return false;
 
-    String coveragePath = argResults['coverage-path'];
-    File coverageFile = fs.file(coveragePath)
+    final String coveragePath = argResults['coverage-path'];
+    final File coverageFile = fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
     printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
-    String baseCoverageData = 'coverage/lcov.base.info';
+    final String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
       if (!platform.isLinux) {
         printError(
@@ -136,10 +136,10 @@ class TestCommand extends FlutterCommand {
         return false;
       }
 
-      Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools');
       try {
-        File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
-        ProcessResult result = processManager.runSync(<String>[
+        final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
+        final ProcessResult result = processManager.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
           '--add-tracefile', sourceFile.path,
@@ -156,7 +156,14 @@ class TestCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    List<String> testArgs = <String>[];
+    if (platform.isWindows) {
+      throwToolExit(
+          'The test command is currently not supported on Windows: '
+          'https://github.com/flutter/flutter/issues/8516'
+      );
+    }
+
+    final List<String> testArgs = <String>[];
 
     commandValidator();
 
@@ -201,7 +208,7 @@ class TestCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    int result = await _runTests(testArgs, testDir);
+    final int result = await _runTests(testArgs, testDir);
 
     if (collector != null) {
       if (!await _collectCoverageData(collector, mergeCoverageData: argResults['merge-coverage']))

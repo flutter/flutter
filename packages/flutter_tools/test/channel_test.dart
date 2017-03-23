@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/channel.dart';
 import 'package:test/test.dart';
 
@@ -11,9 +12,13 @@ import 'src/context.dart';
 
 void main() {
   group('channel', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testUsingContext('list', () async {
-      ChannelCommand command = new ChannelCommand();
-      CommandRunner<Null> runner = createTestCommandRunner(command);
+      final ChannelCommand command = new ChannelCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['channel']);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)

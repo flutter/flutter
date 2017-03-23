@@ -23,11 +23,11 @@ class PlaceholderState extends State<Placeholder> {
   /// Mutating this field will cause this widget to rebuild with the new child.
   Widget get child => _child;
   Widget _child;
-  set child(Widget child) {
-    if (_child == child)
+  set child(Widget value) {
+    if (_child == value)
       return;
     setState(() {
-      _child = child;
+      _child = value;
     });
   }
 

@@ -12,7 +12,7 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Semantics 8 - Merging with reset', (WidgetTester tester) async {
-    SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
       new MergeSemantics(

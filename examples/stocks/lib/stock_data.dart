@@ -10,7 +10,8 @@
 import 'dart:convert';
 import 'dart:math' as math;
 
-import 'package:flutter/http.dart' as http;
+import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 final math.Random _rng = new math.Random();
 
@@ -44,7 +45,7 @@ class StockData {
 
   void appendTo(Map<String, Stock> stocks, List<String> symbols) {
     for (List<String> fields in _data) {
-      Stock stock = new Stock.fromFields(fields);
+      final Stock stock = new Stock.fromFields(fields);
       symbols.add(stock.symbol);
       stocks[stock.symbol] = stock;
     }
@@ -60,25 +61,28 @@ String _urlToFetch(int chunk) {
 }
 
 class StockDataFetcher {
-  int _nextChunk = 0;
+  StockDataFetcher(this.callback) {
+    _httpClient = createHttpClient();
+    _fetchNextChunk();
+  }
+
   final StockDataCallback callback;
+  http.Client _httpClient;
 
   static bool actuallyFetchData = true;
 
-  StockDataFetcher(this.callback) {
-    _fetchNextChunk();
-  }
+  int _nextChunk = 0;
 
   void _fetchNextChunk() {
     if (!actuallyFetchData)
       return;
-    http.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
-      String json = response.body;
+    _httpClient.get(_urlToFetch(_nextChunk++)).then<Null>((http.Response response) {
+      final String json = response.body;
       if (json == null) {
         print("Failed to load stock data chunk ${_nextChunk - 1}");
         return null;
       }
-      JsonDecoder decoder = const JsonDecoder();
+      final JsonDecoder decoder = const JsonDecoder();
       callback(new StockData(decoder.convert(json)));
       if (_nextChunk < _kChunkCount)
         _fetchNextChunk();

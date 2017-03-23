@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		9705A1C51CF9049000538489 /* app.dylib in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEB81CF902C7004384FC /* app.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		3B39670C1E83397F004F5970 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B39670B1E83397F004F5970 /* App.framework */; };
+		3B39670D1E83397F004F5970 /* App.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B39670B1E83397F004F5970 /* App.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3B39670F1E833992004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B39670E1E833992004F5970 /* AppFrameworkInfo.plist */; };
 		9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; };
 		9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9740EEBA1CF902C7004384FC /* Flutter.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9740EEB41CF90195004384FC /* Flutter.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB21CF90195004384FC /* Flutter.xcconfig */; };
 		9740EEB51CF90195004384FC /* Generated.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB31CF90195004384FC /* Generated.xcconfig */; };
 		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };
-		977505191CFDF23500BC28DA /* LocationProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 977505181CFDF23500BC28DA /* LocationProvider.m */; };
 		97A38A351CFDEC880099F1B4 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 97A38A341CFDEC880099F1B4 /* AppDelegate.m */; };
 		97C146F31CF9000F007C117D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 97C146F21CF9000F007C117D /* main.m */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
@@ -28,7 +29,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				9705A1C51CF9049000538489 /* app.dylib in Embed Frameworks */,
+				3B39670D1E83397F004F5970 /* App.framework in Embed Frameworks */,
 				9705A1C71CF904A300538489 /* Flutter.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -37,13 +38,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3B39670B1E83397F004F5970 /* App.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = App.framework; path = Flutter/App.framework; sourceTree = "<group>"; };
+		3B39670E1E833992004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Flutter.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Flutter.xcconfig; path = Flutter/Flutter.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };
-		9740EEB81CF902C7004384FC /* app.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = app.dylib; path = Flutter/app.dylib; sourceTree = "<group>"; };
 		9740EEBA1CF902C7004384FC /* Flutter.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Flutter.framework; path = Flutter/Flutter.framework; sourceTree = "<group>"; };
-		977505171CFDF21E00BC28DA /* LocationProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = LocationProvider.h; sourceTree = "<group>"; };
-		977505181CFDF23500BC28DA /* LocationProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationProvider.m; sourceTree = "<group>"; };
 		97A38A331CFDEC680099F1B4 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		97A38A341CFDEC880099F1B4 /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -59,6 +59,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3B39670C1E83397F004F5970 /* App.framework in Frameworks */,
 				9705A1C61CF904A100538489 /* Flutter.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -70,7 +71,8 @@
 			isa = PBXGroup;
 			children = (
 				9740EEB71CF902C7004384FC /* app.flx */,
-				9740EEB81CF902C7004384FC /* app.dylib */,
+				3B39670B1E83397F004F5970 /* App.framework */,
+				3B39670E1E833992004F5970 /* AppFrameworkInfo.plist */,
 				9740EEBA1CF902C7004384FC /* Flutter.framework */,
 				9740EEB21CF90195004384FC /* Flutter.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
@@ -105,8 +107,6 @@
 				97C146F11CF9000F007C117D /* Supporting Files */,
 				97A38A331CFDEC680099F1B4 /* AppDelegate.h */,
 				97A38A341CFDEC880099F1B4 /* AppDelegate.m */,
-				977505171CFDF21E00BC28DA /* LocationProvider.h */,
-				977505181CFDF23500BC28DA /* LocationProvider.m */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -147,7 +147,7 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0820;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "The Chromium Authors";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
@@ -181,6 +181,7 @@
 				9740EEBB1CF902C7004384FC /* app.flx in Resources */,
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				9740EEB51CF90195004384FC /* Generated.xcconfig in Resources */,
+				3B39670F1E833992004F5970 /* AppFrameworkInfo.plist in Resources */,
 				9740EEB41CF90195004384FC /* Flutter.xcconfig in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
@@ -212,7 +213,6 @@
 			files = (
 				97A38A351CFDEC880099F1B4 /* AppDelegate.m in Sources */,
 				97C146F31CF9000F007C117D /* main.m in Sources */,
-				977505191CFDF23500BC28DA /* LocationProvider.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

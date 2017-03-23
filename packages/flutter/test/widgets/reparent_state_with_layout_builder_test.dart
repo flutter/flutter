@@ -71,7 +71,7 @@ void main() {
     expect(StatefulCreationCounterState.creationCount, 0);
     await tester.pumpWidget(new Bar());
     expect(StatefulCreationCounterState.creationCount, 1);
-    BarState s = tester.state<BarState>(find.byType(Bar));
+    final BarState s = tester.state<BarState>(find.byType(Bar));
     s.trigger();
     await tester.pump();
     expect(StatefulCreationCounterState.creationCount, 1);
@@ -79,11 +79,15 @@ void main() {
 
   testWidgets('Clean then reparent with dependencies',
       (WidgetTester tester) async {
-    GlobalKey key = new GlobalKey();
+
+    int layoutBuilderBuildCount = 0;
 
     StateSetter keyedSetState;
+    StateSetter layoutBuilderSetState;
+    StateSetter childSetState;
 
-    Widget keyedWidget = new StatefulBuilder(
+    final GlobalKey key = new GlobalKey();
+    final Widget keyedWidget = new StatefulBuilder(
       key: key,
       builder: (BuildContext context, StateSetter setState) {
         keyedSetState = setState;
@@ -93,12 +97,7 @@ void main() {
     );
 
     Widget layoutBuilderChild = keyedWidget;
-    StateSetter layoutBuilderSetState;
-
-    StateSetter childSetState;
     Widget deepChild = new Container();
-
-    int layoutBuilderBuildCount = 0;
 
     await tester.pumpWidget(new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
@@ -109,8 +108,8 @@ void main() {
             layoutBuilderSetState = setState;
             return new LayoutBuilder(
               builder: (BuildContext context, BoxConstraints constraints) {
-                ++layoutBuilderBuildCount;
-                return layoutBuilderChild;
+                layoutBuilderBuildCount += 1;
+                return layoutBuilderChild; // initially keyedWidget above, but then a new Container
               },
             );
           }),
@@ -123,7 +122,7 @@ void main() {
                       child: new StatefulBuilder(builder:
                           (BuildContext context, StateSetter setState) {
                         childSetState = setState;
-                        return deepChild;
+                        return deepChild; // initially a Container, but then the keyedWidget above
                       }),
                     ),
                   ),
@@ -134,25 +133,24 @@ void main() {
         ],
       ),
     ));
-
     expect(layoutBuilderBuildCount, 1);
 
-    // This call adds the element ot the dirty list.
-    keyedSetState(() {});
+    keyedSetState(() { /* Change nothing but add the element to the dirty list. */ });
 
     childSetState(() {
+      // The deep child builds in the initial build phase. It takes the child
+      // from the LayoutBuilder before the LayoutBuilder has a chance to build.
       deepChild = keyedWidget;
     });
 
-    // The layout builder will build in a separate build scope. This delays the
-    // removal of the keyed child until this build scope.
     layoutBuilderSetState(() {
+      // The layout builder will build in a separate build scope. This delays
+      // the removal of the keyed child until this build scope.
       layoutBuilderChild = new Container();
     });
 
     // The essential part of this test is that this call to pump doesn't throw.
     await tester.pump();
-
     expect(layoutBuilderBuildCount, 2);
   });
 }

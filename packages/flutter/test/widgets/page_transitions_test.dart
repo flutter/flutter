@@ -47,8 +47,8 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
 void main() {
   testWidgets('Check onstage/offstage handling around transitions', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Container(key: containerKey1, child: new Text('Home')),
       '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
@@ -129,8 +129,8 @@ void main() {
   });
 
   testWidgets('Check back gesture works on iOS', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
       '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
@@ -150,7 +150,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -160,8 +160,8 @@ void main() {
   });
 
   testWidgets('Check back gesture does nothing on android', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
       '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
@@ -181,7 +181,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -190,8 +190,8 @@ void main() {
   });
 
   testWidgets('Check page transition positioning on iOS', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
       '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
@@ -249,8 +249,8 @@ void main() {
   });
 
   testWidgets('Check back gesture disables Heroes', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     const String kHeroTag = 'hero';
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(
@@ -301,7 +301,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -310,7 +310,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Home page is sliding in from the left, no heroes.
-    Point homeOffset = tester.getTopLeft(find.text('Home'));
+    final Point homeOffset = tester.getTopLeft(find.text('Home'));
     expect(homeOffset.x, lessThan(0.0));
     expect(homeOffset.y, 0.0);
 
@@ -321,8 +321,8 @@ void main() {
   });
 
   testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
       '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
@@ -368,8 +368,8 @@ void main() {
 
   // Tests bug https://github.com/flutter/flutter/issues/6451
   testWidgets('Check back gesture with a persistent bottom sheet showing', (WidgetTester tester) async {
-    GlobalKey containerKey1 = new GlobalKey();
-    GlobalKey containerKey2 = new GlobalKey();
+    final GlobalKey containerKey1 = new GlobalKey();
+    final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
       '/sheet': (_) => new PersistentBottomSheetTest(key: containerKey2),
@@ -389,13 +389,13 @@ void main() {
     expect(find.text('Sheet'), isOnstage);
 
     // Show the bottom sheet.
-    PersistentBottomSheetTestState sheet = containerKey2.currentState;
+    final PersistentBottomSheetTestState sheet = containerKey2.currentState;
     sheet.showBottomSheet();
 
     await tester.pump(const Duration(seconds: 1));
 
     // Drag from left edge to invoke the gesture.
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -416,7 +416,7 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
-    PageRoute<Null> route = new MaterialPageRoute<Null>(
+    final PageRoute<Null> route = new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: '/page'),
       builder: (BuildContext context) => new Center(child: new Text('page')),
     );

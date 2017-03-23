@@ -8,21 +8,21 @@ import 'dart:convert';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/os.dart';
-import '../base/platform.dart' as p;
+import '../base/platform.dart';
+import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../devfs.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 import 'mac.dart';
 
-const String _ideviceinstallerInstructions =
-    'To work with iOS devices, please install ideviceinstaller.\n'
-    'If you use homebrew, you can install it with "\$ brew install ideviceinstaller".';
+const String _kIdeviceinstallerInstructions =
+    'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
+    'brew update\n'
+    'brew install ideviceinstaller.';
 
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
@@ -30,7 +30,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('IOSDevices');
 
   @override
-  bool get supportsPlatform => p.platform.isMacOS;
+  bool get supportsPlatform => platform.isMacOS;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();
@@ -47,10 +47,9 @@ class IOSDevice extends Device {
     _screenshotPath = _checkForCommand('idevicescreenshot');
     _pusherPath = _checkForCommand(
         'ios-deploy',
-        'To copy files to iOS devices, please install ios-deploy. '
-        'You can do this using homebrew as follows:\n'
-        '\$ brew tap flutter/flutter\n'
-        '\$ brew install ios-deploy');
+        'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
+        'brew update\n'
+        'brew install ios-deploy');
   }
 
   String _installerPath;
@@ -97,18 +96,18 @@ class IOSDevice extends Device {
     if (!doctor.iosWorkflow.hasIDeviceId)
       return <IOSDevice>[];
 
-    List<IOSDevice> devices = <IOSDevice>[];
+    final List<IOSDevice> devices = <IOSDevice>[];
     for (String id in _getAttachedDeviceIDs(mockIOS)) {
-      String name = IOSDevice._getDeviceInfo(id, 'DeviceName', mockIOS);
+      final String name = IOSDevice._getDeviceInfo(id, 'DeviceName', mockIOS);
       devices.add(new IOSDevice(id, name: name));
     }
     return devices;
   }
 
   static Iterable<String> _getAttachedDeviceIDs([IOSDevice mockIOS]) {
-    String listerPath = (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
+    final String listerPath = (mockIOS != null) ? mockIOS.listerPath : _checkForCommand('idevice_id');
     try {
-      String output = runSync(<String>[listerPath, '-l']);
+      final String output = runSync(<String>[listerPath, '-l']);
       return output.trim().split('\n').where((String s) => s != null && s.isNotEmpty);
     } catch (e) {
       return <String>[];
@@ -116,7 +115,7 @@ class IOSDevice extends Device {
   }
 
   static String _getDeviceInfo(String deviceID, String infoKey, [IOSDevice mockIOS]) {
-    String informerPath = (mockIOS != null)
+    final String informerPath = (mockIOS != null)
         ? mockIOS.informerPath
         : _checkForCommand('ideviceinfo');
     return runSync(<String>[informerPath, '-k', infoKey, '-u', deviceID]).trim();
@@ -124,12 +123,12 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _ideviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
     } catch (e) {
-      if (p.platform.isMacOS) {
+      if (platform.isMacOS) {
         printError('$command not found. $macInstructions');
       } else {
         printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
@@ -142,7 +141,7 @@ class IOSDevice extends Device {
   @override
   bool isAppInstalled(ApplicationPackage app) {
     try {
-      String apps = runCheckedSync(<String>[installerPath, '--list-apps']);
+      final String apps = runCheckedSync(<String>[installerPath, '--list-apps']);
       if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
         return true;
       }
@@ -157,8 +156,8 @@ class IOSDevice extends Device {
 
   @override
   bool installApp(ApplicationPackage app) {
-    IOSApp iosApp = app;
-    Directory bundle = fs.directory(iosApp.deviceBundlePath);
+    final IOSApp iosApp = app;
+    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError("Could not find application bundle at ${bundle.path}; have you run 'flutter build ios'?");
       return false;
@@ -194,7 +193,7 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    DevFSContent kernelContent,
+    String kernelPath,
     bool applicationNeedsRebuild: false,
   }) async {
     if (!prebuiltApplication) {
@@ -203,7 +202,7 @@ class IOSDevice extends Device {
       printTrace('Building ${app.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
-      XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
+      final XcodeBuildResult buildResult = await buildXcodeProject(app: app, mode: mode, target: mainPath, buildForDevice: true);
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
         await diagnoseXcodeBuildFailure(buildResult);
@@ -216,15 +215,15 @@ class IOSDevice extends Device {
     }
 
     // Step 2: Check that the application exists at the specified path.
-    IOSApp iosApp = app;
-    Directory bundle = fs.directory(iosApp.deviceBundlePath);
+    final IOSApp iosApp = app;
+    final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
       printError('Could not find the built application bundle at ${bundle.path}.');
       return new LaunchResult.failed();
     }
 
     // Step 3: Attempt to install the application on the device.
-    List<String> launchArguments = <String>["--enable-dart-profiling"];
+    final List<String> launchArguments = <String>["--enable-dart-profiling"];
 
     if (debuggingOptions.startPaused)
       launchArguments.add("--start-paused");
@@ -240,7 +239,7 @@ class IOSDevice extends Device {
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
-    List<String> launchCommand = <String>[
+    final List<String> launchCommand = <String>[
       '/usr/bin/env',
       'ios-deploy',
       '--id',
@@ -251,7 +250,7 @@ class IOSDevice extends Device {
       '--justlaunch',
     ];
 
-    if (launchArguments.length > 0) {
+    if (launchArguments.isNotEmpty) {
       launchCommand.add('--args');
       launchCommand.add('${launchArguments.join(" ")}');
     }
@@ -271,12 +270,12 @@ class IOSDevice extends Device {
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
-      ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
+      final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
-      ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
+      final ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
         getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
 
-      Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
+      final Future<Uri> forwardObsUri = observatoryDiscovery.nextUri();
       Future<Uri> forwardDiagUri;
       if (debuggingOptions.buildMode == BuildMode.debug) {
         forwardDiagUri = diagnosticDiscovery.nextUri();
@@ -284,9 +283,9 @@ class IOSDevice extends Device {
         forwardDiagUri = new Future<Uri>.value(null);
       }
 
-      Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
+      final Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
 
-      List<Uri> uris = await launch.then<List<Uri>>((int result) async {
+      final List<Uri> uris = await launch.then<List<Uri>>((int result) async {
         installationResult = result;
 
         if (result != 0) {
@@ -308,7 +307,7 @@ class IOSDevice extends Device {
     if (installationResult != 0) {
       printError('Could not install ${bundle.path} on $id.');
       printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-      printError('  open ios/Runner.xcodeproj');
+      printError('  open ios/Runner.xcworkspace');
       printError('');
       return new LaunchResult.failed();
     }
@@ -323,7 +322,7 @@ class IOSDevice extends Device {
   }
 
   Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
-    if (p.platform.isMacOS) {
+    if (platform.isMacOS) {
       runSync(<String>[
         pusherPath,
         '-t',
@@ -342,7 +341,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  TargetPlatform get platform => TargetPlatform.ios;
+  TargetPlatform get targetPlatform => TargetPlatform.ios;
 
   @override
   String get sdkNameAndVersion => 'iOS $_sdkVersion ($_buildVersion)';
@@ -392,7 +391,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
     //
     // iOS 9 format:  Runner[297] <Notice>:
     // iOS 10 format: Runner(libsystem_asl.dylib)[297] <Notice>:
-    String appName = app == null ? '' : app.name.replaceAll('.app', '');
+    final String appName = app == null ? '' : app.name.replaceAll('.app', '');
     _lineRegex = new RegExp(appName + r'(\(.*\))?\[[\d]+\] <[A-Za-z]+>: ');
   }
 
@@ -420,7 +419,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   }
 
   void _onLine(String line) {
-    Match match = _lineRegex.firstMatch(line);
+    final Match match = _lineRegex.firstMatch(line);
 
     if (match != null) {
       // Only display the log line after the initial device and executable information.
@@ -434,7 +433,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
 }
 
 class _IOSDevicePortForwarder extends DevicePortForwarder {
-  _IOSDevicePortForwarder(this.device) : _forwardedPorts = new List<ForwardedPort>();
+  _IOSDevicePortForwarder(this.device) : _forwardedPorts = <ForwardedPort>[];
 
   final IOSDevice device;
 
@@ -447,18 +446,18 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   Future<int> forward(int devicePort, {int hostPort: null}) async {
     if ((hostPort == null) || (hostPort == 0)) {
       // Auto select host port.
-      hostPort = await findAvailablePort();
+      hostPort = await portScanner.findAvailablePort();
     }
 
     // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-    Process process = await runCommand(<String>[
+    final Process process = await runCommand(<String>[
       device.iproxyPath,
       hostPort.toString(),
       devicePort.toString(),
       device.id,
     ]);
 
-    ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
+    final ForwardedPort forwardedPort = new ForwardedPort.withContext(hostPort,
         devicePort, process);
 
     printTrace("Forwarded port $forwardedPort");
@@ -477,7 +476,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
 
     printTrace("Unforwarding port $forwardedPort");
 
-    Process process = forwardedPort.context;
+    final Process process = forwardedPort.context;
 
     if (process != null) {
       processManager.killPid(process.pid);

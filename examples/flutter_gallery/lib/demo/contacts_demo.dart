@@ -49,10 +49,10 @@ class _ContactItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
+    final List<Widget> columnChildren = lines.sublist(0, lines.length - 1).map((String line) => new Text(line)).toList();
     columnChildren.add(new Text(lines.last, style: themeData.textTheme.caption));
 
-    List<Widget> rowChildren = <Widget>[
+    final List<Widget> rowChildren = <Widget>[
       new Expanded(
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +93,7 @@ class ContactsDemoState extends State<ContactsDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final double _appBarHeight = 256.0;
 
-  AppBarBehavior _appBarBehavior;
+  AppBarBehavior _appBarBehavior = AppBarBehavior.pinned;
 
   @override
   Widget build(BuildContext context) {
@@ -149,7 +149,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   children: <Widget>[
                     new Image.asset(
                       'packages/flutter_gallery_assets/ali_connors.jpg',
-                      fit: ImageFit.cover,
+                      fit: BoxFit.cover,
                       height: _appBarHeight,
                     ),
                     // This gradient ensures that the toolbar icons are distinct

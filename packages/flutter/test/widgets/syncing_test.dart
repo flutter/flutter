@@ -54,7 +54,7 @@ void main() {
       )
     );
 
-    TestWidgetState state = tester.state(find.byType(TestWidget));
+    final TestWidgetState state = tester.state(find.byType(TestWidget));
 
     expect(state.persistentState, equals(1));
     expect(state.updates, equals(0));
@@ -111,12 +111,12 @@ void main() {
   });
 
   testWidgets('swap instances around', (WidgetTester tester) async {
-    Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
-    Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
+    final Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
+    final Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
     await tester.pumpWidget(new Column());
 
-    GlobalKey keyA = new GlobalKey();
-    GlobalKey keyB = new GlobalKey();
+    final GlobalKey keyA = new GlobalKey();
+    final GlobalKey keyB = new GlobalKey();
 
     await tester.pumpWidget(
       new Column(
