@@ -23,7 +23,6 @@ Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
   await testXcconfig.writeAsString(certificateConfig);
 }
 
-
 Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
   final List<File> xcconfigFiles = <File>[
     _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig')),
@@ -34,20 +33,25 @@ Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
   bool xcconfigFileExists = false;
 
   for (final File file in xcconfigFiles) {
-    if ((await file.exists())) {
+    if (await file.exists()) {
       xcconfigFileExists = true;
       const String include = '#include "$_kTestXcconfigFileName"';
       final String contents = await file.readAsString();
-      if (!contents.contains(include)) {
+      final bool alreadyPatched = contents.contains(include);
+      if (!alreadyPatched) {
         final IOSink patchOut = file.openWrite(mode: FileMode.APPEND);
+        patchOut.writeln(); // in case EOF is not preceded by line break
         patchOut.writeln(include);
         await patchOut.close();
       }
     }
   }
 
-  if (!xcconfigFileExists)
-    throw 'No xcconfig file found';
+  if (!xcconfigFileExists) {
+    final String candidatesFormatted = xcconfigFiles.map<String>((File f) => f.path).join(', ');
+    throw 'Failed to locate a xcconfig file to patch with provisioning profile '
+        'info. Tried: $candidatesFormatted';
+  }
 }
 
 Future<String> _readProvisioningConfigFile() async {
