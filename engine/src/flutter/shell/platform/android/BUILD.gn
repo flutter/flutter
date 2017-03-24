@@ -9,7 +9,7 @@ import("//build/config/android/rules.gni")
 shared_library("flutter_shell_native") {
   visibility = [ ":*" ]
 
-  output_name = "sky_shell"
+  output_name = "flutter"
 
   sources = [
     "android_context_gl.cc",
@@ -123,7 +123,7 @@ action("android") {
 
   inputs = [
     "$root_build_dir/flutter_java.jar",
-    "$root_build_dir/libsky_shell.so",
+    "$root_build_dir/libflutter.so",
     "$root_build_dir/flutter_shell_assets/icudtl.dat",
   ]
 
@@ -139,7 +139,7 @@ action("android") {
     "--asset_dir",
     rebase_path("flutter_shell_assets", root_build_dir, root_build_dir),
     "--native_lib",
-    rebase_path("libsky_shell.so", root_build_dir, root_build_dir),
+    rebase_path("libflutter.so", root_build_dir, root_build_dir),
     "--android_abi",
     "$android_app_abi",
   ]
