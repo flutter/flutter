@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-class PlatformServices extends StatefulWidget {
+class PlatformChannel extends StatefulWidget {
   @override
-  _PlatformServicesState createState() => new _PlatformServicesState();
+  _PlatformChannelState createState() => new _PlatformChannelState();
 }
 
-class _PlatformServicesState extends State<PlatformServices> {
+class _PlatformChannelState extends State<PlatformChannel> {
   static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
   String _batteryLevel = '';
 
@@ -49,5 +49,5 @@ class _PlatformServicesState extends State<PlatformServices> {
 }
 
 void main() {
-  runApp(new PlatformServices());
+  runApp(new PlatformChannel());
 }
