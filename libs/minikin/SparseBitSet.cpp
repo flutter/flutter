@@ -27,17 +27,6 @@ namespace minikin {
 
 const uint32_t SparseBitSet::kNotFound;
 
-void SparseBitSet::clear() {
-    mMaxVal = 0;
-    if (mOwnIndicesAndBitmaps) {
-        delete[] mIndices;
-        delete[] mBitmaps;
-        mIndexSize = 0;
-        mBitmapSize = 0;
-        mOwnIndicesAndBitmaps = false;
-    }
-}
-
 uint32_t SparseBitSet::calcNumPages(const uint32_t* ranges, size_t nRanges) {
     bool haveZeroPage = false;
     uint32_t nonzeroPageEnd = 0;
@@ -64,17 +53,12 @@ uint32_t SparseBitSet::calcNumPages(const uint32_t* ranges, size_t nRanges) {
 
 void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     if (nRanges == 0) {
-        clear();
         return;
     }
     mMaxVal = ranges[nRanges * 2 - 1];
-    mIndexSize = (mMaxVal + kPageMask) >> kLogValuesPerPage;
-    uint32_t* indices = new uint32_t[mIndexSize];
+    mIndices.reset(new uint32_t[(mMaxVal + kPageMask) >> kLogValuesPerPage]);
     uint32_t nPages = calcNumPages(ranges, nRanges);
-    mBitmapSize = nPages << (kLogValuesPerPage - kLogBitsPerEl);
-    element* bitmaps = new element[mBitmapSize];
-    mOwnIndicesAndBitmaps = true;
-    memset(bitmaps, 0, nPages << (kLogValuesPerPage - 3));
+    mBitmaps.reset(new element[nPages << (kLogValuesPerPage - kLogBitsPerEl)]());
     mZeroPageIndex = noZeroPage;
     uint32_t nonzeroPageEnd = 0;
     uint32_t currentPage = 0;
@@ -90,32 +74,30 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
                     mZeroPageIndex = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
                 }
                 for (uint32_t j = nonzeroPageEnd; j < startPage; j++) {
-                    indices[j] = mZeroPageIndex;
+                    mIndices[j] = mZeroPageIndex;
                 }
             }
-            indices[startPage] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
+            mIndices[startPage] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
         }
 
         size_t index = ((currentPage - 1) << (kLogValuesPerPage - kLogBitsPerEl)) +
             ((start & kPageMask) >> kLogBitsPerEl);
         size_t nElements = (end - (start & ~kElMask) + kElMask) >> kLogBitsPerEl;
         if (nElements == 1) {
-            bitmaps[index] |= (kElAllOnes >> (start & kElMask)) &
+            mBitmaps[index] |= (kElAllOnes >> (start & kElMask)) &
                 (kElAllOnes << ((~end + 1) & kElMask));
         } else {
-            bitmaps[index] |= kElAllOnes >> (start & kElMask);
+            mBitmaps[index] |= kElAllOnes >> (start & kElMask);
             for (size_t j = 1; j < nElements - 1; j++) {
-                bitmaps[index + j] = kElAllOnes;
+                mBitmaps[index + j] = kElAllOnes;
             }
-            bitmaps[index + nElements - 1] |= kElAllOnes << ((~end + 1) & kElMask);
+            mBitmaps[index + nElements - 1] |= kElAllOnes << ((~end + 1) & kElMask);
         }
         for (size_t j = startPage + 1; j < endPage + 1; j++) {
-            indices[j] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
+            mIndices[j] = (currentPage++) << (kLogValuesPerPage - kLogBitsPerEl);
         }
         nonzeroPageEnd = endPage + 1;
     }
-    mBitmaps = bitmaps;
-    mIndices = indices;
 }
 
 int SparseBitSet::CountLeadingZeros(element x) {
