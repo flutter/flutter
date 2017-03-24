@@ -207,7 +207,7 @@ class GalleryDrawer extends StatelessWidget {
       },
     );
 
-    final Widget aboutItem = new AboutDrawerItem(
+    final Widget aboutItem = new AboutListTile(
       icon: const FlutterLogo(),
       applicationVersion: '2016 Q3 Preview',
       applicationIcon: const FlutterLogo(),

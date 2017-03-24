@@ -24,7 +24,8 @@ import 'theme.dart';
 
 /// A [ListTile] that shows an about box.
 ///
-/// This widget is often added to an app's [Drawer].
+/// This widget is often added to an app's [Drawer]. When tapped it shows
+/// an about box dialog with [showAboutDialog].
 ///
 /// The about box will include a button that shows licenses for software used by
 /// the application. The licenses shown are those returned by the
@@ -32,13 +33,13 @@ import 'theme.dart';
 ///
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-class AboutDrawerItem extends StatelessWidget {
+class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
-  AboutDrawerItem({
+  AboutListTile({
     Key key,
     this.icon: const Icon(null),
     this.child,
@@ -130,7 +131,7 @@ class AboutDrawerItem extends StatelessWidget {
 ///
 /// The arguments correspond to the properties on [AboutDialog].
 ///
-/// If the application has a [Drawer], consider using [AboutDrawerItem] instead
+/// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
 ///
 /// If you do not need an about box in your application, you should at least
@@ -163,7 +164,7 @@ void showAboutDialog({
 ///
 /// The arguments correspond to the properties on [LicensePage].
 ///
-/// If the application has a [Drawer], consider using [AboutDrawerItem] instead
+/// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
 ///
 /// The [AboutDialog] shown by [showAboutDialog] includes a button that calls
@@ -195,7 +196,7 @@ void showLicensePage({
 ///
 /// To show an [AboutDialog], use [showAboutDialog].
 ///
-/// If the application has a [Drawer], the [AboutDrawerItem] widget can make the
+/// If the application has a [Drawer], the [AboutListTile] widget can make the
 /// process of showing an about dialog simpler.
 ///
 /// The [AboutDialog] shown by [showAboutDialog] includes a button that calls
@@ -315,7 +316,7 @@ class AboutDialog extends StatelessWidget {
 ///
 /// To show a [LicensePage], use [showLicensePage].
 ///
-/// The [AboutDialog] shown by [showAboutDialog] and [AboutDrawerItem] includes
+/// The [AboutDialog] shown by [showAboutDialog] and [AboutListTile] includes
 /// a button that calls [showLicensePage].
 ///
 /// The licenses shown on the [LicensePage] are those returned by the
