@@ -1074,6 +1074,43 @@ enum VertexMode {
   triangleFan,
 }
 
+/// A set of vertex data used by [Canvas.drawVertices].
+class Vertices extends NativeFieldWrapperClass2 {
+  Vertices(
+    VertexMode mode,
+    List<Point> positions,
+    {
+      List<Point> textureCoordinates,
+      List<Color> colors,
+      List<int> indices,
+    }
+  ) {
+    if (textureCoordinates != null && textureCoordinates.length != positions.length)
+      throw new ArgumentError("[positions] and [textureCoordinates] lengths must match");
+    if (colors != null && colors.length != positions.length)
+      throw new ArgumentError("[positions] and [colors] lengths must match");
+    if (indices != null && indices.any((int i) => i < 0 || i >= positions.length))
+      throw new ArgumentError("[indices] values must be valid indices in the positions list");
+
+    Float32List encodedPositions = _encodePointList(positions);
+    Float32List encodedTexs = (textureCoordinates != null) ?
+      _encodePointList(textureCoordinates) : null;
+    Int32List encodedColors = (colors != null) ? _encodeColorList(colors) : null;
+    Int32List encodedIndices = (indices != null) ? new Int32List.fromList(indices) : null;
+
+    _constructor();
+    _init(mode.index, encodedPositions, encodedTexs, encodedColors, encodedIndices);
+  }
+
+  void _constructor() native "Vertices_constructor";
+
+  void _init(int mode,
+             Float32List positions,
+             Float32List textureCoordinates,
+             Int32List colors,
+             Int32List indices) native "Vertices_init";
+}
+
 /// Defines how a list of points is interpreted when drawing a set of points.
 ///
 /// Used by [Canvas.drawPoints].
@@ -1471,38 +1508,13 @@ class Canvas extends NativeFieldWrapperClass2 {
                    int pointMode,
                    Float32List points) native "Canvas_drawPoints";
 
-  void drawVertices(VertexMode vertexMode,
-                    List<Point> vertices,
-                    List<Point> textureCoordinates,
-                    List<Color> colors,
-                    BlendMode blendMode,
-                    List<int> indicies,
-                    Paint paint) {
-    final int vertexCount = vertices.length;
-
-    if (textureCoordinates.isNotEmpty && textureCoordinates.length != vertexCount)
-      throw new ArgumentError("[vertices] and [textureCoordinates] lengths must match");
-    if (colors.isNotEmpty && colors.length != vertexCount)
-      throw new ArgumentError("[vertices] and [colors] lengths must match");
-
-    final Float32List vertexBuffer = _encodePointList(vertices);
-    final Float32List textureCoordinateBuffer = textureCoordinates.isEmpty ? null : _encodePointList(textureCoordinates);
-    final Int32List colorBuffer = colors.isEmpty ? null : _encodeColorList(colors);
-    final Int32List indexBuffer = new Int32List.fromList(indicies);
-
-    _drawVertices(
-      paint._objects, paint._data, vertexMode.index, vertexBuffer,
-      textureCoordinateBuffer, colorBuffer, blendMode.index, indexBuffer
-    );
+  void drawVertices(Vertices vertices, BlendMode blendMode, Paint paint) {
+    _drawVertices(vertices, blendMode, paint._objects, paint._data);
   }
-  void _drawVertices(List<dynamic> paintObjects,
-                     ByteData paintData,
-                     int vertexMode,
-                     Float32List vertices,
-                     Float32List textureCoordinates,
-                     Int32List colors,
-                     int blendMode,
-                     Int32List indicies) native "Canvas_drawVertices";
+  void _drawVertices(Vertices vertices,
+                     BlendMode blendMode,
+                     List<dynamic> paintObjects,
+                     ByteData paintData) native "Canvas_drawVertices";
 
   // TODO(eseidel): Paint should be optional, but optional doesn't work.
   void drawAtlas(Image atlas,

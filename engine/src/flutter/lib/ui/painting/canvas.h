@@ -10,6 +10,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/picture_recorder.h"
 #include "flutter/lib/ui/painting/rrect.h"
+#include "flutter/lib/ui/painting/vertices.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float32_list.h"
 #include "lib/tonic/typed_data/float64_list.h"
@@ -142,14 +143,10 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
                   SkCanvas::PointMode point_mode,
                   const tonic::Float32List& points);
 
-  void drawVertices(const Paint& paint,
-                    const PaintData& paint_data,
-                    SkCanvas::VertexMode vertex_mode,
-                    const tonic::Float32List& vertices,
-                    const tonic::Float32List& texture_coordinates,
-                    const tonic::Int32List& colors,
+  void drawVertices(const Vertices* vertices,
                     SkBlendMode blend_mode,
-                    const tonic::Int32List& indices);
+                    const Paint& paint,
+                    const PaintData& paint_data);
 
   void drawAtlas(const Paint& paint,
                  const PaintData& paint_data,
