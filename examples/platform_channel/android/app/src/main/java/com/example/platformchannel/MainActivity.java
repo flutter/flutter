@@ -17,10 +17,10 @@ import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.FlutterEventChannel;
 import io.flutter.plugin.common.FlutterEventChannel.EventSink;
+import io.flutter.plugin.common.FlutterEventChannel.StreamHandler;
 import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.FlutterMethodChannel.Response;
-import io.flutter.plugin.common.FlutterMethodChannel.StreamHandler;
 import io.flutter.plugin.common.MethodCall;
 
 public class MainActivity extends FlutterActivity {
