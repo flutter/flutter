@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '9f21ae60eb69714449d131db7af9deebd2ed1e8a',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'effec4955ea3444bfc7c78a7a2f60836cf722f67',
 
    # Fuchsia compatibility
    #
@@ -75,13 +75,6 @@ deps = {
 
   'src/buildtools':
    Var('fuchsia_git') + '/buildtools' + '@' +  Var('buildtools_revision'),
-
-  # TODO(abarth): Remove in favor of //third_party/gtest
-  'src/testing/gtest':
-   Var('chromium_git') + '/external/googletest.git' + '@' + '23574bf2333f834ff665f894c97bef8a5b33a0a9',
-
-  'src/testing/gmock':
-   Var('chromium_git') + '/external/googlemock.git' + '@' + '29763965ab52f24565299976b936d1265cb6a271',
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c3f79166089e5360c09e3053fce50e6e296c3204',
