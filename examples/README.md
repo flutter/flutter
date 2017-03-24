@@ -25,6 +25,13 @@ Available examples include:
 - **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
   Flutter's implementation of [material design](https://material.google.com/).
 
+- **Platform Services** The [platform services app](platform_services)
+  demonstrates how to connect a Flutter app to platform-specific APIs. For
+  documentation, see https://flutter.io/platform-channels/ .
+
+- **Flutter View** The [flutter view app](flutter_view) demonstrates how to
+  embed Flutter within an iOS or Android app.
+
 - **Layers** The [layers vignettes](layers) show how to use the various layers
   in the Flutter framework. There is no main.dart in this directory because each
   file is a standalone example. To run a particular file, use
