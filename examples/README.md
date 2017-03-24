@@ -26,7 +26,8 @@ Available examples include:
   Flutter's implementation of [material design](https://material.google.com/).
 
 - **Platform Services** The [platform services app](platform_services)
-  demonstrates how to connect a Flutter app to platform-specific services.
+  demonstrates how to connect a Flutter app to platform-specific APIs. For
+  documentation, see https://flutter.io/platform-channels/ .
 
 - **Flutter View** The [flutter view app](flutter_view) demonstrates how to
   embed Flutter within an iOS or Android app.
