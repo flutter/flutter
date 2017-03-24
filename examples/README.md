@@ -25,7 +25,7 @@ Available examples include:
 - **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
   Flutter's implementation of [material design](https://material.google.com/).
 
-- **Platform Services** The [platform services app](platform_services)
+- **Platform Channel** The [platform channel app](platform_channel)
   demonstrates how to connect a Flutter app to platform-specific APIs. For
   documentation, see https://flutter.io/platform-channels/ .
 
