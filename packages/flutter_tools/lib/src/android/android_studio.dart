@@ -282,14 +282,19 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final String javaPath = platform.isMacOS ?
         fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
         fs.path.join(directory, 'jre');
-    final ProcessResult result = processManager.runSync(<String>[fs.path.join(javaPath, 'bin', 'java'), '-version']);
-    if (result.exitCode == 0) {
-      final List<String> versionLines = result.stderr.split('\n');
-      final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
-      _validationMessages.add('Java version: $javaVersion');
-      _javaPath = javaPath;
-    } else {
+    final String javaExecutable = fs.path.join(javaPath, 'bin', 'java');
+    if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
+    } else {
+      final ProcessResult result = processManager.runSync(<String>[javaExecutable, '-version']);
+      if (result.exitCode == 0) {
+        final List<String> versionLines = result.stderr.split('\n');
+        final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        _validationMessages.add('Java version: $javaVersion');
+        _javaPath = javaPath;
+      } else {
+        _validationMessages.add('Unable to determine bundled Java version.');
+      }
     }
   }
 
