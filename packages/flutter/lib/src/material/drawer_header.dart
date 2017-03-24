@@ -31,6 +31,7 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
+    this.margin: const EdgeInsets.only(bottom: 8.0),
     this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration: const Duration(milliseconds: 250),
     this.curve: Curves.fastOutSlowIn,
@@ -53,6 +54,9 @@ class DrawerHeader extends StatelessWidget {
   /// If the child is null, the padding has no effect.
   final EdgeInsets padding;
 
+  /// The margin around the drawer header.
+  final EdgeInsets margin;
+
   /// The duration for animations of the [decoration].
   final Duration duration;
 
@@ -72,7 +76,7 @@ class DrawerHeader extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
-      margin: const EdgeInsets.only(bottom: 8.0),
+      margin: margin,
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(
