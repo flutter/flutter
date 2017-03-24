@@ -22,10 +22,9 @@ import 'scaffold.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
 
-/// A [Drawer] item that shows an about box.
+/// A [ListTile] that shows an about box.
 ///
-/// Place this in a [Drawer], specifying your preferred application name,
-/// version, icon, and copyright in the appropriate fields.
+/// This widget is often added to an app's [Drawer].
 ///
 /// The about box will include a button that shows licenses for software used by
 /// the application. The licenses shown are those returned by the
@@ -34,7 +33,7 @@ import 'theme.dart';
 /// If your application does not have a [Drawer], you should provide an
 /// affordance to call [showAboutDialog] or (at least) [showLicensePage].
 class AboutDrawerItem extends StatelessWidget {
-  /// Creates a drawer item for showing an about box.
+  /// Creates a list tile for showing an about box.
   ///
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese

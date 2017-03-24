@@ -40,8 +40,8 @@ enum MaterialListType {
 /// text style, which is a little smaller than the theme's [TextTheme.subhead]
 /// text style, which is used by default.
 enum ListTileStyle {
-  // Use a title font that's appropriate for a normal [ListTile].
-  normal,
+  // Use a title font that's appropriate for a [ListTile] in a list.
+  list,
 
   // Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
   drawer,
@@ -75,7 +75,7 @@ class ListTileTheme extends InheritedWidget {
   const ListTileTheme({
     Key key,
     this.dense: false,
-    this.style: ListTileStyle.normal,
+    this.style: ListTileStyle.list,
     this.selectedColor,
     this.iconColor,
     this.textColor,
@@ -111,11 +111,11 @@ class ListTileTheme extends InheritedWidget {
 
   @override
   bool updateShouldNotify(ListTileTheme oldTheme) {
-    return dense != oldTheme.dense ||
-      style != oldTheme.style ||
-      selectedColor != oldTheme.selectedColor ||
-      iconColor != oldTheme.iconColor ||
-      textColor != oldTheme.textColor;
+    return dense != oldTheme.dense
+        || style != oldTheme.style
+        || selectedColor != oldTheme.selectedColor
+        || iconColor != oldTheme.iconColor
+        || textColor != oldTheme.textColor;
   }
 }
 
@@ -205,7 +205,7 @@ class ListTile extends StatelessWidget {
 
   /// Whether this list tile is part of a vertically dense list.
   ///
-  /// This property inherits its value from the [ListTileTheme].
+  /// If this property is null then its value is based on [ListTileTheme.dense].
   final bool dense;
 
   /// Whether this list tile is interactive.
