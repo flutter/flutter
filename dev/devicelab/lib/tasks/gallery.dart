@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest() {
@@ -27,6 +28,7 @@ class GalleryTransitionTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        await prepareProvisioningCertificates(galleryDirectory.path);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }

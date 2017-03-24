@@ -7,6 +7,7 @@ import 'dart:convert' show JSON;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
+import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 
@@ -97,6 +98,7 @@ class StartupTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -137,6 +139,7 @@ class PerfTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -187,6 +190,7 @@ class DriverTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
@@ -275,6 +279,7 @@ class MemoryTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
       }
