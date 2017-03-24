@@ -17,26 +17,37 @@ const FileSystem _fs = const io.LocalFileSystem();
 /// information required to build and run the project.
 Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
   final String certificateConfig = await _readProvisioningConfigFile();
-  await _patchFlutterXcconfigIfNotPatched(flutterProjectPath);
+  await _patchXcconfigFilesIfNotPatched(flutterProjectPath);
 
   final File testXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/$_kTestXcconfigFileName'));
   await testXcconfig.writeAsString(certificateConfig);
 }
 
-Future<Null> _patchFlutterXcconfigIfNotPatched(String flutterProjectPath) async {
-  final File flutterXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig'));
 
-  if (!(await flutterXcconfig.exists())) {
-    throw 'File not found: ${flutterXcconfig.path}';
+Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
+  final List<File> xcconfigFiles = <File>[
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig')),
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Debug.xcconfig')),
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Release.xcconfig'))
+  ];
+
+  bool xcconfigFileExists = false;
+
+  for (final File file in xcconfigFiles) {
+    if ((await file.exists())) {
+      xcconfigFileExists = true;
+      const String include = '#include "$_kTestXcconfigFileName"';
+      final String contents = await file.readAsString();
+      if (!contents.contains(include)) {
+        final IOSink patchOut = file.openWrite(mode: FileMode.APPEND);
+        patchOut.writeln(include);
+        await patchOut.close();
+      }
+    }
   }
 
-  const String include = '#include "$_kTestXcconfigFileName"';
-  final String contents = await flutterXcconfig.readAsString();
-  if (!contents.contains(include)) {
-    final IOSink patchOut = flutterXcconfig.openWrite(mode: FileMode.APPEND);
-    patchOut.writeln(include);
-    await patchOut.close();
-  }
+  if (!xcconfigFileExists)
+    throw 'No xcconfig file found';
 }
 
 Future<String> _readProvisioningConfigFile() async {
