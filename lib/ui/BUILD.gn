@@ -43,6 +43,8 @@ source_set("ui") {
     "painting/shader.cc",
     "painting/shader.h",
     "painting/utils.h",
+    "painting/vertices.cc",
+    "painting/vertices.h",
     "semantics/semantics_node.cc",
     "semantics/semantics_node.h",
     "semantics/semantics_update.cc",

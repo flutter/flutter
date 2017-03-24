@@ -1429,6 +1429,8 @@ FILE: ../../../flutter/fml/thread_local_unittests.cc
 FILE: ../../../flutter/fml/thread_unittests.cc
 FILE: ../../../flutter/fml/trace_event.cc
 FILE: ../../../flutter/fml/trace_event.h
+FILE: ../../../flutter/lib/ui/painting/vertices.cc
+FILE: ../../../flutter/lib/ui/painting/vertices.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
