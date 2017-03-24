@@ -196,6 +196,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
+  flutter_view_ios__start_up:
+    description: >
+      Verifies that Flutter View can be used from an iOS project.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
   # Tests running on Windows host
 
   flutter_gallery_win__build:
