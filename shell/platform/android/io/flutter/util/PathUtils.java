@@ -10,7 +10,7 @@ import java.lang.String;
 
 public final class PathUtils {
     public static String getDataDirectory(Context applicationContext) {
-        return applicationContext.getDir("sky_shell", Context.MODE_PRIVATE).getPath();
+        return applicationContext.getDir("flutter", Context.MODE_PRIVATE).getPath();
     }
 
     public static String getCacheDirectory(Context applicationContext) {

@@ -57,7 +57,6 @@ public class FlutterMain {
     private static final String DEFAULT_FLX = "app.flx";
 
     private static final String MANIFEST = "flutter.yaml";
-    private static final String PRIVATE_DATA_DIRECTORY_SUFFIX = "sky_shell";
 
     private static final Set<String> SKY_RESOURCES = ImmutableSetBuilder.<String>newInstance()
         .add("icudtl.dat")
@@ -138,7 +137,7 @@ public class FlutterMain {
         long initStartTimestampMillis = SystemClock.uptimeMillis();
         initConfig(applicationContext);
         initResources(applicationContext);
-        System.loadLibrary("sky_shell");
+        System.loadLibrary("flutter");
         initAot(applicationContext);
 
         // We record the initialization time using SystemClock because at the start of the
