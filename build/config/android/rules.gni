@@ -4,7 +4,6 @@
 
 import("//build/config/android/config.gni")
 import("//build/config/android/internal_rules.gni")
-import("//third_party/android_platform/config.gni")
 
 assert(is_android)
 
@@ -1394,8 +1393,6 @@ template("android_apk") {
             _first_ext_removed,
             "$root_build_dir/lib.stripped/{{source_name_part}}$android_product_extension")
 
-    _native_libs_dir = base_path + "/libs"
-
     if (_use_chromium_linker) {
       _native_libs += [ "$root_build_dir/lib.stripped/libchromium_android_linker$android_product_extension" ]
     }
@@ -1414,13 +1411,8 @@ template("android_apk") {
   _android_manifest = invoker.android_manifest
 
   _rebased_build_config = rebase_path(_build_config, root_build_dir)
-  _create_abi_split =
-      defined(invoker.create_abi_split) && invoker.create_abi_split
   _create_density_splits =
       defined(invoker.create_density_splits) && invoker.create_density_splits
-
-  # Help GN understand that _create_abi_split is not unused (bug in GN).
-  assert(_create_abi_split || true)
 
   build_config_target = "${_template_name}__build_config"
   write_build_config(build_config_target) {
@@ -1553,65 +1545,6 @@ template("android_apk") {
     output = final_dex_path
   }
 
-  if (_native_libs != []) {
-    action("${_template_name}__prepare_native") {
-      script = "//build/android/gyp/pack_relocations.py"
-      packed_libraries_dir = "$_native_libs_dir/$android_app_abi"
-      depfile = "$target_gen_dir/$target_name.d"
-      outputs = [
-        depfile,
-      ]
-
-      inputs = _native_libs
-      deps = _chromium_linker_dep
-
-      inputs += [ _build_config ]
-      deps += [ ":$build_config_target" ]
-
-      skip_packing_list = [
-        "gdbserver",
-        "libchromium_android_linker$android_product_extension",
-      ]
-
-      enable_packing_arg = 0
-      if (_enable_relocation_packing) {
-        enable_packing_arg = 1
-        deps += [ relocation_packer_target ]
-      }
-
-      args = [
-        "--depfile",
-        rebase_path(depfile, root_build_dir),
-        "--enable-packing=$enable_packing_arg",
-        "--exclude-packing-list=$skip_packing_list",
-        "--android-pack-relocations",
-        rebase_path(relocation_packer_exe, root_build_dir),
-        "--stripped-libraries-dir",
-        rebase_path(root_build_dir, root_build_dir),
-        "--packed-libraries-dir",
-        rebase_path(packed_libraries_dir, root_build_dir),
-        "--libraries=@FileArg(${_rebased_build_config}:native:libraries)",
-        "--clear-dir",
-      ]
-
-      if (defined(invoker.deps)) {
-        deps += invoker.deps
-      }
-      if (defined(invoker.public_deps)) {
-        public_deps = invoker.public_deps
-      }
-      if (defined(invoker.data_deps)) {
-        data_deps = invoker.data_deps
-      }
-
-      if (is_debug) {
-        rebased_gdbserver = rebase_path([ android_gdbserver ], root_build_dir)
-        inputs += [ android_gdbserver ]
-        args += [ "--libraries=$rebased_gdbserver" ]
-      }
-    }
-  }
-
   final_deps += [ ":${_template_name}__create" ]
   create_apk("${_template_name}__create") {
     apk_path = _final_apk_path
@@ -1658,49 +1591,6 @@ template("android_apk") {
         deps += invoker.deps
       }
     }
-
-    if (_native_libs != [] && !_create_abi_split) {
-      native_libs_dir = _native_libs_dir
-      deps += [ ":${_template_name}__prepare_native" ]
-    }
-  }
-
-  if (_native_libs != [] && _create_abi_split) {
-    _manifest_rule = "${_template_name}__split_manifest_abi_${android_app_abi}"
-    generate_split_manifest(_manifest_rule) {
-      main_manifest = _android_manifest
-      out_manifest =
-          "$gen_dir/split-manifests/${android_app_abi}/AndroidManifest.xml"
-      split_name = "abi_${android_app_abi}"
-      deps = _android_manifest_deps
-    }
-
-    _apk_rule = "${_template_name}__split_apk_abi_${android_app_abi}"
-    final_deps += [ ":$_apk_rule" ]
-    create_apk(_apk_rule) {
-      _split_paths = process_file_template(
-              [ _final_apk_path ],
-              "{{source_dir}}/{{source_name_part}}-abi-${android_app_abi}.apk")
-      apk_path = _split_paths[0]
-      base_path = "$gen_dir/$_apk_rule"
-
-      manifest_outputs = get_target_outputs(":${_manifest_rule}")
-      android_manifest = manifest_outputs[1]
-      load_library_from_apk = _load_library_from_apk
-
-      version_code = _version_code
-      version_name = _version_name
-
-      keystore_name = _keystore_name
-      keystore_path = _keystore_path
-      keystore_password = _keystore_password
-
-      native_libs_dir = _native_libs_dir
-      deps = [
-        ":${_manifest_rule}",
-        ":${_template_name}__prepare_native",
-      ]
-    }
   }
 
   if (defined(invoker.flutter_dist_jar)) {
@@ -1736,7 +1626,6 @@ template("android_apk") {
       }
       deps = [
         ":$create_dist_target",
-        ":${_template_name}__prepare_native",
       ]
       if (defined(invoker.deps)) {
         deps += invoker.deps

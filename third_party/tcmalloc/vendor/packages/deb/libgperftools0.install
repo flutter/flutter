@@ -1,4 +1,0 @@
-usr/lib/lib*.so.*
-usr/bin/pprof*
-debian/tmp/usr/lib/lib*.so.*
-debian/tmp/usr/bin/pprof*
