@@ -108,6 +108,7 @@ void main() {
       expect(bytes, 7);
     });
     testUsingContext('modify existing file on local file system', () async {
+      await devFS.update();
       final File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
