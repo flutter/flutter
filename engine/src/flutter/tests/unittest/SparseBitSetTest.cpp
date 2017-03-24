@@ -32,8 +32,7 @@ TEST(SparseBitSetTest, randomTest) {
         range.push_back((range.back() - 1) + distribution(mt));
     }
 
-    SparseBitSet bitset;
-    bitset.initFromRanges(range.data(), range.size() / 2);
+    SparseBitSet bitset(range.data(), range.size() / 2);
 
     uint32_t ch = 0;
     for (size_t i = 0; i < range.size() / 2; ++i) {

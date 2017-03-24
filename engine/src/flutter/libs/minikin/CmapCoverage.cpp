@@ -132,76 +132,146 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
     return true;
 }
 
-bool CmapCoverage::getCoverage(SparseBitSet& coverage, const uint8_t* cmap_data, size_t cmap_size,
+// Lower value has higher priority. 0 for the highest priority table.
+// kLowestPriority for unsupported tables.
+// This order comes from HarfBuzz's hb-ot-font.cc and needs to be kept in sync with it.
+constexpr uint8_t kLowestPriority = 255;
+uint8_t getTablePriority(uint16_t platformId, uint16_t encodingId) {
+    if (platformId == 3 && encodingId == 10) {
+        return 0;
+    }
+    if (platformId == 0 && encodingId == 6) {
+        return 1;
+    }
+    if (platformId == 0 && encodingId == 4) {
+        return 2;
+    }
+    if (platformId == 3 && encodingId == 1) {
+        return 3;
+    }
+    if (platformId == 0 && encodingId == 3) {
+        return 4;
+    }
+    if (platformId == 0 && encodingId == 2) {
+        return 5;
+    }
+    if (platformId == 0 && encodingId == 1) {
+        return 6;
+    }
+    if (platformId == 0 && encodingId == 0) {
+        return 7;
+    }
+    // Tables other than above are not supported.
+    return kLowestPriority;
+}
+
+SparseBitSet CmapCoverage::getCoverage(const uint8_t* cmap_data, size_t cmap_size,
         bool* has_cmap_format14_subtable) {
-    vector<uint32_t> coverageVec;
-    const size_t kHeaderSize = 4;
-    const size_t kNumTablesOffset = 2;
-    const size_t kTableSize = 8;
-    const size_t kPlatformIdOffset = 0;
-    const size_t kEncodingIdOffset = 2;
-    const size_t kOffsetOffset = 4;
-    const uint16_t kUnicodePlatformId = 0;
-    const uint16_t kMicrosoftPlatformId = 3;
-    const uint16_t kUnicodeBmpEncodingId = 1;
-    const uint16_t kVariationSequencesEncodingId = 5;
-    const uint16_t kUnicodeUcs4EncodingId = 10;
-    const uint32_t kNoTable = UINT32_MAX;
+    constexpr size_t kHeaderSize = 4;
+    constexpr size_t kNumTablesOffset = 2;
+    constexpr size_t kTableSize = 8;
+    constexpr size_t kPlatformIdOffset = 0;
+    constexpr size_t kEncodingIdOffset = 2;
+    constexpr size_t kOffsetOffset = 4;
+    constexpr size_t kFormatOffset = 0;
+    constexpr uint32_t kInvalidOffset = UINT32_MAX;
+
     if (kHeaderSize > cmap_size) {
-        return false;
+        return SparseBitSet();
     }
     uint32_t numTables = readU16(cmap_data, kNumTablesOffset);
     if (kHeaderSize + numTables * kTableSize > cmap_size) {
-        return false;
+        return SparseBitSet();
     }
-    uint32_t bestTable = kNoTable;
-    bool hasCmapFormat14Subtable = false;
-    for (uint32_t i = 0; i < numTables; i++) {
-        uint16_t platformId = readU16(cmap_data, kHeaderSize + i * kTableSize + kPlatformIdOffset);
-        uint16_t encodingId = readU16(cmap_data, kHeaderSize + i * kTableSize + kEncodingIdOffset);
-        if (platformId == kMicrosoftPlatformId && encodingId == kUnicodeUcs4EncodingId) {
-            bestTable = i;
-            break;
-        } else if (platformId == kMicrosoftPlatformId && encodingId == kUnicodeBmpEncodingId) {
-            bestTable = i;
-        } else if (platformId == kUnicodePlatformId &&
-                encodingId == kVariationSequencesEncodingId) {
-            uint32_t offset = readU32(cmap_data, kHeaderSize + i * kTableSize + kOffsetOffset);
-            if (offset <= cmap_size - 2 && readU16(cmap_data, offset) == 14) {
-                hasCmapFormat14Subtable = true;
+
+    uint32_t bestTableOffset = kInvalidOffset;
+    uint16_t bestTableFormat = 0;
+    uint8_t bestTablePriority = kLowestPriority;
+    *has_cmap_format14_subtable = false;
+    for (uint32_t i = 0; i < numTables; ++i) {
+        const uint32_t tableHeadOffset = kHeaderSize + i * kTableSize;
+        const uint16_t platformId = readU16(cmap_data, tableHeadOffset + kPlatformIdOffset);
+        const uint16_t encodingId = readU16(cmap_data, tableHeadOffset + kEncodingIdOffset);
+        const uint32_t offset = readU32(cmap_data, tableHeadOffset + kOffsetOffset);
+
+        if (offset > cmap_size - 2) {
+            continue;  // Invalid table: not enough space to read.
+        }
+        const uint16_t format = readU16(cmap_data, offset + kFormatOffset);
+
+        if (platformId == 0 /* Unicode */ && encodingId == 5 /* Variation Sequences */) {
+            if (!(*has_cmap_format14_subtable) && format == 14) {
+                *has_cmap_format14_subtable = true;
+            } else {
+                // Ignore the (0, 5) table if we have already seen another valid one or it's in a
+                // format we don't understand.
+            }
+        } else {
+            uint32_t length;
+            uint32_t language;
+
+            if (format == 4) {
+                constexpr size_t lengthOffset = 2;
+                constexpr size_t languageOffset = 4;
+                constexpr size_t minTableSize = languageOffset + 2;
+                if (offset > cmap_size - minTableSize) {
+                    continue;  // Invalid table: not enough space to read.
+                }
+                length = readU16(cmap_data, offset + lengthOffset);
+                language = readU16(cmap_data, offset + languageOffset);
+            } else if (format == 12) {
+                constexpr size_t lengthOffset = 4;
+                constexpr size_t languageOffset = 8;
+                constexpr size_t minTableSize = languageOffset + 4;
+                if (offset > cmap_size - minTableSize) {
+                    continue;  // Invalid table: not enough space to read.
+                }
+                length = readU32(cmap_data, offset + lengthOffset);
+                language = readU32(cmap_data, offset + languageOffset);
+            } else {
+                continue;
+            }
+
+            if (length > cmap_size - offset) {
+                continue;  // Invalid table: table length is larger than whole cmap data size.
+            }
+            if (language != 0) {
+                // Unsupported or invalid table: this is either a subtable for the Macintosh
+                // platform (which we don't support), or an invalid subtable since language field
+                // should be zero for non-Macintosh subtables.
+                continue;
+            }
+            const uint8_t priority = getTablePriority(platformId, encodingId);
+            if (priority < bestTablePriority) {
+                bestTableOffset = offset;
+                bestTablePriority = priority;
+                bestTableFormat = format;
             }
         }
+        if (*has_cmap_format14_subtable && bestTablePriority == 0 /* highest priority */) {
+            // Already found the highest priority table and variation sequences table. No need to
+            // look at remaining tables.
+            break;
+        }
     }
-    *has_cmap_format14_subtable = hasCmapFormat14Subtable;
-#ifdef VERBOSE_DEBUG
-    ALOGD("best table = %d\n", bestTable);
-#endif
-    if (bestTable == kNoTable) {
-        return false;
+    if (bestTableOffset == kInvalidOffset) {
+        return SparseBitSet();
     }
-    uint32_t offset = readU32(cmap_data, kHeaderSize + bestTable * kTableSize + kOffsetOffset);
-    if (offset > cmap_size - 2) {
-        return false;
-    }
-    uint16_t format = readU16(cmap_data, offset);
-    bool success = false;
-    const uint8_t* tableData = cmap_data + offset;
-    const size_t tableSize = cmap_size - offset;
-    if (format == 4) {
+    const uint8_t* tableData = cmap_data + bestTableOffset;
+    const size_t tableSize = cmap_size - bestTableOffset;
+    vector<uint32_t> coverageVec;
+    bool success;
+    if (bestTableFormat == 4) {
         success = getCoverageFormat4(coverageVec, tableData, tableSize);
-    } else if (format == 12) {
+    } else {
         success = getCoverageFormat12(coverageVec, tableData, tableSize);
     }
     if (success) {
-        coverage.initFromRanges(&coverageVec.front(), coverageVec.size() >> 1);
+        return SparseBitSet(&coverageVec.front(), coverageVec.size() >> 1);
+    } else {
+        return SparseBitSet();
     }
-#ifdef VERBOSE_DEBUG
-    for (size_t i = 0; i < coverageVec.size(); i += 2) {
-        ALOGD("%x:%x\n", coverageVec[i], coverageVec[i + 1]);
-    }
-    ALOGD("success = %d", success);
-#endif
-    return success;
+
 }
 
 }  // namespace minikin
