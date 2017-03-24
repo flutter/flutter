@@ -11,18 +11,18 @@ import 'package:flutter/foundation.dart';
 import 'app_bar.dart';
 import 'debug.dart';
 import 'dialog.dart';
-import 'drawer_item.dart';
 import 'flat_button.dart';
 import 'icon.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
+import 'list_tile.dart';
 import 'page.dart';
 import 'progress_indicator.dart';
 import 'scaffold.dart';
 import 'scrollbar.dart';
 import 'theme.dart';
 
-/// A [DrawerItem] to show an about box.
+/// A [Drawer] item that shows an about box.
 ///
 /// Place this in a [Drawer], specifying your preferred application name,
 /// version, icon, and copyright in the appropriate fields.
@@ -109,10 +109,10 @@ class AboutDrawerItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    return new DrawerItem(
-      icon: icon,
-      child: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
-      onPressed: () {
+    return new ListTile(
+      leading: icon,
+      title: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
+      onTap: () {
         showAboutDialog(
           context: context,
           applicationName: applicationName,

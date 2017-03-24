@@ -5,8 +5,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'icon_theme.dart';
+import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
@@ -28,7 +31,20 @@ enum MaterialListType {
   twoLine,
 
   /// A list tile that contains three lines of text.
-  threeLine
+  threeLine,
+}
+
+/// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
+///
+/// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
+/// text style, which is a little smaller than the theme's [TextTheme.subhead]
+/// text style, which is used by default.
+enum ListTileStyle {
+  // Use a title font that's appropriate for a normal [ListTile].
+  normal,
+
+  // Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
+  drawer,
 }
 
 /// The vertical extent of the different types of material list tiles.
@@ -45,6 +61,64 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
   MaterialListType.twoLine: 72.0,
   MaterialListType.threeLine: 88.0,
 };
+
+/// An inherited widget that defines  color and style parameters for [ListTile]s
+/// in this widget's subtree.
+///
+/// Values specified here are used for [ListTile] properties that are not given
+/// an explicit non-null value.
+///
+/// The [Drawer] widget specifies a tile theme for its children which sets
+/// [style] to [ListTileStyle.drawer].
+class ListTileTheme extends InheritedWidget {
+  /// Creates an inherited widget that defines color and style parameters for [ListTile]s.
+  const ListTileTheme({
+    Key key,
+    this.dense: false,
+    this.style: ListTileStyle.normal,
+    this.selectedColor,
+    this.iconColor,
+    this.textColor,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  /// If true then [ListTile]s will have the vertically dense layout.
+  final bool dense;
+
+  /// If specified, [style] defines the font used for [ListTile] titles.
+  final ListTileStyle style;
+
+  /// If specified, the color used for icons and text when a [ListTile] is selected.
+  final Color selectedColor;
+
+  /// If specified, the icon color used for enabled [ListTile]s that are not selected.
+  final Color iconColor;
+
+  /// If specified, the text color used for enabled [ListTile]s that are not selected.
+  final Color textColor;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// ListTileTheme theme = ListTileTheme.of(context);
+  /// ```
+  static ListTileTheme of(BuildContext context) {
+    final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
+    return result ?? new ListTileTheme();
+  }
+
+  @override
+  bool updateShouldNotify(ListTileTheme oldTheme) {
+    return dense != oldTheme.dense ||
+      style != oldTheme.style ||
+      selectedColor != oldTheme.selectedColor ||
+      iconColor != oldTheme.iconColor ||
+      textColor != oldTheme.textColor;
+  }
+}
+
 
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
@@ -69,14 +143,15 @@ Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>
 ///
 /// See also:
 ///
-///  * [kListTileExtent], which defines the ListTile sizes.
+///  * [ListTileTheme], which defines visual properties for [ListTile]s.
 ///  * [ListView], which can display an arbitrary number of [ListTile]s
 ///    in a scrolling list.
-///  * [Card], which can be used with [Column] to show a few [ListTile]s.
 ///  * [CircleAvatar], which shows an icon representing a person and is often
 ///    used as the [leading] element of a ListTile.
+///  * [Card], which can be used with [Column] to show a few [ListTile]s.
 ///  * [Divider], which can be used to separate [ListTile]s.
 ///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
+///  * [kListTileExtent], which defines the ListTile sizes.
 ///  * <https://material.google.com/components/lists.html>
 class ListTile extends StatelessWidget {
   /// Creates a list tile.
@@ -91,15 +166,20 @@ class ListTile extends StatelessWidget {
     this.subtitle,
     this.trailing,
     this.isThreeLine: false,
-    this.dense: false,
+    this.dense,
     this.enabled: true,
     this.onTap,
-    this.onLongPress
-  }) : super(key: key);
+    this.onLongPress,
+    this.selected: false,
+  }) : super(key: key) {
+    assert(isThreeLine != null);
+    assert(enabled != null);
+    assert(selected != null);
+  }
 
   /// A widget to display before the title.
   ///
-  /// Typically a [CircleAvatar] widget.
+  /// Typically an [Icon] or a [CircleAvatar] widget.
   final Widget leading;
 
   /// The primary content of the list tile.
@@ -124,6 +204,8 @@ class ListTile extends StatelessWidget {
   final bool isThreeLine;
 
   /// Whether this list tile is part of a vertically dense list.
+  ///
+  /// This property inherits its value from the [ListTileTheme].
   final bool dense;
 
   /// Whether this list tile is interactive.
@@ -142,6 +224,12 @@ class ListTile extends StatelessWidget {
   ///
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
+
+  /// If this tile is also [enabled] then icons and text are rendered with the same color.
+  ///
+  /// By default the selected color is the theme's primary color. The selected color
+  /// can be overridden with a [ListTileTheme].
+  final bool selected;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
   /// [ThemeData.dividerColor] of the context's [Theme] is used.
@@ -174,50 +262,103 @@ class ListTile extends StatelessWidget {
       yield tile;
   }
 
-  TextStyle _primaryTextStyle(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final TextStyle style = theme.textTheme.subhead;
-    if (!enabled) {
-      final Color color = theme.disabledColor;
-      return dense ? style.copyWith(fontSize: 13.0, color: color) : style.copyWith(color: color);
+  Color _iconColor(ThemeData theme, ListTileTheme tileTheme) {
+    if (!enabled)
+      return theme.disabledColor;
+
+    if (selected && tileTheme?.selectedColor != null)
+      return tileTheme.selectedColor;
+
+    if (!selected && tileTheme?.iconColor != null)
+      return tileTheme.iconColor;
+
+    switch (theme.brightness) {
+      case Brightness.light:
+        return selected ? theme.primaryColor : Colors.black45;
+      case Brightness.dark:
+        return selected ? theme.accentColor : null; // null - use current icon theme color
     }
-    return dense ? style.copyWith(fontSize: 13.0) : style;
+    assert(theme.brightness != null);
+    return null;
   }
 
-  TextStyle _secondaryTextStyle(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final Color color = theme.textTheme.caption.color;
+  Color _textColor(ThemeData theme, ListTileTheme tileTheme, Color defaultColor) {
+    if (!enabled)
+      return theme.disabledColor;
+
+    if (selected && tileTheme?.selectedColor != null)
+      return tileTheme.selectedColor;
+
+    if (!selected && tileTheme?.textColor != null)
+      return tileTheme.textColor;
+
+    if (selected) {
+      switch (theme.brightness) {
+        case Brightness.light:
+          return theme.primaryColor;
+        case Brightness.dark:
+          return theme.accentColor;
+      }
+    }
+    return defaultColor;
+  }
+
+  bool _denseLayout(ListTileTheme tileTheme) {
+    return dense != null ? dense : (tileTheme?.dense ?? false);
+  }
+
+  TextStyle _titleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
+    final TextStyle style = tileTheme?.style == ListTileStyle.drawer
+      ? theme.textTheme.body2
+      : theme.textTheme.subhead;
+    final Color color = _textColor(theme, tileTheme, style.color);
+    return _denseLayout(tileTheme)
+      ? style.copyWith(fontSize: 13.0, color: color)
+      : style.copyWith(color: color);
+  }
+
+  TextStyle _subtitleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
     final TextStyle style = theme.textTheme.body1;
-    return dense ? style.copyWith(color: color, fontSize: 12.0) : style.copyWith(color: color);
+    final Color color = _textColor(theme, tileTheme, theme.textTheme.caption.color);
+    return _denseLayout(tileTheme)
+      ? style.copyWith(color: color, fontSize: 12.0)
+      : style.copyWith(color: color);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
+    final ListTileTheme tileTheme = ListTileTheme.of(context);
+
     final bool isTwoLine = !isThreeLine && subtitle != null;
     final bool isOneLine = !isThreeLine && !isTwoLine;
     double tileHeight;
     if (isOneLine)
-      tileHeight = dense ? 48.0 : 56.0;
+      tileHeight = _denseLayout(tileTheme) ? 48.0 : 56.0;
     else if (isTwoLine)
-      tileHeight = dense ? 60.0 : 72.0;
+      tileHeight = _denseLayout(tileTheme) ? 60.0 : 72.0;
     else
-      tileHeight = dense ? 76.0 : 88.0;
+      tileHeight = _denseLayout(tileTheme) ? 76.0 : 88.0;
 
     // Overall, the list tile is a Row() with these children.
     final List<Widget> children = <Widget>[];
 
     if (leading != null) {
-      children.add(new Container(
-        margin: const EdgeInsets.only(right: 16.0),
-        width: 40.0,
-        alignment: FractionalOffset.centerLeft,
-        child: leading
+      children.add(new IconTheme.merge(
+        context: context,
+        data: new IconThemeData(color: _iconColor(theme, tileTheme)),
+        child: new Container(
+          margin: const EdgeInsets.only(right: 16.0),
+          width: 40.0,
+          alignment: FractionalOffset.centerLeft,
+          child: leading
+        ),
       ));
     }
 
     final Widget primaryLine = new AnimatedDefaultTextStyle(
-      style: _primaryTextStyle(context),
+      style: _titleTextStyle(theme, tileTheme),
       duration: kThemeChangeDuration,
       child: title ?? new Container()
     );
@@ -229,22 +370,22 @@ class ListTile extends StatelessWidget {
         children: <Widget>[
           primaryLine,
           new AnimatedDefaultTextStyle(
-            style: _secondaryTextStyle(context),
+            style: _subtitleTextStyle(theme, tileTheme),
             duration: kThemeChangeDuration,
-            child: subtitle
+            child: subtitle,
           )
         ]
       );
     }
     children.add(new Expanded(
-      child: center
+      child: center,
     ));
 
     if (trailing != null) {
       children.add(new Container(
         margin: const EdgeInsets.only(left: 16.0),
         alignment: FractionalOffset.centerRight,
-        child: trailing
+        child: trailing,
       ));
     }
 
@@ -254,9 +395,7 @@ class ListTile extends StatelessWidget {
       child: new Container(
         height: tileHeight,
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: new Row(
-          children: children
-        )
+        child: new Row(children: children),
       )
     );
   }

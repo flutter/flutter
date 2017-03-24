@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'list_tile.dart';
 import 'material.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
@@ -233,8 +234,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
         alignment: FractionalOffset.centerLeft,
@@ -245,7 +245,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
           child: new Container(width: _kEdgeDragWidth)
-        )
+        ),
       );
     } else {
       return new GestureDetector(
@@ -263,8 +263,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   decoration: new BoxDecoration(
                     backgroundColor: _color.evaluate(_controller)
                   ),
-                  child: new Container()
-                )
+                  child: new Container(),
+                ),
               ),
               new Align(
                 alignment: FractionalOffset.centerLeft,
@@ -275,14 +275,21 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: new Focus(
                       key: _drawerKey,
                       child: config.child
-                    )
-                  )
-                )
-              )
-            ]
-          )
-        )
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return new ListTileTheme(
+      style: ListTileStyle.drawer,
+      child: _buildDrawer(context),
+    );
   }
 }
