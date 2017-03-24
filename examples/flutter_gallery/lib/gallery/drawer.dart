@@ -126,96 +126,88 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    final Widget lightThemeItem = new DrawerItem(
-      icon: new Icon(Icons.brightness_5),
-      onPressed: () { onThemeChanged(true); },
+    final Widget lightThemeItem = new ListTile(
+      leading: new Icon(Icons.brightness_5),
+      title: new Text('Light'),
+      trailing: new Radio<bool>(
+        value: true,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged,
+      ),
       selected: useLightTheme,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Light')),
-          new Radio<bool>(
-            value: true,
-            groupValue: useLightTheme,
-            onChanged: onThemeChanged
-          )
-        ]
-      )
+      onTap: () {
+        onThemeChanged(true);
+      },
     );
 
-    final Widget darkThemeItem = new DrawerItem(
-      icon: new Icon(Icons.brightness_7),
-      onPressed: () { onThemeChanged(false); },
-      selected: useLightTheme,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Dark')),
-          new Radio<bool>(
-            value: false,
-            groupValue: useLightTheme,
-            onChanged: onThemeChanged
-          )
-        ]
-      )
+    final Widget darkThemeItem = new ListTile(
+      leading: new Icon(Icons.brightness_7),
+      title: new Text('Dark'),
+      trailing: new Radio<bool>(
+        value: false,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged
+      ),
+      selected: !useLightTheme,
+      onTap: () {
+        onThemeChanged(false);
+      },
     );
 
-    final Widget mountainViewItem = new DrawerItem(
+    final Widget mountainViewItem = new ListTile(
       // on iOS, we don't want to show an Android phone icon
-      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      onPressed: () { onPlatformChanged(TargetPlatform.android); },
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
+      title: new Text('Android'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.android,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
       selected: Theme.of(context).platform == TargetPlatform.android,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Android')),
-          new Radio<TargetPlatform>(
-            value: TargetPlatform.android,
-            groupValue: Theme.of(context).platform,
-            onChanged: onPlatformChanged,
-          )
-        ]
-      )
+      onTap: () {
+        onPlatformChanged(TargetPlatform.android);
+      },
     );
 
-    final Widget cupertinoItem = new DrawerItem(
+    final Widget cupertinoItem = new ListTile(
       // on iOS, we don't want to show the iPhone icon
-      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      onPressed: () { onPlatformChanged(TargetPlatform.iOS); },
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
+      title: new Text('iOS'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.iOS,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
       selected: Theme.of(context).platform == TargetPlatform.iOS,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('iOS')),
-          new Radio<TargetPlatform>(
-            value: TargetPlatform.iOS,
-            groupValue: Theme.of(context).platform,
-            onChanged: onPlatformChanged,
-          )
-        ]
-      )
+      onTap: () {
+        onPlatformChanged(TargetPlatform.iOS);
+      },
     );
 
-    final Widget animateSlowlyItem = new DrawerItem(
-      icon: new Icon(Icons.hourglass_empty),
+    final Widget animateSlowlyItem = new ListTile(
+      leading: new Icon(Icons.hourglass_empty),
+      title: new Text('Animate Slowly'),
+      trailing: new Checkbox(
+        value: timeDilation != 1.0,
+        onChanged: (bool value) {
+          onTimeDilationChanged(value ? 20.0 : 1.0);
+        },
+      ),
       selected: timeDilation != 1.0,
-      onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Animate Slowly')),
-          new Checkbox(
-            value: timeDilation != 1.0,
-            onChanged: (bool value) { onTimeDilationChanged(value ? 20.0 : 1.0); }
-          )
-        ]
-      )
+      onTap: () {
+        onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0);
+      },
     );
 
-    final Widget sendFeedbackItem = new DrawerItem(
-      icon: new Icon(Icons.report),
-      onPressed: onSendFeedback ?? () {
+    final Widget sendFeedbackItem = new ListTile(
+      leading: new Icon(Icons.report),
+      title: new Text('Send feedback'),
+      onTap: onSendFeedback ?? () {
         UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
       },
-      child: new Text('Send feedback'),
     );
 
-    final Widget aboutItem = new AboutDrawerItem(
+    final Widget aboutItem = new AboutListTile(
       icon: const FlutterLogo(),
       applicationVersion: '2016 Q3 Preview',
       applicationIcon: const FlutterLogo(),
@@ -273,36 +265,36 @@ class GalleryDrawer extends StatelessWidget {
     ];
 
     if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(8, new DrawerItem(
-        icon: new Icon(Icons.assessment),
-        onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
+      allDrawerItems.insert(8, new ListTile(
+        leading: new Icon(Icons.assessment),
+        title: new Text('Performance Overlay'),
+        trailing: new Checkbox(
+          value: showPerformanceOverlay,
+          onChanged: (bool value) {
+            onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+          },
+        ),
         selected: showPerformanceOverlay,
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Performance Overlay')),
-            new Checkbox(
-              value: showPerformanceOverlay,
-              onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
-            )
-          ]
-        )
+        onTap: () {
+          onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+        },
       ));
     }
 
     if (onCheckerboardRasterCacheImagesChanged != null) {
-      allDrawerItems.insert(8, new DrawerItem(
-        icon: new Icon(Icons.assessment),
-        onPressed: () { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); },
+      allDrawerItems.insert(8, new ListTile(
+        leading: new Icon(Icons.assessment),
+        title: new Text('Checkerboard Raster Cache Images'),
+        trailing: new Checkbox(
+          value: checkerboardRasterCacheImages,
+          onChanged: (bool value) {
+            onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+          },
+        ),
         selected: checkerboardRasterCacheImages,
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Checkerboard Raster Cache Images')),
-            new Checkbox(
-              value: checkerboardRasterCacheImages,
-              onChanged: (bool value) { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); }
-            )
-          ]
-        )
+        onTap: () {
+          onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+        },
       ));
     }
 

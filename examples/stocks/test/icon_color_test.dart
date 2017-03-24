@@ -38,12 +38,9 @@ Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
 final RegExp materialIconAssetNameColorExtractor = new RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
 
 void checkIconColor(WidgetTester tester, String label, Color color) {
-  // The icon is going to be in the same merged semantics box as the text
-  // regardless of how the menu item is represented, so this is a good
-  // way to find the menu item. I hope.
-  final Element semantics = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), MergeSemantics);
-  expect(semantics, isNotNull);
-  final Element asset = findElementOfExactWidgetTypeGoingDown(semantics, RichText);
+  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
+  expect(listTile, isNotNull);
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
   final RichText richText = asset.widget;
   expect(richText.text.style.color, equals(color));
 }

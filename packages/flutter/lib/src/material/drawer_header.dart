@@ -17,14 +17,12 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 /// Part of the material design [Drawer].
 ///
 /// Requires one of its ancestors to be a [Material] widget. This condition is
-/// satisfied by putting the [DrawerItem] in a [Drawer].
+/// satisfied by putting the [DrawerHeader] in a [Drawer].
 ///
 /// See also:
 ///
-///  * [Drawer]
 ///  * [UserAccountsDrawerHeader], a variant of [DrawerHeader] that is
 ///    specialized for showing user accounts.
-///  * [DrawerItem]
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.

@@ -577,53 +577,41 @@ class GalleryDrawer extends StatelessWidget {
       child: new ListView(
         children: <Widget>[
           new FancyDrawerHeader(),
-          new DrawerItem(
-            icon: new Icon(Icons.brightness_5),
-            onPressed: () { _changeTheme(context, true); },
+          new ListTile(
+            leading: new Icon(Icons.brightness_5),
+            title: new Text('Light'),
+            onTap: () { _changeTheme(context, true); },
             selected: ComplexLayoutApp.of(context).lightTheme,
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Light')),
-                new Radio<bool>(
-                  value: true,
-                  groupValue: ComplexLayoutApp.of(context).lightTheme,
-                  onChanged: (bool value) { _changeTheme(context, value); }
-                )
-              ]
-            )
+            trailing: new Radio<bool>(
+              value: true,
+              groupValue: ComplexLayoutApp.of(context).lightTheme,
+              onChanged: (bool value) { _changeTheme(context, value); }
+            ),
           ),
-          new DrawerItem(
-            icon: new Icon(Icons.brightness_7),
-            onPressed: () { _changeTheme(context, false); },
+          new ListTile(
+            leading: new Icon(Icons.brightness_7),
+            title: new Text('Dark'),
+            onTap: () { _changeTheme(context, false); },
             selected: !ComplexLayoutApp.of(context).lightTheme,
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Dark')),
-                new Radio<bool>(
-                  value: false,
-                  groupValue: ComplexLayoutApp.of(context).lightTheme,
-                  onChanged: (bool value) { _changeTheme(context, value); }
-                )
-              ]
-            )
+            trailing: new Radio<bool>(
+              value: false,
+              groupValue: ComplexLayoutApp.of(context).lightTheme,
+              onChanged: (bool value) { _changeTheme(context, value); },
+            ),
           ),
           new Divider(),
-          new DrawerItem(
-            icon: new Icon(Icons.hourglass_empty),
+          new ListTile(
+            leading: new Icon(Icons.hourglass_empty),
+            title: new Text('Animate Slowly'),
             selected: timeDilation != 1.0,
-            onPressed: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Animate Slowly')),
-                new Checkbox(
-                  value: timeDilation != 1.0,
-                  onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); }
-                )
-              ]
-            )
-          )
-        ]
-      )
+            onTap: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
+            trailing: new Checkbox(
+              value: timeDilation != 1.0,
+              onChanged: (bool value) { ComplexLayoutApp.of(context).toggleAnimationSpeed(); }
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

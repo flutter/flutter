@@ -257,8 +257,8 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///  * [showAboutDialog], which shows a Material-style dialog with information
 ///    about the application, including a button that shows a [LicensePage] that
 ///    uses this API to select licenses to show.
-///  * [AboutDrawerItem], which is a widget to put in a [Drawer] which
-///    automatically calls [showAboutDialog].
+///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
+///    tapped it calls [showAboutDialog].
 class LicenseRegistry {
   LicenseRegistry._();
 

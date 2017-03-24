@@ -116,10 +116,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: _drawerContents.map((String id) {
-                        return new DrawerItem(
-                          icon: new CircleAvatar(child: new Text(id)),
-                          child: new Text('Drawer item $id'),
-                          onPressed: _showNotImplementedMessage,
+                        return new ListTile(
+                          leading: new CircleAvatar(child: new Text(id)),
+                          title: new Text('Drawer item $id'),
+                          onTap: _showNotImplementedMessage,
                         );
                       }).toList(),
                     ),
@@ -133,15 +133,15 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
-                          new DrawerItem(
-                            icon: new Icon(Icons.add),
-                            child: new Text('Add account'),
-                            onPressed: _showNotImplementedMessage,
+                          new ListTile(
+                            leading: new Icon(Icons.add),
+                            title: new Text('Add account'),
+                            onTap: _showNotImplementedMessage,
                           ),
-                          new DrawerItem(
-                            icon: new Icon(Icons.settings),
-                            child: new Text('Manage accounts'),
-                            onPressed: _showNotImplementedMessage,
+                          new ListTile(
+                            leading: new Icon(Icons.settings),
+                            title: new Text('Manage accounts'),
+                            onTap: _showNotImplementedMessage,
                           ),
                         ],
                       ),
