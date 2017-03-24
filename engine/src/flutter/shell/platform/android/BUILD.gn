@@ -6,8 +6,10 @@ import("//flutter/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
-shared_library("sky_shell") {
+shared_library("flutter_shell_native") {
   visibility = [ ":*" ]
+
+  output_name = "sky_shell"
 
   sources = [
     "android_context_gl.cc",
@@ -58,15 +60,15 @@ shared_library("sky_shell") {
     defines += [ "SHELL_ENABLE_VULKAN" ]
   }
 
-  ldflags = [
-    "-landroid",
-    "-lEGL",
-    "-lGLESv2",
+  libs = [
+    "android",
+    "EGL",
+    "GLESv2",
   ]
 }
 
-android_library("java") {
-  visibility = [ ":*" ]
+java_library("flutter_shell_java") {
+  supports_android = true
 
   java_files = [
     "io/flutter/app/FlutterActivity.java",
@@ -96,35 +98,55 @@ android_library("java") {
     "io/flutter/view/ResourcePaths.java",
     "io/flutter/view/VsyncWaiter.java",
   ]
+
+  jar_path = "$root_out_dir/flutter_java.jar"
 }
 
-copy_ex("assets") {
+copy("flutter_shell_assets") {
   visibility = [ ":*" ]
 
-  clear_dir = true
-  dest = "$root_build_dir/sky_shell/assets"
   sources = [
     "$root_build_dir/icudtl.dat",
   ]
+
+  outputs = [
+    "$root_build_dir/flutter_shell_assets/{{source_file_part}}",
+  ]
+
   deps = [
     "//third_party/icu:icudata",
   ]
 }
 
-android_apk("android") {
-  apk_name = "SkyShell"
-  android_manifest = "AndroidManifest.xml"
+action("android") {
+  script = "//build/android/gyp/create_flutter_jar.py"
 
-  native_libs = [ "libsky_shell.so" ]
-  asset_location = "$root_build_dir/sky_shell/assets"
+  inputs = [
+    "$root_build_dir/flutter_java.jar",
+    "$root_build_dir/libsky_shell.so",
+    "$root_build_dir/flutter_shell_assets/icudtl.dat",
+  ]
 
-  extensions_to_not_compress = ".flx"
+  outputs = [
+    "$root_build_dir/flutter.jar",
+  ]
 
-  flutter_dist_jar = "$root_build_dir/flutter.jar"
+  args = [
+    "--output",
+    rebase_path("flutter.jar", root_build_dir, root_build_dir),
+    "--dist_jar",
+    rebase_path("flutter_java.jar", root_build_dir, root_build_dir),
+    "--asset_dir",
+    rebase_path("flutter_shell_assets", root_build_dir, root_build_dir),
+    "--native_lib",
+    rebase_path("libsky_shell.so", root_build_dir, root_build_dir),
+    "--android_abi",
+    "$android_app_abi",
+  ]
 
   deps = [
-    ":assets",
-    ":java",
-    ":sky_shell",
+    ":flutter_shell_assets",
+    ":flutter_shell_java",
+    ":flutter_shell_native",
   ]
 }
