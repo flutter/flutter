@@ -8,7 +8,7 @@ USED LICENSES:
 
 ====================================================================================================
 LIBRARY: icu
-ORIGIN: ../../../base/third_party/icu/LICENSE
+ORIGIN: ../../../lib/ftl/third_party/icu/LICENSE
 TYPE: LicenseType.unknown
 FILE: ../../../lib/ftl/third_party/icu/icu_utf.cc
 FILE: ../../../lib/ftl/third_party/icu/icu_utf.h

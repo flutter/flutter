@@ -400,6 +400,10 @@ abstract class License implements Comparable<License> {
 
 final Map<String, License> _registry = <String, License>{};
 
+void clearLicenseRegistry() {
+  _registry.clear();
+}
+
 final License missingLicense = new UniqueLicense._('<missing>', LicenseType.unknown);
 
 String _reformat(String body) {

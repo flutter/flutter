@@ -2304,7 +2304,8 @@ Future<Null> main(List<String> arguments) async {
 
   try {
     system.stderr.writeln('Finding files...');
-    final RepositoryDirectory root = new RepositoryRoot(new fs.FileSystemDirectory.fromPath(argResults['src']));
+    fs.FileSystemDirectory rootDirectory = new fs.FileSystemDirectory.fromPath(argResults['src']);
+    final RepositoryDirectory root = new RepositoryRoot(rootDirectory);
 
     if (releaseMode) {
       system.stderr.writeln('Collecting licenses...');
@@ -2323,6 +2324,7 @@ Future<Null> main(List<String> arguments) async {
     } else {
       RegExp signaturePattern = new RegExp(r'Signature: (\w+)');
 
+      bool isFirstComponent = true;
       for (RepositoryDirectory component in root.subdirectories) {
         system.stderr.writeln('Collecting licenses for ${component.io.name}');
 
@@ -2357,8 +2359,22 @@ Future<Null> main(List<String> arguments) async {
         if (signature != null)
           sink.writeln('Signature: $signature\n');
 
+        RepositoryDirectory componentRoot;
+        if (isFirstComponent) {
+          // For the first component, we can use the results of the initial
+          // repository crawl.
+          isFirstComponent = false;
+          componentRoot = component;
+        } else {
+          // For other components, we need a clean repository that does not
+          // contain any state left over from previous components.
+          clearLicenseRegistry();
+          componentRoot = new RepositoryRoot(rootDirectory).subdirectories.firstWhere(
+            (RepositoryDirectory dir) => dir.io.name == component.io.name
+          );
+        }
         List<License> licenses = new Set<License>.from(
-            component.getLicenses(progress).toList()).toList();
+            componentRoot.getLicenses(progress).toList()).toList();
 
         sink.writeln('UNUSED LICENSES:\n');
         List<String> unusedLicenses = licenses
