@@ -193,25 +193,62 @@ class FeaturePriceItem extends PriceItem {
   }
 }
 
+class FeatureImage extends StatelessWidget {
+  FeatureImage({ Key key, this.product }) : super(key: key);
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    return new ClipRect(
+      child: new OverflowBox(
+        alignment: FractionalOffset.topRight,
+        child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
+      ),
+    );
+  }
+}
+
 /// Layout the main left and right elements of a FeatureItem.
 class FeatureLayout extends MultiChildLayoutDelegate {
   FeatureLayout();
 
-  static final String left = 'left';
-  static final String right = 'right';
+  static final String price = 'price';
+  static final String image = 'image';
+  static final String title = 'title';
+  static final String description = 'description';
+  static final String vendor = 'vendor';
 
-  // Horizontally: the feature product image appears on the left and
-  // occupies 50% of the available width; the feature product's
-  // description apepars on the right and occupies 50% of the available
-  // width + unitSize. The left and right widgets overlap and the right
-  // widget is stacked on top.
   @override
   void performLayout(Size size) {
+    final Size priceSize = layoutChild(price, new BoxConstraints.loose(size));
+    positionChild(price, new Offset(size.width - priceSize.width, 0.0));
+
     final double halfWidth = size.width / 2.0;
-    layoutChild(left, new BoxConstraints.tightFor(width: halfWidth, height: size.height));
-    positionChild(left, Offset.zero);
-    layoutChild(right, new BoxConstraints.expand(width: halfWidth + unitSize, height: size.height));
-    positionChild(right, new Offset(halfWidth - unitSize, 0.0));
+    final double halfHeight = size.height / 2.0;
+    final double halfUnit = unitSize / 2.0;
+    const double margin = 16.0;
+
+    final Size imageSize = layoutChild(image, new BoxConstraints.loose(size));
+    final double imageX = imageSize.width < halfWidth - halfUnit
+      ? halfWidth / 2.0 - imageSize.width / 2.0 - halfUnit
+      : halfWidth - imageSize.width;
+    positionChild(image, new Offset(imageX, halfHeight - imageSize.height / 2.0));
+
+    final double maxTitleWidth = halfWidth + unitSize - margin;
+    final BoxConstraints titleBoxConstraints = new BoxConstraints(maxWidth: maxTitleWidth);
+    final Size titleSize = layoutChild(title, titleBoxConstraints);
+    final double titleX = halfWidth - unitSize;
+    final double titleY = halfHeight - titleSize.height;
+    positionChild(title, new Offset(titleX, titleY));
+
+    final Size descriptionSize = layoutChild(description, titleBoxConstraints);
+    final double descriptionY = titleY + titleSize.height + margin;
+    positionChild(description, new Offset(titleX, descriptionY));
+
+    final Size vendorSize = layoutChild(vendor, titleBoxConstraints);
+    final double vendorY = descriptionY + descriptionSize.height + margin;
+    positionChild(vendor, new Offset(titleX, vendorY));
   }
 
   @override
@@ -229,63 +266,40 @@ class FeatureItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
     final ShrineTheme theme = ShrineTheme.of(context);
     return new AspectRatio(
-      aspectRatio: 3.0 / 3.5,
+
+      aspectRatio: screenSize.width > screenSize.height
+        ? screenSize.width / (0.85 * screenSize.height - kToolbarHeight)
+        : (0.75 * screenSize.height - kToolbarHeight) / screenSize.width,
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: theme.cardBackgroundColor,
           border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
         ),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: new CustomMultiChildLayout(
+          delegate: new FeatureLayout(),
           children: <Widget>[
-            new SizedBox(
-              height: unitSize,
-              child: new Align(
-                alignment: FractionalOffset.topRight,
-                child: new FeaturePriceItem(product: product),
-              ),
+            new LayoutId(
+              id: FeatureLayout.price,
+              child: new FeaturePriceItem(product: product),
             ),
-            new Expanded(
-              child: new CustomMultiChildLayout(
-                delegate: new FeatureLayout(),
-                children: <Widget>[
-                  new LayoutId(
-                    id: FeatureLayout.left,
-                    child: new ClipRect(
-                      child: new OverflowBox(
-                        minWidth: 340.0,
-                        maxWidth: 340.0,
-                        minHeight: 340.0,
-                        maxHeight: 340.0,
-                        alignment: FractionalOffset.topRight,
-                        child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
-                      ),
-                    ),
-                  ),
-                  new LayoutId(
-                    id: FeatureLayout.right,
-                    child: new Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new Padding(
-                            padding: const EdgeInsets.only(top: 18.0),
-                            child: new Text(product.featureTitle, style: theme.featureTitleStyle),
-                          ),
-                          new Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: new Text(product.featureDescription, style: theme.featureStyle),
-                          ),
-                          new VendorItem(vendor: product.vendor),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            new LayoutId(
+              id: FeatureLayout.image,
+              child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
+            ),
+            new LayoutId(
+              id: FeatureLayout.title,
+              child: new Text(product.featureTitle, style: theme.featureTitleStyle),
+            ),
+            new LayoutId(
+              id: FeatureLayout.description,
+              child: new Text(product.featureDescription, style: theme.featureStyle),
+            ),
+            new LayoutId(
+              id: FeatureLayout.vendor,
+              child: new VendorItem(vendor: product.vendor),
             ),
           ],
         ),
