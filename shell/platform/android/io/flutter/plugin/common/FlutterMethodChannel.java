@@ -74,7 +74,8 @@ public final class FlutterMethodChannel {
     /**
      * Invokes a method on this channel.
      *
-     * @param call a {@link MethodCall}.
+     * @param method the name String of the method.
+     * @param arguments the arguments for the invocation, possibly null.
      * @param handler a {@link Response} handler for the invocation result.
      */
     public void invokeMethod(String method, Object arguments, Response handler) {
