@@ -733,7 +733,7 @@ typedef void StateSetter(VoidCallback fn);
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
 ///    description of the user interface for this subtree. [State] objects can
-///    spontanteously request to rebuild their subtree by callings their
+///    spontaneously request to rebuild their subtree by callings their
 ///    [setState] method, which indicates that some of their internal state
 ///    has changed in a way that might impact the user interface in this
 ///    subtree.
