@@ -478,8 +478,10 @@ class _TabBarState extends State<TabBar> {
 
   @override
   void dispose() {
-    if (_controller != null)
+    if (_controller != null) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+      _controller.removeListener(_handleTabControllerTick);
+    }
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
