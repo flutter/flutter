@@ -1,4 +1,4 @@
-package com.example.flutter;
+package com.example.platformChannel;
 
 import android.graphics.Bitmap;
 import android.support.test.InstrumentationRegistry;
