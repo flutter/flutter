@@ -67,8 +67,13 @@ shared_library("flutter_shell_native") {
   ]
 }
 
+java_prebuilt("android_support_v4") {
+  jar_path = "//third_party/android_tools/sdk/extras/android/support/v4/android-support-v4.jar"
+}
+
 java_library("flutter_shell_java") {
   supports_android = true
+  bypass_platform_checks = true
 
   java_files = [
     "io/flutter/app/FlutterActivity.java",
@@ -100,7 +105,10 @@ java_library("flutter_shell_java") {
   ]
 
   jar_path = "$root_out_dir/flutter_java.jar"
+
+  deps = [":android_support_v4"]
 }
+
 
 copy("flutter_shell_assets") {
   visibility = [ ":*" ]
