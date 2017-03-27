@@ -90,7 +90,7 @@ void RunNonInteractive(ftl::CommandLine initial_command_line,
   }
 
   if (!shell::InitForTesting(initial_command_line)) {
-    shell::PrintUsage("sky_shell");
+    shell::PrintUsage("flutter_tester");
     exit(EXIT_FAILURE);
     return;
   }
@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
   auto command_line = ftl::CommandLineFromArgcArgv(argc, argv);
 
   if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::Help))) {
-    shell::PrintUsage("sky_shell");
+    shell::PrintUsage("flutter_tester");
     return EXIT_SUCCESS;
   }
 

@@ -26,7 +26,7 @@ static void Init(JNIEnv* env,
 
   // Prepare command line arguments and initialize the shell.
   std::vector<std::string> args;
-  args.push_back("sky_shell");
+  args.push_back("flutter_tester");
   for (auto& arg : fml::jni::StringArrayToVector(env, jargs)) {
     args.push_back(std::move(arg));
   }
