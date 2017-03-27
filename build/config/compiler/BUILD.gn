@@ -434,16 +434,7 @@ config("compiler") {
 
     ldflags += [
       "-Wl,--no-undefined",
-
-      # Don't allow visible symbols from libgcc or libc++ to be
-      # re-exported.
-      "-Wl,--exclude-libs=libgcc.a",
-      "-Wl,--exclude-libs=libc++_static.a",
-
-      # Don't allow visible symbols from libraries that contain
-      # assembly code with symbols that aren't hidden properly.
-      # http://crbug.com/448386
-      "-Wl,--exclude-libs=libvpx_assembly_arm.a",
+      "-Wl,--exclude-libs,ALL"
     ]
     if (current_cpu == "arm") {
       ldflags += [
