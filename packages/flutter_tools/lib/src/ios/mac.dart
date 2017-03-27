@@ -11,6 +11,7 @@ import '../application_package.dart';
 import '../base/context.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -130,7 +131,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
   writeFlutterPluginsList();
 
-  _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+  await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -170,11 +171,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Status status = logger.startProgress('Running Xcode build...', expectSlowOperation: true);
   final RunResult result = await runAsync(
     commands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
+  status.stop();
 
   if (result.exitCode != 0) {
     printStatus('Failed to build iOS app');
@@ -321,7 +324,7 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-void _runPodInstall(Directory bundle, String engineDirectory)  {
+Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
     if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
@@ -329,11 +332,13 @@ void _runPodInstall(Directory bundle, String engineDirectory)  {
       return;
     }
     try {
-      runCheckedSync(
+      final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+      await runCheckedAsync(
           <String>['pod', 'install'],
           workingDirectory: bundle.path,
           environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
       );
+      status.stop();
     } catch (e) {
       throwToolExit('Error running pod install: $e');
     }

@@ -185,13 +185,15 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed. To install:\n'
             'brew update\n'
-            'brew install cocoapods'
+            'brew install cocoapods\n'
+            'pod setup'
           ));
         } else {
           messages.add(new ValidationMessage.error(
             'CocoaPods out of date ($cocoaPodsMinimumVersion is required). To upgrade:\n'
             'brew update\n'
-            'brew upgrade cocoapods'
+            'brew upgrade cocoapods\n'
+            'pod setup'
           ));
         }
       }
