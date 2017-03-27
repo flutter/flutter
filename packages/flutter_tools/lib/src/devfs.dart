@@ -42,6 +42,9 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsCompressedStream() {
     return contentsAsStream().transform(GZIP.encoder);
   }
+
+  /// Return the list of files this content depends on.
+  List<String> get fileDependencies => <String>[];
 }
 
 // File content to be copied to the device.
@@ -83,6 +86,9 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
+  List<String> get fileDependencies => <String>[_getFile().path];
+
+  @override
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
@@ -113,8 +119,8 @@ class DevFSByteContent extends DevFSContent {
 
   List<int> get bytes => _bytes;
 
-  set bytes(List<int> newBytes) {
-    _bytes = newBytes;
+  set bytes(List<int> value) {
+    _bytes = value;
     _isModified = true;
   }
 
@@ -145,14 +151,14 @@ class DevFSStringContent extends DevFSByteContent {
 
   String get string => _string;
 
-  set string(String newString) {
-    _string = newString;
+  set string(String value) {
+    _string = value;
     super.bytes = UTF8.encode(_string);
   }
 
   @override
-  set bytes(List<int> newBytes) {
-    string = UTF8.decode(newBytes);
+  set bytes(List<int> value) {
+    string = UTF8.decode(value);
   }
 }
 
@@ -199,8 +205,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
         '_writeDevFSFile',
         params: <String, dynamic> {
           'fsName': fsName,
-          // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
-          'path': deviceUri.toFilePath(windows: false),
+          'uri': deviceUri.toString(),
           'fileContents': fileContents
         },
       );
@@ -268,9 +273,8 @@ class _DevFSHttpWriter {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
-      // TODO(goderbauer): transfer real Uri (instead of file path) when remote end supports it
-      request.headers.add('dev_fs_path_b64',
-                          BASE64.encode(UTF8.encode(deviceUri.toFilePath(windows: false))));
+      request.headers.add('dev_fs_uri_b64',
+                          BASE64.encode(UTF8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
@@ -300,13 +304,12 @@ class _DevFSHttpWriter {
 class DevFS {
   /// Create a [DevFS] named [fsName] for the local files in [directory].
   DevFS(VMService serviceProtocol,
-        String fsName,
+        this.fsName,
         this.rootDirectory, {
         String packagesFilePath
       })
     : _operations = new ServiceProtocolDevFSOperations(serviceProtocol),
-      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol),
-      fsName = fsName {
+      _httpWriter = new _DevFSHttpWriter(fsName, serviceProtocol) {
     _packagesFilePath =
         packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
   }
@@ -493,10 +496,13 @@ class DevFS {
       await for (FileSystemEntity file in files) {
         if (!devFSConfig.noDirectorySymlinks && (file is Link)) {
           // Check if this is a symlink to a directory and skip it.
-          final String linkPath = file.resolveSymbolicLinksSync();
-          final FileSystemEntityType linkType =
-              fs.statSync(linkPath).type;
-          if (linkType == FileSystemEntityType.DIRECTORY) {
+          try {
+            final FileSystemEntityType linkType =
+                fs.statSync(file.resolveSymbolicLinksSync()).type;
+            if (linkType == FileSystemEntityType.DIRECTORY)
+              continue;
+          } on FileSystemException catch (e) {
+            _printScanDirectoryError(file.path, e);
             continue;
           }
         }
@@ -524,11 +530,19 @@ class DevFS {
         if (!_shouldIgnore(deviceUri))
           _scanFile(deviceUri, file);
       }
-    } catch (e) {
-      // Ignore directory and error.
+    } on FileSystemException catch (e) {
+      _printScanDirectoryError(directory.path, e);
       return false;
     }
     return true;
+  }
+
+  void _printScanDirectoryError(String path, Exception e) {
+    printError(
+        'Error while scanning $path.\n'
+        'Hot Reload might not work until the following error is resolved:\n'
+        '$e\n'
+    );
   }
 
   Future<Null> _scanPackages(Set<String> fileFilter) async {

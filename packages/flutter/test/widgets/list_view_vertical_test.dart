@@ -24,7 +24,7 @@ void main() {
     await tester.pumpWidget(buildFrame());
 
     await tester.pump();
-    await tester.scroll(find.text('1'), const Offset(0.0, -300.0));
+    await tester.drag(find.text('1'), const Offset(0.0, -300.0));
     await tester.pump();
     // screen is 600px high, and has the following items:
     //   -10..280 = 1
@@ -38,7 +38,7 @@ void main() {
     expect(find.text('5'), findsNothing);
 
     await tester.pump();
-    await tester.scroll(find.text('2'), const Offset(0.0, -290.0));
+    await tester.drag(find.text('2'), const Offset(0.0, -290.0));
     await tester.pump();
     // screen is 600px high, and has the following items:
     //   -10..280 = 2
@@ -52,7 +52,7 @@ void main() {
     expect(find.text('5'), findsNothing);
 
     await tester.pump();
-    await tester.scroll(find.text('3'), const Offset(-300.0, 0.0));
+    await tester.drag(find.text('3'), const Offset(-300.0, 0.0));
     await tester.pump();
     // nothing should have changed
     expect(find.text('0'), findsNothing);
@@ -88,7 +88,7 @@ void main() {
     expect(find.text('4'), findsNothing);
     expect(find.text('5'), findsNothing);
 
-    await tester.scroll(find.text('0'), const Offset(0.0, -300.0));
+    await tester.drag(find.text('0'), const Offset(0.0, -300.0));
     await tester.pump();
     // screen is 600px high, and has the following items:
     //   -50..240 = 0

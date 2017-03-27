@@ -34,7 +34,7 @@ void main() {
 
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Alabama'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Alabama'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
@@ -67,7 +67,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
     await tester.pump(const Duration(milliseconds: 10));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     final Viewport viewport = tester.widget(find.byType(Viewport));
     expect(viewport.offset.pixels, equals(2400.0));
@@ -105,7 +105,7 @@ void main() {
 
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Alabama'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Alabama'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);

@@ -32,7 +32,7 @@ class CardCollectionState extends State<CardCollection> {
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
 
-  Map<int, Color> _primaryColor = Colors.deepPurple;
+  MaterialColor _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
   DismissDirection _dismissDirection = DismissDirection.horizontal;
   TextAlign _textAlign = TextAlign.center;
@@ -107,10 +107,10 @@ class CardCollectionState extends State<CardCollection> {
             buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
             buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             new Divider(),
-            new DrawerItem(
-              icon: new Icon(Icons.dvr),
-              onPressed: () { debugDumpApp(); debugDumpRenderTree(); },
-              child: new Text('Dump App to Console'),
+            new ListTile(
+              leading: new Icon(Icons.dvr),
+              onTap: () { debugDumpApp(); debugDumpRenderTree(); },
+              title: new Text('Dump App to Console'),
             ),
           ],
         ),
@@ -148,7 +148,7 @@ class CardCollectionState extends State<CardCollection> {
     });
   }
 
-  void _selectColor(Map<int, Color> selection) {
+  void _selectColor(MaterialColor selection) {
     setState(() {
       _primaryColor = selection;
     });
@@ -167,67 +167,51 @@ class CardCollectionState extends State<CardCollection> {
   }
 
   Widget buildDrawerCheckbox(String label, bool value, void callback(), { bool enabled: true }) {
-    return new DrawerItem(
-      onPressed: enabled ? callback : null,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(label)),
-          new Checkbox(
-            value: value,
-            onChanged: enabled ? (_) { callback(); } : null,
-          ),
-        ],
+    return new ListTile(
+      onTap: enabled ? callback : null,
+      title: new Text(label),
+      trailing: new Checkbox(
+        value: value,
+        onChanged: enabled ? (_) { callback(); } : null,
       ),
     );
   }
 
-  Widget buildDrawerColorRadioItem(String label, Map<int, Color> itemValue, Map<int, Color> currentValue, ValueChanged<Map<int, Color>> onChanged, { IconData icon, bool enabled: true }) {
-    return new DrawerItem(
-      icon: new Icon(icon),
-      onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(label)),
-          new Radio<Map<int, Color>>(
-            value: itemValue,
-            groupValue: currentValue,
-            onChanged: enabled ? onChanged : null,
-          ),
-        ],
+  Widget buildDrawerColorRadioItem(String label, MaterialColor itemValue, MaterialColor currentValue, ValueChanged<MaterialColor> onChanged, { IconData icon, bool enabled: true }) {
+    return new ListTile(
+      leading: new Icon(icon),
+      title: new Text(label),
+      onTap: enabled ? () { onChanged(itemValue); } : null,
+      trailing: new Radio<MaterialColor>(
+        value: itemValue,
+        groupValue: currentValue,
+        onChanged: enabled ? onChanged : null,
       ),
     );
   }
 
   Widget buildDrawerDirectionRadioItem(String label, DismissDirection itemValue, DismissDirection currentValue, ValueChanged<DismissDirection> onChanged, { IconData icon, bool enabled: true }) {
-    return new DrawerItem(
-      icon: new Icon(icon),
-      onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(label)),
-          new Radio<DismissDirection>(
-            value: itemValue,
-            groupValue: currentValue,
-            onChanged: enabled ? onChanged : null,
-          ),
-        ],
+    return new ListTile(
+      leading: new Icon(icon),
+      title: new Text(label),
+      onTap: enabled ? () { onChanged(itemValue); } : null,
+      trailing: new Radio<DismissDirection>(
+        value: itemValue,
+        groupValue: currentValue,
+        onChanged: enabled ? onChanged : null,
       ),
     );
   }
 
   Widget buildFontRadioItem(String label, TextAlign itemValue, TextAlign currentValue, ValueChanged<TextAlign> onChanged, { IconData icon, bool enabled: true }) {
-    return new DrawerItem(
-      icon: new Icon(icon),
-      onPressed: enabled ? () { onChanged(itemValue); } : null,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text(label)),
-          new Radio<TextAlign>(
-            value: itemValue,
-            groupValue: currentValue,
-            onChanged: enabled ? onChanged : null,
-          ),
-        ],
+    return new ListTile(
+      leading: new Icon(icon),
+      title: new Text(label),
+      onTap: enabled ? () { onChanged(itemValue); } : null,
+      trailing: new Radio<TextAlign>(
+        value: itemValue,
+        groupValue: currentValue,
+        onChanged: enabled ? onChanged : null,
       ),
     );
   }
@@ -248,7 +232,7 @@ class CardCollectionState extends State<CardCollection> {
 
   Widget _buildCard(BuildContext context, int index) {
     final CardModel cardModel = _cardModels[index];
-    final Widget card = new Dismissable(
+    final Widget card = new Dismissible(
       key: new ObjectKey(cardModel),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) { dismissCard(cardModel); },
@@ -313,7 +297,7 @@ class CardCollectionState extends State<CardCollection> {
     final ThemeData theme = Theme.of(context);
     final TextStyle backgroundTextStyle = theme.primaryTextTheme.title;
 
-    // The background Widget appears behind the Dismissable card when the card
+    // The background Widget appears behind the Dismissible card when the card
     // moves to the left or right. The Positioned widget ensures that the
     // size of the background,card Stack will be based only on the card. The
     // Viewport ensures that when the card's resize animation occurs, the
@@ -378,7 +362,7 @@ class CardCollectionState extends State<CardCollection> {
 
     final Widget body = new Container(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
-      color: _primaryColor[50],
+      color: _primaryColor.shade50,
       child: cardCollection,
     );
 

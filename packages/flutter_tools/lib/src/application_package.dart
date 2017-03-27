@@ -261,6 +261,7 @@ ApplicationPackage getApplicationPackageForPlatform(TargetPlatform platform, {
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       return null;
   }
   assert(platform != null);
@@ -286,6 +287,7 @@ class ApplicationPackageStore {
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
+      case TargetPlatform.fuchsia:
         return null;
     }
     return null;

@@ -19,7 +19,7 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool get opaque => true;
 
   @override
-  bool get barrierDismissable => false;
+  bool get barrierDismissible => false;
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute<dynamic>;
@@ -62,24 +62,35 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
 class PageRouteBuilder<T> extends PageRoute<T> {
+  /// Creates a route that deletates to builder callbacks.
+  ///
+  /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
+  /// and [maintainState] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings: const RouteSettings(),
     this.pageBuilder,
     this.transitionsBuilder: _defaultTransitionsBuilder,
     this.transitionDuration: const Duration(milliseconds: 300),
     this.opaque: true,
-    this.barrierDismissable: false,
+    this.barrierDismissible: false,
     this.barrierColor: null,
     this.maintainState: true,
   }) : super(settings: settings) {
     assert(pageBuilder != null);
     assert(transitionsBuilder != null);
     assert(opaque != null);
-    assert(barrierDismissable != null);
+    assert(barrierDismissible != null);
     assert(maintainState != null);
   }
 
+  /// Used build the route's primary contents.
+  ///
+  /// See [ModalRoute.buildPage] for complete definition of the parameters.
   final RoutePageBuilder pageBuilder;
+
+  /// Used to build the route's transitions.
+  ///
+  /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
   final RouteTransitionsBuilder transitionsBuilder;
 
   @override
@@ -89,7 +100,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool opaque;
 
   @override
-  final bool barrierDismissable;
+  final bool barrierDismissible;
 
   @override
   final Color barrierColor;

@@ -108,6 +108,7 @@ void main() {
       expect(bytes, 7);
     });
     testUsingContext('modify existing file on local file system', () async {
+      await devFS.update();
       final File file = fs.file(fs.path.join(basePath, filePath));
       // Set the last modified time to 5 seconds in the past.
       updateFileModificationTime(file.path, new DateTime.now(), -5);
@@ -269,9 +270,10 @@ void main() {
       ]);
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(bytes, 48);
-    }, timeout: const Timeout(const Duration(seconds: 5)));
+    });
 
     testUsingContext('delete dev file system', () async {
+      expect(vmService.messages, isEmpty, reason: 'prior test timeout');
       await devFS.destroy();
       vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -299,7 +301,7 @@ class MockVMService extends BasicMock implements VMService {
     _httpAddress = Uri.parse('http://127.0.0.1:${_server.port}');
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_path_b64')));
+      final String devicePath = UTF8.decode(BASE64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain<List<int>>().then<Null>((List<int> value) {
         request.response

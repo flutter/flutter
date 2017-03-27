@@ -146,7 +146,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
     ];
     cardModels = new List<CardModel>.generate(cardHeights.length, (int i) {
-      final Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardHeights.length);
+      final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardHeights.length);
       return new CardModel(i, cardHeights[i], color);
     });
   }
@@ -207,7 +207,7 @@ void main() {
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200],
+      accentColor: Colors.redAccent,
     ),
     title: 'Cards',
     home: new OverlayGeometryApp(),

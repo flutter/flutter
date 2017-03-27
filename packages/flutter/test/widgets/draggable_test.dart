@@ -25,9 +25,7 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return new Container(height: 100.0, child: new Text('Target'));
             },
-            onAccept: (int data) {
-              accepted.add(data);
-            }
+            onAccept: accepted.add
           ),
         ]
       )
@@ -539,9 +537,7 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return new Container(height: 100.0, child: new Text('Target'));
             },
-            onAccept: (int data) {
-              accepted.add(data);
-            }
+            onAccept: accepted.add
           ),
         ]
       )
@@ -731,9 +727,7 @@ void main() {
                     )
                   );
                 },
-                onAccept: (int data) {
-                  acceptedInts.add(data);
-                }
+                onAccept: acceptedInts.add
               ),
               new DragTarget<double>(
                 builder: (BuildContext context, List<double> data, List<dynamic> rejects) {
@@ -744,9 +738,7 @@ void main() {
                     )
                   );
                 },
-                onAccept: (double data) {
-                  acceptedDoubles.add(data);
-                }
+                onAccept: acceptedDoubles.add
               ),
             ]
           )
@@ -842,9 +834,7 @@ void main() {
                       child: new Text('Target1')
                     )
                   );
-                }, onAccept: (DragTargetData data) {
-                  acceptedDragTargetDatas.add(data);
-                }
+                }, onAccept: acceptedDragTargetDatas.add
               ),
               new DragTarget<ExtendedDragTargetData>(
                 builder: (BuildContext context, List<ExtendedDragTargetData> data, List<dynamic> rejects) {
@@ -855,9 +845,7 @@ void main() {
                     )
                   );
                 },
-                onAccept: (ExtendedDragTargetData data) {
-                  acceptedExtendedDragTargetDatas.add(data);
-                }
+                onAccept: acceptedExtendedDragTargetDatas.add
               ),
             ]
           )
@@ -901,9 +889,7 @@ void main() {
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                 return new Container(height: 100.0, child: new Text('Target'));
               },
-              onAccept: (int data) {
-                accepted.add(data);
-              }
+              onAccept: accepted.add
             ),
           ]
         )
@@ -1140,9 +1126,7 @@ void main() {
                   builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                     return new Container(height: 100.0, child: new Text('Target'));
                   },
-                  onAccept: (int data) {
-                    accepted.add(data);
-                  }
+                  onAccept: accepted.add
               ),
             ]
         )
@@ -1169,9 +1153,7 @@ void main() {
                   builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                     return new Container(height: 100.0, child: new Text('Target'));
                   },
-                  onAccept: (int data) {
-                    accepted.add(data);
-                  }
+                  onAccept: accepted.add
               ),
             ]
         )
@@ -1258,9 +1240,7 @@ Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                 return new Container(height: 100.0, child: new Text('Target'));
               },
-              onAccept: (int data) {
-                accepted.add(data);
-              }
+              onAccept: accepted.add
             ),
           ]
         )

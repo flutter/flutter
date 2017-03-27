@@ -10,12 +10,12 @@ import 'package:flutter/rendering.dart';
 
 // Material design colors. :p
 List<Color> _kColors = <Color>[
-  Colors.teal[500],
-  Colors.amber[500],
-  Colors.purple[500],
-  Colors.lightBlue[500],
-  Colors.deepPurple[500],
-  Colors.lime[500],
+  Colors.teal,
+  Colors.amber,
+  Colors.purple,
+  Colors.lightBlue,
+  Colors.deepPurple,
+  Colors.lime,
 ];
 
 /// A simple model object for a dot that reacts to pointer pressure.

@@ -554,7 +554,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// The [fit] and [alignment] arguments must not be null.
   FittedBox({
     Key key,
-    this.fit: ImageFit.contain,
+    this.fit: BoxFit.contain,
     this.alignment: FractionalOffset.center,
     Widget child
   }) : super(key: key, child: child) {
@@ -563,7 +563,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   }
 
   /// How to inscribe the child into the space allocated during layout.
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the child within its parent's bounds.
   ///
@@ -826,9 +826,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Both the child and the id arguments must not be null.
   LayoutId({
     Key key,
-    @required Object id,
+    @required this.id,
     @required Widget child
-  }) : id = id, super(key: key ?? new ValueKey<Object>(id), child: child) {
+  }) : super(key: key ?? new ValueKey<Object>(id), child: child) {
     assert(child != null);
     assert(id != null);
   }
@@ -1478,7 +1478,28 @@ class Baseline extends SingleChildRenderObjectWidget {
 
 // SLIVERS
 
+/// A sliver that contains a single box widget.
+///
+/// Slivers are special-purpose widgets that can be combined using a
+/// [CustomScrollView] to create custom scroll effects. A [SliverToBoxAdapter]
+/// is a basic sliver that creates a bridge back to one of the usual box-based
+/// widgets.
+///
+/// Rather than using multiple [SliverToBoxAdapter] widgets to display multiple
+/// box widgets in a [CustomScrollView], consider using [SliverList],
+/// [SliverFixedExtentList], or [SliverGrid], which are more efficient because
+/// they instantiate only those children that are actually visible through the
+/// scroll view's viewport.
+///
+/// See also:
+///
+///  * [CustomScrollView], which displays a scrollable list of slivers.
+///  * [SliverList], which displays multiple box widgets in a linear array.
+///  * [SliverFixedExtentList], which displays multiple box widgets with the
+///    same main-axis extent in a linear array.
+///  * [SliverGrid], which displays multiple box widgets in arbitrary positions.
 class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that contains a single box widget.
   SliverToBoxAdapter({
     Key key,
     Widget child,
@@ -1488,15 +1509,35 @@ class SliverToBoxAdapter extends SingleChildRenderObjectWidget {
   RenderSliverToBoxAdapter createRenderObject(BuildContext context) => new RenderSliverToBoxAdapter();
 }
 
+/// A sliver that applies padding on each side of another sliver.
+///
+/// Slivers are special-purpose widgets that can be combined using a
+/// [CustomScrollView] to create custom scroll effects. A [SliverPadding]
+/// is a basic sliver that insets another sliver by applying padding on each
+/// side.
+///
+/// Applying padding to anything but the most mundane sliver is likely to have
+/// undesired effects. For example, wrapping a
+/// [SliverPinnedPersistentHeader] will cause the app bar to overlap
+/// earlier slivers (contrary to the normal behavior of pinned app bars), and
+/// while the app bar is pinned, the padding will scroll away.
+///
+/// See also:
+///
+///  * [CustomScrollView], which displays a scrollable list of slivers.
 class SliverPadding extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that applies padding on each side of another sliver.
+  ///
+  /// The [padding] argument must not be null.
   SliverPadding({
     Key key,
     @required this.padding,
-    Widget child,
-  }) : super(key: key, child: child) {
+    Widget sliver,
+  }) : super(key: key, child: sliver) {
     assert(padding != null);
   }
 
+  /// The amount of space by which to inset the child sliver.
   final EdgeInsets padding;
 
   @override
@@ -2448,7 +2489,7 @@ class RawImage extends LeafRenderObjectWidget {
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
-  final ImageFit fit;
+  final BoxFit fit;
 
   /// How to align the image within its bounds.
   ///
@@ -2569,9 +2610,9 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
   ///
   /// The [renderBox] argument must not be null.
   WidgetToRenderBoxAdapter({
-    @required RenderBox renderBox,
+    @required this.renderBox,
     this.onBuild
-  }) : renderBox = renderBox,
+  }) :
        // WidgetToRenderBoxAdapter objects are keyed to their render box. This
        // prevents the widget being used in the widget hierarchy in two different
        // places, which would cause the RenderBox to get inserted in multiple

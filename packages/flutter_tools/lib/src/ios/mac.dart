@@ -9,14 +9,18 @@ import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/context.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/logger.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
+import '../plugins.dart';
 import '../services.dart';
 import 'xcodeproj.dart';
 
@@ -125,8 +129,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
+  writeFlutterPluginsList();
 
-  _installCocoaPods(appDirectory, flutterFrameworkDir(mode));
+  await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -166,11 +171,13 @@ Future<XcodeBuildResult> buildXcodeProject({
     );
   }
 
+  final Status status = logger.startProgress('Running Xcode build...', expectSlowOperation: true);
   final RunResult result = await runAsync(
     commands,
     workingDirectory: app.appDirectory,
     allowReentrantFlutter: true
   );
+  status.stop();
 
   if (result.exitCode != 0) {
     printStatus('Failed to build iOS app');
@@ -311,29 +318,30 @@ bool _checkXcodeVersion() {
       return false;
     }
   } catch (e) {
-    printError('Cannot find "xcodebuid". $_xcodeRequirement');
+    printError('Cannot find "xcodebuild". $_xcodeRequirement');
     return false;
   }
   return true;
 }
 
-bool _checkCocoaPodsInstalled() {
-  if (!platform.isMacOS)
-    return false;
-  return exitsHappy(<String>['pod', '--version']);
-}
-
-void _installCocoaPods(Directory bundle, String engineDirectory)  {
+Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!_checkCocoaPodsInstalled()) {
-      printError('Warning: CocoaPods not installed. Not running pod install.');
+    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
+      final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
+      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
       return;
     }
-    runCheckedSync(
-        <String>['pod', 'install'],
-        workingDirectory: bundle.path,
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
-    );
+    try {
+      final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
+      await runCheckedAsync(
+          <String>['pod', 'install'],
+          workingDirectory: bundle.path,
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': engineDirectory},
+      );
+      status.stop();
+    } catch (e) {
+      throwToolExit('Error running pod install: $e');
+    }
   }
 }
 

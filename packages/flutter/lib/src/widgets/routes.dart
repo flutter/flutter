@@ -613,7 +613,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by this class
 
   /// Whether you can dismiss this route by tapping the modal barrier.
-  bool get barrierDismissable;
+  bool get barrierDismissible;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
@@ -638,7 +638,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// widgets being animated as part of the transition.
   bool get offstage => _offstage;
   bool _offstage = false;
-  set offstage (bool value) {
+  set offstage(bool value) {
     if (_offstage == value)
       return;
     setState(() {
@@ -710,14 +710,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// case, use the [Form.onWillPop] property to register the callback.
   ///
   /// To register a callback manually, look up the enclosing [ModalRoute] in a
-  /// [State.dependenciesChanged] callback:
+  /// [State.didChangeDependencies] callback:
   ///
   /// ```dart
   /// ModalRoute<dynamic> _route;
   ///
   /// @override
-  /// void dependenciesChanged() {
-  ///  super.dependenciesChanged();
+  /// void didChangeDependencies() {
+  ///  super.didChangeDependencies();
   ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
   ///  _route = ModalRoute.of(context);
   ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
@@ -816,10 +816,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       ));
       barrier = new AnimatedModalBarrier(
         color: color,
-        dismissable: barrierDismissable
+        dismissible: barrierDismissible
       );
     } else {
-      barrier = new ModalBarrier(dismissable: barrierDismissable);
+      barrier = new ModalBarrier(dismissible: barrierDismissible);
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(

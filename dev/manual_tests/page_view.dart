@@ -31,7 +31,7 @@ class PageViewAppState extends State<PageViewApp> {
     ];
 
     cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
-      final Color color = Color.lerp(Colors.red[300], Colors.blue[900], i / cardSizes.length);
+      final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
       return new CardModel(i, cardSizes[i], color);
     });
   }
@@ -85,27 +85,23 @@ class PageViewAppState extends State<PageViewApp> {
       child: new ListView(
         children: <Widget>[
           new DrawerHeader(child: new Center(child: new Text('Options'))),
-          new DrawerItem(
-            icon: new Icon(Icons.more_horiz),
+          new ListTile(
+            leading: new Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,
-            child: new Text('Horizontal Layout'),
-            onPressed: switchScrollDirection,
+            trailing: new Text('Horizontal Layout'),
+            onTap: switchScrollDirection,
           ),
-          new DrawerItem(
-            icon: new Icon(Icons.more_vert),
+          new ListTile(
+            leading: new Icon(Icons.more_vert),
             selected: scrollDirection == Axis.vertical,
-            child: new Text('Vertical Layout'),
-            onPressed: switchScrollDirection,
+            trailing: new Text('Vertical Layout'),
+            onTap: switchScrollDirection,
           ),
-          new DrawerItem(
-            onPressed: toggleItemsWrap,
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Scrolling wraps around')),
-                // TODO(abarth): Actually make this checkbox change this value.
-                new Checkbox(value: itemsWrap, onChanged: null),
-              ],
-            ),
+          new ListTile(
+            onTap: toggleItemsWrap,
+            title: new Text('Scrolling wraps around'),
+            // TODO(abarth): Actually make this checkbox change this value.
+            trailing: new Checkbox(value: itemsWrap, onChanged: null),
           ),
         ],
       ),
@@ -148,7 +144,7 @@ void main() {
     theme: new ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
-      accentColor: Colors.redAccent[200],
+      accentColor: Colors.redAccent,
     ),
     home: new PageViewApp(),
   ));

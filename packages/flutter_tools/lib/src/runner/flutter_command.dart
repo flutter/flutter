@@ -37,6 +37,8 @@ abstract class FlutterCommand extends Command<Null> {
 
   bool get shouldRunPub => _usesPubOption && argResults['pub'];
 
+  bool get shouldUpdateCache => true;
+
   BuildMode _defaultBuildMode;
 
   void usesTargetOption() {
@@ -77,8 +79,8 @@ abstract class FlutterCommand extends Command<Null> {
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
-  set defaultBuildMode(BuildMode buildMode) {
-    _defaultBuildMode = buildMode;
+  set defaultBuildMode(BuildMode value) {
+    _defaultBuildMode = value;
   }
 
   BuildMode getBuildMode() {
@@ -134,7 +136,8 @@ abstract class FlutterCommand extends Command<Null> {
   Future<Null> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
-    await cache.updateAll();
+    if (shouldUpdateCache)
+      await cache.updateAll();
 
     if (shouldRunPub)
       await pubGet();
@@ -176,7 +179,7 @@ abstract class FlutterCommand extends Command<Null> {
     devices = devices.where((Device device) => device.isSupported()).toList();
 
     if (androidOnly)
-      devices = devices.where((Device device) => device.platform == TargetPlatform.android_arm).toList();
+      devices = devices.where((Device device) => device.targetPlatform == TargetPlatform.android_arm).toList();
 
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');

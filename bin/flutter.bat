@@ -29,11 +29,11 @@ SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
 
 REM Test if Git is available on the Host
-where /q git || ECHO Error: Unable to find git in your PATH. && EXIT 1
+where /q git || ECHO Error: Unable to find git in your PATH. && EXIT /B 1
 REM  Test if the flutter directory is a git clone, otherwise git rev-parse HEAD would fail
 IF NOT EXIST "%flutter_root%\.git" (
   ECHO Error: The Flutter directory is not a clone of the GitHub project.
-  EXIT 1
+  EXIT /B 1
 )
 
 REM Ensure that bin/cache exists.
@@ -82,9 +82,8 @@ GOTO :after_subroutine
     CALL PowerShell.exe -ExecutionPolicy Bypass -Command "& '%FLUTTER_ROOT%/bin/internal/update_dart_sdk.ps1'"
     SET exit_code=%ERRORLEVEL%
     IF %exit_code% NEQ 0 (
-      ECHO Error: Unable to update Dart SDK.
-      REM Do not use /B here, we want to exit out of the script, not just the subroutine
-      EXIT %exit_code%
+      ECHO Error: Unable to update Dart SDK. Retrying... Press Ctrl+C to abort.
+      GOTO :do_sdk_update_and_snapshot
     )
 
   :do_snapshot
@@ -111,4 +110,4 @@ IF /I "%exit_code%" EQU "253" (
   SET exit_code=%ERRORLEVEL%
 )
 
-EXIT %exit_code%
+EXIT /B %exit_code%

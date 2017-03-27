@@ -46,6 +46,7 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
+    this.minSize: 44.0,
     @required this.onPressed,
   });
 
@@ -68,6 +69,16 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// Minimum size of the button.
+  ///
+  /// Defaults to 44.0 which the iOS Human Interface Guideline recommends as the
+  /// minimum tappable area
+  ///
+  /// See also:
+  ///
+  /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/layout/>
+  final double minSize;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -129,11 +140,13 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       onPointerDown: enabled ? _handleTapDown : null,
       onPointerUp: enabled ? _handleTapUp : null,
       onPointerCancel: enabled ? _handleTapCancel : null,
-
       child: new GestureDetector(
         onTap: config.onPressed,
         child: new ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          constraints: new BoxConstraints(
+            minWidth: config.minSize,
+            minHeight: config.minSize,
+          ),
           child: new FadeTransition(
             opacity: new CurvedAnimation(
               parent: _animationController,

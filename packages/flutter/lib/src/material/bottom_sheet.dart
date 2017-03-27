@@ -215,7 +215,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   Duration get transitionDuration => _kBottomSheetDuration;
 
   @override
-  bool get barrierDismissable => true;
+  bool get barrierDismissible => true;
 
   @override
   Color get barrierColor => Colors.black54;

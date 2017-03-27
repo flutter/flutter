@@ -14,31 +14,33 @@ void main() {
 
     await tester.pumpWidget(
       new Material(
-        child: new UserAccountsDrawerHeader(
-          currentAccountPicture: new CircleAvatar(
-            key: avatarA,
-            child: new Text('A')
+        child: new Center(
+          child: new UserAccountsDrawerHeader(
+            currentAccountPicture: new CircleAvatar(
+              key: avatarA,
+              child: new Text('A'),
+            ),
+            otherAccountsPictures: <Widget>[
+              new CircleAvatar(
+                child: new Text('B'),
+              ),
+              new CircleAvatar(
+                key: avatarC,
+                child: new Text('C'),
+              ),
+              new CircleAvatar(
+                key: avatarD,
+                child: new Text('D'),
+              ),
+              new CircleAvatar(
+                child: new Text('E'),
+              )
+            ],
+            accountName: new Text("name"),
+            accountEmail: new Text("email"),
           ),
-          otherAccountsPictures: <Widget>[
-            new CircleAvatar(
-              child: new Text('B')
-            ),
-            new CircleAvatar(
-              key: avatarC,
-              child: new Text('C')
-            ),
-            new CircleAvatar(
-              key: avatarD,
-              child: new Text('D')
-            ),
-            new CircleAvatar(
-              child: new Text('E')
-            )
-          ],
-          accountName: new Text("name"),
-          accountEmail: new Text("email")
-        )
-      )
+        ),
+      ),
     );
 
     expect(find.text('A'), findsOneWidget);
@@ -57,6 +59,9 @@ void main() {
     box = tester.renderObject(find.byKey(avatarC));
     expect(box.size.width, equals(40.0));
     expect(box.size.height, equals(40.0));
+
+    box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge)
 
     final Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
     final Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
@@ -80,19 +85,25 @@ void main() {
       Widget accountName,
       Widget accountEmail,
       VoidCallback onDetailsPressed,
+      EdgeInsets margin,
     }) {
       return new Material(
-        child: new UserAccountsDrawerHeader(
-          currentAccountPicture: currentAccountPicture,
-          otherAccountsPictures: otherAccountsPictures,
-          accountName: accountName,
-          accountEmail: accountEmail,
-          onDetailsPressed: onDetailsPressed,
+        child: new Center(
+          child: new UserAccountsDrawerHeader(
+            currentAccountPicture: currentAccountPicture,
+            otherAccountsPictures: otherAccountsPictures,
+            accountName: accountName,
+            accountEmail: accountEmail,
+            onDetailsPressed: onDetailsPressed,
+            margin: margin,
+          ),
         ),
       );
     }
 
     await tester.pumpWidget(buildFrame());
+    final RenderBox box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    expect(box.size.height, equals(160.0 + 1.0)); // height + bottom edge)
     expect(find.byType(Icon), findsNothing);
 
     await tester.pumpWidget(buildFrame(

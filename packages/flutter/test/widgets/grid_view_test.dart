@@ -47,7 +47,7 @@ void main() {
     expect(find.text(kStates[12]), findsNothing);
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Arkansas'), const Offset(0.0, -200.0));
+    await tester.drag(find.text('Arkansas'), const Offset(0.0, -200.0));
     await tester.pump();
 
     for (int i = 0; i < 4; ++i)
@@ -59,7 +59,7 @@ void main() {
       log.clear();
     }
 
-    await tester.scroll(find.text('Delaware'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Delaware'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
@@ -72,7 +72,7 @@ void main() {
     expect(log, equals(<String>['Tennessee']));
     log.clear();
 
-    await tester.scroll(find.text('Tennessee'), const Offset(0.0, 200.0));
+    await tester.drag(find.text('Tennessee'), const Offset(0.0, 200.0));
     await tester.pump();
 
     await tester.tap(find.text('Tennessee'));
@@ -114,7 +114,7 @@ void main() {
 
     expect(find.text('Nevada'), findsNothing);
 
-    await tester.scroll(find.text('Arkansas'), const Offset(0.0, -4000.0));
+    await tester.drag(find.text('Arkansas'), const Offset(0.0, -4000.0));
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
@@ -326,6 +326,47 @@ void main() {
 
     expect(find.byType(GridView), paints..rect(color: green)..rect(color: green));
     expect(find.byType(GridView), isNot(paints..rect(color: green)..rect(color: green)..rect(color: green)));
+  });
+
+  testWidgets('GridView in zero context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Center(
+        child: new SizedBox(
+          width: 0.0,
+          height: 0.0,
+          child: new GridView.count(
+            crossAxisCount: 4,
+            children: new List<Widget>.generate(20, (int i) {
+              return new Container(
+                child: new Text('$i'),
+              );
+            }),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('GridView in unbounded context', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new SingleChildScrollView(
+        child: new GridView.count(
+          crossAxisCount: 4,
+          shrinkWrap: true,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Container(
+              child: new Text('$i'),
+            );
+          }),
+        ),
+      ),
+    );
+
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('19'), findsOneWidget);
   });
 
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?

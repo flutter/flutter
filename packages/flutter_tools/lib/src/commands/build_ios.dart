@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../application_package.dart';
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
@@ -64,8 +63,7 @@ class BuildIOSCommand extends BuildSubCommand {
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
     final String typeName = artifacts.getEngineType(TargetPlatform.ios, getBuildMode());
-    final Status status = logger.startProgress('Building $app for $logTarget ($typeName)...',
-        expectSlowOperation: true);
+    printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
       mode: getBuildMode(),
@@ -73,7 +71,6 @@ class BuildIOSCommand extends BuildSubCommand {
       buildForDevice: !forSimulator,
       codesign: shouldCodesign
     );
-    status.stop();
 
     if (!result.success) {
       await diagnoseXcodeBuildFailure(result);

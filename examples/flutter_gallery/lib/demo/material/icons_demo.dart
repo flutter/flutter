@@ -12,7 +12,7 @@ class IconsDemo extends StatefulWidget {
 }
 
 class IconsDemoState extends State<IconsDemo> {
-  static final List<Map<int, Color>> iconColorSwatches = <Map<int, Color>>[
+  static final List<MaterialColor> iconColors = <MaterialColor>[
     Colors.red,
     Colors.pink,
     Colors.purple,
@@ -31,17 +31,17 @@ class IconsDemoState extends State<IconsDemo> {
     Colors.deepOrange,
     Colors.brown,
     Colors.grey,
-    Colors.blueGrey
+    Colors.blueGrey,
   ];
 
   int iconColorIndex = 8; // teal
   double iconOpacity = 1.0;
 
-  Color get iconColor => iconColorSwatches[iconColorIndex][400];
+  Color get iconColor => iconColors[iconColorIndex];
 
   void handleIconButtonPress() {
     setState(() {
-      iconColorIndex = (iconColorIndex + 1) % iconColorSwatches.length;
+      iconColorIndex = (iconColorIndex + 1) % iconColors.length;
     });
   }
 

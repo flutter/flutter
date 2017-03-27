@@ -3,19 +3,24 @@
 // found in the LICENSE file.
 
 import 'dart:io' show ProcessResult;
+
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
-
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../context.dart';
+
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockFile extends Mock implements File {}
 
 void main() {
+  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
+  osx.operatingSystem = 'macos';
+
   group('test screenshot', () {
     MockProcessManager mockProcessManager;
     MockFile mockOutputFile;
@@ -56,7 +61,10 @@ void main() {
         ));
         expect(testLogger.errorText, contains('brew install ideviceinstaller'));
       },
-      overrides: <Type, Generator>{ProcessManager: () => mockProcessManager}
+      overrides: <Type, Generator>{
+        ProcessManager: () => mockProcessManager,
+        Platform: () => osx,
+      }
     );
 
     testUsingContext(

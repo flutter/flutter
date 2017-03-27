@@ -148,7 +148,7 @@ abstract class RenderDecoratedSector extends RenderSector {
 
   BoxDecoration _decoration;
   BoxDecoration get decoration => _decoration;
-  set decoration (BoxDecoration value) {
+  set decoration(BoxDecoration value) {
     if (value == _decoration)
       return;
     _decoration = value;
@@ -548,11 +548,10 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
-  RenderSolidColor(Color backgroundColor, {
+  RenderSolidColor(this.backgroundColor, {
     this.desiredDeltaRadius: double.INFINITY,
     this.desiredDeltaTheta: kTwoPi
-  }) : this.backgroundColor = backgroundColor,
-       super(new BoxDecoration(backgroundColor: backgroundColor));
+  }) : super(new BoxDecoration(backgroundColor: backgroundColor));
 
   double desiredDeltaRadius;
   double desiredDeltaTheta;

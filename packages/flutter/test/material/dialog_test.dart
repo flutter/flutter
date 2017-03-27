@@ -131,14 +131,14 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Title'), findsOneWidget);
     await tester.tap(find.text('First option'));
 
     expect(await result, equals(42));
   });
 
-  testWidgets('Barrier dismissable', (WidgetTester tester) async {
+  testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
@@ -164,18 +164,18 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsOneWidget);
 
     // Tap on the barrier.
     await tester.tapAt(const Point(10.0, 10.0));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsNothing);
 
     showDialog<Null>(
       context: context,
-      barrierDismissable: false,
+      barrierDismissible: false,
       child: new Container(
         width: 100.0,
         height: 100.0,
@@ -184,13 +184,13 @@ void main() {
       ),
     );
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
 
     // Tap on the barrier, which shouldn't do anything this time.
     await tester.tapAt(const Point(10.0, 10.0));
 
-    await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);
 
   });

@@ -206,18 +206,13 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
 
   _CircularProgressIndicatorPainter({
     this.valueColor,
-    double value,
-    double headValue,
-    double tailValue,
-    int stepValue,
-    double rotationValue,
+    this.value,
+    this.headValue,
+    this.tailValue,
+    this.stepValue,
+    this.rotationValue,
     this.strokeWidth
-  }) : this.value = value,
-       this.headValue = headValue,
-       this.tailValue = tailValue,
-       this.stepValue = stepValue,
-       this.rotationValue = rotationValue,
-       arcStart = value != null
+  }) : arcStart = value != null
          ? _kStartAngle
          : _kStartAngle + tailValue * 3 / 2 * math.PI + rotationValue * math.PI * 1.7 - stepValue * 0.8 * math.PI,
        arcSweep = value != null

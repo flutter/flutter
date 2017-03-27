@@ -102,7 +102,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 20.0), 1000.0);
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 30.0), 1000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)
 
     expect(showBottomSheetThenCalled, isTrue);

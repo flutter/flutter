@@ -45,7 +45,7 @@ void main() {
     final RenderBox box = tester.renderObject(find.byType(Container));
     expect(box.localToGlobal(Point.origin), equals(Point.origin));
 
-    await tester.scroll(find.byType(SingleChildScrollView), const Offset(-200.0, -200.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(-200.0, -200.0));
 
     expect(box.localToGlobal(Point.origin), equals(const Point(0.0, -200.0)));
   });

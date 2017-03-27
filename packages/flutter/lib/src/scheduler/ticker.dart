@@ -132,7 +132,7 @@ class Ticker {
         throw new FlutterError(
           'A ticker was started twice.\n'
           'A ticker that is already active cannot be started again without first stopping it.\n'
-          'The affected ticker was: ${ this.toString(debugIncludeStack: true) }'
+          'The affected ticker was: ${ toString(debugIncludeStack: true) }'
         );
       }
       return true;
@@ -268,6 +268,9 @@ class Ticker {
     unscheduleTick();
   }
 
+  /// An optional label can be provided for debugging purposes.
+  ///
+  /// This label will appear in the [toString] output in debug builds.
   final String debugLabel;
   StackTrace _debugCreationStack;
 

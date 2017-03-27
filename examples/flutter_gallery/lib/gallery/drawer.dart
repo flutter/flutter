@@ -31,7 +31,7 @@ class GalleryDrawerHeader extends StatefulWidget {
 class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
   bool _logoHasName = true;
   bool _logoHorizontal = true;
-  Map<int, Color> _swatch = Colors.blue;
+  MaterialColor _logoColor = Colors.blue;
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,8 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
         style: _logoHasName ? _logoHorizontal ? FlutterLogoStyle.horizontal
                                               : FlutterLogoStyle.stacked
                                               : FlutterLogoStyle.markOnly,
-        swatch: _swatch,
+        lightColor: _logoColor.shade400,
+        darkColor: _logoColor.shade900,
         textColor: config.light ? const Color(0xFF616161) : const Color(0xFF9E9E9E),
       ),
       duration: const Duration(milliseconds: 750),
@@ -62,22 +63,22 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
         },
         onDoubleTap: () {
           setState(() {
-            final List<Map<int, Color>> options = <Map<int, Color>>[];
-            if (_swatch != Colors.blue)
-              options.addAll(<Map<int, Color>>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
-            if (_swatch != Colors.amber)
-              options.addAll(<Map<int, Color>>[Colors.amber, Colors.amber, Colors.amber]);
-            if (_swatch != Colors.red)
-              options.addAll(<Map<int, Color>>[Colors.red, Colors.red, Colors.red]);
-            if (_swatch != Colors.indigo)
-              options.addAll(<Map<int, Color>>[Colors.indigo, Colors.indigo, Colors.indigo]);
-            if (_swatch != Colors.pink)
-              options.addAll(<Map<int, Color>>[Colors.pink]);
-            if (_swatch != Colors.purple)
-              options.addAll(<Map<int, Color>>[Colors.purple]);
-            if (_swatch != Colors.cyan)
-              options.addAll(<Map<int, Color>>[Colors.cyan]);
-            _swatch = options[new math.Random().nextInt(options.length)];
+            final List<MaterialColor> options = <MaterialColor>[];
+            if (_logoColor != Colors.blue)
+              options.addAll(<MaterialColor>[Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue, Colors.blue]);
+            if (_logoColor != Colors.amber)
+              options.addAll(<MaterialColor>[Colors.amber, Colors.amber, Colors.amber]);
+            if (_logoColor != Colors.red)
+              options.addAll(<MaterialColor>[Colors.red, Colors.red, Colors.red]);
+            if (_logoColor != Colors.indigo)
+              options.addAll(<MaterialColor>[Colors.indigo, Colors.indigo, Colors.indigo]);
+            if (_logoColor != Colors.pink)
+              options.addAll(<MaterialColor>[Colors.pink]);
+            if (_logoColor != Colors.purple)
+              options.addAll(<MaterialColor>[Colors.purple]);
+            if (_logoColor != Colors.cyan)
+              options.addAll(<MaterialColor>[Colors.cyan]);
+            _logoColor = options[new math.Random().nextInt(options.length)];
           });
         }
       )
@@ -125,96 +126,88 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle aboutTextStyle = themeData.textTheme.body2;
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
-    final Widget lightThemeItem = new DrawerItem(
-      icon: new Icon(Icons.brightness_5),
-      onPressed: () { onThemeChanged(true); },
+    final Widget lightThemeItem = new ListTile(
+      leading: new Icon(Icons.brightness_5),
+      title: new Text('Light'),
+      trailing: new Radio<bool>(
+        value: true,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged,
+      ),
       selected: useLightTheme,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Light')),
-          new Radio<bool>(
-            value: true,
-            groupValue: useLightTheme,
-            onChanged: onThemeChanged
-          )
-        ]
-      )
+      onTap: () {
+        onThemeChanged(true);
+      },
     );
 
-    final Widget darkThemeItem = new DrawerItem(
-      icon: new Icon(Icons.brightness_7),
-      onPressed: () { onThemeChanged(false); },
-      selected: useLightTheme,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Dark')),
-          new Radio<bool>(
-            value: false,
-            groupValue: useLightTheme,
-            onChanged: onThemeChanged
-          )
-        ]
-      )
+    final Widget darkThemeItem = new ListTile(
+      leading: new Icon(Icons.brightness_7),
+      title: new Text('Dark'),
+      trailing: new Radio<bool>(
+        value: false,
+        groupValue: useLightTheme,
+        onChanged: onThemeChanged
+      ),
+      selected: !useLightTheme,
+      onTap: () {
+        onThemeChanged(false);
+      },
     );
 
-    final Widget mountainViewItem = new DrawerItem(
+    final Widget mountainViewItem = new ListTile(
       // on iOS, we don't want to show an Android phone icon
-      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      onPressed: () { onPlatformChanged(TargetPlatform.android); },
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
+      title: new Text('Android'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.android,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
       selected: Theme.of(context).platform == TargetPlatform.android,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Android')),
-          new Radio<TargetPlatform>(
-            value: TargetPlatform.android,
-            groupValue: Theme.of(context).platform,
-            onChanged: onPlatformChanged,
-          )
-        ]
-      )
+      onTap: () {
+        onPlatformChanged(TargetPlatform.android);
+      },
     );
 
-    final Widget cupertinoItem = new DrawerItem(
+    final Widget cupertinoItem = new ListTile(
       // on iOS, we don't want to show the iPhone icon
-      icon: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      onPressed: () { onPlatformChanged(TargetPlatform.iOS); },
+      leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
+      title: new Text('iOS'),
+      trailing: new Radio<TargetPlatform>(
+        value: TargetPlatform.iOS,
+        groupValue: Theme.of(context).platform,
+        onChanged: onPlatformChanged,
+      ),
       selected: Theme.of(context).platform == TargetPlatform.iOS,
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('iOS')),
-          new Radio<TargetPlatform>(
-            value: TargetPlatform.iOS,
-            groupValue: Theme.of(context).platform,
-            onChanged: onPlatformChanged,
-          )
-        ]
-      )
+      onTap: () {
+        onPlatformChanged(TargetPlatform.iOS);
+      },
     );
 
-    final Widget animateSlowlyItem = new DrawerItem(
-      icon: new Icon(Icons.hourglass_empty),
+    final Widget animateSlowlyItem = new ListTile(
+      leading: new Icon(Icons.hourglass_empty),
+      title: new Text('Animate Slowly'),
+      trailing: new Checkbox(
+        value: timeDilation != 1.0,
+        onChanged: (bool value) {
+          onTimeDilationChanged(value ? 20.0 : 1.0);
+        },
+      ),
       selected: timeDilation != 1.0,
-      onPressed: () { onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0); },
-      child: new Row(
-        children: <Widget>[
-          new Expanded(child: new Text('Animate Slowly')),
-          new Checkbox(
-            value: timeDilation != 1.0,
-            onChanged: (bool value) { onTimeDilationChanged(value ? 20.0 : 1.0); }
-          )
-        ]
-      )
+      onTap: () {
+        onTimeDilationChanged(timeDilation != 1.0 ? 1.0 : 20.0);
+      },
     );
 
-    final Widget sendFeedbackItem = new DrawerItem(
-      icon: new Icon(Icons.report),
-      onPressed: onSendFeedback ?? () {
+    final Widget sendFeedbackItem = new ListTile(
+      leading: new Icon(Icons.report),
+      title: new Text('Send feedback'),
+      onTap: onSendFeedback ?? () {
         UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
       },
-      child: new Text('Send feedback'),
     );
 
-    final Widget aboutItem = new AboutDrawerItem(
+    final Widget aboutItem = new AboutListTile(
       icon: const FlutterLogo(),
       applicationVersion: '2016 Q3 Preview',
       applicationIcon: const FlutterLogo(),
@@ -272,36 +265,36 @@ class GalleryDrawer extends StatelessWidget {
     ];
 
     if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(8, new DrawerItem(
-        icon: new Icon(Icons.assessment),
-        onPressed: () { onShowPerformanceOverlayChanged(!showPerformanceOverlay); },
+      allDrawerItems.insert(8, new ListTile(
+        leading: new Icon(Icons.assessment),
+        title: new Text('Performance Overlay'),
+        trailing: new Checkbox(
+          value: showPerformanceOverlay,
+          onChanged: (bool value) {
+            onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+          },
+        ),
         selected: showPerformanceOverlay,
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Performance Overlay')),
-            new Checkbox(
-              value: showPerformanceOverlay,
-              onChanged: (bool value) { onShowPerformanceOverlayChanged(!showPerformanceOverlay); }
-            )
-          ]
-        )
+        onTap: () {
+          onShowPerformanceOverlayChanged(!showPerformanceOverlay);
+        },
       ));
     }
 
     if (onCheckerboardRasterCacheImagesChanged != null) {
-      allDrawerItems.insert(8, new DrawerItem(
-        icon: new Icon(Icons.assessment),
-        onPressed: () { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); },
+      allDrawerItems.insert(8, new ListTile(
+        leading: new Icon(Icons.assessment),
+        title: new Text('Checkerboard Raster Cache Images'),
+        trailing: new Checkbox(
+          value: checkerboardRasterCacheImages,
+          onChanged: (bool value) {
+            onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+          },
+        ),
         selected: checkerboardRasterCacheImages,
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Checkerboard Raster Cache Images')),
-            new Checkbox(
-              value: checkerboardRasterCacheImages,
-              onChanged: (bool value) { onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages); }
-            )
-          ]
-        )
+        onTap: () {
+          onCheckerboardRasterCacheImagesChanged(!checkerboardRasterCacheImages);
+        },
       ));
     }
 

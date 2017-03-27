@@ -37,9 +37,7 @@ const Duration kLongRequestTimeout = const Duration(minutes: 1);
 class VMService {
   VMService._(this._peer, this.httpAddress, this.wsAddress, this._requestTimeout) {
     _vm = new VM._empty(this);
-    _peer.listen().catchError((dynamic e, StackTrace stackTrace) {
-      _connectionError.completeError(e, stackTrace);
-    });
+    _peer.listen().catchError(_connectionError.completeError);
 
     _peer.registerMethod('streamNotify', (rpc.Parameters event) {
       _handleStreamNotify(event.asMap);
@@ -171,6 +169,16 @@ class VMService {
   /// Reloads the VM.
   Future<VM> getVM() {
     return _vm.reload();
+  }
+
+  Future<Null> waitForViews({int attempts = 5, int attemptSeconds = 1}) async {
+    await vm.refreshViews();
+    for (int i = 0; (vm.firstView == null) && (i < attempts); i++) {
+      // If the VM doesn't yet have a view, wait for one to show up.
+      printTrace('Waiting for Flutter view');
+      await new Future<Null>.delayed(new Duration(seconds: attemptSeconds));
+      await vm.refreshViews();
+    }
   }
 }
 
@@ -549,7 +557,7 @@ class VM extends ServiceObjectOwner {
         toRemove.add(id);
       }
     });
-    toRemove.forEach((String id) => _isolateCache.remove(id));
+    toRemove.forEach(_isolateCache.remove);
     _buildIsolateList();
   }
 
@@ -745,8 +753,19 @@ class VM extends ServiceObjectOwner {
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
-  FlutterView get mainView {
+  Iterable<FlutterView> get views => _viewCache.values;
+
+  FlutterView get firstView {
     return _viewCache.values.isEmpty ? null : _viewCache.values.first;
+  }
+
+  FlutterView firstViewWithName(String isolateFilter) {
+    if (_viewCache.values.isEmpty) {
+      return null;
+    }
+    return _viewCache.values.firstWhere(
+        (FlutterView v) => v.uiIsolate.name.contains(isolateFilter),
+        orElse: () => null);
   }
 }
 

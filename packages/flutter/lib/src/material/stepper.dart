@@ -53,8 +53,8 @@ const TextStyle _kStepStyle = const TextStyle(
   fontSize: 12.0,
   color: Colors.white,
 );
-final Color _kErrorLight = Colors.red[500];
-final Color _kErrorDark = Colors.red[400];
+final Color _kErrorLight = Colors.red;
+final Color _kErrorDark = Colors.red.shade400;
 const Color _kCircleActiveLight = Colors.white;
 const Color _kCircleActiveDark = Colors.black87;
 const Color _kDisabledLight = Colors.black38;
@@ -81,9 +81,9 @@ class Step {
     this.state: StepState.indexed,
     this.isActive: false,
   }) {
-    assert(this.title != null);
-    assert(this.content != null);
-    assert(this.state != null);
+    assert(title != null);
+    assert(content != null);
+    assert(state != null);
   }
 
   /// The title of the step that typically describes it.
@@ -138,10 +138,10 @@ class Stepper extends StatefulWidget {
     this.onStepContinue,
     this.onStepCancel,
   }) : super(key: key) {
-    assert(this.steps != null);
-    assert(this.type != null);
-    assert(this.currentStep != null);
-    assert(0 <= currentStep && currentStep < this.steps.length);
+    assert(steps != null);
+    assert(type != null);
+    assert(currentStep != null);
+    assert(0 <= currentStep && currentStep < steps.length);
   }
 
   /// The steps of the stepper whose titles, subtitles, icons always get shown.
@@ -222,7 +222,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
       width: visible ? 1.0 : 0.0,
       height: 16.0,
       decoration: new BoxDecoration(
-        backgroundColor: Colors.grey[400],
+        backgroundColor: Colors.grey.shade400,
       ),
     );
   }
@@ -481,7 +481,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 width: _isLast(index) ? 0.0 : 1.0,
                 child: new Container(
                   decoration: new BoxDecoration(
-                    backgroundColor: Colors.grey[400],
+                    backgroundColor: Colors.grey.shade400,
                   ),
                 ),
               ),
@@ -582,7 +582,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: 1.0,
               decoration: new BoxDecoration(
-                backgroundColor: Colors.grey[400],
+                backgroundColor: Colors.grey.shade400,
               ),
             ),
           ),

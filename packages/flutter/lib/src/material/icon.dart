@@ -83,7 +83,7 @@ class Icon extends StatelessWidget {
   /// ```dart
   ///  new Icon(
   ///    icon: Icons.widgets,
-  ///    color: Colors.blue[400],
+  ///    color: Colors.blue.shade400,
   ///  ),
   /// ```
   final Color color;
@@ -114,7 +114,7 @@ class Icon extends StatelessWidget {
                 inherit: false,
                 color: iconColor,
                 fontSize: iconSize,
-                fontFamily: 'MaterialIcons'
+                fontFamily: icon.fontFamily
               )
             )
           )

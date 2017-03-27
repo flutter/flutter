@@ -4,8 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/stop.dart';
-import 'package:mockito/mockito_no_mirrors.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -14,6 +15,10 @@ import 'src/mocks.dart';
 
 void main() {
   group('stop', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testUsingContext('returns 0 when Android is connected and ready to be stopped', () async {
       final StopCommand command = new StopCommand();
       applyMocksToCommand(command);

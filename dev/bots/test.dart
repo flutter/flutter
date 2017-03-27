@@ -13,6 +13,12 @@ String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 /// arguments to flutter test. For example, you might want to call this
 /// script using FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt to
 /// use your own build of the engine.
+///
+/// To run the analysis part, run it with SHARD=analyze
+///
+/// For example:
+/// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
+/// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 Future<Null> main() async {
   if (Platform.environment['SHARD'] == 'docs') {
     print('\x1B[32mDONE: test.dart does nothing in the docs shard.\x1B[0m');
@@ -22,6 +28,13 @@ Future<Null> main() async {
       options: <String>['--flutter-repo'],
     );
 
+    // Try with the --watch analyzer, to make sure it returns success also.
+    // The --benchmark argument exits after one run.
+    await _runFlutterAnalyze(flutterRoot,
+      options: <String>['--flutter-repo', '--watch', '--benchmark'],
+    );
+
+    // Try an analysis against a big version of the gallery.
     await _runCmd(dart, <String>[p.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
       workingDirectory: flutterRoot,
     );
@@ -79,12 +92,7 @@ Future<Null> main() async {
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
     await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
-    await _runAllDartTests(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      environment: <String, String>{ 'FLUTTER_ROOT': flutterRoot },
-    );
-    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'),
-      testPath: 'test/replay',
-    );
+    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'));
 
     await _runAllDartTests(p.join(flutterRoot, 'dev', 'devicelab'));
     await _runFlutterTest(p.join(flutterRoot, 'dev', 'manual_tests'));

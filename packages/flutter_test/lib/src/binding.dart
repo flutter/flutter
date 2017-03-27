@@ -202,8 +202,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// the focus change.
   EditableTextState get focusedEditable => _focusedEditable;
   EditableTextState _focusedEditable;
-  set focusedEditable (EditableTextState editable) {
-    _focusedEditable = editable..requestKeyboard();
+  set focusedEditable(EditableTextState value) {
+    _focusedEditable = value..requestKeyboard();
   }
 
   /// Returns the exception most recently caught by the Flutter framework.
@@ -772,7 +772,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
 /// A [ViewConfiguration] that pretends the display is of a particular size. The
 /// size is in logical pixels. The resulting ViewConfiguration maps the given
-/// size onto the actual display using the [ImageFit.contain] algorithm.
+/// size onto the actual display using the [BoxFit.contain] algorithm.
 class TestViewConfiguration extends ViewConfiguration {
   /// Creates a [TestViewConfiguration] with the given size. Defaults to 800x600.
   TestViewConfiguration({ Size size: _kDefaultTestViewportSize })
@@ -829,10 +829,9 @@ const int _kPointerDecay = -2;
 
 class _LiveTestPointerRecord {
   _LiveTestPointerRecord(
-    int pointer,
+    this.pointer,
     this.position
-  ) : pointer = pointer,
-      color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
+  ) : color = new HSVColor.fromAHSV(0.8, (35.0 * pointer) % 360.0, 1.0, 1.0).toColor(),
       decay = 1;
   final int pointer;
   final Color color;
@@ -890,7 +889,7 @@ class _LiveTestRenderView extends RenderView {
         .keys
         .where((int pointer) => _pointers[pointer].decay == 0)
         .toList()
-        .forEach((int pointer) { _pointers.remove(pointer); });
+        .forEach(_pointers.remove);
       if (dirty)
         scheduleMicrotask(markNeedsPaint);
     }

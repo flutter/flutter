@@ -23,7 +23,6 @@ class AssetBundle {
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kFontManifestJson = 'FontManifest.json';
   static const String _kFontSetMaterial = 'material';
-  static const String _kFontSetRoboto = 'roboto';
   static const String _kLICENSE = 'LICENSE';
 
   bool _fixed = false;
@@ -69,7 +68,6 @@ class AssetBundle {
     String workingDirPath,
     String packagesPath,
     bool includeDefaultFonts: true,
-    bool includeRobotoFonts: true,
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
@@ -126,8 +124,6 @@ class AssetBundle {
     final List<_Asset> materialAssets = <_Asset>[];
     if (usesMaterialDesign && includeDefaultFonts) {
       materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
-      if (includeRobotoFonts)
-        materialAssets.addAll(_getMaterialAssets(_kFontSetRoboto));
     }
     for (_Asset asset in materialAssets) {
       assert(asset.assetFileExists);
@@ -137,7 +133,7 @@ class AssetBundle {
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
 
     final DevFSContent fontManifest =
-        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts, includeRobotoFonts);
+        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts);
     if (fontManifest != null)
       entries[_kFontManifestJson] = fontManifest;
 
@@ -156,11 +152,10 @@ class AssetBundle {
 }
 
 class _Asset {
-  _Asset({ this.base, String assetEntry, this.relativePath, this.source }) {
-    this._assetEntry = assetEntry;
-  }
+  _Asset({ this.base, String assetEntry, this.relativePath, this.source })
+    : _assetEntry = assetEntry;
 
-  String _assetEntry;
+  final String _assetEntry;
 
   final String base;
 
@@ -306,13 +301,10 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
 
 DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
                              bool usesMaterialDesign,
-                             bool includeDefaultFonts,
-                             bool includeRobotoFonts) {
+                             bool includeDefaultFonts) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (usesMaterialDesign && includeDefaultFonts) {
     fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
-    if (includeRobotoFonts)
-      fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetRoboto));
   }
   if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts'))
     fonts.addAll(manifestDescriptor['fonts']);

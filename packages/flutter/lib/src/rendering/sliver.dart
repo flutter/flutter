@@ -1225,9 +1225,9 @@ abstract class RenderSliverHelpers implements RenderSliver {
 ///
 /// See also:
 ///
-/// - [RenderSliver], which explains more about the Sliver protocol.
-/// - [RenderBox], which explains more about the Box protocol.
-/// - [RenderViewport], which allows [RenderSliver] objects to be placed inside
+/// * [RenderSliver], which explains more about the Sliver protocol.
+/// * [RenderBox], which explains more about the Box protocol.
+/// * [RenderViewport], which allows [RenderSliver] objects to be placed inside
 ///   a [RenderBox] (the opposite of this class).
 class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   /// Creates a [RenderSliver] that wraps a [RenderBox].

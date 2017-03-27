@@ -85,7 +85,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
 
   Widget buildItem(LeaveBehindItem item) {
     final ThemeData theme = Theme.of(context);
-    return new Dismissable(
+    return new Dismissible(
       key: new ObjectKey(item),
       direction: _dismissDirection,
       onDismissed: (DismissDirection direction) {
@@ -103,13 +103,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       },
       background: new Container(
         color: theme.primaryColor,
-        child: new ListItem(
+        child: new ListTile(
           leading: new Icon(Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         color: theme.primaryColor,
-        child: new ListItem(
+        child: new ListTile(
           trailing: new Icon(Icons.archive, color: Colors.white, size: 36.0)
         )
       ),
@@ -118,7 +118,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           backgroundColor: theme.canvasColor,
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
         ),
-        child: new ListItem(
+        child: new ListTile(
           title: new Text(item.name),
           subtitle: new Text('${item.subject}\n${item.body}'),
           isThreeLine: true

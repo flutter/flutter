@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
 import 'rendering_tester.dart';

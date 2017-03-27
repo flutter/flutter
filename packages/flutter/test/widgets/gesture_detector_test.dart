@@ -118,7 +118,7 @@ void main() {
     expect(panDelta, isNull);
     expect(didEndPan, isFalse);
 
-    await tester.scrollAt(const Point(10.0, 10.0), const Offset(20.0, 30.0));
+    await tester.dragFrom(const Point(10.0, 10.0), const Offset(20.0, 30.0));
 
     expect(didStartPan, isTrue);
     expect(panDelta.dx, 20.0);

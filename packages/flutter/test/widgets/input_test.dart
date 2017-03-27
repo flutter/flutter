@@ -15,14 +15,12 @@ class MockClipboard {
     'text': null
   };
 
-  Future<dynamic> handleJSONMessage(dynamic message) async {
-    final String method = message['method'];
-    final List<dynamic> args= message['args'];
-    switch (method) {
+  Future<dynamic> handleMethodCall(MethodCall methodCall) async {
+    switch (methodCall.method) {
       case 'Clipboard.getData':
         return _clipboardData;
       case 'Clipboard.setData':
-        _clipboardData = args[0];
+        _clipboardData = methodCall.arguments;
         break;
     }
   }
@@ -40,7 +38,7 @@ Widget overlay(Widget child) {
 
 void main() {
   final MockClipboard mockClipboard = new MockClipboard();
-  PlatformMessages.setMockJSONMessageHandler('flutter/platform', mockClipboard.handleJSONMessage);
+  SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   const String kThreeLines =
     'First line of text is here abcdef ghijkl mnopqrst. ' +
@@ -157,10 +155,9 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
 
     // Try the test again with a nonempty EditableText.
-    tester.testTextInput.updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: 'X',
-      selectionBase: 1,
-      selectionExtent: 1,
+      selection: const TextSelection.collapsed(offset: 1),
     ));
     await checkCursorToggle();
   });
@@ -184,10 +181,9 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
 
     const String testValue = 'ABC';
-    tester.testTextInput.updateEditingState(const TextEditingState(
+    tester.testTextInput.updateEditingValue(const TextEditingValue(
       text: testValue,
-      selectionBase: testValue.length,
-      selectionExtent: testValue.length,
+      selection: const TextSelection.collapsed(offset: testValue.length),
     ));
 
     await tester.pump();

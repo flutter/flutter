@@ -43,7 +43,7 @@ class RenderBlock extends RenderBox
   /// The direction to use as the main axis.
   Axis get mainAxis => _mainAxis;
   Axis _mainAxis;
-  set mainAxis (Axis value) {
+  set mainAxis(Axis value) {
     if (_mainAxis != value) {
       _mainAxis = value;
       markNeedsLayout();
@@ -150,7 +150,7 @@ class RenderBlock extends RenderBox
         break;
     }
 
-    assert(!size.isInfinite);
+    assert(size.isFinite);
   }
 
   @override

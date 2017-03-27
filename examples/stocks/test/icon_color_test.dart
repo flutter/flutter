@@ -38,12 +38,9 @@ Element findElementOfExactWidgetTypeGoingUp(Element node, Type targetType) {
 final RegExp materialIconAssetNameColorExtractor = new RegExp(r'[^/]+/ic_.+_(white|black)_[0-9]+dp\.png');
 
 void checkIconColor(WidgetTester tester, String label, Color color) {
-  // The icon is going to be in the same merged semantics box as the text
-  // regardless of how the menu item is represented, so this is a good
-  // way to find the menu item. I hope.
-  final Element semantics = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), MergeSemantics);
-  expect(semantics, isNotNull);
-  final Element asset = findElementOfExactWidgetTypeGoingDown(semantics, RichText);
+  final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
+  expect(listTile, isNotNull);
+  final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
   final RichText richText = asset.widget;
   expect(richText.text.style.color, equals(color));
 }
@@ -76,7 +73,7 @@ void main() {
     expect(find.text('Account Balance'), findsOneWidget);
 
     // check the colour of the icon - light mode
-    checkIconColor(tester, 'Stock List', Colors.purple[500]); // theme primary color
+    checkIconColor(tester, 'Stock List', Colors.purple.shade500); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.black26); // disabled
     checkIconColor(tester, 'About', Colors.black45); // enabled
 
@@ -87,7 +84,7 @@ void main() {
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
     // check the colour of the icon - dark mode
-    checkIconColor(tester, 'Stock List', Colors.redAccent[200]); // theme accent color
+    checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
     checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });

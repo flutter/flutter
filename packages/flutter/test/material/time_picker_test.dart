@@ -38,13 +38,13 @@ class _TimePickerLauncher extends StatelessWidget {
 Future<Point> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChanged) async {
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged));
   await tester.tap(find.text('X'));
-  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+  await tester.pumpAndSettle(const Duration(seconds: 1));
   return tester.getCenter(find.byKey(const Key('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
   await tester.tap(find.text('OK'));
-  await tester.pumpUntilNoTransientCallbacks(const Duration(seconds: 1));
+  await tester.pumpAndSettle(const Duration(seconds: 1));
 }
 
 void main() {
@@ -118,8 +118,8 @@ void main() {
     int hapticFeedbackCount;
 
     setUpAll(() {
-      PlatformMessages.setMockJSONMessageHandler('flutter/platform', (dynamic message) {
-        if (message['method'] == "HapticFeedback.vibrate")
+      SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) {
+        if (methodCall.method == "HapticFeedback.vibrate")
           hapticFeedbackCount++;
       });
     });

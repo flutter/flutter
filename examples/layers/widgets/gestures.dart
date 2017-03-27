@@ -18,7 +18,7 @@ class _GesturePainter extends CustomPainter {
 
   final double zoom;
   final Offset offset;
-  final Map<int, Color> swatch;
+  final MaterialColor swatch;
   final bool forward;
   final bool scaleEnabled;
   final bool tapEnabled;
@@ -30,8 +30,8 @@ class _GesturePainter extends CustomPainter {
     final Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = new RadialGradient(
-      colors: forward ? <Color>[swatch[50], swatch[900]]
-                      : <Color>[swatch[900], swatch[50]]
+      colors: forward ? <Color>[swatch.shade50, swatch.shade900]
+                      : <Color>[swatch.shade900, swatch.shade50]
     );
     final Paint paint = new Paint()
       ..shader = gradient.createShader(new Rect.fromLTWH(
@@ -71,7 +71,7 @@ class _GestureDemoState extends State<GestureDemo> {
   double _previousZoom;
   double _zoom = 1.0;
 
-  Map<int, Color> _swatch = Colors.blue;
+  MaterialColor _swatch = Colors.blue;
 
   bool _forward = true;
   bool _scaleEnabled = true;
@@ -106,28 +106,42 @@ class _GestureDemoState extends State<GestureDemo> {
 
   void _handleColorChange() {
     setState(() {
-      switch (_swatch) {
-        case Colors.blueGrey:   _swatch = Colors.red; break;
-        case Colors.red:        _swatch = Colors.pink; break;
-        case Colors.pink:       _swatch = Colors.purple; break;
-        case Colors.purple:     _swatch = Colors.deepPurple; break;
-        case Colors.deepPurple: _swatch = Colors.indigo; break;
-        case Colors.indigo:     _swatch = Colors.blue; break;
-        case Colors.blue:       _swatch = Colors.lightBlue; break;
-        case Colors.lightBlue:  _swatch = Colors.cyan; break;
-        case Colors.cyan:       _swatch = Colors.teal; break;
-        case Colors.teal:       _swatch = Colors.green; break;
-        case Colors.green:      _swatch = Colors.lightGreen; break;
-        case Colors.lightGreen: _swatch = Colors.lime; break;
-        case Colors.lime:       _swatch = Colors.yellow; break;
-        case Colors.yellow:     _swatch = Colors.amber; break;
-        case Colors.amber:      _swatch = Colors.orange; break;
-        case Colors.orange:     _swatch = Colors.deepOrange; break;
-        case Colors.deepOrange: _swatch = Colors.brown; break;
-        case Colors.brown:      _swatch = Colors.grey; break;
-        case Colors.grey:       _swatch = Colors.blueGrey; break;
-        default:                assert(false);
-      }
+      if (_swatch == Colors.blueGrey)
+        _swatch = Colors.red;
+      else if (_swatch == Colors.red)
+        _swatch = Colors.pink;
+      else if (_swatch == Colors.pink)
+        _swatch = Colors.purple;
+      else if (_swatch == Colors.purple)
+        _swatch = Colors.deepPurple;
+      else if (_swatch == Colors.deepPurple)
+        _swatch = Colors.indigo;
+      else if (_swatch == Colors.indigo)
+        _swatch = Colors.blue;
+      else if (_swatch == Colors.blue)
+        _swatch = Colors.lightBlue;
+      else if (_swatch == Colors.lightBlue)
+        _swatch = Colors.cyan;
+      else if (_swatch == Colors.teal)
+        _swatch = Colors.green;
+      else if (_swatch == Colors.green)
+        _swatch = Colors.lightGreen;
+      else if (_swatch == Colors.lightGreen)
+        _swatch = Colors.lime;
+      else if (_swatch == Colors.lime)
+        _swatch = Colors.yellow;
+      else if (_swatch == Colors.yellow)
+        _swatch = Colors.amber;
+      else if (_swatch == Colors.amber)
+        _swatch = Colors.orange;
+      else if (_swatch == Colors.orange)
+        _swatch = Colors.deepOrange;
+      else if (_swatch == Colors.deepOrange)
+        _swatch = Colors.brown;
+      else if (_swatch == Colors.brown)
+        _swatch = Colors.grey;
+      else if (_swatch == Colors.grey)
+        _swatch = Colors.blueGrey;
     });
   }
 

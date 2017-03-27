@@ -182,17 +182,34 @@ Future<Process> runDetached(List<String> cmd) {
 
 Future<RunResult> runAsync(List<String> cmd, {
   String workingDirectory,
-  bool allowReentrantFlutter: false
+  bool allowReentrantFlutter: false,
+  Map<String, String> environment
 }) async {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = await processManager.run(
     cmd,
     workingDirectory: workingDirectory,
-    environment: _environment(allowReentrantFlutter),
+    environment: _environment(allowReentrantFlutter, environment),
   );
   final RunResult runResults = new RunResult(results);
   printTrace(runResults.toString());
   return runResults;
+}
+
+Future<RunResult> runCheckedAsync(List<String> cmd, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false,
+  Map<String, String> environment
+}) async {
+  final RunResult result = await runAsync(
+      cmd,
+      workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      environment: environment
+  );
+  if (result.exitCode != 0)
+    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}';
+  return result;
 }
 
 bool exitsHappy(List<String> cli) {

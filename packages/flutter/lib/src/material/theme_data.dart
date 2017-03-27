@@ -70,7 +70,7 @@ class ThemeData {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
-    Map<int, Color> primarySwatch,
+    MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color accentColor,
@@ -93,6 +93,7 @@ class ThemeData {
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
+    String fontFamily,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
@@ -137,6 +138,11 @@ class ThemeData {
     textTheme ??= isDark ? typography.white : typography.black;
     primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
     accentTextTheme ??= accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      textTheme = textTheme.apply(fontFamily: fontFamily);
+      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
+      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
+    }
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,
@@ -290,7 +296,7 @@ class ThemeData {
   final Color cardColor;
 
   /// The color of [Divider]s and [PopupMenuDivider]s, also used
-  /// between [ListItem]s, between rows in [DataTable]s, and so forth.
+  /// between [ListTile]s, between rows in [DataTable]s, and so forth.
   final Color dividerColor;
 
   /// The highlight color used during ink splash animations or to
@@ -334,7 +340,7 @@ class ThemeData {
 
   /// The background color of [Dialog] elements.
   final Color dialogBackgroundColor;
-  
+
   /// The color of the selected tab indicator in a tab bar.
   final Color indicatorColor;
 

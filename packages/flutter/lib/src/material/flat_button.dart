@@ -53,6 +53,8 @@ class FlatButton extends StatelessWidget {
     this.textColor,
     this.disabledTextColor,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.disabledColor,
     this.textTheme,
     this.colorBrightness,
@@ -76,19 +78,39 @@ class FlatButton extends StatelessWidget {
   /// Defaults to a color derived from the [Theme].
   final Color disabledTextColor;
 
-  /// The color of the button, as printed on the [Material]. Defaults to null,
-  /// meaning that the color is automatically derived from the [Theme].
+  /// The primary color of the button, as printed on the [Material], while it
+  /// is in its default (unpressed, enabled) state.
+  ///
+  /// Defaults to null, meaning that the color is automatically derived from the [Theme].
   ///
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   ///  new FlatButton(
-  ///    color: Colors.blue[500],
+  ///    color: Colors.blue,
   ///    onPressed: _handleTap,
   ///    child: new Text('DEMO'),
   ///  ),
   /// ```
   final Color color;
+
+  /// The primary color of the button when the button is in the down (pressed) state.
+  /// The splash is represented as a circular overlay that appears above the
+  /// [highlightColor] overlay. The splash overlay has a center point that matches
+  /// the hit point of the user touch event. The splash overlay will expand to
+  /// fill the button area if the touch is held for long enough time. If the splash
+  /// color has transparency then the highlight and button color will show through.
+  ///
+  /// Defaults to the splash color from the [Theme].
+  final Color splashColor;
+
+  /// The secondary color of the button when the button is in the down (pressed)
+  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// button color (if any). If the highlight color has transparency, the button color
+  /// will show through. The highlight fades in quickly as the button is held down.
+  ///
+  /// Defaults to the highlight color from the [Theme].
+  final Color highlightColor;
 
   /// The color of the button when the button is disabled. Buttons are disabled
   /// by default. To enable a button, set its [onPressed] property to a non-null
@@ -120,6 +142,8 @@ class FlatButton extends StatelessWidget {
       onPressed: onPressed,
       textColor: enabled ? textColor : disabledTextColor,
       color: enabled ? color : disabledColor,
+      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+      splashColor: splashColor ?? Theme.of(context).splashColor,
       textTheme: textTheme,
       colorBrightness: colorBrightness,
       child: child

@@ -110,7 +110,6 @@ class InkSplash extends InkFeature {
   }
 
   final Point _position;
-  final Color _color;
   final BorderRadius _borderRadius;
   final double _targetRadius;
   final RectCallback _clipCallback;
@@ -121,6 +120,17 @@ class InkSplash extends InkFeature {
 
   Animation<int> _alpha;
   AnimationController _alphaController;
+
+  /// The color of the splash.
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    if (value == _color)
+      return;
+    _color = value;
+    controller.markNeedsPaint();
+  }
+
 
   /// The user input is confirmed.
   ///

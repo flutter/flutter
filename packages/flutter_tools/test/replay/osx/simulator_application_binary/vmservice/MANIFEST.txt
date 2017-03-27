@@ -532,7 +532,7 @@
             "fixedId": true,
             "id": "libraries/35",
             "name": "",
-            "uri": "package:flutter/src/widgets/dismissable.dart"
+            "uri": "package:flutter/src/widgets/dismissible.dart"
           },
           {
             "type": "@Library",

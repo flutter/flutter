@@ -30,8 +30,8 @@ Icon?
 .tags*
 
 /Flutter/app.flx
-/Flutter/app.dylib
 /Flutter/app.zip
+/Flutter/App.framework
 /Flutter/Flutter.framework
 /Flutter/Generated.xcconfig
 /ServiceDefinitions.json

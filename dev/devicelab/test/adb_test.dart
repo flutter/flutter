@@ -130,9 +130,9 @@ class CommandArgs {
       return false;
 
     final CommandArgs otherCmd = other;
-    return otherCmd.command == this.command &&
-      const ListEquality<String>().equals(otherCmd.arguments, this.arguments) &&
-      const MapEquality<String, String>().equals(otherCmd.environment, this.environment);
+    return otherCmd.command == command &&
+      const ListEquality<String>().equals(otherCmd.arguments, arguments) &&
+      const MapEquality<String, String>().equals(otherCmd.environment, environment);
   }
 
   @override

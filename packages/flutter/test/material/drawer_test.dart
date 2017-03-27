@@ -20,9 +20,9 @@ void main() {
                   child: new Text('header')
                 )
               ),
-              new DrawerItem(
-                icon: new Icon(Icons.archive),
-                child: new Text('Archive')
+              new ListTile(
+                leading: new Icon(Icons.archive),
+                title: new Text('Archive')
               )
             ]
           )

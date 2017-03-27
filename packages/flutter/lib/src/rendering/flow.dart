@@ -203,7 +203,7 @@ class RenderFlow extends RenderBox
   /// [FlowDelegate.shouldRelayout] and [FlowDelegate.shouldRepaint] functions
   /// to determine whether the new delegate requires this object to update its
   /// layout or painting.
-  set delegate (FlowDelegate newDelegate) {
+  set delegate(FlowDelegate newDelegate) {
     assert(newDelegate != null);
     if (_delegate == newDelegate)
       return;

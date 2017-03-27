@@ -29,12 +29,10 @@ class SpringDescription {
   /// See [mass] and [springConstant] for the units for those arguments. The
   /// damping ratio is unitless.
   SpringDescription.withDampingRatio({
-    double mass,
-    double springConstant,
+    this.mass,
+    this.springConstant,
     double ratio: 1.0
-  }) : mass = mass,
-       springConstant = springConstant,
-       damping = ratio * 2.0 * math.sqrt(mass * springConstant);
+  }) : damping = ratio * 2.0 * math.sqrt(mass * springConstant);
 
   /// The mass of the spring (m). The units are arbitrary, but all springs
   /// within a system should use the same mass units.

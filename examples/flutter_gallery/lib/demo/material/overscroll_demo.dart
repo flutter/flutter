@@ -60,11 +60,11 @@ class OverscrollDemoState extends State<OverscrollDemo> {
         key: _refreshIndicatorKey,
         onRefresh: _handleRefresh,
         child: new ListView.builder(
-          padding: const EdgeInsets.all(8.0),
+          padding: kMaterialListPadding,
           itemCount: _items.length,
           itemBuilder: (BuildContext context, int index) {
             final String item = _items[index];
-            return new ListItem(
+            return new ListTile(
               isThreeLine: true,
               leading: new CircleAvatar(child: new Text(item)),
               title: new Text('This item represents $item.'),

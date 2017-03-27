@@ -225,10 +225,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
 
   int get divisions => _divisions;
   int _divisions;
-  set divisions(int newDivisions) {
-    if (newDivisions == _divisions)
+  set divisions(int value) {
+    if (value == _divisions)
       return;
-    _divisions = newDivisions;
+    _divisions = value;
     markNeedsPaint();
   }
 

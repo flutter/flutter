@@ -88,7 +88,7 @@ class Daemon {
 
     // Start listening.
     commandStream.listen(
-      (Map<String, dynamic> request) => _handleRequest(request),
+      _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
             _onExitCompleter.complete(0);
@@ -264,7 +264,7 @@ class DaemonDomain extends Domain {
   }
 
   Future<Null> shutdown(Map<String, dynamic> args) {
-    Timer.run(() => daemon.shutdown());
+    Timer.run(daemon.shutdown);
     return new Future<Null>.value();
   }
 
@@ -647,7 +647,7 @@ Map<String, dynamic> _deviceToMap(Device device) {
   return <String, dynamic>{
     'id': device.id,
     'name': device.name,
-    'platform': getNameForTargetPlatform(device.platform),
+    'platform': getNameForTargetPlatform(device.targetPlatform),
     'emulator': device.isLocalEmulator
   };
 }

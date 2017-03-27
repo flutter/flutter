@@ -18,6 +18,10 @@ void main() {
   group('analytics', () {
     Directory temp;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       Cache.flutterRoot = '../..';
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');

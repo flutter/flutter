@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 Key firstKey = const Key('first');
 Key secondKey = const Key('second');
@@ -73,6 +74,18 @@ class MutatingRoute extends MaterialPageRoute<Null> {
       // Trigger a rebuild
     });
   }
+}
+
+class MyStatefulWidget extends StatefulWidget {
+  MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  final String value;
+  @override
+  MyStatefulWidgetState createState() => new MyStatefulWidgetState();
+}
+
+class MyStatefulWidgetState extends State<MyStatefulWidget> {
+  @override
+  Widget build(BuildContext context) => new Text(config.value);
 }
 
 void main() {
@@ -713,7 +726,7 @@ void main() {
 
     // Scroll the target upwards by 25 pixels. The Hero flight's Y coordinate
     // will be redirected from 100 to 75.
-    await(tester.scroll(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
+    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
@@ -788,7 +801,7 @@ void main() {
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
-    await(tester.scroll(find.byKey(routeContainerKey), const Offset(0.0, -400.0)));
+    await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -400.0)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
     expect(find.byKey(routeContainerKey), findsNothing); // Scrolled off the top
@@ -804,4 +817,192 @@ void main() {
     expect(find.byKey(routeHeroKey), findsNothing);
   });
 
+  testWidgets('Aborted flight', (WidgetTester tester) async {
+    // See https://github.com/flutter/flutter/issues/5798
+    final Key heroABKey = const Key('AB hero');
+    final Key heroBCKey = const Key('BC hero');
+
+    // Show a 150x150 Hero tagged 'BC'
+    final MaterialPageRoute<Null> routeC = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              // This container will appear at Y=0
+              new Container(
+                child: new Hero(tag: 'BC', child: new Container(key: heroBCKey, height: 150.0))
+              ),
+              new SizedBox(height: 800.0),
+            ],
+          )
+        );
+      },
+    );
+
+    // Show a height=200 Hero tagged 'AB' and a height=50 Hero tagged 'BC'
+    final MaterialPageRoute<Null> routeB = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              new SizedBox(height: 100.0),
+              // This container will appear at Y=100
+              new Container(
+                child: new Hero(tag: 'AB', child: new Container(key: heroABKey, height: 200.0))
+              ),
+              new FlatButton(
+                child: new Text('PUSH C'),
+                onPressed: () { Navigator.push(context, routeC); }
+              ),
+              new Container(
+                child: new Hero(tag: 'BC', child: new Container(height: 150.0))
+              ),
+              new SizedBox(height: 800.0),
+            ],
+          )
+        );
+      },
+    );
+
+    // Show a 100x100 Hero tagged 'AB' with key heroABKey
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return new ListView(
+                children: <Widget> [
+                  new SizedBox(height: 200.0),
+                  // This container will appear at Y=200
+                  new Container(
+                    child: new Hero(tag: 'AB', child: new Container(height: 100.0, width: 100.0)),
+                  ),
+                  new FlatButton(
+                    child: new Text('PUSH B'),
+                    onPressed: () { Navigator.push(context, routeB); }
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    // Pushes routeB
+    await tester.tap(find.text('PUSH B'));
+    await tester.pump();
+    await tester.pump();
+
+    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).y;
+    expect(initialY, 200.0);
+
+    await tester.pump(const Duration(milliseconds: 200));
+    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).y;
+    // Hero AB is mid flight.
+    expect(yAt200ms, lessThan(200.0));
+    expect(yAt200ms, greaterThan(100.0));
+
+    // Pushes route C, causes hero AB's flight to abort, hero BC's flight to start
+    await tester.tap(find.text('PUSH C'));
+    await tester.pump();
+    await tester.pump();
+
+    // Hero AB's aborted flight finishes where it was expected although
+    // it's been faded out.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(tester.getTopLeft(find.byKey(heroABKey)).y, 100.0);
+
+    // One Opacity widget per Hero, only one now has opacity 0.0
+    final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
+    final Iterable<double> opacities = renderers.map((RenderOpacity r) => r.opacity);
+    expect(opacities.singleWhere((double opacity) => opacity == 0.0), 0.0);
+
+    // Hero BC's flight finishes normally.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
+  });
+
+  testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
+    final MaterialPageRoute<Null> route = new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(
+          child: new ListView(
+            children: <Widget>[
+              new Card(
+                child: new Hero(
+                  tag: 'H',
+                  child: new SizedBox(
+                    height: 200.0,
+                    child: new MyStatefulWidget(value: '456'),
+                  ),
+                ),
+              ),
+              new FlatButton(
+                child: new Text('POP'),
+                onPressed: () { Navigator.pop(context); }
+              ),
+            ],
+          )
+        );
+      },
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          body: new Builder(
+            builder: (BuildContext context) { // Navigator.push() needs context
+              return new ListView(
+                children: <Widget> [
+                  new Card(
+                    child: new Hero(
+                      tag: 'H',
+                      child: new SizedBox(
+                        height: 100.0,
+                        child: new MyStatefulWidget(value: '456'),
+                      ),
+                    ),
+                  ),
+                  new FlatButton(
+                    child: new Text('PUSH'),
+                    onPressed: () { Navigator.push(context, route); }
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      )
+    );
+
+    expect(find.text('456'), findsOneWidget);
+
+    // Push route.
+    await tester.tap(find.text('PUSH'));
+    await tester.pump();
+    await tester.pump();
+
+    // Push flight underway.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('456'), findsOneWidget);
+
+    // Push flight finished.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('456'), findsOneWidget);
+
+    // Pop route.
+    await tester.tap(find.text('POP'));
+    await tester.pump();
+    await tester.pump();
+
+    // Pop flight underway.
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(find.text('456'), findsOneWidget);
+
+    // Pop flight finished
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.text('456'), findsOneWidget);
+
+  });
 }

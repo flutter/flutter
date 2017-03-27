@@ -382,9 +382,9 @@ String get adbPath {
     throw 'ANDROID_HOME environment variable missing. This variable must '
         'point to the Android SDK directory containing platform-tools.';
 
-  final File adbPath = file(path.join(androidHome, 'platform-tools/adb'));
+  final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
-  if (!adbPath.existsSync()) throw 'adb not found at: $adbPath';
+  if (!canRun(adbPath)) throw 'adb not found at: $adbPath';
 
-  return adbPath.absolute.path;
+  return path.absolute(adbPath);
 }

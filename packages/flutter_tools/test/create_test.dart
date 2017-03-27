@@ -21,6 +21,10 @@ void main() {
   group('create', () {
     Directory temp;
 
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
     });

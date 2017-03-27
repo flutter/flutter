@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         title: 'Pirate app',
@@ -20,7 +20,7 @@ void main() {
           drawer: new Drawer(
             child: new ListView(
               children: <Widget>[
-                new AboutDrawerItem(
+                new AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
@@ -40,14 +40,14 @@ void main() {
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.byType(IconButton));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsNothing);
     expect(find.text('About box'), findsNothing);
 
     await tester.tap(find.text('About Pirate app'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('About Pirate app'), findsOneWidget);
     expect(find.text('0.1.2'), findsOneWidget);
@@ -60,19 +60,19 @@ void main() {
     });
 
     await tester.tap(find.text('VIEW LICENSES'));
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Pirate license'), findsOneWidget);
   });
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(child: new AboutDrawerItem()),
+      new Material(child: new AboutListTile()),
     );
     expect(find.text('About sky_shell'), findsOneWidget);
   });
 
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Future<Null> licenseFuture;

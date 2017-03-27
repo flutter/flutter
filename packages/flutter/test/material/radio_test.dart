@@ -16,9 +16,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: 2,
-          onChanged: (int value) {
-            log.add(value);
-          },
+          onChanged: log.add,
         ),
       ),
     ));
@@ -34,9 +32,7 @@ void main() {
           key: key,
           value: 1,
           groupValue: 1,
-          onChanged: (int value) {
-            log.add(value);
-          },
+          onChanged: log.add,
           activeColor: Colors.green[500],
         ),
       ),

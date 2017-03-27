@@ -4,11 +4,11 @@
 
 import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
 
-import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'text_editing.dart';
 import 'text_span.dart';
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);

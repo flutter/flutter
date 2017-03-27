@@ -5,10 +5,8 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stack_trace/stack_trace.dart';
 
 import 'application_package.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -66,29 +64,6 @@ class HotRunner extends ResidentRunner {
   bool _runningFromSnapshot = true;
   String kernelFilePath;
 
-  @override
-  Future<int> run({
-    Completer<DebugConnectionInfo> connectionInfoCompleter,
-    Completer<Null> appStartedCompleter,
-    String route,
-    bool shouldBuild: true
-  }) {
-    // Don't let uncaught errors kill the process.
-    return Chain.capture(() {
-      return _run(
-        connectionInfoCompleter: connectionInfoCompleter,
-        appStartedCompleter: appStartedCompleter,
-        route: route,
-        shouldBuild: shouldBuild
-      );
-    }, onError: (dynamic error, StackTrace stackTrace) {
-      // Actually exit on ToolExit.
-      if (error is ToolExit)
-        throw error;
-      printError('Exception from flutter run: $error', stackTrace);
-    });
-  }
-
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
       // Disabled.
@@ -102,81 +77,25 @@ class HotRunner extends ResidentRunner {
         new DartDependencySetBuilder(mainPath, packagesFilePath);
     try {
       _dartDependencies = new Set<String>.from(dartDependencySetBuilder.build());
-    } catch (error) {
-      printStatus('Error detected in application source code:', emphasis: true);
-      printError('$error');
+    } on DartDependencyException catch (error) {
+      printError(
+        'Your application could not be compiled, because its dependencies could not be established.\n'
+        '$error'
+      );
       return false;
     }
     return true;
   }
 
-  Future<int> _run({
+  Future<int> attach(Uri observatoryUri, {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
-    String route,
-    bool shouldBuild: true
+    String isolateFilter,
   }) async {
-    if (!fs.isFileSync(mainPath)) {
-      String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null)
-        message += '\nConsider using the -t option to specify the Dart file to start.';
-      printError(message);
-      return 1;
-    }
-
-    package = getApplicationPackageForPlatform(device.platform, applicationBinary: applicationBinary);
-
-    if (package == null) {
-      String message = 'No application found for ${device.platform}.';
-      final String hint = getMissingPackageHintForPlatform(device.platform);
-      if (hint != null)
-        message += '\n$hint';
-      printError(message);
-      return 1;
-    }
-
-    // Determine the Dart dependencies eagerly.
-    if (!_refreshDartDependencies()) {
-      // Some kind of source level error or missing file in the Dart code.
-      return 1;
-    }
-
-    final Map<String, dynamic> platformArgs = <String, dynamic>{};
-
-    await startEchoingDeviceLog(package);
-
-    final String modeName = getModeName(debuggingOptions.buildMode);
-    printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
-
-    // Include kernel code
-    DevFSContent kernelContent;
-    if (kernelFilePath != null)
-      kernelContent = new DevFSFileContent(fs.file(kernelFilePath));
-
-    // Start the application.
-    final Future<LaunchResult> futureResult = device.startApp(
-      package,
-      debuggingOptions.buildMode,
-      mainPath: mainPath,
-      debuggingOptions: debuggingOptions,
-      platformArgs: platformArgs,
-      route: route,
-      prebuiltApplication: prebuiltMode,
-      kernelContent: kernelContent,
-      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
-    );
-
-    final LaunchResult result = await futureResult;
-
-    if (!result.started) {
-      printError('Error launching application on ${device.name}.');
-      await stopEchoingDeviceLog();
-      return 2;
-    }
-
-    _observatoryUri = result.observatoryUri;
+    _observatoryUri = observatoryUri;
     try {
-      await connectToServiceProtocol(_observatoryUri);
+      await connectToServiceProtocol(
+          _observatoryUri, isolateFilter: isolateFilter);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
@@ -204,7 +123,7 @@ class HotRunner extends ResidentRunner {
     }
 
     await vmService.vm.refreshViews();
-    printTrace('Connected to ${vmService.vm.mainView}.');
+    printTrace('Connected to $currentView.');
 
     if (stayResident) {
       setupTerminal();
@@ -239,9 +158,74 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
+  Future<int> run({
+    Completer<DebugConnectionInfo> connectionInfoCompleter,
+    Completer<Null> appStartedCompleter,
+    String route,
+    bool shouldBuild: true
+  }) async {
+    if (!fs.isFileSync(mainPath)) {
+      String message = 'Tried to run $mainPath, but that file does not exist.';
+      if (target == null)
+        message += '\nConsider using the -t option to specify the Dart file to start.';
+      printError(message);
+      return 1;
+    }
+
+    package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
+
+    if (package == null) {
+      String message = 'No application found for ${device.targetPlatform}.';
+      final String hint = getMissingPackageHintForPlatform(device.targetPlatform);
+      if (hint != null)
+        message += '\n$hint';
+      printError(message);
+      return 1;
+    }
+
+    // Determine the Dart dependencies eagerly.
+    if (!_refreshDartDependencies()) {
+      // Some kind of source level error or missing file in the Dart code.
+      return 1;
+    }
+
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
+
+    await startEchoingDeviceLog(package);
+
+    final String modeName = getModeName(debuggingOptions.buildMode);
+    printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
+
+    // Start the application.
+    final Future<LaunchResult> futureResult = device.startApp(
+      package,
+      debuggingOptions.buildMode,
+      mainPath: mainPath,
+      debuggingOptions: debuggingOptions,
+      platformArgs: platformArgs,
+      route: route,
+      prebuiltApplication: prebuiltMode,
+      kernelPath: kernelFilePath,
+      applicationNeedsRebuild: shouldBuild || hasDirtyDependencies()
+    );
+
+    final LaunchResult result = await futureResult;
+
+    if (!result.started) {
+      printError('Error launching application on ${device.name}.');
+      await stopEchoingDeviceLog();
+      return 2;
+    }
+
+    return attach(result.observatoryUri,
+                  connectionInfoCompleter: connectionInfoCompleter,
+                  appStartedCompleter: appStartedCompleter);
+  }
+
+  @override
   Future<Null> handleTerminalCommand(String code) async {
     final String lower = code.toLowerCase();
-    if ((lower == 'r') || (code == AnsiTerminal.KEY_F5)) {
+    if (lower == 'r') {
       final OperationResult result = await restart(fullRestart: code == 'R');
       if (!result.isOk) {
         // TODO(johnmccutchan): Attempt to determine the number of errors that
@@ -315,7 +299,7 @@ class HotRunner extends ResidentRunner {
   Future<Null> _launchInView(Uri entryUri,
                              Uri packagesUri,
                              Uri assetsDirectoryUri) async {
-    final FlutterView view = vmService.vm.mainView;
+    final FlutterView view = currentView;
     return view.runFromSource(entryUri, packagesUri, assetsDirectoryUri);
   }
 
@@ -448,7 +432,7 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload');
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-        reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+        reloadMessage = 'Reload done: $loadedLibraryCount of $finalLibraryCount libraries needed reloading';
       }
     } catch (error, st) {
       final int errorCode = error['code'];
@@ -522,16 +506,16 @@ class HotRunner extends ResidentRunner {
     const String bold = '\u001B[0;1m';
     const String reset = '\u001B[0m';
     printStatus(
-      '$fire  To hot reload your app on the fly, press "r" or F5. To restart the app entirely, press "R".',
+      '$fire  To hot reload your app on the fly, press "r". To restart the app entirely, press "R".',
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
-                       'press "r" or F5. To restart the app entirely, press "R".$reset'
+                       'press "r". To restart the app entirely, press "R".$reset'
     );
     printStatus('The Observatory debugger and profiler is available at: $_observatoryUri');
     if (details) {
       printHelpDetails();
-      printStatus('To repeat this help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('To repeat this help message, press "h". To quit, press "q".');
     } else {
-      printStatus('For a more detailed help message, press "h" or F1. To quit, press "q", F10, or Ctrl-C.');
+      printStatus('For a more detailed help message, press "h". To quit, press "q".');
     }
   }
 

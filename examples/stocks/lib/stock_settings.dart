@@ -103,139 +103,99 @@ class StockSettingsState extends State<StockSettings> {
 
   Widget buildSettingsPane(BuildContext context) {
     final List<Widget> rows = <Widget>[
-      new DrawerItem(
-        icon: new Icon(Icons.thumb_up),
-        onPressed: () => _confirmOptimismChange(),
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Everything is awesome')),
-            new Checkbox(
-              value: config.configuration.stockMode == StockMode.optimistic,
-              onChanged: (bool value) => _confirmOptimismChange()
-            ),
-          ]
-        )
+      new ListTile(
+        leading: new Icon(Icons.thumb_up),
+        title: new Text('Everything is awesome'),
+        onTap: _confirmOptimismChange,
+        trailing: new Checkbox(
+          value: config.configuration.stockMode == StockMode.optimistic,
+          onChanged: (bool value) => _confirmOptimismChange(),
+        ),
       ),
-      new DrawerItem(
-        icon: new Icon(Icons.backup),
-        onPressed: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Back up stock list to the cloud')),
-            new Switch(
-              value: config.configuration.backupMode == BackupMode.enabled,
-              onChanged: _handleBackupChanged
-            ),
-          ]
-        )
+      new ListTile(
+        leading: new Icon(Icons.backup),
+        title: new Text('Back up stock list to the cloud'),
+        onTap: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
+        trailing: new Switch(
+          value: config.configuration.backupMode == BackupMode.enabled,
+          onChanged: _handleBackupChanged,
+        ),
       ),
-      new DrawerItem(
-        icon: new Icon(Icons.picture_in_picture),
-        onPressed: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Show rendering performance overlay')),
-            new Switch(
-              value: config.configuration.showPerformanceOverlay,
-              onChanged: _handleShowPerformanceOverlayChanged
-            ),
-          ]
-        )
+      new ListTile(
+        leading: new Icon(Icons.picture_in_picture),
+        title: new Text('Show rendering performance overlay'),
+        onTap: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
+        trailing: new Switch(
+          value: config.configuration.showPerformanceOverlay,
+          onChanged: _handleShowPerformanceOverlayChanged,
+        ),
       ),
-      new DrawerItem(
-        icon: new Icon(Icons.accessibility),
-        onPressed: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
-        child: new Row(
-          children: <Widget>[
-            new Expanded(child: new Text('Show semantics overlay')),
-            new Switch(
-              value: config.configuration.showSemanticsDebugger,
-              onChanged: _handleShowSemanticsDebuggerChanged
-            ),
-          ]
-        )
+      new ListTile(
+        leading: new Icon(Icons.accessibility),
+        title: new Text('Show semantics overlay'),
+        onTap: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
+        trailing: new Switch(
+          value: config.configuration.showSemanticsDebugger,
+          onChanged: _handleShowSemanticsDebuggerChanged,
+        ),
       ),
     ];
     assert(() {
       // material grid and size construction lines are only available in checked mode
       rows.addAll(<Widget>[
-        new DrawerItem(
-          icon: new Icon(Icons.border_clear),
-          onPressed: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show material grid (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowGrid,
-                onChanged: _handleShowGridChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.border_clear),
+          title: new Text('Show material grid (for debugging)'),
+          onTap: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
+          trailing: new Switch(
+            value: config.configuration.debugShowGrid,
+            onChanged: _handleShowGridChanged,
+          ),
         ),
-        new DrawerItem(
-          icon: new Icon(Icons.border_all),
-          onPressed: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show construction lines (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowSizes,
-                onChanged: _handleShowSizesChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.border_all),
+          title: new Text('Show construction lines (for debugging)'),
+          onTap: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
+          trailing: new Switch(
+            value: config.configuration.debugShowSizes,
+            onChanged: _handleShowSizesChanged,
+          ),
         ),
-        new DrawerItem(
-          icon: new Icon(Icons.format_color_text),
-          onPressed: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show baselines (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowBaselines,
-                onChanged: _handleShowBaselinesChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.format_color_text),
+          title: new Text('Show baselines (for debugging)'),
+          onTap: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
+          trailing: new Switch(
+            value: config.configuration.debugShowBaselines,
+            onChanged: _handleShowBaselinesChanged,
+          ),
         ),
-        new DrawerItem(
-          icon: new Icon(Icons.filter_none),
-          onPressed: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show layer boundaries (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowLayers,
-                onChanged: _handleShowLayersChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.filter_none),
+          title: new Text('Show layer boundaries (for debugging)'),
+          onTap: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
+          trailing: new Switch(
+            value: config.configuration.debugShowLayers,
+            onChanged: _handleShowLayersChanged,
+          ),
         ),
-        new DrawerItem(
-          icon: new Icon(Icons.mouse),
-          onPressed: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show pointer hit-testing (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowPointers,
-                onChanged: _handleShowPointersChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.mouse),
+          title: new Text('Show pointer hit-testing (for debugging)'),
+          onTap: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
+          trailing: new Switch(
+            value: config.configuration.debugShowPointers,
+            onChanged: _handleShowPointersChanged,
+          ),
         ),
-        new DrawerItem(
-          icon: new Icon(Icons.gradient),
-          onPressed: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
-          child: new Row(
-            children: <Widget>[
-              new Expanded(child: new Text('Show repaint rainbow (for debugging)')),
-              new Switch(
-                value: config.configuration.debugShowRainbow,
-                onChanged: _handleShowRainbowChanged
-              ),
-            ]
-          )
+        new ListTile(
+          leading: new Icon(Icons.gradient),
+          title: new Text('Show repaint rainbow (for debugging)'),
+          onTap: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
+          trailing: new Switch(
+            value: config.configuration.debugShowRainbow,
+            onChanged: _handleShowRainbowChanged,
+          ),
         ),
       ]);
       return true;

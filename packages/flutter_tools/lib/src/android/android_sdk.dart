@@ -87,8 +87,9 @@ class AndroidSdk {
         return new AndroidSdk(fs.path.join(androidHomeDir, 'sdk'));
     }
 
-    File aaptBin = os.which('aapt'); // in build-tools/$version/aapt
-    if (aaptBin != null) {
+    // in build-tools/$version/aapt
+    final List<File> aaptBins = os.whichAll('aapt');
+    for (File aaptBin in aaptBins) {
       // Make sure we're using the aapt from the SDK.
       aaptBin = fs.file(aaptBin.resolveSymbolicLinksSync());
       final String dir = aaptBin.parent.parent.parent.path;
@@ -96,8 +97,9 @@ class AndroidSdk {
         return new AndroidSdk(dir);
     }
 
-    File adbBin = os.which('adb'); // in platform-tools/adb
-    if (adbBin != null) {
+    // in platform-tools/adb
+    final List<File> adbBins = os.whichAll('adb');
+    for (File adbBin in adbBins) {
       // Make sure we're using the adb from the SDK.
       adbBin = fs.file(adbBin.resolveSymbolicLinksSync());
       final String dir = adbBin.parent.parent.path;
@@ -122,14 +124,14 @@ class AndroidSdk {
 
   /// Validate the Android SDK. This returns an empty list if there are no
   /// issues; otherwise, it returns a list of issues found.
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
+  List<String> validateSdkWellFormed() {
     if (!processManager.canRun(adbPath))
       return <String>['Android SDK file not found: $adbPath.'];
 
     if (sdkVersions.isEmpty || latestVersion == null)
       return <String>['Android SDK is missing command line tools; download from https://goo.gl/XxQghQ'];
 
-    return latestVersion.validateSdkWellFormed(requireApkSigner: requireApkSigner);
+    return latestVersion.validateSdkWellFormed();
   }
 
   String getPlatformToolsPath(String binaryName) {
@@ -225,31 +227,12 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
 
   String get aaptPath => getBuildToolsPath('aapt');
 
-  String get dxPath => getBuildToolsPath('dx');
-
-  String get zipalignPath => getBuildToolsPath('zipalign');
-
-  String get apksignerPath => getBuildToolsPath('apksigner');
-
-  List<String> validateSdkWellFormed({bool requireApkSigner = true}) {
-    if (buildToolsVersion.major < minimumAndroidSdkVersion) {
-      return <String>['Minimum supported Android SDK version is $minimumAndroidSdkVersion '
-                      'but this system has ${buildToolsVersion.major}. Please upgrade.'];
-    }
+  List<String> validateSdkWellFormed() {
     if (_exists(androidJarPath) != null)
       return <String>[_exists(androidJarPath)];
 
     if (_canRun(aaptPath) != null)
       return <String>[_canRun(aaptPath)];
-
-    if (_canRun(dxPath) != null)
-      return <String>[_canRun(dxPath)];
-
-    if (_canRun(zipalignPath) != null)
-      return <String>[_canRun(zipalignPath)];
-
-    if (requireApkSigner && _canRun(apksignerPath) != null)
-      return <String>[_canRun(apksignerPath) + '\napksigner requires Android SDK Build Tools 24.0.3 or newer.'];
 
     return <String>[];
   }

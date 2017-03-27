@@ -88,7 +88,7 @@ void main() {
           height: 200.0,
           child: new FittedBox(
             key: outside,
-            fit: ImageFit.cover,
+            fit: BoxFit.cover,
             child: new Container(
               key: inside,
               width: 100.0,

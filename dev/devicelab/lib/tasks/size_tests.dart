@@ -7,6 +7,7 @@ import 'dart:io';
 import 'package:flutter_devicelab/framework/adb.dart';
 
 import '../framework/framework.dart';
+import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createBasicMaterialAppSizeTest() {
@@ -30,13 +31,14 @@ TaskFunction createBasicMaterialAppSizeTest() {
         await flutter('build', options: <String>['clean']);
 
         if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          await prepareProvisioningCertificates(sampleDir.path);
           await flutter('build', options: <String>['ios', '--release']);
           // IPAs are created manually AFAICT
           await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
           releaseSizeInBytes = await file('${sampleDir.path}/build/app.ipa').length();
         } else {
           await flutter('build', options: <String>['apk', '--release']);
-          releaseSizeInBytes = await file('${sampleDir.path}/android/app/build/outputs/apk/app.apk').length();
+          releaseSizeInBytes = await file('${sampleDir.path}/build/app/outputs/apk/app-release.apk').length();
         }
       });
     });

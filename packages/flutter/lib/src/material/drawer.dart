@@ -5,6 +5,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'list_tile.dart';
 import 'material.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
@@ -30,7 +31,23 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 ///
 /// Drawers are typically used with the [Scaffold.drawer] property. The child of
 /// the drawer is usually a [ListView] whose first child is a [DrawerHeader]
-/// that displays status information about the current user.
+/// that displays status information about the current user. The remaining
+/// drawer children are often constructed with [ListTile]s, often concluding
+/// with an [AboutListTile].
+///
+/// An open drawer can be closed by calling [Navigator.pop]. For example
+/// a drawer item might close the drawer when tapped:
+///
+/// ```dart
+/// new ListTile(
+///   leading: new Icon(Icons.change_history),
+///   title: new Text('Change history'),
+///   onTap: () {
+///     // change app state...
+///     Navigator.pop(context); // close the drawer
+///   },
+/// );
+/// ```
 ///
 /// The [AppBar] automatically displays an appropriate [IconButton] to show the
 /// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
@@ -43,9 +60,6 @@ const Duration _kBaseSettleDuration = const Duration(milliseconds: 246);
 ///  * [Scaffold.of], to obtain the current [ScaffoldState], which manages the
 ///    display and animation of the drawer.
 ///  * [ScaffoldState.openDrawer], which displays its [Drawer], if any.
-///  * [Navigator.pop], which closes the drawer if it is open.
-///  * [DrawerItem], a widget for items in drawers.
-///  * [DrawerHeader], a widget for the top part of a drawer.
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
@@ -233,8 +247,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
         alignment: FractionalOffset.centerLeft,
@@ -245,7 +258,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           behavior: HitTestBehavior.translucent,
           excludeFromSemantics: true,
           child: new Container(width: _kEdgeDragWidth)
-        )
+        ),
       );
     } else {
       return new GestureDetector(
@@ -263,8 +276,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   decoration: new BoxDecoration(
                     backgroundColor: _color.evaluate(_controller)
                   ),
-                  child: new Container()
-                )
+                  child: new Container(),
+                ),
               ),
               new Align(
                 alignment: FractionalOffset.centerLeft,
@@ -275,14 +288,21 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: new Focus(
                       key: _drawerKey,
                       child: config.child
-                    )
-                  )
-                )
-              )
-            ]
-          )
-        )
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return new ListTileTheme(
+      style: ListTileStyle.drawer,
+      child: _buildDrawer(context),
+    );
   }
 }

@@ -39,7 +39,7 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     controller.animateTo(326.0, duration: const Duration(milliseconds: 300), curve: Curves.ease);
-    await tester.pumpUntilNoTransientCallbacks(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(controller.offset, equals(326.0));
     expect(realOffset(), equals(controller.offset));
@@ -228,7 +228,35 @@ void main() {
 
     controller.jumpTo(1.0);
     controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('Scroll controllers notify when the position changes', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+
+    final List<double> log = <double>[];
+
+    controller.addListener(() {
+      log.add(controller.offset);
+    });
+
+    await tester.pumpWidget(new ListView(
+      controller: controller,
+      children: kStates.map<Widget>((String state) {
+        return new Container(height: 200.0, child: new Text(state));
+      }).toList(),
+    ));
+
+    expect(log, isEmpty);
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -250.0));
+
+    expect(log, equals(<double>[ 250.0 ]));
+    log.clear();
+
+    controller.dispose();
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -130.0));
+    expect(log, isEmpty);
   });
 }

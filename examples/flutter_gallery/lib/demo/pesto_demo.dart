@@ -25,7 +25,7 @@ final Set<Recipe> _favoriteRecipes = new Set<Recipe>();
 final ThemeData _kTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.teal,
-  accentColor: Colors.redAccent[200],
+  accentColor: Colors.redAccent,
 );
 
 class PestoHome extends StatelessWidget {
@@ -139,7 +139,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
     final EdgeInsets padding = const EdgeInsets.all(8.0);
     return new SliverPadding(
       padding: padding,
-      child: new SliverGrid(
+      sliver: new SliverGrid(
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: _kRecipePageMaxWidth,
           crossAxisSpacing: 8.0,
@@ -218,7 +218,7 @@ class _PestoLogoState extends State<PestoLogo> {
           children: <Widget>[
             new Positioned.fromRect(
               rect: _imageRectTween.lerp(config.t),
-              child: new Image.asset(_kSmallLogoImage, fit: ImageFit.contain),
+              child: new Image.asset(_kSmallLogoImage, fit: BoxFit.contain),
             ),
             new Positioned.fromRect(
               rect: _textRectTween.lerp(config.t),
@@ -254,7 +254,7 @@ class RecipeCard extends StatelessWidget {
           children: <Widget>[
             new Hero(
               tag: recipe.imagePath,
-              child: new Image.asset(recipe.imagePath, fit: ImageFit.contain)
+              child: new Image.asset(recipe.imagePath, fit: BoxFit.contain)
             ),
             new Expanded(
               child: new Row(
@@ -325,7 +325,7 @@ class _RecipePageState extends State<RecipePage> {
               tag: config.recipe.imagePath,
               child: new Image.asset(
                 config.recipe.imagePath,
-                fit: fullWidth ? ImageFit.fitWidth : ImageFit.cover,
+                fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
               ),
             ),
           ),
@@ -437,7 +437,7 @@ class RecipeSheet extends StatelessWidget {
                     width: 32.0,
                     height: 32.0,
                     alignment: FractionalOffset.centerLeft,
-                    fit: ImageFit.scaleDown
+                    fit: BoxFit.scaleDown
                   )
                 ),
                 new TableCell(

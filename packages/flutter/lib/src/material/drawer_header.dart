@@ -17,14 +17,12 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 /// Part of the material design [Drawer].
 ///
 /// Requires one of its ancestors to be a [Material] widget. This condition is
-/// satisfied by putting the [DrawerItem] in a [Drawer].
+/// satisfied by putting the [DrawerHeader] in a [Drawer].
 ///
 /// See also:
 ///
-///  * [Drawer]
 ///  * [UserAccountsDrawerHeader], a variant of [DrawerHeader] that is
 ///    specialized for showing user accounts.
-///  * [DrawerItem]
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
@@ -33,6 +31,7 @@ class DrawerHeader extends StatelessWidget {
   const DrawerHeader({
     Key key,
     this.decoration,
+    this.margin: const EdgeInsets.only(bottom: 8.0),
     this.padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
     this.duration: const Duration(milliseconds: 250),
     this.curve: Curves.fastOutSlowIn,
@@ -55,6 +54,9 @@ class DrawerHeader extends StatelessWidget {
   /// If the child is null, the padding has no effect.
   final EdgeInsets padding;
 
+  /// The margin around the drawer header.
+  final EdgeInsets margin;
+
   /// The duration for animations of the [decoration].
   final Duration duration;
 
@@ -74,7 +76,7 @@ class DrawerHeader extends StatelessWidget {
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(
       height: statusBarHeight + _kDrawerHeaderHeight,
-      margin: const EdgeInsets.only(bottom: 8.0),
+      margin: margin,
       decoration: new BoxDecoration(
         border: new Border(
           bottom: new BorderSide(

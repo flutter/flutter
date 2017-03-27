@@ -33,7 +33,8 @@ class BuildAotCommand extends BuildSubCommand {
         defaultsTo: 'android-arm',
         allowed: <String>['android-arm', 'ios']
       )
-      ..addFlag('interpreter');
+      ..addFlag('interpreter')
+      ..addFlag('quiet', defaultsTo: false);
   }
 
   @override
@@ -51,8 +52,11 @@ class BuildAotCommand extends BuildSubCommand {
       throwToolExit('Unknown platform: $targetPlatform');
 
     final String typeName = artifacts.getEngineType(platform, getBuildMode());
-    final Status status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
-        expectSlowOperation: true);
+    Status status;
+    if (!argResults['quiet']) {
+      status = logger.startProgress('Building AOT snapshot in ${getModeName(getBuildMode())} mode ($typeName)...',
+          expectSlowOperation: true);
+    }
     final String outputPath = await buildAotSnapshot(
       findMainDartFile(targetFile),
       platform,
@@ -60,12 +64,17 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter']
     );
-    status.stop();
+    status?.stop();
 
     if (outputPath == null)
       throwToolExit(null);
 
-    printStatus('Built to $outputPath${fs.path.separator}.');
+    final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
+    if (argResults['quiet']) {
+      printTrace(builtMessage);
+    } else {
+      printStatus(builtMessage);
+    }
   }
 }
 
@@ -124,6 +133,7 @@ Future<String> _buildAotSnapshot(
   final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
   final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+  final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
 
   final String vmEntryPoints = artifacts.getArtifactPath(Artifact.dartVmEntryPointsTxt, platform, buildMode);
   final String ioEntryPoints = artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, platform, buildMode);
@@ -174,6 +184,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 
@@ -198,6 +209,7 @@ Future<String> _buildAotSnapshot(
     '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
     '--print_snapshot_sizes',
+    '--dependencies=$dependencies',
   ];
 
   if (!interpreter) {
@@ -230,6 +242,7 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.darwin_x64:
     case TargetPlatform.linux_x64:
     case TargetPlatform.windows_x64:
+    case TargetPlatform.fuchsia:
       assert(false);
   }
 
@@ -249,14 +262,18 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
+  // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
+  // the Dart SDK.
+  await outputDir.childFile('gen_snapshot.d').writeAsString('snapshot.d: $genSnapshot\n');
+
   // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
   // end-developer can link into their app.
   if (platform == TargetPlatform.ios) {
-    printStatus('Building app.dylib...');
+    printStatus('Building App.framework...');
 
     // These names are known to from the engine.
-    final String kVmSnapshotData = 'kDartVmSnapshotData';
-    final String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
+    const String kVmSnapshotData = 'kDartVmSnapshotData';
+    const String kIsolateSnapshotData = 'kDartIsolateSnapshotData';
 
     final String kVmSnapshotDataC = fs.path.join(outputDir.path, '$kVmSnapshotData.c');
     final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
@@ -289,16 +306,17 @@ Future<String> _buildAotSnapshot(
         ..addAll(<String>['-c', assembly, '-o', assemblyO]));
     }
 
-    final String appSo = fs.path.join(outputDir.path, 'app.dylib');
-
+    final String frameworkDir = fs.path.join(outputDir.path, 'App.framework');
+    fs.directory(frameworkDir).createSync(recursive: true);
+    final String appLib = fs.path.join(frameworkDir, 'App');
     final List<String> linkCommand = <String>['xcrun', 'clang']
       ..addAll(commonBuildOptions)
       ..addAll(<String>[
         '-dynamiclib',
         '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
         '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
-        '-install_name', '@rpath/app.dylib',
-        '-o', appSo,
+        '-install_name', '@rpath/App.framework/App',
+        '-o', appLib,
     ]);
     if (interpreter) {
       linkCommand.add(kVmSnapshotDataO);

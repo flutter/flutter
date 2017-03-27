@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'basic.dart';
@@ -63,8 +64,8 @@ abstract class TextSelectionDelegate {
   void hideToolbar();
 }
 
-// An interface for building the selection UI, to be provided by the
-// implementor of the toolbar widget.
+/// An interface for building the selection UI, to be provided by the
+/// implementor of the toolbar widget.
 abstract class TextSelectionControls {
   /// Builds a selection handle of the given type.
   Widget buildHandle(BuildContext context, TextSelectionHandleType type);

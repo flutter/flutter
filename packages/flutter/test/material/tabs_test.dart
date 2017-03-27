@@ -6,6 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/recording_canvas.dart';
+
 class StateMarker extends StatefulWidget {
   StateMarker({ Key key, this.child }) : super(key: key);
 
@@ -26,7 +28,13 @@ class StateMarkerState extends State<StateMarker> {
   }
 }
 
-Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, Key tabBarKey }) {
+Widget buildFrame({
+    Key tabBarKey,
+    List<String> tabs,
+    String value,
+    bool isScrollable: false,
+    Color indicatorColor,
+  }) {
   return new Material(
     child: new DefaultTabController(
       initialIndex: tabs.indexOf(value),
@@ -35,6 +43,7 @@ Widget buildFrame({ List<String> tabs, String value, bool isScrollable: false, K
         key: tabBarKey,
         tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
         isScrollable: isScrollable,
+        indicatorColor: indicatorColor,
       ),
     ),
   );
@@ -102,6 +111,19 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
   );
 }
 
+class TabIndicatorRecordingCanvas extends TestRecordingCanvas {
+  TabIndicatorRecordingCanvas(this.indicatorColor);
+
+  final Color indicatorColor;
+  Rect indicatorRect;
+
+  @override
+  void drawRect(Rect rect, Paint paint) {
+    if (paint.color == indicatorColor)
+      indicatorRect = rect;
+  }
+}
+
 void main() {
   testWidgets('TabBar tap selects tab', (WidgetTester tester) async {
     final List<String> tabs = <String>['A', 'B', 'C'];
@@ -151,18 +173,15 @@ void main() {
     expect(controller.previousIndex, 2);
 
     await tester.tap(find.text('C'));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 2);
 
     await tester.tap(find.text('B'));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 1);
 
     await tester.tap(find.text('A'));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 0);
   });
 
@@ -179,8 +198,7 @@ void main() {
     expect(tester.getCenter(find.text('FFFFFF')).x, greaterThan(401.0));
 
     await tester.tap(find.text('FFFFFF'));
-    await tester.pump();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
     expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));
@@ -294,7 +312,7 @@ void main() {
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
     Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 1);
     expect(find.text('LEFT CHILD'), findsNothing);
     expect(find.text('RIGHT CHILD'), findsOneWidget);
@@ -302,7 +320,7 @@ void main() {
     // Fling to the right, switch back to the 'LEFT' tab
     flingStart = tester.getCenter(find.text('RIGHT CHILD'));
     await tester.flingFrom(flingStart, const Offset(200.0, 0.0), 10000.0);
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(controller.index, 0);
     expect(find.text('LEFT CHILD'), findsOneWidget);
     expect(find.text('RIGHT CHILD'), findsNothing);
@@ -440,21 +458,21 @@ void main() {
     });
 
     await tester.tap(find.text('RIGHT'));
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(value, 'RIGHT');
 
     await tester.tap(find.text('LEFT'));
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(value, 'LEFT');
 
     final Point leftFlingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(leftFlingStart, const Offset(-200.0, 0.0), 10000.0);
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(value, 'RIGHT');
 
     final Point rightFlingStart = tester.getCenter(find.text('RIGHT CHILD'));
     await tester.flingFrom(rightFlingStart, const Offset(200.0, 0.0), 10000.0);
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pumpAndSettle();
     expect(value, 'LEFT');
   });
 
@@ -618,7 +636,7 @@ void main() {
     expect(secondColor, equals(Colors.blue[500]));
   });
 
-  testWidgets('TabBar unselectedLabelColor control test', (WidgetTester tester) async {
+  testWidgets('TabBarView page left and right test', (WidgetTester tester) async {
     final TabController controller = new TabController(
       vsync: const TestVSync(),
       length: 2,
@@ -635,29 +653,81 @@ void main() {
 
     expect(controller.index, equals(0));
 
-    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
-
+    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
     expect(controller.index, equals(0));
 
-    await gesture.moveBy(const Offset(-380.0, 0.0));
-
+    // Drag to the left and right, by less than the TabBarView's width.
+    // The selected index (controller.index) should not change.
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
     expect(controller.index, equals(0));
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsNothing);
 
-    await gesture.moveBy(const Offset(-40.0, 0.0));
-
-    expect(controller.index, equals(1));
-
-    await gesture.moveBy(const Offset(-40.0, 0.0));
-    await tester.pump();
-
-    expect(controller.index, equals(1));
-
+    // Drag more than the TabBarView's width to the right. This forces
+    // the selected index to change to 1.
+    await gesture.moveBy(const Offset(-500.0, 0.0));
     await gesture.up();
-    await tester.pumpUntilNoTransientCallbacks();
+    await tester.pump(); // start the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     expect(controller.index, equals(1));
-
     expect(find.text('First'), findsNothing);
     expect(find.text('Second'), findsOneWidget);
+
+    gesture = await tester.startGesture(const Point(100.0, 100.0));
+    expect(controller.index, equals(1));
+
+    // Drag to the left and right, by less than the TabBarView's width.
+    // The selected index (controller.index) should not change.
+    await gesture.moveBy(const Offset(-100.0, 0.0));
+    await gesture.moveBy(const Offset(100.0, 0.0));
+    expect(controller.index, equals(1));
+    expect(find.text('First'), findsNothing);
+    expect(find.text('Second'), findsOneWidget);
+
+    // Drag more than the TabBarView's width to the left. This forces
+    // the selected index to change back to 0.
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await gesture.up();
+    await tester.pump(); // start the scroll animation
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(controller.index, equals(0));
+    expect(find.text('First'), findsOneWidget);
+    expect(find.text('Second'), findsNothing);
   });
 
+  testWidgets('TabBar tap animates the selection indicator', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/7479
+
+    final List<String> tabs = <String>['A', 'B'];
+
+    const Color indicatorColor = const Color(0xFFFF0000);
+    await tester.pumpWidget(buildFrame(tabs: tabs, value: 'A', indicatorColor: indicatorColor));
+
+    final RenderBox box = tester.renderObject(find.byType(TabBar));
+    final TabIndicatorRecordingCanvas canvas = new TabIndicatorRecordingCanvas(indicatorColor);
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect0 = canvas.indicatorRect;
+    expect(indicatorRect0.left, 0.0);
+    expect(indicatorRect0.width, 400.0);
+    expect(indicatorRect0.height, 2.0);
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect1 = canvas.indicatorRect;
+    expect(indicatorRect1.left, greaterThan(indicatorRect0.left));
+    expect(indicatorRect1.right, lessThan(800.0));
+    expect(indicatorRect1.height, 2.0);
+
+    await tester.pump(const Duration(milliseconds: 300));
+    box.paint(context, Offset.zero);
+    final Rect indicatorRect2 = canvas.indicatorRect;
+    expect(indicatorRect2.left, 400.0);
+    expect(indicatorRect2.width, 400.0);
+    expect(indicatorRect2.height, 2.0);
+  });
 }

@@ -24,7 +24,7 @@ class _NotImplementedDialog extends StatelessWidget {
       content: new Text('This feature has not yet been implemented.'),
       actions: <Widget>[
         new FlatButton(
-          onPressed: () { debugDumpApp(); },
+          onPressed: debugDumpApp,
           child: new Row(
             children: <Widget>[
               new Icon(
@@ -124,19 +124,20 @@ class StockHomeState extends State<StockHome> {
       child: new ListView(
         children: <Widget>[
           new DrawerHeader(child: new Center(child: new Text('Stocks'))),
-          new DrawerItem(
-            icon: new Icon(Icons.assessment),
+          new ListTile(
+            leading: new Icon(Icons.assessment),
+            title: new Text('Stock List'),
             selected: true,
-            child: new Text('Stock List')
           ),
-          new DrawerItem(
-            icon: new Icon(Icons.account_balance),
-            onPressed: null,
-            child: new Text('Account Balance')
+          new ListTile(
+            leading: new Icon(Icons.account_balance),
+            title: new Text('Account Balance'),
+            enabled: false,
           ),
-          new DrawerItem(
-            icon: new Icon(Icons.dvr),
-            onPressed: () {
+          new ListTile(
+            leading: new Icon(Icons.dvr),
+            title: new Text('Dump App to Console'),
+            onTap: () {
               try {
                 debugDumpApp();
                 debugDumpRenderTree();
@@ -146,38 +147,43 @@ class StockHomeState extends State<StockHome> {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }
             },
-            child: new Text('Dump App to Console')
           ),
           new Divider(),
-          new DrawerItem(
-            icon: new Icon(Icons.thumb_up),
-            onPressed: () => _handleStockModeChange(StockMode.optimistic),
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Optimistic')),
-                new Radio<StockMode>(value: StockMode.optimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-              ]
-            )
+          new ListTile(
+            leading: new Icon(Icons.thumb_up),
+            title: new Text('Optimistic'),
+            trailing: new Radio<StockMode>(
+              value: StockMode.optimistic,
+              groupValue: config.configuration.stockMode,
+              onChanged: _handleStockModeChange
+            ),
+            onTap: () {
+              _handleStockModeChange(StockMode.optimistic);
+            },
           ),
-          new DrawerItem(
-            icon: new Icon(Icons.thumb_down),
-            onPressed: () => _handleStockModeChange(StockMode.pessimistic),
-            child: new Row(
-              children: <Widget>[
-                new Expanded(child: new Text('Pessimistic')),
-                new Radio<StockMode>(value: StockMode.pessimistic, groupValue: config.configuration.stockMode, onChanged: _handleStockModeChange)
-              ]
-            )
+          new ListTile(
+            leading: new Icon(Icons.thumb_down),
+            title: new Text('Pessimistic'),
+            trailing: new Radio<StockMode>(
+              value: StockMode.pessimistic,
+              groupValue: config.configuration.stockMode,
+              onChanged: _handleStockModeChange
+            ),
+            onTap: () {
+              _handleStockModeChange(StockMode.pessimistic);
+            },
           ),
           new Divider(),
-          new DrawerItem(
-            icon: new Icon(Icons.settings),
-            onPressed: _handleShowSettings,
-            child: new Text('Settings')),
-          new DrawerItem(
-            icon: new Icon(Icons.help),
-            onPressed: _handleShowAbout,
-            child: new Text('About'))
+          new ListTile(
+            leading: new Icon(Icons.settings),
+            title: new Text('Settings'),
+            onTap: _handleShowSettings,
+          ),
+          new ListTile(
+            leading: new Icon(Icons.help),
+            title: new Text('About'),
+            onTap: _handleShowAbout,
+          ),
         ]
       )
     );
@@ -312,7 +318,7 @@ class StockHomeState extends State<StockHome> {
     return new FloatingActionButton(
       tooltip: 'Create company',
       child: new Icon(Icons.add),
-      backgroundColor: Colors.redAccent[200],
+      backgroundColor: Colors.redAccent,
       onPressed: _handleCreateCompany
     );
   }

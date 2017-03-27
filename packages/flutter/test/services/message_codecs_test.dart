@@ -66,27 +66,27 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         -0x7fffffff - 1,
-        <int>[3, 0x80, 0x00, 0x00, 0x00],
+        <int>[3, 0x00, 0x00, 0x00, 0x80],
       );
       _checkEncoding<dynamic>(
         standard,
         -0x7fffffff - 2,
-        <int>[4, 0xff, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff],
+        <int>[4, 0xff, 0xff, 0xff, 0x7f, 0xff, 0xff, 0xff, 0xff],
       );
       _checkEncoding<dynamic>(
         standard,
         0x7fffffff,
-        <int>[3, 0x7f, 0xff, 0xff, 0xff],
+        <int>[3, 0xff, 0xff, 0xff, 0x7f],
       );
       _checkEncoding<dynamic>(
         standard,
         0x7fffffff + 1,
-        <int>[4, 0x00, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00],
+        <int>[4, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00],
       );
       _checkEncoding<dynamic>(
         standard,
         -0x7fffffffffffffff - 1,
-        <int>[4, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00],
+        <int>[4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80],
       );
       _checkEncoding<dynamic>(
         standard,
@@ -96,7 +96,7 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         0x7fffffffffffffff,
-        <int>[4, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff],
+        <int>[4, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f],
       );
       _checkEncoding<dynamic>(
         standard,
@@ -113,7 +113,7 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         new Uint8List(254),
-        <int>[8, 254, 0, 254]..addAll(new List<int>.filled(254, 0)),
+        <int>[8, 254, 254, 0]..addAll(new List<int>.filled(254, 0)),
       );
       _checkEncoding<dynamic>(
         standard,
@@ -123,7 +123,7 @@ void main() {
       _checkEncoding<dynamic>(
         standard,
         new Uint8List(0xffff + 1),
-        <int>[8, 255, 0, 1, 0, 0]..addAll(new List<int>.filled(0xffff + 1, 0)),
+        <int>[8, 255, 0, 0, 1, 0]..addAll(new List<int>.filled(0xffff + 1, 0)),
       );
     });
     test('should encode and decode simple messages', () {

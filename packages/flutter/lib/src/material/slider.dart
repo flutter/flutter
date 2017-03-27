@@ -232,8 +232,8 @@ const double _kActiveThumbRadius = 9.0;
 const double _kDisabledThumbRadius = 4.0;
 const double _kReactionRadius = 16.0;
 const double _kTrackWidth = 144.0;
-final Color _kInactiveTrackColor = Colors.grey[400];
-final Color _kActiveTrackColor = Colors.grey[500];
+final Color _kInactiveTrackColor = Colors.grey.shade400;
+final Color _kActiveTrackColor = Colors.grey;
 final Tween<double> _kReactionRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kReactionRadius);
 final Tween<double> _kThumbRadiusTween = new Tween<double>(begin: _kThumbRadius, end: _kActiveThumbRadius);
 final ColorTween _kTrackColorTween = new ColorTween(begin: _kInactiveTrackColor, end: _kActiveTrackColor);
@@ -316,27 +316,27 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
   int get divisions => _divisions;
   int _divisions;
-  set divisions(int newDivisions) {
-    if (newDivisions == _divisions)
+  set divisions(int value) {
+    if (value == _divisions)
       return;
-    _divisions = newDivisions;
+    _divisions = value;
     markNeedsPaint();
   }
 
   String get label => _label;
   String _label;
-  set label(String newLabel) {
-    if (newLabel == _label)
+  set label(String value) {
+    if (value == _label)
       return;
-    _label = newLabel;
+    _label = value;
     additionalConstraints = _getAdditionalConstraints(_label);
-    if (newLabel != null) {
+    if (value != null) {
       // TODO(abarth): Handle textScaleFactor.
       // https://github.com/flutter/flutter/issues/5938
       _labelPainter
         ..text = new TextSpan(
           style: _textTheme.body1.copyWith(fontSize: 10.0),
-          text: newLabel
+          text: value
         )
         ..layout();
     } else {

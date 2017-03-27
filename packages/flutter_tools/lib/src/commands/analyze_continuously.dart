@@ -169,7 +169,7 @@ class AnalysisServer {
     _process.exitCode.whenComplete(() => _process = null);
 
     final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
-    errorStream.listen((String error) => printError(error));
+    errorStream.listen(printError);
 
     final Stream<String> inStream = _process.stdout.transform(UTF8.decoder).transform(const LineSplitter());
     inStream.listen(_handleServerResponse);
@@ -238,7 +238,7 @@ class AnalysisServer {
 
   void _handleStatus(Map<String, dynamic> statusInfo) {
     // {"event":"server.status","params":{"analysis":{"isAnalyzing":true}}}
-    if (statusInfo['analysis'] != null) {
+    if (statusInfo['analysis'] != null && !_analyzingController.isClosed) {
       final bool isAnalyzing = statusInfo['analysis']['isAnalyzing'];
       _analyzingController.add(isAnalyzing);
     }
@@ -255,7 +255,8 @@ class AnalysisServer {
     // {"event":"analysis.errors","params":{"file":"/Users/.../lib/main.dart","errors":[]}}
     final String file = issueInfo['file'];
     final List<AnalysisError> errors = issueInfo['errors'].map((Map<String, dynamic> json) => new AnalysisError(json)).toList();
-    _errorsController.add(new FileAnalysisErrors(file, errors));
+    if (!_errorsController.isClosed)
+      _errorsController.add(new FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {

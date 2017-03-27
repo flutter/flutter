@@ -35,7 +35,7 @@ Future<Null> main() async {
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
-    final BuildableElement appState = tester.element(find.byType(stocks.StocksApp));
+    final Element appState = tester.element(find.byType(stocks.StocksApp));
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {

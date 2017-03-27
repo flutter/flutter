@@ -159,11 +159,11 @@ class _PagePosition extends ScrollPosition {
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-  set viewportFraction(double newValue) {
-    if (_viewportFraction == newValue)
+  set viewportFraction(double value) {
+    if (_viewportFraction == value)
       return;
     final double oldPage = page;
-    _viewportFraction = newValue;
+    _viewportFraction = value;
     if (oldPage != null)
       correctPixels(getPixelsFromPage(oldPage));
   }
