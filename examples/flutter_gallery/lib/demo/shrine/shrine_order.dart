@@ -9,10 +9,133 @@ import 'shrine_page.dart';
 import 'shrine_theme.dart';
 import 'shrine_types.dart';
 
-/// Describes a product and vendor in detail, supports specifying
-/// a order quantity (0-5). Appears at the top of the OrderPage.
-class OrderItem extends StatelessWidget {
-  OrderItem({ Key key, this.product, this.quantity, this.quantityChanged }) : super(key: key) {
+// Displays the product title's, description, and order quantity dropdown.
+class _ProductItem extends StatelessWidget {
+  _ProductItem({ Key key, this.product, this.quantity, this.onChanged }) : super(key: key) {
+    assert(product != null);
+    assert(quantity != null);
+    assert(onChanged != null);
+  }
+
+  final Product product;
+  final int quantity;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final ShrineTheme theme = ShrineTheme.of(context);
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        new Text(product.name, style: theme.featureTitleStyle),
+        const SizedBox(height: 24.0),
+        new Text(product.description, style: theme.featureStyle),
+        const SizedBox(height: 16.0),
+        new Padding(
+          padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 88.0),
+          child: new DropdownButtonHideUnderline(
+            child: new Container(
+              decoration: new BoxDecoration(
+                border: new Border.all(
+                  color: const Color(0xFFD9D9D9),
+                ),
+              ),
+              child: new DropdownButton<int>(
+                items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
+                  return new DropdownMenuItem<int>(
+                    value: value,
+                    child: new Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: new Text('Quantity $value', style: theme.quantityMenuStyle),
+                    ),
+                  );
+                }).toList(),
+                value: quantity,
+                onChanged: onChanged,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Vendor name and description
+class _VendorItem extends StatelessWidget {
+  _VendorItem({ Key key, this.vendor }) : super(key: key) {
+    assert(vendor != null);
+  }
+
+  final Vendor vendor;
+
+  @override
+  Widget build(BuildContext context) {
+    final ShrineTheme theme = ShrineTheme.of(context);
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        new SizedBox(
+          height: 24.0,
+          child: new Align(
+            alignment: FractionalOffset.bottomLeft,
+            child: new Text(vendor.name, style: theme.vendorTitleStyle),
+          ),
+        ),
+        const SizedBox(height: 16.0),
+        new Text(vendor.description, style: theme.vendorStyle),
+      ],
+    );
+  }
+}
+
+// Layout the order page's heading: the product's image, the
+// title/description/dropdown product item, and the vendor item.
+class _HeadingLayout extends MultiChildLayoutDelegate {
+  _HeadingLayout();
+
+  static final String image = 'image';
+  static final String icon = 'icon';
+  static final String product = 'product';
+  static final String vendor = 'vendor';
+
+  @override
+  void performLayout(Size size) {
+    const double margin = 56.0;
+    final bool landscape = size.width > size.height;
+    final double imageWidth = (landscape ? size.width / 2.0 : size.width) - margin * 2.0;
+    final BoxConstraints imageConstraints = new BoxConstraints(maxHeight: 224.0, maxWidth: imageWidth);
+    final Size imageSize = layoutChild(image, imageConstraints);
+    final double imageY = 0.0;
+    positionChild(image, new Offset(margin, imageY));
+
+    final double productWidth = landscape ? size.width / 2.0 : size.width - margin;
+    final BoxConstraints productConstraints = new BoxConstraints(maxWidth: productWidth);
+    final Size productSize = layoutChild(product, productConstraints);
+    final double productX = landscape ? size.width / 2.0 : margin;
+    final double productY = landscape ? 0.0 : imageY + imageSize.height + 16.0;
+    positionChild(product, new Offset(productX, productY));
+
+    final Size iconSize = layoutChild(icon, new BoxConstraints.loose(size));
+    positionChild(icon, new Offset(productX - iconSize.width - 16.0, productY + 8.0));
+
+    final double vendorWidth = landscape ? size.width - margin : productWidth;
+    layoutChild(vendor, new BoxConstraints(maxWidth: vendorWidth));
+    final double vendorX = landscape ? margin : productX;
+    final double vendorY = productY + productSize.height + 16.0;
+    positionChild(vendor, new Offset(vendorX, vendorY));
+  }
+
+  @override
+  bool shouldRelayout(_HeadingLayout oldDelegate) => true;
+}
+
+// Describes a product and vendor in detail, supports specifying
+// a order quantity (0-5). Appears at the top of the OrderPage.
+class _Heading extends StatelessWidget {
+  _Heading({ Key key, this.product, this.quantity, this.quantityChanged }) : super(key: key) {
     assert(product != null);
     assert(quantity != null && quantity >= 0 && quantity <= 5);
   }
@@ -23,92 +146,50 @@ class OrderItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ShrineTheme theme = ShrineTheme.of(context);
-    return new Material(
-      type: MaterialType.card,
-      elevation: 0,
-      child: new Padding(
-        padding: const EdgeInsets.only(left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new Padding(
-              padding: const EdgeInsets.only(left: 56.0),
-              child: new SizedBox(
-                width: 248.0,
-                height: 248.0,
+    final Size screenSize = MediaQuery.of(context).size;
+    return new SizedBox(
+      height: (screenSize.height - kToolbarHeight) * 1.35,
+      child: new Material(
+        type: MaterialType.card,
+        elevation: 0,
+        child: new Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
+          child: new CustomMultiChildLayout(
+            delegate: new _HeadingLayout(),
+            children: <Widget>[
+              new LayoutId(
+                id: _HeadingLayout.image,
                 child: new Hero(
                   tag: product.tag,
-                  child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
+                  child: new Image.asset(
+                    product.imageAsset,
+                    fit: BoxFit.contain,
+                    alignment: FractionalOffset.center,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24.0),
-            new Row(
-              children: <Widget>[
-                new Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: new Center(
-                    child: new Icon(
-                      Icons.info_outline,
-                      size: 24.0,
-                      color: const Color(0xFFFFE0E0),
-                    ),
-                  ),
+              new LayoutId(
+                id: _HeadingLayout.icon,
+                child: new Icon(
+                  Icons.info_outline,
+                  size: 24.0,
+                  color: const Color(0xFFFFE0E0),
                 ),
-                new Expanded(
-                  child: new Text(product.name, style: theme.featureTitleStyle),
-                ),
-              ],
-            ),
-            new Padding(
-              padding: const EdgeInsets.only(left: 56.0),
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  const SizedBox(height: 24.0),
-                  new Text(product.description, style: theme.featureStyle),
-                  const SizedBox(height: 16.0),
-                  new Padding(
-                    padding: const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 88.0),
-                    child: new DropdownButtonHideUnderline(
-                      child: new Container(
-                        decoration: new BoxDecoration(
-                          border: new Border.all(
-                            color: const Color(0xFFD9D9D9),
-                          ),
-                        ),
-                        child: new DropdownButton<int>(
-                          items: <int>[0, 1, 2, 3, 4, 5].map((int value) {
-                            return new DropdownMenuItem<int>(
-                              value: value,
-                              child: new Padding(
-                                padding: const EdgeInsets.only(left: 8.0),
-                                child: new Text('Quantity $value', style: theme.quantityMenuStyle),
-                              ),
-                            );
-                          }).toList(),
-                          value: quantity,
-                          onChanged: quantityChanged,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  new SizedBox(
-                    height: 24.0,
-                    child: new Align(
-                      alignment: FractionalOffset.bottomLeft,
-                      child: new Text(product.vendor.name, style: theme.vendorTitleStyle),
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  new Text(product.vendor.description, style: theme.vendorStyle),
-                  const SizedBox(height: 24.0),
-                ],
               ),
-            ),
-          ],
+              new LayoutId(
+                id: _HeadingLayout.product,
+                child: new _ProductItem(
+                  product: product,
+                  quantity: quantity,
+                  onChanged: quantityChanged,
+                ),
+              ),
+              new LayoutId(
+                id: _HeadingLayout.vendor,
+                child: new _VendorItem(vendor: product.vendor),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -130,9 +211,9 @@ class OrderPage extends StatefulWidget {
   _OrderPageState createState() => new _OrderPageState();
 }
 
-/// Displays a product's OrderItem above photos of all of the other products
-/// arranged in two columns. Enables the user to specify a quantity and add an
-/// order to the shopping cart.
+// Displays a product's heading above photos of all of the other products
+// arranged in two columns. Enables the user to specify a quantity and add an
+// order to the shopping cart.
 class _OrderPageState extends State<OrderPage> {
   GlobalKey<ScaffoldState> scaffoldKey;
 
@@ -164,6 +245,7 @@ class _OrderPageState extends State<OrderPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bool landscape = MediaQuery.of(context).orientation == Orientation.landscape;
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
       products: config.products,
@@ -187,7 +269,7 @@ class _OrderPageState extends State<OrderPage> {
         slivers: <Widget>[
           new SliverList(
             delegate: new SliverChildListDelegate(<Widget>[
-              new OrderItem(
+              new _Heading(
                 product: config.order.product,
                 quantity: currentOrder.quantity,
                 quantityChanged: (int value) { updateOrder(quantity: value); },
@@ -198,8 +280,8 @@ class _OrderPageState extends State<OrderPage> {
           new SliverPadding(
             padding: const EdgeInsets.all(8.0),
             sliver: new SliverGrid(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
+              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: landscape ? 3 : 2,
                 mainAxisSpacing: 8.0,
                 crossAxisSpacing: 8.0,
                 childAspectRatio: 160.0 / 216.0, // width/height
@@ -225,11 +307,11 @@ class _OrderPageState extends State<OrderPage> {
   }
 }
 
-/// Displays a full-screen modal OrderPage.
-///
-/// The order field will be replaced each time the user reconfigures the order.
-/// When the user backs out of this route the completer's value will be the
-/// final value of the order field.
+// Displays a full-screen modal OrderPage.
+//
+// The order field will be replaced each time the user reconfigures the order.
+// When the user backs out of this route the completer's value will be the
+// final value of the order field.
 class ShrineOrderRoute extends ShrinePageRoute<Order> {
   ShrineOrderRoute({
     this.order,
