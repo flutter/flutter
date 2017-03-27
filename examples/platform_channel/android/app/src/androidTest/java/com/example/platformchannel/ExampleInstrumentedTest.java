@@ -1,4 +1,4 @@
-package com.example.platformChannel;
+package com.example.platformchannel;
 
 import android.graphics.Bitmap;
 import android.support.test.InstrumentationRegistry;
