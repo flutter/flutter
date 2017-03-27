@@ -4,20 +4,14 @@
 
 #include "flutter/fml/thread.h"
 
+#include <pthread.h>
+
 #include <memory>
 #include <string>
 
 #include "flutter/fml/message_loop.h"
 #include "lib/ftl/build_config.h"
 #include "lib/ftl/synchronization/waitable_event.h"
-
-#if OS_MACOSX
-#include <pthread/pthread.h>
-#elif OS_LINUX || OS_ANDROID
-#include <pthread.h>
-#else
-#error Unsupported Platform
-#endif
 
 namespace fml {
 
