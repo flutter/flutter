@@ -80,14 +80,17 @@ class InkSplash extends InkFeature {
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
+    BorderRadius borderRadius = BorderRadius.zero,
     double radius,
     VoidCallback onRemoved,
   }) : _position = position,
        _color = color,
+       _borderRadius = borderRadius,
        _targetRadius = radius ?? _getTargetRadius(referenceBox, containedInkWell, rectCallback, position),
        _clipCallback = _getClipCallback(referenceBox, containedInkWell, rectCallback),
        _repositionToReferenceBox = !containedInkWell,
        super(controller: controller, referenceBox: referenceBox, onRemoved: onRemoved) {
+    assert(_borderRadius != null);
     _radiusController = new AnimationController(duration: _kUnconfirmedSplashDuration, vsync: controller.vsync)
       ..addListener(controller.markNeedsPaint)
       ..forward();
@@ -107,6 +110,7 @@ class InkSplash extends InkFeature {
   }
 
   final Point _position;
+  final BorderRadius _borderRadius;
   final double _targetRadius;
   final RectCallback _clipCallback;
   final bool _repositionToReferenceBox;
@@ -158,6 +162,26 @@ class InkSplash extends InkFeature {
     super.dispose();
   }
 
+  RRect _clipRRectFromRect(Rect rect) {
+    return new RRect.fromRectAndCorners(
+      rect,
+      topLeft: _borderRadius.topLeft, topRight: _borderRadius.topRight,
+      bottomLeft: _borderRadius.bottomLeft, bottomRight: _borderRadius.bottomRight,
+    );
+  }
+
+  void _clipCanvasWithRect(Canvas canvas, Rect rect, {Offset offset}) {
+    Rect clipRect = rect;
+    if (offset != null) {
+      clipRect = clipRect.shift(offset);
+    }
+    if (_borderRadius != BorderRadius.zero) {
+      canvas.clipRRect(_clipRRectFromRect(clipRect));
+    } else {
+      canvas.clipRect(clipRect);
+    }
+  }
+
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = new Paint()..color = _color.withAlpha(_alpha.value);
@@ -168,14 +192,15 @@ class InkSplash extends InkFeature {
     if (originOffset == null) {
       canvas.save();
       canvas.transform(transform.storage);
-      if (_clipCallback != null)
-        canvas.clipRect(_clipCallback());
+      if (_clipCallback != null) {
+        _clipCanvasWithRect(canvas, _clipCallback());
+      }
       canvas.drawCircle(center, _radius.value, paint);
       canvas.restore();
     } else {
       if (_clipCallback != null) {
         canvas.save();
-        canvas.clipRect(_clipCallback().shift(originOffset));
+        _clipCanvasWithRect(canvas, _clipCallback(), offset: originOffset);
       }
       canvas.drawCircle(center + originOffset, _radius.value, paint);
       if (_clipCallback != null)
