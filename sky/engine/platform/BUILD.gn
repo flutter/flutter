@@ -265,7 +265,7 @@ source_set("platform") {
   }
 
   if (is_mac && !is_ios) {
-    sources += [ "fonts/apple/FontCacheMac.cpp" ]
+    sources += [ "fonts/FontCacheEmpty.cpp" ]
   }
 
   if (is_android || is_ios) {
@@ -273,7 +273,7 @@ source_set("platform") {
   }
 
   if (is_linux && !is_android) {
-    sources += [ "fonts/linux/FontCacheLinux.cpp" ]
+    sources += [ "fonts/FontCacheEmpty.cpp" ]
   }
 
   if (is_fuchsia) {
