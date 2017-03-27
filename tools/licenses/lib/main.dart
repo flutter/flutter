@@ -1243,13 +1243,14 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
     return result;
   }
 
-  Iterable<RepositoryLicensedFile> get _allFiles sync* {
+  Iterable<RepositoryLicensedFile> get _signatureFiles sync* {
     for (RepositoryLicensedFile file in _files) {
       if (file.isIncludedInBuildProducts)
         yield file;
     }
     for (RepositoryDirectory directory in _subdirectories) {
-      yield* directory._allFiles;
+      if (directory.includeInSignature)
+        yield* directory._signatureFiles;
     }
   }
 
@@ -1263,12 +1264,15 @@ class RepositoryDirectory extends RepositoryEntry implements LicenseSource {
   /// Compute a signature representing a hash of all the licensed files within
   /// this directory tree.
   Future<String> get signature async {
-    List allFiles = _allFiles.toList();
+    List allFiles = _signatureFiles.toList();
     allFiles.sort((RepositoryLicensedFile a, RepositoryLicensedFile b) =>
         a.io.fullName.compareTo(b.io.fullName));
     crypto.Digest digest = await crypto.md5.bind(_signatureStream(allFiles)).single;
     return digest.bytes.map((int e) => e.toRadixString(16).padLeft(2, '0')).join();
   }
+
+  /// True if this directory's contents should be included when computing the signature.
+  bool get includeInSignature => true;
 }
 
 class RepositoryGenericThirdPartyDirectory extends RepositoryDirectory {
@@ -1596,6 +1600,14 @@ class RepositoryAndroidToolsDirectory extends RepositoryDirectory {
       return new RepositoryAndroidNdkDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
+
+  // This directory's contents are different on each host platform.  We assume
+  // that the components of the Android SDK that are linked into our releases
+  // are consistent among all host platforms.  Given that the host SDK will not
+  // affect the signature, be sure to force a regeneration of the third_party
+  // golden licenses if the SDK is ever updated.
+  @override
+  bool get includeInSignature => false;
 }
 
 class RepositoryAndroidPlatformDirectory extends RepositoryDirectory {
