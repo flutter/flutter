@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:meta/meta.dart';
 
 import 'base/io.dart';
+import 'base/os.dart';
+import 'base/platform.dart';
 import 'globals.dart';
 import 'usage.dart';
 
@@ -21,8 +23,7 @@ const String _kDartTypeId = 'DartError';
 const String _kCrashServerHost = 'clients2.google.com';
 
 /// Path to the crash servlet.
-// TODO(yjbanov): switch to non-staging when production is ready.
-const String _kCrashEndpointPath = '/cr/staging_report';
+const String _kCrashEndpointPath = '/cr/report';
 
 /// The field corresponding to the multipart/form-data file attachment where
 /// crash backend expects to find the Dart stack trace.
@@ -33,11 +34,6 @@ const String _kStackTraceFileField = 'DartError';
 /// The precise value is not important. It is ignored by the crash back end, but
 /// it must be supplied in the request.
 const String _kStackTraceFilename = 'stacktrace_file';
-
-/// We only send crash reports in testing mode.
-///
-/// See [enterTestingMode] and [exitTestingMode].
-bool _testing = false;
 
 /// Sends crash reports to Google.
 class CrashReportSender {
@@ -72,12 +68,6 @@ class CrashReportSender {
     @required String getFlutterVersion(),
   }) async {
     try {
-      // TODO(yjbanov): we only actually send crash reports in tests. When we
-      // iron out the process, we will remove this guard and report crashes
-      // when !flutterUsage.suppressAnalytics.
-      if (!_testing)
-        return null;
-
       if (_usage.suppressAnalytics)
         return null;
 
@@ -92,8 +82,11 @@ class CrashReportSender {
       );
 
       final http.MultipartRequest req = new http.MultipartRequest('POST', uri);
+      req.fields['uuid'] = _usage.clientId;
       req.fields['product'] = _kProductId;
       req.fields['version'] = flutterVersion;
+      req.fields['osName'] = platform.operatingSystem;
+      req.fields['osVersion'] = os.name;  // this actually includes version
       req.fields['type'] = _kDartTypeId;
       req.fields['error_runtime_type'] = '${error.runtimeType}';
 
@@ -121,16 +114,4 @@ class CrashReportSender {
       }
     }
   }
-}
-
-/// Enables testing mode.
-@visibleForTesting
-void enterTestingMode() {
-  _testing = true;
-}
-
-/// Disables testing mode.
-@visibleForTesting
-void exitTestingMode() {
-  _testing = false;
 }
