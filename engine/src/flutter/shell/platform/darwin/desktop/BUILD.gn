@@ -37,23 +37,20 @@ source_set("mac_desktop_platform") {
 }
 
 executable("shell_standalone") {
-  output_name = "sky_shell"
-
+  output_name = "flutter_tester"
   deps = [
     ":mac_desktop_platform",
   ]
 }
 
 resource_copy_mac("mac_desktop_resources") {
-  app_name = "SkyShell"
-
+  app_name = "FlutterTester"
   resources = [ "//third_party/icu/android/icudtl.dat" ]
-
   bundle_directory = "."
 }
 
 mac_app("shell_application_bundle") {
-  app_name = "SkyShell"
+  app_name = "FlutterTester"
   info_plist = "Info.plist"
   xibs = [ "flutter_mac.xib" ]
 

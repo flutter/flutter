@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 executable("linux") {
-  output_name = "sky_shell"
+  output_name = "flutter_tester"
 
   sources = [
     "main_linux.cc",
