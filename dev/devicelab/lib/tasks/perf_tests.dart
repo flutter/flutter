@@ -13,7 +13,7 @@ import '../framework/utils.dart';
 
 TaskFunction createPlatformServiceDriverTest() {
   return new DriverTest(
-      '${flutterDirectory.path}/examples/platform_services',
+      '${flutterDirectory.path}/examples/platform_channel',
       'test_driver/button_tap.dart',
   );
 }

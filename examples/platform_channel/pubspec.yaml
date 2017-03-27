@@ -1,4 +1,4 @@
-name: platform_services
+name: platform_channel
 
 dependencies:
   flutter:
