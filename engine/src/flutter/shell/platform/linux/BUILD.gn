@@ -17,10 +17,6 @@ executable("linux") {
     "//flutter/shell/testing",
     "//lib/ftl",
     "//lib/tonic",
-
-    # Required by FontCacheLinux. Not Skia. Skia uses a custom font manager
-    # that delegates to us.
-    "//third_party:fontconfig",
     "//third_party/skia",
   ]
 }
