@@ -47,8 +47,8 @@ int _columnSpanAtIndex(int index) {
 
 // The Shrine home page arranges the product cards into two columns. The card
 // on every 4th and 5th row spans two columns.
-class ShrineGridLayout extends SliverGridLayout {
-  const ShrineGridLayout({
+class _ShrineGridLayout extends SliverGridLayout {
+  const _ShrineGridLayout({
     @required this.rowStride,
     @required this.columnStride,
     @required this.tileHeight,
@@ -95,14 +95,14 @@ class ShrineGridLayout extends SliverGridLayout {
   }
 }
 
-class ShrineGridDelegate extends SliverGridDelegate {
+class _ShrineGridDelegate extends SliverGridDelegate {
   static const double _kSpacing = 8.0;
 
   @override
   SliverGridLayout getLayout(SliverConstraints constraints) {
     final double tileWidth = (constraints.crossAxisExtent - _kSpacing) / 2.0;
     final double tileHeight = 40.0 + 144.0 + 40.0;
-    return new ShrineGridLayout(
+    return new _ShrineGridLayout(
       tileWidth: tileWidth,
       tileHeight: tileHeight,
       rowStride: tileHeight + _kSpacing,
@@ -114,9 +114,9 @@ class ShrineGridDelegate extends SliverGridDelegate {
   bool shouldRelayout(covariant SliverGridDelegate oldDelegate) => false;
 }
 
-/// Displays the Vendor's name and avatar.
-class VendorItem extends StatelessWidget {
-  VendorItem({ Key key, this.vendor }) : super(key: key) {
+// Displays the Vendor's name and avatar.
+class _VendorItem extends StatelessWidget {
+  _VendorItem({ Key key, this.vendor }) : super(key: key) {
     assert(vendor != null);
   }
 
@@ -145,10 +145,10 @@ class VendorItem extends StatelessWidget {
   }
 }
 
-/// Displays the product's price. If the product is in the shopping cart the background
-/// is highlighted.
-abstract class PriceItem extends StatelessWidget {
-  PriceItem({ Key key, this.product }) : super(key: key) {
+// Displays the product's price. If the product is in the shopping cart then the
+// background is highlighted.
+abstract class _PriceItem extends StatelessWidget {
+  _PriceItem({ Key key, this.product }) : super(key: key) {
     assert(product != null);
   }
 
@@ -167,8 +167,8 @@ abstract class PriceItem extends StatelessWidget {
   }
 }
 
-class ProductPriceItem extends PriceItem {
-  ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
+class _ProductPriceItem extends _PriceItem {
+  _ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -180,8 +180,8 @@ class ProductPriceItem extends PriceItem {
   }
 }
 
-class FeaturePriceItem extends PriceItem {
-  FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
+class _FeaturePriceItem extends _PriceItem {
+  _FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -193,34 +193,54 @@ class FeaturePriceItem extends PriceItem {
   }
 }
 
-/// Layout the main left and right elements of a FeatureItem.
-class FeatureLayout extends MultiChildLayoutDelegate {
-  FeatureLayout();
+class _HeadingLayout extends MultiChildLayoutDelegate {
+  _HeadingLayout();
 
-  static final String left = 'left';
-  static final String right = 'right';
+  static final String price = 'price';
+  static final String image = 'image';
+  static final String title = 'title';
+  static final String description = 'description';
+  static final String vendor = 'vendor';
 
-  // Horizontally: the feature product image appears on the left and
-  // occupies 50% of the available width; the feature product's
-  // description apepars on the right and occupies 50% of the available
-  // width + unitSize. The left and right widgets overlap and the right
-  // widget is stacked on top.
   @override
   void performLayout(Size size) {
+    final Size priceSize = layoutChild(price, new BoxConstraints.loose(size));
+    positionChild(price, new Offset(size.width - priceSize.width, 0.0));
+
     final double halfWidth = size.width / 2.0;
-    layoutChild(left, new BoxConstraints.tightFor(width: halfWidth, height: size.height));
-    positionChild(left, Offset.zero);
-    layoutChild(right, new BoxConstraints.expand(width: halfWidth + unitSize, height: size.height));
-    positionChild(right, new Offset(halfWidth - unitSize, 0.0));
+    final double halfHeight = size.height / 2.0;
+    final double halfUnit = unitSize / 2.0;
+    const double margin = 16.0;
+
+    final Size imageSize = layoutChild(image, new BoxConstraints.loose(size));
+    final double imageX = imageSize.width < halfWidth - halfUnit
+      ? halfWidth / 2.0 - imageSize.width / 2.0 - halfUnit
+      : halfWidth - imageSize.width;
+    positionChild(image, new Offset(imageX, halfHeight - imageSize.height / 2.0));
+
+    final double maxTitleWidth = halfWidth + unitSize - margin;
+    final BoxConstraints titleBoxConstraints = new BoxConstraints(maxWidth: maxTitleWidth);
+    final Size titleSize = layoutChild(title, titleBoxConstraints);
+    final double titleX = halfWidth - unitSize;
+    final double titleY = halfHeight - titleSize.height;
+    positionChild(title, new Offset(titleX, titleY));
+
+    final Size descriptionSize = layoutChild(description, titleBoxConstraints);
+    final double descriptionY = titleY + titleSize.height + margin;
+    positionChild(description, new Offset(titleX, descriptionY));
+
+    layoutChild(vendor, titleBoxConstraints);
+    final double vendorY = descriptionY + descriptionSize.height + margin;
+    positionChild(vendor, new Offset(titleX, vendorY));
   }
 
   @override
-  bool shouldRelayout(FeatureLayout oldDelegate) => false;
+  bool shouldRelayout(_HeadingLayout oldDelegate) => false;
 }
 
-/// A card that highlights the "featured" catalog item.
-class FeatureItem extends StatelessWidget {
-  FeatureItem({ Key key, this.product }) : super(key: key) {
+// A card that highlights the "featured" catalog item.
+class _Heading extends StatelessWidget {
+  _Heading({ Key key, this.product }) : super(key: key) {
     assert(product.featureTitle != null);
     assert(product.featureDescription != null);
   }
@@ -229,63 +249,39 @@ class FeatureItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
     final ShrineTheme theme = ShrineTheme.of(context);
-    return new AspectRatio(
-      aspectRatio: 3.0 / 3.5,
+    return new SizedBox(
+      height: screenSize.width > screenSize.height
+        ? (screenSize.height - kToolbarHeight) * 0.85
+        : (screenSize.height - kToolbarHeight) * 0.70,
       child: new Container(
         decoration: new BoxDecoration(
           backgroundColor: theme.cardBackgroundColor,
           border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
         ),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: new CustomMultiChildLayout(
+          delegate: new _HeadingLayout(),
           children: <Widget>[
-            new SizedBox(
-              height: unitSize,
-              child: new Align(
-                alignment: FractionalOffset.topRight,
-                child: new FeaturePriceItem(product: product),
-              ),
+            new LayoutId(
+              id: _HeadingLayout.price,
+              child: new _FeaturePriceItem(product: product),
             ),
-            new Expanded(
-              child: new CustomMultiChildLayout(
-                delegate: new FeatureLayout(),
-                children: <Widget>[
-                  new LayoutId(
-                    id: FeatureLayout.left,
-                    child: new ClipRect(
-                      child: new OverflowBox(
-                        minWidth: 340.0,
-                        maxWidth: 340.0,
-                        minHeight: 340.0,
-                        maxHeight: 340.0,
-                        alignment: FractionalOffset.topRight,
-                        child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
-                      ),
-                    ),
-                  ),
-                  new LayoutId(
-                    id: FeatureLayout.right,
-                    child: new Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: new Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new Padding(
-                            padding: const EdgeInsets.only(top: 18.0),
-                            child: new Text(product.featureTitle, style: theme.featureTitleStyle),
-                          ),
-                          new Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: new Text(product.featureDescription, style: theme.featureStyle),
-                          ),
-                          new VendorItem(vendor: product.vendor),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            new LayoutId(
+              id: _HeadingLayout.image,
+              child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
+            ),
+            new LayoutId(
+              id: _HeadingLayout.title,
+              child: new Text(product.featureTitle, style: theme.featureTitleStyle),
+            ),
+            new LayoutId(
+              id: _HeadingLayout.description,
+              child: new Text(product.featureDescription, style: theme.featureStyle),
+            ),
+            new LayoutId(
+              id: _HeadingLayout.vendor,
+              child: new _VendorItem(vendor: product.vendor),
             ),
           ],
         ),
@@ -294,9 +290,10 @@ class FeatureItem extends StatelessWidget {
   }
 }
 
-/// A card that displays a product's image, price, and vendor.
-class ProductItem extends StatelessWidget {
-  ProductItem({ Key key, this.product, this.onPressed }) : super(key: key) {
+// A card that displays a product's image, price, and vendor. The _ProductItem
+// cards appear in a grid below the heading.
+class _ProductItem extends StatelessWidget {
+  _ProductItem({ Key key, this.product, this.onPressed }) : super(key: key) {
     assert(product != null);
   }
 
@@ -312,7 +309,7 @@ class ProductItem extends StatelessWidget {
             children: <Widget>[
               new Align(
                 alignment: FractionalOffset.centerRight,
-                child: new ProductPriceItem(product: product),
+                child: new _ProductPriceItem(product: product),
               ),
               new Container(
                 width: 144.0,
@@ -325,7 +322,7 @@ class ProductItem extends StatelessWidget {
                 ),
               new Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: new VendorItem(vendor: product.vendor),
+                child: new _VendorItem(vendor: product.vendor),
               ),
             ],
           ),
@@ -339,18 +336,18 @@ class ProductItem extends StatelessWidget {
   }
 }
 
-/// The Shrine app's home page. Displays the featured item above all of the
-/// product items arranged in two columns.
+// The Shrine app's home page. Displays the featured item above a grid
+// of the product items.
 class ShrineHome extends StatefulWidget {
   @override
   _ShrineHomeState createState() => new _ShrineHomeState();
 }
 
 class _ShrineHomeState extends State<ShrineHome> {
-  static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Home');
-  static final ShrineGridDelegate gridDelegate = new ShrineGridDelegate();
+  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Home');
+  static final _ShrineGridDelegate gridDelegate = new _ShrineGridDelegate();
 
-  Future<Null> showOrderPage(Product product) async {
+  Future<Null> _showOrderPage(Product product) async {
     final Order order = _shoppingCart[product] ?? new Order(product: product);
     final Order completedOrder = await Navigator.push(context, new ShrineOrderRoute(
       order: order,
@@ -371,13 +368,13 @@ class _ShrineHomeState extends State<ShrineHome> {
   Widget build(BuildContext context) {
     final Product featured = _products.firstWhere((Product product) => product.featureDescription != null);
     return new ShrinePage(
-      scaffoldKey: scaffoldKey,
+      scaffoldKey: _scaffoldKey,
       products: _products,
       shoppingCart: _shoppingCart,
       body: new CustomScrollView(
         slivers: <Widget>[
           new SliverToBoxAdapter(
-            child: new FeatureItem(product: featured),
+            child: new _Heading(product: featured),
           ),
           new SliverPadding(
             padding: const EdgeInsets.all(16.0),
@@ -385,9 +382,9 @@ class _ShrineHomeState extends State<ShrineHome> {
               gridDelegate: gridDelegate,
               delegate: new SliverChildListDelegate(
                 _products.map((Product product) {
-                  return new ProductItem(
+                  return new _ProductItem(
                     product: product,
-                    onPressed: () { showOrderPage(product); },
+                    onPressed: () { _showOrderPage(product); },
                   );
                 }).toList(),
               ),
