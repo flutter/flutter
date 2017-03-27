@@ -119,6 +119,30 @@ void main() {
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
+    testUsingContext('Emits partial status when CocoaPods is not installed', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+        ..hasCocoaPods = false;
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+
+    testUsingContext('Emits partial status when CocoaPods version is too low', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget()
+        ..cocoaPodsVersionText = '0.39.0';
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{ Xcode: () => xcode });
+
     testUsingContext('Succeeds when all checks pass', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.xcodeVersionText)
@@ -165,4 +189,10 @@ class IOSWorkflowTestTarget extends IOSWorkflow {
 
   @override
   bool get hasIDeviceInstaller => true;
+
+  @override
+  bool hasCocoaPods = true;
+
+  @override
+  String cocoaPodsVersionText = '1.2.0';
 }
