@@ -730,4 +730,33 @@ void main() {
     expect(indicatorRect2.width, 400.0);
     expect(indicatorRect2.height, 2.0);
   });
+
+  testWidgets('TabBarView child disposed during animation', (WidgetTester tester) async {
+    // This is a regression test for this patch:
+    // https://github.com/flutter/flutter/pull/9015
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: 2,
+    );
+
+    Widget buildFrame() {
+      return new Material(
+        child: new TabBar(
+          key: new UniqueKey(),
+          controller: controller,
+          tabs: <Widget>[ new Text('A'), new Text('B') ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+
+    // The original TabBar will be disposed. The controller should no
+    // longer have any listeners from the original TabBar.
+    await tester.pumpWidget(buildFrame());
+
+    controller.index = 1;
+    await tester.pump(const Duration(milliseconds: 300));
+  });
 }
