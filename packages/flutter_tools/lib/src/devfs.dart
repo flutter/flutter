@@ -551,7 +551,7 @@ class DevFS {
 
     for (String packageName in packageMap.map.keys) {
       final Uri packageUri = packageMap.map[packageName];
-      final String packagePath = packageUri.toFilePath();
+      final String packagePath = fs.path.fromUri(packageUri);
       final Directory packageDirectory = fs.directory(packageUri);
       Uri directoryUriOnDevice = fs.path.toUri(fs.path.join('packages', packageName) + fs.path.separator);
       bool packageExists;
