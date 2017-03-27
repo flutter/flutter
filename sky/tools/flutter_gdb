@@ -109,8 +109,8 @@ class GdbClient(object):
             [adb_path, 'forward', 'tcp:%d' % args.gdb_port, 'tcp:%d' % args.gdb_port])
 
         debug_out_path = os.path.join(flutter_root, 'out/%s' % args.local_engine)
-        if not os.path.exists(os.path.join(debug_out_path, 'libsky_shell.so')):
-            print 'Unable to find libsky_shell.so. Make sure you have completed a %s build' % args.local_engine
+        if not os.path.exists(os.path.join(debug_out_path, 'libflutter.so')):
+            print 'Unable to find libflutter.so. Make sure you have completed a %s build' % args.local_engine
             return 1
 
         eval_commands = []
