@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.example.flutter;
+package com.example.platformchannel;
 
 import android.content.ContextWrapper;
 import android.content.Intent;
