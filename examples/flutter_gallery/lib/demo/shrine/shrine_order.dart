@@ -245,7 +245,6 @@ class _OrderPageState extends State<OrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final bool landscape = MediaQuery.of(context).orientation == Orientation.landscape;
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
       products: config.products,
@@ -267,24 +266,20 @@ class _OrderPageState extends State<OrderPage> {
       ),
       body: new CustomScrollView(
         slivers: <Widget>[
-          new SliverList(
-            delegate: new SliverChildListDelegate(<Widget>[
-              new _Heading(
-                product: config.order.product,
-                quantity: currentOrder.quantity,
-                quantityChanged: (int value) { updateOrder(quantity: value); },
-              ),
-              const SizedBox(height: 24.0),
-            ]),
+          new SliverToBoxAdapter(
+            child: new _Heading(
+              product: config.order.product,
+              quantity: currentOrder.quantity,
+              quantityChanged: (int value) { updateOrder(quantity: value); },
+            ),
           ),
           new SliverPadding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.fromLTRB(8.0, 32.0, 8.0, 8.0),
             sliver: new SliverGrid(
-              gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: landscape ? 3 : 2,
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 248.0,
                 mainAxisSpacing: 8.0,
                 crossAxisSpacing: 8.0,
-                childAspectRatio: 160.0 / 216.0, // width/height
               ),
               delegate: new SliverChildListDelegate(
                 config.products
