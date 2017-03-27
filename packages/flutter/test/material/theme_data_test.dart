@@ -81,4 +81,12 @@ void main() {
     expect(lightTheme.accentTextTheme.title.color, typography.black.title.color);
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
+
+  test('Can control fontFamily', () {
+    final ThemeData themeData = new ThemeData(fontFamily: 'Ahem');
+
+    expect(themeData.textTheme.body2.fontFamily, equals('Ahem'));
+    expect(themeData.primaryTextTheme.title.fontFamily, equals('Ahem'));
+    expect(themeData.accentTextTheme.display4.fontFamily, equals('Ahem'));
+  });
 }

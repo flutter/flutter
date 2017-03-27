@@ -92,7 +92,7 @@ class ButtonTheme extends InheritedWidget {
   /// Defaults to 16.0 pixels of horizontal padding.
   final EdgeInsets padding;
 
-  /// The color from the closest instance of this class that encloses the given context.
+  /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage is as follows:
   ///

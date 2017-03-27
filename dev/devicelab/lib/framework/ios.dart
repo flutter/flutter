@@ -17,25 +17,40 @@ const FileSystem _fs = const io.LocalFileSystem();
 /// information required to build and run the project.
 Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
   final String certificateConfig = await _readProvisioningConfigFile();
-  await _patchFlutterXcconfigIfNotPatched(flutterProjectPath);
+  await _patchXcconfigFilesIfNotPatched(flutterProjectPath);
 
   final File testXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/$_kTestXcconfigFileName'));
   await testXcconfig.writeAsString(certificateConfig);
 }
 
-Future<Null> _patchFlutterXcconfigIfNotPatched(String flutterProjectPath) async {
-  final File flutterXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig'));
+Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
+  final List<File> xcconfigFiles = <File>[
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig')),
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Debug.xcconfig')),
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Release.xcconfig'))
+  ];
 
-  if (!(await flutterXcconfig.exists())) {
-    throw 'File not found: ${flutterXcconfig.path}';
+  bool xcconfigFileExists = false;
+
+  for (final File file in xcconfigFiles) {
+    if (await file.exists()) {
+      xcconfigFileExists = true;
+      const String include = '#include "$_kTestXcconfigFileName"';
+      final String contents = await file.readAsString();
+      final bool alreadyPatched = contents.contains(include);
+      if (!alreadyPatched) {
+        final IOSink patchOut = file.openWrite(mode: FileMode.APPEND);
+        patchOut.writeln(); // in case EOF is not preceded by line break
+        patchOut.writeln(include);
+        await patchOut.close();
+      }
+    }
   }
 
-  const String include = '#include "$_kTestXcconfigFileName"';
-  final String contents = await flutterXcconfig.readAsString();
-  if (!contents.contains(include)) {
-    final IOSink patchOut = flutterXcconfig.openWrite(mode: FileMode.APPEND);
-    patchOut.writeln(include);
-    await patchOut.close();
+  if (!xcconfigFileExists) {
+    final String candidatesFormatted = xcconfigFiles.map<String>((File f) => f.path).join(', ');
+    throw 'Failed to locate a xcconfig file to patch with provisioning profile '
+        'info. Tried: $candidatesFormatted';
   }
 }
 

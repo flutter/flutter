@@ -135,6 +135,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   UserAccountsDrawerHeader({
     Key key,
     this.decoration,
+    this.margin: const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
     this.otherAccountsPictures,
     @required this.accountName,
@@ -145,6 +146,9 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// The header's background. If decoration is null then a [BoxDecoration]
   /// with its background color set to the current theme's primaryColor is used.
   final Decoration decoration;
+
+  /// The margin around the drawer header.
+  final EdgeInsets margin;
 
   /// A widget placed in the upper-left corner that represents the current
   /// user's account. Normally a [CircleAvatar].
@@ -181,6 +185,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       decoration: config.decoration ?? new BoxDecoration(
         backgroundColor: Theme.of(context).primaryColor,
       ),
+      margin: config.margin,
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[

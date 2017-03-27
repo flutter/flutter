@@ -93,6 +93,7 @@ class ThemeData {
     Color indicatorColor,
     Color hintColor,
     Color errorColor,
+    String fontFamily,
     TextTheme textTheme,
     TextTheme primaryTextTheme,
     TextTheme accentTextTheme,
@@ -137,6 +138,11 @@ class ThemeData {
     textTheme ??= isDark ? typography.white : typography.black;
     primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
     accentTextTheme ??= accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      textTheme = textTheme.apply(fontFamily: fontFamily);
+      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
+      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
+    }
     return new ThemeData.raw(
       brightness: brightness,
       primaryColor: primaryColor,

@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         title: 'Pirate app',
@@ -20,7 +20,7 @@ void main() {
           drawer: new Drawer(
             child: new ListView(
               children: <Widget>[
-                new AboutDrawerItem(
+                new AboutListTile(
                   applicationVersion: '0.1.2',
                   applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
@@ -67,12 +67,12 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(child: new AboutDrawerItem()),
+      new Material(child: new AboutListTile()),
     );
     expect(find.text('About sky_shell'), findsOneWidget);
   });
 
-  testWidgets('AboutDrawerItem control test', (WidgetTester tester) async {
+  testWidgets('AboutListTile control test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     Future<Null> licenseFuture;
