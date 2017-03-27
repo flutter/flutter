@@ -4,7 +4,7 @@
 
 #include "flutter/fml/platform/darwin/message_loop_darwin.h"
 
-#include <CoreFoundation/CoreFoundation.h>
+#include <CoreFoundation/CFRunLoop.h>
 #include <Foundation/Foundation.h>
 
 namespace fml {
