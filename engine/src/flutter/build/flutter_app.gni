@@ -67,17 +67,10 @@ template("flutter_app") {
   flutter_core_snapshot_vm_data = "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
   flutter_core_snapshot_isolate_data = "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
 
-  dart_binary_label = "//dart/runtime/bin:dart($host_toolchain)"
-  dart_binary_dir = get_label_info(dart_binary_label, "root_out_dir")
-  dart_binary = "$dart_binary_dir/dart"
-
   flutter_root = "//lib/flutter"
-  flutter_tools_path = "$flutter_root/packages/flutter_tools"
   flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
-  flutter_tools_gen_dir = get_label_info(flutter_tools_label, "target_gen_dir")
-  flutter_tools_name = get_label_info(flutter_tools_label, "name")
-  flutter_tools_packages = "$flutter_tools_gen_dir/$flutter_tools_name.packages"
-  flutter_tools_main = "$flutter_tools_path/bin/fuchsia_builder.dart"
+  flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
+  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/flutter_tools"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$root_out_dir/$bundle_name"
@@ -140,7 +133,6 @@ template("flutter_app") {
     depfile = bundle_depfile
 
     inputs = [
-      flutter_tools_main,
       snapshot_path,
     ]
     if (defined(invoker.manifest)) {
@@ -154,16 +146,10 @@ template("flutter_app") {
     script = "//flutter/build/package.py"
 
     args = [
-      "--root",
-      rebase_path(dart_binary_dir),
       "--flutter-root",
       rebase_path(flutter_root),
-      "--dart",
-      rebase_path(dart_binary),
-      "--flutter-tools-packages",
-      rebase_path(flutter_tools_packages),
-      "--flutter-tools-main",
-      rebase_path(flutter_tools_main),
+      "--flutter-tools",
+      rebase_path(flutter_tools_bin),
       "--working-dir",
       rebase_path("$target_gen_dir/build"),
       "--app-dir",
@@ -188,7 +174,6 @@ template("flutter_app") {
 
     deps = [
       ":$flutter_snapshot_name",
-      dart_binary_label,
       flutter_tools_label,
     ]
   }
