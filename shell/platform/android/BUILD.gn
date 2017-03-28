@@ -131,7 +131,7 @@ action("android") {
 
   inputs = [
     "$root_build_dir/flutter_java.jar",
-    "$root_build_dir/libflutter.so",
+    "$root_build_dir/lib.stripped/libflutter.so",
     "$root_build_dir/flutter_shell_assets/icudtl.dat",
   ]
 
@@ -147,7 +147,7 @@ action("android") {
     "--asset_dir",
     rebase_path("flutter_shell_assets", root_build_dir, root_build_dir),
     "--native_lib",
-    rebase_path("libflutter.so", root_build_dir, root_build_dir),
+    rebase_path("lib.stripped/libflutter.so", root_build_dir, root_build_dir),
     "--android_abi",
     "$android_app_abi",
   ]
