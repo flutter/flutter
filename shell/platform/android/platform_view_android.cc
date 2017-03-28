@@ -285,14 +285,15 @@ void PlatformViewAndroid::HandlePlatformMessage(
     pending_responses_[response_id] = response;
   }
 
-  auto data = message->data();
+  fml::jni::ScopedJavaLocalRef<jobject> message_buffer(env,
+      env->NewDirectByteBuffer(const_cast<uint8_t*>(message->data().data()),
+                               message->data().size()));
   auto java_channel = fml::jni::StringToJavaString(env, message->channel());
   message = nullptr;
 
   // This call can re-enter in InvokePlatformMessageResponseCallback.
   FlutterViewHandlePlatformMessage(
-      env, view.obj(), java_channel.obj(),
-      env->NewDirectByteBuffer(data.data(), data.size()), response_id);
+      env, view.obj(), java_channel.obj(), message_buffer.obj(), response_id);
 }
 
 void PlatformViewAndroid::HandlePlatformMessageResponse(
@@ -382,8 +383,11 @@ void PlatformViewAndroid::UpdateSemantics(
         buffer_int32[position++] = child;
     }
 
+    fml::jni::ScopedJavaLocalRef<jobject> direct_buffer(env,
+        env->NewDirectByteBuffer(buffer.data(), buffer.size()));
+
     FlutterViewUpdateSemantics(
-        env, view.obj(), env->NewDirectByteBuffer(buffer.data(), buffer.size()),
+        env, view.obj(), direct_buffer.obj(),
         fml::jni::VectorToStringArray(env, strings).obj());
   }
 }
