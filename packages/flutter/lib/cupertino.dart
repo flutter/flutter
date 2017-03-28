@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter widgets implementing the current iOS design language.
+/// Flutter widgets implementing the current iOS design language. It contains
+/// base UI components of an iOS system.
 ///
 /// To use, import `package:flutter/cupertino.dart`.
 library cupertino;

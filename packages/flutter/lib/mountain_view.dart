@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter widgets implementing base Android UI components.
+/// Flutter widgets implementing base Android UI components. Contains
+/// Material-agnostic basic Android reusable UI elements.
 ///
 /// To use, import `package:flutter/mountain_view.dart`.
-
 library mountain_view;
 
 export 'src/mountain_view/page.dart';
