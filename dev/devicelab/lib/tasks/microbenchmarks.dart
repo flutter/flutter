@@ -13,6 +13,9 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
+/// The maximum amount of time a single microbenchmarks is allowed to take.
+const Duration _kBenchmarkTimeout = const Duration(minutes: 6);
+
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
 TaskFunction createMicrobenchmarkTask() {
@@ -21,24 +24,29 @@ TaskFunction createMicrobenchmarkTask() {
     await device.unlock();
 
     Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
-      print('Running $benchmarkPath');
-      final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
-      final Process flutterProcess = await inDirectory(appDir, () async {
-        if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-          await prepareProvisioningCertificates(appDir.path);
-        }
-        return await _startFlutter(
-          options: <String>[
-            '--profile',  // --release doesn't work on iOS due to code signing issues
-            '-d',
-            device.deviceId,
-            benchmarkPath,
-          ],
-          canFail: false,
-        );
-      });
+      Future<Map<String, double>> _run() async {
+        print('Running $benchmarkPath');
+        final Directory appDir = dir(
+            path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
+        final Process flutterProcess = await inDirectory(appDir, () async {
+          if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+            await prepareProvisioningCertificates(appDir.path);
+          }
+          return await _startFlutter(
+            options: <String>[
+              '--profile',
+              // --release doesn't work on iOS due to code signing issues
+              '-d',
+              device.deviceId,
+              benchmarkPath,
+            ],
+            canFail: false,
+          );
+        });
 
-      return await _readJsonResults(flutterProcess);
+        return await _readJsonResults(flutterProcess);
+      }
+      return _run().timeout(_kBenchmarkTimeout);
     }
 
     final Map<String, double> allResults = <String, double>{};
