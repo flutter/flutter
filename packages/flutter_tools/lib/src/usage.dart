@@ -128,7 +128,8 @@ class Usage {
   ║ See Google's privacy policy:                                               ║
   ║ https://www.google.com/intl/en/policies/privacy/                           ║
   ║                                                                            ║
-  ║ Use "flutter config --no-analytics" to disable analytics reporting.        ║
+  ║ Use "flutter config --no-analytics" to disable analytics and crash         ║
+  ║ reporting.                                                                 ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
