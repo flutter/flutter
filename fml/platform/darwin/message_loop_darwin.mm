@@ -41,7 +41,7 @@ void MessageLoopDarwin::Run() {
 
   while (running_) {
     @autoreleasepool {
-      CFRunLoopRunResult result =
+      int result =
           CFRunLoopRunInMode(kCFRunLoopDefaultMode, kDistantFuture, YES);
       if (result == kCFRunLoopRunStopped || result == kCFRunLoopRunFinished) {
         // This handles the case where the loop is terminated using
