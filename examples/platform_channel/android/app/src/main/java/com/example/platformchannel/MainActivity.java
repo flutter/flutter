@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2016 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,23 +25,23 @@ public class MainActivity extends FlutterActivity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    new FlutterMethodChannel(getFlutterView(), BATTERY_CHANNEL).setMethodCallHandler(
-      new MethodCallHandler() {
-        @Override
-        public void onMethodCall(MethodCall call, Response response) {
-          if (call.method.equals("getBatteryLevel")) {
-            int batteryLevel = getBatteryLevel();
+    new FlutterMethodChannel(getFlutterView(), CHANNEL).setMethodCallHandler(
+        new MethodCallHandler() {
+          @Override
+          public void onMethodCall(MethodCall call, Response response) {
+            if (call.method.equals("getBatteryLevel")) {
+              int batteryLevel = getBatteryLevel();
 
-            if (batteryLevel != -1) {
-              response.success(batteryLevel);
+              if (batteryLevel != -1) {
+                response.success(batteryLevel);
+              } else {
+                response.error("UNAVAILABLE", "Battery level not available.", null);
+              }
             } else {
-              response.error("UNAVAILABLE", "Battery level not available.", null);
+              response.notImplemented();
             }
-          } else {
-            response.notImplemented();
           }
         }
-      }
     );
   }
 
