@@ -334,7 +334,7 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
     description.add('Object or closure painting: ');
     return description.addAll(
       '', ', ', '',
-      _predicates.map((_PaintPredicate predicate) => predicate.toString()),
+      _predicates.map<String>((_PaintPredicate predicate) => predicate.toString()),
     );
   }
 
@@ -692,7 +692,7 @@ String _describeInvocation(Invocation call) {
     buffer.write(call.positionalArguments[0].toString());
   } else if (call.isMethod) {
     buffer.write('(');
-    buffer.writeAll(call.positionalArguments.map(_valueName), ', ');
+    buffer.writeAll(call.positionalArguments.map<String>(_valueName), ', ');
     String separator = call.positionalArguments.isEmpty ? '' : ', ';
     call.namedArguments.forEach((Symbol name, Object value) {
       buffer.write(separator);
