@@ -2,12 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/mountain_view.dart';
 import 'package:flutter/widgets.dart';
-import 'package:meta/meta.dart';
 
-import 'material.dart';
 import 'theme.dart';
 
 /// A modal route that replaces the entire screen with a material design transition.
@@ -52,7 +51,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     super.dispose();
   }
 
-  _CupertinoBackGestureController _backGestureController;
+  CupertinoBackGestureController _backGestureController;
 
   /// Support for dismissing this route with a horizontal swipe is enabled
   /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
@@ -72,7 +71,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     if (controller.status != AnimationStatus.completed)
       return null;
     assert(_backGestureController == null);
-    _backGestureController = new _CupertinoBackGestureController(
+    _backGestureController = new CupertinoBackGestureController(
       navigator: navigator,
       controller: controller,
       onDisposed: () { _backGestureController = null; }
@@ -99,7 +98,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS &&
         Navigator.of(context).userGestureInProgress) {
-      return new _CupertinoPageTransition(
+      return new CupertinoPageTransition(
         animation: new AnimationMean(left: animation, right: forwardAnimation),
         child: child
       );

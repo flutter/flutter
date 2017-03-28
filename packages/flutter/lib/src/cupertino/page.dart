@@ -1,15 +1,18 @@
 import 'package:flutter/widgets.dart';
+import 'package:meta/meta.dart';
+
+import '../material/material.dart'; // non ideal
 
 const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for iOS.
-class _CupertinoPageTransition extends AnimatedWidget {
+class CupertinoPageTransition extends AnimatedWidget {
   static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
     begin: FractionalOffset.topRight,
     end: -FractionalOffset.topRight
   );
 
-  _CupertinoPageTransition({
+  CupertinoPageTransition({
     Key key,
     Animation<double> animation,
     this.child
@@ -70,8 +73,8 @@ class _CupertinoTransitionCurve extends Curve {
 
 // This class responds to drag gestures to control the route's transition
 // animation progress. Used for iOS back gesture.
-class _CupertinoBackGestureController extends NavigationGestureController {
-  _CupertinoBackGestureController({
+class CupertinoBackGestureController extends NavigationGestureController {
+  CupertinoBackGestureController({
     @required NavigatorState navigator,
     @required this.controller,
     @required this.onDisposed,
