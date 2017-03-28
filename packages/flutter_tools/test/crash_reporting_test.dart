@@ -3,10 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
@@ -30,23 +32,42 @@ void main() {
       tools.crashFileSystem = new MemoryFileSystem();
       tools.writelnStderr = ([_]) { };
       setExitFunctionForTests((_) { });
-      enterTestingMode();
     });
 
     tearDown(() {
       tools.crashFileSystem = const LocalFileSystem();
       tools.writelnStderr = stderr.writeln;
       restoreExitFunction();
-      exitTestingMode();
     });
 
     testUsingContext('should send crash reports', () async {
       String method;
       Uri uri;
+      Map<String, String> fields;
 
       CrashReportSender.initializeWith(new MockClient((Request request) async {
         method = request.method;
         uri = request.url;
+
+        // A very ad-hoc multipart request parser. Good enough for this test.
+        String boundary = request.headers['Content-Type'];
+        boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+        fields = new Map<String, String>.fromIterable(
+          UTF8.decode(request.bodyBytes)
+              .split('--$boundary')
+              .map<List<String>>((String part) {
+                final Match nameMatch = new RegExp(r'name="(.*)"').firstMatch(part);
+                if (nameMatch == null)
+                  return null;
+                final String name = nameMatch[1];
+                final String value = part.split('\n').skip(2).join('\n').trim();
+                return <String>[name, value];
+              })
+              .where((List<String> pair) => pair != null),
+          key: (List<String> pair) => pair[0],
+          value: (List<String> pair) => pair[1],
+        );
+
         return new Response(
             'test-report-id',
             200
@@ -68,12 +89,20 @@ void main() {
         scheme: 'https',
         host: 'clients2.google.com',
         port: 443,
-        path: '/cr/staging_report',
+        path: '/cr/report',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
           'version' : 'test-version',
         },
       ));
+      expect(fields['uuid'], '00000000-0000-4000-0000-000000000000');
+      expect(fields['product'], 'Flutter_Tools');
+      expect(fields['version'], 'test-version');
+      expect(fields['osName'], platform.operatingSystem);
+      expect(fields['osVersion'], 'fake OS name and version');
+      expect(fields['type'], 'DartError');
+      expect(fields['error_runtime_type'], 'StateError');
+
       final BufferLogger logger = context[Logger];
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');

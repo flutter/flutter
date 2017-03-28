@@ -66,6 +66,10 @@ class Usage {
     _analytics.enabled = value;
   }
 
+  /// A stable randomly generated UUID used to deduplicate multiple identical
+  /// reports coming from the same computer.
+  String get clientId => _analytics.clientId;
+
   void sendCommand(String command) {
     if (!suppressAnalytics)
       _analytics.sendScreenView(command);
@@ -114,12 +118,18 @@ class Usage {
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║                 Welcome to Flutter! - https://flutter.io                   ║
   ║                                                                            ║
-  ║ The Flutter tool anonymously reports feature usage statistics and basic    ║
-  ║ crash reports to Google in order to help Google contribute improvements to ║
-  ║ Flutter over time. See Google's privacy policy:                            ║
+  ║ The Flutter tool anonymously reports feature usage statistics and crash    ║
+  ║ reports to Google in order to help Google contribute improvements to       ║
+  ║ Flutter over time.                                                         ║
+  ║                                                                            ║
+  ║ Read about data we send with crash reports:                                ║
+  ║ https://github.com/flutter/flutter/wiki/Flutter-CLI-crash-reporting        ║
+  ║                                                                            ║
+  ║ See Google's privacy policy:                                               ║
   ║ https://www.google.com/intl/en/policies/privacy/                           ║
   ║                                                                            ║
-  ║ Use "flutter config --no-analytics" to disable analytics reporting.        ║
+  ║ Use "flutter config --no-analytics" to disable analytics and crash         ║
+  ║ reporting.                                                                 ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }

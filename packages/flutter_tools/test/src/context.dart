@@ -170,6 +170,9 @@ class MockSimControl extends Mock implements SimControl {
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
   @override
   List<File> whichAll(String execName) => <File>[];
+
+  @override
+  String get name => 'fake OS name and version';
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
@@ -189,6 +192,9 @@ class MockUsage implements Usage {
 
   @override
   set enabled(bool value) { }
+
+  @override
+  String get clientId => '00000000-0000-4000-0000-000000000000';
 
   @override
   void sendCommand(String command) { }
