@@ -239,7 +239,7 @@ class OptionalPlatformMethodChannel extends PlatformMethodChannel {
 /// The identity of the channel is given by its name, so other uses of that name
 /// with may interfere with this channel's communication.
 ///
-/// See: <https://flutter.io/platform-services/>
+/// See: <https://flutter.io/platform-channels/>
 class PlatformEventChannel {
   /// Creates a [PlatformEventChannel] with the specified [name].
   ///
