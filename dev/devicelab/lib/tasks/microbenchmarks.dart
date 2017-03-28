@@ -79,6 +79,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   StreamSubscription<String> stdoutSub;
 
   int prefixLength = 0;
+  bool processKilled = false;
   stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
@@ -94,6 +95,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
     if (line.contains(jsonEnd)) {
       jsonStarted = false;
       stdoutSub.cancel();
+      processKilled = true;
       process.kill(ProcessSignal.SIGINT);  // flutter run doesn't quit automatically
       completer.complete(JSON.decode(jsonBuf.toString()));
       return;
@@ -101,6 +103,12 @@ Future<Map<String, double>> _readJsonResults(Process process) {
 
     if (jsonStarted)
       jsonBuf.writeln(line.substring(prefixLength));
+  });
+
+  process.exitCode.then<int>((int code) {
+    if (!processKilled && code != 0) {
+      completer.completeError('flutter run failed: exit code=$code');
+    }
   });
 
   return completer.future;
