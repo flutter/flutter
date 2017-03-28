@@ -89,7 +89,7 @@ void main() {
         scheme: 'https',
         host: 'clients2.google.com',
         port: 443,
-        path: '/cr/staging_report',
+        path: '/cr/report',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
           'version' : 'test-version',
