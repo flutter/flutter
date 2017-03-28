@@ -164,7 +164,7 @@ class PlatformMethodChannel {
           } on PlatformException catch (e) {
             return codec.encodeErrorEnvelope(
               code: e.code, message: e.message, details: e.details);
-          } on MissingPluginException catch (e) {
+          } on MissingPluginException {
             return null;
           }
         },
@@ -199,7 +199,7 @@ class PlatformMethodChannel {
           } on PlatformException catch (e) {
             return codec.encodeErrorEnvelope(
               code: e.code, message: e.message, details: e.details);
-          } on MissingPluginException catch (e) {
+          } on MissingPluginException {
             return null;
           }
         },
