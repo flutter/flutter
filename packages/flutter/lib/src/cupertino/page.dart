@@ -5,8 +5,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
 
-import '../material/material.dart'; // non ideal
-
 const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for iOS.
@@ -36,8 +34,10 @@ class CupertinoPageTransition extends AnimatedWidget {
     // but not while being controlled by a gesture.
     return new SlideTransition(
       position: listenable,
-      child: new Material(
-        elevation: 6,
+      child: new PhysicalModel(
+        shape: BoxShape.rectangle,
+        color: const Color(0x00000000), // we don't need the canvas background, just the elevation
+        elevation: 16,
         child: child
       )
     );
