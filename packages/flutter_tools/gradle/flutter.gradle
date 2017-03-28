@@ -137,11 +137,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
         }
 
-        project.dependencies {
-            // FlutterActivity extends FragmentActivity
-            compile 'com.android.support:support-fragment:24.2.0+'
-        }
-
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
