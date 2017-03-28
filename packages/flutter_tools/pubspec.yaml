@@ -21,7 +21,7 @@ dependencies:
   meta: ^1.0.4
   mustache: ^0.2.5
   package_config: '>=0.1.5 <2.0.0'
-  platform: 1.1.0
+  platform: 1.1.1
   process: 2.0.1
   stack_trace: ^1.4.0
   usage: ^3.0.0+1
