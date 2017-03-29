@@ -289,12 +289,14 @@ class _MaterialButtonState extends State<MaterialButton> {
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = config.height ?? buttonTheme.height;
     final int elevation = (_highlight ? config.highlightElevation : config.elevation) ?? 0;
+    final bool hasColorOrElevation = (config.color != null || elevation > 0);
     Widget contents = new IconTheme.merge(
       context: context,
       data: new IconThemeData(
         color: textColor
       ),
       child: new InkWell(
+        borderRadius: hasColorOrElevation ? null : kMaterialEdges[MaterialType.button],
         highlightColor: config.highlightColor ?? theme.highlightColor,
         splashColor: config.splashColor ?? theme.splashColor,
         onTap: config.onPressed,
@@ -308,7 +310,7 @@ class _MaterialButtonState extends State<MaterialButton> {
         )
       )
     );
-    if (elevation > 0 || config.color != null) {
+    if (hasColorOrElevation) {
       contents = new Material(
         type: MaterialType.button,
         color: config.color,

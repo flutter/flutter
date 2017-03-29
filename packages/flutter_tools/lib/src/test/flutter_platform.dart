@@ -222,7 +222,7 @@ class _FlutterPlatform extends PlatformPlugin {
           processObservatoryPort = detectedPort;
         },
         startTimeoutTimer: () {
-          new Future<_InitialResult>.delayed(_kTestStartupTimeout, timeout.complete);
+          new Future<_InitialResult>.delayed(_kTestStartupTimeout).then((_) => timeout.complete());
         },
       );
 

@@ -185,6 +185,8 @@ class TextSpan {
     final String indent = '$prefix  ';
     if (style != null)
       buffer.writeln(style.toString(indent));
+    if (recognizer != null)
+      buffer.writeln('${indent}recognizer: ${recognizer.runtimeType}');
     if (text != null)
       buffer.writeln('$indent"$text"');
     if (children != null) {

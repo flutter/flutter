@@ -11,7 +11,7 @@ typedef void ErrorHandler(dynamic error, StackTrace stackTrace);
 AppContext get context => Zone.current['context'];
 
 class AppContext {
-  Map<Type, dynamic> _instances = <Type, dynamic>{};
+  final Map<Type, dynamic> _instances = <Type, dynamic>{};
   Zone _zone;
 
   AppContext() : _zone = Zone.current;

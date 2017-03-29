@@ -30,7 +30,7 @@ class DeviceManager {
     _deviceDiscoverers.add(new IOSSimulators());
   }
 
-  List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
+  final List<DeviceDiscovery> _deviceDiscoverers = <DeviceDiscovery>[];
 
   /// A user-specified device ID.
   String specifiedDeviceId;

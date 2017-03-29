@@ -107,8 +107,8 @@ class InputField extends StatefulWidget {
 }
 
 class _InputFieldState extends State<InputField> {
-  GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
-  GlobalKey<EditableTextState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
+  final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
+  final GlobalKey<EditableTextState> _focusKey = new GlobalKey(debugLabel: "_InputFieldState _focusKey");
 
   GlobalKey get focusKey => config.focusKey ?? (config.key is GlobalKey ? config.key : _focusKey);
 

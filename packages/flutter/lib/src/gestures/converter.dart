@@ -34,7 +34,7 @@ class _PointerState {
 /// Converts from engine pointer data to framework pointer events.
 class PointerEventConverter {
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
-  static Map<int, _PointerState> _pointers = <int, _PointerState>{};
+  static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
   static _PointerState _ensureStateForPointer(ui.PointerData datum, Point position) {
     return _pointers.putIfAbsent(

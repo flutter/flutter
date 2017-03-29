@@ -16,7 +16,7 @@ import 'utils.dart';
 /// Maximum amount of time a single task is allowed to take to run.
 ///
 /// If exceeded the task is considered to have failed.
-const Duration taskTimeout = const Duration(minutes: 10);
+const Duration taskTimeout = const Duration(minutes: 25);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.

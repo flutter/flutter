@@ -175,20 +175,20 @@ abstract class ResidentRunner {
     exit(0);
   }
 
-  bool _processingSignal = false;
+  bool _processingUserRequest = false;
   Future<Null> _handleSignal(ProcessSignal signal) async {
-    if (_processingSignal) {
+    if (_processingUserRequest) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
-    _processingSignal = true;
+    _processingUserRequest = true;
 
     final bool fullRestart = signal == ProcessSignal.SIGUSR2;
 
     try {
       await restart(fullRestart: fullRestart);
     } finally {
-      _processingSignal = false;
+      _processingUserRequest = false;
     }
   }
 
@@ -277,20 +277,18 @@ abstract class ResidentRunner {
     return false;
   }
 
-  bool _processingTerminalRequest = false;
-
   Future<Null> processTerminalInput(String command) async {
-    if (_processingTerminalRequest) {
+    if (_processingUserRequest) {
       printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
-    _processingTerminalRequest = true;
+    _processingUserRequest = true;
     try {
       final bool handled = await _commonTerminalInputHandler(command);
       if (!handled)
         await handleTerminalCommand(command);
     } finally {
-      _processingTerminalRequest = false;
+      _processingUserRequest = false;
     }
   }
 

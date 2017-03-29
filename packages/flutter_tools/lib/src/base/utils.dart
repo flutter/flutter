@@ -105,8 +105,8 @@ class ItemListNotifier<T> {
 
   Set<T> _items;
 
-  StreamController<T> _addedController = new StreamController<T>.broadcast();
-  StreamController<T> _removedController = new StreamController<T>.broadcast();
+  final StreamController<T> _addedController = new StreamController<T>.broadcast();
+  final StreamController<T> _removedController = new StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -168,7 +168,7 @@ class SettingsFile {
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
-  Random _random = new Random();
+  final Random _random = new Random();
 
   /// Generate a version 4 (random) uuid. This is a uuid scheme that only uses
   /// random numbers as the source of the generated uuid.

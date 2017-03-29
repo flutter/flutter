@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Slightly longer than task timeout that gives the task runner a chance to
 /// clean-up before forcefully quitting it.
-const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 11);
+const Duration taskTimeoutWithGracePeriod = const Duration(minutes: 26);
 
 /// Runs a task in a separate Dart VM and collects the result using the VM
 /// service protocol.
