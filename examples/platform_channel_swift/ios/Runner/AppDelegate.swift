@@ -8,7 +8,7 @@
 import UIKit
 import Flutter
 
-@UIApplicationMain
+//@UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
 
   override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
