@@ -585,9 +585,8 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 #pragma mark - Application Messages
 
 - (void)sendBinaryMessage:(NSData*)message channelName:(NSString*)channel {
+  NSAssert(message, @"The message must not be null");
   NSAssert(channel, @"The channel must not be null");
-  if (message == nil)
-    message = [NSData data];
   _platformView->DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
           channel.UTF8String, shell::GetVectorFromNSData(message), nil));
@@ -596,15 +595,15 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 - (void)sendBinaryMessage:(NSData*)message
               channelName:(NSString*)channel
        binaryReplyHandler:(FlutterBinaryReplyHandler)callback {
+  NSAssert(message, @"The message must not be null");
   NSAssert(channel, @"The channel must not be null");
   NSAssert(callback, @"The callback must not be null");
-  if (message == nil)
-    message = [NSData data];
   _platformView->DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
           channel.UTF8String, shell::GetVectorFromNSData(message),
           ftl::MakeRefCounted<PlatformMessageResponseDarwin>(^(NSData* reply) {
-            callback(reply);
+            if (callback)
+              callback(reply);
           })));
 }
 

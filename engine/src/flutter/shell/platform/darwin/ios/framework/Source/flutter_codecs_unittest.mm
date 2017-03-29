@@ -7,14 +7,16 @@
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeNil) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  ASSERT_TRUE([codec encode:nil] == nil);
-  ASSERT_TRUE([codec decode:nil] == nil);
+  ASSERT_TRUE([[codec encode:nil] isEqualTo:[NSData data]]);
+  ASSERT_TRUE([[codec decode:nil] isEqualTo:@""]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeEmptyString) {
+  NSString* value = @"";
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  ASSERT_TRUE([codec encode:@""] == nil);
-  ASSERT_TRUE([codec decode:[NSData data]] == nil);
+  NSData* encoded = [codec encode:value];
+  NSString* decoded = [codec decode:encoded];
+  ASSERT_TRUE([value isEqualTo:decoded]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeAsciiString) {
@@ -39,13 +41,6 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNonBMPString) {
   NSData* encoded = [codec encode:value];
   NSString* decoded = [codec decode:encoded];
   ASSERT_TRUE([value isEqualTo:decoded]);
-}
-
-TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  ASSERT_TRUE([codec encode:nil] == nil);
-  ASSERT_TRUE([codec decode:nil] == nil);
-  ASSERT_TRUE([codec decode:[NSData data]] == nil);
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeArray) {

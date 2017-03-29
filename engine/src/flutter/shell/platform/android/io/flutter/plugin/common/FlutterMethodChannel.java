@@ -10,10 +10,11 @@ import io.flutter.view.FlutterView.BinaryMessageReplyCallback;
 import io.flutter.view.FlutterView.BinaryMessageResponse;
 import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A named channel for communicating with the Flutter application using asynchronous
- * method calls.
+ * method calls and event streams.
  *
  * Incoming method calls are decoded from binary on receipt, and Java results are encoded
  * into binary before being transmitted back to Flutter. The {@link MethodCodec} used must be
@@ -85,7 +86,7 @@ public final class FlutterMethodChannel {
     /**
      * Registers a method call handler on this channel.
      *
-     * Overrides any existing handler registration.
+     * Overrides any existing handler registration (for messages, method calls, or streams).
      *
      * @param handler a {@link MethodCallHandler}, or null to deregister.
      */
@@ -95,38 +96,22 @@ public final class FlutterMethodChannel {
     }
 
     /**
-     * Strategy for handling the result of a method call. Supports dual use:
-     * Implementations of methods to be invoked by Flutter act as clients of this interface
-     * for sending results back to Flutter. Invokers of Flutter methods provide
-     * implementations of this interface for handling results received from Flutter.
+     * Registers a stream handler on this channel.
+     *
+     * Overrides any existing handler registration (for messages, method calls, or streams).
+     *
+     * @param handler a {@link StreamHandler}, or null to deregister.
      */
-    public interface Response {
-        /**
-         * Handles a successful result.
-         *
-         * @param result The result, possibly null.
-         */
-        void success(Object result);
-
-        /**
-         * Handles an error result.
-         *
-         * @param errorCode An error code String.
-         * @param errorMessage A human-readable error message String, possibly null.
-         * @param errorDetails Error details, possibly null
-         */
-        void error(String errorCode, String errorMessage, Object errorDetails);
-
-        /**
-         * Handles a call to an unimplemented method.
-         */
-        void notImplemented();
+    public void setStreamHandler(final StreamHandler handler) {
+        view.addOnBinaryMessageListenerAsync(name,
+            handler == null ? null : new StreamListener(handler));
     }
 
     /**
      * A call-back interface for handling incoming method calls.
      */
     public interface MethodCallHandler {
+
         /**
          * Handles the specified method call.
          *
@@ -134,6 +119,59 @@ public final class FlutterMethodChannel {
          * @param response A {@link Response} for providing a single method call result.
          */
         void onMethodCall(MethodCall call, Response response);
+    }
+
+    /**
+     * A call-back interface for handling stream setup and teardown requests.
+     */
+    public interface StreamHandler {
+        /**
+         * Handles a stream setup request.
+         *
+         * @param arguments Stream configuration arguments, possibly null.
+         * @param eventSink An {@link EventSink} used to emit events once the stream has been set
+         * up.
+         */
+        void listen(Object arguments, EventSink eventSink);
+
+        /**
+         * Handles a stream tear-down request.
+         *
+         * @param arguments Stream configuration arguments, possibly null.
+         */
+        void cancel(Object arguments);
+    }
+
+    /**
+     * Response interface for sending results back to Flutter.
+     */
+    public interface Response {
+        /**
+         * Submits a successful result.
+         *
+         * @param result The result, possibly null.
+         */
+        void success(Object result);
+
+        /**
+         * Submits an error during message handling, an error result of a method call, or an error
+         * event.
+         *
+         * @param errorCode An error code String.
+         * @param errorMessage A human-readable error message String, possibly null.
+         * @param errorDetails Error details, possibly null
+         */
+        void error(String errorCode, String errorMessage, Object errorDetails);
+    }
+
+    /**
+     * A {@link Response} supporting multiple results and which can be terminated.
+     */
+    public interface EventSink extends Response {
+        /**
+         * Signals that no more events will be emitted.
+         */
+        void done();
     }
 
     private final class MethodCallResultCallback implements BinaryMessageReplyCallback {
@@ -145,15 +183,11 @@ public final class FlutterMethodChannel {
 
         @Override
         public void onReply(ByteBuffer reply) {
-            if (reply == null) {
-                handler.notImplemented();
-            } else {
-                try {
-                    final Object result = codec.decodeEnvelope(reply);
-                    handler.success(result);
-                } catch (FlutterException e) {
-                    handler.error(e.code, e.getMessage(), e.details);
-                }
+            try {
+                final Object result = codec.decodeEnvelope(reply);
+                handler.success(result);
+            } catch (FlutterException e) {
+                handler.error(e.code, e.getMessage(), e.details);
             }
         }
     }
@@ -188,13 +222,6 @@ public final class FlutterMethodChannel {
                         done = true;
                     }
 
-                    @Override
-                    public void notImplemented() {
-                        checkDone();
-                        response.send(null);
-                        done = true;
-                    }
-
                     private void checkDone() {
                         if (done) {
                             throw new IllegalStateException("Call result already provided");
@@ -204,6 +231,70 @@ public final class FlutterMethodChannel {
             } catch (Exception e) {
                 Log.e(TAG + name, "Failed to handle method call", e);
                 response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+            }
+        }
+    }
+
+    private final class StreamListener implements OnBinaryMessageListenerAsync {
+        private final StreamHandler handler;
+
+        StreamListener(StreamHandler handler) {
+            this.handler = handler;
+        }
+
+        @Override
+        public void onMessage(FlutterView view, ByteBuffer message,
+            final BinaryMessageResponse response) {
+            final MethodCall call = codec.decodeMethodCall(message);
+            final AtomicBoolean cancelled = new AtomicBoolean(false);
+            if (call.method.equals("listen")) {
+                try {
+                    handler.listen(call.arguments, new EventSink() {
+                        @Override
+                        public void success(Object event) {
+                            if (cancelled.get()) {
+                                return;
+                            }
+                            FlutterMethodChannel.this.view.sendBinaryMessage(
+                                name,
+                                codec.encodeSuccessEnvelope(event),
+                                null);
+                        }
+
+                        @Override
+                        public void error(String errorCode, String errorMessage,
+                            Object errorDetails) {
+                            if (cancelled.get()) {
+                                return;
+                            }
+                            FlutterMethodChannel.this.view.sendBinaryMessage(
+                                name,
+                                codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails),
+                                null);
+                        }
+
+                        @Override
+                        public void done() {
+                            if (cancelled.get()) {
+                                return;
+                            }
+                            FlutterMethodChannel.this.view.sendBinaryMessage(name, null, null);
+                        }
+                    });
+                    response.send(codec.encodeSuccessEnvelope(null));
+                } catch (Exception e) {
+                    Log.e(TAG + name, "Failed to open event stream", e);
+                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                }
+            } else if (call.method.equals("cancel")) {
+                cancelled.set(true);
+                try {
+                    handler.cancel(call.arguments);
+                    response.send(codec.encodeSuccessEnvelope(null));
+                } catch (Exception e) {
+                    Log.e(TAG + name, "Failed to close event stream", e);
+                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                }
             }
         }
     }
