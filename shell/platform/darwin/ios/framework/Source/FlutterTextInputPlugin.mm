@@ -160,23 +160,21 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   id args = call.arguments;
   if ([method isEqualToString:@"TextInput.show"]) {
     [self showTextInput];
-    resultReceiver(nil, nil);
+    resultReceiver(nil);
   } else if ([method isEqualToString:@"TextInput.hide"]) {
     [self hideTextInput];
-    resultReceiver(nil, nil);
+    resultReceiver(nil);
   } else if ([method isEqualToString:@"TextInput.setClient"]) {
     [self setTextInputClient:[args[0] intValue] withConfiguration:args[1]];
-    resultReceiver(nil, nil);
+    resultReceiver(nil);
   } else if ([method isEqualToString:@"TextInput.setEditingState"]) {
     [self setTextInputEditingState:args];
-    resultReceiver(nil, nil);
+    resultReceiver(nil);
   } else if ([method isEqualToString:@"TextInput.clearClient"]) {
     [self clearTextInputClient];
-    resultReceiver(nil, nil);
+    resultReceiver(nil);
   } else {
-    resultReceiver(nil, [FlutterError errorWithCode:@"UNKNOWN"
-                                            message:@"Unknown method"
-                                            details:nil]);
+    resultReceiver(FlutterMethodNotImplemented);
   }
 }
 

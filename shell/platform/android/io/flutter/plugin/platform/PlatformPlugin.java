@@ -17,6 +17,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
 
+import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.util.PathUtils;
 
 import io.flutter.plugin.common.ActivityLifecycleListener;
@@ -81,7 +82,7 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
             } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
                 response.success(getPathProviderApplicationDocumentsDirectory());
             } else {
-                response.error("unknown", "Unknown method: " + method, null);
+                response.notImplemented();
             }
         } catch (JSONException e) {
             response.error("error", "JSON error: " + e.getMessage(), null);
