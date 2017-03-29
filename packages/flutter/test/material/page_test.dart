@@ -22,7 +22,6 @@ void main() {
     final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-    // await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
@@ -48,7 +47,6 @@ void main() {
     final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
-    // await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
