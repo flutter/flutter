@@ -46,39 +46,39 @@ using namespace shell;
   id args = call.arguments;
   if ([method isEqualToString:@"SystemSound.play"]) {
     [self playSystemSound:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"HapticFeedback.vibrate"]) {
     [self vibrateHapticFeedback];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"UrlLauncher.launch"]) {
     [self launchURL:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"SystemChrome.setPreferredOrientations"]) {
     [self setSystemChromePreferredOrientations:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"SystemChrome.setApplicationSwitcherDescription"]) {
     [self setSystemChromeApplicationSwitcherDescription:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"SystemChrome.setEnabledSystemUIOverlays"]) {
     [self setSystemChromeEnabledSystemUIOverlays:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"SystemChrome.setSystemUIOverlayStyle"]) {
     [self setSystemChromeSystemUIOverlayStyle:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"SystemNavigator.pop"]) {
     [self popSystemNavigator];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"Clipboard.getData"]) {
-    resultReceiver([self getClipboardData:args]);
+    resultReceiver([self getClipboardData:args], nil);
   } else if ([method isEqualToString:@"Clipboard.setData"]) {
     [self setClipboardData:args];
-    resultReceiver(nil);
+    resultReceiver(nil, nil);
   } else if ([method isEqualToString:@"PathProvider.getTemporaryDirectory"]) {
-    resultReceiver([self getPathProviderTemporaryDirectory]);
+    resultReceiver([self getPathProviderTemporaryDirectory], nil);
   } else if ([method isEqualToString:@"PathProvider.getApplicationDocumentsDirectory"]) {
-    resultReceiver([self getPathProviderApplicationDocumentsDirectory]);
+    resultReceiver([self getPathProviderApplicationDocumentsDirectory], nil);
   } else {
-    resultReceiver(FlutterMethodNotImplemented);
+    resultReceiver(nil, [FlutterError errorWithCode:@"UNKNOWN" message:@"Unknown method" details: nil]);
   }
 }
 

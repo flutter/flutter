@@ -16,8 +16,6 @@
 }
 
 - (NSData*)encode:(id)message {
-  if (message == nil)
-    return nil;
   NSMutableData* data = [NSMutableData dataWithCapacity:32];
   FlutterStandardWriter* writer = [FlutterStandardWriter writerWithData:data];
   [writer writeValue:message];
@@ -25,8 +23,6 @@
 }
 
 - (id)decode:(NSData*)message {
-  if (!message.length)
-    return nil;
   FlutterStandardReader* reader =
       [FlutterStandardReader readerWithData:message];
   id value = [reader readValue];
@@ -83,7 +79,7 @@
   return [FlutterMethodCall methodCallWithMethodName:value1 arguments:value2];
 }
 
-- (id)decodeEnvelope:(NSData*)envelope {
+- (id)decodeEnvelope:(NSData*)envelope error:(FlutterError**)error {
   FlutterStandardReader* reader =
       [FlutterStandardReader readerWithData:envelope];
   UInt8 flag = [reader readByte];
@@ -103,7 +99,9 @@
                @"Invalid standard envelope");
       NSAssert(message == nil || [message isKindOfClass:[NSString class]],
                @"Invalid standard envelope");
-      result = [FlutterError errorWithCode:code message:message details:details];
+      *error =
+          [FlutterError errorWithCode:code message:message details:details];
+      result = nil;
     } break;
   }
   return result;
@@ -150,12 +148,12 @@ using namespace shell;
   NSAssert(data, @"Data cannot be nil");
   NSAssert(data.length % elementSize == 0,
            @"Data must contain integral number of elements");
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  _data = [data retain];
-  _type = type;
-  _elementSize = elementSize;
-  _elementCount = data.length / elementSize;
+  if (self = [super init]) {
+    _data = [data retain];
+    _type = type;
+    _elementSize = elementSize;
+    _elementCount = data.length / elementSize;
+  }
   return self;
 }
 
@@ -186,9 +184,9 @@ using namespace shell;
 
 - (instancetype)initWithHex:(NSString*)hex {
   NSAssert(hex, @"Hex cannot be nil");
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  _hex = [hex retain];
+  if (self = [super init]) {
+    _hex = [hex retain];
+  }
   return self;
 }
 
@@ -225,9 +223,9 @@ using namespace shell;
 }
 
 - (instancetype)initWithData:(NSMutableData*)data {
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  _data = [data retain];
+  if (self = [super init]) {
+    _data = [data retain];
+  }
   return self;
 }
 
@@ -361,10 +359,10 @@ using namespace shell;
 }
 
 - (instancetype)initWithData:(NSData*)data {
-  self = [super init];
-  NSAssert(self, @"Super init cannot be nil");
-  _data = [data retain];
-  _range = NSMakeRange(0, 0);
+  if (self = [super init]) {
+    _data = [data retain];
+    _range = NSMakeRange(0, 0);
+  }
   return self;
 }
 

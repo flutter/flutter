@@ -14,14 +14,10 @@
 }
 
 - (NSData*)encode:(NSData*)message {
-  if (!message.length)
-    return nil;
   return message;
 }
 
 - (NSData*)decode:(NSData*)message {
-  if (!message.length)
-    return nil;
   return message;
 }
 @end
@@ -36,15 +32,14 @@
 }
 
 - (NSData*)encode:(NSString*)message {
-  if (!message.length)
-    return nil;
+  if (!message.length) {
+    return [NSData data];
+  }
   const char* utf8 = message.UTF8String;
   return [NSData dataWithBytes:utf8 length:strlen(utf8)];
 }
 
 - (NSString*)decode:(NSData*)message {
-  if (!message.length)
-    return nil;
   return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding]
       autorelease];
 }
@@ -60,8 +55,6 @@
 }
 
 - (NSData*)encode:(id)message {
-  if (message == nil)
-    return nil;
   NSData* encoding =
       [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
   NSAssert(encoding, @"Invalid JSON message, encoding failed");
@@ -69,8 +62,6 @@
 }
 
 - (id)decode:(NSData*)message {
-  if (!message.length)
-    return nil;
   id decoded =
       [NSJSONSerialization JSONObjectWithData:message options:0 error:nil];
   NSAssert(decoded, @"Invalid JSON message, decoding failed");
@@ -116,13 +107,14 @@
   return [FlutterMethodCall methodCallWithMethodName:method arguments:arguments];
 }
 
-- (id)decodeEnvelope:(NSData*)envelope {
+- (id)decodeEnvelope:(NSData*)envelope error:(FlutterError**)error {
   NSArray* array = [[FlutterJSONMessageCodec sharedInstance] decode:envelope];
   if (array.count == 1)
     return array[0];
   NSAssert(array.count == 3, @"Invalid JSON envelope");
   NSAssert([array[0] isKindOfClass:[NSString class]], @"Invalid JSON envelope");
   NSAssert(array[1] == nil || [array[1] isKindOfClass:[NSString class]], @"Invalid JSON envelope");
-  return [FlutterError errorWithCode:array[0] message:array[1] details:array[2]];
+  *error = [FlutterError errorWithCode:array[0] message:array[1] details:array[2]];
+  return nil;
 }
 @end

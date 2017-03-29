@@ -5,7 +5,7 @@
 package io.flutter.plugin.common;
 
 /**
- * Command object representing a method call on a {@link FlutterMethodChannel}.
+ * Command object representing a method call on a {@link FlutterMessageChannel}.
  */
 public final class MethodCall {
     /**

@@ -1434,7 +1434,6 @@ FILE: ../../../flutter/lib/ui/painting/vertices.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterEventChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterException.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMethodChannel.java

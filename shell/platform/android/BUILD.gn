@@ -81,7 +81,6 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/BinaryCodec.java",
     "io/flutter/plugin/common/FlutterException.java",
-    "io/flutter/plugin/common/FlutterEventChannel.java",
     "io/flutter/plugin/common/FlutterMessageChannel.java",
     "io/flutter/plugin/common/FlutterMethodChannel.java",
     "io/flutter/plugin/common/JSONMessageCodec.java",
