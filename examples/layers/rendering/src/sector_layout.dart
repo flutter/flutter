@@ -15,7 +15,8 @@ class SectorConstraints extends Constraints {
     this.maxDeltaRadius: double.INFINITY,
     this.minDeltaTheta: 0.0,
     this.maxDeltaTheta: kTwoPi
-  });
+  }) : assert(maxDeltaRadius >= minDeltaRadius),
+       assert(maxDeltaTheta >= minDeltaTheta);
 
   const SectorConstraints.tight({ double deltaRadius: 0.0, double deltaTheta: 0.0 })
     : minDeltaRadius = deltaRadius,
@@ -216,12 +217,16 @@ class RenderSectorRing extends RenderSectorWithChildren {
     BoxDecoration decoration,
     double deltaRadius: double.INFINITY,
     double padding: 0.0
-  }) : _padding = padding, _desiredDeltaRadius = deltaRadius, super(decoration);
+  }) : _padding = padding,
+       assert(deltaRadius >= 0.0),
+       _desiredDeltaRadius = deltaRadius,
+       super(decoration);
 
   double _desiredDeltaRadius;
   double get desiredDeltaRadius => _desiredDeltaRadius;
   set desiredDeltaRadius(double value) {
     assert(value != null);
+    assert(value >= 0);
     if (_desiredDeltaRadius != value) {
       _desiredDeltaRadius = value;
       markNeedsLayout();
@@ -249,11 +254,11 @@ class RenderSectorRing extends RenderSectorWithChildren {
   @override
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
     final double outerDeltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
-    final double innerDeltaRadius = outerDeltaRadius - padding * 2.0;
+    final double innerDeltaRadius = math.max(0.0, outerDeltaRadius - padding * 2.0);
     final double childRadius = radius + padding;
     final double paddingTheta = math.atan(padding / (radius + outerDeltaRadius));
     double innerTheta = paddingTheta; // increments with each child
-    double remainingDeltaTheta = constraints.maxDeltaTheta - (innerTheta + paddingTheta);
+    double remainingDeltaTheta = math.max(0.0, constraints.maxDeltaTheta - (innerTheta + paddingTheta));
     RenderSector child = firstChild;
     while (child != null) {
       final SectorConstraints innerConstraints = new SectorConstraints(
@@ -489,10 +494,12 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     assert(child.parentData is SectorParentData);
     assert(width != null);
     assert(height != null);
-    final double maxChildDeltaRadius = math.min(width, height) / 2.0 - innerRadius;
+    if (!width.isFinite && !height.isFinite)
+      return Size.zero;
+    final double maxChildDeltaRadius = math.max(0.0, math.min(width, height) / 2.0 - innerRadius);
     final SectorDimensions childDimensions = child.getIntrinsicDimensions(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), innerRadius);
     final double dimension = (innerRadius + childDimensions.deltaRadius) * 2.0;
-    return constraints.constrain(new Size(dimension, dimension));
+    return new Size.square(dimension);
   }
 
   @override

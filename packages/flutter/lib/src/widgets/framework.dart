@@ -3006,7 +3006,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
   static String _stringify(Object exception) {
     try {
       return exception.toString();
-    } catch (e) { }
+    } catch (e) { } // ignore: empty_catches
     return 'Error';
   }
 

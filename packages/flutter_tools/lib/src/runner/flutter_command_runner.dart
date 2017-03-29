@@ -280,7 +280,11 @@ class FlutterCommandRunner extends CommandRunner<Null> {
           if (engineSourcePath == '/' || engineSourcePath.isEmpty || !dirExists)
             engineSourcePath = null;
         }
-      } on FileSystemException { } on FormatException { }
+      } on FileSystemException {
+        engineSourcePath = null;
+      } on FormatException {
+        engineSourcePath = null;
+      }
 
       if (engineSourcePath == null)
         engineSourcePath = _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
