@@ -18,6 +18,7 @@ Animator::Animator(ftl::WeakPtr<Rasterizer> rasterizer,
       engine_(engine),
       layer_tree_pipeline_(ftl::MakeRefCounted<LayerTreePipeline>(3)),
       pending_frame_semaphore_(1),
+      frame_number_(1),
       paused_(false),
       weak_factory_(this) {}
 
@@ -37,6 +38,8 @@ void Animator::Start() {
 }
 
 void Animator::BeginFrame(ftl::TimePoint frame_time) {
+  TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
+
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {
@@ -101,12 +104,15 @@ void Animator::RequestFrame() {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  blink::Threads::UI()->PostTask([self = weak_factory_.GetWeakPtr()]() {
-    if (!self.get())
-      return;
-    TRACE_EVENT_INSTANT0("flutter", "RequestFrame");
-    self->AwaitVSync();
-  });
+  blink::Threads::UI()->PostTask(
+      [ self = weak_factory_.GetWeakPtr(), frame_number = frame_number_ ]() {
+        if (!self.get()) {
+          return;
+        }
+        TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending",
+                                 frame_number);
+        self->AwaitVSync();
+      });
 }
 
 void Animator::AwaitVSync() {

@@ -30,6 +30,8 @@ static void AddTraceMetadata() {
   blink::Threads::Gpu()->PostTask([]() { Dart_SetThreadName("gpu_thread"); });
   blink::Threads::UI()->PostTask([]() { Dart_SetThreadName("ui_thread"); });
   blink::Threads::IO()->PostTask([]() { Dart_SetThreadName("io_thread"); });
+  blink::Threads::Platform()->PostTask(
+      []() { Dart_SetThreadName("platform_thread"); });
 }
 
 void TracingController::StartTracing() {

@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "flutter/fml/trace_event.h"
 #include "lib/ftl/build_config.h"
 
 #if OS_MACOSX
@@ -111,6 +112,7 @@ ftl::TimePoint MessageLoopImpl::RegisterTaskAndGetNextWake(
 }
 
 ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
+  TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasks");
   std::vector<ftl::Closure> invocations;
 
   {
