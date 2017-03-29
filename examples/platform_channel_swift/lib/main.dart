@@ -13,7 +13,7 @@ class PlatformChannel extends StatefulWidget {
 }
 
 class _PlatformChannelState extends State<PlatformChannel> {
-  static const PlatformMethodChannel platform = const PlatformMethodChannel('battery');
+  static const PlatformMethodChannel platform = const PlatformMethodChannel('io.flutter.samples/battery');
   String _batteryLevel = '';
 
   Future<Null> _getBatteryLevel() async {
