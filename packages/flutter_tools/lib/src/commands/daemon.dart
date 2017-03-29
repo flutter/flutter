@@ -286,11 +286,11 @@ class AppDomain extends Domain {
     registerHandler('discover', discover);
   }
 
-  static Uuid _uuidGenerator = new Uuid();
+  static final Uuid _uuidGenerator = new Uuid();
 
   static String _getNewAppId() => _uuidGenerator.generateV4();
 
-  List<AppInstance> _apps = <AppInstance>[];
+  final List<AppInstance> _apps = <AppInstance>[];
 
   Future<Map<String, dynamic>> start(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
@@ -537,7 +537,7 @@ class DeviceDomain extends Domain {
     }
   }
 
-  List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
+  final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
   Future<List<Device>> getDevices([Map<String, dynamic> args]) {
     final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
@@ -670,7 +670,7 @@ dynamic _toJsonable(dynamic obj) {
 }
 
 class NotifyingLogger extends Logger {
-  StreamController<LogMessage> _messageController = new StreamController<LogMessage>.broadcast();
+  final StreamController<LogMessage> _messageController = new StreamController<LogMessage>.broadcast();
 
   Stream<LogMessage> get onMessage => _messageController.stream;
 

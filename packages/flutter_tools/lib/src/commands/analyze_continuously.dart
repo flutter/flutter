@@ -150,8 +150,8 @@ class AnalysisServer {
   final List<String> directories;
 
   Process _process;
-  StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
-  StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
+  final StreamController<bool> _analyzingController = new StreamController<bool>.broadcast();
+  final StreamController<FileAnalysisErrors> _errorsController = new StreamController<FileAnalysisErrors>.broadcast();
 
   int _id = 0;
 

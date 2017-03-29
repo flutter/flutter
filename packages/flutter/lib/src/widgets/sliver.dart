@@ -287,8 +287,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       performRebuild();
   }
 
-  SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
-  Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
+  final SplayTreeMap<int, Element> _childElements = new SplayTreeMap<int, Element>();
+  final Map<int, Widget> _childWidgets = new HashMap<int, Widget>();
   RenderBox _currentBeforeChild;
 
   @override

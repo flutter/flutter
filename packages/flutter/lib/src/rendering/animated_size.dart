@@ -58,7 +58,7 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
 
   AnimationController _controller;
   CurvedAnimation _animation;
-  SizeTween _sizeTween = new SizeTween();
+  final SizeTween _sizeTween = new SizeTween();
   bool _didChangeTargetSizeLastFrame = false;
   bool _hasVisualOverflow;
   double _lastValue;
