@@ -362,7 +362,7 @@ class FlutterEngine {
     for (FileSystemEntity entity in dir.listSync()) {
       if (entity is File) {
         final String name = fs.path.basename(entity.path);
-        if (name == 'sky_shell')
+        if (name == 'flutter_tester')
           os.makeExecutable(entity);
       }
     }

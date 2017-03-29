@@ -37,7 +37,7 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.skyShell:
-      return 'sky_shell';
+      return 'flutter_tester';
     case Artifact.snapshotDart:
       return 'snapshot.dart';
     case Artifact.flutterFramework:
