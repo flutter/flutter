@@ -47,8 +47,11 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.color,
     this.minSize: 44.0,
+    this.activeOpacity: 0.1,
     @required this.onPressed,
-  });
+  }) {
+    assert(activeOpacity >= 0.0 && activeOpacity <= 1.0);
+  }
 
   /// The widget below this widget in the tree.
   ///
@@ -79,6 +82,11 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/layout/>
   final double minSize;
+
+  /// The opacity that the button will fade to when it is active (pressed)
+  ///
+  /// This defaults to 0.1
+  final double activeOpacity;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
@@ -120,7 +128,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   void _handleTapDown(PointerDownEvent event) {
-    _animationController.animateTo(0.1, duration: kFadeOutDuration);
+    _animationController.animateTo(
+      config.activeOpacity,
+      duration: kFadeOutDuration,
+    );
   }
 
   void _handleTapUp(PointerUpEvent event) {
