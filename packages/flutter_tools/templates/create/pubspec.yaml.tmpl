@@ -9,6 +9,10 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 {{/withDriverTest}}
+{{#withPluginHook}}
+  {{pluginProjectName}}:
+    path: ../
+{{/withPluginHook}}
 
 # For information on the generic Dart part of this file, see the
 # following page: https://www.dartlang.org/tools/pub/pubspec
