@@ -103,7 +103,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
   @override
   void performLayout() {
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
     final double itemExtent = this.itemExtent;
@@ -136,6 +136,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are no children.
         geometry = SliverGeometry.zero;
+        childManager.didFinishLayout();
         return;
       }
     }
@@ -206,7 +207,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         || constraints.scrollOffset > 0.0,
     );
 
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didFinishLayout();
   }
 }
 

@@ -44,7 +44,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
     final double scrollOffset = constraints.scrollOffset;
@@ -78,6 +78,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       if (!addInitialChild()) {
         // There are no children.
         geometry = SliverGeometry.zero;
+        childManager.didFinishLayout();
         return;
       }
     }
@@ -242,6 +243,6 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didFinishLayout();
   }
 }

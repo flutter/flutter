@@ -31,12 +31,29 @@ abstract class SliverChildDelegate {
   /// be too difficult to estimate the number of children.
   int get estimatedChildCount => null;
 
+  /// Returns an estimate of the max scroll extent for all the children.
+  ///
+  /// Subclasses should override this function if they have additional
+  /// information about their max scroll extent.
+  ///
+  /// The default implementation returns null, which causes the caller to
+  /// extrapolate the max scroll offset from the given parameters.
   double estimateMaxScrollOffset(
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
     double trailingScrollOffset,
   ) => null;
+
+  /// Called at the end of layout to indicate that layout is now complete.
+  ///
+  /// The `firstIndex` argument is the index of the first child that was
+  /// included in the current layout. The `lastIndex` argument is the index of
+  /// the last child that was included in the current layout.
+  ///
+  /// Useful for subclasses that which to track which children are included in
+  /// the underlying render tree.
+  void didFinishLayout(int firstIndex, int lastIndex) {}
 
   bool shouldRebuild(covariant SliverChildDelegate oldDelegate);
 
@@ -413,6 +430,19 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       leadingScrollOffset,
       trailingScrollOffset,
     );
+  }
+
+  @override
+  void didStartLayout() {
+    assert(debugAssertChildListLocked());
+  }
+
+  @override
+  void didFinishLayout() {
+    assert(debugAssertChildListLocked());
+    final int firstIndex = _childElements.firstKey() ?? 0;
+    final int lastIndex = _childElements.lastKey() ?? 0;
+    widget.delegate.didFinishLayout(firstIndex, lastIndex);
   }
 
   int _currentlyUpdatingChildIndex;
