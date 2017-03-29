@@ -4,10 +4,41 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/mountain_view.dart';
 import 'package:flutter/widgets.dart';
 
+import 'material.dart';
 import 'theme.dart';
+
+// Used for Android and Fuchsia.
+class _MountainViewPageTransition extends AnimatedWidget {
+  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft,
+    end: FractionalOffset.topLeft
+  );
+
+  _MountainViewPageTransition({
+    Key key,
+    Animation<double> animation,
+    this.child,
+  }) : super(
+    key: key,
+    listenable: _kTween.animate(new CurvedAnimation(
+      parent: animation, // The route's linear 0.0 - 1.0 animation.
+      curve: Curves.fastOutSlowIn
+    )
+  ));
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO(ianh): tell the transform to be un-transformed for hit testing
+    return new SlideTransition(
+      position: listenable,
+      child: child
+    );
+  }
+}
 
 /// A modal route that replaces the entire screen with a material design transition.
 ///
@@ -103,7 +134,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         child: child
       );
     } else {
-      return new MountainViewPageTransition(
+      return new _MountainViewPageTransition(
         animation: animation,
         child: child
       );

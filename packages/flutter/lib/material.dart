@@ -2,10 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Flutter widgets implementing Material Design. Contains UI components
-/// and patterns adherent to the Material Design specs. Also composes and
-/// reuses base platform components from the Mountain View and Cupertino
-/// packages.
+/// Flutter widgets implementing Material Design.
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
