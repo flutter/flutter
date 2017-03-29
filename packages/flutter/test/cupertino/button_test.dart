@@ -125,4 +125,49 @@ void main() {
     // Still doesn't animate.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
+
+  testWidgets('ActiveOpacity defaults to 0.1', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new CupertinoButton(
+      child: new Text('Tap me'),
+      onPressed: () {},
+    )));
+
+    // Keep a "down" gesture on the button
+    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    await tester.startGesture(center);
+    // Hack(dvdwasibi): The fadeout duration is 10 ms so this ensures that
+    // when we check the opacity, the animation has reached the end
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
+
+    // Check opacity
+    final Opacity opacity = tester.widget(find.descendant(
+      of: find.byType(CupertinoButton),
+      matching: find.byType(Opacity),
+    ));
+    expect(opacity.opacity, 0.1);
+  });
+
+  testWidgets('ActiveOpacity parameter', (WidgetTester tester) async {
+    final double activeOpacity = 0.5;
+    await tester.pumpAndSettle(const Duration(seconds:4));
+    await tester.pumpWidget(new Center(child: new CupertinoButton(
+      activeOpacity: activeOpacity,
+      child: new Text('Tap me'),
+      onPressed: () {},
+    )));
+
+    // Keep a "down" gesture on the button
+    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    await tester.startGesture(center);
+    // Hack(dvdwasibi): The fadeout duration is 10 ms so this ensures that
+    // when we check the opacity, the animation has reached the end
+    await tester.pumpAndSettle(const Duration(milliseconds:10));
+
+    // Check opacity
+    final Opacity opacity = tester.widget(find.descendant(
+      of: find.byType(CupertinoButton),
+      matching: find.byType(Opacity),
+    ));
+    expect(opacity.opacity, activeOpacity);
+  });
 }
