@@ -107,6 +107,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
   static const Duration kFadeInDuration = const Duration(milliseconds: 350);
+  Tween<double> _opacityTween;
 
   AnimationController _animationController;
 
@@ -115,8 +116,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     super.initState();
     _animationController = new AnimationController(
       duration: const Duration(milliseconds: 200),
-      value: 1.0,
+      value: 0.0,
       vsync: this,
+    );
+    _opacityTween = new Tween<double>(
+      begin: 1.0,
+      end: config.activeOpacity
     );
   }
 
@@ -127,19 +132,26 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     super.dispose();
   }
 
-  void _handleTapDown(PointerDownEvent event) {
-    _animationController.animateTo(
-      config.activeOpacity,
-      duration: kFadeOutDuration,
+  @override
+  void didUpdateConfig(CupertinoButton old) {
+    super.didUpdateConfig(old);
+    _opacityTween = new Tween<double>(
+      begin: 1.0,
+      end: config.activeOpacity
     );
   }
 
+  void _handleTapDown(PointerDownEvent event) {
+
+    _animationController.animateTo(1.0,duration: kFadeOutDuration);
+  }
+
   void _handleTapUp(PointerUpEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeInDuration);
+    _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
   void _handleTapCancel(PointerCancelEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeInDuration);
+    _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
   @override
@@ -159,10 +171,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             minHeight: config.minSize,
           ),
           child: new FadeTransition(
-            opacity: new CurvedAnimation(
+            opacity: _opacityTween.animate(new CurvedAnimation(
               parent: _animationController,
               curve: Curves.decelerate,
-            ),
+            )),
             child: new DecoratedBox(
               decoration: new BoxDecoration(
                 borderRadius: const BorderRadius.all(const Radius.circular(8.0)),

@@ -135,9 +135,7 @@ void main() {
     // Keep a "down" gesture on the button
     final Point center = tester.getCenter(find.byType(CupertinoButton));
     await tester.startGesture(center);
-    // Hack(dvdwasibi): The fadeout duration is 10 ms so this ensures that
-    // when we check the opacity, the animation has reached the end
-    await tester.pumpAndSettle(const Duration(milliseconds: 10));
+    await tester.pumpAndSettle();
 
     // Check opacity
     final Opacity opacity = tester.widget(find.descendant(
@@ -158,9 +156,8 @@ void main() {
     // Keep a "down" gesture on the button
     final Point center = tester.getCenter(find.byType(CupertinoButton));
     await tester.startGesture(center);
-    // Hack(dvdwasibi): The fadeout duration is 10 ms so this ensures that
-    // when we check the opacity, the animation has reached the end
-    await tester.pumpAndSettle(const Duration(milliseconds:10));
+    await tester.pumpAndSettle();
+
 
     // Check opacity
     final Opacity opacity = tester.widget(find.descendant(
