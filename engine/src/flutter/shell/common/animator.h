@@ -47,6 +47,7 @@ class Animator {
   ftl::RefPtr<LayerTreePipeline> layer_tree_pipeline_;
   flutter::Semaphore pending_frame_semaphore_;
   LayerTreePipeline::ProducerContinuation producer_continuation_;
+  int64_t frame_number_;
   bool paused_;
 
   ftl::WeakPtrFactory<Animator> weak_factory_;
