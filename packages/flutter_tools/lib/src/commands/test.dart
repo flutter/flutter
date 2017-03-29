@@ -197,7 +197,7 @@ class TestCommand extends FlutterCommand {
     }
     testArgs.addAll(files);
 
-    final String shellPath = artifacts.getArtifactPath(Artifact.skyShell);
+    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
     loader.installHook(
