@@ -65,7 +65,7 @@ public class TextInputPlugin implements MethodCallHandler {
                 clearTextInputClient();
                 response.success(null);
             } else {
-                response.error("unknown", "Unknown method: " + call.method, null);
+                response.notImplemented();
             }
         } catch (JSONException e) {
             response.error("error", "JSON error: " + e.getMessage(), null);
