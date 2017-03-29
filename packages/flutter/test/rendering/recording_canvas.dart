@@ -18,8 +18,11 @@ import 'package:flutter/rendering.dart';
 /// ```
 ///
 /// In some cases it may be useful to define a subclass that overrides the
-/// Canvas methods the test is checking and squirrels away the parameters
+/// [Canvas] methods the test is checking and squirrels away the parameters
 /// that the test requires.
+///
+/// For simple tests, consider using the [paints] matcher, which overlays a
+/// pattern matching API over [TestRecordingCanvas].
 class TestRecordingCanvas implements Canvas {
   /// All of the method calls on this canvas.
   final List<Invocation> invocations = <Invocation>[];
@@ -70,8 +73,7 @@ class TestRecordingPaintingContext implements PaintingContext {
   }
 
   @override
-  void noSuchMethod(Invocation invocation) {
-  }
+  void noSuchMethod(Invocation invocation) { }
 }
 
 class _MethodCall implements Invocation {

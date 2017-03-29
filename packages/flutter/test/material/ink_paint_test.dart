@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  Material.debugEnablePhysicalModel = true;
-
   testWidgets('Does the ink widget render a border radius', (WidgetTester tester) async {
     final Color highlightColor = new Color(0xAAFF0000);
     final Color splashColor = new Color(0xAA0000FF);
@@ -38,7 +36,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(new Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final RenderBox box = tester.renderObject<RenderPhysicalModel>(find.byType(PhysicalModel)).child;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
     expect(
       box,
       paints
