@@ -9,7 +9,10 @@ void checkEncodeDecode(id value, NSData* expectedEncoding) {
   FlutterStandardMessageCodec* codec =
       [FlutterStandardMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
-  ASSERT_TRUE([encoded isEqual:expectedEncoding]);
+  if (expectedEncoding == nil)
+    ASSERT_TRUE(encoded == nil);
+  else
+    ASSERT_TRUE([encoded isEqual:expectedEncoding]);
   id decoded = [codec decode:encoded];
   if (value == nil || value == [NSNull null])
     ASSERT_TRUE(decoded == nil);
@@ -29,8 +32,7 @@ void checkEncodeDecode(id value) {
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeNil) {
-  char bytes[1] = {0x00};
-  checkEncodeDecode(nil, [NSData dataWithBytes:bytes length:1]);
+  checkEncodeDecode(nil, nil);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeNSNull) {
@@ -216,9 +218,7 @@ TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithNilResult) {
   FlutterStandardMethodCodec* codec =
       [FlutterStandardMethodCodec sharedInstance];
   NSData* encoded = [codec encodeSuccessEnvelope:nil];
-  FlutterError* error = nil;
-  id decoded = [codec decodeEnvelope:encoded error:&error];
-  ASSERT_TRUE(error == nil);
+  id decoded = [codec decodeEnvelope:encoded];
   ASSERT_TRUE(decoded == nil);
 }
 
@@ -226,10 +226,8 @@ TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithSingleResult) {
   FlutterStandardMethodCodec* codec =
       [FlutterStandardMethodCodec sharedInstance];
   NSData* encoded = [codec encodeSuccessEnvelope:@42];
-  FlutterError* decodedError = nil;
-  id decodedResult = [codec decodeEnvelope:encoded error:&decodedError];
-  ASSERT_TRUE(decodedError == nil);
-  ASSERT_TRUE([decodedResult isEqual:@42]);
+  id decoded = [codec decodeEnvelope:encoded];
+  ASSERT_TRUE([decoded isEqual:@42]);
 }
 
 TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithResultMap) {
@@ -237,9 +235,8 @@ TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithResultMap) {
       [FlutterStandardMethodCodec sharedInstance];
   NSDictionary* result = @{ @"a" : @42, @42 : @"a" };
   NSData* encoded = [codec encodeSuccessEnvelope:result];
-  FlutterError* decodedError = nil;
-  id decodedResult = [codec decodeEnvelope:encoded error:&decodedError];
-  ASSERT_TRUE([decodedResult isEqual:result]);
+  id decoded = [codec decodeEnvelope:encoded];
+  ASSERT_TRUE([decoded isEqual:result]);
 }
 
 TEST(FlutterStandardCodec, HandlesErrorEnvelopes) {
@@ -250,8 +247,6 @@ TEST(FlutterStandardCodec, HandlesErrorEnvelopes) {
                                             message:@"something failed"
                                             details:details];
   NSData* encoded = [codec encodeErrorEnvelope:error];
-  FlutterError* decodedError = nil;
-  id decodedResult = [codec decodeEnvelope:encoded error:&decodedError];
-  ASSERT_TRUE(decodedResult == nil);
-  ASSERT_TRUE([decodedError isEqual:error]);
+  id decoded = [codec decodeEnvelope:encoded];
+  ASSERT_TRUE([decoded isEqual:error]);
 }
