@@ -122,10 +122,10 @@ class FlutterPlugin implements Plugin<Project> {
             project.tasks.create("flutterBuildX86Jar", Jar) {
                 destinationDir flutterX86Jar.parentFile
                 archiveName flutterX86Jar.name
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libsky_shell.so") {
+                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
                     into "lib/x86"
                 }
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libsky_shell.so") {
+                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
                     into "lib/x86_64"
                 }
             }

@@ -38,7 +38,7 @@ void main() {
 
       expect(
           artifacts.getArtifactPath(Artifact.skyShell),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'sky_shell')
+          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
       Cache: () => new Cache(rootOverride: tempDir),
@@ -91,7 +91,7 @@ void main() {
 
       expect(
           artifacts.getArtifactPath(Artifact.skyShell),
-          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'sky_shell')
+          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
       Platform: () => new FakePlatform(operatingSystem: 'linux')
