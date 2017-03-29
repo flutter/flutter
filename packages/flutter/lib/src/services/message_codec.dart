@@ -5,7 +5,7 @@
 import 'dart:typed_data';
 import 'dart:ui' show hashValues;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 /// A message encoding/decoding mechanism.
 ///
