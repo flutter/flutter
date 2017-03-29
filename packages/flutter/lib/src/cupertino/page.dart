@@ -9,24 +9,33 @@ const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for iOS.
 class CupertinoPageTransition extends AnimatedWidget {
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
+  static final FractionalOffsetTween _kRightLeftTween = new FractionalOffsetTween(
     begin: FractionalOffset.topRight,
-    end: -FractionalOffset.topRight
+    end: -FractionalOffset.topRight,
   );
+
+  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft,
+    end: FractionalOffset.topLeft,
+  );
+
+  final Widget child;
+  final bool fullscreenDialog;
 
   CupertinoPageTransition({
     Key key,
-    Animation<double> animation,
-    this.child
+    @required Animation<double> animation,
+    @required this.child,
+    this.fullscreenDialog: false,
   }) : super(
     key: key,
-    listenable: _kTween.animate(new CurvedAnimation(
-      parent: animation,
-      curve: new _CupertinoTransitionCurve(null)
-    )
-  ));
-
-  final Widget child;
+    listenable: (fullscreenDialog ? _kBottomUpTween : _kRightLeftTween).animate(
+      new CurvedAnimation(
+        parent: animation,
+        curve: new _CupertinoTransitionCurve(null),
+      )
+    ),
+  );
 
   @override
   Widget build(BuildContext context) {

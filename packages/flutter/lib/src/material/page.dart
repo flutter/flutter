@@ -47,12 +47,16 @@ class _MountainViewPageTransition extends AnimatedWidget {
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
 /// [maintainState] to false.
+///
+/// Specify whether the incoming page is a fullscreen modal dialog. On iOS, those
+/// pages animate bottom->up rather than right->left.
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
+    this.fullscreenDialog: false,
   }) : super(settings: settings) {
     assert(builder != null);
     assert(opaque);
@@ -60,6 +64,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+  final bool fullscreenDialog;
 
   @override
   final bool maintainState;
@@ -98,6 +103,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     // allow the user to dismiss the route with a swipe.
     if (hasScopedWillPopCallback)
       return null;
+    if (fullscreenDialog)
+      return null;
     if (controller.status != AnimationStatus.completed)
       return null;
     assert(_backGestureController == null);
@@ -126,16 +133,16 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
-    if (Theme.of(context).platform == TargetPlatform.iOS &&
-        Navigator.of(context).userGestureInProgress) {
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
       return new CupertinoPageTransition(
         animation: new AnimationMean(left: animation, right: forwardAnimation),
-        child: child
+        fullscreenDialog: fullscreenDialog,
+        child: child,
       );
     } else {
       return new _MountainViewPageTransition(
         animation: animation,
-        child: child
+        child: child,
       );
     }
   }
