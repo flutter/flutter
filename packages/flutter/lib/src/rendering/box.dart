@@ -1694,25 +1694,28 @@ abstract class RenderBox extends RenderObject {
   /// even through it does not [paint] its children.
   bool hitTest(HitTestResult result, { @required Point position }) {
     assert(() {
-      if (debugNeedsLayout) {
-        throw new FlutterError(
-          'Cannot hit test a dirty render box.\n'
-          'The hitTest() method was called on this RenderBox:\n'
-          '  $this\n'
-          'Unfortunately, since this object has been marked as needing layout, its geometry is not known at this time. '
-          'This means it cannot be accurately hit-tested. Make sure to only mark nodes as needing layout during a pipeline '
-          'flush, so that it is marked clean before any event handling occurs. If you are trying to perform a hit test '
-          'during the layout phase itself, make sure you only hit test nodes that have completed layout (e.g. the node\'s '
-          'children, after their layout() method has been called).'
-        );
-      }
       if (!hasSize) {
+        if (debugNeedsLayout) {
+          throw new FlutterError(
+            'Cannot hit test a render box that has never been laid out.\n'
+            'The hitTest() method was called on this RenderBox:\n'
+            '  $this\n'
+            'Unfortunately, this object\'s geometry is not known at this time, '
+            'probably because it has never been laid out. '
+            'This means it cannot be accurately hit-tested. If you are trying '
+            'to perform a hit test during the layout phase itself, make sure '
+            'you only hit test nodes that have completed layout (e.g. the node\'s '
+            'children, after their layout() method has been called).'
+          );
+        }
         throw new FlutterError(
           'Cannot hit test a render box with no size.\n'
           'The hitTest() method was called on this RenderBox:\n'
           '  $this\n'
-          'Although this node is not marked as needing layout, its size is not set. A RenderBox object must have an '
-          'explicit size before it can be hit-tested. Make sure that the RenderBox in question sets its size during layout.'
+          'Although this node is not marked as needing layout, '
+          'its size is not set. A RenderBox object must have an '
+          'explicit size before it can be hit-tested. Make sure '
+          'that the RenderBox in question sets its size during layout.'
         );
       }
       return true;
