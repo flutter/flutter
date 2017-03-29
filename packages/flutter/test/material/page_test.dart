@@ -19,14 +19,14 @@ void main() {
       )
     );
 
-    Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     // await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    final Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     expect(widget1TopLeft.x == widget2TopLeft.x, true);
     expect(widget1TopLeft.y - widget2TopLeft.y < 0, true); // Page 1 is above page 2 mid-transition.
@@ -45,14 +45,14 @@ void main() {
       )
     );
 
-    Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     // await tester.pumpAndSettle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    final Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // This is currently an incorrect behaviour and we want right to left transition instead.
     // See https://github.com/flutter/flutter/issues/8726.
