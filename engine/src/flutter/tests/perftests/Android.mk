@@ -31,6 +31,7 @@ perftest_src_files := \
 
 include $(CLEAR_VARS)
 LOCAL_MODULE := minikin_perftests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_CPPFLAGS := -Werror -Wall -Wextra
 LOCAL_SRC_FILES := $(perftest_src_files)
 LOCAL_STATIC_LIBRARIES := \
