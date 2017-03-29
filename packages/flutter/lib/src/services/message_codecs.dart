@@ -5,8 +5,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer;
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer, required;
 
 import 'message_codec.dart';
 
