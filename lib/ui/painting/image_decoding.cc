@@ -8,6 +8,7 @@
 #include "flutter/glue/trace_event.h"
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/resource_context.h"
+#include "lib/ftl/build_config.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/tonic/dart_persistent_value.h"
 #include "lib/tonic/dart_state.h"
