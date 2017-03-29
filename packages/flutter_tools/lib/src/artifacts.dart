@@ -9,13 +9,11 @@ import 'build_info.dart';
 import 'globals.dart';
 
 enum Artifact {
-  icudtlDat,
-  libskyShellSo,
   dartIoEntriesTxt,
   dartVmEntryPointsTxt,
   dartVmEntryPointsAndroidTxt,
   genSnapshot,
-  skyShell,
+  flutterTester,
   snapshotDart,
   flutterFramework,
   vmSnapshotData,
@@ -24,10 +22,6 @@ enum Artifact {
 
 String _artifactToFileName(Artifact artifact) {
   switch (artifact) {
-    case Artifact.icudtlDat:
-      return 'icudtl.dat';
-    case Artifact.libskyShellSo:
-      return 'libsky_shell.so';
     case Artifact.dartIoEntriesTxt:
       return 'dart_io_entries.txt';
     case Artifact.dartVmEntryPointsTxt:
@@ -36,7 +30,7 @@ String _artifactToFileName(Artifact artifact) {
       return 'dart_vm_entry_points_android.txt';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
-    case Artifact.skyShell:
+    case Artifact.flutterTester:
       return 'flutter_tester';
     case Artifact.snapshotDart:
       return 'snapshot.dart';
@@ -98,9 +92,6 @@ class CachedArtifacts extends Artifacts {
   String _getAndroidArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
     final String engineDir = _getEngineArtifactsPath(platform, mode);
     switch (artifact) {
-      case Artifact.icudtlDat:
-      case Artifact.libskyShellSo:
-        return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
       case Artifact.dartVmEntryPointsAndroidTxt:
@@ -137,14 +128,13 @@ class CachedArtifacts extends Artifacts {
         // For script snapshots any gen_snapshot binary will do. Returning gen_snapshot for
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
-      case Artifact.skyShell:
+      case Artifact.flutterTester:
         if (platform == TargetPlatform.windows_x64)
           throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
         continue fallThrough;
       fallThrough:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
-      case Artifact.icudtlDat:
         final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
         return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
@@ -206,17 +196,13 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
-      case Artifact.libskyShellSo:
-        final String abi = _getAbiDirectory(platform);
-        return fs.path.join(engineOutPath, 'gen', 'flutter', 'shell', 'platform', 'android', 'android', fs.path.join('android', 'libs', abi, _artifactToFileName(artifact)));
       case Artifact.genSnapshot:
         return _genSnapshotPath(platform, mode);
-      case Artifact.skyShell:
-        return _skyShellPath(platform);
+      case Artifact.flutterTester:
+        return _flutterTesterPath(platform);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
         return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));
-      case Artifact.icudtlDat:
       case Artifact.flutterFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
     }
@@ -239,25 +225,12 @@ class LocalEngineArtifacts extends Artifacts {
     return fs.path.join(engineOutPath, clang, _artifactToFileName(Artifact.genSnapshot));
   }
 
-  String _skyShellPath(TargetPlatform platform) {
+  String _flutterTesterPath(TargetPlatform platform) {
     if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
-      return fs.path.join(engineOutPath, _artifactToFileName(Artifact.skyShell));
+      return fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
-      return fs.path.join(engineOutPath, 'SkyShell.app', 'Contents', 'MacOS', 'SkyShell');
+      return fs.path.join(engineOutPath, 'FlutterTester.app', 'Contents', 'MacOS', 'FlutterTester');
     }
     throw new Exception('Unsupported platform $platform.');
-  }
-
-  String _getAbiDirectory(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android_arm:
-        return 'armeabi-v7a';
-      case TargetPlatform.android_x64:
-        return 'x86_64';
-      case TargetPlatform.android_x86:
-        return 'x86';
-      default:
-        throw new Exception('Unsupported platform $platform.');
-    }
   }
 }
