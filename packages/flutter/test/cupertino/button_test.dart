@@ -149,7 +149,6 @@ void main() {
 
   testWidgets('ActiveOpacity parameter', (WidgetTester tester) async {
     final double activeOpacity = 0.5;
-    await tester.pumpAndSettle(const Duration(seconds:4));
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       activeOpacity: activeOpacity,
       child: new Text('Tap me'),
