@@ -279,15 +279,14 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
 
   g_handle_platform_message_method =
       env->GetMethodID(g_flutter_view_class->obj(), "handlePlatformMessage",
-                       "(Ljava/lang/String;Ljava/nio/ByteBuffer;I)V");
+                       "(Ljava/lang/String;[BI)V");
 
   if (g_handle_platform_message_method == nullptr) {
     return false;
   }
 
   g_handle_platform_message_response_method = env->GetMethodID(
-      g_flutter_view_class->obj(), "handlePlatformMessageResponse",
-      "(ILjava/nio/ByteBuffer;)V");
+      g_flutter_view_class->obj(), "handlePlatformMessageResponse", "(I[B)V");
 
   if (g_handle_platform_message_response_method == nullptr) {
     return false;

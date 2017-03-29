@@ -596,11 +596,11 @@ public class FlutterView extends SurfaceView
     }
 
     // Called by native to send us a platform message.
-    private void handlePlatformMessage(String channel, ByteBuffer message, final int responseId) {
+    private void handlePlatformMessage(String channel, byte[] message, final int responseId) {
         OnBinaryMessageListenerAsync listener = mMessageListeners.get(channel);
         if (listener != null) {
             try {
-                listener.onMessage(this, message,
+                listener.onMessage(this, ByteBuffer.wrap(message),
                     new BinaryMessageResponse() {
                         @Override
                         public void send(ByteBuffer response) {
@@ -622,11 +622,11 @@ public class FlutterView extends SurfaceView
     private final Map<Integer, BinaryMessageReplyCallback> mPendingResponses = new HashMap<>();
 
     // Called by native to respond to a platform message that we sent.
-    private void handlePlatformMessageResponse(int responseId, ByteBuffer response) {
+    private void handlePlatformMessageResponse(int responseId, byte[] response) {
         BinaryMessageReplyCallback callback = mPendingResponses.remove(responseId);
         if (callback != null) {
             try {
-                callback.onReply(response);
+                callback.onReply(ByteBuffer.wrap(response));
             } catch (Exception ex) {
                 Log.e(TAG, "Uncaught exception in binary message listener reply", ex);
             }

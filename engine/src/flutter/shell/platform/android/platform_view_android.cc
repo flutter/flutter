@@ -285,15 +285,17 @@ void PlatformViewAndroid::HandlePlatformMessage(
     pending_responses_[response_id] = response;
   }
 
-  fml::jni::ScopedJavaLocalRef<jobject> message_buffer(env,
-      env->NewDirectByteBuffer(const_cast<uint8_t*>(message->data().data()),
-                               message->data().size()));
+  fml::jni::ScopedJavaLocalRef<jbyteArray> message_array(env,
+      env->NewByteArray(message->data().size()));
+  env->SetByteArrayRegion(
+      message_array.obj(), 0, message->data().size(),
+      reinterpret_cast<const jbyte*>(message->data().data()));
   auto java_channel = fml::jni::StringToJavaString(env, message->channel());
   message = nullptr;
 
   // This call can re-enter in InvokePlatformMessageResponseCallback.
   FlutterViewHandlePlatformMessage(
-      env, view.obj(), java_channel.obj(), message_buffer.obj(), response_id);
+      env, view.obj(), java_channel.obj(), message_array.obj(), response_id);
 }
 
 void PlatformViewAndroid::HandlePlatformMessageResponse(
@@ -306,13 +308,13 @@ void PlatformViewAndroid::HandlePlatformMessageResponse(
   if (view.is_null())
     return;
 
-  std::string message_data(reinterpret_cast<const char*>(data.data()),
-                           data.size());
-
-  auto java_message_data = fml::jni::StringToJavaString(env, message_data);
+  fml::jni::ScopedJavaLocalRef<jbyteArray> data_array(env,
+      env->NewByteArray(data.size()));
+  env->SetByteArrayRegion(data_array.obj(), 0, data.size(),
+                          reinterpret_cast<const jbyte*>(data.data()));
 
   FlutterViewHandlePlatformMessageResponse(env, view.obj(), response_id,
-                                           java_message_data.obj());
+                                           data_array.obj());
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(jint id, jint action) {
