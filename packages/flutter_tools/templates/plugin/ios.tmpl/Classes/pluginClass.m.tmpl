@@ -7,15 +7,13 @@
   self = [super init];
   if (self) {
     FlutterMethodChannel *channel = [FlutterMethodChannel
-        methodChannelNamed:@"{{projectName}}"
-           binaryMessenger:flutterView
-                     codec:[FlutterStandardMethodCodec sharedInstance]];
+        methodChannelWithName:@"{{projectName}}"
+           binaryMessenger:flutterView];
     [channel setMethodCallHandler:^(FlutterMethodCall *call,
                                     FlutterResultReceiver result) {
       if ([@"getPlatformVersion" isEqualToString:call.method]) {
         result([@"iOS " stringByAppendingString:[[UIDevice currentDevice]
-                                                    systemVersion]],
-               nil);
+                                                    systemVersion]]);
       }
     }];
   }
