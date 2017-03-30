@@ -13,8 +13,7 @@
       (FlutterViewController*)self.window.rootViewController;
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"battery"
-         binaryMessenger:controller
-                   codec:[FlutterStandardMethodCodec sharedInstance]];
+            binaryMessenger:controller];
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResultReceiver result) {
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
@@ -25,15 +24,12 @@
                                    message:@"Battery info unavailable"
                                    details:nil]);
       } else {
-        result([NSNumber numberWithInt:(int)(device.batteryLevel * 100)]);
+        result(@((int)(device.batteryLevel * 100)));
       }
     } else {
-      result([FlutterError errorWithCode:@"UNKNOWN_METHOD"
-                                 message:@"Unknown battery method called"
-                                 details:nil]);
+      result(FlutterMethodNotImplemented);
     }
   }];
   return YES;
 }
-
 @end

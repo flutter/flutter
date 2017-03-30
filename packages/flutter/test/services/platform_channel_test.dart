@@ -37,10 +37,10 @@ void main() {
   group('PlatformMethodChannel', () {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
-    const PlatformMethodChannel channel = const PlatformMethodChannel('ch', jsonMethod);
+    const PlatformMethodChannel channel = const PlatformMethodChannel('ch7', jsonMethod);
     test('can invoke method and get result', () async {
       PlatformMessages.setMockBinaryMessageHandler(
-        'ch',
+        'ch7',
         (ByteData message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
           if (methodCall['method'] == 'sayHello')
@@ -54,11 +54,11 @@ void main() {
     });
     test('can invoke method and get error', () async {
       PlatformMessages.setMockBinaryMessageHandler(
-        'ch',
+        'ch7',
         (ByteData message) async {
           return jsonMessage.encodeMessage(<dynamic>[
-            'unknown',
-            'Method not understood',
+            'bad',
+            'Something happened',
             <String, dynamic>{'a': 42, 'b': 3.14},
           ]);
         },
@@ -67,11 +67,33 @@ void main() {
         await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
       } on PlatformException catch(e) {
-        expect(e.code, equals('unknown'));
-        expect(e.message, equals('Method not understood'));
+        expect(e.code, equals('bad'));
+        expect(e.message, equals('Something happened'));
         expect(e.details, equals(<String, dynamic>{'a': 42, 'b': 3.14}));
+      } catch(e) {
+        fail('PlatformException expected');
       }
     });
+    test('can invoke unimplemented method', () async {
+      PlatformMessages.setMockBinaryMessageHandler(
+        'ch7',
+        (ByteData message) async => null,
+      );
+      try {
+        await channel.invokeMethod('sayHello', 'hello');
+        fail('Exception expected');
+      } on MissingPluginException catch(e) {
+        expect(e.message, contains('sayHello'));
+        expect(e.message, contains('ch7'));
+      } catch(e) {
+        fail('MissingPluginException expected');
+      }
+    });
+  });
+  group('PlatformEventChannel', () {
+    const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
+    const MethodCodec jsonMethod = const JSONMethodCodec();
+    const PlatformEventChannel channel = const PlatformEventChannel('ch', jsonMethod);
     test('can receive event stream', () async {
       void emitEvent(dynamic event) {
         PlatformMessages.handlePlatformMessage(
