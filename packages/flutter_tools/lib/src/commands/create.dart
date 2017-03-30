@@ -190,7 +190,10 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
     flutterPackagesDirectory = fs.path.normalize(flutterPackagesDirectory);
     flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
-    final String pluginClass = _createPluginClassName(projectName);
+    final String pluginDartClass = _createPluginClassName(projectName);
+    final String pluginClass = pluginDartClass.endsWith('Plugin')
+        ? pluginDartClass
+        : pluginDartClass + 'Plugin';
 
     return <String, dynamic>{
       'projectName': projectName,
@@ -201,6 +204,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'androidMinApiLevel': android.minApiLevel,
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
+      'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
     };
   }

@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    {{pluginClass}}.platformVersion.then((String platformVersion) {
+    {{pluginDartClass}}.platformVersion.then((String platformVersion) {
       setState(() {
         _platformVersion = platformVersion;
       });
