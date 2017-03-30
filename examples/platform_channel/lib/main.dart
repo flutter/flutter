@@ -19,19 +19,22 @@ class _PlatformChannelState extends State<PlatformChannel> {
         const PlatformEventChannel('io.flutter.samples/charging');
 
     
-  String _batteryLevel = '';
+  String _batteryLevel = 'Battery level unknown';
   String _chargingStatus = '';
+  String _buttonText = 'Refresh';
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
     try {
       final int result = await methodChannel.invokeMethod('getBatteryLevel');
-      batteryLevel = 'Battery level at $result % .';
+      batteryLevel = 'Battery level at $result% .';
+
     } on PlatformException catch (e) {
       batteryLevel = "Failed to get battery level.";
     }
     setState(() {
       _batteryLevel = batteryLevel;
+      _buttonText = 'Refresh';
     });
   }
 
@@ -63,11 +66,11 @@ class _PlatformChannelState extends State<PlatformChannel> {
             new Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                new Text(_batteryLevel, key: new Key('Battery level label')),
                 new RaisedButton(
-                  child: new Text('Refresh'),
+                  child: new Text(_buttonText),
                   onPressed: _getBatteryLevel,
                 ),
+                new Text(_batteryLevel, key: new Key('Battery level label')),
               ],
             ),
             new SizedBox(height: 32.0),
