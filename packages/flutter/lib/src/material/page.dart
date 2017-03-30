@@ -106,7 +106,16 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       controller: controller,
       onDisposed: () { _backGestureController = null; }
     );
+
+    controller.addStatusListener(handleBackGestureEnded);
     return _backGestureController;
+  }
+
+  void handleBackGestureEnded (AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _backGestureController?.dispose();
+      controller.removeStatusListener(handleBackGestureEnded);
+    }
   }
 
   @override

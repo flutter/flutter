@@ -93,7 +93,6 @@ class CupertinoBackGestureController extends NavigationGestureController {
   @override
   void dispose() {
     controller.removeStatusListener(handleStatusChanged);
-    controller = null;
     onDisposed();
     super.dispose();
   }
@@ -137,10 +136,6 @@ class CupertinoBackGestureController extends NavigationGestureController {
   void handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed) {
       navigator.pop();
-      assert(controller == null);
-    } else if (status == AnimationStatus.completed) {
-      dispose();
-      assert(controller == null);
     }
   }
 }
