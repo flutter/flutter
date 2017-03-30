@@ -112,10 +112,12 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   AnimationController _animationController;
 
-  Tween<double> get _tween => new Tween<double>(
-    begin: 1.0,
-    end: config.pressedOpacity
-  );
+  void _setTween() {
+    _opacityTween = new Tween<double>(
+      begin: 1.0,
+      end: config.pressedOpacity,
+    );
+  }
 
   @override
   void initState() {
@@ -125,7 +127,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       value: 0.0,
       vsync: this,
     );
-    _opacityTween = _tween;
+    _setTween();
   }
 
   @override
@@ -138,7 +140,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   @override
   void didUpdateConfig(CupertinoButton old) {
     super.didUpdateConfig(old);
-    _opacityTween = _tween;
+    _setTween();
   }
 
   void _handleTapDown(PointerDownEvent event) {

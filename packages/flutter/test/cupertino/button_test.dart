@@ -158,7 +158,6 @@ void main() {
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
-
     // Check opacity
     final Opacity opacity = tester.widget(find.descendant(
       of: find.byType(CupertinoButton),
