@@ -12,13 +12,6 @@ const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for Android and Fuchsia.
 class _MountainViewPageTransition extends AnimatedWidget {
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft,
-    end: FractionalOffset.topLeft
-  );
-
-  Animation<double> routeAnimation;
-
   _MountainViewPageTransition({
     Key key,
     this.routeAnimation,
@@ -31,7 +24,13 @@ class _MountainViewPageTransition extends AnimatedWidget {
     )
   ));
 
+  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft / 4.0,
+    end: FractionalOffset.topLeft
+  );
+
   final Widget child;
+  final Animation<double> routeAnimation;
 
   @override
   Widget build(BuildContext context) {
