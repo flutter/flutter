@@ -23,24 +23,8 @@
 #include <vector>
 
 #include <minikin/FontCollection.h>
-#include <minikin/MinikinFontFreeType.h>
 
 namespace minikin {
-
-// The Bitmap class is for debugging. We'll probably move it out
-// of here into a separate lightweight software rendering module
-// (optional, as we'd hope most clients would do their own)
-class Bitmap {
-public:
-    Bitmap(int width, int height);
-    ~Bitmap();
-    void writePnm(std::ofstream& o) const;
-    void drawGlyph(const GlyphBitmap& bitmap, int x, int y);
-private:
-    int width;
-    int height;
-    uint8_t* buf;
-};
 
 struct LayoutGlyph {
     // index into mFaces and mHbFonts vectors. We could imagine
@@ -94,8 +78,6 @@ public:
     static float measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
         const std::shared_ptr<FontCollection>& collection, float* advances);
-
-    void draw(minikin::Bitmap*, int x0, int y0, float size) const;
 
     // public accessors
     size_t nGlyphs() const;
