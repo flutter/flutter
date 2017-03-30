@@ -104,16 +104,16 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     _backGestureController = new CupertinoBackGestureController(
       navigator: navigator,
       controller: controller,
-      onDisposed: () { _backGestureController = null; }
     );
 
     controller.addStatusListener(handleBackGestureEnded);
     return _backGestureController;
   }
 
-  void handleBackGestureEnded (AnimationStatus status) {
+  void handleBackGestureEnded(AnimationStatus status) {
     if (status == AnimationStatus.completed) {
       _backGestureController?.dispose();
+      _backGestureController = null;
       controller.removeStatusListener(handleBackGestureEnded);
     }
   }
