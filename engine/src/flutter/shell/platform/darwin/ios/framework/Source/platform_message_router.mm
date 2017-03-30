@@ -27,6 +27,10 @@ void PlatformMessageRouter::HandlePlatformMessage(
         completer->Complete(GetVectorFromNSData(reply));
       }
     });
+  } else {
+    if (completer) {
+      completer->Complete(GetVectorFromNSData(nil));
+    }
   }
 }
 
