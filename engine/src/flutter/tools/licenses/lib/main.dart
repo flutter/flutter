@@ -680,80 +680,6 @@ class RepositoryIcuLicenseFile extends RepositoryLicenseFile {
   Iterable<License> get licenses => _licenses;
 }
 
-class RepositoryXdgMimeLicenseFile extends RepositoryLicenseFile {
-  RepositoryXdgMimeLicenseFile(RepositoryDirectory parent, fs.TextFile io)
-    : _licenses = _parseLicense(io),
-      super(parent, io);
-
-  @override
-  fs.TextFile get io => super.io;
-
-  final List<License> _licenses;
-
-  static final RegExp _pattern = new RegExp(
-    r'^Licensed under the Academic Free License version 2\.0 \(below\)\n*'
-    r'Or under the following terms:\n+'
-    r'This library is free software; you can redistribute it and/or\n'
-    r'modify it under the terms of the GNU Lesser General Public\n'
-    r'License as published by the Free Software Foundation; either\n'
-    r'version (2) of the License, or \(at your option\) any later version\.\n+'
-    r'This library is distributed in the hope that it will be useful,\n'
-    r'but WITHOUT ANY WARRANTY; without even the implied warranty of\n'
-    r'MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE\. +See the GNU\n'
-    r'Lesser General Public License for more details\.\n+'
-    r'You should have received a copy of the (GNU Lesser) General Public\n'
-    r'License along with this library; if not, write to the\n'
-    r'Free Software Foundation, Inc\., 59 Temple Place - Suite 330,\n'
-    r'Boston, MA 02111-1307, USA\.\n*'
-    r'--------------------------------------------------------------------------------\n'
-    r'Academic Free License v\. 2\.0\n'
-    r'--------------------------------------------------------------------------------\n+'
-    r'(This Academic Free License \(the "License"\) applies to (?:.|\n)*'
-    r'This license is Copyright \(C\) 2003 Lawrence E\. Rosen\. All rights reserved\.\n'
-    r'Permission is hereby granted to copy and distribute this license without\n'
-    r'modification\. This license may not be modified without the express written\n'
-    r'permission of its copyright owner\.\n*)$',
-    multiLine: true,
-    caseSensitive: false
-  );
-
-  static List<License> _parseLicense(fs.TextFile io) {
-    final Match match = _pattern.firstMatch(io.readString());
-    if (match == null)
-      throw 'could not parse xdg_mime license file';
-    assert(match.groupCount == 3);
-    return <License>[
-      new License.fromUrl('${match.group(2)}:${match.group(1)}', origin: io.fullName),
-      new License.fromBodyAndType(match.group(3), LicenseType.afl, origin: io.fullName),
-    ];
-  }
-
-  @override
-  List<License> licensesFor(String name) {
-    return <License>[_licenses[0]];
-  }
-
-  @override
-  License licenseOfType(LicenseType type) {
-    if (type == _licenses[0].type)
-      return _licenses[0];
-    if (type == _licenses[1].type)
-      return _licenses[1];
-    throw 'tried to use xdg_mime license file to find a license by type but type wasn\'t valid';
-  }
-
-  @override
-  License licenseWithName(String name) {
-    throw 'tried to use xdg_mime license file to find a license by name';
-  }
-
-  @override
-  License get defaultLicense => _licenses[0];
-
-  @override
-  Iterable<License> get licenses => _licenses;
-}
-
 Iterable<List<int>> splitIntList(List<int> data, int boundary) sync* {
   int index = 0;
   List<int> getOne() {
@@ -1896,17 +1822,6 @@ class RepositorySkiaDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryXdgMimeDirectory extends RepositoryDirectory {
-  RepositoryXdgMimeDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  RepositoryFile createFile(fs.IoNode entry) {
-    if (entry.name == 'LICENSE')
-      return new RepositoryXdgMimeLicenseFile(this, entry);
-    return super.createFile(entry);
-  }
-}
-
 class RepositoryVulkanDirectory extends RepositoryDirectory {
   RepositoryVulkanDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1959,7 +1874,7 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
     if (entry.name == 'expat')
       return new RepositoryExpatDirectory(this, entry);
     if (entry.name == 'freetype-android')
-      throw 'detected unexpected resurgence of freetype-android';
+      throw '//third_party/freetype-android is no longer part of this client: remove it';
     if (entry.name == 'freetype2')
       return new RepositoryFreetypeDirectory(this, entry);
     if (entry.name == 'icu')
@@ -1978,38 +1893,6 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositorySkiaDirectory(this, entry);
     if (entry.name == 'vulkan')
       return new RepositoryVulkanDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryBaseThirdPartyDirectory extends RepositoryGenericThirdPartyDirectory {
-  RepositoryBaseThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'dynamic-annotations' // only used by a random test
-        && entry.name != 'valgrind' // unopt engine builds only
-        && super.shouldRecurse(entry);
-  }
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'xdg_mime')
-      return new RepositoryXdgMimeDirectory(this, entry);
-    return super.createSubdirectory(entry);
-  }
-}
-
-class RepositoryBaseDirectory extends RepositoryDirectory {
-  RepositoryBaseDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool get isLicenseRoot => true;
-
-  @override
-  RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'third_party')
-      return new RepositoryBaseThirdPartyDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 }
@@ -2228,10 +2111,10 @@ class RepositoryRoot extends RepositoryDirectory {
 
   @override
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'base')
+      throw '//base is no longer part of this client: remove it';
     if (entry.name == 'third_party')
       return new RepositoryRootThirdPartyDirectory(this, entry);
-    if (entry.name == 'base')
-      return new RepositoryBaseDirectory(this, entry);
     if (entry.name == 'dart')
       return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'flutter')
