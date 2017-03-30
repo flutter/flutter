@@ -37,9 +37,12 @@ public class MainActivity extends FlutterActivity {
               } else {
                 response.error("UNAVAILABLE", "Battery level not available.", null);
               }
+            } else {
+              response.notImplemented();
             }
           }
-    });
+        }
+    );
   }
 
   private int getBatteryLevel() {

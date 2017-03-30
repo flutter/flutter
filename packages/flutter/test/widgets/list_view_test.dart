@@ -5,6 +5,17 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+class TestSliverChildListDelegate extends SliverChildListDelegate {
+  TestSliverChildListDelegate(List<Widget> children) : super(children);
+
+  final List<String> log = <String>[];
+
+  @override
+  void didFinishLayout(int firstIndex, int lastIndex) {
+    log.add('didFinishLayout firstIndex=$firstIndex lastIndex=$lastIndex');
+  }
+}
+
 void main() {
   testWidgets('ListView default control', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new ListView(itemExtent: 100.0)));
@@ -162,5 +173,44 @@ void main() {
 
     expect(find.text('0'), findsOneWidget);
     expect(find.text('19'), findsOneWidget);
+  });
+
+  testWidgets('didFinishLayout has correct indicies', (WidgetTester tester) async {
+    final TestSliverChildListDelegate delegate = new TestSliverChildListDelegate(
+      new List<Widget>.generate(20, (int i) {
+        return new Container(
+          child: new Text('$i'),
+        );
+      })
+    );
+
+    await tester.pumpWidget(
+      new ListView.custom(
+        itemExtent: 110.0,
+        childrenDelegate: delegate,
+      ),
+    );
+
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=5']));
+    delegate.log.clear();
+
+    await tester.pumpWidget(
+      new ListView.custom(
+        itemExtent: 210.0,
+        childrenDelegate: delegate,
+      ),
+    );
+
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=0 lastIndex=2']));
+    delegate.log.clear();
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
+
+    expect(delegate.log, isEmpty);
+
+    await tester.pump();
+
+    expect(delegate.log, equals(<String>['didFinishLayout firstIndex=2 lastIndex=5']));
+    delegate.log.clear();
   });
 }

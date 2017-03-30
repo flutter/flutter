@@ -28,7 +28,7 @@ StreamChannel<String> _defaultOpenChannel(Uri uri) =>
     new IOWebSocketChannel.connect(uri.toString()).cast();
 
 /// The default VM service request timeout.
-const Duration kDefaultRequestTimeout = const Duration(seconds: 10);
+const Duration kDefaultRequestTimeout = const Duration(seconds: 30);
 
 /// Used for RPC requests that may take a long time.
 const Duration kLongRequestTimeout = const Duration(minutes: 1);

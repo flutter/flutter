@@ -87,6 +87,13 @@ abstract class RenderSliverBoxChildManager {
   /// affect the visible contents of the [RenderSliverMultiBoxAdaptor].
   void setDidUnderflow(bool value);
 
+  /// Called at the beginning of layout to indicate that layout is about to
+  /// occur.
+  void didStartLayout() { }
+
+  /// Called at the end of layout to indicate that layout is now complete.
+  void didFinishLayout() { }
+
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
   ///

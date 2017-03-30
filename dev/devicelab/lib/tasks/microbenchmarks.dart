@@ -76,11 +76,17 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   bool jsonStarted = false;
   final StringBuffer jsonBuf = new StringBuffer();
   final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
-  StreamSubscription<String> stdoutSub;
+
+  final StreamSubscription<String> stderrSub = process.stderr
+      .transform(const Utf8Decoder())
+      .transform(const LineSplitter())
+      .listen((String line) {
+        stderr.writeln('[STDERR] $line');
+      });
 
   int prefixLength = 0;
-  bool processKilled = false;
-  stdoutSub = process.stdout
+  bool processWasKilledIntentionally = false;
+  final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
       .transform(const LineSplitter())
       .listen((String line) {
@@ -94,8 +100,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
 
     if (line.contains(jsonEnd)) {
       jsonStarted = false;
-      stdoutSub.cancel();
-      processKilled = true;
+      processWasKilledIntentionally = true;
       process.kill(ProcessSignal.SIGINT);  // flutter run doesn't quit automatically
       completer.complete(JSON.decode(jsonBuf.toString()));
       return;
@@ -106,7 +111,9 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   });
 
   process.exitCode.then<int>((int code) {
-    if (!processKilled && code != 0) {
+    stdoutSub.cancel();
+    stderrSub.cancel();
+    if (!processWasKilledIntentionally && code != 0) {
       completer.completeError('flutter run failed: exit code=$code');
     }
   });

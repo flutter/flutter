@@ -105,6 +105,8 @@ class MethodCall {
 ///
 /// * [PlatformMethodChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
+/// * [PlatformEventChannel], which use [MethodCodec]s for communication
+///   between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] in binary.
   ByteData encodeMethodCall(MethodCall methodCall);
@@ -139,7 +141,7 @@ abstract class MethodCodec {
 /// * [PlatformMethodChannel.invokeMethod], which completes the returned future
 ///   with a [PlatformException], if invoking the platform plugin method
 ///   results in an error envelope.
-/// * [PlatformMethodChannel.receiveBroadcastStream], which emits
+/// * [PlatformEventChannel.receiveBroadcastStream], which emits
 ///   [PlatformException]s as error events, whenever an event received from the
 ///   platform plugin is wrapped in an error envelope.
 class PlatformException implements Exception {
@@ -167,8 +169,22 @@ class PlatformException implements Exception {
   String toString() => 'PlatformException($code, $message, $details)';
 }
 
-/// Thrown to indicate that a platform interaction failed to find the plugin.
+/// Thrown to indicate that a platform interaction failed to find a handling
+/// plugin.
+///
+/// See also:
+///
+/// * [PlatformMethodChannel.invokeMethod], which completes the returned future
+///   with a [MissingPluginException], if no plugin handler for the method call
+///   was found.
 class MissingPluginException implements Exception {
+  /// Creates a [MissingPluginException] with an optional human-readable
+  /// error message.
+  MissingPluginException([this.message]);
+
+  /// A human-readable error message, possibly `null`.
+  final String message;
+
   @override
-  String toString() => 'MissingPluginException';
+  String toString() => 'MissingPluginException($message)';
 }
