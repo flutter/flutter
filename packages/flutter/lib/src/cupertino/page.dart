@@ -9,19 +9,6 @@ const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for iOS.
 class CupertinoPageTransition extends AnimatedWidget {
-  static final FractionalOffsetTween _kRightLeftTween = new FractionalOffsetTween(
-    begin: FractionalOffset.topRight,
-    end: -FractionalOffset.topRight,
-  );
-
-  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft,
-    end: FractionalOffset.topLeft,
-  );
-
-  final Widget child;
-  final bool fullscreenDialog;
-
   CupertinoPageTransition({
     Key key,
     @required Animation<double> animation,
@@ -37,6 +24,19 @@ class CupertinoPageTransition extends AnimatedWidget {
     ),
   );
 
+  static final FractionalOffsetTween _kRightLeftTween = new FractionalOffsetTween(
+    begin: FractionalOffset.topRight,
+    end: -FractionalOffset.topRight,
+  );
+
+  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft,
+    end: FractionalOffset.topLeft,
+  );
+
+  final Widget child;
+  final bool fullscreenDialog;
+
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
@@ -47,7 +47,7 @@ class CupertinoPageTransition extends AnimatedWidget {
         shape: BoxShape.rectangle,
         color: const Color(0x00000000), // we don't need the canvas background, just the elevation
         elevation: 16,
-        child: child
+        child: child,
       )
     );
   }
@@ -57,7 +57,7 @@ class CupertinoPageTransition extends AnimatedWidget {
 class _CupertinoTransitionCurve extends Curve {
   _CupertinoTransitionCurve(this.curve);
 
-  Curve curve;
+  final Curve curve;
 
   @override
   double transform(double t) {
@@ -102,7 +102,6 @@ class CupertinoBackGestureController extends NavigationGestureController {
   @override
   void dispose() {
     controller.removeStatusListener(handleStatusChanged);
-    controller = null;
     onDisposed();
     super.dispose();
   }
@@ -146,10 +145,6 @@ class CupertinoBackGestureController extends NavigationGestureController {
   void handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed) {
       navigator.pop();
-      assert(controller == null);
-    } else if (status == AnimationStatus.completed) {
-      dispose();
-      assert(controller == null);
     }
   }
 }
