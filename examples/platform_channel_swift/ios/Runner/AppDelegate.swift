@@ -8,10 +8,12 @@ import Flutter
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
 
-  override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    let controller : FlutterViewController = window?.rootViewController as! FlutterViewController;
-    let batteryChannel = FlutterMethodChannel.init(name: "samples.flutter.io/battery",
-                                                   binaryMessenger: controller);
+  override func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+      let controller : FlutterViewController = window?.rootViewController as! FlutterViewController;
+      let batteryChannel = FlutterMethodChannel.init(name: "samples.flutter.io/battery",
+                                                     binaryMessenger: controller);
       batteryChannel.setMethodCallHandler({
         (call: FlutterMethodCall, result: FlutterResultReceiver) -> Void in
         if ("getBatteryLevel" == call.method) {

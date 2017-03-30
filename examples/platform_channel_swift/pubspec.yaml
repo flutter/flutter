@@ -1,4 +1,4 @@
-name: platform_channel
+name: platform_channel_swift
 
 dependencies:
   flutter:
