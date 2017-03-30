@@ -35,9 +35,9 @@ static NSString* const channel = @"increment";
   if ([segue.identifier isEqualToString:@"FlutterViewControllerSegue"]) {
     self.flutterViewController = segue.destinationViewController;
 
-    self.messageChannel = [FlutterMessageChannel messageChannelNamed:channel
-                                                     binaryMessenger:self.flutterViewController
-                                                               codec:[FlutterStringCodec sharedInstance]];
+    self.messageChannel = [FlutterMessageChannel messageChannelWithName:channel
+                                                        binaryMessenger:self.flutterViewController
+                                                                  codec:[FlutterStringCodec sharedInstance]];
 
     MainViewController*  __weak weakSelf = self;
     [self.messageChannel setMessageHandler:^(id message, FlutterReplyHandler replyHandler) {
