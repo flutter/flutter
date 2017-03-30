@@ -121,7 +121,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   TimeOfDay _fromTime = const TimeOfDay(hour: 7, minute: 28);
   DateTime _toDate = new DateTime.now();
   TimeOfDay _toTime = const TimeOfDay(hour: 7, minute: 28);
-  List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
+  final List<String> _allActivities = <String>['hiking', 'swimming', 'boating', 'fishing'];
   String _activity = 'fishing';
 
   @override

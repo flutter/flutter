@@ -28,17 +28,13 @@ void main() {
 
     testUsingContext('getArtifactPath', () {
       expect(
-          artifacts.getArtifactPath(Artifact.libskyShellSo, TargetPlatform.android_arm, BuildMode.debug),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'android-arm', 'libsky_shell.so')
-      );
-      expect(
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release', 'Flutter.framework')
       );
 
       expect(
-          artifacts.getArtifactPath(Artifact.skyShell),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'sky_shell')
+          artifacts.getArtifactPath(Artifact.flutterTester),
+          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
       Cache: () => new Cache(rootOverride: tempDir),
@@ -90,8 +86,8 @@ void main() {
       );
 
       expect(
-          artifacts.getArtifactPath(Artifact.skyShell),
-          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'sky_shell')
+          artifacts.getArtifactPath(Artifact.flutterTester),
+          fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester')
       );
     }, overrides: <Type, Generator> {
       Platform: () => new FakePlatform(operatingSystem: 'linux')

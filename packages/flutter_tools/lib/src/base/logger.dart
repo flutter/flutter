@@ -135,9 +135,9 @@ class BufferLogger extends Logger {
   @override
   bool get isVerbose => false;
 
-  StringBuffer _error = new StringBuffer();
-  StringBuffer _status = new StringBuffer();
-  StringBuffer _trace = new StringBuffer();
+  final StringBuffer _error = new StringBuffer();
+  final StringBuffer _status = new StringBuffer();
+  final StringBuffer _trace = new StringBuffer();
 
   String get errorText => _error.toString();
   String get statusText => _status.toString();

@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -87,6 +86,13 @@ abstract class RenderSliverBoxChildManager {
   /// Useful for subclasses to determine whether newly added children could
   /// affect the visible contents of the [RenderSliverMultiBoxAdaptor].
   void setDidUnderflow(bool value);
+
+  /// Called at the beginning of layout to indicate that layout is about to
+  /// occur.
+  void didStartLayout() { }
+
+  /// Called at the end of layout to indicate that layout is now complete.
+  void didFinishLayout() { }
 
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.

@@ -34,8 +34,8 @@ class TextFieldDemoState extends State<TextFieldDemo> {
 
   bool _autovalidate = false;
   bool _formWasEdited = false;
-  GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-  GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
+  final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
+  final GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {

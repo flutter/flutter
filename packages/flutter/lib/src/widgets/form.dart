@@ -70,7 +70,7 @@ class Form extends StatefulWidget {
 /// Typically obtained via [Form.of].
 class FormState extends State<Form> {
   int _generation = 0;
-  Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
+  final Set<FormFieldState<dynamic>> _fields = new Set<FormFieldState<dynamic>>();
 
   // Called when a form field has changed. This will cause all form fields
   // to rebuild, useful if form fields have interdependencies.

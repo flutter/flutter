@@ -30,6 +30,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
+    argParser.addFlag(
+      'plugin',
+      negatable: true,
+      defaultsTo: false,
+      help: 'Generate a new Flutter Plugin project.'
+    );
     argParser.addOption(
       'description',
       defaultsTo: 'A new flutter project.',
@@ -80,9 +86,10 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
+    final bool generatePlugin = argResults['plugin'];
+
     final Directory projectDir = fs.directory(argResults.rest.first);
     final String dirPath = fs.path.normalize(projectDir.absolute.path);
-    final String relativePath = fs.path.relative(dirPath);
     final String projectName = _normalizeProjectName(fs.path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
@@ -93,24 +100,55 @@ class CreateCommand extends FlutterCommand {
     if (error != null)
       throwToolExit(error);
 
-    final int generatedCount = _renderTemplates(
-      projectName,
-      argResults['description'],
-      dirPath,
-      flutterPackagesDirectory,
-      renderDriverTest: argResults['with-driver-test']
+    final Map<String, dynamic> templateContext = _templateContext(
+        projectName, argResults['description'], dirPath,
+        flutterPackagesDirectory, renderDriverTest: argResults['with-driver-test'],
+        withPluginHook: generatePlugin,
     );
+
+    printStatus('Creating project ${fs.path.relative(dirPath)}...');
+    int generatedCount = 0;
+    String appPath = dirPath;
+    if (generatePlugin) {
+      final String description = argResults.wasParsed('description')
+          ? argResults['description']
+          : 'A new flutter plugin project.';
+      templateContext['description'] = description;
+      generatedCount += _renderTemplate('plugin', dirPath, templateContext);
+
+      if (argResults['pub'])
+        await pubGet(directory: dirPath);
+
+      appPath = fs.path.join(dirPath, 'example');
+      final String androidPluginIdentifier = templateContext['androidIdentifier'];
+      final String exampleProjectName = projectName + '_example';
+      templateContext['projectName'] = exampleProjectName;
+      templateContext['androidIdentifier'] = _createAndroidIdentifier(exampleProjectName);
+      templateContext['iosIdentifier'] = _createUTIIdentifier(exampleProjectName);
+      templateContext['description'] = 'Demonstrates how to use the $projectName plugin.';
+      templateContext['pluginProjectName'] = projectName;
+      templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
+    }
+
+    generatedCount += _renderTemplate('create', appPath, templateContext);
+    if (argResults['with-driver-test']) {
+      final String testPath = fs.path.join(appPath, 'test_driver');
+      generatedCount += _renderTemplate('driver', testPath, templateContext);
+    }
+
     printStatus('Wrote $generatedCount files.');
     printStatus('');
 
-    updateXcodeGeneratedProperties(dirPath, BuildMode.debug, flx.defaultMainPath);
+    updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
 
     if (argResults['pub'])
-      await pubGet(directory: dirPath);
+      await pubGet(directory: appPath);
 
     printStatus('');
 
     // Run doctor; tell the user the next steps.
+    final String relativeAppPath = fs.path.relative(appPath);
+    final String relativePluginPath = fs.path.relative(dirPath);
     if (doctor.canLaunchAnything) {
       // Let them know a summary of the state of their tooling.
       await doctor.summary();
@@ -118,11 +156,18 @@ class CreateCommand extends FlutterCommand {
       printStatus('''
 All done! In order to run your application, type:
 
-  \$ cd $relativePath
+  \$ cd $relativeAppPath
   \$ flutter run
 
-Your main program file is lib/main.dart in the $relativePath directory.
+Your main program file is lib/main.dart in the $relativeAppPath directory.
 ''');
+      if (generatePlugin) {
+        printStatus('''
+Your plugin code is in lib/$projectName.dart in the $relativePluginPath directory.
+
+Host platform code is in the android/ and ios/ directories under $relativePluginPath.
+''');
+      }
     } else {
       printStatus("You'll need to install additional components before you can run "
         "your Flutter app:");
@@ -133,48 +178,40 @@ Your main program file is lib/main.dart in the $relativePath directory.
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
         "re-validate your setup.");
-      printStatus("When complete, type 'flutter run' from the '$relativePath' "
+      printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
         "directory in order to launch your app.");
-      printStatus("Your main program file is: $relativePath/lib/main.dart");
+      printStatus("Your main program file is: $relativeAppPath/lib/main.dart");
     }
   }
 
-  int _renderTemplates(String projectName, String projectDescription, String dirPath,
-      String flutterPackagesDirectory, { bool renderDriverTest: false }) {
-    fs.directory(dirPath).createSync(recursive: true);
-
+  Map<String, dynamic> _templateContext(String projectName,
+      String projectDescription, String dirPath, String flutterPackagesDirectory,
+      { bool renderDriverTest: false, bool withPluginHook: false }) {
     flutterPackagesDirectory = fs.path.normalize(flutterPackagesDirectory);
     flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
 
-    printStatus('Creating project ${fs.path.relative(dirPath)}...');
+    final String pluginDartClass = _createPluginClassName(projectName);
+    final String pluginClass = pluginDartClass.endsWith('Plugin')
+        ? pluginDartClass
+        : pluginDartClass + 'Plugin';
 
-    final Map<String, dynamic> templateContext = <String, dynamic>{
+    return <String, dynamic>{
       'projectName': projectName,
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': projectDescription,
       'flutterPackagesDirectory': flutterPackagesDirectory,
-      'androidMinApiLevel': android.minApiLevel
+      'androidMinApiLevel': android.minApiLevel,
+      'withDriverTest': renderDriverTest,
+      'pluginClass': pluginClass,
+      'pluginDartClass': pluginDartClass,
+      'withPluginHook': withPluginHook,
     };
+  }
 
-    int fileCount = 0;
-
-    templateContext['withDriverTest'] = renderDriverTest;
-
-    final Template createTemplate = new Template.fromName('create');
-    fileCount += createTemplate.render(
-      fs.directory(dirPath),
-      templateContext, overwriteExisting: false,
-      projectName: projectName
-    );
-
-    if (renderDriverTest) {
-      final Template driverTemplate = new Template.fromName('driver');
-      fileCount += driverTemplate.render(fs.directory(fs.path.join(dirPath, 'test_driver')),
-          templateContext, overwriteExisting: false);
-    }
-
-    return fileCount;
+  int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
+    final Template template = new Template.fromName(templateName);
+    return template.render(fs.directory(dirPath), context, overwriteExisting: false);
   }
 }
 
@@ -187,7 +224,12 @@ String _normalizeProjectName(String name) {
 }
 
 String _createAndroidIdentifier(String name) {
-  return 'com.yourcompany.${camelCase(name)}';
+  return 'com.yourcompany.$name';
+}
+
+String _createPluginClassName(String name) {
+  final String camelizedName = camelCase(name);
+  return camelizedName[0].toUpperCase() + camelizedName.substring(1);
 }
 
 String _createUTIIdentifier(String name) {
