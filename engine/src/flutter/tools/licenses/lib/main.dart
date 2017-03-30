@@ -2117,6 +2117,7 @@ class RepositoryDartThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
         && entry.name != 'd8' // testing tool for dart2js
         && entry.name != 'pkg'
         && entry.name != 'pkg_tested'
+        && entry.name != 'requirejs' // only used by DDC
         && super.shouldRecurse(entry);
   }
 

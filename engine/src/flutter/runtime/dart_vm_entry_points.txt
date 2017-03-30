@@ -1,5 +1,8 @@
+dart:async,::,_setScheduleImmediateClosure
 dart:io,::,_setupHooks
 dart:io,_Platform,set:_nativeScript
+dart:isolate,::,_getIsolateScheduleImmediateClosure
+dart:isolate,::,_setupHooks
 dart:isolate,::,_startMainIsolate
 dart:ui,::,_beginFrame
 dart:ui,::,_dispatchPlatformMessage
