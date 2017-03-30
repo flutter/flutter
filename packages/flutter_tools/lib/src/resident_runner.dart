@@ -175,20 +175,20 @@ abstract class ResidentRunner {
     exit(0);
   }
 
-  bool _processingSignal = false;
+  bool _processingUserRequest = false;
   Future<Null> _handleSignal(ProcessSignal signal) async {
-    if (_processingSignal) {
+    if (_processingUserRequest) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
-    _processingSignal = true;
+    _processingUserRequest = true;
 
     final bool fullRestart = signal == ProcessSignal.SIGUSR2;
 
     try {
       await restart(fullRestart: fullRestart);
     } finally {
-      _processingSignal = false;
+      _processingUserRequest = false;
     }
   }
 
@@ -226,7 +226,19 @@ abstract class ResidentRunner {
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(appFinished);
+    vmService.done.then<Null>(
+        _serviceProtocolDone,
+        onError: _serviceProtocolError).whenComplete(appFinished);
+  }
+
+  Future<Null> _serviceProtocolDone(dynamic object) {
+    printTrace('Service protocol connection closed.');
+    return new Future<Null>.value(object);
+  }
+
+  Future<Null> _serviceProtocolError(dynamic error, StackTrace stack) {
+    printTrace('Service protocol connection closed with an error: $error\n$stack');
+    return new Future<Null>.error(error, stack);
   }
 
   /// Returns [true] if the input has been handled by this function.
@@ -277,20 +289,18 @@ abstract class ResidentRunner {
     return false;
   }
 
-  bool _processingTerminalRequest = false;
-
   Future<Null> processTerminalInput(String command) async {
-    if (_processingTerminalRequest) {
+    if (_processingUserRequest) {
       printTrace('Ignoring terminal input: "$command" because we are busy.');
       return;
     }
-    _processingTerminalRequest = true;
+    _processingUserRequest = true;
     try {
       final bool handled = await _commonTerminalInputHandler(command);
       if (!handled)
         await handleTerminalCommand(command);
     } finally {
-      _processingTerminalRequest = false;
+      _processingUserRequest = false;
     }
   }
 

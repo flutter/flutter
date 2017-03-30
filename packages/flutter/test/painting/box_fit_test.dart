@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('applyImageFit', () {
+  test('applyBoxFit', () {
     FittedSizes result;
 
     result = applyBoxFit(BoxFit.scaleDown, const Size(100.0, 1000.0), const Size(200.0, 2000.0));

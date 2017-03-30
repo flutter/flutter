@@ -599,7 +599,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
 
   DateTime _selectedDate;
   _DatePickerMode _mode = _DatePickerMode.day;
-  GlobalKey _pickerKey = new GlobalKey();
+  final GlobalKey _pickerKey = new GlobalKey();
 
   void _vibrate() {
     switch (Theme.of(context).platform) {

@@ -135,7 +135,7 @@ class Hero extends StatefulWidget {
 }
 
 class _HeroState extends State<Hero> {
-  GlobalKey _key = new GlobalKey();
+  final GlobalKey _key = new GlobalKey();
   Size _placeholderSize;
 
   void startFlight() {

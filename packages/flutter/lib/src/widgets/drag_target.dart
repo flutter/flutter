@@ -462,7 +462,7 @@ class _DragAvatar<T> extends Drag {
   final OverlayState overlayState;
 
   _DragTargetState<T> _activeTarget;
-  List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
+  final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
   Point _position;
   Offset _lastOffset;
   OverlayEntry _entry;

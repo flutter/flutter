@@ -4,7 +4,7 @@
 
 import 'dart:ui' show hashValues, TextAffinity, TextPosition;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show TextAffinity, TextPosition;
 

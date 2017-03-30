@@ -1,9 +1,22 @@
 #include "AppDelegate.h"
+{{#withPluginHook}}
+#include "{{pluginClass}}.h"
 
+@implementation AppDelegate {
+  {{pluginClass}} *_{{pluginProjectName}};
+}
+{{/withPluginHook}}
+{{^withPluginHook}}
 @implementation AppDelegate
+{{/withPluginHook}}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+{{#withPluginHook}}
+  FlutterViewController *flutterController =
+      (FlutterViewController *)self.window.rootViewController;
+  _{{pluginProjectName}} = [[{{pluginClass}} alloc] initWithFlutterView:flutterController];
+{{/withPluginHook}}
     return YES;
 }
 

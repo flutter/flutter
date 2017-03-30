@@ -140,9 +140,8 @@ class TestGesture {
   }) async {
     assert(hitTester != null);
     assert(dispatcher != null);
-    final Completer<TestGesture> completer = new Completer<TestGesture>();
     TestGesture result;
-    TestAsyncUtils.guard(() async {
+    return TestAsyncUtils.guard(() async {
       // dispatch down event
       final HitTestResult hitTestResult = hitTester(downLocation);
       final TestPointer testPointer = new TestPointer(pointer);
@@ -151,10 +150,11 @@ class TestGesture {
       // create a TestGesture
       result = new TestGesture._(dispatcher, hitTestResult, testPointer);
       return null;
-    }).whenComplete(() {
-      completer.complete(result);
+    }).then<TestGesture>((Null value) {
+      return result;
+    }, onError: (dynamic error, StackTrace stack) {
+      return new Future<TestGesture>.error(error, stack);
     });
-    return completer.future;
   }
 
   final EventDispatcher _dispatcher;

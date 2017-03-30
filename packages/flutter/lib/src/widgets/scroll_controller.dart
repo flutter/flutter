@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import 'scroll_position.dart';
 

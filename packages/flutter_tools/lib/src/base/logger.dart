@@ -135,9 +135,9 @@ class BufferLogger extends Logger {
   @override
   bool get isVerbose => false;
 
-  StringBuffer _error = new StringBuffer();
-  StringBuffer _status = new StringBuffer();
-  StringBuffer _trace = new StringBuffer();
+  final StringBuffer _error = new StringBuffer();
+  final StringBuffer _status = new StringBuffer();
+  final StringBuffer _trace = new StringBuffer();
 
   String get errorText => _error.toString();
   String get statusText => _status.toString();
@@ -282,7 +282,7 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
-    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE], 
+    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE],
     //     we should check beforehand if stdin is connected to a terminal or not
     //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
     try {

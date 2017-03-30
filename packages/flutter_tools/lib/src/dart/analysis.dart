@@ -34,7 +34,7 @@ class AnalysisDriver {
     _processPlugins();
   }
 
-  Set<Source> _analyzedSources = new HashSet<Source>();
+  final Set<Source> _analyzedSources = new HashSet<Source>();
 
   AnalysisOptionsProvider analysisOptionsProvider =
       new AnalysisOptionsProvider();
@@ -245,7 +245,7 @@ class PackageInfo {
   Packages _packages;
 
   Map<String, List<file_system.Folder>> asMap() => _map;
-  HashMap<String, List<file_system.Folder>> _map =
+  final HashMap<String, List<file_system.Folder>> _map =
       new HashMap<String, List<file_system.Folder>>();
 
   Packages asPackages() => _packages;

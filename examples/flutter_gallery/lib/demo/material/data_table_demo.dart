@@ -151,7 +151,7 @@ class _DataTableDemoState extends State<DataTableDemo> {
   int _rowsPerPage = PaginatedDataTable.defaultRowsPerPage;
   int _sortColumnIndex;
   bool _sortAscending = true;
-  DessertDataSource _dessertsDataSource = new DessertDataSource();
+  final DessertDataSource _dessertsDataSource = new DessertDataSource();
 
   void _sort<T>(Comparable<T> getField(Dessert d), int columnIndex, bool ascending) {
     _dessertsDataSource._sort<T>(getField, ascending);

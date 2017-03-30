@@ -69,7 +69,7 @@ void main() {
     await tester.pumpWidget(
       new Material(child: new AboutListTile()),
     );
-    expect(find.text('About sky_shell'), findsOneWidget);
+    expect(find.text('About flutter_tester'), findsOneWidget);
   });
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
