@@ -9,22 +9,22 @@ const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for iOS.
 class CupertinoPageTransition extends AnimatedWidget {
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: FractionalOffset.topRight,
-    end: -FractionalOffset.topRight
-  );
-
   CupertinoPageTransition({
     Key key,
     Animation<double> animation,
-    this.child
+    this.child,
   }) : super(
     key: key,
     listenable: _kTween.animate(new CurvedAnimation(
       parent: animation,
-      curve: new _CupertinoTransitionCurve(null)
-    )
+      curve: new _CupertinoTransitionCurve(null),
+    ),
   ));
+
+  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
+    begin: FractionalOffset.topRight,
+    end: -FractionalOffset.topRight,
+  );
 
   final Widget child;
 
@@ -38,7 +38,7 @@ class CupertinoPageTransition extends AnimatedWidget {
         shape: BoxShape.rectangle,
         color: const Color(0x00000000), // we don't need the canvas background, just the elevation
         elevation: 16,
-        child: child
+        child: child,
       )
     );
   }
@@ -48,7 +48,7 @@ class CupertinoPageTransition extends AnimatedWidget {
 class _CupertinoTransitionCurve extends Curve {
   _CupertinoTransitionCurve(this.curve);
 
-  Curve curve;
+  final Curve curve;
 
   @override
   double transform(double t) {
