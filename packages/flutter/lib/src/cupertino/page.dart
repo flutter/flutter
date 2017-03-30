@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-const double _kMinFlingVelocity = 1.0;  // screen width per second
+const double _kMinFlingVelocity = 1.0;  // screen width per second.
+const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
 // Used for iOS.
 class CupertinoPageTransition extends AnimatedWidget {
@@ -36,7 +37,7 @@ class CupertinoPageTransition extends AnimatedWidget {
       position: listenable,
       child: new PhysicalModel(
         shape: BoxShape.rectangle,
-        color: const Color(0x00000000), // we don't need the canvas background, just the elevation
+        color: _kBackgroundColor,
         elevation: 16,
         child: child,
       )
