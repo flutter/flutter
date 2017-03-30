@@ -25,7 +25,7 @@ class _MountainViewPageTransition extends AnimatedWidget {
   ));
 
   static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft / 4.0,
+    begin: const FractionalOffset(0.0, 0.25),
     end: FractionalOffset.topLeft
   );
 
