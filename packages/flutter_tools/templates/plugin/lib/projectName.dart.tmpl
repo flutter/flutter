@@ -1,0 +1,11 @@
+import 'dart:async';
+
+import 'package:flutter/services.dart';
+
+class {{pluginDartClass}} {
+  static const PlatformMethodChannel _channel =
+      const PlatformMethodChannel('{{projectName}}');
+
+  static Future<String> get platformVersion =>
+      _channel.invokeMethod('getPlatformVersion');
+}

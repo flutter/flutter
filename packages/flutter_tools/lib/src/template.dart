@@ -62,11 +62,12 @@ class Template {
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting: true,
-    String projectName
   }) {
     destination.createSync(recursive: true);
     int fileCount = 0;
 
+    final String projectName = context['projectName'];
+    final String pluginClass = context['pluginClass'];
     final String destinationDirPath = destination.absolute.path;
 
     _templateFilePaths.forEach((String relativeDestPath, String absoluteSrcPath) {
@@ -76,6 +77,8 @@ class Template {
           .replaceAll(_kTemplateExtension, '');
       if (projectName != null)
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
+      if (pluginClass != null)
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       final File finalDestinationFile = fs.file(finalDestinationPath);
       final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 

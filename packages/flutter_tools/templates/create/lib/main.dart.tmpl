@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 {{#withDriverTest}}
 import 'package:flutter_driver/driver_extension.dart';
 {{/withDriverTest}}
+{{#withPluginHook}}
+import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
+{{/withPluginHook}}
 
 void main() {
 {{#withDriverTest}}
@@ -55,6 +58,19 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+{{#withPluginHook}}
+  String _platformVersion = 'Unknown';
+
+  @override
+  void initState() {
+    super.initState();
+    {{pluginDartClass}}.platformVersion.then((String platformVersion) {
+      setState(() {
+        _platformVersion = platformVersion;
+      });
+    });
+  }
+{{/withPluginHook}}
 
   void _incrementCounter() {
     setState(() {
@@ -84,9 +100,21 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(config.title),
       ),
       body: new Center(
+{{#withPluginHook}}
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            new Text('Running on: $_platformVersion\n'),
+            new Text(
+                'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.'),
+          ],
+        ),
+{{/withPluginHook}}
+{{^withPluginHook}}
         child: new Text(
           'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
         ),
+{{/withPluginHook}}
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _incrementCounter,
