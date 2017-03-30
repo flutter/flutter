@@ -126,10 +126,10 @@ void main() {
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
 
-  testWidgets('ActiveOpacity defaults to 0.1', (WidgetTester tester) async {
+  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       child: new Text('Tap me'),
-      onPressed: () {},
+      onPressed: () { },
     )));
 
     // Keep a "down" gesture on the button
@@ -145,12 +145,12 @@ void main() {
     expect(opacity.opacity, 0.1);
   });
 
-  testWidgets('ActiveOpacity parameter', (WidgetTester tester) async {
-    final double activeOpacity = 0.5;
+  testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
+    final double pressedOpacity = 0.5;
     await tester.pumpWidget(new Center(child: new CupertinoButton(
-      activeOpacity: activeOpacity,
+      pressedOpacity: pressedOpacity,
       child: new Text('Tap me'),
-      onPressed: () {},
+      onPressed: () { },
     )));
 
     // Keep a "down" gesture on the button
@@ -164,6 +164,6 @@ void main() {
       of: find.byType(CupertinoButton),
       matching: find.byType(Opacity),
     ));
-    expect(opacity.opacity, activeOpacity);
+    expect(opacity.opacity, pressedOpacity);
   });
 }
