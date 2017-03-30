@@ -1,4 +1,4 @@
-Signature: 34a92cbc41efdec894d1375c7b0815c6
+Signature: f28599a8aeda7c2f2acc3668627010a8
 
 UNUSED LICENSES:
 
@@ -770,6 +770,7 @@ FILE: ../../../dart/runtime/observatory/lib/src/elements/library_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/library_view.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/local_var_descriptors_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/megamorphiccache_ref.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/native_memory_profiler.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/object_common.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/object_view.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/objectpool_ref.dart
@@ -1579,14 +1580,37 @@ FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.h
+FILE: ../../../dart/runtime/lib/async.cc
+FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/subtypetestcache_ref.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/subtypetestcache_view.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/unlinkedcall_ref.dart
+FILE: ../../../dart/runtime/observatory/lib/src/elements/unlinkedcall_view.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/objects/single_target_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/objects/subtype_test_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/objects/unlinked_call.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/single_target_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/subtype_test_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/models/repositories/unlinked_call.dart
+FILE: ../../../dart/runtime/observatory/lib/src/repositories/single_target_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/repositories/subtype_test_cache.dart
+FILE: ../../../dart/runtime/observatory/lib/src/repositories/unlinked_call.dart
 FILE: ../../../dart/runtime/platform/allocation.h
 FILE: ../../../dart/runtime/platform/growable_array.h
+FILE: ../../../dart/runtime/vm/dwarf.cc
+FILE: ../../../dart/runtime/vm/dwarf.h
 FILE: ../../../dart/runtime/vm/fixed_cache.h
 FILE: ../../../dart/runtime/vm/fixed_cache_test.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks.h
+FILE: ../../../dart/runtime/vm/malloc_hooks_arm.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_arm64.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_ia32.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_mips.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks_unsupported.cc
+FILE: ../../../dart/runtime/vm/malloc_hooks_x64.cc
 FILE: ../../../dart/runtime/vm/stack_trace.cc
 FILE: ../../../dart/runtime/vm/stack_trace.h
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
