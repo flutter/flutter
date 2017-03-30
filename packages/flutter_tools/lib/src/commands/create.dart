@@ -36,12 +36,6 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Generate a new Flutter Plugin project.'
     );
-    argParser.addFlag(
-        'example',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Generate an example app, demonstrating the use of the plugin. Only used when generating a plugin project.'
-    );
     argParser.addOption(
       'description',
       defaultsTo: 'A new flutter project.',
@@ -93,8 +87,6 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
     final bool generatePlugin = argResults['plugin'];
-    final bool generateApp = !generatePlugin || argResults['example'];
-    final bool includeDriverTest = argResults['with-driver-test'];
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     final String dirPath = fs.path.normalize(projectDir.absolute.path);
@@ -137,24 +129,22 @@ class CreateCommand extends FlutterCommand {
       templateContext['pluginProjectName'] = projectName;
       templateContext['androidPluginIdentifier'] = androidPluginIdentifier;
     }
-    if (generateApp) {
-      generatedCount += _renderTemplate('create', appPath, templateContext);
-      if (includeDriverTest) {
-        final String testPath = fs.path.join(appPath, 'test_driver');
-        generatedCount += _renderTemplate('driver', testPath, templateContext);
-      }
+
+    generatedCount += _renderTemplate('create', appPath, templateContext);
+    if (argResults['with-driver-test']) {
+      final String testPath = fs.path.join(appPath, 'test_driver');
+      generatedCount += _renderTemplate('driver', testPath, templateContext);
     }
+
     printStatus('Wrote $generatedCount files.');
     printStatus('');
 
-    if (generateApp) {
-      updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
+    updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
 
-      if (argResults['pub'])
-        await pubGet(directory: appPath);
+    if (argResults['pub'])
+      await pubGet(directory: appPath);
 
-      printStatus('');
-    }
+    printStatus('');
 
     // Run doctor; tell the user the next steps.
     final String relativeAppPath = fs.path.relative(appPath);
@@ -163,8 +153,7 @@ class CreateCommand extends FlutterCommand {
       // Let them know a summary of the state of their tooling.
       await doctor.summary();
 
-      if (generateApp) {
-        printStatus('''
+      printStatus('''
 All done! In order to run your application, type:
 
   \$ cd $relativeAppPath
@@ -172,7 +161,6 @@ All done! In order to run your application, type:
 
 Your main program file is lib/main.dart in the $relativeAppPath directory.
 ''');
-      }
       if (generatePlugin) {
         printStatus('''
 Your plugin code is in lib/$projectName.dart in the $relativePluginPath directory.
