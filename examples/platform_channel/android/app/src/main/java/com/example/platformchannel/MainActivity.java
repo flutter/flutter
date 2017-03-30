@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 
 public class MainActivity extends FlutterActivity {
-  private static final String CHANNEL = "battery";
+  private static final String CHANNEL = "samples.flutter.io/battery";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {

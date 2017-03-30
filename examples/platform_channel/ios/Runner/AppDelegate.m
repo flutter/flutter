@@ -1,9 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 #import "AppDelegate.h"
-
 #import <Flutter/Flutter.h>
 
 @implementation AppDelegate
@@ -12,19 +11,18 @@
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
-      methodChannelWithName:@"battery"
+      methodChannelWithName:@"samples.flutter.io/battery"
             binaryMessenger:controller];
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResultReceiver result) {
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
-      UIDevice* device = UIDevice.currentDevice;
-      device.batteryMonitoringEnabled = YES;
-      if (device.batteryState == UIDeviceBatteryStateUnknown) {
+      int batteryLevel = [self getBatteryLevel];
+      if (batteryLevel == -1) {
         result([FlutterError errorWithCode:@"UNAVAILABLE"
                                    message:@"Battery info unavailable"
                                    details:nil]);
       } else {
-        result(@((int)(device.batteryLevel * 100)));
+        result(@(batteryLevel));
       }
     } else {
       result(FlutterMethodNotImplemented);
@@ -32,4 +30,15 @@
   }];
   return YES;
 }
+
+- (int)getBatteryLevel {
+  UIDevice* device = UIDevice.currentDevice;
+  device.batteryMonitoringEnabled = YES;
+  if (device.batteryState == UIDeviceBatteryStateUnknown) {
+    return -1;
+  } else {
+    return ((int)(device.batteryLevel * 100));
+  }
+}
+
 @end
