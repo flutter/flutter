@@ -29,6 +29,9 @@ Available examples include:
   demonstrates how to connect a Flutter app to platform-specific APIs. For
   documentation, see https://flutter.io/platform-channels/ .
 
+- **Platform Channel Swift** The [platform channel swift
+  app](platform_channel_swift) is the same as [platform channel](platform_channel) but without an Android version and the iOS version is in swift.
+
 - **Flutter View** The [flutter view app](flutter_view) demonstrates how to
   embed Flutter within an iOS or Android app.
 
