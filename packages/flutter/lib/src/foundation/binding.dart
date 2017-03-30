@@ -7,7 +7,7 @@ import 'dart:convert' show JSON;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
-import 'package:meta/meta.dart' show mustCallSuper, protected, required;
+import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
