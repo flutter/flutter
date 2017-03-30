@@ -1,0 +1,23 @@
+#import "{{pluginClass}}.h"
+
+@implementation {{pluginClass}} {
+}
+
+- (instancetype)initWithFlutterView:(FlutterViewController *)flutterView {
+  self = [super init];
+  if (self) {
+    FlutterMethodChannel *channel = [FlutterMethodChannel
+        methodChannelWithName:@"{{projectName}}"
+           binaryMessenger:flutterView];
+    [channel setMethodCallHandler:^(FlutterMethodCall *call,
+                                    FlutterResultReceiver result) {
+      if ([@"getPlatformVersion" isEqualToString:call.method]) {
+        result([@"iOS " stringByAppendingString:[[UIDevice currentDevice]
+                                                    systemVersion]]);
+      }
+    }];
+  }
+  return self;
+}
+
+@end

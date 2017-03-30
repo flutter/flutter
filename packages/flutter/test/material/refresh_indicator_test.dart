@@ -88,7 +88,7 @@ void main() {
       ),
     );
 
-    await tester.fling(find.text('X'), const Offset(0.0, -300.0), 1000.0);
+    await tester.fling(find.text('X'), const Offset(0.0, 300.0), 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));

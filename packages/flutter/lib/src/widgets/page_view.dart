@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
-import 'package:meta/meta.dart';
 
 import 'basic.dart';
 import 'framework.dart';

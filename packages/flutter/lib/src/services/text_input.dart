@@ -261,6 +261,8 @@ class _TextInputClientHandler {
       case 'TextInputClient.performAction':
         _currentConnection._client.performAction(_toTextInputAction(args[1]));
         break;
+      default:
+        throw new MissingPluginException();
     }
   }
 

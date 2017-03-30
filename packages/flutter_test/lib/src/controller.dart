@@ -380,6 +380,7 @@ class WidgetController {
   Future<Null> dragFrom(Point startLocation, Offset offset, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      assert(gesture != null);
       await gesture.moveBy(offset);
       await gesture.up();
       return null;

@@ -90,7 +90,7 @@ class PlatformMessageChannel<T> {
 }
 
 /// A named channel for communicating with platform plugins using asynchronous
-/// method calls and event streams.
+/// method calls.
 ///
 /// Method calls are encoded into binary before being sent, and binary results
 /// received are decoded into Dart values. The [MethodCodec] used must be
@@ -125,12 +125,16 @@ class PlatformMethodChannel {
   /// * a result (possibly `null`), on successful invocation;
   /// * a [PlatformException], if the invocation failed in the platform plugin;
   /// * a [FormatException], if encoding or decoding failed.
+  /// * a [MissingPluginException], if the method has not been implemented.
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
-    return codec.decodeEnvelope(await PlatformMessages.sendBinary(
+    final dynamic result = await PlatformMessages.sendBinary(
       name,
       codec.encodeMethodCall(new MethodCall(method, arguments)),
-    ));
+    );
+    if (result == null)
+      throw new MissingPluginException("No implementation found for method $method on channel $name");
+    return codec.decodeEnvelope(result);
   }
 
   /// Sets a callback for receiving method calls on this channel.
@@ -143,7 +147,9 @@ class PlatformMethodChannel {
   /// is sent back to the platform plugin caller wrapped in a success envelope
   /// as defined by the [codec] of this channel. If the future completes with
   /// a [PlatformException], the fields of that exception will be used to
-  /// populate an error envelope which is sent back instead.
+  /// populate an error envelope which is sent back instead. If the future
+  /// completes with a [MissingPluginException], an empty reply is sent
+  /// similarly to what happens if no method call handler has been set.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
     if (handler == null) {
       PlatformMessages.setBinaryMessageHandler(name, null);
@@ -158,6 +164,8 @@ class PlatformMethodChannel {
           } on PlatformException catch (e) {
             return codec.encodeErrorEnvelope(
               code: e.code, message: e.message, details: e.details);
+          } on MissingPluginException {
+            return null;
           }
         },
       );
@@ -170,9 +178,10 @@ class PlatformMethodChannel {
   /// this channel, if any. To remove the mock handler, pass `null` as the
   /// `handler` argument.
   ///
-  /// If the future returned by the handler completes with a result, that value
-  /// is used as the result of the method invocation. If the future completes
-  /// with a [PlatformException], that will be thrown instead.
+  /// Later calls to [invokeMethod] will result in a successful result,
+  /// a [PlatformException] or a [MissingPluginException], determined by how
+  /// the future returned by the mock callback completes. The [codec] of this
+  /// channel is used to encode and decode values and errors.
   ///
   /// This is intended for testing. Method calls intercepted in this manner are
   /// not sent to platform plugins.
@@ -190,75 +199,12 @@ class PlatformMethodChannel {
           } on PlatformException catch (e) {
             return codec.encodeErrorEnvelope(
               code: e.code, message: e.message, details: e.details);
+          } on MissingPluginException {
+            return null;
           }
         },
       );
     }
-  }
-
-  /// Sets up a broadcast stream for receiving events on this channel.
-  ///
-  /// Returns a broadcast [Stream] which emits events to listeners as follows:
-  ///
-  /// * a decoded data event (possibly `null`) for each successful event
-  /// received from the platform plugin;
-  /// * an error event containing a [PlatformException] for each error event
-  /// received from the platform plugin;
-  /// * an error event containing a [FormatException] for each event received
-  /// where decoding fails;
-  /// * an error event containing a [PlatformException] or [FormatException]
-  /// whenever stream setup fails (stream setup is done only when listener
-  /// count changes from 0 to 1).
-  ///
-  /// Notes for platform plugin implementers:
-  ///
-  /// Plugins must expose methods named `listen` and `cancel` suitable for
-  /// invocations by [invokeMethod]. Both methods are invoked with the specified
-  /// [arguments].
-  ///
-  /// Following the semantics of broadcast streams, `listen` will be called as
-  /// the first listener registers with the returned stream, and `cancel` when
-  /// the last listener cancels its registration. This pattern may repeat
-  /// indefinitely. Platform plugins should consume no stream-related resources
-  /// while listener count is zero.
-  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
-    StreamController<dynamic> controller;
-    controller = new StreamController<dynamic>.broadcast(
-      onListen: () async {
-        PlatformMessages.setBinaryMessageHandler(
-          name, (ByteData reply) async {
-            if (reply == null) {
-              controller.close();
-            } else {
-              try {
-                controller.add(codec.decodeEnvelope(reply));
-              } catch (e) {
-                controller.addError(e);
-              }
-            }
-          }
-        );
-        try {
-          await invokeMethod('listen', arguments);
-        } catch (e) {
-          PlatformMessages.setBinaryMessageHandler(name, null);
-          controller.addError(e);
-        }
-      }, onCancel: () async {
-        PlatformMessages.setBinaryMessageHandler(name, null);
-        try {
-          await invokeMethod('cancel', arguments);
-        } catch (exception, stack) {
-          FlutterError.reportError(new FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'services library',
-            context: 'while de-activating platform stream on channel $name',
-          ));
-        }
-      }
-    );
-    return controller.stream;
   }
 }
 
@@ -278,5 +224,100 @@ class OptionalPlatformMethodChannel extends PlatformMethodChannel {
     } on MissingPluginException {
       return null;
     }
+  }
+}
+
+/// A named channel for communicating with platform plugins using event streams.
+///
+/// Stream setup requests are encoded into binary before being sent,
+/// and binary events received are decoded into Dart values. The [MethodCodec]
+/// used must be compatible with the one used by the platform plugin. This can
+/// be achieved by creating a FlutterEventChannel counterpart of this channel on
+/// the platform side. The Dart type of events sent and received is `dynamic`,
+/// but only values supported by the specified [MethodCodec] can be used.
+///
+/// The identity of the channel is given by its name, so other uses of that name
+/// with may interfere with this channel's communication.
+///
+/// See: <https://flutter.io/platform-channels/>
+class PlatformEventChannel {
+  /// Creates a [PlatformEventChannel] with the specified [name].
+  ///
+  /// The [codec] used will be [StandardMethodCodec], unless otherwise
+  /// specified.
+  ///
+  /// Neither [name] nor [codec] may be `null`.
+  const PlatformEventChannel(this.name, [this.codec = const StandardMethodCodec()]);
+
+  /// The logical channel on which communication happens, not `null`.
+  final String name;
+
+  /// The message codec used by this channel, not `null`.
+  final MethodCodec codec;
+
+  /// Sets up a broadcast stream for receiving events on this channel.
+  ///
+  /// Returns a broadcast [Stream] which emits events to listeners as follows:
+  ///
+  /// * a decoded data event (possibly `null`) for each successful event
+  /// received from the platform plugin;
+  /// * an error event containing a [PlatformException] for each error event
+  /// received from the platform plugin;
+  /// * an error event containing a [FormatException] for each event received
+  /// where decoding fails;
+  /// * an error event containing a [PlatformException],
+  /// [MissingPluginException], or [FormatException] whenever stream setup fails
+  /// (stream setup is done only when listener count changes from 0 to 1).
+  ///
+  /// Notes for platform plugin implementers:
+  ///
+  /// Plugins must expose methods named `listen` and `cancel` suitable for
+  /// invocations by [PlatformMethodChannel.invokeMethod]. Both methods are
+  /// invoked with the specified [arguments].
+  ///
+  /// Following the semantics of broadcast streams, `listen` will be called as
+  /// the first listener registers with the returned stream, and `cancel` when
+  /// the last listener cancels its registration. This pattern may repeat
+  /// indefinitely. Platform plugins should consume no stream-related resources
+  /// while listener count is zero.
+  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+    final PlatformMethodChannel methodChannel = new PlatformMethodChannel(name, codec);
+    StreamController<dynamic> controller;
+    controller = new StreamController<dynamic>.broadcast(
+      onListen: () async {
+        PlatformMessages.setBinaryMessageHandler(
+          name, (ByteData reply) async {
+            if (reply == null) {
+              controller.close();
+            } else {
+              try {
+                controller.add(codec.decodeEnvelope(reply));
+              } catch (e) {
+                controller.addError(e);
+              }
+            }
+          }
+        );
+        try {
+          await methodChannel.invokeMethod('listen', arguments);
+        } catch (e) {
+          PlatformMessages.setBinaryMessageHandler(name, null);
+          controller.addError(e);
+        }
+      }, onCancel: () async {
+        PlatformMessages.setBinaryMessageHandler(name, null);
+        try {
+          await methodChannel.invokeMethod('cancel', arguments);
+        } catch (exception, stack) {
+          FlutterError.reportError(new FlutterErrorDetails(
+            exception: exception,
+            stack: stack,
+            library: 'services library',
+            context: 'while de-activating platform stream on channel $name',
+          ));
+        }
+      }
+    );
+    return controller.stream;
   }
 }

@@ -1,0 +1,14 @@
+name: platform_channel_swift
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_driver:
+    path: ../../packages/flutter_driver
+
+flutter:
+  uses-material-design: true

@@ -1079,7 +1079,7 @@ class RenderTable extends RenderBox {
   }
 
   // cache the table geometry for painting purposes
-  List<double> _rowTops = <double>[];
+  final List<double> _rowTops = <double>[];
   List<double> _columnLefts;
 
   /// Returns the position and dimensions of the box that the given

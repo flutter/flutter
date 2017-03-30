@@ -211,9 +211,8 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
 
-  # TODO(goderbauer): disabled until https://github.com/flutter/flutter/issues/8986 is resolved
-  # hot_mode_dev_cycle_win__benchmark:
-  #   description: >
-  #     Measures the performance of Dart VM hot patching feature on Windows.
-  #   stage: devicelab_win
-  #   required_agent_capabilities: ["windows"]
+  hot_mode_dev_cycle_win__benchmark:
+    description: >
+      Measures the performance of Dart VM hot patching feature on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]

@@ -427,7 +427,7 @@ class AndroidDevice extends Device {
     return _portForwarder;
   }
 
-  static RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
+  static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
   /// Return the most recent timestamp in the Android log or `null` if there is
   /// no available timestamp. The format can be passed to logcat's -T option.

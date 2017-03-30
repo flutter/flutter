@@ -14,7 +14,7 @@ import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 const String kCaption = 'Flutter Gallery';
 
 final List<String> demoCategories = new LinkedHashSet<String>.from(
-  kAllGalleryItems.map((GalleryItem item) => item.category)
+  kAllGalleryItems.map<String>((GalleryItem item) => item.category)
 ).toList();
 
 final List<String> routeNames =

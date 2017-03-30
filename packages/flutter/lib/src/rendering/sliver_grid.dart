@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:meta/meta.dart';
+import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
@@ -477,7 +477,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
 
   @override
   void performLayout() {
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didStartLayout();
     childManager.setDidUnderflow(false);
 
     final double scrollOffset = constraints.scrollOffset;
@@ -510,6 +510,7 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
           layoutOffset: firstChildGridGeometry.scrollOffset)) {
         // There are no children.
         geometry = SliverGeometry.zero;
+        childManager.didFinishLayout();
         return;
       }
     }
@@ -587,6 +588,6 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: true,
     );
 
-    assert(childManager.debugAssertChildListLocked());
+    childManager.didFinishLayout();
   }
 }
