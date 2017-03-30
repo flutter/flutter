@@ -177,12 +177,12 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
-  # flutter_gallery_ios__transition_perf:
-  #   description: >
-  #     Measures the performance of screen transitions in Flutter Gallery on
-  #     iOS.
-  #   stage: devicelab_ios
-  #   required_agent_capabilities: ["has-ios-device"]
+  flutter_gallery_ios__transition_perf:
+    description: >
+      Measures the performance of screen transitions in Flutter Gallery on
+      iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
 
   basic_material_app_ios__size:
     description: >
