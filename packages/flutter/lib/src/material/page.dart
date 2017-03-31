@@ -81,6 +81,14 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    if (!(nextRoute is MaterialPageRoute<dynamic>))
+      return false;
+    final MaterialPageRoute<dynamic> nextMaterialPageRoute = nextRoute;
+    return !nextMaterialPageRoute.fullscreenDialog;
+  }
+
+  @override
   void dispose() {
     _backGestureController?.dispose();
     super.dispose();
