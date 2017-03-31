@@ -41,6 +41,7 @@ LOCAL_TEST_DATA := \
 LOCAL_TEST_DATA := $(foreach f,$(LOCAL_TEST_DATA),frameworks/minikin/tests:$(f))
 
 LOCAL_MODULE := minikin_tests
+LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 LOCAL_MODULE_CLASS := NATIVE_TESTS
 
