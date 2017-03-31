@@ -8,34 +8,56 @@ import 'package:flutter/widgets.dart';
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
 const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
-/// Transitions used for standard iOS full page transitions by bringing in the next
-/// screen from the right on top of the previous screen pushing off-screen to the
-/// left with a parallax effect.
+/// Transitions used for standard iOS full page transitions by bringing coming in from the right on
+/// top of the previous screen and by becoming pushed off-screen to the left with a parallax effect
+/// below the next screen.
 class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
-    @required Animation<double> animation,
+    // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
+    @required Animation<double> incomingRouteAnimation,
+    // Linear route animation from 0.0 to 1.0 when another screen is being pushed on top of this
+    // one.
+    @required Animation<double> outgoingRouteAnimation,
     @required this.child,
-  }) : super(
-    key: key,
-    listenable: _kRightLeftTween.animate(
-      new CurvedAnimation(
-        // It's an average of the incoming and outgoing animations so it's just >0 at
-        // the beginning of the incoming animation, =0.5 at the visible resting state and
-        // just <1 at the end of its outgoing animation.
-        parent: animation,
-        curve: new _CupertinoTransitionCurve(Curves.easeOut),
-        reverseCurve: new _CupertinoTransitionCurve(Curves.easeIn),
-      )
-    ),
-  );
+  })
+      : incomingPositionAnimation = _kRightMiddleTween.animate(
+          new CurvedAnimation(
+            parent: incomingRouteAnimation,
+            curve: Curves.easeOut,
+            reverseCurve: Curves.easeIn,
+          )
+        ),
+        outgoingPositionAnimation = _kMiddleLeftTween.animate(
+          new CurvedAnimation(
+            parent: outgoingRouteAnimation,
+            curve: Curves.easeOut,
+            reverseCurve: Curves.easeIn,
+          )
+        ),
+        super(
+          key: key,
+          // Trigger a rebuild whenever any animation route happens. The listenable's value is not
+          // used.
+          listenable: new AnimationSum(left: incomingRouteAnimation, right: outgoingRouteAnimation),
+        );
 
-  // It's 2x the screen width because the resting state is in the middle.
-  static final FractionalOffsetTween _kRightLeftTween = new FractionalOffsetTween(
+  // Fractional offset from offscreen to the right to fully on screen.
+  static final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
     begin: FractionalOffset.topRight,
-    end: -FractionalOffset.topRight,
+    end: FractionalOffset.topLeft,
   );
 
+  // Fractional offset from fully on screen to 1/3 offscreen to the left.
+  static final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
+    begin: FractionalOffset.topLeft,
+    end: const FractionalOffset(-0.33, 0.0),
+  );
+
+  // When this page is coming in to cover another page.
+  final Animation<FractionalOffset> incomingPositionAnimation;
+  // When this page is becoming covered by another page.
+  final Animation<FractionalOffset> outgoingPositionAnimation;
   final Widget child;
 
   @override
@@ -43,45 +65,17 @@ class CupertinoPageTransition extends AnimatedWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: listenable,
-      child: new PhysicalModel(
-        shape: BoxShape.rectangle,
-        color: _kBackgroundColor,
-        elevation: 16,
-        child: child,
-      )
+      position: outgoingPositionAnimation,
+      child: new SlideTransition(
+        position: incomingPositionAnimation,
+        child: new PhysicalModel(
+          shape: BoxShape.rectangle,
+          color: _kBackgroundColor,
+          elevation: 16,
+          child: child,
+        ),
+      ),
     );
-  }
-}
-
-// Custom curve for iOS page transitions.
-class _CupertinoTransitionCurve extends Curve {
-  _CupertinoTransitionCurve(this.curve);
-
-  final Curve curve;
-
-  @override
-  double transform(double t) {
-    // The input [t] is the average of the current and next route's animation.
-    // This means t=0.5 represents when the route is fully onscreen. At
-    // t > 0.5, it is partially offscreen to the left (which happens when there
-    // is another route on top). At t < 0.5, the route is to the right.
-    // We divide the range into two halves, each with a different transition,
-    // and scale each half to the range [0.0, 1.0] before applying curves so that
-    // each half goes through the full range of the curve.
-    if (t > 0.5) {
-      // Route is to the left of center.
-      t = (t - 0.5) * 2.0;
-      if (curve != null)
-        t = curve.transform(t);
-      t = t / 3.0;
-      t = t / 2.0 + 0.5;
-    } else {
-      // Route is to the right of center.
-      if (curve != null)
-        t = curve.transform(t * 2.0) / 2.0;
-    }
-    return t;
   }
 }
 
@@ -132,7 +126,7 @@ class CupertinoBackGestureController extends NavigationGestureController {
 
   @override
   void dispose() {
-    controller.removeStatusListener(handleStatusChanged);
+    controller.removeStatusListener(_handleStatusChanged);
     super.dispose();
   }
 
@@ -166,13 +160,13 @@ class CupertinoBackGestureController extends NavigationGestureController {
 
     // Don't end the gesture until the transition completes.
     final AnimationStatus status = controller.status;
-    handleStatusChanged(status);
-    controller?.addStatusListener(handleStatusChanged);
+    _handleStatusChanged(status);
+    controller?.addStatusListener(_handleStatusChanged);
 
     return (status == AnimationStatus.reverse || status == AnimationStatus.dismissed);
   }
 
-  void handleStatusChanged(AnimationStatus status) {
+  void _handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed)
       navigator.pop();
   }

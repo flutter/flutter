@@ -158,7 +158,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
       else
         return new CupertinoPageTransition(
-          animation: new AnimationMean(left: animation, right: forwardAnimation),
+          incomingRouteAnimation: animation,
+          outgoingRouteAnimation: forwardAnimation,
           child: child,
         );
     } else {
