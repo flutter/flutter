@@ -4,13 +4,14 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show required;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 typedef Future<String> UpdateUrlFetcher();
 
 class Updater extends StatefulWidget {
-  Updater({ this.updateUrlFetcher, this.child, Key key }) : super(key: key) {
+  Updater({ @required this.updateUrlFetcher, this.child, Key key }) : super(key: key) {
     assert(updateUrlFetcher != null);
   }
 

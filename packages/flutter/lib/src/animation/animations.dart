@@ -324,8 +324,8 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
   ///
   /// The parent and curve arguments must not be null.
   CurvedAnimation({
-    this.parent,
-    this.curve,
+    @required this.parent,
+    @required this.curve,
     this.reverseCurve
   }) {
     assert(parent != null);
@@ -546,8 +546,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
   /// Creates a CompoundAnimation. Both arguments must be non-null. Either can
   /// be a CompoundAnimation itself to combine multiple animations.
   CompoundAnimation({
-    this.first,
-    this.next,
+    @required this.first,
+    @required this.next,
   }) {
     assert(first != null);
     assert(next != null);

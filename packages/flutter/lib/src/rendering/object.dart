@@ -613,9 +613,14 @@ class _SemanticsGeometry {
       parent.applyPaintTransform(child, transform);
     }
   }
-  void updateSemanticsNode({ RenderObject rendering, SemanticsNode semantics, SemanticsNode parentSemantics }) {
+  void updateSemanticsNode({
+    @required RenderObject rendering,
+    @required SemanticsNode semantics,
+    @required SemanticsNode parentSemantics,
+  }) {
     assert(rendering != null);
     assert(semantics != null);
+    assert(parentSemantics != null);
     assert(parentSemantics.wasAffectedByClip != null);
     semantics.transform = transform;
     if (clipRect != null) {
@@ -630,7 +635,7 @@ class _SemanticsGeometry {
 
 abstract class _SemanticsFragment {
   _SemanticsFragment({
-    RenderObject renderObjectOwner,
+    @required RenderObject renderObjectOwner,
     this.annotator,
     List<_SemanticsFragment> children
   }) {
@@ -670,8 +675,9 @@ abstract class _SemanticsFragment {
 /// that comes from the (dirty) ancestors.)
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment({
-    RenderObject renderObjectOwner
+    @required RenderObject renderObjectOwner
   }) : super(renderObjectOwner: renderObjectOwner) {
+    assert(renderObjectOwner != null);
     assert(renderObjectOwner._semantics != null);
   }
 
@@ -829,14 +835,18 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
 class _ForkingSemanticsFragment extends _SemanticsFragment {
   _ForkingSemanticsFragment({
     RenderObject renderObjectOwner,
-    Iterable<_SemanticsFragment> children
+    @required Iterable<_SemanticsFragment> children
   }) : super(renderObjectOwner: renderObjectOwner, children: children) {
     assert(children != null);
     assert(children.length > 1);
   }
 
   @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
+  Iterable<SemanticsNode> compile({
+    @required _SemanticsGeometry geometry,
+    SemanticsNode currentSemantics,
+    SemanticsNode parentSemantics
+  }) sync* {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; });
     assert(geometry != null);

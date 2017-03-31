@@ -184,36 +184,36 @@ class ThemeData {
   /// create intermediate themes based on two themes created with the
   /// [new ThemeData] constructor.
   ThemeData.raw({
-    this.brightness,
-    this.primaryColor,
-    this.primaryColorBrightness,
-    this.accentColor,
-    this.accentColorBrightness,
-    this.canvasColor,
-    this.scaffoldBackgroundColor,
-    this.cardColor,
-    this.dividerColor,
-    this.highlightColor,
-    this.splashColor,
-    this.selectedRowColor,
-    this.unselectedWidgetColor,
-    this.disabledColor,
-    this.buttonColor,
-    this.secondaryHeaderColor,
-    this.textSelectionColor,
-    this.textSelectionHandleColor,
-    this.backgroundColor,
-    this.dialogBackgroundColor,
-    this.indicatorColor,
-    this.hintColor,
-    this.errorColor,
-    this.textTheme,
-    this.primaryTextTheme,
-    this.accentTextTheme,
-    this.iconTheme,
-    this.primaryIconTheme,
-    this.accentIconTheme,
-    this.platform
+    @required this.brightness,
+    @required this.primaryColor,
+    @required this.primaryColorBrightness,
+    @required this.accentColor,
+    @required this.accentColorBrightness,
+    @required this.canvasColor,
+    @required this.scaffoldBackgroundColor,
+    @required this.cardColor,
+    @required this.dividerColor,
+    @required this.highlightColor,
+    @required this.splashColor,
+    @required this.selectedRowColor,
+    @required this.unselectedWidgetColor,
+    @required this.disabledColor,
+    @required this.buttonColor,
+    @required this.secondaryHeaderColor,
+    @required this.textSelectionColor,
+    @required this.textSelectionHandleColor,
+    @required this.backgroundColor,
+    @required this.dialogBackgroundColor,
+    @required this.indicatorColor,
+    @required this.hintColor,
+    @required this.errorColor,
+    @required this.textTheme,
+    @required this.primaryTextTheme,
+    @required this.accentTextTheme,
+    @required this.iconTheme,
+    @required this.primaryIconTheme,
+    @required this.accentIconTheme,
+    @required this.platform
   }) {
     assert(brightness != null);
     assert(primaryColor != null);
@@ -222,7 +222,6 @@ class ThemeData {
     assert(accentColorBrightness != null);
     assert(canvasColor != null);
     assert(scaffoldBackgroundColor != null);
-    assert(dialogBackgroundColor != null);
     assert(cardColor != null);
     assert(dividerColor != null);
     assert(highlightColor != null);
@@ -234,7 +233,8 @@ class ThemeData {
     assert(secondaryHeaderColor != null);
     assert(textSelectionColor != null);
     assert(textSelectionHandleColor != null);
-    assert(disabledColor != null);
+    assert(backgroundColor != null);
+    assert(dialogBackgroundColor != null);
     assert(indicatorColor != null);
     assert(hintColor != null);
     assert(errorColor != null);

@@ -158,7 +158,7 @@ class _TabLabelBarRenderer extends RenderFlex {
     MainAxisAlignment mainAxisAlignment,
     CrossAxisAlignment crossAxisAlignment,
     TextBaseline textBaseline,
-    this.onPerformLayout,
+    @required this.onPerformLayout,
   }) : super(
     children: children,
     direction: direction,

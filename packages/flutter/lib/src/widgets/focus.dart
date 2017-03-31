@@ -21,7 +21,7 @@ class _FocusScope extends InheritedWidget {
   _FocusScope({
     Key key,
     this.focusState,
-    this.scopeFocused,
+    @required this.scopeFocused,
     this.focusedScope,
     this.focusedWidget,
     @required Widget child,

@@ -135,8 +135,8 @@ const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
 class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSwitch({
-    bool value,
-    Color activeColor,
+    @required bool value,
+    @required Color activeColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }) : _value = value,

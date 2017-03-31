@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart' show required;
+
 import '../android/android_sdk.dart';
 import '../android/gradle.dart';
 import '../base/common.dart';
@@ -14,7 +16,7 @@ import 'build.dart';
 export '../android/android_device.dart' show AndroidDevice;
 
 class ApkKeystoreInfo {
-  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, this.keyPassword }) {
+  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, @required this.keyPassword }) {
     assert(keystore != null);
   }
 

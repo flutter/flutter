@@ -116,7 +116,7 @@ class _ShrineGridDelegate extends SliverGridDelegate {
 
 // Displays the Vendor's name and avatar.
 class _VendorItem extends StatelessWidget {
-  _VendorItem({ Key key, this.vendor }) : super(key: key) {
+  _VendorItem({ Key key, @required this.vendor }) : super(key: key) {
     assert(vendor != null);
   }
 
@@ -148,7 +148,7 @@ class _VendorItem extends StatelessWidget {
 // Displays the product's price. If the product is in the shopping cart then the
 // background is highlighted.
 abstract class _PriceItem extends StatelessWidget {
-  _PriceItem({ Key key, this.product }) : super(key: key) {
+  _PriceItem({ Key key, @required this.product }) : super(key: key) {
     assert(product != null);
   }
 
@@ -240,7 +240,8 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
 // A card that highlights the "featured" catalog item.
 class _Heading extends StatelessWidget {
-  _Heading({ Key key, this.product }) : super(key: key) {
+  _Heading({ Key key, @required this.product }) : super(key: key) {
+    assert(product != null);
     assert(product.featureTitle != null);
     assert(product.featureDescription != null);
   }
@@ -293,7 +294,7 @@ class _Heading extends StatelessWidget {
 // A card that displays a product's image, price, and vendor. The _ProductItem
 // cards appear in a grid below the heading.
 class _ProductItem extends StatelessWidget {
-  _ProductItem({ Key key, this.product, this.onPressed }) : super(key: key) {
+  _ProductItem({ Key key, @required this.product, this.onPressed }) : super(key: key) {
     assert(product != null);
   }
 

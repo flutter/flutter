@@ -199,7 +199,7 @@ abstract class BindingBase {
   /// service extension method is called with a new value.
   @protected
   void registerBoolServiceExtension({
-    String name,
+    @required String name,
     @required AsyncValueGetter<bool> getter,
     @required AsyncValueSetter<bool> setter
   }) {

@@ -625,7 +625,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 class _TimePickerDialog extends StatefulWidget {
   _TimePickerDialog({
     Key key,
-    this.initialTime
+    @required this.initialTime
   }) : super(key: key) {
     assert(initialTime != null);
   }
@@ -794,7 +794,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
 Future<TimeOfDay> showTimePicker({
   BuildContext context,
-  TimeOfDay initialTime
+  @required TimeOfDay initialTime
 }) async {
   assert(initialTime != null);
   return await showDialog(

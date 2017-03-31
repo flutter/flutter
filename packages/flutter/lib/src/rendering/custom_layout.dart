@@ -267,7 +267,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   /// The [delegate] argument must not be null.
   RenderCustomMultiChildLayoutBox({
     List<RenderBox> children,
-    MultiChildLayoutDelegate delegate
+    @required MultiChildLayoutDelegate delegate
   }) : _delegate = delegate {
     assert(delegate != null);
     addAll(children);

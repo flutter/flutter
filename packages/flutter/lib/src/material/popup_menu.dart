@@ -438,9 +438,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// 12, 16, 24. The elevation defaults to 8, the appropriate elevation for popup
 /// menus.
 Future<T> showMenu<T>({
-  BuildContext context,
+  @required BuildContext context,
   RelativeRect position,
-  List<PopupMenuEntry<T>> items,
+  @required List<PopupMenuEntry<T>> items,
   T initialValue,
   int elevation: 8
 }) {

@@ -35,7 +35,7 @@ class Theme extends InheritedWidget {
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
-    Widget child
+    @required Widget child
   }) : super(key: key, child: child) {
     assert(child != null);
     assert(data != null);

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart' show required;
 import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
@@ -18,7 +19,7 @@ abstract class ApplicationPackage {
   /// Package ID from the Android Manifest or equivalent.
   final String id;
 
-  ApplicationPackage({ this.id }) {
+  ApplicationPackage({ @required this.id }) {
     assert(id != null);
   }
 
@@ -41,8 +42,8 @@ class AndroidApk extends ApplicationPackage {
 
   AndroidApk({
     String id,
-    this.apkPath,
-    this.launchActivity
+    @required this.apkPath,
+    @required this.launchActivity
   }) : super(id: id) {
     assert(apkPath != null);
     assert(launchActivity != null);

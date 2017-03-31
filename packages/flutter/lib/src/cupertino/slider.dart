@@ -189,7 +189,7 @@ const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material s
 
 class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderCupertinoSlider({
-    double value,
+    @required double value,
     int divisions,
     Color activeColor,
     this.onChanged,
