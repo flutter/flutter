@@ -39,16 +39,16 @@ void main() {
   });
 
   testWidgets('Focus handling', (WidgetTester tester) async {
-    final GlobalKey inputKey = new GlobalKey();
+    final FocusNode focusNode = new FocusNode();
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new Center(
-          child: new Input(key: inputKey, autofocus: true)
+          child: new Input(focusNode: focusNode, autofocus: true)
         )
       )
     ));
 
-    expect(Focus.at(inputKey.currentContext), isTrue);
+    expect(focusNode.hasFocus, isTrue);
   });
 
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {

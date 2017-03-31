@@ -16,7 +16,7 @@ import 'debug.dart';
 /// During painting, the render tree generates a tree of composited layers that
 /// are uploaded into the engine and displayed by the compositor. This class is
 /// the base class for all composited layers.
-abstract class Layer {
+abstract class Layer extends Object with TreeDiagnosticsMixin {
   /// This layer's parent in the layer tree
   ContainerLayer get parent => _parent;
   ContainerLayer _parent;
@@ -70,44 +70,18 @@ abstract class Layer {
   /// origin of the builder's coordinate system.
   void addToScene(ui.SceneBuilder builder, Offset layerOffset);
 
-  @override
-  String toString() => '$runtimeType';
-
   /// The object responsible for creating this layer.
   ///
   /// Defaults to the value of [RenderObject.debugCreator] for the render object
   /// that created this layer. Used in debug messages.
   dynamic debugCreator;
 
-  /// Returns a string representation of this layer and its descendants.
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
-    String result = '$prefixLineOne$this\n';
-    final String childrenDescription = debugDescribeChildren(prefixOtherLines);
-    final String descriptionPrefix = childrenDescription != '' ? '$prefixOtherLines \u2502 ' : '$prefixOtherLines   ';
-    final List<String> description = <String>[];
-    debugFillDescription(description);
-    result += description.map((String description) => "$descriptionPrefix$description\n").join();
-    if (childrenDescription == '') {
-      final String prefix = prefixOtherLines.trimRight();
-      if (prefix != '')
-        result += '$prefix\n';
-    } else {
-      result += childrenDescription;
-    }
-    return result;
-  }
-
-  /// Add additional information to the given description for use by [toStringDeep].
-  @protected
-  @mustCallSuper
+  @override
   void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
     if (debugCreator != null)
       description.add('creator: $debugCreator');
   }
-
-  /// Returns a description of this layer's children for use by [toStringDeep].
-  @protected
-  String debugDescribeChildren(String prefix) => '';
 }
 
 /// A composited layer containing a [Picture]

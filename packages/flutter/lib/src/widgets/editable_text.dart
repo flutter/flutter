@@ -9,7 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
-import 'focus.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'scroll_controller.dart';
@@ -125,11 +126,12 @@ class InputValue {
 class EditableText extends StatefulWidget {
   /// Creates a basic text input control.
   ///
-  /// The [value] argument must not be null.
+  /// The [value], [focusNode], [style], and [cursorColor] arguments must not
+  /// be null.
   EditableText({
     Key key,
     @required this.value,
-    @required this.focusKey,
+    @required this.focusNode,
     this.obscureText: false,
     @required this.style,
     @required this.cursorColor,
@@ -143,7 +145,7 @@ class EditableText extends StatefulWidget {
     this.onSubmitted,
   }) : super(key: key) {
     assert(value != null);
-    assert(focusKey != null);
+    assert(focusNode != null);
     assert(obscureText != null);
     assert(style != null);
     assert(cursorColor != null);
@@ -154,8 +156,8 @@ class EditableText extends StatefulWidget {
   /// The string being displayed in this widget.
   final InputValue value;
 
-  /// Key of the enclosing widget that holds the focus.
-  final GlobalKey focusKey;
+  /// Controls whether this widget has keyboard focus.
+  final FocusNode focusNode;
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
@@ -217,11 +219,23 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   TextSelectionOverlay _selectionOverlay;
 
   final ScrollController _scrollController = new ScrollController();
+  bool _didAutoFocus = false;
 
   @override
   void initState() {
     super.initState();
     _currentValue = config.value;
+    config.focusNode.addListener(_handleFocusChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_didAutoFocus && config.autofocus) {
+      _didRequestKeyboard = true;
+      FocusScope.of(context).autofocus(config.focusNode);
+      _didAutoFocus = true;
+    }
   }
 
   @override
@@ -230,6 +244,10 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       _currentValue = config.value;
       if (_isAttachedToKeyboard)
         _textInputConnection.setEditingState(_getTextEditingValueFromInputValue(_currentValue));
+    }
+    if (config.focusNode != oldConfig.focusNode) {
+      oldConfig.focusNode.removeListener(_handleFocusChanged);
+      config.focusNode.addListener(_handleFocusChanged);
     }
   }
 
@@ -250,12 +268,10 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     return scrollOffset;
   }
 
-  // True if the focus was explicitly requested last frame. This ensures we
-  // don't show the keyboard when focus defaults back to the EditableText.
-  bool _requestingFocus = false;
+  bool _didRequestKeyboard = false;
 
   void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard && (_requestingFocus || config.autofocus)) {
+    if (focused && !_isAttachedToKeyboard && _didRequestKeyboard) {
       _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_getTextEditingValueFromInputValue(_currentValue))
         ..show();
@@ -266,7 +282,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       }
       _clearComposing();
     }
-    _requestingFocus = false;
+    _didRequestKeyboard = false;
   }
 
   void _clearComposing() {
@@ -286,10 +302,11 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (_isAttachedToKeyboard) {
       _textInputConnection.show();
     } else {
-      Focus.moveTo(config.focusKey);
-      setState(() {
-        _requestingFocus = true;
-      });
+      _didRequestKeyboard = true;
+      if (config.focusNode.hasFocus)
+        _attachOrDetachKeyboard(true);
+      else
+        FocusScope.of(context).requestFocus(config.focusNode);
     }
   }
 
@@ -307,7 +324,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   @override
   void performAction(TextInputAction action) {
     _clearComposing();
-    Focus.clear(context);
+    config.focusNode.unfocus();
     if (config.onSubmitted != null)
       config.onSubmitted(_currentValue);
   }
@@ -369,30 +386,8 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
-  @override
-  void dispose() {
-    if (_isAttachedToKeyboard) {
-      _textInputConnection.close();
-      _textInputConnection = null;
-    }
-    assert(!_isAttachedToKeyboard);
-    if (_cursorTimer != null)
-      _stopCursorTimer();
-    assert(_cursorTimer == null);
-    _selectionOverlay?.dispose();
-    _selectionOverlay = null;
-    super.dispose();
-  }
-
-  void _stopCursorTimer() {
-    _cursorTimer.cancel();
-    _cursorTimer = null;
-    _showCursor = false;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final bool focused = Focus.at(config.focusKey.currentContext);
+  void _handleFocusChanged() {
+    final bool focused = config.focusNode.hasFocus;
     _attachOrDetachKeyboard(focused);
 
     if (_cursorTimer == null && focused && config.value.selection.isCollapsed)
@@ -408,7 +403,33 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
         _selectionOverlay = null;
       }
     }
+  }
 
+  @override
+  void dispose() {
+    if (_isAttachedToKeyboard) {
+      _textInputConnection.close();
+      _textInputConnection = null;
+    }
+    assert(!_isAttachedToKeyboard);
+    if (_cursorTimer != null)
+      _stopCursorTimer();
+    assert(_cursorTimer == null);
+    _selectionOverlay?.dispose();
+    _selectionOverlay = null;
+    config.focusNode.removeListener(_handleFocusChanged);
+    super.dispose();
+  }
+
+  void _stopCursorTimer() {
+    _cursorTimer.cancel();
+    _cursorTimer = null;
+    _showCursor = false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    FocusScope.of(context).reparentIfNeeded(config.focusNode);
     return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,

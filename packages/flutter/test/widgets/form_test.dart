@@ -120,7 +120,6 @@ void main() {
   testWidgets('Multiple Inputs communicate', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = new GlobalKey<FormState>();
     final GlobalKey<FormFieldState<InputValue>> fieldKey = new GlobalKey<FormFieldState<InputValue>>();
-    final GlobalKey focusKey = new GlobalKey();
     // Input 2's validator depends on a input 1's value.
     String errorText(InputValue input) => fieldKey.currentState.value?.text.toString() + '/error';
 
@@ -130,21 +129,18 @@ void main() {
           child: new Form(
             key: formKey,
             autovalidate: true,
-            child: new Focus(
-              key: focusKey,
-              child: new ListView(
-                children: <Widget>[
-                  new TextField(
-                    key: fieldKey
-                  ),
-                  new TextField(
-                    validator: errorText,
-                  ),
-                ]
-              )
+            child: new ListView(
+              children: <Widget>[
+                new TextField(
+                  key: fieldKey,
+                ),
+                new TextField(
+                  validator: errorText,
+                ),
+              ],
             ),
-          )
-        )
+          ),
+        ),
       );
     }
 

@@ -795,26 +795,22 @@ void main() {
 
   testWidgets('Input label text animates', (WidgetTester tester) async {
     final GlobalKey inputKey = new GlobalKey();
-    final GlobalKey focusKey = new GlobalKey();
 
     Widget innerBuilder() {
       return new Center(
         child: new Material(
-          child: new Focus(
-            key: focusKey,
-            child: new Column(
-              children: <Widget>[
-                new Input(
-                  labelText: 'First'
-                ),
-                new Input(
-                  key: inputKey,
-                  labelText: 'Second'
-                ),
-              ]
-            )
-          )
-        )
+          child: new Column(
+            children: <Widget>[
+              new Input(
+                labelText: 'First',
+              ),
+              new Input(
+                key: inputKey,
+                labelText: 'Second',
+              ),
+            ],
+          ),
+        ),
       );
     }
     Widget builder() => overlay(innerBuilder());
@@ -825,6 +821,7 @@ void main() {
 
     // Focus the Input. The label should start animating upwards.
     await tester.tap(find.byKey(inputKey));
+    await tester.idle();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 

@@ -15,16 +15,20 @@ void sendFakeKeyEvent(Map<String, dynamic> data) {
 
 void main() {
   testWidgets('Can dispose without keyboard', (WidgetTester tester) async {
-    await tester.pumpWidget(new RawKeyboardListener(child: new Container()));
-    await tester.pumpWidget(new RawKeyboardListener(child: new Container()));
+    final FocusNode focusNode = new FocusNode();
+    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
+    await tester.pumpWidget(new RawKeyboardListener(focusNode: focusNode, onKey: null, child: new Container()));
     await tester.pumpWidget(new Container());
   });
 
   testWidgets('Fuchsia key event', (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
+    final FocusNode focusNode = new FocusNode();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+
     await tester.pumpWidget(new RawKeyboardListener(
-      focused: true,
+      focusNode: focusNode,
       onKey: events.add,
       child: new Container(),
     ));
@@ -46,14 +50,20 @@ void main() {
     expect(typedData.hidUsage, 0x04);
     expect(typedData.codePoint, 0x64);
     expect(typedData.modifiers, 0x08);
+
+    await tester.pumpWidget(new Container());
+    focusNode.dispose();
   });
 
   testWidgets('Defunct listeners do not receive events',
       (WidgetTester tester) async {
     final List<RawKeyEvent> events = <RawKeyEvent>[];
 
+    final FocusNode focusNode = new FocusNode();
+    tester.binding.focusManager.rootScope.requestFocus(focusNode);
+
     await tester.pumpWidget(new RawKeyboardListener(
-      focused: true,
+      focusNode: focusNode,
       onKey: events.add,
       child: new Container(),
     ));
@@ -84,5 +94,8 @@ void main() {
     await tester.idle();
 
     expect(events.length, 0);
+
+    await tester.pumpWidget(new Container());
+    focusNode.dispose();
   });
 }
