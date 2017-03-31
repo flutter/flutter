@@ -81,8 +81,6 @@ struct MinikinRect {
     void join(const MinikinRect& r);
 };
 
-class MinikinFontFreeType;
-
 // Callback for freeing data
 typedef void (*MinikinDestroyFunc) (void* data);
 
