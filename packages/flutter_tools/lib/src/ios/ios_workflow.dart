@@ -41,7 +41,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  bool get hasPythonSixModule => exitsHappy(<String>['python', '-c', 'import six']);
+  bool get hasPythonSixModule => kPythonSix.isInstalled;
 
   bool get hasCocoaPods => exitsHappy(<String>['pod', '--version']);
 
@@ -124,10 +124,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       pythonStatus = ValidationType.installed;
     } else {
       pythonStatus = ValidationType.missing;
-      messages.add(new ValidationMessage.error(
-        'Python installation missing module "six".\n'
-        'Install via \'pip install six\' or \'sudo easy_install six\'.'
-      ));
+      messages.add(new ValidationMessage.error(kPythonSix.errorMessage));
     }
 
     // brew installed
