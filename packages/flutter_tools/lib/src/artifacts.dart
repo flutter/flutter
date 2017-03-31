@@ -11,7 +11,6 @@ import 'globals.dart';
 enum Artifact {
   dartIoEntriesTxt,
   dartVmEntryPointsTxt,
-  dartVmEntryPointsAndroidTxt,
   genSnapshot,
   flutterTester,
   snapshotDart,
@@ -26,8 +25,6 @@ String _artifactToFileName(Artifact artifact) {
       return 'dart_io_entries.txt';
     case Artifact.dartVmEntryPointsTxt:
       return 'dart_vm_entry_points.txt';
-    case Artifact.dartVmEntryPointsAndroidTxt:
-      return 'dart_vm_entry_points_android.txt';
     case Artifact.genSnapshot:
       return 'gen_snapshot';
     case Artifact.flutterTester:
@@ -94,7 +91,6 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
       case Artifact.dartVmEntryPointsTxt:
-      case Artifact.dartVmEntryPointsAndroidTxt:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         return fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
@@ -192,7 +188,6 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.dartIoEntriesTxt:
         return fs.path.join(_engineSrcPath, 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsTxt:
-      case Artifact.dartVmEntryPointsAndroidTxt:
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
         return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', _artifactToFileName(artifact));

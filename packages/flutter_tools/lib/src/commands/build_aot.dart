@@ -147,19 +147,14 @@ Future<String> _buildAotSnapshot(
 
   final String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
   final String uiPath = fs.path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
-  final String jniPath = fs.path.join(skyEnginePkg, 'dart_jni', 'jni.dart');
   final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
   final List<String> filePaths = <String>[
     vmEntryPoints,
     ioEntryPoints,
     uiPath,
-    jniPath,
     vmServicePath,
   ];
-
-  // These paths are used only on Android.
-  String vmEntryPointsAndroid;
 
   // These paths are used only on iOS.
   String snapshotDartIOS;
@@ -169,10 +164,6 @@ Future<String> _buildAotSnapshot(
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      vmEntryPointsAndroid = artifacts.getArtifactPath(Artifact.dartVmEntryPointsAndroidTxt, platform, buildMode);
-      filePaths.addAll(<String>[
-        vmEntryPointsAndroid,
-      ]);
       break;
     case TargetPlatform.ios:
       snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
@@ -206,7 +197,6 @@ Future<String> _buildAotSnapshot(
     '--isolate_snapshot_data=$isolateSnapshotData',
     '--packages=${packageMap.packagesPath}',
     '--url_mapping=dart:ui,$uiPath',
-    '--url_mapping=dart:jni,$jniPath',
     '--url_mapping=dart:vmservice_sky,$vmServicePath',
     '--print_snapshot_sizes',
     '--dependencies=$dependencies',
@@ -225,7 +215,6 @@ Future<String> _buildAotSnapshot(
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_instructions=$vmSnapshotInstructions',
         '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
-        '--embedder_entry_points_manifest=$vmEntryPointsAndroid',
         '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
         '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
       ]);
