@@ -4,10 +4,10 @@
 
 package io.flutter.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.view.WindowManager;
 import io.flutter.plugin.platform.PlatformPlugin;
@@ -19,7 +19,7 @@ import java.util.ArrayList;
 /**
  * Base class for activities that use Flutter.
  */
-public class FlutterActivity extends FragmentActivity {
+public class FlutterActivity extends Activity {
     private FlutterView flutterView;
 
     private String[] getArgsFromIntent(Intent intent) {
