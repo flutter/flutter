@@ -21,10 +21,6 @@ JNIEnv* AttachCurrentThread();
 
 void DetachFromVM();
 
-void InitAndroidApplicationContext(const JavaRef<jobject>& context);
-
-const jobject GetAndroidApplicationContext();
-
 std::string JavaStringToString(JNIEnv* env, jstring string);
 
 ScopedJavaLocalRef<jstring> StringToJavaString(JNIEnv* env,
@@ -39,8 +35,6 @@ ScopedJavaLocalRef<jobjectArray> VectorToStringArray(
 bool HasException(JNIEnv* env);
 
 bool ClearException(JNIEnv* env);
-
-std::string GetJavaExceptionInfo(JNIEnv* env, jthrowable java_throwable);
 
 }  // namespace jni
 }  // namespace fml
