@@ -36,15 +36,6 @@ extern android::Mutex gMinikinLock;
 // Aborts if gMinikinLock is not acquired. Do nothing on the release build.
 void assertMinikinLocked();
 
-// Returns true if c is emoji.
-bool isEmoji(uint32_t c);
-
-// Returns true if c is emoji modifier base.
-bool isEmojiBase(uint32_t c);
-
-// Returns true if c is emoji modifier.
-bool isEmojiModifier(uint32_t c);
-
 hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag);
 
 // An RAII wrapper for hb_blob_t
