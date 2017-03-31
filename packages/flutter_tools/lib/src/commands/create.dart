@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:path/path.dart' as path;
-
 import '../android/android.dart' as android;
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -208,7 +206,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
-      'flutterRootUri': path.toUri(path.absolute(Cache.flutterRoot)).toString(),
+      'flutterRootUri': fs.path.toUri(fs.path.absolute(Cache.flutterRoot)).toString(),
     };
   }
 
