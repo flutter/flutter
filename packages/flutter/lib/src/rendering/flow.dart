@@ -180,7 +180,7 @@ class RenderFlow extends RenderBox
   /// [isRepaintBounday].
   RenderFlow({
     List<RenderBox> children,
-    FlowDelegate delegate
+    @required FlowDelegate delegate
   }) : _delegate = delegate {
     assert(delegate != null);
     addAll(children);

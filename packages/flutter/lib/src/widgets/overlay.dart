@@ -386,7 +386,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 class _Theatre extends RenderObjectWidget {
   _Theatre({
     this.onstage,
-    this.offstage,
+    @required this.offstage,
   }) {
     assert(offstage != null);
     assert(!offstage.any((Widget child) => child == null));

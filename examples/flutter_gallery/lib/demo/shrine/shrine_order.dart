@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../shrine_demo.dart' show ShrinePageRoute;
@@ -11,7 +12,12 @@ import 'shrine_types.dart';
 
 // Displays the product title's, description, and order quantity dropdown.
 class _ProductItem extends StatelessWidget {
-  _ProductItem({ Key key, this.product, this.quantity, this.onChanged }) : super(key: key) {
+  _ProductItem({
+    Key key,
+    @required this.product,
+    @required this.quantity,
+    @required this.onChanged,
+  }) : super(key: key) {
     assert(product != null);
     assert(quantity != null);
     assert(onChanged != null);
@@ -64,7 +70,7 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  _VendorItem({ Key key, this.vendor }) : super(key: key) {
+  _VendorItem({ Key key, @required this.vendor }) : super(key: key) {
     assert(vendor != null);
   }
 
@@ -135,7 +141,12 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 // Describes a product and vendor in detail, supports specifying
 // a order quantity (0-5). Appears at the top of the OrderPage.
 class _Heading extends StatelessWidget {
-  _Heading({ Key key, this.product, this.quantity, this.quantityChanged }) : super(key: key) {
+  _Heading({
+    Key key,
+    @required this.product,
+    @required this.quantity,
+    this.quantityChanged,
+  }) : super(key: key) {
     assert(product != null);
     assert(quantity != null && quantity >= 0 && quantity <= 5);
   }
@@ -197,7 +208,12 @@ class _Heading extends StatelessWidget {
 }
 
 class OrderPage extends StatefulWidget {
-  OrderPage({ Key key, this.order, this.products, this.shoppingCart }) : super(key: key) {
+  OrderPage({
+    Key key,
+    @required this.order,
+    @required this.products,
+    @required this.shoppingCart,
+  }) : super(key: key) {
     assert(order != null);
     assert(products != null && products.isNotEmpty);
     assert(shoppingCart != null);

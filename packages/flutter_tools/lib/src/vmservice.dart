@@ -8,6 +8,7 @@ import 'dart:convert' show BASE64;
 import 'package:file/file.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:meta/meta.dart' show required;
 import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -680,8 +681,8 @@ class VM extends ServiceObjectOwner {
 
   // Write one file into a file system.
   Future<Map<String, dynamic>> writeDevFSFile(String fsName, {
-    String path,
-    List<int> fileContents
+    @required String path,
+    @required List<int> fileContents
   }) {
     assert(path != null);
     assert(fileContents != null);

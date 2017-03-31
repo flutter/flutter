@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -117,7 +118,7 @@ class DrawerController extends StatefulWidget {
   /// The [child] argument must not be null and is typically a [Drawer].
   DrawerController({
     GlobalKey key,
-    this.child
+    @required this.child
   }) : super(key: key) {
     assert(child != null);
   }

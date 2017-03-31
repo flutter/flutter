@@ -81,7 +81,7 @@ class SnackBarAction extends StatefulWidget {
   /// The [label] and [onPressed] arguments must be non-null.
   SnackBarAction({
     Key key,
-    this.label,
+    @required this.label,
     @required this.onPressed
   }) : super(key: key) {
     assert(label != null);

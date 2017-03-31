@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 const double kColorItemHeight = 48.0;
@@ -41,7 +42,12 @@ final List<Palette> allPalettes = <Palette>[
 
 
 class ColorItem extends StatelessWidget {
-  ColorItem({ Key key, this.index, this.color, this.prefix: '' }) : super(key: key) {
+  ColorItem({
+    Key key,
+    @required this.index,
+    @required this.color,
+    this.prefix: '',
+  }) : super(key: key) {
     assert(index != null);
     assert(color != null);
     assert(prefix != null);

@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
@@ -68,7 +69,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   /// and [maintainState] arguments must not be null.
   PageRouteBuilder({
     RouteSettings settings: const RouteSettings(),
-    this.pageBuilder,
+    @required this.pageBuilder,
     this.transitionsBuilder: _defaultTransitionsBuilder,
     this.transitionDuration: const Duration(milliseconds: 300),
     this.opaque: true,

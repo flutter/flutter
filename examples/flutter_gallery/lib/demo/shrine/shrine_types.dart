@@ -4,6 +4,8 @@
 
 import 'dart:ui' show hashValues;
 
+import 'package:flutter/foundation.dart';
+
 class Vendor {
   const Vendor({
     this.name,
@@ -64,7 +66,7 @@ class Product {
 }
 
 class Order {
-  Order({ this.product, this.quantity: 1, this.inCart: false }) {
+  Order({ @required this.product, this.quantity: 1, this.inCart: false }) {
     assert(product != null);
     assert(quantity != null && quantity >= 0);
     assert(inCart != null);

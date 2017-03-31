@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'sections.dart';
@@ -10,7 +11,7 @@ const double kSectionIndicatorWidth = 32.0;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
-  SectionCard({ Key key, this.section }) : super(key: key) {
+  SectionCard({ Key key, @required this.section }) : super(key: key) {
     assert(section != null);
   }
 
@@ -60,7 +61,12 @@ class SectionTitle extends StatelessWidget {
     color: const Color(0x19000000),
   );
 
-  SectionTitle({ Key key, this.section, this.scale, this.opacity }) : super(key: key) {
+  SectionTitle({
+    Key key,
+    @required this.section,
+    @required this.scale,
+    @required this.opacity,
+  }) : super(key: key) {
     assert(section != null);
     assert(scale != null);
     assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
@@ -115,7 +121,7 @@ class SectionIndicator extends StatelessWidget {
 
 // Display a single SectionDetail.
 class SectionDetailView extends StatelessWidget {
-  SectionDetailView({ Key key, this.detail }) : super(key: key) {
+  SectionDetailView({ Key key, @required this.detail }) : super(key: key) {
     assert(detail != null && detail.imageAsset != null);
     assert((detail.imageAsset ?? detail.title) != null);
   }

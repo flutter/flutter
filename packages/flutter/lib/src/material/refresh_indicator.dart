@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'progress_indicator.dart';
@@ -81,9 +82,9 @@ class RefreshIndicator extends StatefulWidget {
   /// [displacement] is 40.0 logical pixels.
   RefreshIndicator({
     Key key,
-    this.child,
+    @required this.child,
     this.displacement: 40.0,
-    this.onRefresh,
+    @required this.onRefresh,
     this.color,
     this.backgroundColor
   }) : super(key: key) {

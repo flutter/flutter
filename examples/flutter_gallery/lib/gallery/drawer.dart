@@ -4,7 +4,7 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart' show defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, required;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -90,9 +90,9 @@ class GalleryDrawer extends StatelessWidget {
   GalleryDrawer({
     Key key,
     this.useLightTheme,
-    this.onThemeChanged,
+    @required this.onThemeChanged,
     this.timeDilation,
-    this.onTimeDilationChanged,
+    @required this.onTimeDilationChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,

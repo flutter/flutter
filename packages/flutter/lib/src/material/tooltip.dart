@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 
@@ -42,12 +43,12 @@ class Tooltip extends StatefulWidget {
   /// The [message] argument cannot be null.
   Tooltip({
     Key key,
-    this.message,
+    @required this.message,
     this.height: 32.0,
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
-    this.child,
+    @required this.child,
   }) : super(key: key) {
     assert(message != null);
     assert(height != null);

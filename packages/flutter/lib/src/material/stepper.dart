@@ -131,7 +131,7 @@ class Stepper extends StatefulWidget {
   /// The [steps], [type], and [currentStep] arguments must not be null.
   Stepper({
     Key key,
-    this.steps,
+    @required this.steps,
     this.type: StepperType.vertical,
     this.currentStep: 0,
     this.onStepTapped,

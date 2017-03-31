@@ -24,10 +24,10 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// The [value], [activeColor], and [inactiveColor] arguments must not be
   /// null.
   RenderToggleable({
-    bool value,
+    @required bool value,
     Size size,
-    Color activeColor,
-    Color inactiveColor,
+    @required Color activeColor,
+    @required Color inactiveColor,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
   }) : _value = value,

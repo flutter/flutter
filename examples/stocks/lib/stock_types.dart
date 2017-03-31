@@ -2,21 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 enum StockMode { optimistic, pessimistic }
 enum BackupMode { enabled, disabled }
 
 class StockConfiguration {
   StockConfiguration({
-    this.stockMode,
-    this.backupMode,
-    this.debugShowGrid,
-    this.debugShowSizes,
-    this.debugShowBaselines,
-    this.debugShowLayers,
-    this.debugShowPointers,
-    this.debugShowRainbow,
-    this.showPerformanceOverlay,
-    this.showSemanticsDebugger
+    @required this.stockMode,
+    @required this.backupMode,
+    @required this.debugShowGrid,
+    @required this.debugShowSizes,
+    @required this.debugShowBaselines,
+    @required this.debugShowLayers,
+    @required this.debugShowPointers,
+    @required this.debugShowRainbow,
+    @required this.showPerformanceOverlay,
+    @required this.showSemanticsDebugger
   }) {
     assert(stockMode != null);
     assert(backupMode != null);

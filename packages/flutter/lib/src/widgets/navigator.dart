@@ -825,7 +825,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// This can be useful in combination with [removeRouteBelow] when building a
   /// non-linear user experience.
-  void replace({ Route<dynamic> oldRoute, Route<dynamic> newRoute }) {
+  void replace({ @required Route<dynamic> oldRoute, @required Route<dynamic> newRoute }) {
     assert(!_debugLocked);
     assert(oldRoute != null);
     assert(newRoute != null);
@@ -919,7 +919,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// route must not be the first route in the history.
   ///
   /// In every other way, this acts the same as [replace].
-  void replaceRouteBelow({ Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
+  void replaceRouteBelow({ @required Route<dynamic> anchorRoute, Route<dynamic> newRoute }) {
     assert(anchorRoute != null);
     assert(anchorRoute._navigator == this);
     assert(_history.indexOf(anchorRoute) > 0);

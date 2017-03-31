@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'drawer.dart';
@@ -68,9 +69,9 @@ class GalleryHome extends StatefulWidget {
   GalleryHome({
     Key key,
     this.useLightTheme,
-    this.onThemeChanged,
+    @required this.onThemeChanged,
     this.timeDilation,
-    this.onTimeDilationChanged,
+    @required this.onTimeDilationChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,

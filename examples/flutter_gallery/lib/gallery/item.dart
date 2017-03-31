@@ -4,6 +4,7 @@
 
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../demo/all.dart';
@@ -11,7 +12,13 @@ import '../demo/all.dart';
 typedef Widget GalleryDemoBuilder();
 
 class GalleryItem extends StatelessWidget {
-  GalleryItem({ this.title, this.subtitle, this.category, this.routeName, this.buildRoute }) {
+  GalleryItem({
+    @required this.title,
+    this.subtitle,
+    @required this.category,
+    @required this.routeName,
+    @required this.buildRoute,
+  }) {
     assert(title != null);
     assert(category != null);
     assert(routeName != null);

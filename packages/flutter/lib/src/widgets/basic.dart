@@ -2314,7 +2314,7 @@ class Flow extends MultiChildRenderObjectWidget {
   /// The [delegate] argument must not be null.
   Flow.unwrapped({
     Key key,
-    this.delegate,
+    @required this.delegate,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children) {
     assert(delegate != null);

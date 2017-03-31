@@ -286,7 +286,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.selectedIndex,
     this.elevation: 8,
     this.theme,
-    this.style,
+    @required this.style,
   }) {
     assert(style != null);
   }
@@ -336,7 +336,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   DropdownMenuItem({
     Key key,
     this.value,
-    this.child,
+    @required this.child,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -372,7 +372,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   /// be given.
   DropdownButtonHideUnderline({
     Key key,
-    Widget child,
+    @required Widget child,
   }) : super(key: key, child: child) {
     assert(child != null);
   }
