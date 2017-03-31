@@ -4,7 +4,7 @@
 
 import 'dart:ui' show Color, Size, Rect;
 
-import 'package:flutter/foundation.dart' show required;
+import 'package:flutter/foundation.dart';
 
 import 'animation.dart';
 import 'animations.dart';

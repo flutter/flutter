@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show required;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'test_async_utils.dart';

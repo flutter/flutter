@@ -793,9 +793,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 ///  * [showDatePicker]
 ///  * <https://material.google.com/components/pickers.html#pickers-time-pickers>
 Future<TimeOfDay> showTimePicker({
-  BuildContext context,
+  @required BuildContext context,
   @required TimeOfDay initialTime
 }) async {
+  assert(context != null);
   assert(initialTime != null);
   return await showDialog(
     context: context,

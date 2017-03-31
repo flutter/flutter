@@ -4,7 +4,7 @@
 
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart' show required;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../demo/all.dart';

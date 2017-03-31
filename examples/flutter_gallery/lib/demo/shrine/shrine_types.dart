@@ -4,7 +4,7 @@
 
 import 'dart:ui' show hashValues;
 
-import 'package:flutter/foundation.dart' show required;
+import 'package:flutter/foundation.dart';
 
 class Vendor {
   const Vendor({
