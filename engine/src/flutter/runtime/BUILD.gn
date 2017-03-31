@@ -102,10 +102,6 @@ source_set("runtime") {
     deps += [ "//lib/tonic/debugger" ]
   }
 
-  if (is_android) {
-    deps += [ "//flutter/lib/jni" ]
-  }
-
   # On iOS (device), precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no generic snapshot.

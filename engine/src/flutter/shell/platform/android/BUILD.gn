@@ -38,7 +38,6 @@ shared_library("flutter_shell_native") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/fml",
-    "//flutter/lib/jni",
     "//flutter/lib/ui",
     "//flutter/runtime",
     "//flutter/shell/common",

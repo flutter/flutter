@@ -20,10 +20,6 @@ static void Init(JNIEnv* env,
                  jclass clazz,
                  jobject context,
                  jobjectArray jargs) {
-  fml::jni::ScopedJavaLocalRef<jobject> scoped_context(
-      env, env->NewLocalRef(context));
-  fml::jni::InitAndroidApplicationContext(scoped_context);
-
   // Prepare command line arguments and initialize the shell.
   std::vector<std::string> args;
   args.push_back("flutter_tester");

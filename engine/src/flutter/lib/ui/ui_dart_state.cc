@@ -8,10 +8,6 @@
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "lib/tonic/converter/dart_converter.h"
 
-#if defined(OS_ANDROID)
-#include "flutter/lib/jni/dart_jni.h"
-#endif
-
 using tonic::ToDart;
 
 namespace blink {
@@ -22,11 +18,7 @@ UIDartState::UIDartState(IsolateClient* isolate_client,
                          std::unique_ptr<Window> window)
     : isolate_client_(isolate_client),
       main_port_(ILLEGAL_PORT),
-      window_(std::move(window)) {
-#ifdef OS_ANDROID
-  jni_data_.reset(new DartJniIsolateData());
-#endif
-}
+      window_(std::move(window)) {}
 
 UIDartState::~UIDartState() {
   main_port_ = ILLEGAL_PORT;
@@ -53,12 +45,6 @@ void UIDartState::DidSetIsolate() {
 UIDartState* UIDartState::Current() {
   return static_cast<UIDartState*>(DartState::Current());
 }
-
-#if defined(OS_ANDROID)
-DartJniIsolateData* UIDartState::jni_data() {
-  return jni_data_.get();
-}
-#endif  // defined(OS_ANDROID)
 
 void UIDartState::set_font_selector(PassRefPtr<FontSelector> selector) {
   font_selector_ = selector;

@@ -14,7 +14,6 @@
 #include "lib/tonic/dart_state.h"
 
 namespace blink {
-struct DartJniIsolateData;
 class FontSelector;
 class Window;
 
@@ -40,10 +39,6 @@ class UIDartState : public tonic::DartState {
   const std::string& debug_name() const { return debug_name_; }
   Window* window() const { return window_.get(); }
 
-#if defined(OS_ANDROID)
-  DartJniIsolateData* jni_data();
-#endif
-
   void set_font_selector(PassRefPtr<FontSelector> selector);
   PassRefPtr<FontSelector> font_selector();
 
@@ -55,10 +50,6 @@ class UIDartState : public tonic::DartState {
   std::string debug_name_;
   std::unique_ptr<Window> window_;
   RefPtr<FontSelector> font_selector_;
-
-#if defined(OS_ANDROID)
-  std::unique_ptr<DartJniIsolateData> jni_data_;
-#endif
 };
 
 }  // namespace blink

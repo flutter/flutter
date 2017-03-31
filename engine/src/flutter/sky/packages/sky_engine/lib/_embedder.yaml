@@ -6,7 +6,6 @@ embedded_libs:
   "dart:developer": "../dart_sdk/developer/developer.dart"
   "dart:io": "../dart_sdk/io/io.dart"
   "dart:isolate": "../dart_sdk/isolate/isolate.dart"
-  "dart:jni": "../dart_jni/jni.dart"
   "dart:math": "../dart_sdk/math/math.dart"
   "dart:typed_data": "../dart_sdk/typed_data/typed_data.dart"
   "dart:ui": "../dart_ui/ui.dart"

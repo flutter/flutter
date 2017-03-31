@@ -84,11 +84,4 @@ source_set("ui") {
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
-
-  if (is_android) {
-    deps += [
-      # TODO(abarth): In principle, these libraries should be fully independent.
-      "//flutter/lib/jni",
-    ]
-  }
 }
