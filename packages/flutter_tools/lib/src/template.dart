@@ -116,7 +116,9 @@ class Template {
 
       if (sourceFile.path.endsWith(_kTemplateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents = new mustache.Template(templateContents).renderString(context);
+        final mustache.Template mustacheTemplate = new mustache.Template(
+          templateContents, htmlEscapeValues: false);
+        final String renderedContents = mustacheTemplate.renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 
