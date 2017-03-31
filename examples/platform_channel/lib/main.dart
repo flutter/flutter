@@ -13,28 +13,24 @@ class PlatformChannel extends StatefulWidget {
 }
 
 class _PlatformChannelState extends State<PlatformChannel> {
-    static const PlatformMethodChannel methodChannel =
-        const PlatformMethodChannel('io.flutter.samples/battery');
-    static const PlatformEventChannel eventChannel =
-        const PlatformEventChannel('io.flutter.samples/charging');
+  static const PlatformMethodChannel methodChannel =
+      const PlatformMethodChannel('io.flutter.samples/battery');
+  static const PlatformEventChannel eventChannel =
+      const PlatformEventChannel('io.flutter.samples/charging');
 
-    
-  String _batteryLevel = 'Battery level unknown';
-  String _chargingStatus = '';
-  String _buttonText = 'Refresh';
+  String _batteryLevel = 'Battery level: unknown.';
+  String _chargingStatus = 'Battery status: unknown.';
 
   Future<Null> _getBatteryLevel() async {
     String batteryLevel;
     try {
       final int result = await methodChannel.invokeMethod('getBatteryLevel');
-      batteryLevel = 'Battery level at $result% .';
-
+      batteryLevel = 'Battery level: $result%.';
     } on PlatformException catch (e) {
       batteryLevel = "Failed to get battery level.";
     }
     setState(() {
       _batteryLevel = batteryLevel;
-      _buttonText = 'Refresh';
     });
   }
 
@@ -46,43 +42,38 @@ class _PlatformChannelState extends State<PlatformChannel> {
 
   void _onEvent(String event) {
     setState(() {
-      _chargingStatus = " ${event == 'charging' ? '' : 'dis'}charging.";
+      _chargingStatus =
+          "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
     });
   }
 
   void _onError(PlatformException error) {
     setState(() {
-      _chargingStatus = " unknown.";
+      _chargingStatus = "Battery status: unknown.";
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return new Material(
-      child: new Center(
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: <Widget>[
-                new RaisedButton(
-                  child: new Text(_buttonText),
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              new Text(_batteryLevel, key: new Key('Battery level label')),
+              new Padding(
+                padding: new EdgeInsets.all(15.0),
+                child: new RaisedButton(
+                  child: new Text('Refresh'),
                   onPressed: _getBatteryLevel,
                 ),
-                new Text(_batteryLevel, key: new Key('Battery level label')),
-              ],
-            ),
-            new SizedBox(height: 32.0),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                new Text("Battery status:"),
-                new Text(_chargingStatus),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          new Text(_chargingStatus),
+        ],
       ),
     );
   }
