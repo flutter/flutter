@@ -39,51 +39,12 @@
 #include "HbFontCache.h"
 #include "LayoutUtils.h"
 #include "MinikinInternal.h"
-#include <minikin/MinikinFontFreeType.h>
 #include <minikin/Layout.h>
 
 using std::string;
 using std::vector;
 
 namespace minikin {
-
-Bitmap::Bitmap(int width, int height) : width(width), height(height) {
-    buf = new uint8_t[width * height]();
-}
-
-Bitmap::~Bitmap() {
-    delete[] buf;
-}
-
-void Bitmap::writePnm(std::ofstream &o) const {
-    o << "P5" << std::endl;
-    o << width << " " << height << std::endl;
-    o << "255" << std::endl;
-    o.write((const char *)buf, width * height);
-    o.close();
-}
-
-void Bitmap::drawGlyph(const GlyphBitmap& bitmap, int x, int y) {
-    int bmw = bitmap.width;
-    int bmh = bitmap.height;
-    x += bitmap.left;
-    y -= bitmap.top;
-    int x0 = std::max(0, x);
-    int x1 = std::min(width, x + bmw);
-    int y0 = std::max(0, y);
-    int y1 = std::min(height, y + bmh);
-    const unsigned char* src = bitmap.buffer + (y0 - y) * bmw + (x0 - x);
-    uint8_t* dst = buf + y0 * width;
-    for (int yy = y0; yy < y1; yy++) {
-        for (int xx = x0; xx < x1; xx++) {
-            int pixel = (int)dst[xx] + (int)src[xx - x];
-            pixel = pixel > 0xff ? 0xff : pixel;
-            dst[xx] = pixel;
-        }
-        src += bmw;
-        dst += width;
-    }
-}
 
 const int kDirection_Mask = 0x1;
 
@@ -1088,34 +1049,6 @@ void Layout::appendLayout(Layout* src, size_t start, float extraAdvance) {
 
     if (fontMap != fontMapStack) {
         delete[] fontMap;
-    }
-}
-
-void Layout::draw(minikin::Bitmap* surface, int x0, int y0, float size) const {
-    /*
-    TODO: redo as MinikinPaint settings
-    if (mProps.hasTag(minikinHinting)) {
-        int hintflags = mProps.value(minikinHinting).getIntValue();
-        if (hintflags & 1) load_flags |= FT_LOAD_NO_HINTING;
-        if (hintflags & 2) load_flags |= FT_LOAD_NO_AUTOHINT;
-    }
-    */
-    for (size_t i = 0; i < mGlyphs.size(); i++) {
-        const LayoutGlyph& glyph = mGlyphs[i];
-        MinikinFont* mf = mFaces[glyph.font_ix].font;
-        MinikinFontFreeType* face = static_cast<MinikinFontFreeType*>(mf);
-        GlyphBitmap glyphBitmap;
-        MinikinPaint paint;
-        paint.size = size;
-        bool ok = face->Render(glyph.glyph_id, paint, &glyphBitmap);
-#ifdef VERBOSE_DEBUG
-        ALOGD("glyphBitmap.width=%d, glyphBitmap.height=%d (%d, %d) x=%f, y=%f, ok=%d",
-            glyphBitmap.width, glyphBitmap.height, glyphBitmap.left, glyphBitmap.top, glyph.x, glyph.y, ok);
-#endif
-        if (ok) {
-            surface->drawGlyph(glyphBitmap,
-                x0 + int(floor(glyph.x + 0.5)), y0 + int(floor(glyph.y + 0.5)));
-        }
     }
 }
 
