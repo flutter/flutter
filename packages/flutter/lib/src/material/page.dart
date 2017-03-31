@@ -118,6 +118,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     // allow the user to dismiss the route with a swipe.
     if (hasScopedWillPopCallback)
       return null;
+    // Fullscreen dialogs aren't dismissable by back swipe.
     if (fullscreenDialog)
       return null;
     if (controller.status != AnimationStatus.completed)

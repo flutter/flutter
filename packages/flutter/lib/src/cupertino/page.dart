@@ -71,7 +71,7 @@ class CupertinoPageTransition extends AnimatedWidget {
         child: new PhysicalModel(
           shape: BoxShape.rectangle,
           color: _kBackgroundColor,
-          elevation: 16,
+          elevation: 32,
           child: child,
         ),
       ),

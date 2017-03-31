@@ -15,7 +15,7 @@ void main() {
           '/next': (BuildContext context) {
             return new Material(child: new Text('Page 2'));
           },
-        }
+        },
       )
     );
 
@@ -25,11 +25,12 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    final Opacity widget2Opacity =
+    Opacity widget2Opacity =
         tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
-    final Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
+    // Android transition is vertical only.
     expect(widget1TopLeft.x == widget2TopLeft.x, true);
     // Page 1 is above page 2 mid-transition.
     expect(widget1TopLeft.y < widget2TopLeft.y, true);
@@ -37,6 +38,29 @@ void main() {
     expect(widget2TopLeft.y < widget2Size.height / 4.0, true);
     // Animation starts with page 2 being near transparent.
     expect(widget2Opacity.opacity < 0.01, true);
+
+    await tester.pumpAndSettle();
+
+    // Page 2 covers page 1.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1));
+
+    widget2Opacity = tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 2 starts to move down.
+    expect(widget1TopLeft.y < widget2TopLeft.y, true);
+    // Page 2 starts to lose opacity.
+    expect(widget2Opacity.opacity < 1.0, true);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
   });
 
   testWidgets('test iOS page transition', (WidgetTester tester) async {
@@ -48,146 +72,210 @@ void main() {
           '/next': (BuildContext context) {
             return new Material(child: new Text('Page 2'));
           },
-        }
+        },
       )
     );
 
-    final Point widget1StartingTopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Point widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    final Point widget1OutgoingTopLeft = tester.getTopLeft(find.text('Page 1'));
-    final Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    Point widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 1 is moving to the left.
-    expect(widget1OutgoingTopLeft.x < widget1StartingTopLeft.x, true);
+    expect(widget1TransientTopLeft.x < widget1InitialTopLeft.x, true);
     // Page 1 isn't moving vertically.
-    expect(widget1OutgoingTopLeft.y == widget1StartingTopLeft.y, true);
-    // Page 2 animates in horizontally only.
-    expect(widget1StartingTopLeft.y == widget2TopLeft.y, true);
+    expect(widget1TransientTopLeft.y == widget1InitialTopLeft.y, true);
+    // iOS transition is horizontal only.
+    expect(widget1InitialTopLeft.y == widget2TopLeft.y, true);
     // Page 2 is coming in from the right.
-    expect(widget2TopLeft.x > widget1StartingTopLeft.x, true);
+    expect(widget2TopLeft.x > widget1InitialTopLeft.x, true);
+
+    await tester.pumpAndSettle();
+
+    // Page 2 covers page 1.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 1 is coming back from the left.
+    expect(widget1TransientTopLeft.x < widget1InitialTopLeft.x, true);
+    // Page 1 isn't moving vertically.
+    expect(widget1TransientTopLeft.y == widget1InitialTopLeft.y, true);
+    // iOS transition is horizontal only.
+    expect(widget1InitialTopLeft.y == widget2TopLeft.y, true);
+    // Page 2 is leaving towards the right.
+    expect(widget2TopLeft.x > widget1InitialTopLeft.x, true);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+
+    widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    // Page 1 is back where it started.
+    expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
   });
 
-  testWidgets('Check back gesture works on iOS', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
-    };
+  testWidgets('test iOS fullscreen dialog transition', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Material(child: new Text('Page 1')),
+      )
+    );
 
-    await tester.pumpWidget(new MaterialApp(
-      routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.iOS),
+    final Point widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Material(child: new Text('Page 2'));
+      },
+      fullscreenDialog: true,
     ));
 
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
-
     await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 100));
 
-    expect(find.text('Home'), findsNothing);
-    expect(find.text('Settings'), isOnstage);
+    Point widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 1 doesn't move.
+    expect(widget1TransientTopLeft == widget1InitialTopLeft, true);
+    // Fullscreen dialogs transitions vertically only.
+    expect(widget1InitialTopLeft.x == widget2TopLeft.x, true);
+    // Page 2 is coming in from the bottom.
+    expect(widget2TopLeft.y > widget1InitialTopLeft.y, true);
+
+    await tester.pumpAndSettle();
+
+    // Page 2 covers page 1.
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // Page 1 doesn't move.
+    expect(widget1TransientTopLeft == widget1InitialTopLeft, true);
+    // Fullscreen dialogs transitions vertically only.
+    expect(widget1InitialTopLeft.x == widget2TopLeft.x, true);
+    // Page 2 is leaving towards the bottom.
+    expect(widget2TopLeft.y > widget1InitialTopLeft.y, true);
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), findsNothing);
+
+    widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    // Page 1 is back where it started.
+    expect(widget1InitialTopLeft == widget1TransientTopLeft, true);
+  });
+
+  testWidgets('test no back gesture on Android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.android),
+        home: new Scaffold(body: new Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return new Scaffold(body: new Text('Page 2'));
+          },
+        },
+      )
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
     final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
-    await gesture.moveBy(const Offset(50.0, 0.0));
-    await tester.pump();
+    await gesture.moveBy(const Offset(400.0, 0.0));
+    await tester.pumpAndSettle();
 
-    // Home is now visible.
-    expect(find.text('Home'), isOnstage);
-    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    // Page 2 didn't move
+    expect(tester.getTopLeft(find.text('Page 2')), Point.origin);
   });
 
-  testWidgets('Check back gesture does nothing on android', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
-    };
+  testWidgets('test back gesture on iOS', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Scaffold(body: new Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return new Scaffold(body: new Text('Page 2'));
+          },
+        },
+      )
+    );
 
-    await tester.pumpWidget(new MaterialApp(
-      routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.android),
-    ));
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pumpAndSettle();
 
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.text('Home'), findsNothing);
-    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
     final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
-    await gesture.moveBy(const Offset(50.0, 0.0));
-    await tester.pump();
+    await gesture.moveBy(const Offset(400.0, 0.0));
+    await tester.pumpAndSettle();
 
-    expect(find.text('Home'), findsNothing);
-    expect(find.text('Settings'), isOnstage);
+    // Page 1 is now visible.
+    expect(find.text('Page 1'), isOnstage);
+    expect(find.text('Page 2'), isOnstage);
   });
 
-  testWidgets('Check page transition positioning on iOS', (WidgetTester tester) async {
-    final GlobalKey containerKey1 = new GlobalKey();
-    final GlobalKey containerKey2 = new GlobalKey();
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
-    };
+  testWidgets('test no back gesture on iOS fullscreen dialogs', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Scaffold(body: new Text('Page 1')),
+      )
+    );
 
-    await tester.pumpWidget(new MaterialApp(
-      routes: routes,
-      theme: new ThemeData(platform: TargetPlatform.iOS),
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+      builder: (BuildContext context) {
+        return new Scaffold(body: new Text('Page 2'));
+      },
+      fullscreenDialog: true,
     ));
+    await tester.pumpAndSettle();
 
-    Navigator.pushNamed(containerKey1.currentContext, '/settings');
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
 
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 16));
+    // Drag from left edge to invoke the gesture.
+    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    await gesture.moveBy(const Offset(400.0, 0.0));
+    await tester.pumpAndSettle();
 
-    expect(find.text('Home'), isOnstage);
-    expect(find.text('Settings'), isOnstage);
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
 
-    // Home page is staying in place.
-    Point homeOffset = tester.getTopLeft(find.text('Home'));
-    expect(homeOffset.x, 0.0);
-    expect(homeOffset.y, 0.0);
-
-    // Settings page is sliding up from the bottom.
-    Point settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, 0.0);
-    expect(settingsOffset.y, greaterThan(0.0));
-
-    await tester.pump(const Duration(seconds: 1));
-
-    expect(find.text('Home'), findsNothing);
-    expect(find.text('Settings'), isOnstage);
-
-    // Settings page is in position.
-    settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, 0.0);
-    expect(settingsOffset.y, 0.0);
-
-    Navigator.pop(containerKey1.currentContext);
-
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 16));
-
-    // Home page is staying in place.
-    homeOffset = tester.getTopLeft(find.text('Home'));
-    expect(homeOffset.x, 0.0);
-    expect(homeOffset.y, 0.0);
-
-    // Settings page is sliding down off the bottom.
-    settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, 0.0);
-    expect(settingsOffset.y, greaterThan(0.0));
-
-    await tester.pump(const Duration(seconds: 1));
+    // Page 2 didn't move
+    expect(tester.getTopLeft(find.text('Page 2')), Point.origin);
   });
 }
