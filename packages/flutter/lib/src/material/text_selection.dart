@@ -20,7 +20,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
 
   final TextSelectionDelegate delegate;
-  InputValue get value => delegate.inputValue;
+  TextEditingValue get value => delegate.textEditingValue;
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +51,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   void _handleCut() {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.selection.textBefore(value.text) + value.selection.textAfter(value.text),
       selection: new TextSelection.collapsed(offset: value.selection.start)
     );
@@ -60,7 +60,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 
   void _handleCopy() {
     Clipboard.setData(new ClipboardData(text: value.selection.textInside(value.text)));
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.text,
       selection: new TextSelection.collapsed(offset: value.selection.end)
     );
@@ -68,10 +68,10 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   Future<Null> _handlePaste() async {
-    final InputValue value = this.value;  // Snapshot the input before using `await`.
+    final TextEditingValue value = this.value;  // Snapshot the input before using `await`.
     final ClipboardData data = await Clipboard.getData(Clipboard.kTextPlain);
     if (data != null) {
-      delegate.inputValue = new InputValue(
+      delegate.textEditingValue = new TextEditingValue(
         text: value.selection.textBefore(value.text) + data.text + value.selection.textAfter(value.text),
         selection: new TextSelection.collapsed(offset: value.selection.start + data.text.length)
       );
@@ -80,7 +80,7 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 
   void _handleSelectAll() {
-    delegate.inputValue = new InputValue(
+    delegate.textEditingValue = new TextEditingValue(
       text: value.text,
       selection: new TextSelection(baseOffset: 0, extentOffset: value.text.length)
     );
@@ -196,4 +196,4 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
-final _MaterialTextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();
+final TextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();

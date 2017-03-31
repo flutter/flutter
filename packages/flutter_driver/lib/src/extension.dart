@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -262,20 +263,29 @@ class FlutterDriverExtension {
     return new ScrollResult();
   }
 
+  Finder _findEditableText(SerializableFinder finder) {
+    return find.descendant(of: _createFinder(finder), matching: find.byType(EditableText));
+  }
+
+  EditableTextState _getEditableTextState(Finder finder) {
+    final StatefulElement element = finder.evaluate().single;
+    return element.state;
+  }
+
   Future<SetInputTextResult> _setInputText(Command command) async {
     final SetInputText setInputTextCommand = command;
-    final Finder target = await _waitForElement(_createFinder(setInputTextCommand.finder));
-    final Input input = target.evaluate().single.widget;
-    input.onChanged(new InputValue(text: setInputTextCommand.text));
+    final Finder target = await _waitForElement(_findEditableText(setInputTextCommand.finder));
+    final EditableTextState editable = _getEditableTextState(target);
+    editable.updateEditingValue(new TextEditingValue(text: setInputTextCommand.text));
     return new SetInputTextResult();
   }
 
   Future<SubmitInputTextResult> _submitInputText(Command command) async {
     final SubmitInputText submitInputTextCommand = command;
-    final Finder target = await _waitForElement(_createFinder(submitInputTextCommand.finder));
-    final Input input = target.evaluate().single.widget;
-    input.onSubmitted(input.value);
-    return new SubmitInputTextResult(input.value.text);
+    final Finder target = await _waitForElement(_findEditableText(submitInputTextCommand.finder));
+    final EditableTextState editable = _getEditableTextState(target);
+    editable.performAction(TextInputAction.done);
+    return new SubmitInputTextResult(editable.config.controller.value.text);
   }
 
   Future<GetTextResult> _getText(Command command) async {

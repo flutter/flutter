@@ -261,8 +261,8 @@ final List<GalleryItem> kAllGalleryItems = <GalleryItem>[
     title: 'Text fields',
     subtitle: 'Single line of editable text and numbers',
     category: 'Material Components',
-    routeName: TextFieldDemo.routeName,
-    buildRoute: (BuildContext context) => new TextFieldDemo(),
+    routeName: TextFormFieldDemo.routeName,
+    buildRoute: (BuildContext context) => new TextFormFieldDemo(),
   ),
   new GalleryItem(
     title: 'Tooltips',

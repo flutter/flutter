@@ -29,22 +29,22 @@ class _NotImplementedDialog extends StatelessWidget {
             children: <Widget>[
               new Icon(
                 Icons.dvr,
-                size: 18.0
+                size: 18.0,
               ),
               new Container(
-                width: 8.0
+                width: 8.0,
               ),
               new Text('DUMP APP TO CONSOLE'),
-            ]
-          )
+            ],
+          ),
         ),
         new FlatButton(
           onPressed: () {
             Navigator.pop(context, false);
           },
-          child: new Text('OH WELL')
-        )
-      ]
+          child: new Text('OH WELL'),
+        ),
+      ],
     );
   }
 }
@@ -65,7 +65,7 @@ class StockHomeState extends State<StockHome> {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   bool _isSearching = false;
-  InputValue _searchQuery = InputValue.empty;
+  final TextEditingController _searchQuery = new TextEditingController();
   bool _autorefresh = false;
 
   void _handleSearchBegin() {
@@ -73,9 +73,9 @@ class StockHomeState extends State<StockHome> {
       onRemove: () {
         setState(() {
           _isSearching = false;
-          _searchQuery = InputValue.empty;
+          _searchQuery.clear();
         });
-      }
+      },
     ));
     setState(() {
       _isSearching = true;
@@ -84,12 +84,6 @@ class StockHomeState extends State<StockHome> {
 
   void _handleSearchEnd() {
     Navigator.pop(context);
-  }
-
-  void _handleSearchQueryChanged(InputValue query) {
-    setState(() {
-      _searchQuery = query;
-    });
   }
 
   void _handleStockModeChange(StockMode value) {
@@ -155,7 +149,7 @@ class StockHomeState extends State<StockHome> {
             trailing: new Radio<StockMode>(
               value: StockMode.optimistic,
               groupValue: config.configuration.stockMode,
-              onChanged: _handleStockModeChange
+              onChanged: _handleStockModeChange,
             ),
             onTap: () {
               _handleStockModeChange(StockMode.optimistic);
@@ -167,7 +161,7 @@ class StockHomeState extends State<StockHome> {
             trailing: new Radio<StockMode>(
               value: StockMode.pessimistic,
               groupValue: config.configuration.stockMode,
-              onChanged: _handleStockModeChange
+              onChanged: _handleStockModeChange,
             ),
             onTap: () {
               _handleStockModeChange(StockMode.pessimistic);
@@ -184,8 +178,8 @@ class StockHomeState extends State<StockHome> {
             title: new Text('About'),
             onTap: _handleShowAbout,
           ),
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -205,7 +199,7 @@ class StockHomeState extends State<StockHome> {
         new IconButton(
           icon: new Icon(Icons.search),
           onPressed: _handleSearchBegin,
-          tooltip: 'Search'
+          tooltip: 'Search',
         ),
         new PopupMenuButton<_StockMenuItem>(
           onSelected: (_StockMenuItem value) { _handleStockMenu(context, value); },
@@ -213,29 +207,29 @@ class StockHomeState extends State<StockHome> {
             new CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
               checked: _autorefresh,
-              child: new Text('Autorefresh')
+              child: new Text('Autorefresh'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
-              child: new Text('Refresh')
+              child: new Text('Refresh'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
-              child: new Text('Increase animation speed')
+              child: new Text('Increase animation speed'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
-              child: new Text('Decrease animation speed')
-            )
-          ]
-        )
+              child: new Text('Decrease animation speed'),
+            ),
+          ],
+        ),
       ],
       bottom: new TabBar(
         tabs: <Widget>[
           new Tab(text: StockStrings.of(context).market()),
           new Tab(text: StockStrings.of(context).portfolio()),
-        ]
-      )
+        ],
+      ),
     );
   }
 
@@ -262,8 +256,8 @@ class StockHomeState extends State<StockHome> {
         label: "BUY MORE",
         onPressed: () {
           _buyStock(stock);
-        }
-      )
+        },
+      ),
     ));
   }
 
@@ -276,14 +270,14 @@ class StockHomeState extends State<StockHome> {
       },
       onShow: (Stock stock) {
         _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
-      }
+      },
     );
   }
 
   Widget _buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
     return new Container(
       key: new ValueKey<StockHomeTab>(tab),
-      child: _buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList(), tab)
+      child: _buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList(), tab),
     );
   }
 
@@ -296,21 +290,23 @@ class StockHomeState extends State<StockHome> {
         icon: new Icon(Icons.arrow_back),
         color: Theme.of(context).accentColor,
         onPressed: _handleSearchEnd,
-        tooltip: 'Back'
+        tooltip: 'Back',
       ),
       title: new TextField(
+        controller: _searchQuery,
         autofocus: true,
-        hintText: 'Search stocks',
-        onChanged: _handleSearchQueryChanged
+        decoration: const InputDecoration(
+          hintText: 'Search stocks',
+        ),
       ),
-      backgroundColor: Theme.of(context).canvasColor
+      backgroundColor: Theme.of(context).canvasColor,
     );
   }
 
   void _handleCreateCompany() {
     showModalBottomSheet<Null>(
       context: context,
-      builder: (BuildContext context) => new _CreateCompanySheet()
+      builder: (BuildContext context) => new _CreateCompanySheet(),
     );
   }
 
@@ -319,7 +315,7 @@ class StockHomeState extends State<StockHome> {
       tooltip: 'Create company',
       child: new Icon(Icons.add),
       backgroundColor: Colors.redAccent,
-      onPressed: _handleCreateCompany
+      onPressed: _handleCreateCompany,
     );
   }
 
@@ -336,9 +332,9 @@ class StockHomeState extends State<StockHome> {
           children: <Widget>[
             _buildStockTab(context, StockHomeTab.market, config.symbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
-          ]
-        )
-      )
+          ],
+        ),
+      ),
     );
   }
 }
@@ -351,9 +347,11 @@ class _CreateCompanySheet extends StatelessWidget {
       children: <Widget>[
         new TextField(
           autofocus: true,
-          hintText: 'Company Name',
+          decoration: const InputDecoration(
+            hintText: 'Company Name',
+          ),
         ),
-      ]
+      ],
     );
   }
 }
