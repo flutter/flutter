@@ -12,31 +12,38 @@ const double _kMinFlingVelocity = 1.0;  // screen width per second
 
 // Used for Android and Fuchsia.
 class _MountainViewPageTransition extends AnimatedWidget {
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft,
-    end: FractionalOffset.topLeft
-  );
-
   _MountainViewPageTransition({
     Key key,
-    Animation<double> animation,
+    this.routeAnimation,
     this.child,
   }) : super(
     key: key,
     listenable: _kTween.animate(new CurvedAnimation(
-      parent: animation, // The route's linear 0.0 - 1.0 animation.
+      parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
       curve: Curves.fastOutSlowIn
     )
   ));
 
+  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
+    begin: const FractionalOffset(0.0, 0.25),
+    end: FractionalOffset.topLeft
+  );
+
   final Widget child;
+  final Animation<double> routeAnimation;
 
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
       position: listenable,
-      child: child
+      child: new FadeTransition(
+        opacity: new CurvedAnimation(
+          parent: routeAnimation,
+          curve: Curves.easeIn, // Eyeballed from other Material apps.
+        ),
+        child: child,
+      ),
     );
   }
 }
@@ -272,7 +279,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       );
     } else {
       return new _MountainViewPageTransition(
-        animation: animation,
+        routeAnimation: animation,
         child: child
       );
     }
