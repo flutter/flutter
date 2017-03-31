@@ -33,13 +33,11 @@ minikin_src_files := \
     Measurement.cpp \
     MinikinInternal.cpp \
     MinikinFont.cpp \
-    MinikinFontFreeType.cpp \
     SparseBitSet.cpp \
     WordBreaker.cpp
 
 minikin_c_includes := \
     external/harfbuzz_ng/src \
-    external/freetype/include \
     frameworks/minikin/include \
     $(intermediates)
 
