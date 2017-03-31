@@ -76,12 +76,9 @@ class MessageLoopImpl : public ftl::RefCountedThreadSafe<MessageLoopImpl> {
   size_t order_ FTL_GUARDED_BY(delayed_tasks_mutex_);
   std::atomic_bool terminated_;
 
-  FTL_WARN_UNUSED_RESULT
-  ftl::TimePoint RegisterTaskAndGetNextWake(ftl::Closure task,
-                                            ftl::TimePoint target_time);
+  void RegisterTask(ftl::Closure task, ftl::TimePoint target_time);
 
-  FTL_WARN_UNUSED_RESULT
-  ftl::TimePoint RunExpiredTasksAndGetNextWake();
+  void RunExpiredTasks();
 
   FTL_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
 };

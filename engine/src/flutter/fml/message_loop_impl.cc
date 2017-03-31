@@ -43,11 +43,11 @@ MessageLoopImpl::~MessageLoopImpl() = default;
 
 void MessageLoopImpl::PostTask(ftl::Closure task, ftl::TimePoint target_time) {
   FTL_DCHECK(task != nullptr);
-  WakeUp(RegisterTaskAndGetNextWake(task, target_time));
+  RegisterTask(task, target_time);
 }
 
 void MessageLoopImpl::RunExpiredTasksNow() {
-  WakeUp(RunExpiredTasksAndGetNextWake());
+  RunExpiredTasks();
 }
 
 void MessageLoopImpl::AddTaskObserver(TaskObserver* observer) {
@@ -75,14 +75,15 @@ void MessageLoopImpl::DoRun() {
   // Allow the implementation to do its thing.
   Run();
 
-  // The message loop is shutting down. Check if there are expired tasks. This
-  // is the last chance for expired tasks to be serviced.
-  RunExpiredTasksNow();
-
   // The loop may have been implicitly terminated. This can happen if the
   // implementation supports termination via platform specific APIs or just
   // error conditions. Set the terminated flag manually.
   terminated_ = true;
+
+  // The message loop is shutting down. Check if there are expired tasks. This
+  // is the last chance for expired tasks to be serviced. Make sure the
+  // terminated flag is already set so we don't accrue additional tasks now.
+  RunExpiredTasksNow();
 
   // When the message loop is in the process of shutting down, pending tasks
   // should be destructed on the message loop's thread. We have just returned
@@ -97,21 +98,20 @@ void MessageLoopImpl::DoTerminate() {
   Terminate();
 }
 
-ftl::TimePoint MessageLoopImpl::RegisterTaskAndGetNextWake(
-    ftl::Closure task,
-    ftl::TimePoint target_time) {
+void MessageLoopImpl::RegisterTask(ftl::Closure task,
+                                   ftl::TimePoint target_time) {
+  FTL_DCHECK(task != nullptr);
   if (terminated_) {
     // If the message loop has already been terminated, PostTask should destruct
     // |task| synchronously within this function.
-    return ftl::TimePoint::Max();
+    return;
   }
-  FTL_DCHECK(task != nullptr);
   ftl::MutexLocker lock(&delayed_tasks_mutex_);
   delayed_tasks_.push({++order_, std::move(task), target_time});
-  return delayed_tasks_.top().target_time;
+  WakeUp(delayed_tasks_.top().target_time);
 }
 
-ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
+void MessageLoopImpl::RunExpiredTasks() {
   TRACE_EVENT0("fml", "MessageLoop::RunExpiredTasks");
   std::vector<ftl::Closure> invocations;
 
@@ -119,7 +119,7 @@ ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
     ftl::MutexLocker lock(&delayed_tasks_mutex_);
 
     if (delayed_tasks_.empty()) {
-      return ftl::TimePoint::Max();
+      return;
     }
 
     auto now = ftl::TimePoint::Now();
@@ -131,6 +131,9 @@ ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
       invocations.emplace_back(std::move(top.task));
       delayed_tasks_.pop();
     }
+
+    WakeUp(delayed_tasks_.empty() ? ftl::TimePoint::Max()
+                                  : delayed_tasks_.top().target_time);
   }
 
   for (const auto& invocation : invocations) {
@@ -139,10 +142,6 @@ ftl::TimePoint MessageLoopImpl::RunExpiredTasksAndGetNextWake() {
       observer->DidProcessTask();
     }
   }
-
-  ftl::MutexLocker lock(&delayed_tasks_mutex_);
-  return delayed_tasks_.empty() ? ftl::TimePoint::Max()
-                                : delayed_tasks_.top().target_time;
 }
 
 }  // namespace fml
