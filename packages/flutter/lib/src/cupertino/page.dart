@@ -8,35 +8,35 @@ import 'package:flutter/widgets.dart';
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
 const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
-// Used for iOS.
+/// Transitions used for standard iOS full page transitions by bringing in the next
+/// screen from the right on top of the previous screen pushing off-screen to the
+/// left with a parallax effect.
 class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
     @required Animation<double> animation,
     @required this.child,
-    this.fullscreenDialog: false,
   }) : super(
     key: key,
-    listenable: (fullscreenDialog ? _kBottomUpTween : _kRightLeftTween).animate(
+    listenable: _kRightLeftTween.animate(
       new CurvedAnimation(
+        // It's an average of the incoming and outgoing animations so it's just >0 at
+        // the beginning of the incoming animation, =0.5 at the visible resting state and
+        // just <1 at the end of its outgoing animation.
         parent: animation,
-        curve: new _CupertinoTransitionCurve(null),
+        curve: new _CupertinoTransitionCurve(Curves.easeOut),
+        reverseCurve: new _CupertinoTransitionCurve(Curves.easeIn),
       )
     ),
   );
 
+  // It's 2x the screen width because the resting state is in the middle.
   static final FractionalOffsetTween _kRightLeftTween = new FractionalOffsetTween(
     begin: FractionalOffset.topRight,
     end: -FractionalOffset.topRight,
   );
 
-  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft,
-    end: FractionalOffset.topLeft,
-  );
-
   final Widget child;
-  final bool fullscreenDialog;
 
   @override
   Widget build(BuildContext context) {
@@ -82,6 +82,39 @@ class _CupertinoTransitionCurve extends Curve {
         t = curve.transform(t * 2.0) / 2.0;
     }
     return t;
+  }
+}
+
+/// Transitions used for summoning fullscreen dialogs in iOS such as creating a new
+/// calendar event etc by bringing in the next screen from the bottom.
+class CupertinoFullscreenDialogTransition extends AnimatedWidget {
+  CupertinoFullscreenDialogTransition({
+    Key key,
+    @required Animation<double> animation,
+    @required this.child,
+  }) : super(
+    key: key,
+    listenable: _kBottomUpTween.animate(
+      new CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      )
+    ),
+  );
+
+  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft,
+    end: FractionalOffset.topLeft,
+  );
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new SlideTransition(
+      position: listenable,
+      child: child,
+    );
   }
 }
 

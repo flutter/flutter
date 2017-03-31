@@ -143,11 +143,16 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
-      return new CupertinoPageTransition(
-        animation: new AnimationMean(left: animation, right: forwardAnimation),
-        fullscreenDialog: fullscreenDialog,
-        child: child,
-      );
+      if (fullscreenDialog)
+        return new CupertinoFullscreenDialogTransition(
+          animation: animation,
+          child: child,
+        );
+      else
+        return new CupertinoPageTransition(
+          animation: new AnimationMean(left: animation, right: forwardAnimation),
+          child: child,
+        );
     } else {
       return new _MountainViewPageTransition(
         animation: animation,
