@@ -48,10 +48,6 @@
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 
-#if defined(OS_ANDROID)
-#include "flutter/lib/jni/dart_jni.h"
-#endif
-
 using tonic::DartClassProvider;
 using tonic::LogIfError;
 using tonic::ToDart;
@@ -165,11 +161,7 @@ bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
   return mtime > since;
 }
 
-void ThreadExitCallback() {
-#if defined(OS_ANDROID)
-  DartJni::OnThreadExit();
-#endif
-}
+void ThreadExitCallback() {}
 
 bool IsServiceIsolateURL(const char* url_name) {
   return url_name != nullptr &&
@@ -303,14 +295,6 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
     dart_state->class_library().add_provider("ui",
                                              std::move(ui_class_provider));
 
-#if defined(OS_ANDROID)
-    DartJni::InitForIsolate();
-    std::unique_ptr<DartClassProvider> jni_class_provider(
-        new DartClassProvider(dart_state, "dart:jni"));
-    dart_state->class_library().add_provider("jni",
-                                             std::move(jni_class_provider));
-#endif
-
     if (!kernel_data.empty()) {
       // We are running kernel code.
       FTL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(kernel_data.data(),
@@ -373,14 +357,6 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
     dart::bin::SetCaptureStderr(false);
   }
 }
-
-#if defined(OS_ANDROID)
-
-DartJniIsolateData* GetDartJniDataForCurrentIsolate() {
-  return UIDartState::Current()->jni_data();
-}
-
-#endif
 
 }  // namespace
 
@@ -674,9 +650,6 @@ void InitDartVM() {
 #endif
 
   DartUI::InitForGlobal();
-#if defined(OS_ANDROID)
-  DartJni::InitForGlobal(GetDartJniDataForCurrentIsolate);
-#endif
 
   // Setup embedder tracing hooks. To avoid data races, it is recommended that
   // these hooks be installed before the DartInitialize, so do that setup now.

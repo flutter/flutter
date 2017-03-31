@@ -4,7 +4,6 @@
 
 import("//dart/sdk/lib/rules.gni")
 import("//flutter/build/dart/rules.gni")
-import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 import("//flutter/sky/engine/core/core.gni")
 
@@ -78,14 +77,6 @@ copy("copy_dart_ui") {
   ]
 }
 
-copy("copy_dart_jni") {
-  sources = dart_jni_files
-
-  outputs = [
-    "$root_gen_dir/dart-pkg/sky_engine/dart_jni/{{source_file_part}}",
-  ]
-}
-
 group("copy_dart_sdk") {
   deps = [
     ":async",
@@ -111,7 +102,6 @@ dart_pkg("sky_engine") {
   ]
 
   deps = [
-    ":copy_dart_jni",
     ":copy_dart_sdk",
     ":copy_dart_ui",
   ]

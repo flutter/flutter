@@ -29,10 +29,6 @@
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 
-#ifdef OS_ANDROID
-#include "flutter/lib/jni/dart_jni.h"
-#endif
-
 using tonic::LogIfError;
 using tonic::ToDart;
 
@@ -183,14 +179,6 @@ void DartController::CreateIsolateFor(const std::string& script_uri,
         new tonic::DartClassProvider(dart_state(), "dart:ui"));
     dart_state()->class_library().add_provider("ui",
                                                std::move(ui_class_provider));
-
-#ifdef OS_ANDROID
-    DartJni::InitForIsolate();
-    std::unique_ptr<tonic::DartClassProvider> jni_class_provider(
-        new tonic::DartClassProvider(dart_state(), "dart:jni"));
-    dart_state()->class_library().add_provider("jni",
-                                               std::move(jni_class_provider));
-#endif
   }
   Dart_ExitIsolate();
 }

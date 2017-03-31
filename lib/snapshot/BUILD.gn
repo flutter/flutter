@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/lib/jni/dart_jni.gni")
 import("//flutter/lib/snapshot/toolchain.gni")
 import("//flutter/lib/ui/dart_ui.gni")
 
@@ -23,14 +22,6 @@ copy("generate_dart_ui") {
   ]
 }
 
-copy("generate_dart_jni") {
-  sources = dart_jni_files
-
-  outputs = [
-    "$bindings_output_dir/dart_jni/{{source_file_part}}",
-  ]
-}
-
 action("generate_snapshot_bin") {
   if (target_is_fuchsia) {
     snapshot_dart = "snapshot_fuchsia.dart"
@@ -39,14 +30,13 @@ action("generate_snapshot_bin") {
   }
 
   deps = [
-    ":generate_dart_jni",
     ":generate_dart_ui",
     "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
   ]
   inputs = [
              "//dart/runtime/tools/create_snapshot_bin.py",
              snapshot_dart,
-           ] + dart_ui_files + dart_jni_files
+           ] + dart_ui_files
 
   vm_isolate_snapshot = "$target_gen_dir/vm_isolate_snapshot.bin"
   isolate_snapshot = "$target_gen_dir/isolate_snapshot.bin"
@@ -56,7 +46,6 @@ action("generate_snapshot_bin") {
   ]
 
   rebased_dart_ui_path = rebase_path(dart_ui_path)
-  rebased_dart_jni_path = rebase_path(dart_jni_path)
 
   gen_snapshot_dir =
       get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
@@ -79,7 +68,6 @@ action("generate_snapshot_bin") {
     "--target_os",
     target_os,
     "--url_mapping=dart:ui,$rebased_dart_ui_path",
-    "--url_mapping=dart:jni,$rebased_dart_jni_path",
   ]
 
   if (target_is_fuchsia) {

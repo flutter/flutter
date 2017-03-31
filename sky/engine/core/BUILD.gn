@@ -48,8 +48,4 @@ static_library("core") {
   if (flutter_runtime_mode != "release") {
     public_deps += [ "//lib/tonic/debugger" ]
   }
-
-  if (is_android) {
-    public_deps += [ "//flutter/lib/jni" ]
-  }
 }
