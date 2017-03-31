@@ -18,11 +18,11 @@
 
 #include <unicode/uchar.h>
 
-#include "MinikinInternal.h"
+#include <minikin/Emoji.h>
 
 namespace minikin {
 
-TEST(MinikinInternalTest, isEmojiTest) {
+TEST(EmojiTest, isEmojiTest) {
     EXPECT_TRUE(isEmoji(0x0023));  // NUMBER SIGN
     EXPECT_TRUE(isEmoji(0x0035));  // DIGIT FIVE
     EXPECT_TRUE(isEmoji(0x2640));  // FEMALE SIGN
@@ -40,7 +40,7 @@ TEST(MinikinInternalTest, isEmojiTest) {
     EXPECT_FALSE(isEmoji(0x29E3D));  // A han character.
 }
 
-TEST(MinikinInternalTest, isEmojiModifierTest) {
+TEST(EmojiTest, isEmojiModifierTest) {
     EXPECT_TRUE(isEmojiModifier(0x1F3FB));  // EMOJI MODIFIER FITZPATRICK TYPE-1-2
     EXPECT_TRUE(isEmojiModifier(0x1F3FC));  // EMOJI MODIFIER FITZPATRICK TYPE-3
     EXPECT_TRUE(isEmojiModifier(0x1F3FD));  // EMOJI MODIFIER FITZPATRICK TYPE-4
@@ -53,7 +53,7 @@ TEST(MinikinInternalTest, isEmojiModifierTest) {
     EXPECT_FALSE(isEmojiModifier(0x29E3D));  // A han character.
 }
 
-TEST(MinikinInternalTest, isEmojiBaseTest) {
+TEST(EmojiTest, isEmojiBaseTest) {
     EXPECT_TRUE(isEmojiBase(0x261D));  // WHITE UP POINTING INDEX
     EXPECT_TRUE(isEmojiBase(0x270D));  // WRITING HAND
     EXPECT_TRUE(isEmojiBase(0x1F385));  // FATHER CHRISTMAS
@@ -75,6 +75,14 @@ TEST(MinikinInternalTest, isEmojiBaseTest) {
     EXPECT_FALSE(isEmojiBase(0x1F384));  // CHRISTMAS TREE
     EXPECT_FALSE(isEmojiBase(0x1F9DE));  // GENIE
     EXPECT_FALSE(isEmojiBase(0x29E3D));  // A han character.
+}
+
+TEST(EmojiTest, emojiBidiOverrideTest) {
+    EXPECT_EQ(U_RIGHT_TO_LEFT, emojiBidiOverride(nullptr, 0x05D0));  // HEBREW LETTER ALEF
+    EXPECT_EQ(U_LEFT_TO_RIGHT,
+            emojiBidiOverride(nullptr, 0x1F170));  // NEGATIVE SQUARED LATIN CAPITAL LETTER A
+    EXPECT_EQ(U_OTHER_NEUTRAL, emojiBidiOverride(nullptr, 0x1F6F7));  // SLED
+    EXPECT_EQ(U_OTHER_NEUTRAL, emojiBidiOverride(nullptr, 0x1F9E6));  // SOCKS
 }
 
 }  // namespace minikin

@@ -18,8 +18,9 @@
 
 #include <android/log.h>
 
-#include <minikin/WordBreaker.h>
+#include <minikin/Emoji.h>
 #include <minikin/Hyphenator.h>
+#include <minikin/WordBreaker.h>
 #include "MinikinInternal.h"
 
 #include <unicode/uchar.h>

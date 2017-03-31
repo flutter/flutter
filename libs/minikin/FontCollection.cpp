@@ -27,6 +27,7 @@
 #include "FontLanguage.h"
 #include "FontLanguageListCache.h"
 #include "MinikinInternal.h"
+#include <minikin/Emoji.h>
 #include <minikin/FontCollection.h>
 
 using std::vector;
