@@ -92,6 +92,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     if (!(nextRoute is MaterialPageRoute<dynamic>))
       return false;
     final MaterialPageRoute<dynamic> nextMaterialPageRoute = nextRoute;
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return !nextMaterialPageRoute.fullscreenDialog;
   }
 
