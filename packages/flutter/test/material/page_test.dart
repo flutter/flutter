@@ -25,8 +25,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    Opacity widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
+    Opacity widget2Opacity = tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
     Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 

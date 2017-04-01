@@ -20,27 +20,28 @@ class CupertinoPageTransition extends AnimatedWidget {
     // one.
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
-  })
-      : incomingPositionAnimation = _kRightMiddleTween.animate(
-          new CurvedAnimation(
-            parent: incomingRouteAnimation,
-            curve: Curves.easeOut,
-            reverseCurve: Curves.easeIn,
-          )
+  }) :
+      incomingPositionAnimation = _kRightMiddleTween.animate(
+        new CurvedAnimation(
+          parent: incomingRouteAnimation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        )
+      ),
+      outgoingPositionAnimation = _kMiddleLeftTween.animate(
+        new CurvedAnimation(
+          parent: outgoingRouteAnimation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        )
+      ),
+      super(
+        key: key,
+        // Trigger a rebuild whenever any of the 2 animation route happens.
+        listenable: new Listenable.merge(
+          <Listenable> [incomingRouteAnimation, outgoingRouteAnimation]
         ),
-        outgoingPositionAnimation = _kMiddleLeftTween.animate(
-          new CurvedAnimation(
-            parent: outgoingRouteAnimation,
-            curve: Curves.easeOut,
-            reverseCurve: Curves.easeIn,
-          )
-        ),
-        super(
-          key: key,
-          // Trigger a rebuild whenever any animation route happens. The listenable's value is not
-          // used.
-          listenable: new AnimationSum(left: incomingRouteAnimation, right: outgoingRouteAnimation),
-        );
+      );
 
   // Fractional offset from offscreen to the right to fully on screen.
   static final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
@@ -51,7 +52,7 @@ class CupertinoPageTransition extends AnimatedWidget {
   // Fractional offset from fully on screen to 1/3 offscreen to the left.
   static final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
     begin: FractionalOffset.topLeft,
-    end: const FractionalOffset(-0.33, 0.0),
+    end: const FractionalOffset(-1.0/3.0, 0.0),
   );
 
   // When this page is coming in to cover another page.
