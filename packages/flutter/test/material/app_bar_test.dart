@@ -459,7 +459,7 @@ void main() {
     final double initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
-    // Scroll the not-pinned appbar, collapsing the expanded height. At this
+    // Scroll the floating-pinned appbar, collapsing the expanded height. At this
     // point only the tabBar is visible.
     controller.jumpTo(600.0);
     await tester.pump();
@@ -468,7 +468,7 @@ void main() {
     expect(appBarHeight(tester), lessThan(initialAppBarHeight));
     expect(appBarHeight(tester), initialTabBarHeight);
 
-    // Scroll the not-pinned appbar back into view
+    // Scroll the floating-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
     expect(appBarIsVisible(tester), true);

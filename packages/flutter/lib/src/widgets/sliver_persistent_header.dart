@@ -19,6 +19,13 @@ abstract class SliverPersistentHeaderDelegate {
   double get maxExtent;
 
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate);
+
+  /// Specifies how floating headers should animate in and out of view.
+  ///
+  /// If the value of this property is null, then floating headers will
+  /// not animate into place.
+  @protected
+  FloatingHeaderSnapConfiguration get snapConfiguration => null;
 }
 
 class SliverPersistentHeader extends StatelessWidget {
@@ -224,7 +231,13 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    return new _RenderSliverFloatingPersistentHeaderForWidgets();
+    return new _RenderSliverFloatingPersistentHeaderForWidgets()
+      ..snapConfiguration = delegate.snapConfiguration;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverFloatingPersistentHeaderForWidgets renderObject) {
+    renderObject.snapConfiguration = delegate.snapConfiguration;
   }
 }
 
@@ -241,7 +254,13 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
-    return new _RenderSliverFloatingPinnedPersistentHeaderForWidgets();
+    return new _RenderSliverFloatingPinnedPersistentHeaderForWidgets()
+      ..snapConfiguration = delegate.snapConfiguration;
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverFloatingPinnedPersistentHeaderForWidgets renderObject) {
+    renderObject.snapConfiguration = delegate.snapConfiguration;
   }
 }
 

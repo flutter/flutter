@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -494,6 +495,69 @@ class _AppBarState extends State<AppBar> {
   }
 }
 
+class _FloatingAppBar extends StatefulWidget {
+  _FloatingAppBar({ Key key, this.child }) : super(key: key);
+
+  final Widget child;
+
+  @override
+  _FloatingAppBarState createState() => new _FloatingAppBarState();
+}
+
+// A wrapper for the widget created by _SliverAppBarDelegate that starts and
+/// stops the floating appbar's snap-into-view or snap-out-of-view animation.
+class _FloatingAppBarState extends State<_FloatingAppBar> {
+  ScrollableState _scrollable;
+  ScrollActivity _activity;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _updateScrollPositionListener();
+  }
+
+  @override
+  void dispose() {
+    _scrollable?.position?.removeActivityChangedListener(_scrollPositionListener);
+    super.dispose();
+  }
+
+  void _updateScrollPositionListener() {
+    final ScrollableState scrollable = Scrollable.of(context);
+    _scrollable?.position?.removeActivityChangedListener(_scrollPositionListener);
+    _scrollable = scrollable;
+    _scrollable?.position?.addActivityChangedListener(_scrollPositionListener);
+  }
+
+  RenderSliverFloatingPersistentHeader _headerRenderer() {
+    return context.ancestorRenderObjectOfType(const TypeMatcher<RenderSliverFloatingPersistentHeader>());
+  }
+
+  void _scrollPositionListener() {
+    if (_scrollable == null)
+      return;
+
+    // When a scroll stops, then maybe snap the appbar into view.
+    // Similarly, when a scroll starts, then maybe stop the snap animation.
+    final ScrollActivity activity = _scrollable.position.activity;
+    if (_activity is! IdleScrollActivity && activity is IdleScrollActivity) {
+      final RenderSliverFloatingPersistentHeader header = _headerRenderer();
+      header?.maybeStartSnapAnimation(_scrollable.position.userScrollDirection);
+    } else if (_activity is IdleScrollActivity && activity is! IdleScrollActivity) {
+      final RenderSliverFloatingPersistentHeader header = _headerRenderer();
+      header?.maybeStopSnapAnimation(_scrollable.position.userScrollDirection);
+    }
+    _activity = activity;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_scrollable == null)
+      _updateScrollPositionListener();
+    return config.child;
+  }
+}
+
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   _SliverAppBarDelegate({
     @required this.leading,
@@ -513,6 +577,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.topPadding,
     @required this.floating,
     @required this.pinned,
+    @required this.snapConfiguration,
   }) : _bottomHeight = bottom?.bottomHeight ?? 0.0 {
     assert(primary || topPadding == 0.0);
   }
@@ -544,11 +609,14 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => math.max(topPadding + (expandedHeight ?? kToolbarHeight + _bottomHeight), minExtent);
 
   @override
+  final FloatingHeaderSnapConfiguration snapConfiguration;
+
+  @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
     final double visibleMainHeight = maxExtent - shrinkOffset - topPadding;
     final double toolbarOpacity = pinned && !floating ? 1.0
       : ((visibleMainHeight - _bottomHeight) / kToolbarHeight).clamp(0.0, 1.0);
-    return FlexibleSpaceBar.createSettings(
+    final Widget appBar = FlexibleSpaceBar.createSettings(
       minExtent: minExtent,
       maxExtent: maxExtent,
       currentExtent: math.max(minExtent, maxExtent - shrinkOffset),
@@ -570,6 +638,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
       ),
     );
+    return floating ? new _FloatingAppBar(child: appBar) : appBar;
   }
 
   @override
@@ -590,7 +659,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || expandedHeight != oldDelegate.expandedHeight
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
-        || floating != oldDelegate.floating;
+        || floating != oldDelegate.floating
+        || snapConfiguration != oldDelegate.snapConfiguration;
   }
 
   @override
@@ -628,7 +698,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
-class SliverAppBar extends StatelessWidget {
+class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
   SliverAppBar({
     Key key,
@@ -647,11 +717,13 @@ class SliverAppBar extends StatelessWidget {
     this.expandedHeight,
     this.floating: false,
     this.pinned: false,
+    this.snap: false,
   }) : super(key: key) {
     assert(primary != null);
     assert(floating != null);
     assert(pinned != null);
     assert(pinned && floating ? bottom != null : true);
+    assert(snap != null);
   }
 
   /// A widget to display before the [title].
@@ -776,6 +848,13 @@ class SliverAppBar extends StatelessWidget {
   ///
   /// Otherwise, the user will need to scroll near the top of the scroll view to
   /// reveal the app bar.
+  ///
+  /// See also:
+  ///
+  ///   * If [snap] is true then a scroll that exposes the app bar will trigger
+  ///     an animation that slides the entire app bar into view. Similarly if
+  ///     a scroll dismisses the app bar, the animation will slide it completely
+  ///     out of view.
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
@@ -784,33 +863,60 @@ class SliverAppBar extends StatelessWidget {
   /// remain visible rather than being scrolled out of view.
   final bool pinned;
 
+  /// If [snap] and [floating] are true then the floating app bar will "snap"
+  /// into view.
+  ///
+  /// If [snap] is true then a scroll that exposes the floating app bar will
+  /// trigger an animation that slides the entire app bar into view. Similarly if
+  /// a scroll dismisses the app bar, the animation will slide the app bar
+  /// completely out of view.
+  ///
+  /// Snapping only applies when the app bar is floating, not when the appbar
+  /// appears at the top of its scroll view.
+  final bool snap;
+
+  @override
+  _SliverAppBarState createState() => new _SliverAppBarState();
+}
+
+class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    final double topPadding = primary ? MediaQuery.of(context).padding.top : 0.0;
-    final double collapsedHeight = (pinned && floating && bottom != null)
-      ? bottom.bottomHeight + topPadding : null;
+    final double topPadding = config.primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double collapsedHeight = (config.pinned && config.floating && config.bottom != null)
+      ? config.bottom.bottomHeight + topPadding : null;
+
+    FloatingHeaderSnapConfiguration snapConfiguration;
+    if (config.snap && config.floating) {
+      snapConfiguration = new FloatingHeaderSnapConfiguration(
+        vsync: this,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+      );
+    }
 
     return new SliverPersistentHeader(
-      floating: floating,
-      pinned: pinned,
+      floating: config.floating,
+      pinned: config.pinned,
       delegate: new _SliverAppBarDelegate(
-        leading: leading,
-        title: title,
-        actions: actions,
-        flexibleSpace: flexibleSpace,
-        bottom: bottom,
-        elevation: elevation,
-        backgroundColor: backgroundColor,
-        brightness: brightness,
-        iconTheme: iconTheme,
-        textTheme: textTheme,
-        primary: primary,
-        centerTitle: centerTitle,
-        expandedHeight: expandedHeight,
+        leading: config.leading,
+        title: config.title,
+        actions: config.actions,
+        flexibleSpace: config.flexibleSpace,
+        bottom: config.bottom,
+        elevation: config.elevation,
+        backgroundColor: config.backgroundColor,
+        brightness: config.brightness,
+        iconTheme: config.iconTheme,
+        textTheme: config.textTheme,
+        primary: config.primary,
+        centerTitle: config.centerTitle,
+        expandedHeight: config.expandedHeight,
         collapsedHeight: collapsedHeight,
         topPadding: topPadding,
-        floating: floating,
-        pinned: pinned,
+        floating: config.floating,
+        pinned: config.pinned,
+        snapConfiguration: snapConfiguration,
       ),
     );
   }
