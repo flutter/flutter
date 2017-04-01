@@ -89,7 +89,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
-    if (!(nextRoute is MaterialPageRoute<dynamic>))
+    if (nextRoute is! MaterialPageRoute<dynamic>)
       return false;
     final MaterialPageRoute<dynamic> nextMaterialPageRoute = nextRoute;
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
