@@ -86,7 +86,7 @@ class CupertinoBackGestureController extends NavigationGestureController {
     assert(controller != null);
   }
 
-  AnimationController controller;
+  final AnimationController controller;
 
   @override
   void dispose() {
