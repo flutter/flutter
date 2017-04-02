@@ -16,7 +16,7 @@
       (FlutterViewController*)self.window.rootViewController;
 
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
-      methodChannelWithName:@"samples.flutter.io/battery"
+      methodChannelWithName:@"io.flutter.samples/battery"
             binaryMessenger:controller];
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
                                          FlutterResultReceiver result) {
@@ -34,9 +34,8 @@
     }
   }];
 
-
   FlutterEventChannel* chargingChannel = [FlutterEventChannel
-      eventChannelWithName:@"samples.flutter.io/charging"
+      eventChannelWithName:@"io.flutter.samples/charging"
            binaryMessenger:controller];
   [chargingChannel setStreamHandler:self];
   return YES;
