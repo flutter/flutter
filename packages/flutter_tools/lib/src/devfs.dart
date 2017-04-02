@@ -339,14 +339,16 @@ class DevFS {
   Uri get baseUri => _baseUri;
 
   Future<Uri> create() async {
+    printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     _baseUri = await _operations.create(fsName);
     printTrace('DevFS: Created new filesystem on the device ($_baseUri)');
     return _baseUri;
   }
 
-  Future<dynamic> destroy() {
+  Future<Null> destroy() async {
+    printTrace('DevFS: Deleting filesystem on the device ($_baseUri)');
+    await _operations.destroy(fsName);
     printTrace('DevFS: Deleted filesystem on the device ($_baseUri)');
-    return _operations.destroy(fsName);
   }
 
   /// Update files on the device and return the number of bytes sync'd

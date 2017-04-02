@@ -437,7 +437,7 @@ typedef void _OnDragEnd(Velocity velocity, Offset offset, bool wasAccepted);
 // eeding this object pointer events even after it has been disposed.
 class _DragAvatar<T> extends Drag {
   _DragAvatar({
-    this.overlayState,
+    @required this.overlayState,
     this.data,
     Point initialPosition,
     this.dragStartPoint: Point.origin,

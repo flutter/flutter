@@ -226,7 +226,19 @@ abstract class ResidentRunner {
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.whenComplete(appFinished);
+    vmService.done.then<Null>(
+        _serviceProtocolDone,
+        onError: _serviceProtocolError).whenComplete(appFinished);
+  }
+
+  Future<Null> _serviceProtocolDone(dynamic object) {
+    printTrace('Service protocol connection closed.');
+    return new Future<Null>.value(object);
+  }
+
+  Future<Null> _serviceProtocolError(dynamic error, StackTrace stack) {
+    printTrace('Service protocol connection closed with an error: $error\n$stack');
+    return new Future<Null>.error(error, stack);
   }
 
   /// Returns [true] if the input has been handled by this function.

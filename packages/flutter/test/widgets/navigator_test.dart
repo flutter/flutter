@@ -177,18 +177,6 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
-  testWidgets('Missing settings in onGenerateRoute throws exception', (WidgetTester tester) async {
-    await tester.pumpWidget(new Navigator(
-      onGenerateRoute: (RouteSettings settings) {
-        return new MaterialPageRoute<Null>(
-          builder: (BuildContext context) => new Container()
-        );
-      }
-    ));
-    final Object exception = tester.takeException();
-    expect(exception is FlutterError, isTrue);
-  });
-
   testWidgets('Gestures between push and build are ignored', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{

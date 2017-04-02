@@ -7,7 +7,7 @@ import 'dart:convert' show JSON;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
 
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
@@ -199,7 +199,7 @@ abstract class BindingBase {
   /// service extension method is called with a new value.
   @protected
   void registerBoolServiceExtension({
-    String name,
+    @required String name,
     @required AsyncValueGetter<bool> getter,
     @required AsyncValueSetter<bool> setter
   }) {

@@ -487,9 +487,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
 class _Circle {
   _Circle({
-    this.state,
-    this.index,
-    this.color,
+    @required this.state,
+    @required this.index,
+    @required this.color,
     @required TickerProvider vsync,
   }) {
     assert(state != null);

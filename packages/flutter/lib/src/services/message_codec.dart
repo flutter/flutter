@@ -44,7 +44,7 @@ class MethodCall {
   final dynamic arguments;
 
   @override
-  bool operator== (dynamic other) {
+  bool operator == (dynamic other) {
     if (identical(this, other))
       return true;
     if (runtimeType != other.runtimeType)

@@ -111,7 +111,7 @@ abstract class PaintPattern {
   /// See also: [save], [restore].
   void saveRestore();
 
-  /// Indicates that a rectangular clip.
+  /// Indicates that a rectangular clip is expected next.
   ///
   /// The next rectangular clip is examined. Any arguments that are passed to
   /// this method are compared to the actual [Canvas.clipRect] call's argument
@@ -134,6 +134,18 @@ abstract class PaintPattern {
   /// Any calls made between the last matched call (if any) and the
   /// [Canvas.drawRect] call are ignored.
   void rect({ Rect rect, Color color });
+
+  /// Indicates that a rounded rectangle clip is expected next.
+  ///
+  /// The next rounded rectangle clip is examined. Any arguments that are passed
+  /// to this method are compared to the actual [Canvas.clipRRect] call's
+  /// argument and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.clipRRect] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.clipRRect] call are ignored.
+  void clipRRect({ RRect rrect });
 
   /// Indicates that a rounded rectangle is expected next.
   ///
@@ -263,6 +275,11 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   }
 
   @override
+  void clipRRect({ RRect rrect }) {
+    _predicates.add(new _FunctionPaintPredicate(#clipRRect, <dynamic>[rrect]));
+  }
+
+  @override
   void rrect({ RRect rrect, Color color, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _RRectPaintPredicate(rrect: rrect, color: color, hasMaskFilter: hasMaskFilter, style: style));
   }
@@ -331,6 +348,8 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
 
   @override
   Description describe(Description description) {
+    if (_predicates.isEmpty)
+      return description.add('An object or closure and a paint pattern.');
     description.add('Object or closure painting: ');
     return description.addAll(
       '', ', ', '',
@@ -351,8 +370,13 @@ class _TestRecordingCanvasPatternMatcher extends Matcher implements PaintPattern
   bool _evaluatePredicates(Iterable<Invocation> calls, StringBuffer description) {
     // If we ever want to have a matcher for painting nothing, create a separate
     // paintsNothing matcher.
-    if (_predicates.isEmpty)
-      throw new Exception('You must add a pattern to the paints matcher.');
+    if (_predicates.isEmpty) {
+      description.write(
+        'painted something, but you must now add a pattern to the paints matcher '
+        'in the test to verify that it matches the important parts of the following.'
+      );
+      return false;
+    }
     if (calls.isEmpty) {
       description.write('painted nothing.');
       return false;

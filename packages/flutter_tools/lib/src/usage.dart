@@ -47,7 +47,7 @@ class Usage {
 
   Analytics _analytics;
 
-  bool _printedUsage = false;
+  bool _printedWelcome = false;
   bool _suppressAnalytics = false;
 
   bool get isFirstRun => _analytics.firstRun;
@@ -108,10 +108,12 @@ class Usage {
     await _analytics.waitForLastPing(timeout: const Duration(milliseconds: 250));
   }
 
-  void printUsage() {
-    if (_printedUsage)
+  void printWelcome() {
+    // This gets called if it's the first run by the selected command, if any,
+    // and on exit, in case there was no command.
+    if (_printedWelcome)
       return;
-    _printedUsage = true;
+    _printedWelcome = true;
 
     printStatus('');
     printStatus('''

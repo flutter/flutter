@@ -14,6 +14,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'app.dart';
+import 'focus_manager.dart';
 import 'framework.dart';
 
 export 'dart:ui' show AppLifecycleState, Locale;
@@ -118,6 +119,14 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// widget tree rooted at this binding.
   BuildOwner get buildOwner => _buildOwner;
   final BuildOwner _buildOwner = new BuildOwner();
+
+  /// The object in charge of the focus tree.
+  /// 
+  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
+  /// the [FocusScopeNode] for a given [BuildContext].
+  /// 
+  /// See [FocusManager] for more details.
+  final FocusManager focusManager = new FocusManager();
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 

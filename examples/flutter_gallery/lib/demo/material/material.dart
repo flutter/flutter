@@ -27,6 +27,6 @@ export 'slider_demo.dart';
 export 'snack_bar_demo.dart';
 export 'tabs_demo.dart';
 export 'tabs_fab_demo.dart';
-export 'text_field_demo.dart';
+export 'text_form_field_demo.dart';
 export 'tooltip_demo.dart';
 export 'two_level_list_demo.dart';

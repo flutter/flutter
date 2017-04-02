@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 // This demo is based on
 // https://material.google.com/components/dialogs.html#dialogs-full-screen-dialogs
@@ -15,7 +16,7 @@ enum DismissDialogAction {
 }
 
 class DateTimeItem extends StatelessWidget {
-  DateTimeItem({ Key key, DateTime dateTime, this.onChanged })
+  DateTimeItem({ Key key, DateTime dateTime, @required this.onChanged })
     : date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = new TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
       super(key: key) {

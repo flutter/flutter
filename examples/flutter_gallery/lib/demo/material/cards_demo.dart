@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class TravelDestination {
@@ -36,7 +37,7 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, this.destination }) : super(key: key) {
+  TravelDestinationItem({ Key key, @required this.destination }) : super(key: key) {
     assert(destination != null && destination.isValid);
   }
 

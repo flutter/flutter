@@ -93,7 +93,7 @@ class RenderPadding extends RenderShiftedBox {
   ///
   /// The [padding] argument must not be null and must have non-negative insets.
   RenderPadding({
-    EdgeInsets padding,
+    @required EdgeInsets padding,
     RenderBox child
   }) : _padding = padding, super(child) {
     assert(padding != null);
@@ -499,7 +499,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// The [requestedSize] argument must not be null.
   RenderSizedOverflowBox({
     RenderBox child,
-    Size requestedSize,
+    @required Size requestedSize,
     FractionalOffset alignment: FractionalOffset.center
   }) : _requestedSize = requestedSize,
        super(child: child, alignment: alignment) {
@@ -792,7 +792,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
     RenderBox child,
-    SingleChildLayoutDelegate delegate
+    @required SingleChildLayoutDelegate delegate
   }) : _delegate = delegate, super(child) {
     assert(delegate != null);
   }
@@ -901,8 +901,8 @@ class RenderBaseline extends RenderShiftedBox {
   /// The [baseline] and [baselineType] arguments must not be null.
   RenderBaseline({
     RenderBox child,
-    double baseline,
-    TextBaseline baselineType
+    @required double baseline,
+    @required TextBaseline baselineType
   }) : _baseline = baseline,
        _baselineType = baselineType,
        super(child) {

@@ -148,10 +148,11 @@ class DemoItem<T> {
     this.hint,
     this.builder,
     this.valueToString
-  });
+  }) : textController = new TextEditingController(text: valueToString(value));
 
   final String name;
   final String hint;
+  final TextEditingController textController;
   final DemoItemBodyBuilder<T> builder;
   final ValueToString<T> valueToString;
   T value;
@@ -205,18 +206,20 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                   onCancel: () { Form.of(context).reset(); close(); },
                   child: new Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: new TextField(
-                      hintText: item.hint,
-                      labelText: item.name,
-                      initialValue: new InputValue(text: item.value),
-                      onSaved: (InputValue val) { item.value = val.text; },
+                    child: new TextFormField(
+                      controller: item.textController,
+                      decoration: new InputDecoration(
+                        hintText: item.hint,
+                        labelText: item.name,
+                      ),
+                      onSaved: (String value) { item.value = value; },
                     ),
                   ),
                 );
-              }
-            )
+              },
+            ),
           );
-        }
+        },
       ),
       new DemoItem<_Location>(
         name: 'Location',
@@ -229,8 +232,6 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
               item.isExpanded = false;
             });
           }
-
-
           return new Form(
             child: new Builder(
               builder: (BuildContext context) {

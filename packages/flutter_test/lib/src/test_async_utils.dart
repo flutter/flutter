@@ -67,7 +67,7 @@ class TestAsyncUtils {
     final _AsyncScope scope = new _AsyncScope(StackTrace.current, zone);
     _scopeStack.add(scope);
     final Future<Null> result = scope.zone.run(body);
-    void completionHandler(dynamic error, StackTrace stack) {
+    Future<Null> completionHandler(dynamic error, StackTrace stack) {
       assert(_scopeStack.isNotEmpty);
       assert(_scopeStack.contains(scope));
       bool leaked = false;
@@ -101,10 +101,13 @@ class TestAsyncUtils {
         }
         throw new FlutterError(message.toString().trimRight());
       }
+      if (error != null)
+        return new Future<Null>.error(error, stack);
+      return new Future<Null>.value(null);
     }
     return result.then<Null>(
       (Null value) {
-        completionHandler(null, null);
+        return completionHandler(null, null);
       },
       onError: completionHandler
     );

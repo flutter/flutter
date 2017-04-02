@@ -43,22 +43,22 @@ enum TextSelectionHandleType {
 /// [start] handle always moves the [start]/[baseOffset] of the selection.
 enum _TextSelectionHandlePosition { start, end }
 
-/// Signature for reporting changes to the selection component of an
-/// [InputValue] for the purposes of a [TextSelectionOverlay]. The [caretRect]
-/// argument gives the location of the caret in the coordinate space of the
-/// [RenderBox] given by the [TextSelectionOverlay.renderObject].
+/// Signature for reporting changes to the selection component of a
+/// [TextEditingValue] for the purposes of a [TextSelectionOverlay]. The
+/// [caretRect] argument gives the location of the caret in the coordinate space
+/// of the [RenderBox] given by the [TextSelectionOverlay.renderObject].
 ///
 /// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
-typedef void TextSelectionOverlayChanged(InputValue value, Rect caretRect);
+typedef void TextSelectionOverlayChanged(TextEditingValue value, Rect caretRect);
 
 /// An interface for manipulating the selection, to be used by the implementor
 /// of the toolbar widget.
 abstract class TextSelectionDelegate {
   /// Gets the current text input.
-  InputValue get inputValue;
+  TextEditingValue get textEditingValue;
 
   /// Sets the current text input (replaces the whole line).
-  set inputValue(InputValue value);
+  set textEditingValue(TextEditingValue value);
 
   /// Hides the text selection toolbar.
   void hideToolbar();
@@ -89,13 +89,14 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   ///
   /// The [context] must not be null and must have an [Overlay] as an ancestor.
   TextSelectionOverlay({
-    InputValue input,
+    @required TextEditingValue value,
     @required this.context,
     this.debugRequiredFor,
     this.renderObject,
     this.onSelectionOverlayChanged,
     this.selectionControls,
-  }): _input = input {
+  }): _value  = value {
+    assert(value != null);
     assert(context != null);
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null);
@@ -133,7 +134,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   Animation<double> get _handleOpacity => _handleController.view;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
-  InputValue _input;
+  TextEditingValue _value;
 
   /// A pair of handles. If this is non-null, there are always 2, though the
   /// second is hidden when the selection is collapsed.
@@ -142,7 +143,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// A copy/paste toolbar.
   OverlayEntry _toolbar;
 
-  TextSelection get _selection => _input.selection;
+  TextSelection get _selection => _value.selection;
 
   /// Shows the handles by inserting them into the [context]'s overlay.
   void showHandles() {
@@ -172,10 +173,10 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   /// synchronously. This means that it is safe to call during builds, but also
   /// that if you do call this during a build, the UI will not update until the
   /// next frame (i.e. many milliseconds later).
-  void update(InputValue newInput) {
-    if (_input == newInput)
+  void update(TextEditingValue newValue) {
+    if (_value == newValue)
       return;
-    _input = newInput;
+    _value = newValue;
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
       SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
     } else {
@@ -259,13 +260,13 @@ class TextSelectionOverlay implements TextSelectionDelegate {
         caretRect = renderObject.getLocalRectForCaret(newSelection.extent);
         break;
     }
-    update(_input.copyWith(selection: newSelection, composing: TextRange.empty));
+    update(_value.copyWith(selection: newSelection, composing: TextRange.empty));
     if (onSelectionOverlayChanged != null)
-      onSelectionOverlayChanged(_input, caretRect);
+      onSelectionOverlayChanged(_value, caretRect);
   }
 
   void _handleSelectionHandleTapped() {
-    if (inputValue.selection.isCollapsed) {
+    if (_value.selection.isCollapsed) {
       if (_toolbar != null) {
         _toolbar?.remove();
         _toolbar = null;
@@ -276,14 +277,14 @@ class TextSelectionOverlay implements TextSelectionDelegate {
   }
 
   @override
-  InputValue get inputValue => _input;
+  TextEditingValue get textEditingValue => _value;
 
   @override
-  set inputValue(InputValue value) {
-    update(value);
+  set textEditingValue(TextEditingValue newValue) {
+    update(newValue);
     if (onSelectionOverlayChanged != null) {
-      final Rect caretRect = renderObject.getLocalRectForCaret(value.selection.extent);
-      onSelectionOverlayChanged(value, caretRect);
+      final Rect caretRect = renderObject.getLocalRectForCaret(newValue.selection.extent);
+      onSelectionOverlayChanged(newValue, caretRect);
     }
   }
 

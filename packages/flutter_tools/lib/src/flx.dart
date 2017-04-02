@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart' show required;
+
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
@@ -27,10 +29,10 @@ const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 
 Future<int> createSnapshot({
-  String mainPath,
-  String snapshotPath,
+  @required String mainPath,
+  @required String snapshotPath,
   String depfilePath,
-  String packages
+  @required String packages
 }) {
   assert(mainPath != null);
   assert(snapshotPath != null);

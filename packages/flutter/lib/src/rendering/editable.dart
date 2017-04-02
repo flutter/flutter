@@ -47,25 +47,26 @@ class RenderEditable extends RenderBox {
   /// Creates a render object for a single line of editable text.
   RenderEditable({
     TextSpan text,
+    TextAlign textAlign,
     Color cursorColor,
-    bool showCursor: false,
+    ValueNotifier<bool> showCursor,
     int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
-  }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
+  }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
-       _showCursor = showCursor,
+       _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
-    assert(showCursor != null);
+    assert(_showCursor != null);
     assert(maxLines != null);
     assert(textScaleFactor != null);
     assert(offset != null);
-    assert(!showCursor || cursorColor != null);
+    assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
@@ -87,6 +88,15 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  /// How the text should be aligned horizontally.
+  TextAlign get textAlign => _textPainter.textAlign;
+  set textAlign(TextAlign value) {
+    if (_textPainter.textAlign == value)
+      return;
+    _textPainter.textAlign = value;
+    markNeedsPaint();
+  }
+
   /// The color to use when painting the cursor.
   Color get cursorColor => _cursorColor;
   Color _cursorColor;
@@ -98,13 +108,17 @@ class RenderEditable extends RenderBox {
   }
 
   /// Whether to paint the cursor.
-  bool get showCursor => _showCursor;
-  bool _showCursor;
-  set showCursor(bool value) {
+  ValueNotifier<bool> get showCursor => _showCursor;
+  ValueNotifier<bool> _showCursor;
+  set showCursor(ValueNotifier<bool> value) {
     assert(value != null);
     if (_showCursor == value)
       return;
+    if (attached)
+      _showCursor.removeListener(markNeedsPaint);
     _showCursor = value;
+    if (attached)
+      _showCursor.addListener(markNeedsPaint);
     markNeedsPaint();
   }
 
@@ -176,6 +190,20 @@ class RenderEditable extends RenderBox {
     markNeedsLayout();
   }
 
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _offset.addListener(markNeedsPaint);
+    _showCursor.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _offset.removeListener(markNeedsPaint);
+    _showCursor.removeListener(markNeedsPaint);
+    super.detach();
+  }
+
   bool get _isMultiline => maxLines > 1;
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
@@ -225,7 +253,7 @@ class RenderEditable extends RenderBox {
     // TODO(mpcomplete): We should be more disciplined about when we dirty the
     // layout state of the text painter so that we can know that the layout is
     // clean at this point.
-    _textPainter.layout(maxWidth: _maxContentWidth);
+    _layoutText();
 
     final Offset paintOffset = _paintOffset;
 
@@ -260,12 +288,6 @@ class RenderEditable extends RenderBox {
   }
 
   double get _preferredLineHeight => _textPainter.preferredLineHeight;
-
-  double get _maxContentWidth {
-    if (_maxLines > 1)
-      return constraints.maxWidth - (_kCaretGap + _kCaretWidth);
-    return double.INFINITY;
-  }
 
   @override
   double computeMinIntrinsicHeight(double width) {
@@ -333,11 +355,19 @@ class RenderEditable extends RenderBox {
 
   Rect _caretPrototype;
 
+  void _layoutText() {
+    final double caretMargin = _kCaretGap + _kCaretWidth;
+    final double maxWidth = _maxLines > 1 ?
+      math.max(0.0, constraints.maxWidth - caretMargin) : double.INFINITY;
+    final double minWidth = math.max(0.0, constraints.minWidth - caretMargin);
+    _textPainter.layout(minWidth: minWidth, maxWidth: maxWidth);
+  }
+
   @override
   void performLayout() {
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
-    _textPainter.layout(maxWidth: _maxContentWidth);
+    _layoutText();
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
       _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
     ));
@@ -365,7 +395,7 @@ class RenderEditable extends RenderBox {
     final Offset effectiveOffset = offset + _paintOffset;
 
     if (_selection != null) {
-      if (_selection.isCollapsed && _showCursor && cursorColor != null) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
         _paintCaret(context.canvas, effectiveOffset);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);

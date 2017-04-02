@@ -27,13 +27,9 @@ class TestAPISubclass extends TestAPI {
   }
 }
 
-Future<Null> helperFunction(WidgetTester tester) async {
-  await tester.pump();
-}
-
-Future<Null> guardedHelper(WidgetTester tester) {
+Future<Null> _guardedThrower() {
   return TestAsyncUtils.guard(() async {
-    await tester.pumpWidget(new Text('Hello'));
+    throw 'Hello';
   });
 }
 
@@ -172,6 +168,15 @@ void main() {
       real_test.expect(lines.length, 3);
     }
     await f1;
+  });
+
+  testWidgets('TestAsyncUtils - guard body can throw', (WidgetTester tester) async {
+    try {
+      await _guardedThrower();
+      expect(false, true); // _guardedThrower should throw and we shouldn't reach here
+    } on String catch (s) {
+      expect(s, 'Hello');
+    }
   });
 
   // see also dev/manual_tests/test_data which contains tests run by the flutter_tools tests for 'flutter test'

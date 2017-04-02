@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 enum GridDemoTileStyle {
@@ -143,9 +144,9 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({
     Key key,
-    this.photo,
-    this.tileStyle,
-    this.onBannerTap
+    @required this.photo,
+    @required this.tileStyle,
+    @required this.onBannerTap
   }) : super(key: key) {
     assert(photo != null && photo.isValid);
     assert(tileStyle != null);

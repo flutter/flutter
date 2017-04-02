@@ -516,7 +516,7 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   AnimatedOpacity({
     Key key,
     this.child,
-    this.opacity,
+    @required this.opacity,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : super(key: key, curve: curve, duration: duration) {

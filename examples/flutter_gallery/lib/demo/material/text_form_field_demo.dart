@@ -6,13 +6,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class TextFieldDemo extends StatefulWidget {
-  TextFieldDemo({ Key key }) : super(key: key);
+class TextFormFieldDemo extends StatefulWidget {
+  TextFormFieldDemo({ Key key }) : super(key: key);
 
-  static const String routeName = '/material/text-field';
+  static const String routeName = '/material/text-form-field';
 
   @override
-  TextFieldDemoState createState() => new TextFieldDemoState();
+  TextFormFieldDemoState createState() => new TextFormFieldDemoState();
 }
 
 class PersonData {
@@ -21,7 +21,7 @@ class PersonData {
   String password = '';
 }
 
-class TextFieldDemoState extends State<TextFieldDemo> {
+class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersonData person = new PersonData();
@@ -35,7 +35,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
   bool _autovalidate = false;
   bool _formWasEdited = false;
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
-  final GlobalKey<FormFieldState<InputValue>> _passwordFieldKey = new GlobalKey<FormFieldState<InputValue>>();
+  final GlobalKey<FormFieldState<String>> _passwordFieldKey = new GlobalKey<FormFieldState<String>>();
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
@@ -47,30 +47,30 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     }
   }
 
-  String _validateName(InputValue value) {
+  String _validateName(String value) {
     _formWasEdited = true;
-    if (value.text.isEmpty)
+    if (value.isEmpty)
       return 'Name is required.';
     final RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
-    if (!nameExp.hasMatch(value.text))
+    if (!nameExp.hasMatch(value))
       return 'Please enter only alphabetical characters.';
     return null;
   }
 
-  String _validatePhoneNumber(InputValue value) {
+  String _validatePhoneNumber(String value) {
     _formWasEdited = true;
     final RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
-    if (!phoneExp.hasMatch(value.text))
+    if (!phoneExp.hasMatch(value))
       return '###-###-#### - Please enter a valid phone number.';
     return null;
   }
 
-  String _validatePassword(InputValue value) {
+  String _validatePassword(String value) {
     _formWasEdited = true;
-    final FormFieldState<InputValue> passwordField = _passwordFieldKey.currentState;
-    if (passwordField.value == null || passwordField.value.text.isEmpty)
+    final FormFieldState<String> passwordField = _passwordFieldKey.currentState;
+    if (passwordField.value == null || passwordField.value.isEmpty)
       return 'Please choose a password.';
-    if (passwordField.value.text != value.text)
+    if (passwordField.value != value)
       return 'Passwords don\'t match';
     return null;
   }
@@ -104,7 +104,7 @@ class TextFieldDemoState extends State<TextFieldDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Text fields')
+        title: new Text('Text fields'),
       ),
       body: new Form(
         key: _formKey,
@@ -113,48 +113,58 @@ class TextFieldDemoState extends State<TextFieldDemo> {
         child: new ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           children: <Widget>[
-            new TextField(
-              icon: new Icon(Icons.person),
-              hintText: 'What do people call you?',
-              labelText: 'Name *',
-              onSaved: (InputValue val) { person.name = val.text; },
+            new TextFormField(
+              decoration: const InputDecoration(
+                icon: const Icon(Icons.person),
+                hintText: 'What do people call you?',
+                labelText: 'Name *',
+              ),
+              onSaved: (String value) { person.name = value; },
               validator: _validateName,
             ),
-            new TextField(
-              icon: new Icon(Icons.phone),
-              hintText: 'Where can we reach you?',
-              labelText: 'Phone Number *',
+            new TextFormField(
+              decoration: const InputDecoration(
+                icon: const Icon(Icons.phone),
+                hintText: 'Where can we reach you?',
+                labelText: 'Phone Number *',
+              ),
               keyboardType: TextInputType.phone,
-              onSaved: (InputValue val) { person.phoneNumber = val.text; },
+              onSaved: (String value) { person.phoneNumber = value; },
               validator: _validatePhoneNumber,
             ),
-            new TextField(
-              hintText: 'Tell us about yourself',
-              labelText: 'Life story',
+            new TextFormField(
+              decoration: const InputDecoration(
+                hintText: 'Tell us about yourself',
+                labelText: 'Life story',
+              ),
               maxLines: 3,
             ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 new Expanded(
-                  child: new TextField(
+                  child: new TextFormField(
                     key: _passwordFieldKey,
-                    hintText: 'How do you log in?',
-                    labelText: 'New Password *',
+                    decoration: const InputDecoration(
+                      hintText: 'How do you log in?',
+                      labelText: 'New Password *',
+                    ),
                     obscureText: true,
-                    onSaved: (InputValue val) { person.password = val.text; }
-                  )
+                    onSaved: (String value) { person.password = value; },
+                  ),
                 ),
                 const SizedBox(width: 16.0),
                 new Expanded(
-                  child: new TextField(
-                    hintText: 'How do you log in?',
-                    labelText: 'Re-type Password *',
+                  child: new TextFormField(
+                    decoration: const InputDecoration(
+                      hintText: 'How do you log in?',
+                      labelText: 'Re-type Password *',
+                    ),
                     obscureText: true,
                     validator: _validatePassword,
-                  )
-                )
-              ]
+                  ),
+                ),
+              ],
             ),
             new Container(
               padding: const EdgeInsets.all(20.0),
@@ -168,9 +178,9 @@ class TextFieldDemoState extends State<TextFieldDemo> {
               padding: const EdgeInsets.only(top: 20.0),
               child: new Text('* indicates required field', style: Theme.of(context).textTheme.caption),
             ),
-          ]
+          ],
         )
-      )
+      ),
     );
   }
 }

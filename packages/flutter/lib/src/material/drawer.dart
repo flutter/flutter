@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -117,7 +118,7 @@ class DrawerController extends StatefulWidget {
   /// The [child] argument must not be null and is typically a [Drawer].
   DrawerController({
     GlobalKey key,
-    this.child
+    @required this.child
   }) : super(key: key) {
     assert(child != null);
   }
@@ -157,8 +158,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   LocalHistoryEntry _historyEntry;
-  // TODO(abarth): This should be a GlobalValueKey when those exist.
-  GlobalKey get _drawerKey => new GlobalObjectKey(config.key);
+  final FocusScopeNode _focusScopeNode = new FocusScopeNode();
 
   void _ensureHistoryEntry() {
     if (_historyEntry == null) {
@@ -166,7 +166,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       if (route != null) {
         _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
         route.addLocalHistoryEntry(_historyEntry);
-        Focus.moveScopeTo(_drawerKey, context: context);
+        FocusScope.of(context).setFirstFocus(_focusScopeNode);
       }
     }
   }
@@ -209,10 +209,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
+  final GlobalKey _drawerKey = new GlobalKey();
+
   double get _width {
-    final RenderBox drawerBox = _drawerKey.currentContext?.findRenderObject();
-    if (drawerBox != null)
-      return drawerBox.size.width;
+    final RenderBox box = _drawerKey.currentContext?.findRenderObject();
+    if (box != null)
+      return box.size.width;
     return _kWidth; // drawer not being shown currently
   }
 
@@ -285,8 +287,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   alignment: FractionalOffset.centerRight,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
-                    child: new Focus(
+                    child: new FocusScope(
                       key: _drawerKey,
+                      node: _focusScopeNode,
                       child: config.child
                     ),
                   ),

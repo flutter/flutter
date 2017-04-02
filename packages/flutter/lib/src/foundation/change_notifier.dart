@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
@@ -157,6 +157,19 @@ class _MergingListenable extends ChangeNotifier {
     for (Listenable child in _children)
       child?.removeListener(notifyListeners);
     super.dispose();
+  }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = new StringBuffer();
+    buffer.write('_MergingListenable([');
+    for (int i = 0; i < _children.length; ++i) {
+      buffer.write(_children[i].toString());
+      if (i < _children.length - 1)
+        buffer.write(', ');
+    }
+    buffer.write('])');
+    return buffer.toString();
   }
 }
 
