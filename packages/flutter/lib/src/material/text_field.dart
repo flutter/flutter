@@ -69,6 +69,7 @@ class TextField extends StatefulWidget {
     this.decoration: const InputDecoration(),
     this.keyboardType: TextInputType.text,
     this.style,
+    this.textAlign,
     this.autofocus: false,
     this.obscureText: false,
     this.maxLines: 1,
@@ -88,7 +89,7 @@ class TextField extends StatefulWidget {
 
   /// The decoration to show around the text field.
   ///
-  /// By default, draws a horizontal line under the input field but can be
+  /// By default, draws a horizontal line under the text field but can be
   /// configured to show an icon, label, hint text, and error text.
   ///
   /// Set this field to null to remove the decoration entirely (including the
@@ -105,10 +106,13 @@ class TextField extends StatefulWidget {
   /// If null, defaults to a text style from the current [Theme].
   final TextStyle style;
 
-  /// Whether this input field should focus itself if nothing else is already
+  /// How the text being edited should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// Whether this text field should focus itself if nothing else is already
   /// focused.
   ///
-  /// If true, the keyboard will open as soon as this input obtains focus.
+  /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
   /// Defaults to false.
@@ -118,8 +122,8 @@ class TextField extends StatefulWidget {
 
   /// Whether to hide the text being edited (e.g., for passwords).
   ///
-  /// When this is set to true, all the characters in the input are replaced by
-  /// U+2022 BULLET characters (•).
+  /// When this is set to true, all the characters in the text field are
+  /// replaced by U+2022 BULLET characters (•).
   ///
   /// Defaults to false.
   final bool obscureText;
@@ -209,6 +213,7 @@ class _TextFieldState extends State<TextField> {
         focusNode: focusNode,
         keyboardType: config.keyboardType,
         style: style,
+        textAlign: config.textAlign,
         autofocus: config.autofocus,
         obscureText: config.obscureText,
         maxLines: config.maxLines,
@@ -227,6 +232,7 @@ class _TextFieldState extends State<TextField> {
           return new InputDecorator(
             decoration: config.decoration,
             baseStyle: config.style,
+            textAlign: config.textAlign,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             child: child,

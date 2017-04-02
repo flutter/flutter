@@ -431,6 +431,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<Null> enterText(Finder finder, String text) async {
     await showKeyboard(finder);
     testTextInput.enterText(text);
+    await idle();
     return null;
   }
 }

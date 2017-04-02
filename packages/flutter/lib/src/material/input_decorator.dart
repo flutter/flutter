@@ -238,6 +238,7 @@ class InputDecorator extends StatelessWidget {
     Key key,
     @required this.decoration,
     this.baseStyle,
+    this.textAlign,
     this.isFocused: false,
     this.isEmpty: false,
     this.child,
@@ -251,6 +252,9 @@ class InputDecorator extends StatelessWidget {
   ///
   /// If null, defaults to a text style from the current [Theme].
   final TextStyle baseStyle;
+
+  /// How the text in the decoration should be aligned horizontally.
+  final TextAlign textAlign;
 
   /// Whether the input field has focus.
   ///
@@ -342,7 +346,7 @@ class InputDecorator extends StatelessWidget {
 
     final Color activeColor = _getActiveColor(themeData);
 
-    double topPadding = isDense ? 12.0 : 16.0;
+    double topPadding = isCollapsed ? 0.0 : (isDense ? 12.0 : 16.0);
 
     final List<Widget> stackChildren = <Widget>[];
 
@@ -383,12 +387,18 @@ class InputDecorator extends StatelessWidget {
       stackChildren.add(
         new Positioned(
           left: 0.0,
+          right: 0.0,
           top: topPadding + baseStyle.fontSize - hintStyle.fontSize,
           child: new AnimatedOpacity(
             opacity: (isEmpty && !hasInlineLabel) ? 1.0 : 0.0,
             duration: _kTransitionDuration,
             curve: _kTransitionCurve,
-            child: new Text(hintText, style: hintStyle),
+            child: new Text(
+              hintText,
+              style: hintStyle,
+              overflow: TextOverflow.ellipsis,
+              textAlign: textAlign,
+            ),
           ),
         ),
       );
@@ -406,8 +416,14 @@ class InputDecorator extends StatelessWidget {
       final TextStyle errorStyle = decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor);
       stackChildren.add(new Positioned(
         left: 0.0,
+        right: 0.0,
         bottom: 0.0,
-        child: new Text(errorText, style: errorStyle)
+        child: new Text(
+          errorText,
+          style: errorStyle,
+          textAlign: textAlign,
+          overflow: TextOverflow.ellipsis,
+        ),
       ));
     }
 
