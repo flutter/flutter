@@ -29,7 +29,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
       formKey.currentState.save();
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
@@ -60,7 +59,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
     }
@@ -93,7 +91,6 @@ void main() {
     Future<Null> checkErrorText(String testValue) async {
       formKey.currentState.reset();
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
       await tester.pumpWidget(builder(false));
 
       // We have to manually validate if we're not autovalidating.
@@ -105,7 +102,6 @@ void main() {
       // Try again with autovalidation. Should validate immediately.
       formKey.currentState.reset();
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
       await tester.pumpWidget(builder(true));
 
       expect(find.text(errorText(testValue)), findsOneWidget);
@@ -146,7 +142,6 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       await tester.enterText(find.byType(EditableText).first, testValue);
-      await tester.idle();
       await tester.pump();
 
       // Check for a new Text widget with our error text.
@@ -190,7 +185,6 @@ void main() {
     // sanity check, make sure we can still edit the text and everything updates
     expect(inputKey.currentState.value, equals(initialValue));
     await tester.enterText(find.byType(EditableText), 'world');
-    await tester.idle();
     await tester.pump();
     expect(inputKey.currentState.value, equals('world'));
     expect(editableText.config.controller.text, equals('world'));
@@ -221,7 +215,6 @@ void main() {
     expect(formKey.currentState.validate(), isTrue);
 
     await tester.enterText(find.byType(EditableText), 'Test');
-    await tester.idle();
     await tester.pumpWidget(builder(false));
 
     // Form wasn't saved yet.

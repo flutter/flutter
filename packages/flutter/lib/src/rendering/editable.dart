@@ -47,6 +47,7 @@ class RenderEditable extends RenderBox {
   /// Creates a render object for a single line of editable text.
   RenderEditable({
     TextSpan text,
+    TextAlign textAlign,
     Color cursorColor,
     bool showCursor: false,
     int maxLines: 1,
@@ -55,7 +56,7 @@ class RenderEditable extends RenderBox {
     TextSelection selection,
     @required ViewportOffset offset,
     this.onSelectionChanged,
-  }) : _textPainter = new TextPainter(text: text, textScaleFactor: textScaleFactor),
+  }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
        _showCursor = showCursor,
        _maxLines = maxLines,
@@ -85,6 +86,15 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.text = value;
     markNeedsLayout();
+  }
+
+  /// How the text should be aligned horizontally.
+  TextAlign get textAlign => _textPainter.textAlign;
+  set textAlign(TextAlign value) {
+    if (_textPainter.textAlign == value)
+      return;
+    _textPainter.textAlign = value;
+    markNeedsPaint();
   }
 
   /// The color to use when painting the cursor.
@@ -225,7 +235,7 @@ class RenderEditable extends RenderBox {
     // TODO(mpcomplete): We should be more disciplined about when we dirty the
     // layout state of the text painter so that we can know that the layout is
     // clean at this point.
-    _textPainter.layout(maxWidth: _maxContentWidth);
+    _layoutText();
 
     final Offset paintOffset = _paintOffset;
 
@@ -260,12 +270,6 @@ class RenderEditable extends RenderBox {
   }
 
   double get _preferredLineHeight => _textPainter.preferredLineHeight;
-
-  double get _maxContentWidth {
-    if (_maxLines > 1)
-      return constraints.maxWidth - (_kCaretGap + _kCaretWidth);
-    return double.INFINITY;
-  }
 
   @override
   double computeMinIntrinsicHeight(double width) {
@@ -333,11 +337,19 @@ class RenderEditable extends RenderBox {
 
   Rect _caretPrototype;
 
+  void _layoutText() {
+    final double caretMargin = _kCaretGap + _kCaretWidth;
+    final double maxWidth = _maxLines > 1 ?
+      math.max(0.0, constraints.maxWidth - caretMargin) : double.INFINITY;
+    final double minWidth = math.max(0.0, constraints.minWidth - caretMargin);
+    _textPainter.layout(minWidth: minWidth, maxWidth: maxWidth);
+  }
+
   @override
   void performLayout() {
     _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
-    _textPainter.layout(maxWidth: _maxContentWidth);
+    _layoutText();
     size = new Size(constraints.maxWidth, constraints.constrainHeight(
       _textPainter.height.clamp(_preferredLineHeight, _preferredLineHeight * _maxLines)
     ));

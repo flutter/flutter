@@ -804,4 +804,52 @@ void main() {
     expect(iconRight, equals(tester.getTopLeft(find.text('label')).x));
     expect(iconRight, equals(tester.getTopLeft(find.byType(EditableText)).x));
   });
+
+  testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new TextField(
+            decoration: new InputDecoration.collapsed(
+              hintText: 'hint',
+            ),
+          ),
+        ),
+      )),
+    );
+
+    expect(tester.getTopLeft(find.text('hint')), equals(tester.getTopLeft(find.byType(TextField))));
+  });
+
+  testWidgets('Can align to center', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new Container(
+            width: 300.0,
+            child: new TextField(
+              textAlign: TextAlign.center,
+              decoration: null,
+            ),
+          ),
+        ),
+      )),
+    );
+
+    final RenderEditable editable = findRenderEditable(tester);
+    Point topLeft = editable.localToGlobal(
+        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+    );
+
+    expect(topLeft.x, equals(399.0));
+
+    await tester.enterText(find.byType(EditableText), 'abcd');
+    await tester.pump();
+
+    topLeft = editable.localToGlobal(
+        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+    );
+
+    expect(topLeft.x, equals(399.0));
+  });
 }
