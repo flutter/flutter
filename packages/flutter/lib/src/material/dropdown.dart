@@ -462,7 +462,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// By default this button's height is the same as its menu items' heights.
   /// If isDense is true, the button's height is reduced by about half. This
   /// can be useful when the button is embedded in a container that adds
-  /// its own decorations, like [InputContainer].
+  /// its own decorations, like [InputDecorator].
   final bool isDense;
 
   @override

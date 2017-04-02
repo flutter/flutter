@@ -158,6 +158,19 @@ class _MergingListenable extends ChangeNotifier {
       child?.removeListener(notifyListeners);
     super.dispose();
   }
+
+  @override
+  String toString() {
+    final StringBuffer buffer = new StringBuffer();
+    buffer.write('_MergingListenable([');
+    for (int i = 0; i < _children.length; ++i) {
+      buffer.write(_children[i].toString());
+      if (i < _children.length - 1)
+        buffer.write(', ');
+    }
+    buffer.write('])');
+    return buffer.toString();
+  }
 }
 
 /// A [ChangeNotifier] that holds a single value.

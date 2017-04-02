@@ -321,7 +321,7 @@ class FlutterDriver {
     return null;
   }
 
-  /// Sets the text value of the `Input` widget located by [finder].
+  /// Sets the text value of the [TextField] widget located by [finder].
   ///
   /// This command invokes the `onChanged` handler of the `Input` widget with
   /// the provided [text].
@@ -330,10 +330,10 @@ class FlutterDriver {
     return null;
   }
 
-  /// Submits the current text value of the `Input` widget located by [finder].
+  /// Submits the current text value of the [TextField] widget located by [finder].
   ///
-  /// This command invokes the `onSubmitted` handler of the `Input` widget and
-  /// the returns the submitted text value.
+  /// This command invokes the `onSubmitted` handler of the [TextField] widget
+  /// and the returns the submitted text value.
   Future<String> submitInputText(SerializableFinder finder, {Duration timeout}) async {
     final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder, timeout: timeout));
     return json['text'];

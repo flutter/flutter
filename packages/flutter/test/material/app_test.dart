@@ -43,9 +43,9 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
         child: new Center(
-          child: new Input(focusNode: focusNode, autofocus: true)
-        )
-      )
+          child: new TextField(focusNode: focusNode, autofocus: true),
+        ),
+      ),
     ));
 
     expect(focusNode.hasFocus, isTrue);
