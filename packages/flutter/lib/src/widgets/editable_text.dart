@@ -23,29 +23,19 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
-class TextEditingController extends ChangeNotifier {
+class TextEditingController extends ValueNotifier<TextEditingValue> {
   TextEditingController({ String text })
-    : _value = text == null ? TextEditingValue.empty : new TextEditingValue(text: text);
+    : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
 
   TextEditingController.fromValue(TextEditingValue value)
-    : _value = value ?? TextEditingValue.empty;
+    : super(value ?? TextEditingValue.empty);
 
-  TextEditingValue get value => _value;
-  TextEditingValue _value;
-  set value(TextEditingValue newValue) {
-    assert(newValue != null);
-    if (_value == newValue)
-      return;
-    _value = newValue;
-    notifyListeners();
-  }
-
-  String get text => _value.text;
+  String get text => value.text;
   set text(String newText) {
     value = value.copyWith(text: newText, composing: TextRange.empty);
   }
 
-  TextSelection get selection => _value.selection;
+  TextSelection get selection => value.selection;
   set selection(TextSelection newSelection) {
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
@@ -174,7 +164,7 @@ class EditableText extends StatefulWidget {
 /// State for a [EditableText].
 class EditableTextState extends State<EditableText> implements TextInputClient {
   Timer _cursorTimer;
-  bool _showCursor = false;
+  final ValueNotifier<bool> _showCursor = new ValueNotifier<bool>(false);
 
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
@@ -206,7 +196,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (config.controller != oldConfig.controller) {
       oldConfig.controller.removeListener(_didChangeTextEditingValue);
       config.controller.addListener(_didChangeTextEditingValue);
-      if (_isAttachedToKeyboard && config.controller.value != oldConfig.controller.value)
+      if (_hasInputConnection && config.controller.value != oldConfig.controller.value)
         _textInputConnection.setEditingState(config.controller.value);
      }
     if (config.focusNode != oldConfig.focusNode) {
@@ -218,13 +208,9 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   @override
   void dispose() {
     config.controller.removeListener(_didChangeTextEditingValue);
-    if (_isAttachedToKeyboard) {
-      _textInputConnection.close();
-      _textInputConnection = null;
-    }
-    assert(!_isAttachedToKeyboard);
-    if (_cursorTimer != null)
-      _stopCursorTimer();
+    _closeInputConnectionIfNeeded();
+    assert(!_hasInputConnection);
+    _stopCursorTimer();
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
@@ -256,12 +242,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     config.controller.value = value;
   }
 
-  void _didChangeTextEditingValue() {
-    setState(() { /* We use config.controller.value in build(). */ });
-  }
-
-  bool get _isAttachedToKeyboard => _textInputConnection != null && _textInputConnection.attached;
-
+  bool get _hasFocus => config.focusNode.hasFocus;
   bool get _isMultiline => config.maxLines > 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
@@ -278,17 +259,28 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   bool _didRequestKeyboard = false;
+  bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
 
-  void _attachOrDetachKeyboard(bool focused) {
-    if (focused && !_isAttachedToKeyboard && _didRequestKeyboard) {
+  void _openInputConnectionIfNeeded() {
+    if (!_hasInputConnection) {
       _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
         ..setEditingState(_value)
         ..show();
-    } else if (!focused) {
-      if (_isAttachedToKeyboard) {
-        _textInputConnection.close();
-        _textInputConnection = null;
-      }
+    }
+  }
+
+  void _closeInputConnectionIfNeeded() {
+    if (_hasInputConnection) {
+      _textInputConnection.close();
+      _textInputConnection = null;
+    }
+  }
+
+  void _openOrCloseInputConnectionIfNeeded() {
+    if (_hasFocus && _didRequestKeyboard) {
+      _openInputConnectionIfNeeded();
+    } else if (!_hasFocus) {
+      _closeInputConnectionIfNeeded();
       config.controller.clearComposing();
     }
     _didRequestKeyboard = false;
@@ -302,20 +294,32 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   void requestKeyboard() {
-    if (_isAttachedToKeyboard) {
+    if (_hasInputConnection) {
       _textInputConnection.show();
     } else {
-      _didRequestKeyboard = true;
-      if (config.focusNode.hasFocus)
-        _attachOrDetachKeyboard(true);
-      else
+      if (_hasFocus) {
+        _openInputConnectionIfNeeded();
+      } else {
+        _didRequestKeyboard = true;
         FocusScope.of(context).requestFocus(config.focusNode);
+      }
     }
   }
 
   void _hideSelectionOverlayIfNeeded() {
     _selectionOverlay?.hide();
     _selectionOverlay = null;
+  }
+
+  void _updateOrDisposeSelectionOverlayIfNeeded() {
+    if (_selectionOverlay != null) {
+      if (_hasFocus) {
+        _selectionOverlay.update(_value);
+      } else {
+        _selectionOverlay.dispose();
+        _selectionOverlay = null;
+      }
+    }
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
@@ -351,7 +355,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   /// Whether the blinking cursor is actually visible at this precise moment
   /// (it's hidden half the time, since it blinks).
   @visibleForTesting
-  bool get cursorCurrentlyVisible => _showCursor;
+  bool get cursorCurrentlyVisible => _showCursor.value;
 
   /// The cursor blink interval (the amount of time the cursor is in the "on"
   /// state or the "off" state). A complete cursor blink period is twice this
@@ -360,39 +364,39 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
 
   void _cursorTick(Timer timer) {
-    setState(() {
-      _showCursor = !_showCursor;
-    });
+    _showCursor.value = !_showCursor.value;
   }
 
   void _startCursorTimer() {
-    _showCursor = true;
+    _showCursor.value = true;
     _cursorTimer = new Timer.periodic(_kCursorBlinkHalfPeriod, _cursorTick);
   }
 
-  void _handleFocusChanged() {
-    final bool focused = config.focusNode.hasFocus;
-    _attachOrDetachKeyboard(focused);
-
-    if (_cursorTimer == null && focused && _value.selection.isCollapsed)
-      _startCursorTimer();
-    else if (_cursorTimer != null && (!focused || !_value.selection.isCollapsed))
-      _stopCursorTimer();
-
-    if (_selectionOverlay != null) {
-      if (focused) {
-        _selectionOverlay.update(_value);
-      } else {
-        _selectionOverlay.dispose();
-        _selectionOverlay = null;
-      }
-    }
+  void _stopCursorTimer() {
+    _cursorTimer?.cancel();
+    _cursorTimer = null;
+    _showCursor.value = false;
   }
 
-  void _stopCursorTimer() {
-    _cursorTimer.cancel();
-    _cursorTimer = null;
-    _showCursor = false;
+  void _startOrStopCursorTimerIfNeeded() {
+    if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
+      _startCursorTimer();
+    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
+      _stopCursorTimer();
+  }
+
+  void _didChangeTextEditingValue() {
+    _startOrStopCursorTimerIfNeeded();
+    _updateOrDisposeSelectionOverlayIfNeeded();
+    // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
+    // to avoid this setState().
+    setState(() { /* We use config.controller.value in build(). */ });
+  }
+
+  void _handleFocusChanged() {
+    _openOrCloseInputConnectionIfNeeded();
+    _startOrStopCursorTimerIfNeeded();
+    _updateOrDisposeSelectionOverlayIfNeeded();
   }
 
   @override
@@ -440,7 +444,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextEditingValue value;
   final TextStyle style;
   final Color cursorColor;
-  final bool showCursor;
+  final ValueNotifier<bool> showCursor;
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;

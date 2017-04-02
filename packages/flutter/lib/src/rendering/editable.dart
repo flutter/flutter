@@ -49,7 +49,7 @@ class RenderEditable extends RenderBox {
     TextSpan text,
     TextAlign textAlign,
     Color cursorColor,
-    bool showCursor: false,
+    ValueNotifier<bool> showCursor,
     int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
@@ -58,15 +58,15 @@ class RenderEditable extends RenderBox {
     this.onSelectionChanged,
   }) : _textPainter = new TextPainter(text: text, textAlign: textAlign, textScaleFactor: textScaleFactor),
        _cursorColor = cursorColor,
-       _showCursor = showCursor,
+       _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
-    assert(showCursor != null);
+    assert(_showCursor != null);
     assert(maxLines != null);
     assert(textScaleFactor != null);
     assert(offset != null);
-    assert(!showCursor || cursorColor != null);
+    assert(!_showCursor.value || cursorColor != null);
     _tap = new TapGestureRecognizer()
       ..onTapDown = _handleTapDown
       ..onTap = _handleTap
@@ -108,13 +108,17 @@ class RenderEditable extends RenderBox {
   }
 
   /// Whether to paint the cursor.
-  bool get showCursor => _showCursor;
-  bool _showCursor;
-  set showCursor(bool value) {
+  ValueNotifier<bool> get showCursor => _showCursor;
+  ValueNotifier<bool> _showCursor;
+  set showCursor(ValueNotifier<bool> value) {
     assert(value != null);
     if (_showCursor == value)
       return;
+    if (attached)
+      _showCursor.removeListener(markNeedsPaint);
     _showCursor = value;
+    if (attached)
+      _showCursor.addListener(markNeedsPaint);
     markNeedsPaint();
   }
 
@@ -184,6 +188,20 @@ class RenderEditable extends RenderBox {
     if (attached)
       _offset.addListener(markNeedsPaint);
     markNeedsLayout();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    _offset.addListener(markNeedsPaint);
+    _showCursor.addListener(markNeedsPaint);
+  }
+
+  @override
+  void detach() {
+    _offset.removeListener(markNeedsPaint);
+    _showCursor.removeListener(markNeedsPaint);
+    super.detach();
   }
 
   bool get _isMultiline => maxLines > 1;
@@ -377,7 +395,7 @@ class RenderEditable extends RenderBox {
     final Offset effectiveOffset = offset + _paintOffset;
 
     if (_selection != null) {
-      if (_selection.isCollapsed && _showCursor && cursorColor != null) {
+      if (_selection.isCollapsed && _showCursor.value && cursorColor != null) {
         _paintCaret(context.canvas, effectiveOffset);
       } else if (!_selection.isCollapsed && _selectionColor != null) {
         _selectionRects ??= _textPainter.getBoxesForSelection(_selection);
