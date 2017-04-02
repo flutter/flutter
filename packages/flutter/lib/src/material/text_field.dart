@@ -15,29 +15,6 @@ export 'package:flutter/services.dart' show TextInputType;
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-/// A simple undecorated text input field.
-///
-/// If you want decorations as specified in the Material spec (most likely),
-/// use [Input] instead.
-///
-/// This widget is comparable to [Text] in that it does not include a margin
-/// or any decoration outside the text itself. It is useful for applications,
-/// like a search box, that don't need any additional decoration. It should
-/// also be useful in custom widgets that support text input.
-///
-/// The [value] field must be updated each time the [onChanged] callback is
-/// invoked. Be sure to include the full [value] provided by the [onChanged]
-/// callback, or information like the current selection will be lost.
-///
-/// Requires one of its ancestors to be a [Material] widget.
-///
-/// See also:
-///
-/// * [Input], which adds a label, a divider below the text field, and support for
-///   an error message.
-
-
-
 /// A Material Design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
