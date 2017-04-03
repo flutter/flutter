@@ -19,6 +19,7 @@ include $(CLEAR_VARS)
 include $(CLEAR_VARS)
 minikin_src_files := \
     CmapCoverage.cpp \
+    Emoji.cpp \
     FontCollection.cpp \
     FontFamily.cpp \
     FontLanguage.cpp \
