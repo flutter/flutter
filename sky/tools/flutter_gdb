@@ -99,7 +99,10 @@ class GdbClient(object):
 
     def run(self, args):
         flutter_root = _get_flutter_root()
-        adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+        if args.adb is None:
+            adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+        else:
+            adb_path = args.adb
 
         if args.pull_libs:
             if not self._copy_system_libs(adb_path, args.package, args.sysroot):
@@ -140,7 +143,10 @@ class GdbServer(object):
 
     def run(self, args):
         flutter_root = _get_flutter_root()
-        adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+        if args.adb is None:
+            adb_path = os.path.join(flutter_root, ADB_LOCAL_PATH)
+        else:
+            adb_path = args.adb
 
         package_pid = _find_package_pid(adb_path, args.package)
         if package_pid is None:
@@ -167,6 +173,7 @@ class GdbServer(object):
 def main():
     parser = argparse.ArgumentParser(description='Flutter debugger tool')
     subparsers = parser.add_subparsers(help='sub-command help')
+    parser.add_argument('--adb', type=str, help='path to ADB tool')
 
     commands = [
         GdbClient(),
