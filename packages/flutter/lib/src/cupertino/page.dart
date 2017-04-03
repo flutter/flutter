@@ -39,7 +39,7 @@ class CupertinoPageTransition extends AnimatedWidget {
         key: key,
         // Trigger a rebuild whenever any of the 2 animation route happens.
         listenable: new Listenable.merge(
-          <Listenable> [incomingRouteAnimation, outgoingRouteAnimation]
+          <Listenable>[incomingRouteAnimation, outgoingRouteAnimation]
         ),
       );
 
