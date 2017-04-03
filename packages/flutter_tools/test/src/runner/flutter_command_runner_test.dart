@@ -16,12 +16,12 @@ void main() {
     testUsingContext('checks that Flutter installation is up-to-date', () async {
       final MockFlutterVersion version = FlutterVersion.instance;
       bool versionChecked = false;
-      when(version.checkFlutterVersionFreshness()).thenAnswer((_) {
+      when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
         versionChecked = true;
         return null;
       });
 
-      createTestCommandRunner(new DummyFlutterCommand(shouldUpdateCache: false))
+      await createTestCommandRunner(new DummyFlutterCommand(shouldUpdateCache: false))
           .run(<String>['dummy']);
 
       expect(versionChecked, isTrue);
