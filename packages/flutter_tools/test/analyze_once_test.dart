@@ -86,7 +86,7 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
+          'warning - The parameter \'child\' is required',
           '1 warning found.',
         ],
         toolExit: true,
@@ -100,7 +100,7 @@ void main() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
+          'warning - The parameter \'child\' is required',
           '1 warning found.',
         ],
         toolExit: true,
@@ -126,8 +126,8 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
-          '[lint] Only throw instances of classes extending either Exception or Error',
+          'warning - The parameter \'child\' is required',
+          'lint - Only throw instances of classes extending either Exception or Error',
           '1 warning and 1 lint found.',
         ],
         toolExit: true,
@@ -141,8 +141,8 @@ void main() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
-          '[lint] Only throw instances of classes extending either Exception or Error',
+          'warning - The parameter \'child\' is required',
+          'lint - Only throw instances of classes extending either Exception or Error',
           '1 warning and 1 lint found.',
         ],
         toolExit: true,
