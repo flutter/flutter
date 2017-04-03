@@ -101,6 +101,19 @@ void main() {
       await version.checkFlutterVersionFreshness();
       _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
     });
+
+    testFlutterVersion('ignores network issues', () async {
+      final FlutterVersion version = FlutterVersion.instance;
+
+      fakeData(
+          localCommitDate: _outOfDateVersion,
+          versionCheckStamp: _stampMissing,
+          errorOnFetch: true,
+      );
+
+      await version.checkFlutterVersionFreshness();
+      _expectVersionMessage('');
+    });
   });
 }
 
@@ -134,12 +147,17 @@ void fakeData({
   DateTime remoteCommitDate,
   String versionCheckStamp,
   bool expectSetStamp: false,
+  bool errorOnFetch: false,
 }) {
   final MockProcessManager pm = context.getVariable(ProcessManager);
   final MockCache cache = context.getVariable(Cache);
 
   ProcessResult success(String standardOutput) {
     return new ProcessResult(1, 0, standardOutput, '');
+  }
+
+  ProcessResult failure(int exitCode) {
+    return new ProcessResult(1, exitCode, '', 'error');
   }
 
   when(cache.getStampFor(any)).thenAnswer((Invocation invocation) {
@@ -188,7 +206,7 @@ void fakeData({
     } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__', 'https://github.com/flutter/flutter.git')) {
       return success('');
     } else if (argsAre('git', 'fetch', '__flutter_version_check__', 'master')) {
-      return success('');
+      return errorOnFetch ? failure(128) : success('');
     } else if (remoteCommitDate != null && argsAre('git', 'log', '__flutter_version_check__/master', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(remoteCommitDate.toString());
     }
