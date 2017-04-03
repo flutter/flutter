@@ -508,25 +508,30 @@ class _FloatingAppBar extends StatefulWidget {
 /// stops the floating appbar's snap-into-view or snap-out-of-view animation.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollableState _scrollable;
+  ScrollPosition _position;
   ScrollActivity _activity;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateScrollPositionListener();
+    _updateScrollable();
   }
 
   @override
   void dispose() {
-    _scrollable?.position?.removeActivityChangedListener(_scrollPositionListener);
+    _position?.removeActivityChangedListener(_scrollPositionListener);
     super.dispose();
   }
 
-  void _updateScrollPositionListener() {
-    final ScrollableState scrollable = Scrollable.of(context);
-    _scrollable?.position?.removeActivityChangedListener(_scrollPositionListener);
-    _scrollable = scrollable;
-    _scrollable?.position?.addActivityChangedListener(_scrollPositionListener);
+  void _updateScrollable() {
+    _scrollable = Scrollable.of(context);
+    _updateScrollPosition();
+  }
+
+  void _updateScrollPosition() {
+    _position?.removeActivityChangedListener(_scrollPositionListener);
+    _position = _scrollable?.position;
+    _position?.addActivityChangedListener(_scrollPositionListener);
   }
 
   RenderSliverFloatingPersistentHeader _headerRenderer() {
@@ -553,7 +558,9 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   @override
   Widget build(BuildContext context) {
     if (_scrollable == null)
-      _updateScrollPositionListener();
+      _updateScrollable();
+    if (_scrollable.position != _position)
+      _updateScrollPosition();
     return config.child;
   }
 }
