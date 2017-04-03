@@ -39,6 +39,7 @@
 #include "HbFontCache.h"
 #include "LayoutUtils.h"
 #include "MinikinInternal.h"
+#include <minikin/Emoji.h>
 #include <minikin/Layout.h>
 
 using std::string;
@@ -522,6 +523,13 @@ BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSi
         return;
     }
     UErrorCode status = U_ZERO_ERROR;
+    // Set callbacks to override bidi classes of new emoji
+    ubidi_setClassCallback(mBidi, emojiBidiOverride, nullptr, nullptr, nullptr, &status);
+    if (!U_SUCCESS(status)) {
+        ALOGE("error setting bidi callback function, status = %d", status);
+        return;
+    }
+
     UBiDiLevel bidiReq = bidiFlags;
     if (bidiFlags == kBidi_Default_LTR) {
         bidiReq = UBIDI_DEFAULT_LTR;

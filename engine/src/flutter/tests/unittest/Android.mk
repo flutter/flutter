@@ -67,13 +67,13 @@ LOCAL_SRC_FILES += \
     ../util/FontTestUtils.cpp \
     ../util/MinikinFontForTest.cpp \
     ../util/UnicodeUtils.cpp \
+    EmojiTest.cpp \
     FontCollectionTest.cpp \
     FontCollectionItemizeTest.cpp \
     FontFamilyTest.cpp \
     FontLanguageListCacheTest.cpp \
     HbFontCacheTest.cpp \
     HyphenatorTest.cpp \
-    MinikinInternalTest.cpp \
     GraphemeBreakTests.cpp \
     LayoutTest.cpp \
     LayoutUtilsTest.cpp \
