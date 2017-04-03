@@ -18,6 +18,8 @@ import 'text_field.dart';
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
+/// For a documentation about the various parameters, see [TextField].
+///
 /// See also:
 ///
 ///  * <https://material.google.com/components/text-fields.html>
@@ -26,6 +28,9 @@ import 'text_field.dart';
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
 class TextFormField extends FormField<String> {
+  /// Creates a [FormField] that contains a [TextField].
+  ///
+  /// For a documentation about the various parameters, see [TextField].
   TextFormField({
     Key key,
     TextEditingController controller,
@@ -53,9 +58,7 @@ class TextFormField extends FormField<String> {
         autofocus: autofocus,
         obscureText: obscureText,
         maxLines: maxLines,
-        onChanged: (String value) {
-          field.onChanged(value);
-        },
+        onChanged: field.onChanged,
       );
     },
   );
