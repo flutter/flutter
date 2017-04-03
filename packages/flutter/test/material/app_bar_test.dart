@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight }) {
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new Scaffold(
     body: new DefaultTabController(
       length: 3,
@@ -19,6 +19,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight 
             floating: floating,
             pinned: pinned,
             expandedHeight: expandedHeight,
+            snap: snap,
             bottom: new TabBar(
               tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
             ),
@@ -44,17 +45,11 @@ bool appBarIsVisible(WidgetTester tester) {
   return sliver.geometry.visible;
 }
 
-double appBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(AppBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar)).height;
 
-double tabBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(TabBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double appBarY(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).y;
+
+double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
 
 void main() {
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
@@ -475,4 +470,73 @@ void main() {
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
+
+  testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: false,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), 0.0);
+
+    // Scroll to the middle of the list. The (floating) appbar is no longer visible.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.animateTo(256.0, curve: Curves.linear, duration: const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), false);
+    expect(appBarY(tester), lessThan(-128.0));
+
+    // Trigger the floating appbar snap animation.
+    position.animateTo(250.0, curve: Curves.linear, duration: const Duration(milliseconds: 500));
+    position.updateUserScrollDirection(ScrollDirection.forward); // ignore: INVALID_USE_OF_PROTECTED_MEMBER, since this is using a protected method for testing purposes
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(appBarY(tester), lessThan(0.0));
+    double previousAppBarY = appBarY(tester);
+
+    // Verify that the appbar is animating into view
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), greaterThan(previousAppBarY));
+    previousAppBarY = appBarY(tester);
+
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), greaterThan(previousAppBarY));
+
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), 0.0);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: true,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+
+
+    // Scroll to the middle of the list. The only the tab bar is visible.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.animateTo(256.0, curve: Curves.linear, duration: const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarY(tester), 0.0);
+    expect(appBarHeight(tester), kTextTabBarHeight);
+
+    // Trigger the floating appbar snap animation.
+    position.animateTo(250.0, curve: Curves.linear, duration: const Duration(milliseconds: 500));
+    position.updateUserScrollDirection(ScrollDirection.forward); // ignore: INVALID_USE_OF_PROTECTED_MEMBER, since this is using a protected method for testing purposes
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.pumpAndSettle();
+    expect(appBarHeight(tester), 128.0);
+  });
+
 }
