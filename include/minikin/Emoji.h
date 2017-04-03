@@ -14,31 +14,21 @@
  * limitations under the License.
  */
 
-// Definitions internal to Minikin
-#define LOG_TAG "Minikin"
-
-#include "MinikinInternal.h"
-#include "HbFontCache.h"
-
-#include <log/log.h>
+#include <unicode/uchar.h>
 
 namespace minikin {
 
-android::Mutex gMinikinLock;
+// Returns true if c is emoji.
+bool isEmoji(uint32_t c);
 
-void assertMinikinLocked() {
-#ifdef ENABLE_RACE_DETECTION
-    LOG_ALWAYS_FATAL_IF(gMinikinLock.tryLock() == 0);
-#endif
-}
+// Returns true if c is emoji modifier base.
+bool isEmojiBase(uint32_t c);
 
-hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag) {
-    assertMinikinLocked();
-    hb_font_t* font = getHbFontLocked(minikinFont);
-    hb_face_t* face = hb_font_get_face(font);
-    hb_blob_t* blob = hb_face_reference_table(face, tag);
-    hb_font_destroy(font);
-    return blob;
-}
+// Returns true if c is emoji modifier.
+bool isEmojiModifier(uint32_t c);
+
+// Bidi override for ICU that knows about new emoji.
+UCharDirection emojiBidiOverride(const void* context, UChar32 c);
 
 }  // namespace minikin
+
