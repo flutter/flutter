@@ -20,6 +20,7 @@
 #include <unicode/utf16.h>
 
 #include <minikin/GraphemeBreak.h>
+#include <minikin/Emoji.h>
 #include "MinikinInternal.h"
 
 namespace minikin {
