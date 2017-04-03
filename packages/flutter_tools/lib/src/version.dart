@@ -81,7 +81,7 @@ class FlutterVersion {
   }
 
   /// A date String describing the last framework commit.
-  static String get frameworkCommitDate => _latestGitCommitDate();
+  String get frameworkCommitDate => _latestGitCommitDate();
 
   static String _latestGitCommitDate([String branch]) {
     final List<String> args = <String>['git', 'log'];
@@ -106,30 +106,30 @@ class FlutterVersion {
   ///
   /// Throws [ToolExit] if a git command fails, for example, when the remote git
   /// repository is not reachable due to a network issue.
-  static String get remoteFrameworkCommitDate {
-    _removeVersionCheckRemoteIfExists();
+  static Future<String> fetchRemoteFrameworkCommitDate() async {
+    await _removeVersionCheckRemoteIfExists();
     try {
-      _runSync(<String>[
+      await _run(<String>[
         'git',
         'remote',
         'add',
         _kVersionCheckRemote,
         'https://github.com/flutter/flutter.git',
       ], Cache.flutterRoot, lenient: false);
-      _runSync(<String>['git', 'fetch', _kVersionCheckRemote, 'master'], Cache.flutterRoot, lenient: false);
+      await _run(<String>['git', 'fetch', _kVersionCheckRemote, 'master'], Cache.flutterRoot, lenient: false);
       return _latestGitCommitDate('$_kVersionCheckRemote/master');
     } finally {
-      _removeVersionCheckRemoteIfExists();
+      await _removeVersionCheckRemoteIfExists();
     }
   }
 
-  static void _removeVersionCheckRemoteIfExists() {
-    final List<String> remotes = _runSync(<String>['git', 'remote'], Cache.flutterRoot, lenient: false)
+  static Future<Null> _removeVersionCheckRemoteIfExists() async {
+    final List<String> remotes = (await _run(<String>['git', 'remote'], Cache.flutterRoot, lenient: false))
         .split('\n')
         .map((String name) => name.trim())  // to account for OS-specific line-breaks
         .toList();
     if (remotes.contains(_kVersionCheckRemote)) {
-      _runSync(<String>['git', 'remote', 'remove', _kVersionCheckRemote], Cache.flutterRoot, lenient: false);
+      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote], Cache.flutterRoot, lenient: false);
     }
   }
 
@@ -174,7 +174,7 @@ class FlutterVersion {
   /// This function must run while [Cache.lock] is acquired because it reads and
   /// writes shared cache files.
   Future<Null> checkFlutterVersionFreshness() async {
-    final DateTime localFrameworkCommitDate = DateTime.parse(FlutterVersion.frameworkCommitDate);
+    final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
     final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
@@ -202,7 +202,7 @@ class FlutterVersion {
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║ $warning ║
   ║                                                                            ║
-  ║ To update to the latest version, run flutter update.                       ║
+  ║ To update to the latest version, run flutter upgrade.                      ║
   ╚════════════════════════════════════════════════════════════════════════════╝
 ''';
   }
@@ -232,7 +232,7 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(FlutterVersion.remoteFrameworkCommitDate);
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate());
       Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(<String, String>{
         'lastTimeVersionWasChecked': '${clock.now()}',
         'lastKnownRemoteVersion': '$remoteFrameworkCommitDate',
@@ -263,6 +263,27 @@ String _runSync(List<String> command, String cwd, {bool lenient: true}) {
       'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
       'Standard error: ${results.stderr}',
       exitCode: results.exitCode,
+    );
+  }
+
+  return '';
+}
+
+/// Runs [command] and returns the standard output as a string.
+///
+/// If [lenient] is `true` and the command fails, returns an empty string.
+/// Otherwise, throws a [ToolExit] exception.
+Future<String> _run(List<String> command, String cwd, {bool lenient: true}) async {
+  final ProcessResult results = await processManager.run(command, workingDirectory: cwd);
+
+  if (results.exitCode == 0)
+    return results.stdout.trim();
+
+  if (!lenient) {
+    throwToolExit(
+        'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+            'Standard error: ${results.stderr}',
+        exitCode: results.exitCode,
     );
   }
 

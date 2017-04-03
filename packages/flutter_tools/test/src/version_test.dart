@@ -29,6 +29,10 @@ const String _stampMissing = '____stamp_missing____';
 
 void main() {
   group('FlutterVersion', () {
+    setUpAll(() {
+      Cache.disableLocking();
+    });
+
     testFlutterVersion('prints nothing when Flutter installation looks fresh', () async {
       fakeData(localCommitDate: _upToDateVersion);
       await FlutterVersion.instance.checkFlutterVersionFreshness();
@@ -166,7 +170,7 @@ void fakeData({
     throw new StateError('Unexpected call to Cache.setStampFor(${invocation.positionalArguments}, ${invocation.namedArguments})');
   });
 
-  when(pm.runSync(any, workingDirectory: any)).thenAnswer((Invocation invocation) {
+  final Answering syncAnswer = (Invocation invocation) {
     bool argsAre(String a1, [String a2, String a3, String a4, String a5, String a6, String a7, String a8]) {
       const ListEquality<String> equality = const ListEquality<String>();
       final List<String> args = invocation.positionalArguments.single;
@@ -189,7 +193,12 @@ void fakeData({
       return success(remoteCommitDate.toString());
     }
 
-    throw new StateError('Unexpected call to ProcessManager.runSync(${invocation.positionalArguments}, ${invocation.namedArguments})');
+    throw new StateError('Unexpected call to ProcessManager.run(${invocation.positionalArguments}, ${invocation.namedArguments})');
+  };
+
+  when(pm.runSync(any, workingDirectory: any)).thenAnswer(syncAnswer);
+  when(pm.run(any, workingDirectory: any)).thenAnswer((Invocation invocation) async {
+    return syncAnswer(invocation);
   });
 }
 

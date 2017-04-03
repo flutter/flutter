@@ -6,7 +6,11 @@ import 'package:quiver/time.dart';
 
 import 'context.dart';
 
+const Clock _systemClock = const Clock();
+
 /// Currently active clock implementation.
 ///
 /// By default uses system clock. Override this in tests using [Clock.fixed].
-Clock get clock => context == null ? const Clock() : context[Clock];
+Clock get clock => context == null
+  ? _systemClock
+  : context.putIfAbsent(Clock, () => _systemClock);
