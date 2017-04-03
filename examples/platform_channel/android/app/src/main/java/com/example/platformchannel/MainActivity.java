@@ -69,23 +69,22 @@ public class MainActivity extends FlutterActivity {
     );
   }
 
-    private BroadcastReceiver createChargingStateChangeReceiver(final EventSink events) {
-      return new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-          int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+  private BroadcastReceiver createChargingStateChangeReceiver(final EventSink events) {
+    return new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
 
-          if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
-            events.error("UNAVAILABLE", "Charging status unavailbale", null);
-          } else {
-            boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                                 status == BatteryManager.BATTERY_STATUS_FULL;
-            events.success(isCharging ? "charging" : "discharging");
-          }
+        if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
+          events.error("UNAVAILABLE", "Charging status unavailbale", null);
+        } else {
+          boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                               status == BatteryManager.BATTERY_STATUS_FULL;
+          events.success(isCharging ? "charging" : "discharging");
         }
-      };
-    }
-
+      }
+    };
+  }
 
   private int getBatteryLevel() {
     int batteryLevel = -1;
