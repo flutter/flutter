@@ -181,7 +181,7 @@ void fakeData({
       return equality.equals(args, expectedArgs);
     }
 
-    if (argsAre('git', 'log', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S')) {
+    if (argsAre('git', 'log', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(localCommitDate.toString());
     } else if (argsAre('git', 'remote')) {
       return success('');
@@ -189,7 +189,7 @@ void fakeData({
       return success('');
     } else if (argsAre('git', 'fetch', '__flutter_version_check__', 'master')) {
       return success('');
-    } else if (remoteCommitDate != null && argsAre('git', 'log', '__flutter_version_check__/master', '-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S')) {
+    } else if (remoteCommitDate != null && argsAre('git', 'log', '__flutter_version_check__/master', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(remoteCommitDate.toString());
     }
 

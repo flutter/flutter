@@ -90,7 +90,7 @@ class FlutterVersion {
       args.add(branch);
     }
 
-    args.addAll(<String>['-n', '1', '--pretty=format:%ad', '--date=format:%Y-%m-%d %H:%M:%S']);
+    args.addAll(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']);
     return _runSync(args, Cache.flutterRoot, lenient: false);
   }
 
