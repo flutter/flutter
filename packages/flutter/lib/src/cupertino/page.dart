@@ -20,6 +20,11 @@ final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
   end: const FractionalOffset(-1.0/3.0, 0.0),
 );
 
+final IntTween _kElevationTween = new IntTween(
+  begin: 0,
+  end: 42,
+);
+
 /// Provides the native iOS page transition animation.
 ///
 /// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
@@ -37,18 +42,24 @@ class CupertinoPageTransition extends AnimatedWidget {
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
   }) :
-      incomingPositionAnimation = _kRightMiddleTween.animate(
+      _incomingPositionAnimation = _kRightMiddleTween.animate(
         new CurvedAnimation(
           parent: incomingRouteAnimation,
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
         )
       ),
-      outgoingPositionAnimation = _kMiddleLeftTween.animate(
+      _outgoingPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
           parent: outgoingRouteAnimation,
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
+        )
+      ),
+      _incomingElevationAnimation = _kElevationTween.animate(
+        new CurvedAnimation(
+          parent: incomingRouteAnimation,
+          curve: Curves.easeOut,
         )
       ),
       super(
@@ -60,9 +71,10 @@ class CupertinoPageTransition extends AnimatedWidget {
       );
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> incomingPositionAnimation;
+  final Animation<FractionalOffset> _incomingPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> outgoingPositionAnimation;
+  final Animation<FractionalOffset> _outgoingPositionAnimation;
+  final Animation<int> _incomingElevationAnimation;
   final Widget child;
 
   @override
@@ -70,13 +82,13 @@ class CupertinoPageTransition extends AnimatedWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: outgoingPositionAnimation,
+      position: _outgoingPositionAnimation,
       child: new SlideTransition(
-        position: incomingPositionAnimation,
+        position: _incomingPositionAnimation,
         child: new PhysicalModel(
           shape: BoxShape.rectangle,
           color: _kBackgroundColor,
-          elevation: 32,
+          elevation: _incomingElevationAnimation.value,
           child: child,
         ),
       ),
