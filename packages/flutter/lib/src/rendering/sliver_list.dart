@@ -24,8 +24,9 @@ import 'sliver_multi_box_adaptor.dart';
 ///
 /// If the children have a fixed extent in the main axis, consider using
 /// [RenderSliverFixedExtentList] rather than [RenderSliverList] because
-/// does not need to perform layout on its children to obtain their extent in
-/// the main axis and is therefore more efficient.
+/// [RenderSliverFixedExtentList] does not need to perform layout on its
+/// children to obtain their extent in the main axis and is therefore more
+/// efficient.
 ///
 /// See also:
 ///
