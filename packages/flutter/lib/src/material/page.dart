@@ -58,12 +58,16 @@ class _MountainViewPageTransition extends AnimatedWidget {
 /// By default, when a modal route is replaced by another, the previous route
 /// remains in memory. To free all the resources when this is not necessary, set
 /// [maintainState] to false.
+///
+/// Specify whether the incoming page is a fullscreen modal dialog. On iOS, those
+/// pages animate bottom->up rather than right->left.
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
+    this.fullscreenDialog: false,
   }) : super(settings: settings) {
     assert(builder != null);
     assert(opaque);
@@ -71,6 +75,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+  final bool fullscreenDialog;
 
   @override
   final bool maintainState;
@@ -84,6 +89,12 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
     return nextRoute is MaterialPageRoute<dynamic>;
+  }
+
+  @override
+  bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
+    // Don't perform outgoing animation if the next route is a fullscreen dialog.
+    return nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog;
   }
 
   @override
@@ -108,6 +119,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     // If attempts to dismiss this route might be vetoed, then do not
     // allow the user to dismiss the route with a swipe.
     if (hasScopedWillPopCallback)
+      return null;
+    // Fullscreen dialogs aren't dismissable by back swipe.
+    if (fullscreenDialog)
       return null;
     if (controller.status != AnimationStatus.completed)
       return null;
@@ -146,12 +160,18 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
-    if (Theme.of(context).platform == TargetPlatform.iOS &&
-        Navigator.of(context).userGestureInProgress) {
-      return new CupertinoPageTransition(
-        animation: new AnimationMean(left: animation, right: forwardAnimation),
-        child: child
-      );
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      if (fullscreenDialog)
+        return new CupertinoFullscreenDialogTransition(
+          animation: animation,
+          child: child,
+        );
+      else
+        return new CupertinoPageTransition(
+          incomingRouteAnimation: animation,
+          outgoingRouteAnimation: forwardAnimation,
+          child: child,
+        );
     } else {
       return new _MountainViewPageTransition(
         routeAnimation: animation,

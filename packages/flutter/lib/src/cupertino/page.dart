@@ -8,6 +8,18 @@ import 'package:flutter/widgets.dart';
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
 const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
+// Fractional offset from offscreen to the right to fully on screen.
+final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
+  begin: FractionalOffset.topRight,
+  end: FractionalOffset.topLeft,
+);
+
+// Fractional offset from fully on screen to 1/3 offscreen to the left.
+final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
+  begin: FractionalOffset.topLeft,
+  end: const FractionalOffset(-1.0/3.0, 0.0),
+);
+
 /// Provides the native iOS page transition animation.
 ///
 /// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
@@ -18,21 +30,39 @@ const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background co
 class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
-    @required Animation<double> animation,
+    // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
+    @required Animation<double> incomingRouteAnimation,
+    // Linear route animation from 0.0 to 1.0 when another screen is being pushed on top of this
+    // one.
+    @required Animation<double> outgoingRouteAnimation,
     @required this.child,
-  }) : super(
-    key: key,
-    listenable: _kTween.animate(new CurvedAnimation(
-      parent: animation,
-      curve: new _CupertinoTransitionCurve(null),
-    ),
-  ));
+  }) :
+      incomingPositionAnimation = _kRightMiddleTween.animate(
+        new CurvedAnimation(
+          parent: incomingRouteAnimation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        )
+      ),
+      outgoingPositionAnimation = _kMiddleLeftTween.animate(
+        new CurvedAnimation(
+          parent: outgoingRouteAnimation,
+          curve: Curves.easeOut,
+          reverseCurve: Curves.easeIn,
+        )
+      ),
+      super(
+        key: key,
+        // Trigger a rebuild whenever any of the 2 animation route happens.
+        listenable: new Listenable.merge(
+          <Listenable>[incomingRouteAnimation, outgoingRouteAnimation]
+        ),
+      );
 
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: FractionalOffset.topRight,
-    end: -FractionalOffset.topRight,
-  );
-
+  // When this page is coming in to cover another page.
+  final Animation<FractionalOffset> incomingPositionAnimation;
+  // When this page is becoming covered by another page.
+  final Animation<FractionalOffset> outgoingPositionAnimation;
   final Widget child;
 
   @override
@@ -40,45 +70,50 @@ class CupertinoPageTransition extends AnimatedWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: listenable,
-      child: new PhysicalModel(
-        shape: BoxShape.rectangle,
-        color: _kBackgroundColor,
-        elevation: 16,
-        child: child,
-      )
+      position: outgoingPositionAnimation,
+      child: new SlideTransition(
+        position: incomingPositionAnimation,
+        child: new PhysicalModel(
+          shape: BoxShape.rectangle,
+          color: _kBackgroundColor,
+          elevation: 32,
+          child: child,
+        ),
+      ),
     );
   }
 }
 
-// Custom curve for iOS page transitions.
-class _CupertinoTransitionCurve extends Curve {
-  _CupertinoTransitionCurve(this.curve);
+/// Transitions used for summoning fullscreen dialogs in iOS such as creating a new
+/// calendar event etc by bringing in the next screen from the bottom.
+class CupertinoFullscreenDialogTransition extends AnimatedWidget {
+  CupertinoFullscreenDialogTransition({
+    Key key,
+    @required Animation<double> animation,
+    @required this.child,
+  }) : super(
+    key: key,
+    listenable: _kBottomUpTween.animate(
+      new CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeInOut,
+      )
+    ),
+  );
 
-  final Curve curve;
+  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+    begin: FractionalOffset.bottomLeft,
+    end: FractionalOffset.topLeft,
+  );
+
+  final Widget child;
 
   @override
-  double transform(double t) {
-    // The input [t] is the average of the current and next route's animation.
-    // This means t=0.5 represents when the route is fully onscreen. At
-    // t > 0.5, it is partially offscreen to the left (which happens when there
-    // is another route on top). At t < 0.5, the route is to the right.
-    // We divide the range into two halves, each with a different transition,
-    // and scale each half to the range [0.0, 1.0] before applying curves so that
-    // each half goes through the full range of the curve.
-    if (t > 0.5) {
-      // Route is to the left of center.
-      t = (t - 0.5) * 2.0;
-      if (curve != null)
-        t = curve.transform(t);
-      t = t / 3.0;
-      t = t / 2.0 + 0.5;
-    } else {
-      // Route is to the right of center.
-      if (curve != null)
-        t = curve.transform(t * 2.0) / 2.0;
-    }
-    return t;
+  Widget build(BuildContext context) {
+    return new SlideTransition(
+      position: listenable,
+      child: child,
+    );
   }
 }
 
@@ -96,7 +131,7 @@ class CupertinoBackGestureController extends NavigationGestureController {
 
   @override
   void dispose() {
-    controller.removeStatusListener(handleStatusChanged);
+    controller.removeStatusListener(_handleStatusChanged);
     super.dispose();
   }
 
@@ -130,13 +165,13 @@ class CupertinoBackGestureController extends NavigationGestureController {
 
     // Don't end the gesture until the transition completes.
     final AnimationStatus status = controller.status;
-    handleStatusChanged(status);
-    controller?.addStatusListener(handleStatusChanged);
+    _handleStatusChanged(status);
+    controller?.addStatusListener(_handleStatusChanged);
 
     return (status == AnimationStatus.reverse || status == AnimationStatus.dismissed);
   }
 
-  void handleStatusChanged(AnimationStatus status) {
+  void _handleStatusChanged(AnimationStatus status) {
     if (status == AnimationStatus.dismissed)
       navigator.pop();
   }
