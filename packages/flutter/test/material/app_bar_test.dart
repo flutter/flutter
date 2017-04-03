@@ -246,6 +246,25 @@ void main() {
     expect(tester.getSize(title).width, equals(620.0));
   });
 
+  testWidgets('AppBar with no Scaffold', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new SizedBox(
+        height: kToolbarHeight,
+        child: new AppBar(
+          leading: new Text('L'),
+          title: new Text('No Scaffold'),
+          actions: <Widget>[new Text('A1'), new Text('A2')],
+        ),
+      ),
+    );
+
+    expect(find.text('L'), findsOneWidget);
+    expect(find.text('No Scaffold'), findsOneWidget);
+    expect(find.text('A1'), findsOneWidget);
+    expect(find.text('A2'), findsOneWidget);
+  });
+
+
   testWidgets('AppBar render at zero size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(
