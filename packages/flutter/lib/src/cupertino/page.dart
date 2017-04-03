@@ -8,12 +8,18 @@ import 'package:flutter/widgets.dart';
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
 const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
-// Used for iOS.
+/// Provides the native iOS page transition animation.
+///
+/// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
+/// AnimatedWidget wrapping that animates the page transition.
+///
+/// The page slides in from the right and exits in reverse. It also shifts to the left in
+/// a parallax motion when another page enters to cover it.
 class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
-    Animation<double> animation,
-    this.child,
+    @required Animation<double> animation,
+    @required this.child,
   }) : super(
     key: key,
     listenable: _kTween.animate(new CurvedAnimation(
@@ -76,8 +82,8 @@ class _CupertinoTransitionCurve extends Curve {
   }
 }
 
-// This class responds to drag gestures to control the route's transition
-// animation progress. Used for iOS back gesture.
+/// This class responds to drag gestures to control the route's transition
+/// animation progress. Used for iOS back gesture.
 class CupertinoBackGestureController extends NavigationGestureController {
   CupertinoBackGestureController({
     @required NavigatorState navigator,
