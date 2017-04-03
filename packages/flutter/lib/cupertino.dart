@@ -10,6 +10,7 @@ library cupertino;
 export 'src/cupertino/activity_indicator.dart';
 export 'src/cupertino/button.dart';
 export 'src/cupertino/dialog.dart';
+export 'src/cupertino/page.dart';
 export 'src/cupertino/slider.dart';
 export 'src/cupertino/switch.dart';
 export 'src/cupertino/thumb_painter.dart';
