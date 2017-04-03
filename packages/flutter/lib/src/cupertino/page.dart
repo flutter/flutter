@@ -8,9 +8,25 @@ import 'package:flutter/widgets.dart';
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
 const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
-/// Transitions used for standard iOS full page transitions by bringing coming in from the right on
-/// top of the previous screen and by becoming pushed off-screen to the left with a parallax effect
-/// below the next screen.
+// Fractional offset from offscreen to the right to fully on screen.
+final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
+  begin: FractionalOffset.topRight,
+  end: FractionalOffset.topLeft,
+);
+
+// Fractional offset from fully on screen to 1/3 offscreen to the left.
+final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
+  begin: FractionalOffset.topLeft,
+  end: const FractionalOffset(-1.0/3.0, 0.0),
+);
+
+/// Provides the native iOS page transition animation.
+///
+/// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
+/// AnimatedWidget wrapping that animates the page transition.
+///
+/// The page slides in from the right and exits in reverse. It also shifts to the left in
+/// a parallax motion when another page enters to cover it.
 class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
@@ -42,18 +58,6 @@ class CupertinoPageTransition extends AnimatedWidget {
           <Listenable>[incomingRouteAnimation, outgoingRouteAnimation]
         ),
       );
-
-  // Fractional offset from offscreen to the right to fully on screen.
-  static final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
-    begin: FractionalOffset.topRight,
-    end: FractionalOffset.topLeft,
-  );
-
-  // Fractional offset from fully on screen to 1/3 offscreen to the left.
-  static final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
-    begin: FractionalOffset.topLeft,
-    end: const FractionalOffset(-1.0/3.0, 0.0),
-  );
 
   // When this page is coming in to cover another page.
   final Animation<FractionalOffset> incomingPositionAnimation;
@@ -113,8 +117,8 @@ class CupertinoFullscreenDialogTransition extends AnimatedWidget {
   }
 }
 
-// This class responds to drag gestures to control the route's transition
-// animation progress. Used for iOS back gesture.
+/// This class responds to drag gestures to control the route's transition
+/// animation progress. Used for iOS back gesture.
 class CupertinoBackGestureController extends NavigationGestureController {
   CupertinoBackGestureController({
     @required NavigatorState navigator,
@@ -123,7 +127,7 @@ class CupertinoBackGestureController extends NavigationGestureController {
     assert(controller != null);
   }
 
-  AnimationController controller;
+  final AnimationController controller;
 
   @override
   void dispose() {
