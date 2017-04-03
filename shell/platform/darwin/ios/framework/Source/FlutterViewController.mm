@@ -54,10 +54,6 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
                                     FlutterTextInputDelegate>
 @end
 
-void FlutterInit(int argc, const char* argv[]) {
-  // Deprecated. To be removed.
-}
-
 @implementation FlutterViewController {
   fml::scoped_nsprotocol<FlutterDartProject*> _dartProject;
   UIInterfaceOrientationMask _orientationPreferences;

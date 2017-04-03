@@ -23,13 +23,4 @@ FLUTTER_EXPORT
 - (void)handleStatusBarTouches:(UIEvent*)event;
 @end
 
-__BEGIN_DECLS
-
-// Initializes Flutter for this process. Need only be called once per process.
-FLUTTER_EXPORT void FlutterInit(int argc, const char* argv[])
-    __attribute__((deprecated("This call is no longer necessary and will be "
-                              "removed in an upcoming release.")));
-
-__END_DECLS
-
 #endif  // FLUTTER_FLUTTERVIEWCONTROLLER_H_
