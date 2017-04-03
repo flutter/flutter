@@ -56,7 +56,7 @@ class Form extends StatefulWidget {
   ///
   /// If the callback returns a Future that resolves to false, the form's route
   /// will not be popped.
-  WillPopCallback onWillPop;
+  final WillPopCallback onWillPop;
 
   @override
   FormState createState() => new FormState();

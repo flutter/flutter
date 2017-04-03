@@ -520,6 +520,7 @@ class PaintingContext {
 ///
 /// * The [toString] method, which should describe the constraints so that they
 ///   appear in a usefully readable form in the output of [debugDumpRenderTree].
+@immutable
 abstract class Constraints {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

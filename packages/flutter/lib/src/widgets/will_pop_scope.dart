@@ -34,7 +34,7 @@ class WillPopScope extends StatefulWidget {
   ///
   /// If the callback returns a Future that resolves to false, the enclosing
   /// route will not be popped.
-  WillPopCallback onWillPop;
+  final WillPopCallback onWillPop;
 
   @override
   _WillPopScopeState createState() => new _WillPopScopeState();

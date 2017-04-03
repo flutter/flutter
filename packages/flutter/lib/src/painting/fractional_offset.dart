@@ -4,12 +4,15 @@
 
 import 'dart:ui' as ui show lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// An offset that's expressed as a fraction of a Size.
 ///
 /// FractionalOffset(1.0, 0.0) represents the top right of the Size,
 /// FractionalOffset(0.0, 1.0) represents the bottom left of the Size,
+@immutable
 class FractionalOffset {
   /// Creates a fractional offset.
   ///

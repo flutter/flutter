@@ -391,6 +391,7 @@ class TypeMatcher<T> {
 ///    be read by descendant widgets.
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
+@immutable
 abstract class Widget {
   /// Initializes [key] for subclasses.
   const Widget({ this.key });

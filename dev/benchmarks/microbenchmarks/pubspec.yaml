@@ -1,7 +1,7 @@
 name: microbenchmarks
 description: Small benchmarks for very specific parts of the Flutter framework.
 dependencies:
-  meta: ^1.0.3
+  meta: ^1.0.5
   flutter:
     sdk: flutter
   flutter_test:

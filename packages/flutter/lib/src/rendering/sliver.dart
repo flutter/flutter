@@ -422,6 +422,7 @@ class SliverConstraints extends Constraints {
 ///
 /// A sliver can occupy space in several different ways, which is why this class
 /// contains multiple values.
+@immutable
 class SliverGeometry {
   /// Creates an object that describes the amount of space occupied by a sliver.
   ///

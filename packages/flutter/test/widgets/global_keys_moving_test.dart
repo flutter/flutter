@@ -31,7 +31,8 @@ class StatefulLeafState extends State<StatefulLeaf> {
 class KeyedWrapper extends StatelessWidget {
   KeyedWrapper(this.key1, this.key2);
 
-  Key key1, key2;
+  final Key key1;
+  final Key key2;
 
   @override
   Widget build(BuildContext context) {

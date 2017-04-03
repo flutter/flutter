@@ -643,8 +643,8 @@ class _MergeableMaterialListBody extends ListBody {
     this.boxShadows
   }) : super(children: children, mainAxis: mainAxis);
 
-  List<MergeableMaterialItem> items;
-  List<BoxShadow> boxShadows;
+  final List<MergeableMaterialItem> items;
+  final List<BoxShadow> boxShadows;
 
   @override
   RenderListBody createRenderObject(BuildContext context) {
