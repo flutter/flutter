@@ -317,8 +317,10 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
   }
 
   @override
-  Future<bool> willPop() async {
-    return willHandlePopInternally || await super.willPop();
+  Future<RoutePopDisposition> willPop() async {
+    if (willHandlePopInternally)
+      return RoutePopDisposition.pop;
+    return await super.willPop();
   }
 
   @override
@@ -383,6 +385,28 @@ class _ModalScopeStatus extends InheritedWidget {
     if (canPop)
       description.add('can pop');
   }
+}
+
+/// Indicates whether the current route should be popped.
+///
+/// Used as the return value for [Route.willPop].
+enum RoutePopDisposition {
+  /// Pop the route.
+  ///
+  /// If [Route.willPop] returns [pop] then the back button will actually pop
+  /// the current route.
+  pop,
+
+  /// Do not pop the route.
+  ///
+  /// If [Route.willPop] returns [doNotPop] then the back button will be ignored.
+  doNotPop,
+
+  /// Delegate this to the next level of navigation.
+  ///
+  /// If [Route.willPop] return [bubble] then the back button will be handled
+  /// by the [SystemNavigator], which will usually close the application.
+  bubble,
 }
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
@@ -664,12 +688,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [removeScopedWillPopCallback], which removes a callback from the list
   ///   this method checks.
   @override
-  Future<bool> willPop() async {
+  Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState scope = _scopeKey.currentState;
     assert(scope != null);
     for (WillPopCallback callback in new List<WillPopCallback>.from(scope._willPopCallbacks)) {
       if (!await callback())
-        return false;
+        return RoutePopDisposition.doNotPop;
     }
     return await super.willPop();
   }
