@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Color, Size, Rect;
 
+import 'package:flutter/foundation.dart';
+
 import 'animation.dart';
 import 'animations.dart';
 import 'curves.dart';
@@ -231,7 +233,7 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ this.curve }) {
+  CurveTween({ @required this.curve }) {
     assert(curve != null);
   }
 

@@ -835,7 +835,7 @@ class RenderBackdropFilter extends RenderProxyBox {
   /// Creates a backdrop filter.
   ///
   /// The [filter] argument must not be null.
-  RenderBackdropFilter({ RenderBox child, ui.ImageFilter filter })
+  RenderBackdropFilter({ RenderBox child, @required ui.ImageFilter filter })
     : _filter = filter, super(child) {
     assert(filter != null);
   }
@@ -1426,7 +1426,7 @@ class RenderTransform extends RenderProxyBox {
   ///
   /// The [transform] argument must not be null.
   RenderTransform({
-    Matrix4 transform,
+    @required Matrix4 transform,
     Offset origin,
     FractionalOffset alignment,
     this.transformHitTests: true,

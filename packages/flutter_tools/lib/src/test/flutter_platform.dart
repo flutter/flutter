@@ -72,7 +72,7 @@ typedef Future<Null> _Finalizer();
 
 class _FlutterPlatform extends PlatformPlugin {
   _FlutterPlatform({
-    this.shellPath,
+    @required this.shellPath,
     this.collector,
     this.debuggerMode,
     this.explicitObservatoryPort,

@@ -222,7 +222,7 @@ enum _GlowState { idle, absorb, pull, recede }
 
 class _GlowController extends ChangeNotifier {
   _GlowController({
-    TickerProvider vsync,
+    @required TickerProvider vsync,
     @required Color color,
     @required Axis axis,
   }) : _color = color,

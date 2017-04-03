@@ -253,11 +253,11 @@ class DataTable extends StatelessWidget {
   /// otherwise it should be false.
   DataTable({
     Key key,
-    this.columns,
+    @required this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
     this.onSelectAll,
-    this.rows
+    @required this.rows
   }) : _onlyTextColumn = _initOnlyTextColumn(columns), super(key: key) {
     assert(columns != null);
     assert(columns.isNotEmpty);

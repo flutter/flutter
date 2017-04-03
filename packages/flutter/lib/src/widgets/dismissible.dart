@@ -128,8 +128,8 @@ class Dismissible extends StatefulWidget {
 
 class _DismissibleClipper extends CustomClipper<Rect> {
   _DismissibleClipper({
-    this.axis,
-    this.moveAnimation
+    @required this.axis,
+    @required this.moveAnimation
   }) : super(reclip: moveAnimation) {
     assert(axis != null);
     assert(moveAnimation != null);

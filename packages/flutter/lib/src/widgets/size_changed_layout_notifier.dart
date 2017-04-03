@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -56,7 +57,7 @@ class SizeChangedLayoutNotifier extends SingleChildRenderObjectWidget {
 class _RenderSizeChangedWithCallback extends RenderProxyBox {
   _RenderSizeChangedWithCallback({
     RenderBox child,
-    this.onLayoutChangedCallback
+    @required this.onLayoutChangedCallback
   }) : super(child) {
     assert(onLayoutChangedCallback != null);
   }

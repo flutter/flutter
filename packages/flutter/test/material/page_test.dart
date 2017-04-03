@@ -277,4 +277,31 @@ void main() {
     // Page 2 didn't move
     expect(tester.getTopLeft(find.text('Page 2')), Point.origin);
   });
+
+  testWidgets('test iOS page transition', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Material(child: new Text('Page 1')),
+        routes: <String, WidgetBuilder>{
+          '/next': (BuildContext context) {
+            return new Material(child: new Text('Page 2'));
+          },
+        }
+      )
+    );
+
+    final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 250));
+
+    final Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+
+    // This is currently an incorrect behaviour and we want right to left transition instead.
+    // See https://github.com/flutter/flutter/issues/8726.
+    expect(widget1TopLeft.x == widget2TopLeft.x, true);
+    expect(widget1TopLeft.y - widget2TopLeft.y < 0, true);
+  });
 }

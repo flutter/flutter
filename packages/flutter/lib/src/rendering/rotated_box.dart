@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -23,7 +24,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   ///
   /// The [quarterTurns] argument must not be null.
   RenderRotatedBox({
-    int quarterTurns,
+    @required int quarterTurns,
     RenderBox child
   }) : _quarterTurns = quarterTurns {
     assert(quarterTurns != null);

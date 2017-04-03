@@ -58,7 +58,7 @@ class FlatButton extends StatelessWidget {
     this.disabledColor,
     this.textTheme,
     this.colorBrightness,
-    this.child
+    @required this.child
   }) : super(key: key) {
     assert(child != null);
   }

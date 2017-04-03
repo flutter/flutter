@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -49,8 +50,8 @@ class BottomSheet extends StatefulWidget {
   BottomSheet({
     Key key,
     this.animationController,
-    this.onClosing,
-    this.builder
+    @required this.onClosing,
+    @required this.builder
   }) : super(key: key) {
     assert(onClosing != null);
     assert(builder != null);
@@ -256,7 +257,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///  * [BottomSheet]
 ///  * [Scaffold.showBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html#bottom-sheets-modal-bottom-sheets>
-Future<T> showModalBottomSheet<T>({ BuildContext context, WidgetBuilder builder }) {
+Future<T> showModalBottomSheet<T>({ @required BuildContext context, @required WidgetBuilder builder }) {
   assert(context != null);
   assert(builder != null);
   return Navigator.push(context, new _ModalBottomSheetRoute<T>(

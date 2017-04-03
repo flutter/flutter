@@ -64,7 +64,7 @@ class _MountainViewPageTransition extends AnimatedWidget {
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
-    this.builder,
+    @required this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
     this.fullscreenDialog: false,

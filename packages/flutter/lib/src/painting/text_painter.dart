@@ -318,23 +318,35 @@ class TextPainter {
     return new Offset(dx, box.top);
   }
 
+  Offset get _emptyOffset {
+    // TODO(abarth): Handle the directionality of the text painter itself.
+    switch (textAlign ?? TextAlign.left) {
+      case TextAlign.left:
+      case TextAlign.justify:
+        return Offset.zero;
+      case TextAlign.right:
+        return new Offset(width, 0.0);
+      case TextAlign.center:
+        return new Offset(width / 2.0, 0.0);
+    }
+    return null;
+  }
+
   /// Returns the offset at which to paint the caret.
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
     final int offset = position.offset;
-    // TODO(abarth): Handle the directionality of the text painter itself.
-    const Offset emptyOffset = Offset.zero;
     switch (position.affinity) {
       case TextAffinity.upstream:
         return _getOffsetFromUpstream(offset, caretPrototype)
             ?? _getOffsetFromDownstream(offset, caretPrototype)
-            ?? emptyOffset;
+            ?? _emptyOffset;
       case TextAffinity.downstream:
         return _getOffsetFromDownstream(offset, caretPrototype)
             ?? _getOffsetFromUpstream(offset, caretPrototype)
-            ?? emptyOffset;
+            ?? _emptyOffset;
     }
     assert(position.affinity != null);
     return null;

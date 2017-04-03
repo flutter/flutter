@@ -489,7 +489,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { @required Point position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);

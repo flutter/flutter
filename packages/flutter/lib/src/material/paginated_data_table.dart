@@ -66,7 +66,7 @@ class PaginatedDataTable extends StatefulWidget {
     Key key,
     @required this.header,
     this.actions,
-    this.columns,
+    @required this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
     this.onSelectAll,

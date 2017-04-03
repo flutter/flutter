@@ -261,7 +261,7 @@ BoxConstraints _getAdditionalConstraints(String label) {
 
 class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandler {
   _RenderSlider({
-    double value,
+    @required double value,
     int divisions,
     String label,
     Color activeColor,

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
 import 'test_async_utils.dart';
@@ -135,8 +136,8 @@ class TestGesture {
   /// via the `dispatcher` argument.
   static Future<TestGesture> down(Point downLocation, {
     int pointer: 1,
-    HitTester hitTester,
-    EventDispatcher dispatcher
+    @required HitTester hitTester,
+    @required EventDispatcher dispatcher,
   }) async {
     assert(hitTester != null);
     assert(dispatcher != null);

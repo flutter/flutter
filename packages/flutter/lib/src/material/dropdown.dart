@@ -286,7 +286,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.selectedIndex,
     this.elevation: 8,
     this.theme,
-    this.style,
+    @required this.style,
   }) {
     assert(style != null);
   }
@@ -336,7 +336,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   DropdownMenuItem({
     Key key,
     this.value,
-    this.child,
+    @required this.child,
   }) : super(key: key) {
     assert(child != null);
   }
@@ -372,7 +372,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   /// be given.
   DropdownButtonHideUnderline({
     Key key,
-    Widget child,
+    @required Widget child,
   }) : super(key: key, child: child) {
     assert(child != null);
   }
@@ -462,7 +462,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// By default this button's height is the same as its menu items' heights.
   /// If isDense is true, the button's height is reduced by about half. This
   /// can be useful when the button is embedded in a container that adds
-  /// its own decorations, like [InputContainer].
+  /// its own decorations, like [InputDecorator].
   final bool isDense;
 
   @override

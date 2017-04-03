@@ -116,7 +116,7 @@ abstract class FlutterCommand extends Command<Null> {
     final UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     if (flutterUsage.isFirstRun)
-      flutterUsage.printUsage();
+      flutterUsage.printWelcome();
 
     return verifyThenRunCommand().whenComplete(() {
       final int ms = stopwatch.elapsedMilliseconds;

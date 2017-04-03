@@ -5,6 +5,7 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -16,7 +17,7 @@ typedef void OnResultListener(String result);
 // The choice of JSON parsing here is meant as an example that might surface
 // in real-world applications.
 class Calculator {
-  Calculator({ this.onProgressListener, this.onResultListener, String data })
+  Calculator({ @required this.onProgressListener, @required this.onResultListener, String data })
   // In order to keep the example files smaller, we "cheat" a little and
   // replicate our small json string into a 10,000-element array.
   : _data = _replicateJson(data, 10000) {
@@ -85,7 +86,7 @@ class CalculationMessage {
 // This class manages these ports and maintains state related to the
 // progress of the background computation.
 class CalculationManager {
-  CalculationManager({ this.onProgressListener, this.onResultListener })
+  CalculationManager({ @required this.onProgressListener, @required this.onResultListener })
   : _receivePort = new ReceivePort() {
     assert(onProgressListener != null);
     assert(onResultListener != null);

@@ -277,14 +277,22 @@ class AnsiTerminal {
 
   bool supportsColor;
 
-  String bolden(String str) => supportsColor ? '$_bold$str$_reset' : str;
+  String bolden(String message) {
+    if (!supportsColor)
+      return message;
+    final StringBuffer result = new StringBuffer();
+    for (String line in message.split('\n'))
+      result.writeln('$_bold$line$_reset');
+    return result.toString();
+  }
 
   String clearScreen() => supportsColor ? _clear : '\n\n';
 
   set singleCharMode(bool value) {
-    // TODO(goderbauer): instead of trying to set lineMode and then catching [_ENOTTY] or [_INVALID_HANDLE],
-    //     we should check beforehand if stdin is connected to a terminal or not
-    //     (requires https://github.com/dart-lang/sdk/issues/29083 to be resolved).
+    // TODO(goderbauer): instead of trying to set lineMode and then catching
+    // [_ENOTTY] or [_INVALID_HANDLE], we should check beforehand if stdin is
+    // connected to a terminal or not.
+    // (Requires https://github.com/dart-lang/sdk/issues/29083 to be resolved.)
     try {
       // The order of setting lineMode and echoMode is important on Windows.
       if (value) {

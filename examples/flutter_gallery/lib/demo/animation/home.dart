@@ -31,8 +31,8 @@ const double _kAppBarMidHeight = 256.0;
 // TODO(hansmuller): it would be worth adding something like this to the framework.
 class _RenderStatusBarPaddingSliver extends RenderSliver {
   _RenderStatusBarPaddingSliver({
-    double maxHeight,
-    double scrollFactor,
+    @required double maxHeight,
+    @required double scrollFactor,
   }) : _maxHeight = maxHeight, _scrollFactor = scrollFactor {
     assert(maxHeight != null && maxHeight >= 0.0);
     assert(scrollFactor != null && scrollFactor >= 1.0);
@@ -264,8 +264,8 @@ class _AllSectionsView extends AnimatedWidget {
   _AllSectionsView({
     Key key,
     this.sectionIndex,
-    this.sections,
-    this.selectedIndex,
+    @required this.sections,
+    @required this.selectedIndex,
     this.minHeight,
     this.midHeight,
     this.maxHeight,
