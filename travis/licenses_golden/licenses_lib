@@ -1,4 +1,4 @@
-Signature: 5565bfd8b8db2375e0c0cc7e9611b386
+Signature: 020afa3096f0f735c9f65a07b146964b
 
 UNUSED LICENSES:
 
@@ -68,14 +68,14 @@ FILE: ../../../lib/ftl/files/file.h
 FILE: ../../../lib/ftl/files/file_descriptor.cc
 FILE: ../../../lib/ftl/files/file_descriptor.h
 FILE: ../../../lib/ftl/files/file_unittest.cc
-FILE: ../../../lib/ftl/files/path.cc
 FILE: ../../../lib/ftl/files/path.h
+FILE: ../../../lib/ftl/files/path_posix.cc
 FILE: ../../../lib/ftl/files/path_unittest.cc
 FILE: ../../../lib/ftl/files/scoped_temp_dir.cc
 FILE: ../../../lib/ftl/files/scoped_temp_dir.h
 FILE: ../../../lib/ftl/files/scoped_temp_dir_unittest.cc
-FILE: ../../../lib/ftl/files/symlink.cc
 FILE: ../../../lib/ftl/files/symlink.h
+FILE: ../../../lib/ftl/files/symlink_posix.cc
 FILE: ../../../lib/ftl/files/unique_fd.cc
 FILE: ../../../lib/ftl/files/unique_fd.h
 FILE: ../../../lib/ftl/functional/closure.h
@@ -100,6 +100,10 @@ FILE: ../../../lib/ftl/memory/weak_ptr.h
 FILE: ../../../lib/ftl/memory/weak_ptr_internal.cc
 FILE: ../../../lib/ftl/memory/weak_ptr_internal.h
 FILE: ../../../lib/ftl/memory/weak_ptr_unittest.cc
+FILE: ../../../lib/ftl/random/rand.cc
+FILE: ../../../lib/ftl/random/rand.h
+FILE: ../../../lib/ftl/random/uuid.cc
+FILE: ../../../lib/ftl/random/uuid.h
 FILE: ../../../lib/ftl/strings/ascii.cc
 FILE: ../../../lib/ftl/strings/ascii.h
 FILE: ../../../lib/ftl/strings/ascii_unittest.cc
@@ -123,8 +127,8 @@ FILE: ../../../lib/ftl/strings/trim.h
 FILE: ../../../lib/ftl/strings/trim_unittest.cc
 FILE: ../../../lib/ftl/strings/utf_codecs.cc
 FILE: ../../../lib/ftl/strings/utf_codecs.h
-FILE: ../../../lib/ftl/synchronization/cond_var.cc
 FILE: ../../../lib/ftl/synchronization/cond_var.h
+FILE: ../../../lib/ftl/synchronization/cond_var_posix.cc
 FILE: ../../../lib/ftl/synchronization/cond_var_unittest.cc
 FILE: ../../../lib/ftl/synchronization/mutex_unittest.cc
 FILE: ../../../lib/ftl/synchronization/sleep.cc
@@ -146,6 +150,7 @@ FILE: ../../../lib/ftl/time/stopwatch.h
 FILE: ../../../lib/ftl/time/time_delta.h
 FILE: ../../../lib/ftl/time/time_point.cc
 FILE: ../../../lib/ftl/time/time_point.h
+FILE: ../../../lib/ftl/time/time_printers.cc
 FILE: ../../../lib/ftl/time/time_unittest.cc
 FILE: ../../../lib/tonic/converter/dart_converter.cc
 FILE: ../../../lib/tonic/converter/dart_converter.h
@@ -215,14 +220,93 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: lib
+ORIGIN: ../../../lib/ftl/files/path_win.cc + ../../../lib/ftl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../lib/ftl/files/path_win.cc
+FILE: ../../../lib/ftl/files/symlink_win.cc
+FILE: ../../../lib/ftl/inttypes.h
+FILE: ../../../lib/ftl/portable_unistd.h
+FILE: ../../../lib/ftl/random/rand_unittest.cc
+FILE: ../../../lib/ftl/strings/join_strings.h
+FILE: ../../../lib/ftl/strings/join_strings_unittest.cc
+FILE: ../../../lib/ftl/synchronization/cond_var_win.cc
+FILE: ../../../lib/ftl/threading/thread.cc
+FILE: ../../../lib/ftl/threading/thread.h
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: lib
 ORIGIN: ../../../lib/ftl/synchronization/monitor.cc + ../../../lib/ftl/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../lib/ftl/synchronization/monitor.cc
 FILE: ../../../lib/ftl/synchronization/monitor.h
-FILE: ../../../lib/ftl/synchronization/mutex.cc
 FILE: ../../../lib/ftl/synchronization/mutex.h
+FILE: ../../../lib/ftl/synchronization/mutex_posix.cc
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Fuchisa Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: lib
+ORIGIN: ../../../lib/ftl/synchronization/mutex_win.cc + ../../../lib/ftl/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../lib/ftl/synchronization/mutex_win.cc
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Fuchisa Authors. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -307,4 +391,4 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 4
+Total license count: 6
