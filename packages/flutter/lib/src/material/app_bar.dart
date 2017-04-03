@@ -336,7 +336,7 @@ class _AppBarState extends State<AppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final ScaffoldState scaffold = Scaffold.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     _hasDrawer = scaffold?.hasDrawer ?? false;
     _canPop = ModalRoute.of(context)?.canPop ?? false;
   }
