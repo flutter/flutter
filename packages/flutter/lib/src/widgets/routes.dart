@@ -570,7 +570,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// topmost route, e.g. because the use pressed the back button, the
   /// primary animation runs from 1.0 to 0.0.
   ///
-  /// The following example uses the animation to drive a
+  /// The following example uses the primary animation to drive a
   /// [SlideTransition] that translates the top of the new route vertically
   /// from the bottom of the screen when it is pushed on the Navigator's
   /// stack. When the route is popped the SlideTransition translates the
