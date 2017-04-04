@@ -193,7 +193,7 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
     for (int target_ms = 0 + 2; target_ms < count + 2; target_ms++) {
       auto begin = ftl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked]() {
+          [begin, target_ms, &checked, count]() {
             auto delta = ftl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);
@@ -217,10 +217,10 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
   std::thread thread([&checked, count]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();
-    for (int target_ms = count + 2; target_ms >= 0 + 2; target_ms--) {
+    for (int target_ms = count + 2; target_ms > 0 + 2; target_ms--) {
       auto begin = ftl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked]() {
+          [begin, target_ms, &checked, count]() {
             auto delta = ftl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);

@@ -25,6 +25,11 @@ using PlatformMessageLoopImpl = fml::MessageLoopAndroid;
 #include "flutter/fml/platform/linux/message_loop_linux.h"
 using PlatformMessageLoopImpl = fml::MessageLoopLinux;
 
+#elif OS_WIN
+
+#include "flutter/fml/platform/win/message_loop_win.h"
+using PlatformMessageLoopImpl = fml::MessageLoopWin;
+
 #else
 
 #error This platform does not have a message loop implementation.
