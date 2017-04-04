@@ -578,7 +578,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// ```dart
   /// new PageRouteBuilder(
-  ///   pageBuilder: (BuildContext context, _, __) {
+  ///   pageBuilder: (BuildContext context,
+  ///       Animation<double> animation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child,
+  ///   ) {
   ///     return new Scaffold(
   ///       appBar: new AppBar(title: new Text('Hello')),
   ///       body: new Center(
@@ -590,7 +594,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
-  ///       Widget child) {
+  ///       Widget child,
+  ///    ) {
   ///     return new SlideTransition(
   ///       position: new FractionalOffsetTween(
   ///         begin: FractionalOffset.bottomLeft,
@@ -626,7 +631,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       BuildContext context,
   ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
-  ///       Widget child
+  ///       Widget child,
   ///   ) {
   ///     return new SlideTransition(
   ///       position: new FractionalOffsetTween(
