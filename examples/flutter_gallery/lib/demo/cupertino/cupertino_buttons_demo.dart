@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+const Color _kBlue = const Color(0xFF007AFF);
+
 class CupertinoButtonsDemo extends StatefulWidget {
   static const String routeName = '/cupertino/buttons';
 
@@ -55,7 +57,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                 new Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: new Text('With Background'),
-                  color: CupertinoButton.kBlue,
+                  color: _kBlue,
                   onPressed: () {
                     setState(() {_pressedCount++;});
                   }
@@ -63,7 +65,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                 new Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
                   child: new Text('Disabled'),
-                  color: CupertinoButton.kBlue,
+                  color: _kBlue,
                   onPressed: null,
                 ),
               ],

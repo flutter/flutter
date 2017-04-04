@@ -41,14 +41,18 @@ class CupertinoPageTransition extends AnimatedWidget {
     // one.
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
+    // Perform incoming transition linearly. Use to precisely track back gesture drags.
+    bool linearTransition,
   }) :
-      _incomingPositionAnimation = _kRightMiddleTween.animate(
-        new CurvedAnimation(
-          parent: incomingRouteAnimation,
-          curve: Curves.easeOut,
-          reverseCurve: Curves.easeIn,
-        )
-      ),
+      _incomingPositionAnimation = linearTransition
+        ? _kRightMiddleTween.animate(incomingRouteAnimation)
+        : _kRightMiddleTween.animate(
+            new CurvedAnimation(
+              parent: incomingRouteAnimation,
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeIn,
+            )
+          ),
       _outgoingPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
           parent: outgoingRouteAnimation,
@@ -76,6 +80,7 @@ class CupertinoPageTransition extends AnimatedWidget {
   final Animation<FractionalOffset> _outgoingPositionAnimation;
   final Animation<int> _incomingElevationAnimation;
   final Widget child;
+
 
   @override
   Widget build(BuildContext context) {

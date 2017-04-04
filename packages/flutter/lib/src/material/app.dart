@@ -174,8 +174,21 @@ class _MaterialScrollBehavior extends ScrollBehavior {
   }
 
   @override
-  Color getGlowColor(BuildContext context) {
-    return Theme.of(context).accentColor;
+  Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // the base class as well.
+    switch (getPlatform(context)) {
+      case TargetPlatform.iOS:
+        return child;
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return new GlowingOverscrollIndicator(
+          child: child,
+          axisDirection: axisDirection,
+          color: Theme.of(context).accentColor,
+        );
+    }
+    return null;
   }
 }
 

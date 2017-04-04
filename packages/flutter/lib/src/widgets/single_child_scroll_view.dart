@@ -38,6 +38,7 @@ import 'scrollable.dart';
 /// * [PageView], for a scrollable that works page by page.
 /// * [Scrollable], which handles arbitrary scrolling effects.
 class SingleChildScrollView extends StatelessWidget {
+  /// Creates a box in which a single widget can be scrolled.
   SingleChildScrollView({
     Key key,
     this.scrollDirection: Axis.vertical,
@@ -57,12 +58,32 @@ class SingleChildScrollView extends StatelessWidget {
     );
   }
 
+  /// The axis along which the scroll view scrolls.
+  ///
+  /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
 
+  /// Whether the scroll view scrolls in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from
+  /// left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then scroll view
+  /// scrolls from top to bottom when [reverse] is false and from bottom to top
+  /// when [reverse] is true.
+  ///
+  /// Defaults to false.
   final bool reverse;
 
+  /// The amount of space by which to inset the child.
   final EdgeInsets padding;
 
+  /// An object that can be used to control the position to which this scroll
+  /// view is scrolled.
+  ///
+  /// Must be null if [primary] is true.
   final ScrollController controller;
 
   /// Whether this is the primary scroll view associated with the parent
@@ -75,8 +96,15 @@ class SingleChildScrollView extends StatelessWidget {
   /// not specified.
   final bool primary;
 
+  /// How the scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
+  /// The widget that scrolls.
   final Widget child;
 
   AxisDirection _getDirection(BuildContext context) {

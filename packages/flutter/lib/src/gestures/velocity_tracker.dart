@@ -147,6 +147,7 @@ class VelocityTracker {
   final List<_PointAtTime> _samples = new List<_PointAtTime>(_kHistorySize);
   int _index = 0;
 
+  /// Adds a position as the given time to the tracker.
   void addPosition(Duration time, Point position) {
     _index += 1;
     if (_index == _kHistorySize)
@@ -154,6 +155,8 @@ class VelocityTracker {
     _samples[_index] = new _PointAtTime(position, time);
   }
 
+  /// Returns an estimate of the velocity of the object being tracked by the
+  /// tracker given the current information available to the tracker.
   VelocityEstimate getVelocityEstimate() {
     final List<double> x = <double>[];
     final List<double> y = <double>[];

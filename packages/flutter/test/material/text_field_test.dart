@@ -852,4 +852,38 @@ void main() {
 
     expect(topLeft.x, equals(399.0));
   });
+
+  testWidgets('Can align to center within center', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new Container(
+            width: 300.0,
+            child: new Center(
+              child: new TextField(
+                textAlign: TextAlign.center,
+                decoration: null,
+              ),
+            ),
+          ),
+        ),
+      )),
+    );
+
+    final RenderEditable editable = findRenderEditable(tester);
+    Point topLeft = editable.localToGlobal(
+        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+    );
+
+    expect(topLeft.x, equals(399.0));
+
+    await tester.enterText(find.byType(EditableText), 'abcd');
+    await tester.pump();
+
+    topLeft = editable.localToGlobal(
+        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+    );
+
+    expect(topLeft.x, equals(399.0));
+  });
 }

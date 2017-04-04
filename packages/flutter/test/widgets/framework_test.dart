@@ -403,28 +403,6 @@ void main() {
     expect(count, 2);
   });
 
-  testWidgets('GlobalKey notification exception handling', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
-
-    await tester.pumpWidget(new Container(key: key));
-
-    GlobalKey.registerRemoveListener(key, (GlobalKey key) {
-      throw new Exception('Misbehaving listener');
-    });
-
-    bool didReceiveCallback = false;
-    GlobalKey.registerRemoveListener(key, (GlobalKey key) {
-      expect(didReceiveCallback, isFalse);
-      didReceiveCallback = true;
-    });
-
-    await tester.pumpWidget(new Placeholder());
-
-    expect(tester.takeException(), isNotNull);
-    expect(didReceiveCallback, isTrue);
-  });
-
-
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
     StateSetter setState;
 

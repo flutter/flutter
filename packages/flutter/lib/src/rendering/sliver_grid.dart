@@ -424,8 +424,7 @@ class SliverGridParentData extends SliverMultiBoxAdaptorParentData {
   String toString() => 'crossAxisOffset=$crossAxisOffset; ${super.toString()}';
 }
 
-/// A sliver that contains multiple box children that whose size and position
-/// are determined by a delegate.
+/// A sliver that places multiple box children in a two dimensional arrangement.
 ///
 /// [RenderSliverGrid] places its children in arbitrary positions determined by
 /// [gridDelegate]. Each child is forced to have the size specified by the

@@ -34,6 +34,22 @@ void main() {
       });
     }
 
+    test('accepts task with minimum amount of configuration', () {
+      final Manifest manifest = loadTaskManifest('''
+tasks:
+  minimum_configuration_task:
+    description: Description is mandatory.
+    stage: stage_is_mandatory_too
+    required_agent_capabilities: ["so-is-capability"]
+''');
+
+      expect(manifest.tasks.single.description, 'Description is mandatory.');
+      expect(manifest.tasks.single.stage, 'stage_is_mandatory_too');
+      expect(manifest.tasks.single.requiredAgentCapabilities, <String>['so-is-capability']);
+      expect(manifest.tasks.single.isFlaky, false);
+      expect(manifest.tasks.single.timeoutInMinutes, null);
+    });
+
     testManifestError(
       'invalid top-level type',
       'Manifest must be a dictionary but was YamlScalar: null',
@@ -79,7 +95,7 @@ void main() {
 
     testManifestError(
       'invalid task property',
-      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities',
+      'Unrecognized property "bar" in Value of task "foo". Allowed properties: description, stage, required_agent_capabilities, flaky, timeout_in_minutes',
       '''
       tasks:
         foo:
@@ -129,7 +145,7 @@ void main() {
     );
 
     testManifestError(
-      'missing stage',
+      'missing required_agent_capabilities',
       'requiredAgentCapabilities must not be empty in task "foo".',
       '''
       tasks:
@@ -139,5 +155,45 @@ void main() {
           required_agent_capabilities: []
       '''
     );
+
+    testManifestError(
+      'bad flaky type',
+      'flaky must be a boolean but was String: not-a-boolean',
+      '''
+      tasks:
+        foo:
+          description: b
+          stage: c
+          required_agent_capabilities: ["a"]
+          flaky: not-a-boolean
+      '''
+    );
+
+    test('accepts boolean flaky option', () {
+      final Manifest manifest = loadTaskManifest('''
+tasks:
+  flaky_task:
+    description: d
+    stage: s
+    required_agent_capabilities: ["c"]
+    flaky: true
+''');
+
+      expect(manifest.tasks.single.name, 'flaky_task');
+      expect(manifest.tasks.single.isFlaky, isTrue);
+    });
+
+    test('accepts custom timeout_in_minutes option', () {
+      final Manifest manifest = loadTaskManifest('''
+tasks:
+  task_with_custom_timeout:
+    description: d
+    stage: s
+    required_agent_capabilities: ["c"]
+    timeout_in_minutes: 120
+''');
+
+      expect(manifest.tasks.single.timeoutInMinutes, 120);
+    });
   });
 }

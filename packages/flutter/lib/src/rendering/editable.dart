@@ -357,10 +357,9 @@ class RenderEditable extends RenderBox {
 
   void _layoutText() {
     final double caretMargin = _kCaretGap + _kCaretWidth;
-    final double maxWidth = _maxLines > 1 ?
-      math.max(0.0, constraints.maxWidth - caretMargin) : double.INFINITY;
-    final double minWidth = math.max(0.0, constraints.minWidth - caretMargin);
-    _textPainter.layout(minWidth: minWidth, maxWidth: maxWidth);
+    final double availableWidth = math.max(0.0, constraints.maxWidth - caretMargin);
+    final double maxWidth = _maxLines > 1 ? availableWidth : double.INFINITY;
+    _textPainter.layout(minWidth: availableWidth, maxWidth: maxWidth);
   }
 
   @override

@@ -427,13 +427,13 @@ class InputDecorator extends StatelessWidget {
       ));
     }
 
-    Widget result = new Stack(children: stackChildren);
+    final Widget stack = new Stack(children: stackChildren);
 
     if (decoration.icon != null) {
       assert(!isCollapsed);
       final double iconSize = isDense ? 18.0 : 24.0;
       final double iconTop = topPadding + (baseStyle.fontSize - iconSize) / 2.0;
-      result = new Row(
+      return new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Container(
@@ -448,12 +448,15 @@ class InputDecorator extends StatelessWidget {
               child: decoration.icon,
             ),
           ),
-          new Expanded(child: result),
+          new Expanded(child: stack),
         ],
       );
+    } else {
+      return new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: double.INFINITY),
+        child: stack,
+      );
     }
-
-    return result;
   }
 }
 
