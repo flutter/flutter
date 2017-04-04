@@ -374,11 +374,13 @@ Map<_Asset, List<_Asset>> _parseAssets(
   if (manifestDescriptor.containsKey('fonts')) {
     for (Map<String, dynamic> family in manifestDescriptor['fonts']) {
       final List<Map<String, dynamic>> fonts = family['fonts'];
-      if (fonts == null) continue;
+      if (fonts == null)
+        continue;
 
       for (Map<String, dynamic> font in fonts) {
         final String asset = font['asset'];
-        if (asset == null) continue;
+        if (asset == null)
+          continue;
 
         final _Asset baseAsset = _resolveAsset(packageMap, assetBase, asset);
         if (!baseAsset.assetFileExists) {

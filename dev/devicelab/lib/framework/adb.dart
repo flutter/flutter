@@ -384,7 +384,8 @@ String get adbPath {
 
   final String adbPath = path.join(androidHome, 'platform-tools/adb');
 
-  if (!canRun(adbPath)) throw 'adb not found at: $adbPath';
+  if (!canRun(adbPath))
+    throw 'adb not found at: $adbPath';
 
   return path.absolute(adbPath);
 }

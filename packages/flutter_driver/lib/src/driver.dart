@@ -537,7 +537,8 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 
   Future<VMServiceClientConnection> attemptConnection() async {
     Uri uri = Uri.parse(url);
-    if (uri.scheme == 'http') uri = uri.replace(scheme: 'ws', path: '/ws');
+    if (uri.scheme == 'http')
+      uri = uri.replace(scheme: 'ws', path: '/ws');
 
     WebSocket ws1;
     WebSocket ws2;

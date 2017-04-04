@@ -128,7 +128,8 @@ final ArgParser _argParser = new ArgParser()
   );
 
 bool _listsEqual(List<dynamic> a, List<dynamic> b) {
-  if (a.length != b.length) return false;
+  if (a.length != b.length)
+    return false;
 
   for (int i = 0; i < a.length; i++) {
     if (a[i] != b[i])
