@@ -53,6 +53,9 @@ class SpringDescription {
   /// used for the value of the [mass] property, and T is the time unit used for
   /// driving the [SpringSimulation].
   final double damping;
+
+  @override
+  String toString() => '$runtimeType(mass: ${mass.toStringAsFixed(1)}, springConstant: ${springConstant.toStringAsFixed(1)}, damping: ${damping.toStringAsFixed(1)})';
 }
 
 /// The kind of spring solution that the [SpringSimulation] is using to simulate the spring.
@@ -114,6 +117,9 @@ class SpringSimulation extends Simulation {
     return nearZero(_solution.x(time), tolerance.distance) &&
            nearZero(_solution.dx(time), tolerance.velocity);
   }
+
+  @override
+  String toString() => '$runtimeType(end: $_endPosition, $type)';
 }
 
 /// A SpringSimulation where the value of [x] is guaranteed to have exactly the

@@ -18,11 +18,13 @@ class FrictionSimulation extends Simulation {
   /// drag coefficient, a unitless value; the initial position, in the same
   /// length units as used for [x]; and the initial velocity, in the same
   /// velocity units as used for [dx].
-  FrictionSimulation(double drag, double position, double velocity)
-    : _drag = drag,
-      _dragLog = math.log(drag),
-      _x = position,
-      _v = velocity;
+  FrictionSimulation(double drag, double position, double velocity, {
+    Tolerance tolerance: Tolerance.defaultTolerance,
+  }) : _drag = drag,
+       _dragLog = math.log(drag),
+       _x = position,
+       _v = velocity,
+       super(tolerance: tolerance);
 
   /// Creates a new friction simulation with its fluid drag coefficient set so
   /// as to ensure that the simulation starts and ends at the specified
@@ -42,8 +44,9 @@ class FrictionSimulation extends Simulation {
     return new FrictionSimulation(
       _dragFor(startPosition, endPosition, startVelocity, endVelocity),
       startPosition,
-      startVelocity
-    )..tolerance = new Tolerance(velocity: endVelocity.abs());
+      startVelocity,
+      tolerance: new Tolerance(velocity: endVelocity.abs()),
+    );
   }
 
   final double _drag;

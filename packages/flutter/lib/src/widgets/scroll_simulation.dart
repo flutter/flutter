@@ -34,9 +34,11 @@ class BouncingScrollSimulation extends SimulationGroup {
     @required double leadingExtent,
     @required double trailingExtent,
     @required SpringDescription spring,
+    Tolerance tolerance: Tolerance.defaultTolerance,
   }) : _leadingExtent = leadingExtent,
        _trailingExtent = trailingExtent,
-       _spring = spring {
+       _spring = spring,
+       super(tolerance: tolerance) {
     assert(position != null);
     assert(velocity != null);
     assert(_leadingExtent != null);
@@ -73,15 +75,15 @@ class BouncingScrollSimulation extends SimulationGroup {
       if (position > _trailingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation = new ScrollSpringSimulation(_spring, position, _trailingExtent, velocity);
+        _currentSimulation = new ScrollSpringSimulation(_spring, position, _trailingExtent, velocity, tolerance: tolerance);
         return true;
       } else if (position < _leadingExtent) {
         _isSpringing = true;
         _offset = intervalOffset;
-        _currentSimulation = new ScrollSpringSimulation(_spring, position, _leadingExtent, velocity);
+        _currentSimulation = new ScrollSpringSimulation(_spring, position, _leadingExtent, velocity, tolerance: tolerance);
         return true;
       } else if (_currentSimulation == null) {
-        _currentSimulation = new FrictionSimulation(0.135, position, velocity);
+        _currentSimulation = new FrictionSimulation(0.135, position, velocity, tolerance: tolerance);
         return true;
       }
     }
