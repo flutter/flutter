@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  Material.debugEnablePhysicalModel = true;
+
   testWidgets('Does the ink widget render a border radius', (WidgetTester tester) async {
     final Color highlightColor = new Color(0xAAFF0000);
     final Color splashColor = new Color(0xAA0000FF);
