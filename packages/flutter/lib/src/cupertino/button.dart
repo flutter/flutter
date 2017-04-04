@@ -5,28 +5,34 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+// TODO(xster): move this to a common Cupertino color palette with the next yak.
+const Color _kBlue = const Color(0xFF007AFF);
+const Color _kWhite = const Color(0xFFFFFFFF);
+const Color _kDisabledBackground = const Color(0xFFA9A9A9);
+const Color _kDisabledForeground = const Color(0xFFC4C4C4);
+
 const TextStyle _kButtonTextStyle = const TextStyle(
   fontFamily: '.SF UI Text',
   inherit: false,
   fontSize: 15.0,
   fontWeight: FontWeight.normal,
-  color: CupertinoButton.kBlue,
+  color: _kBlue,
   textBaseline: TextBaseline.alphabetic,
 );
 
 final TextStyle _kDisabledButtonTextStyle = _kButtonTextStyle.copyWith(
-  color: CupertinoButton.kDisabledForeground,
+  color: _kDisabledForeground,
 );
 
 final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
-  color: CupertinoButton.kWhite,
+  color: _kWhite,
 );
 
 const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
 const EdgeInsets _kBackgroundButtonPadding =
     const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
 
-/// An iOS style button.
+/// An iOS-style button.
 ///
 /// Takes in a text or an icon that fades out and in on touch. May optionally have a
 /// background.
@@ -35,13 +41,7 @@ const EdgeInsets _kBackgroundButtonPadding =
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
 class CupertinoButton extends StatefulWidget {
-  // TODO(xster): move this to a common Cupertino color palatte with the next yak.
-  static const Color kBlue = const Color(0xFF007AFF);
-  static const Color kWhite = const Color(0xFFFFFFFF);
-  static const Color kDisabledBackground = const Color(0xFFA9A9A9);
-  static const Color kDisabledForeground = const Color(0xFFC4C4C4);
-
-
+  /// Creates an iOS-style button.
   CupertinoButton({
     @required this.child,
     this.padding,
@@ -156,7 +156,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: new BoxDecoration(
                 borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
                 backgroundColor: backgroundColor != null && !enabled
-                    ? CupertinoButton.kDisabledBackground
+                    ? _kDisabledBackground
                     : backgroundColor,
               ),
               child: new Padding(

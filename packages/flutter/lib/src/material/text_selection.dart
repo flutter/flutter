@@ -196,4 +196,5 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 }
 
+/// Text selection controls that follow the Material Design specification.
 final TextSelectionControls materialTextSelectionControls = new _MaterialTextSelectionControls();

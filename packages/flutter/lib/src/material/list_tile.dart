@@ -40,10 +40,10 @@ enum MaterialListType {
 /// text style, which is a little smaller than the theme's [TextTheme.subhead]
 /// text style, which is used by default.
 enum ListTileStyle {
-  // Use a title font that's appropriate for a [ListTile] in a list.
+  /// Use a title font that's appropriate for a [ListTile] in a list.
   list,
 
-  // Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
+  /// Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
   drawer,
 }
 

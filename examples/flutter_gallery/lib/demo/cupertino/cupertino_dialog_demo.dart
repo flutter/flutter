@@ -5,6 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+const Color _kBlue = const Color(0xFF007AFF);
+
 class CupertinoDialogDemo extends StatefulWidget {
   static const String routeName = '/cupertino/dialog';
 
@@ -30,8 +32,6 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
     });
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
@@ -44,7 +44,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
         children: <Widget> [
           new CupertinoButton(
             child: new Text('Alert'),
-            color: CupertinoButton.kBlue,
+            color: _kBlue,
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
@@ -68,7 +68,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
           new Padding(padding: const EdgeInsets.all(8.0)),
           new CupertinoButton(
             child: new Text('Alert with Title'),
-            color: CupertinoButton.kBlue,
+            color: _kBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoDialog<String>(
