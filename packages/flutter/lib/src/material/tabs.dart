@@ -353,7 +353,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// Creates a material design tab bar.
   ///
-  /// The [tabs] argument must not be nuull and must have more than one widget.
+  /// The [tabs] argument must not be null and must have more than one widget.
   ///
   /// If a [TabController] is not provided, then there must be a
   /// [DefaultTabController] ancestor.
@@ -446,6 +446,18 @@ class _TabBarState extends State<TabBar> {
 
   void _updateTabController() {
     final TabController newController = config.controller ?? DefaultTabController.of(context);
+    assert(() {
+      if (newController == null) {
+        throw new FlutterError(
+          'No TabController for ${config.runtimeType}.\n'
+          'When creating a ${config.runtimeType}, you must either provide an explicit '
+          'TabController using the "controller" property, or you must ensure that there '
+          'is a DefaultTabController above the ${config.runtimeType}.\n'
+          'In this case, there was neither an explicit controller nor a default controller.'
+        );
+      }
+      return true;
+    });
     if (newController == _controller)
       return;
 
@@ -700,6 +712,18 @@ class _TabBarViewState extends State<TabBarView> {
 
   void _updateTabController() {
     final TabController newController = config.controller ?? DefaultTabController.of(context);
+    assert(() {
+      if (newController == null) {
+        throw new FlutterError(
+          'No TabController for ${config.runtimeType}.\n'
+          'When creating a ${config.runtimeType}, you must either provide an explicit '
+          'TabController using the "controller" property, or you must ensure that there '
+          'is a DefaultTabController above the ${config.runtimeType}.\n'
+          'In this case, there was neither an explicit controller nor a default controller.'
+        );
+      }
+      return true;
+    });
     if (newController == _controller)
       return;
 
@@ -876,7 +900,18 @@ class TabPageSelector extends StatelessWidget {
     final ColorTween selectedColor = new ColorTween(begin: Colors.transparent, end: color);
     final ColorTween previousColor = new ColorTween(begin: color, end: Colors.transparent);
     final TabController tabController = controller ?? DefaultTabController.of(context);
-    assert(tabController != null);
+    assert(() {
+      if (tabController == null) {
+        throw new FlutterError(
+          'No TabController for $runtimeType.\n'
+          'When creating a $runtimeType, you must either provide an explicit TabController '
+          'using the "controller" property, or you must ensure that there is a '
+          'DefaultTabController above the $runtimeType.\n'
+          'In this case, there was neither an explicit controller nor a default controller.'
+        );
+      }
+      return true;
+    });
     final Animation<double> animation = new CurvedAnimation(
       parent: tabController.animation,
       curve: Curves.fastOutSlowIn,
