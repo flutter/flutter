@@ -43,8 +43,6 @@ source_set("fml") {
       "platform/darwin/cf_utils.h",
       "platform/darwin/message_loop_darwin.h",
       "platform/darwin/message_loop_darwin.mm",
-      "platform/darwin/nsstring_utils.h",
-      "platform/darwin/nsstring_utils.mm",
       "platform/darwin/paths_darwin.mm",
       "platform/darwin/resource_mapping_darwin.h",
       "platform/darwin/resource_mapping_darwin.mm",
