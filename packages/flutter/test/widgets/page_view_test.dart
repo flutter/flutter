@@ -60,8 +60,7 @@ void main() {
     expect(log, equals(<String>['Alaska']));
     log.clear();
 
-    await tester.fling(
-        find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
+    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 1000.0);
     await tester.pumpAndSettle(_frameDuration);
 
     expect(find.text('Alabama'), findsNothing);
