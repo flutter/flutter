@@ -190,7 +190,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     bool _hasStudioAt(String path, {Version newerThan}) {
       return studios.any((AndroidStudio studio) {
-        if (studio.directory != path) return false;
+        if (studio.directory != path)
+          return false;
         if (newerThan != null) {
           return studio.version.compareTo(newerThan) >= 0;
         }

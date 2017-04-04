@@ -101,7 +101,8 @@ Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
       final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
-      if (response != 'ready') throw 'not ready yet';
+      if (response != 'ready')
+        throw 'not ready yet';
       return isolate;
     } catch (error) {
       const Duration connectionTimeout = const Duration(seconds: 2);

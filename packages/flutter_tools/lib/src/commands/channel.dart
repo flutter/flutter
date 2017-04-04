@@ -43,10 +43,13 @@ class ChannelCommand extends FlutterCommand {
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
         final List<String> split = line.split('/');
-        if (split.length < 2) return null;
+        if (split.length < 2)
+          return null;
         final String branchName = split[1];
-        if (branchName.startsWith('HEAD')) return null;
-        if (branchName == currentBranch) return '* $branchName';
+        if (branchName.startsWith('HEAD'))
+          return null;
+        if (branchName == currentBranch)
+          return '* $branchName';
         return '  $branchName';
       },
     );

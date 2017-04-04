@@ -25,8 +25,10 @@ class Version implements Comparable<Version> {
   factory Version(int major, int minor, int patch, {String text}) {
     if (text == null) {
       text = major == null ? '0' : '$major';
-      if (minor != null) text = '$text.$minor';
-      if (patch != null) text = '$text.$patch';
+      if (minor != null)
+        text = '$text.$minor';
+      if (patch != null)
+        text = '$text.$patch';
     }
 
     return new Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
@@ -93,8 +95,10 @@ class Version implements Comparable<Version> {
 
   @override
   int compareTo(Version other) {
-    if (major != other.major) return major.compareTo(other.major);
-    if (minor != other.minor) return minor.compareTo(other.minor);
+    if (major != other.major)
+      return major.compareTo(other.major);
+    if (minor != other.minor)
+      return minor.compareTo(other.minor);
     return patch.compareTo(other.patch);
   }
 
