@@ -75,6 +75,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
+
+  /// Whether this route is a full-screen dialog.
+  ///
+  /// Prevents [startPopGesture] from poping the route using an edge swipe on
+  /// iOS.
   final bool fullscreenDialog;
 
   @override

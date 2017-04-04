@@ -25,6 +25,7 @@ import 'thumb_painter.dart';
 ///
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/switches/>
 class CupertinoSwitch extends StatefulWidget {
+  /// Creates an iOS-style switch.
   CupertinoSwitch({
     Key key,
     @required this.value,

@@ -23,27 +23,70 @@ export 'package:flutter/services.dart' show TextEditingValue, TextSelection, Tex
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
+/// A controller for an editable text field.
+///
+/// Whenever the user modifies a text field with an associated
+/// [TextEditingController], the text field updates [value] and the controller
+/// notifies its listeners. Listeners can then read the [text] and [selection]
+/// properties to learn what the user has typed or how the selection has been
+/// updated.
+///
+/// Similarly, if you modify the [text] or [selection] properties, the text
+/// field will be notified and will update itself appropriately.
+///
+/// A [TextEditingController] can also be used to provide an initial value for a
+/// text field. If you build a text field with a controller that already has
+/// [text], the text field will use that text as its initial value.
+///
+/// See also:
+///
+///  * [TextField], which is a Material Design text field that can be controlled
+///    with a [TextEditingController].
+///  * [EditableText], which is a raw region of editable text that can be
+///    controlled with a [TextEditingController].
 class TextEditingController extends ValueNotifier<TextEditingValue> {
+  /// Creates a controller for an editable text field.
+  ///
+  /// This constructor treats a null [text] argument as if it were the empty
+  /// string.
   TextEditingController({ String text })
     : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
 
+  /// Creates a controller for an editiable text field from an initial [TextEditingValue].
+  ///
+  /// This constructor treats a null [value] argument as if it were
+  /// [TextEditingValue.empty].
   TextEditingController.fromValue(TextEditingValue value)
     : super(value ?? TextEditingValue.empty);
 
+  /// The current string the user is editing.
   String get text => value.text;
   set text(String newText) {
     value = value.copyWith(text: newText, composing: TextRange.empty);
   }
 
+  /// The currently selected [text].
+  ///
+  /// If the selection is collapsed, then this property gives the offset of the
+  /// cursor within the text.
   TextSelection get selection => value.selection;
   set selection(TextSelection newSelection) {
     value = value.copyWith(selection: newSelection, composing: TextRange.empty);
   }
 
+  /// Set the [value] to empty.
+  ///
+  /// After calling this function, [text] will be the empty string and the
+  /// selection will be invalid.
   void clear() {
     value = TextEditingValue.empty;
   }
 
+  /// Set the composing region to an empty range.
+  ///
+  /// The composing region is the range of text that is still being composed.
+  /// Calling this function indicates that the user is done composing that
+  /// region.
   void clearComposing() {
     value = value.copyWith(composing: TextRange.empty);
   }
