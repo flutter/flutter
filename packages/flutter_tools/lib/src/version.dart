@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
+import 'package:quiver/time.dart';
 
 import 'base/common.dart';
-import 'base/clock.dart';
 import 'base/context.dart';
 import 'base/io.dart';
 import 'base/process.dart';
@@ -26,7 +26,7 @@ final Set<String> kKnownBranchNames = new Set<String>.from(<String>[
 
 class FlutterVersion {
   @visibleForTesting
-  FlutterVersion() {
+  FlutterVersion(this._clock) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
 
     final int slash = _channel.indexOf('/');
@@ -41,6 +41,8 @@ class FlutterVersion {
     _frameworkRevision = _runGit('git log -n 1 --pretty=format:%H');
     _frameworkAge = _runGit('git log -n 1 --pretty=format:%ar');
   }
+
+  final Clock _clock;
 
   String _repositoryUrl;
   String get repositoryUrl => _repositoryUrl;
@@ -131,7 +133,7 @@ class FlutterVersion {
       await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
   }
 
-  static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion());
+  static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion(const Clock()));
 
   /// Return a short string for the version (`alpha/a76bc8e22b`).
   static String getVersionString({ bool whitelistBranchName: false }) {
@@ -171,7 +173,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<Null> checkFlutterVersionFreshness() async {
     final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
-    final Duration frameworkAge = clock.now().difference(localFrameworkCommitDate);
+    final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > kVersionAgeConsideredUpToDate;
 
     Future<bool> newerFrameworkVersionAvailable() async {
@@ -217,7 +219,7 @@ class FlutterVersion {
     if (versionCheckStamp != null) {
       final Map<String, String> data = JSON.decode(versionCheckStamp);
       final DateTime lastTimeVersionWasChecked = DateTime.parse(data['lastTimeVersionWasChecked']);
-      final Duration timeSinceLastCheck = clock.now().difference(lastTimeVersionWasChecked);
+      final Duration timeSinceLastCheck = _clock.now().difference(lastTimeVersionWasChecked);
 
       // Don't ping the server too often. Return cached value if it's fresh.
       if (timeSinceLastCheck < kCheckAgeConsideredUpToDate)
@@ -228,7 +230,7 @@ class FlutterVersion {
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate());
       Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(<String, String>{
-        'lastTimeVersionWasChecked': '${clock.now()}',
+        'lastTimeVersionWasChecked': '${_clock.now()}',
         'lastKnownRemoteVersion': '$remoteFrameworkCommitDate',
       }));
       return remoteFrameworkCommitDate;

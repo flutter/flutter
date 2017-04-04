@@ -134,10 +134,9 @@ void testFlutterVersion(String description, dynamic testMethod()) {
     description,
     testMethod,
     overrides: <Type, Generator>{
-      FlutterVersion: () => new FlutterVersion(),
+      FlutterVersion: () => new FlutterVersion(_testClock),
       ProcessManager: () => new MockProcessManager(),
       Cache: () => new MockCache(),
-      Clock: () => _testClock,
     },
   );
 }
