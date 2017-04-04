@@ -19,8 +19,8 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_TEST_DATA := \
-    data/BoldItalic.ttf \
     data/Bold.ttf \
+    data/BoldItalic.ttf \
     data/ColorEmojiFont.ttf \
     data/ColorTextMixedEmojiFont.ttf \
     data/Emoji.ttf \
@@ -32,11 +32,14 @@ LOCAL_TEST_DATA := \
     data/NoGlyphFont.ttf \
     data/Regular.ttf \
     data/TextEmojiFont.ttf \
+    data/UnicodeBMPOnly.ttf \
+    data/UnicodeBMPOnly2.ttf \
+    data/UnicodeUCS4.ttf \
     data/VariationSelectorTest-Regular.ttf \
     data/ZhHans.ttf \
     data/ZhHant.ttf \
+    data/emoji.xml \
     data/itemize.xml \
-    data/emoji.xml
 
 LOCAL_TEST_DATA := $(foreach f,$(LOCAL_TEST_DATA),frameworks/minikin/tests:$(f))
 
@@ -66,6 +69,7 @@ LOCAL_SRC_FILES += \
     ../util/FontTestUtils.cpp \
     ../util/MinikinFontForTest.cpp \
     ../util/UnicodeUtils.cpp \
+    CmapCoverageTest.cpp \
     EmojiTest.cpp \
     FontCollectionTest.cpp \
     FontCollectionItemizeTest.cpp \

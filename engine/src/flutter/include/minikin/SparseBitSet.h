@@ -31,19 +31,20 @@ namespace minikin {
 // of thousands to millions. It is particularly efficient when there are
 // large gaps. The motivating example is Unicode coverage of a font, but
 // the abstraction itself is fully general.
-
 class SparseBitSet {
 public:
-    SparseBitSet(): mMaxVal(0), mOwnIndicesAndBitmaps(false) {
-    }
-
-    // Clear the set
-    void clear();
+    // Create an empty bit set.
+    SparseBitSet() : mMaxVal(0) {}
 
     // Initialize the set to a new value, represented by ranges. For
     // simplicity, these ranges are arranged as pairs of values,
     // inclusive of start, exclusive of end, laid out in a uint32 array.
-    void initFromRanges(const uint32_t* ranges, size_t nRanges);
+    SparseBitSet(const uint32_t* ranges, size_t nRanges) : SparseBitSet() {
+        initFromRanges(ranges, nRanges);
+    }
+
+    SparseBitSet(SparseBitSet&&) = default;
+    SparseBitSet& operator=(SparseBitSet&&) = default;
 
     // Determine whether the value is included in the set
     bool get(uint32_t ch) const {
@@ -65,6 +66,8 @@ public:
     static const uint32_t kNotFound = ~0u;
 
 private:
+    void initFromRanges(const uint32_t* ranges, size_t nRanges);
+
     static const int kLogValuesPerPage = 8;
     static const int kPageMask = (1 << kLogValuesPerPage) - 1;
     static const int kLogBytesPerEl = 2;
@@ -81,18 +84,14 @@ private:
 
     uint32_t mMaxVal;
 
-    // True if this SparseBitSet is responsible for freeing mIndices and mBitamps.
-    bool mOwnIndicesAndBitmaps;
-
-    uint32_t mIndexSize;
-    const uint32_t* mIndices;
-    uint32_t mBitmapSize;
-    const element* mBitmaps;
+    std::unique_ptr<uint32_t[]> mIndices;
+    std::unique_ptr<element[]> mBitmaps;
     uint32_t mZeroPageIndex;
-};
 
-// Note: this thing cannot be used in vectors yet. If that were important, we'd need to
-// make the copy constructor work, and probably set up move traits as well.
+    // Forbid copy and assign.
+    SparseBitSet(const SparseBitSet&) = delete;
+    void operator=(const SparseBitSet&) = delete;
+};
 
 }  // namespace minikin
 
