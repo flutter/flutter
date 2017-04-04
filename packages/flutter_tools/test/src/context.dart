@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:test/test.dart';
@@ -53,7 +54,8 @@ void _defaultInitializeContext(AppContext testContext) {
       return mock;
     })
     ..putIfAbsent(SimControl, () => new MockSimControl())
-    ..putIfAbsent(Usage, () => new MockUsage());
+    ..putIfAbsent(Usage, () => new MockUsage())
+    ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion());
 }
 
 void testUsingContext(String description, dynamic testMethod(), {
@@ -230,3 +232,5 @@ class _MockUsageTimer implements UsageTimer {
   @override
   void finish() { }
 }
+
+class MockFlutterVersion extends Mock implements FlutterVersion {}

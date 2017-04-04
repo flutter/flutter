@@ -74,6 +74,16 @@ class Cache {
     _lock = null;
   }
 
+  /// Checks if the current process owns the lock for the cache directory at
+  /// this very moment; throws a [StateError] if it doesn't.
+  static void checkLockAcquired() {
+    if (_lockEnabled && _lock == null) {
+      throw new StateError(
+        'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
+      );
+    }
+  }
+
   static String _dartSdkVersion;
 
   static String get dartSdkVersion {

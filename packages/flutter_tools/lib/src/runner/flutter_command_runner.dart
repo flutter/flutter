@@ -236,6 +236,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       flutterUsage.suppressAnalytics = true;
 
     _checkFlutterCopy();
+    await FlutterVersion.instance.checkFlutterVersionFreshness();
 
     if (globalResults.wasParsed('packages'))
       PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(globalResults['packages']));

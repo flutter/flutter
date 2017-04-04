@@ -10,6 +10,7 @@ environment:
 dependencies:
   archive: ^1.0.20
   args: ^0.13.4
+  collection: '>=1.9.1 <2.0.0'
   coverage: ^0.8.0
   crypto: '>=1.1.1 <3.0.0'
   file: 2.3.2
@@ -23,6 +24,7 @@ dependencies:
   package_config: '>=0.1.5 <2.0.0'
   platform: 1.1.1
   process: 2.0.1
+  quiver: ^0.24.0
   stack_trace: ^1.4.0
   usage: ^3.0.1
   vm_service_client: '0.2.2+4'
