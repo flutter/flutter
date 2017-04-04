@@ -36,15 +36,19 @@ class CupertinoPageTransition extends AnimatedWidget {
     // one.
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
+    // Perform incoming transition linearly. Use to precisely track back gesture drags.
+    bool linearTransition,
   }) :
-      incomingPositionAnimation = _kRightMiddleTween.animate(
-        new CurvedAnimation(
-          parent: incomingRouteAnimation,
-          curve: Curves.easeOut,
-          reverseCurve: Curves.easeIn,
-        )
-      ),
-      outgoingPositionAnimation = _kMiddleLeftTween.animate(
+      _incomingPositionAnimation = linearTransition
+        ? _kRightMiddleTween.animate(incomingRouteAnimation)
+        : _kRightMiddleTween.animate(
+            new CurvedAnimation(
+              parent: incomingRouteAnimation,
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeIn,
+            )
+          ),
+      _outgoingPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
           parent: outgoingRouteAnimation,
           curve: Curves.easeOut,
@@ -60,19 +64,20 @@ class CupertinoPageTransition extends AnimatedWidget {
       );
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> incomingPositionAnimation;
+  final Animation<FractionalOffset> _incomingPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> outgoingPositionAnimation;
+  final Animation<FractionalOffset> _outgoingPositionAnimation;
   final Widget child;
+
 
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: outgoingPositionAnimation,
+      position: _outgoingPositionAnimation,
       child: new SlideTransition(
-        position: incomingPositionAnimation,
+        position: _incomingPositionAnimation,
         child: new PhysicalModel(
           shape: BoxShape.rectangle,
           color: _kBackgroundColor,
