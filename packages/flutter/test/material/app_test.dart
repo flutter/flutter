@@ -30,9 +30,9 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new MaterialApp(
-          home: new Text('Home sweet home')
-        )
-      )
+          home: new Text('Home sweet home'),
+        ),
+      ),
     );
 
     expect(find.text('Home sweet home'), findsOneWidget);
@@ -51,11 +51,25 @@ void main() {
     expect(focusNode.hasFocus, isTrue);
   });
 
+  testWidgets('Can place app inside FocusScope', (WidgetTester tester) async {
+    final FocusScopeNode focusScopeNode = new FocusScopeNode();
+
+    await tester.pumpWidget(new FocusScope(
+      autofocus: true,
+      node: focusScopeNode,
+      child: new MaterialApp(
+        home: new Text('Home'),
+      ),
+    ));
+
+    expect(find.text('Home'), findsOneWidget);
+  });
+
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new StateMarker()
-      )
+        home: new StateMarker(),
+      ),
     );
 
     final StateMarkerState state1 = tester.state(find.byType(StateMarker));
@@ -64,8 +78,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         debugShowMaterialGrid: true,
-        home: new StateMarker()
-      )
+        home: new StateMarker(),
+      ),
     );
 
     final StateMarkerState state2 = tester.state(find.byType(StateMarker));
@@ -82,8 +96,8 @@ void main() {
             return new Material(
               child: new RaisedButton(
                 child: new Text('X'),
-                onPressed: () { Navigator.of(context).pushNamed('/next'); }
-              )
+                onPressed: () { Navigator.of(context).pushNamed('/next'); },
+              ),
             );
           }
         ),
@@ -93,11 +107,11 @@ void main() {
               builder: (BuildContext context) {
                 ++buildCounter;
                 return new Container();
-              }
+              },
             );
-          }
-        }
-      )
+          },
+        },
+      ),
     );
 
     expect(buildCounter, 0);
