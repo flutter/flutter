@@ -143,7 +143,8 @@ class _FlutterPlatform extends PlatformPlugin {
       final Completer<WebSocket> webSocket = new Completer<WebSocket>();
       server.listen(
         (HttpRequest request) {
-          webSocket.complete(WebSocketTransformer.upgrade(request));
+          if (!webSocket.isCompleted)
+            webSocket.complete(WebSocketTransformer.upgrade(request));
         },
         onError: (dynamic error, dynamic stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
