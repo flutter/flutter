@@ -131,7 +131,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     _backGestureController = new CupertinoBackGestureController(
       navigator: navigator,
       controller: controller,
-      transitionAnimatedWidget: _transitionAnimatedWidget,
     );
 
     controller.addStatusListener(_handleBackGestureEnded);
@@ -174,6 +173,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
           incomingRouteAnimation: animation,
           outgoingRouteAnimation: forwardAnimation,
           child: child,
+          // In the middle of a back gesture drag, let the transition be linear to match finger
+          // motions.
+          linearTransition: _backGestureController != null,
         );
     } else {
       _transitionAnimatedWidget = new _MountainViewPageTransition(
@@ -181,7 +183,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         child: child
       );
     }
-    print('building transition $_transitionAnimatedWidget');
     return _transitionAnimatedWidget;
   }
 

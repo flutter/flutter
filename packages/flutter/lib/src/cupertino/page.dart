@@ -36,16 +36,19 @@ class CupertinoPageTransition extends AnimatedWidget {
     // one.
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
+    // Perform incoming transition linearly. Use to precisely track back gesture drags.
+    bool linearTransition,
   }) :
-      _incomingPositionLinearAnimation = _kRightMiddleTween.animate(incomingRouteAnimation),
-      _incomingPositionAnimation = _kRightMiddleTween.animate(
-        new CurvedAnimation(
-          parent: incomingRouteAnimation,
-          curve: Curves.easeOut,
-          reverseCurve: Curves.easeIn,
-        )
-      ),
-      outgoingPositionAnimation = _kMiddleLeftTween.animate(
+      _incomingPositionAnimation = linearTransition
+        ? _kRightMiddleTween.animate(incomingRouteAnimation)
+        : _kRightMiddleTween.animate(
+            new CurvedAnimation(
+              parent: incomingRouteAnimation,
+              curve: Curves.easeOut,
+              reverseCurve: Curves.easeIn,
+            )
+          ),
+      _outgoingPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
           parent: outgoingRouteAnimation,
           curve: Curves.easeOut,
@@ -60,24 +63,21 @@ class CupertinoPageTransition extends AnimatedWidget {
         ),
       );
 
-  final Animation<FractionalOffset> _incomingPositionLinearAnimation;
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> incomingPositionAnimation;
+  final Animation<FractionalOffset> _incomingPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> outgoingPositionAnimation;
+  final Animation<FractionalOffset> _outgoingPositionAnimation;
   final Widget child;
 
-  bool _linearTransition = false;
 
   @override
   Widget build(BuildContext context) {
-    print('linear is $_linearTransition');
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: outgoingPositionAnimation,
+      position: _outgoingPositionAnimation,
       child: new SlideTransition(
-        position: _linearTransition ? _incomingPositionLinearAnimation : _incomingPositionAnimation,
+        position: _incomingPositionAnimation,
         child: new PhysicalModel(
           shape: BoxShape.rectangle,
           color: _kBackgroundColor,
@@ -128,24 +128,15 @@ class CupertinoBackGestureController extends NavigationGestureController {
   CupertinoBackGestureController({
     @required NavigatorState navigator,
     @required this.controller,
-    AnimatedWidget transitionAnimatedWidget,
-  }) :
-      _cupertinoPageTransition = transitionAnimatedWidget is CupertinoPageTransition
-          ? transitionAnimatedWidget
-          : null,
-      super(navigator) {
+  }) : super(navigator) {
     assert(controller != null);
-    _cupertinoPageTransition?._linearTransition = true;
-    print('linear transition is ${_cupertinoPageTransition._linearTransition}');
   }
 
   final AnimationController controller;
-  final CupertinoPageTransition _cupertinoPageTransition;
 
   @override
   void dispose() {
     controller.removeStatusListener(_handleStatusChanged);
-    _cupertinoPageTransition?._linearTransition = false;
     super.dispose();
   }
 
