@@ -73,7 +73,7 @@ $specificMessage
 $_kProvisioningConfigFileEnvironmentVariable variable is not defined in your
 environment. Please, define it and try again.
 
-Example provisioining xcconfig:
+Example provisioning xcconfig:
 
 ProvisioningStyle=Manual
 CODE_SIGN_IDENTITY=...

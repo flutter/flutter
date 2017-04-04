@@ -18,6 +18,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
     if (await sampleDir.exists())
       rmTree(sampleDir);
 
+    final Stopwatch watch = new Stopwatch();
     int releaseSizeInBytes;
 
     await inDirectory(Directory.systemTemp, () async {
@@ -32,19 +33,26 @@ TaskFunction createBasicMaterialAppSizeTest() {
 
         if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
           await prepareProvisioningCertificates(sampleDir.path);
+          watch.start();
           await flutter('build', options: <String>['ios', '--release']);
+          watch.stop();
           // IPAs are created manually AFAICT
           await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
           releaseSizeInBytes = await file('${sampleDir.path}/build/app.ipa').length();
         } else {
+          watch.start();
           await flutter('build', options: <String>['apk', '--release']);
+          watch.stop();
           releaseSizeInBytes = await file('${sampleDir.path}/build/app/outputs/apk/app-release.apk').length();
         }
       });
     });
 
     return new TaskResult.success(
-        <String, dynamic>{'release_size_in_bytes': releaseSizeInBytes},
-        benchmarkScoreKeys: <String>['release_size_in_bytes']);
+        <String, dynamic>{
+          'release_size_in_bytes': releaseSizeInBytes,
+          'build_time_millis': watch.elapsedMilliseconds,
+        },
+        benchmarkScoreKeys: <String>['release_size_in_bytes', 'build_time_millis']);
   };
 }
