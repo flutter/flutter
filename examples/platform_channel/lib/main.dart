@@ -14,9 +14,9 @@ class PlatformChannel extends StatefulWidget {
 
 class _PlatformChannelState extends State<PlatformChannel> {
   static const PlatformMethodChannel methodChannel =
-      const PlatformMethodChannel('io.flutter.samples/battery');
+      const PlatformMethodChannel('samples.flutter.io/battery');
   static const PlatformEventChannel eventChannel =
-      const PlatformEventChannel('io.flutter.samples/charging');
+      const PlatformEventChannel('samples.flutter.io/charging');
 
   String _batteryLevel = 'Battery level: unknown.';
   String _chargingStatus = 'Battery status: unknown.';
@@ -64,7 +64,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
             children: <Widget>[
               new Text(_batteryLevel, key: new Key('Battery level label')),
               new Padding(
-                padding: new EdgeInsets.all(15.0),
+                padding: new EdgeInsets.all(16.0),
                 child: new RaisedButton(
                   child: new Text('Refresh'),
                   onPressed: _getBatteryLevel,

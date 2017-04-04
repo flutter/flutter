@@ -24,8 +24,8 @@ import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.MethodCall;
 
 public class MainActivity extends FlutterActivity {
-  private static final String BATTERY_CHANNEL = "io.flutter.samples/battery";
-  private static final String CHARGING_CHANNEL = "io.flutter.samples/charging";
+  private static final String BATTERY_CHANNEL = "samples.flutter.io/battery";
+  private static final String CHARGING_CHANNEL = "samples.flutter.io/charging";
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -76,7 +76,7 @@ public class MainActivity extends FlutterActivity {
         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
 
         if (status == BatteryManager.BATTERY_STATUS_UNKNOWN) {
-          events.error("UNAVAILABLE", "Charging status unavailbale", null);
+          events.error("UNAVAILABLE", "Charging status unavailable", null);
         } else {
           boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                                status == BatteryManager.BATTERY_STATUS_FULL;

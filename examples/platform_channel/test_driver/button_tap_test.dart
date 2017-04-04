@@ -14,12 +14,12 @@ void main() {
     });
 
     tearDownAll(() async {
-      if (driver != null)
-        driver.close();
+      if (driver != null) driver.close();
     });
 
     test('tap on the button, verify result', () async {
-      final SerializableFinder batteryLevelLabel = find.byValueKey('Battery level label');
+      final SerializableFinder batteryLevelLabel =
+          find.byValueKey('Battery level label');
       expect(batteryLevelLabel, isNotNull);
 
       final SerializableFinder button = find.text('Refresh');
@@ -27,7 +27,7 @@ void main() {
       await driver.tap(button);
 
       String batteryLevel;
-      while(batteryLevel == null || batteryLevel.contains('unknown')) {
+      while (batteryLevel == null || batteryLevel.contains('unknown')) {
         batteryLevel = await driver.getText(batteryLevelLabel);
       }
 
