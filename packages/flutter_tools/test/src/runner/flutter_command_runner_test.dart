@@ -18,7 +18,6 @@ void main() {
       bool versionChecked = false;
       when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
         versionChecked = true;
-        return null;
       });
 
       await createTestCommandRunner(new DummyFlutterCommand(shouldUpdateCache: false))

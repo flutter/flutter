@@ -118,7 +118,7 @@ void main() {
 }
 
 void _expectVersionMessage(String message) {
-  final BufferLogger logger = context.getVariable(Logger);
+  final BufferLogger logger = context[Logger];
   expect(logger.statusText.trim(), message.trim());
 }
 
@@ -149,8 +149,8 @@ void fakeData({
   bool expectSetStamp: false,
   bool errorOnFetch: false,
 }) {
-  final MockProcessManager pm = context.getVariable(ProcessManager);
-  final MockCache cache = context.getVariable(Cache);
+  final MockProcessManager pm = context[ProcessManager];
+  final MockCache cache = context[Cache];
 
   ProcessResult success(String standardOutput) {
     return new ProcessResult(1, 0, standardOutput, '');

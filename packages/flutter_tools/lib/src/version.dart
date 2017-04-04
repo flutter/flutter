@@ -86,12 +86,11 @@ class FlutterVersion {
   static String _latestGitCommitDate([String branch]) {
     final List<String> args = <String>['git', 'log'];
 
-    if (branch != null) {
+    if (branch != null)
       args.add(branch);
-    }
 
     args.addAll(<String>['-n', '1', '--pretty=format:%ad', '--date=iso']);
-    return _runSync(args, Cache.flutterRoot, lenient: false);
+    return _runSync(args, lenient: false);
   }
 
   /// The name of the temporary git remote used to check for the latest
@@ -115,8 +114,8 @@ class FlutterVersion {
         'add',
         _kVersionCheckRemote,
         'https://github.com/flutter/flutter.git',
-      ], Cache.flutterRoot, lenient: false);
-      await _run(<String>['git', 'fetch', _kVersionCheckRemote, 'master'], Cache.flutterRoot, lenient: false);
+      ]);
+      await _run(<String>['git', 'fetch', _kVersionCheckRemote, 'master']);
       return _latestGitCommitDate('$_kVersionCheckRemote/master');
     } finally {
       await _removeVersionCheckRemoteIfExists();
@@ -124,25 +123,22 @@ class FlutterVersion {
   }
 
   static Future<Null> _removeVersionCheckRemoteIfExists() async {
-    final List<String> remotes = (await _run(<String>['git', 'remote'], Cache.flutterRoot, lenient: false))
+    final List<String> remotes = (await _run(<String>['git', 'remote']))
         .split('\n')
         .map((String name) => name.trim())  // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_kVersionCheckRemote)) {
-      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote], Cache.flutterRoot, lenient: false);
-    }
+    if (remotes.contains(_kVersionCheckRemote))
+      await _run(<String>['git', 'remote', 'remove', _kVersionCheckRemote]);
   }
 
   static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion());
 
   /// Return a short string for the version (`alpha/a76bc8e22b`).
   static String getVersionString({ bool whitelistBranchName: false }) {
-    final String cwd = Cache.flutterRoot;
-
-    String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD'], cwd));
+    String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD']));
     commit = commit.isEmpty ? 'unknown' : commit;
 
-    String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD'], cwd);
+    String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
     branch = branch == 'HEAD' ? 'master' : branch;
 
     if (whitelistBranchName || branch.isEmpty) {
@@ -154,15 +150,15 @@ class FlutterVersion {
     return '$branch/$commit';
   }
 
-  /// We warn the user if the age of their Flutter installation is greater than
-  /// this duration.
-  @visibleForTesting
-  static const Duration kVersionAgeConsideredUpToDate = const Duration(days: 4 * 7);
-
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
-  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 1);
+  static const Duration kCheckAgeConsideredUpToDate = const Duration(days: 7);
+
+  /// We warn the user if the age of their Flutter installation is greater than
+  /// this duration.
+  @visibleForTesting
+  static final Duration kVersionAgeConsideredUpToDate = kCheckAgeConsideredUpToDate * 4;
 
   /// The prefix of the stamp file where we cache Flutter version check data.
   @visibleForTesting
@@ -187,9 +183,8 @@ class FlutterVersion {
       return latestFlutterCommitDate.isAfter(localFrameworkCommitDate);
     }
 
-    if (installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
+    if (installationSeemsOutdated && await newerFrameworkVersionAvailable())
       printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
-    }
   }
 
   @visibleForTesting
@@ -202,7 +197,7 @@ class FlutterVersion {
   ╔════════════════════════════════════════════════════════════════════════════╗
   ║ $warning ║
   ║                                                                            ║
-  ║ To update to the latest version, run flutter upgrade.                      ║
+  ║ To update to the latest version, run "flutter upgrade".                    ║
   ╚════════════════════════════════════════════════════════════════════════════╝
 ''';
   }
@@ -225,9 +220,8 @@ class FlutterVersion {
       final Duration timeSinceLastCheck = clock.now().difference(lastTimeVersionWasChecked);
 
       // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < kCheckAgeConsideredUpToDate) {
+      if (timeSinceLastCheck < kCheckAgeConsideredUpToDate)
         return DateTime.parse(data['lastKnownRemoteVersion']);
-      }
     }
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
@@ -238,56 +232,65 @@ class FlutterVersion {
         'lastKnownRemoteVersion': '$remoteFrameworkCommitDate',
       }));
       return remoteFrameworkCommitDate;
-    } on ToolExit catch(error) {
+    } on VersionCheckError catch (error) {
       // This happens when any of the git commands fails, which can happen when
       // there's no Internet connectivity. Remote version check is best effort
       // only. We do not prevent the command from running when it fails.
-      printTrace('Failed to check Flutter version in the remote repository: ${error.message}');
+      printTrace('Failed to check Flutter version in the remote repository: $error');
       return null;
     }
   }
 }
 
-/// Runs [command] and returns the standard output as a string.
+/// Thrown when we fail to check Flutter version.
 ///
-/// If [lenient] is `true` and the command fails, returns an empty string.
-/// Otherwise, throws a [ToolExit] exception.
-String _runSync(List<String> command, String cwd, {bool lenient: true}) {
-  final ProcessResult results = processManager.runSync(command, workingDirectory: cwd);
+/// This can happen when we attempt to `git fetch` but there is no network, or
+/// when the installation is not git-based (e.g. a user clones the repo but
+/// then removes .git).
+class VersionCheckError implements Exception {
 
-  if (results.exitCode == 0)
-    return results.stdout.trim();
+  VersionCheckError(this.message);
 
-  if (!lenient) {
-    throwToolExit(
-      'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-      'Standard error: ${results.stderr}',
-      exitCode: results.exitCode,
-    );
-  }
+  final String message;
 
-  return '';
+  @override
+  String toString() => '$VersionCheckError: $message';
 }
 
 /// Runs [command] and returns the standard output as a string.
 ///
 /// If [lenient] is `true` and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
-Future<String> _run(List<String> command, String cwd, {bool lenient: true}) async {
-  final ProcessResult results = await processManager.run(command, workingDirectory: cwd);
+String _runSync(List<String> command, {bool lenient: true}) {
+  final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0)
     return results.stdout.trim();
 
   if (!lenient) {
-    throwToolExit(
-        'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
-            'Standard error: ${results.stderr}',
-        exitCode: results.exitCode,
+    throw new VersionCheckError(
+      'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+      'Standard error: ${results.stderr}'
     );
   }
 
   return '';
+}
+
+/// Runs [command] in the root of the Flutter installation and returns the
+/// standard output as a string.
+///
+/// If the command fails, throws a [ToolExit] exception.
+Future<String> _run(List<String> command) async {
+  final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
+
+  if (results.exitCode == 0)
+    return results.stdout.trim();
+
+  throw new VersionCheckError(
+    'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+    'Standard error: ${results.stderr}'
+  );
 }
 
 String _shortGitRevision(String revision) {
