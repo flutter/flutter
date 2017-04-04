@@ -15,11 +15,35 @@ export 'package:flutter/rendering.dart' show
   SliverGridDelegateWithFixedCrossAxisCount,
   SliverGridDelegateWithMaxCrossAxisExtent;
 
+/// A delegate that supplies children for slivers.
+///
+/// Many slivers lazily construct their box children to avoid creating more
+/// children than are visible through the [Viewport]. Rather than receiving
+/// their children as an explicit [List], they receive their children using a
+/// [SliverChildDelegate].
+///
+/// It's uncommon to subclass [SliverChildDelegate]. Instead, consider using one
+/// of the existing subclasses that provide adaptors to builder callbacks or
+/// explict child lists.
+///
+/// See also:
+///
+///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
+///    callback to construct the children.
+///  * [SliverChildListDelegate], which is a delegate that has an explicit list
+///    of children.
 abstract class SliverChildDelegate {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const SliverChildDelegate();
 
+  /// Returns the child with the given index.
+  ///
+  /// Should return null if asked to build a widget with a greater index than
+  /// exists.
+  ///
+  /// Subclasses typically override this function and wrap their children in
+  /// [RepaintBoundary] widgets.
   Widget build(BuildContext context, int index);
 
   /// Returns an estimate of the number of children this delegate will build.
@@ -55,6 +79,15 @@ abstract class SliverChildDelegate {
   /// the underlying render tree.
   void didFinishLayout(int firstIndex, int lastIndex) {}
 
+  /// Called whenever a new instance of the child delegate class is
+  /// provided to the sliver.
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If the method returns false, then the [build] call might be optimized
+  /// away.
   bool shouldRebuild(covariant SliverChildDelegate oldDelegate);
 
   @override
@@ -64,7 +97,9 @@ abstract class SliverChildDelegate {
     return '$runtimeType#$hashCode(${description.join(", ")})';
   }
 
+  /// Add additional information to the given description for use by [toString].
   @protected
+  @mustCallSuper
   void debugFillDescription(List<String> description) {
     try {
       final int children = estimatedChildCount;
@@ -76,11 +111,38 @@ abstract class SliverChildDelegate {
   }
 }
 
+/// A delegate that supplies children for slivers using a builder callback.
+///
+/// Many slivers lazily construct their box children to avoid creating more
+/// children than are visible through the [Viewport]. This delegate provides
+/// children using an [IndexedWidgetBuilder] callback. The widgets returned from
+/// the builder callback are wrapped in [RepaintBoundary] widgets.
+///
+/// See also:
+///
+///  * [SliverChildListDelegate], which is a delegate that has an explicit list
+///    of children.
 class SliverChildBuilderDelegate extends SliverChildDelegate {
+  /// Creates a delegate that supplies children for slivers using the given
+  /// builder callback
   const SliverChildBuilderDelegate(this.builder, { this.childCount });
 
+  /// Called to build children for the sliver.
+  ///
+  /// Will be called only for indices greater than or equal to zero and less
+  /// than [childCount] (if [childCount] is non-null).
+  ///
+  /// Should return null if asked to build a widget with a greater index than
+  /// exists.
+  ///
+  /// The delegate wraps the children returned by this builder in
+  /// [RepaintBoundary] widgets.
   final IndexedWidgetBuilder builder;
 
+  /// The total number of children this delegate can provide.
+  ///
+  /// If null, the number of children is determined by the least index for which
+  /// [builder] returns null.
   final int childCount;
 
   @override
@@ -101,19 +163,33 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
   bool shouldRebuild(covariant SliverChildBuilderDelegate oldDelegate) => true;
 }
 
-// ///
-// /// In general building all the widgets in advance is not efficient. It is
-// /// better to create a delegate that builds them on demand by subclassing
-// /// [SliverChildDelegate] directly.
-// ///
-// /// This class is provided for the cases where either the list of children is
-// /// known well in advance (ideally the children are themselves compile-time
-// /// constants, for example), and therefore will not be built each time the
-// /// delegate itself is created, or the list is small, such that it's likely
-// /// always visible (and thus there is nothing to be gained by building it on
-// /// demand). For example, the body of a dialog box might fit both of these
-// /// conditions.
+/// A delegate that supplies children for slivers using an explicit list.
+///
+/// Many slivers lazily construct their box children to avoid creating more
+/// children than are visible through the [Viewport]. This delegate provides
+/// children using an explicit list, which is convenient but reduces the benefit
+/// of building children lazily.
+///
+/// In general building all the widgets in advance is not efficient. It is
+/// better to create a delegate that builds them on demand using
+/// [SliverChildBuilderDelegate] or by subclassing [SliverChildDelegate]
+/// directly.
+///
+/// This class is provided for the cases where either the list of children is
+/// known well in advance (ideally the children are themselves compile-time
+/// constants, for example), and therefore will not be built each time the
+/// delegate itself is created, or the list is small, such that it's likely
+/// always visible (and thus there is nothing to be gained by building it on
+/// demand). For example, the body of a dialog box might fit both of these
+/// conditions.
+///
+/// See also:
+///
+///  * [SliverChildBuilderDelegate], which is a delegate that uses a builder
+///    callback to construct the children.
 class SliverChildListDelegate extends SliverChildDelegate {
+  /// Creates a delegate that supplies children for slivers using the given
+  /// list.
   const SliverChildListDelegate(this.children, { this.addRepaintBoundaries: true });
 
   /// Whether to wrap each child in a [RepaintBoundary].
@@ -149,7 +225,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
   }
 }
 
+/// A base class for sliver that have multiple box children.
+///
+/// Helps subclasses build their children lazily using a [SliverChildDelegate].
 abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
+  /// Initializes fields for subclasses.
   SliverMultiBoxAdaptorWidget({
     Key key,
     @required this.delegate,
@@ -157,6 +237,16 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
     assert(delegate != null);
   }
 
+  /// The delegate that provides the children for this widget.
+  ///
+  /// The children are constructed lazily using this widget to avoid creating
+  /// more children than are visible through the [Viewport].
+  ///
+  /// See also:
+  ///
+  ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
+  ///    commonly used subclasses of [SliverChildDelegate] that use a builder
+  ///    callback and an explicit child list, respectively.
   final SliverChildDelegate delegate;
 
   @override
@@ -165,6 +255,13 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   @override
   RenderSliverMultiBoxAdaptor createRenderObject(BuildContext context);
 
+  /// Returns an estimate of the max scroll extent for all the children.
+  ///
+  /// Subclasses should override this function if they have additional
+  /// information about their max scroll extent.
+  ///
+  /// The default implementation returns calls
+  /// [SliverChildDelegate.estimateMaxScrollOffset].
   double estimateMaxScrollOffset(
     SliverConstraints constraints,
     int firstIndex,
@@ -188,7 +285,29 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   }
 }
 
+/// A sliver that places multiple box children in a linear array along the main
+/// axis.
+///
+/// Each child is forced to have the [SliverConstraints.crossAxisExtent] in the
+/// cross axis but determines its own main axis extent.
+///
+/// [SliverList] determines its scroll offset by "dead reckoning" because
+/// children outside the visible part of the sliver are not materialized, which
+/// means [SliverList] cannot learn their main axis extent. Instead, newly
+/// materialized children are placed adjacent to existing children.
+///
+/// If the children have a fixed extent in the main axis, consider using
+/// [SliverFixedExtentList] rather than [SliverList] because
+/// [SliverFixedExtentList] does not need to perform layout on its children to
+/// obtain their extent in the main axis and is therefore more efficient.
+///
+/// See also:
+///
+///  * [SliverFixedExtentList], which is more efficient for children with
+///    the same extent in the main axis.
+///  * [SliverGrid], which places its children in arbitrary positions.
 class SliverList extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places box children in a linear array.
   SliverList({
     Key key,
     @required SliverChildDelegate delegate,
@@ -201,13 +320,34 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+/// A sliver that places multiple box children with the same main axis extent in
+/// a linear array.
+///
+/// [SliverFixedExtentList] places its children in a linear array along the main
+/// axis starting at offset zero and without gaps. Each child is forced to have
+/// the [itemExtent] in the main axis and the
+/// [SliverConstraints.crossAxisExtent] in the cross axis.
+///
+/// [SliverFixedExtentList] is more efficient than [SliverList] because
+/// [SliverFixedExtentList] does not need to perform layout on its children to
+/// obtain their extent in the main axis.
+///
+/// See also:
+///
+///  * [SliverFill], which determines the [itemExtent] based on
+///    [SliverConstraints.viewportMainAxisExtent].
+///  * [SliverList], which does not require its children to have the same
+///    extent in the main axis.
 class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places box children with the same main axis extent
+  /// in a linear array.
   SliverFixedExtentList({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
   }) : super(key: key, delegate: delegate);
 
+  /// The extent the children are forced to have in the main axis.
   final double itemExtent;
 
   @override
@@ -222,13 +362,27 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+/// A sliver that places multiple box children in a two dimensional arrangement.
+///
+/// [SliverGrid] places its children in arbitrary positions determined by
+/// [gridDelegate]. Each child is forced to have the size specified by the
+/// [gridDelegate].
+///
+/// See also:
+///
+///  * [SliverList], which places its children in a linear array.
+///  * [SliverFixedExtentList], which places its children in a linear
+///    array with a fixed extent in the main axis.
 class SliverGrid extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver that places multiple box children in a two dimensional
+  /// arrangement.
   SliverGrid({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.gridDelegate,
   }) : super(key: key, delegate: delegate);
 
+  /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
 
   @override
@@ -260,7 +414,18 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+/// A sliver that contains a multiple box children that each fill the viewport.
+///
+/// [SliverFill] places its children in a linear array along the main axis. Each
+/// child is sized to fill the viewport, both in the main and cross axis.
+///
+/// See also:
+///
+///  * [SliverFixedExtentList], which has a configurable [itemExtent].
+///  * [SliverList], which does not require its children to have the same
+///    extent in the main axis.
 class SliverFill extends SliverMultiBoxAdaptorWidget {
+  /// Creates a sliver whose box children that each fill the viewport.
   SliverFill({
     Key key,
     @required SliverChildDelegate delegate,
@@ -270,6 +435,11 @@ class SliverFill extends SliverMultiBoxAdaptorWidget {
     assert(viewportFraction > 0.0);
   }
 
+  /// The fraction of the viewport that each child should fill in the main axis.
+  ///
+  /// If this fraction is less than 1.0, more than one child will be visible at
+  /// once. If this fraction is greater than 1.0, each child will be larger than
+  /// the viewport in the main axis.
   final double viewportFraction;
 
   @override
@@ -284,7 +454,12 @@ class SliverFill extends SliverMultiBoxAdaptorWidget {
   }
 }
 
+/// An element that lazily builds children for a [SliverMultiBoxAdaptorWidget].
+///
+/// Implements [RenderSliverBoxChildManager], which lets this element manage
+/// the children of subclasses of [RenderSliverMultiBoxAdaptor].
 class SliverMultiBoxAdaptorElement extends RenderObjectElement implements RenderSliverBoxChildManager {
+  /// Creates an element that lazily builds children for the given widget.
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
   @override

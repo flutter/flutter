@@ -68,8 +68,7 @@ abstract class ScrollView extends StatelessWidget {
   /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
 
-  /// Whether the scroll view scrolls in the reading direction in the
-  /// [scrollDirection].
+  /// Whether the scroll view scrolls in the reading direction.
   ///
   /// For example, if the reading direction is left-to-right and
   /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from

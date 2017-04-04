@@ -211,8 +211,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   }
 }
 
-/// A sliver that contains multiple box children that have a given extent in the
-/// main axis.
+/// A sliver that places multiple box children with the same main axis extent in
+/// a linear array.
 ///
 /// [RenderSliverFixedExtentList] places its children in a linear array along
 /// the main axis starting at offset zero and without gaps. Each child is forced
