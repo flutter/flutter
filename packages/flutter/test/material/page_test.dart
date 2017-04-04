@@ -209,7 +209,7 @@ void main() {
     // Drag from left edge to invoke the gesture.
     final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
@@ -240,7 +240,7 @@ void main() {
     // Drag from left edge to invoke the gesture.
     final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     // Page 1 is now visible.
     expect(find.text('Page 1'), isOnstage);
@@ -250,12 +250,12 @@ void main() {
     expect(tester.getTopLeft(find.text('Page 2')), const Point(400.0, 0.0));
 
     await gesture.moveBy(const Offset(-200.0, 0.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Point(200.0, 0.0));
 
     await gesture.moveBy(const Offset(-100.0, 200.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(tester.getTopLeft(find.text('Page 2')), const Point(100.0, 0.0));
   });
@@ -282,7 +282,7 @@ void main() {
     // Drag from left edge to invoke the gesture.
     final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.text('Page 1'), findsNothing);
     expect(find.text('Page 2'), isOnstage);
