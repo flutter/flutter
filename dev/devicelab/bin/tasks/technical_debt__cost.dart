@@ -13,7 +13,8 @@ import 'package:path/path.dart' as path;
 // the numbers below are odd, so that the totals don't seem round. :-)
 const double todoCost = 1009.0; // about two average SWE days, in dollars
 const double ignoreCost = 2003.0; // four average SWE days, in dollars
-const double pythonCost = 3001.0; //  six average SWE days, in dollars
+const double pythonCost = 3001.0; // six average SWE days, in dollars
+const double skipCost = 2473.0; // 20 hours: 5 to fix the issue we're ignoring, 15 to fix the bugs we missed because the test was off
 
 final RegExp todoPattern = new RegExp(r'(?://|#) *TODO');
 final RegExp ignorePattern = new RegExp(r'// *ignore:');
@@ -25,12 +26,15 @@ Future<double> findCostsForFile(File file) async {
       path.extension(file.path) != '.yaml' &&
       path.extension(file.path) != '.sh')
     return 0.0;
+  final bool isTest = file.path.endsWith('_test.dart');
   double total = 0.0;
   for (String line in await file.readAsLines()) {
     if (line.contains(todoPattern))
       total += todoCost;
     if (line.contains(ignorePattern))
       total += ignoreCost;
+    if (isTest && line.contains('skip:'))
+      total += skipCost;
   }
   return total;
 }
