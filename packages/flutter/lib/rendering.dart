@@ -50,6 +50,7 @@ export 'src/rendering/rotated_box.dart';
 export 'src/rendering/semantics.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
+export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_list.dart';

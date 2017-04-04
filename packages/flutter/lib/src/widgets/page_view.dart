@@ -426,7 +426,7 @@ class _PageViewState extends State<PageView> {
             axisDirection: axisDirection,
             offset: offset,
             slivers: <Widget>[
-              new SliverFill(
+              new SliverFillViewport(
                 viewportFraction: config.controller.viewportFraction,
                 delegate: config.childrenDelegate
               ),
