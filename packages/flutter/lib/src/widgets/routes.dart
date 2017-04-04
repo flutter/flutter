@@ -558,21 +558,103 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   and exit transition of routes pushed on top of this route.
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
 
-  /// Override this method to wrap the route in a number of transition widgets.
-  ///
-  /// For example, to create a fade entrance transition, wrap the given child
-  /// widget in a [FadeTransition] using the given animation as the opacity.
+  /// Override this method to wrap the [child] with one or more transition
+  /// widgets that define how the route arrives and leaves the screen.
   ///
   /// By default, the child is not wrapped in any transition widgets.
   ///
+  /// The buildTransitions method is typically used to define transitions
+  /// that animate the new topmost route's comings and goings. When the
+  /// Navigator pushes a route on the top of its stack, the new route's
+  /// primaryAnimation runs from 0.0 to 1.0. When the Navigator pops the
+  /// topmost route, e.g. because the use pressed the back button, the
+  /// primary animation runs from 1.0 to 0.0.
+  ///
+  /// The following example uses the primaryAnimation to drive a
+  /// SlideTransition that translates the top of the new route vertically
+  /// from the bottom of the screen when it is pushed on the Navigator's
+  /// stack. When the route is popped the SlideTransition translates the
+  /// route from the top of the screen back to the bottom.
+  ///
+  /// ```dart
+  /// new PageRouteBuilder(
+  ///   pageBuilder: (BuildContext context, _, __) {
+  ///     return new Scaffold(
+  ///       appBar: new AppBar(title: new Text('Hello')),
+  ///       body: new Center(
+  ///         child: new Text('Hello World'),
+  ///       ),
+  ///     );
+  ///   },
+  ///   transitionsBuilder: (
+  ///       BuildContext context,
+  ///       Animation<double> primaryAnimation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child) {
+  ///     return new SlideTransition(
+  ///       position: new FractionalOffsetTween(
+  ///         begin: FractionalOffset.bottomLeft,
+  ///         end: FractionalOffset.topLeft
+  ///       ).animate(primaryAnimation),
+  ///       child: child, // child is the value returned by pageBuilder
+  ///     );
+  ///   },
+  /// );
+  ///```
+  ///
+  /// We've used PageRouteBuilder to demonstrate the buildTransitions method
+  /// here. The body of an override of the buildTransitions method would be
+  /// defined in the same way.
+  ///
+  /// When the Navigator pushes a route on the top of its stack, the
+  /// secondaryAnimation can be used to define how route that was on the top
+  /// of the stack leaves the screen. Similarly when the topmost route is
+  /// popped, the secondaryAnimation can be used to define how the route
+  /// below it reappears on the screen. When the Navigator pushes a new route
+  /// on the top of its stack, the old topmost route's secondaryAnimation
+  /// runs from 1.0 to 0.0.  When the Navigator pops the topmost route, the
+  /// secondaryAnimation for the route below it runs from 0.0 to 1.0.
+  ///
+  /// The example below adds an transition that's driven by the
+  /// secondaryAnimation. When this route disappears because a new route has
+  /// been pushed on top of it, it translates in the opposite direction of
+  /// the new route. Likewise when the route is exposed because the topmost
+  /// route has been popped off.
+  ///
+  /// ```dart
+  ///   transitionsBuilder: (
+  ///       BuildContext context,
+  ///       Animation<double> primaryAnimation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child) {
+  ///     return new SlideTransition(
+  ///       position: new FractionalOffsetTween(
+  ///         begin: FractionalOffset.bottomLeft,
+  ///         end: FractionalOffset.topLeft,
+  ///       ).animate(primaryAnimation),
+  ///       child: new SlideTransition(
+  ///         position: new FractionalOffsetTween(
+  ///           begin: FractionalOffset.topLeft,
+  ///           end: FractionalOffset.bottomLeft,
+  ///         ).animate(secondaryAnimation),
+  ///         child: child,
+  ///       ),
+  ///     );
+  ///   }
+  ///```
+  ///
+  /// In practice the secondaryAnimation is not used very often because animating
+  /// both the topmost route and the route below it can be more distracting
+  /// than helpful.
+  ///
   /// * [context] The context in which the route is being built.
-  /// * [animation] The animation for this route's transition. When entering,
+  /// * [primaryAnimation] The animation for this route's transition. When entering,
   ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
   ///   runs backwards from 1.0 to 0.0.
-  /// * [forwardAnimation] The animation for the route being pushed on top of
-  ///   this route. This animation lets this route coordinate with the entrance
-  ///   and exit transition of routes pushed on top of this route.
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+  /// * [secondaryAnimation] The animation for the route below the topmost route.
+  ///   This animation lets this route coordinate with the entrance
+  ///   and exit transition of routes pushed on top.
+  Widget buildTransitions(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation, Widget child) {
     return child;
   }
 
