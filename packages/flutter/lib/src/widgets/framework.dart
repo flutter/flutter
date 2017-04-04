@@ -129,11 +129,6 @@ class ObjectKey extends LocalKey {
   }
 }
 
-/// Signature for a callback when a global key is removed from the tree.
-///
-/// Used by [GlobalKey.registerRemoveListener].
-typedef void GlobalKeyRemoveListener(GlobalKey key);
-
 /// A key that is unique across the entire app.
 ///
 /// Global keys uniquely identify elements. Global keys provide access to other
@@ -168,7 +163,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   const GlobalKey.constructor() : super._();
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
-  static final Map<GlobalKey, Set<GlobalKeyRemoveListener>> _removeListeners = <GlobalKey, Set<GlobalKeyRemoveListener>>{};
   static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
   static final Set<Element> _debugIllFatedElements = new HashSet<Element>();
   static final Map<GlobalKey, Element> _debugReservations = <GlobalKey, Element>{};
@@ -296,53 +290,6 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
         return state;
     }
     return null;
-  }
-
-  /// Calls `listener` whenever a widget with the given global key is removed
-  /// from the tree.
-  ///
-  /// Listeners can be removed with [unregisterRemoveListener].
-  static void registerRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
-    assert(key != null);
-    final Set<GlobalKeyRemoveListener> listeners =
-        _removeListeners.putIfAbsent(key, () => new HashSet<GlobalKeyRemoveListener>());
-    final bool added = listeners.add(listener);
-    assert(added);
-  }
-
-  /// Stop calling `listener` whenever a widget with the given global key is
-  /// removed from the tree.
-  ///
-  /// Listeners can be added with [registerRemoveListener].
-  static void unregisterRemoveListener(GlobalKey key, GlobalKeyRemoveListener listener) {
-    assert(key != null);
-    assert(_removeListeners.containsKey(key));
-    assert(_removeListeners[key].contains(listener));
-    final bool removed = _removeListeners[key].remove(listener);
-    if (_removeListeners[key].isEmpty)
-      _removeListeners.remove(key);
-    assert(removed);
-  }
-
-  static void _notifyListeners() {
-    if (_removedKeys.isEmpty)
-      return;
-    try {
-      for (GlobalKey key in _removedKeys) {
-        if (!_registry.containsKey(key) && _removeListeners.containsKey(key)) {
-          final Set<GlobalKeyRemoveListener> localListeners = new HashSet<GlobalKeyRemoveListener>.from(_removeListeners[key]);
-          for (GlobalKeyRemoveListener listener in localListeners) {
-            try {
-              listener(key);
-            } catch (e, stack) {
-              _debugReportException('while notifying GlobalKey listener', e, stack);
-            }
-          }
-        }
-      }
-    } finally {
-      _removedKeys.clear();
-    }
   }
 }
 
@@ -2082,7 +2029,6 @@ class BuildOwner {
         }
         return true;
       });
-      scheduleMicrotask(GlobalKey._notifyListeners);
     } catch (e, stack) {
       _debugReportException('while finalizing the widget tree', e, stack);
     } finally {
