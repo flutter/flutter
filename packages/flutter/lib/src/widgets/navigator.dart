@@ -13,6 +13,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
+import 'routes.dart';
 import 'ticker_provider.dart';
 
 /// An abstraction for an entry managed by a [Navigator].
@@ -72,7 +73,9 @@ abstract class Route<T> {
   /// See also:
   ///
   /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  Future<bool> willPop() async => !isFirst;
+  Future<RoutePopDisposition> willPop() async {
+    return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
+  }
 
   /// A request was made to pop this route. If the route can handle it
   /// internally (e.g. because it has its own stack of internal state) then
@@ -969,8 +972,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   Future<bool> maybePop([dynamic result]) async {
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
-    if (await route.willPop() && mounted) {
-      pop(result);
+    final RoutePopDisposition disposition = await route.willPop();
+    if (disposition != RoutePopDisposition.bubble && mounted) {
+      if (disposition == RoutePopDisposition.pop)
+        pop(result);
       return true;
     }
     return false;
