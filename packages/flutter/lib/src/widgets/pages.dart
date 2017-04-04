@@ -46,15 +46,15 @@ abstract class PageRoute<T> extends ModalRoute<T> {
 /// primary contents.
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef Widget RoutePageBuilder(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation);
+typedef Widget RoutePageBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
 
 /// Signature for the [PageRouteBuilder] function that builds the route's
 /// transitions.
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation, Widget child);
+typedef Widget RouteTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
 
-Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation, Widget child) {
+Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
   return child;
 }
 
@@ -110,13 +110,13 @@ class PageRouteBuilder<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation) {
-    return pageBuilder(context, primaryAnimation, secondaryAnimation);
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return pageBuilder(context, animation, secondaryAnimation);
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation, Widget child) {
-    return transitionsBuilder(context, primaryAnimation, secondaryAnimation, child);
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+    return transitionsBuilder(context, animation, secondaryAnimation, child);
   }
 
 }

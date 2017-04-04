@@ -566,11 +566,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// The buildTransitions method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
   /// [Navigator] pushes a route on the top of its stack, the new route's
-  /// [primaryAnimation] runs from 0.0 to 1.0. When the Navigator pops the
+  /// primary [animation] runs from 0.0 to 1.0. When the Navigator pops the
   /// topmost route, e.g. because the use pressed the back button, the
   /// primary animation runs from 1.0 to 0.0.
   ///
-  /// The following example uses the primaryAnimation to drive a
+  /// The following example uses the animation to drive a
   /// [SlideTransition] that translates the top of the new route vertically
   /// from the bottom of the screen when it is pushed on the Navigator's
   /// stack. When the route is popped the SlideTransition translates the
@@ -588,14 +588,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   },
   ///   transitionsBuilder: (
   ///       BuildContext context,
-  ///       Animation<double> primaryAnimation,
+  ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
   ///       Widget child) {
   ///     return new SlideTransition(
   ///       position: new FractionalOffsetTween(
   ///         begin: FractionalOffset.bottomLeft,
   ///         end: FractionalOffset.topLeft
-  ///       ).animate(primaryAnimation),
+  ///       ).animate(animation),
   ///       child: child, // child is the value returned by pageBuilder
   ///     );
   ///   },
@@ -624,7 +624,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```dart
   ///   transitionsBuilder: (
   ///       BuildContext context,
-  ///       Animation<double> primaryAnimation,
+  ///       Animation<double> animation,
   ///       Animation<double> secondaryAnimation,
   ///       Widget child
   ///   ) {
@@ -632,7 +632,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       position: new FractionalOffsetTween(
   ///         begin: FractionalOffset.bottomLeft,
   ///         end: FractionalOffset.topLeft,
-  ///       ).animate(primaryAnimation),
+  ///       ).animate(animation),
   ///       child: new SlideTransition(
   ///         position: new FractionalOffsetTween(
   ///           begin: FractionalOffset.topLeft,
@@ -644,20 +644,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///   }
   ///```
   ///
-  /// In practice the secondaryAnimation is not used very often because animating
-  /// both the topmost route and the route below it can be more distracting
-  /// than helpful.
+  /// In practice the secondaryAnimation is used pretty rarely.
   ///
-  /// * [context] The context in which the route is being built.
-  /// * [primaryAnimation] The animation for this route's transition. When entering,
-  ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
-  ///   runs backwards from 1.0 to 0.0.
-  /// * [secondaryAnimation] The animation for the route below the topmost route.
-  ///   This animation lets this route coordinate with the entrance
-  ///   and exit transition of routes pushed on top.
+  ///  * [context] The context in which the route is being built.
+  ///  * [animation] When the [Navigator] pushes a route on the top of its stack,
+  ///    the new route's primary [animation] runs from 0.0 to 1.0. When the Navigator
+  ///    pops the topmost route this animation runs from 1.0 to 0.0.
+  ///  * [secondaryAnimation] When the Navigator pushes a new route
+  ///    on the top of its stack, the old topmost route's secondaryAnimation
+  ///    runs from 1.0 to 0.0.  When the Navigator pops the topmost route, the
+  ///    secondaryAnimation for the route below it runs from 0.0 to 1.0.
   Widget buildTransitions(
       BuildContext context,
-      Animation<double> primaryAnimation,
+      Animation<double> animation,
       Animation<double> secondaryAnimation,
       Widget child,
   ) {
