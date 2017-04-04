@@ -32,6 +32,8 @@ class ManifestTask {
     @required this.description,
     @required this.stage,
     @required this.requiredAgentCapabilities,
+    @required this.isFlaky,
+    @required this.timeoutInMinutes,
   }) {
     final String taskName = 'task "$name"';
     _checkIsNotBlank(name, 'Task name', taskName);
@@ -51,6 +53,14 @@ class ManifestTask {
 
   /// Capabilities required of the build agent to be able to perform this task.
   final List<String> requiredAgentCapabilities;
+
+  /// Whether this test is flaky.
+  ///
+  /// Flaky tests are not considered when deciding if the build is broken.
+  final bool isFlaky;
+
+  /// An optional custom timeout specified in minutes.
+  final int timeoutInMinutes;
 }
 
 /// Thrown when the manifest YAML is not valid.
@@ -72,7 +82,8 @@ Manifest _validateAndParseManifest(Map<String, dynamic> manifestYaml) {
 
 List<ManifestTask> _validateAndParseTasks(dynamic tasksYaml) {
   _checkType(tasksYaml is Map, tasksYaml, 'Value of "tasks"', 'dictionary');
-  return tasksYaml.keys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
+  final List<String> sortedKeys = tasksYaml.keys.toList()..sort();
+  return sortedKeys.map((dynamic taskName) => _validateAndParseTask(taskName, tasksYaml[taskName])).toList();
 }
 
 ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
@@ -82,7 +93,19 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     'description',
     'stage',
     'required_agent_capabilities',
+    'flaky',
+    'timeout_in_minutes',
   ]);
+
+  final dynamic isFlaky = taskYaml['flaky'];
+  if (isFlaky != null) {
+    _checkType(isFlaky is bool, isFlaky, 'flaky', 'boolean');
+  }
+
+  final dynamic timeoutInMinutes = taskYaml['timeout_in_minutes'];
+  if (timeoutInMinutes != null) {
+    _checkType(timeoutInMinutes is int, timeoutInMinutes, 'timeout_in_minutes', 'integer');
+  }
 
   final List<String> capabilities = _validateAndParseCapabilities(taskName, taskYaml['required_agent_capabilities']);
   return new ManifestTask._(
@@ -90,6 +113,8 @@ ManifestTask _validateAndParseTask(dynamic taskName, dynamic taskYaml) {
     description: taskYaml['description'],
     stage: taskYaml['stage'],
     requiredAgentCapabilities: capabilities,
+    isFlaky: isFlaky ?? false,
+    timeoutInMinutes: timeoutInMinutes,
   );
 }
 
