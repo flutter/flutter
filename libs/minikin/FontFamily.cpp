@@ -175,8 +175,7 @@ void FontFamily::computeCoverage() {
         ALOGE("Could not get cmap table size!\n");
         return;
     }
-    // TODO: Error check?
-    CmapCoverage::getCoverage(mCoverage, cmapTable.get(), cmapTable.size(), &mHasVSTable);
+    mCoverage = CmapCoverage::getCoverage(cmapTable.get(), cmapTable.size(), &mHasVSTable);
 
     for (size_t i = 0; i < mFonts.size(); ++i) {
         std::unordered_set<AxisTag> supportedAxes = mFonts[i].getSupportedAxesLocked();
