@@ -1388,8 +1388,6 @@ FILE: ../../../flutter/fml/platform/darwin/cf_utils.cc
 FILE: ../../../flutter/fml/platform/darwin/cf_utils.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/message_loop_darwin.mm
-FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.h
-FILE: ../../../flutter/fml/platform/darwin/nsstring_utils.mm
 FILE: ../../../flutter/fml/platform/darwin/paths_darwin.mm
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.h
 FILE: ../../../flutter/fml/platform/darwin/resource_mapping_darwin.mm

@@ -5,11 +5,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 #include <UIKit/UIKit.h>
-#include <unicode/utf16.h>
-
-#include <string>
-
-#include "flutter/fml/platform/darwin/nsstring_utils.h"
+#include <algorithm>
 
 static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
 static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
@@ -26,6 +22,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 
 @interface FlutterTextInputView : UIView<UIKeyInput>
 
+@property(nonatomic, readonly) NSMutableString* text;
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 
 @end
@@ -35,7 +32,6 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   int _selectionBase;
   int _selectionExtent;
   const char* _selectionAffinity;
-  std::u16string _text;
 }
 
 @synthesize keyboardType = _keyboardType;
@@ -48,9 +44,15 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   if (self) {
     _selectionBase = -1;
     _selectionExtent = -1;
+    _text = [[NSMutableString alloc] init];
   }
 
   return self;
+}
+
+- (void)dealloc {
+  [_text release];
+  [super dealloc];
 }
 
 - (void)setTextInputClient:(int)client {
@@ -63,7 +65,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   _selectionAffinity = _kTextAffinityDownstream;
   if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
     _selectionAffinity = _kTextAffinityUpstream;
-  _text = fml::StringFromNSString(state[@"text"]);
+  [self.text setString:state[@"text"]];
 }
 
 - (UITextAutocorrectionType)autocorrectionType {
@@ -87,7 +89,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
                                   @"selectionIsDirectional" : @(false),
                                   @"composingBase" : @(0),
                                   @"composingExtent" : @(0),
-                                  @"text" : fml::StringToNSString(_text),
+                                  @"text" : [NSString stringWithString:self.text],
                                 }];
 }
 
@@ -99,7 +101,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   int start = std::max(0, std::min(_selectionBase, _selectionExtent));
   int end = std::max(0, std::max(_selectionBase, _selectionExtent));
   int len = end - start;
-  _text.replace(start, len, fml::StringFromNSString(text));
+  [self.text replaceCharactersInRange:NSMakeRange(start, len) withString:text];
   int caret = start + text.length;
   _selectionBase = caret;
   _selectionExtent = caret;
@@ -111,18 +113,11 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   int start = std::max(0, std::min(_selectionBase, _selectionExtent));
   int end = std::max(0, std::max(_selectionBase, _selectionExtent));
   int len = end - start;
-  if (len > 0) {
-    _text.erase(start, len);
-  } else if (start > 0) {
+  if (len == 0 && start > 0) {
     start -= 1;
     len = 1;
-    if (start > 0 && UTF16_IS_LEAD(_text[start - 1]) &&
-        UTF16_IS_TRAIL(_text[start])) {
-      start -= 1;
-      len += 1;
-    }
-    _text.erase(start, len);
   }
+  [self.text deleteCharactersInRange:NSMakeRange(start, len)];
   _selectionBase = start;
   _selectionExtent = start;
   _selectionAffinity = _kTextAffinityDownstream;
