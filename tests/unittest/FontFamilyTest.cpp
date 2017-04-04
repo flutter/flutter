@@ -45,6 +45,12 @@ static FontLanguage createFontLanguageWithoutICUSanitization(const std::string& 
     return FontLanguage(input.c_str(), input.size());
 }
 
+std::shared_ptr<FontFamily> makeFamily(const std::string& fontPath) {
+    std::shared_ptr<MinikinFont> font(new MinikinFontForTest(fontPath));
+    return std::make_shared<FontFamily>(
+            std::vector<Font>({Font(font, FontStyle())}));
+}
+
 TEST_F(FontLanguageTest, basicTests) {
     FontLanguage defaultLang;
     FontLanguage emptyLang("", 0);
@@ -596,15 +602,8 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
     const char kMultiAxisFont[] = kTestFontDir "/MultiAxis.ttf";
     const char kNoAxisFont[] = kTestFontDir "/Regular.ttf";
 
-    std::shared_ptr<MinikinFont> multiAxisFont(new MinikinFontForTest(kMultiAxisFont));
-    std::shared_ptr<FontFamily> multiAxisFamily(
-            std::shared_ptr<FontFamily>(new FontFamily(
-                    std::vector<Font>({Font(multiAxisFont, FontStyle())}))));
-
-    std::shared_ptr<MinikinFont> noAxisFont(new MinikinFontForTest(kNoAxisFont));
-    std::shared_ptr<FontFamily> noAxisFamily(
-            std::shared_ptr<FontFamily>(new FontFamily(
-                    std::vector<Font>({Font(noAxisFont, FontStyle())}))));
+    std::shared_ptr<FontFamily> multiAxisFamily = makeFamily(kMultiAxisFont);
+    std::shared_ptr<FontFamily> noAxisFamily = makeFamily(kNoAxisFont);
 
     {
         // Do not ceate new instance if none of variations are specified.
@@ -654,6 +653,33 @@ TEST_F(FontFamilyTest, createFamilyWithVariationTest) {
         EXPECT_NE(multiAxisFamily.get(), newFamily.get());
         EXPECT_EQ(nullptr, noAxisFamily->createFamilyWithVariation(variations));
     }
+}
+
+TEST_F(FontFamilyTest, coverageTableSelectionTest) {
+    // This font supports U+0061. The cmap subtable is format 4 and its platform ID is 0 and
+    // encoding ID is 1.
+    const char kUnicodeEncoding1Font[] = kTestFontDir "UnicodeBMPOnly.ttf";
+
+    // This font supports U+0061. The cmap subtable is format 4 and its platform ID is 0 and
+    // encoding ID is 3.
+    const char kUnicodeEncoding3Font[] = kTestFontDir "UnicodeBMPOnly2.ttf";
+
+    // This font has both cmap format 4 subtable which platform ID is 0 and encoding ID is 1
+    // and cmap format 14 subtable which platform ID is 0 and encoding ID is 10.
+    // U+0061 is listed in both subtable but U+1F926 is only listed in latter.
+    const char kUnicodeEncoding4Font[] = kTestFontDir "UnicodeUCS4.ttf";
+
+    std::shared_ptr<FontFamily> unicodeEnc1Font = makeFamily(kUnicodeEncoding1Font);
+    std::shared_ptr<FontFamily> unicodeEnc3Font = makeFamily(kUnicodeEncoding3Font);
+    std::shared_ptr<FontFamily> unicodeEnc4Font = makeFamily(kUnicodeEncoding4Font);
+
+    android::AutoMutex _l(gMinikinLock);
+
+    EXPECT_TRUE(unicodeEnc1Font->hasGlyph(0x0061, 0));
+    EXPECT_TRUE(unicodeEnc3Font->hasGlyph(0x0061, 0));
+    EXPECT_TRUE(unicodeEnc4Font->hasGlyph(0x0061, 0));
+
+    EXPECT_TRUE(unicodeEnc4Font->hasGlyph(0x1F926, 0));
 }
 
 }  // namespace minikin
