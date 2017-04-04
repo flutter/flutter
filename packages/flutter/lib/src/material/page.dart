@@ -77,6 +77,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   final WidgetBuilder builder;
   final bool fullscreenDialog;
 
+  AnimatedWidget _transitionAnimatedWidget;
+
   @override
   final bool maintainState;
 
@@ -129,6 +131,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     _backGestureController = new CupertinoBackGestureController(
       navigator: navigator,
       controller: controller,
+      transitionAnimatedWidget: _transitionAnimatedWidget,
     );
 
     controller.addStatusListener(_handleBackGestureEnded);
@@ -162,22 +165,24 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       if (fullscreenDialog)
-        return new CupertinoFullscreenDialogTransition(
+        _transitionAnimatedWidget = new CupertinoFullscreenDialogTransition(
           animation: animation,
           child: child,
         );
       else
-        return new CupertinoPageTransition(
+        _transitionAnimatedWidget = new CupertinoPageTransition(
           incomingRouteAnimation: animation,
           outgoingRouteAnimation: forwardAnimation,
           child: child,
         );
     } else {
-      return new _MountainViewPageTransition(
+      _transitionAnimatedWidget = new _MountainViewPageTransition(
         routeAnimation: animation,
         child: child
       );
     }
+    print('building transition $_transitionAnimatedWidget');
+    return _transitionAnimatedWidget;
   }
 
   @override

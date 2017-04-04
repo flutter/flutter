@@ -37,7 +37,8 @@ class CupertinoPageTransition extends AnimatedWidget {
     @required Animation<double> outgoingRouteAnimation,
     @required this.child,
   }) :
-      incomingPositionAnimation = _kRightMiddleTween.animate(
+      _incomingPositionLinearAnimation = _kRightMiddleTween.animate(incomingRouteAnimation),
+      _incomingPositionAnimation = _kRightMiddleTween.animate(
         new CurvedAnimation(
           parent: incomingRouteAnimation,
           curve: Curves.easeOut,
@@ -59,20 +60,24 @@ class CupertinoPageTransition extends AnimatedWidget {
         ),
       );
 
+  final Animation<FractionalOffset> _incomingPositionLinearAnimation;
   // When this page is coming in to cover another page.
   final Animation<FractionalOffset> incomingPositionAnimation;
   // When this page is becoming covered by another page.
   final Animation<FractionalOffset> outgoingPositionAnimation;
   final Widget child;
 
+  bool _linearTransition = false;
+
   @override
   Widget build(BuildContext context) {
+    print('linear is $_linearTransition');
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
       position: outgoingPositionAnimation,
       child: new SlideTransition(
-        position: incomingPositionAnimation,
+        position: _linearTransition ? _incomingPositionLinearAnimation : _incomingPositionAnimation,
         child: new PhysicalModel(
           shape: BoxShape.rectangle,
           color: _kBackgroundColor,
@@ -123,15 +128,24 @@ class CupertinoBackGestureController extends NavigationGestureController {
   CupertinoBackGestureController({
     @required NavigatorState navigator,
     @required this.controller,
-  }) : super(navigator) {
+    AnimatedWidget transitionAnimatedWidget,
+  }) :
+      _cupertinoPageTransition = transitionAnimatedWidget is CupertinoPageTransition
+          ? transitionAnimatedWidget
+          : null,
+      super(navigator) {
     assert(controller != null);
+    _cupertinoPageTransition?._linearTransition = true;
+    print('linear transition is ${_cupertinoPageTransition._linearTransition}');
   }
 
   final AnimationController controller;
+  final CupertinoPageTransition _cupertinoPageTransition;
 
   @override
   void dispose() {
     controller.removeStatusListener(_handleStatusChanged);
+    _cupertinoPageTransition?._linearTransition = false;
     super.dispose();
   }
 
