@@ -75,7 +75,7 @@ abstract class ScrollView extends StatelessWidget {
   /// left to right when [reverse] is false and from right to left when
   /// [reverse] is true.
   ///
-  /// Similarly, if [scrollDirection] is [Axis.vertical], then scroll view
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
   /// scrolls from top to bottom when [reverse] is false and from bottom to top
   /// when [reverse] is true.
   ///

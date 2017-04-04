@@ -862,6 +862,22 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+/// A reference to the semantics tree.
+///
+/// The framework maintains the semantics tree (used for accessibility and
+/// indexing) only when there is at least one client holding an open
+/// [SemanticsHandle].
+///
+/// The framework notifies the client that it has updated the semantics tree by
+/// calling the [listener] callback. When the client no longer needs the
+/// semantics tree, the client can call [dispose] on the [SemanticsHandle],
+/// which stops these callbacks and closes the [SemanticsHandle]. When all the
+/// outstanding [SemanticsHandle] objects are closed, the framework stops
+/// updating the semantics tree.
+///
+/// To obtain a [SemanticsHandle], call [PipelineOwner.ensureSemantics] on the
+/// [PipelineOwner] for the render tree from which you wish to read semantics.
+/// You can obtain the [PipelineOwner] using the [RenderObject.owner] property.
 class SemanticsHandle {
   SemanticsHandle._(this._owner, this.listener) {
     assert(_owner != null);
@@ -870,8 +886,16 @@ class SemanticsHandle {
   }
 
   PipelineOwner _owner;
+
+  /// The callback that will be notified when the semantics tree updates.
   final VoidCallback listener;
 
+  /// Closes the semantics handle and stops calling [listener] when the
+  /// semantics updates.
+  ///
+  /// When all the outstanding [SemanticsHandle] objects for a given
+  /// [PipelineOwner] are closed, the [PipelineOwner] will stop updating the
+  /// semantics tree.
   @mustCallSuper
   void dispose() {
     assert(() {
@@ -1096,6 +1120,18 @@ class PipelineOwner {
 
   int _outstandingSemanticsHandle = 0;
 
+  /// Opens a [SemanticsHandle] and calls [listener] whenever the semantics tree
+  /// updates.
+  ///
+  /// The [PipelineOwner] updates the semantics tree only when there are clients
+  /// that wish to use the semantics tree. These clients express their interest
+  /// by holding [SemanticsHandle] objects that notify them whenever the
+  /// semantics tree updates.
+  ///
+  /// Clients can close their [SemanticsHandle] by calling
+  /// [SemanticsHandle.dispose]. Once all the outstanding [SemanticsHandle]
+  /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
+  /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback listener }) {
     if (_outstandingSemanticsHandle++ == 0) {
       assert(_semanticsOwner == null);

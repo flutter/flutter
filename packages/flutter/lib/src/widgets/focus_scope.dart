@@ -27,31 +27,31 @@ class _FocusScopeMarker extends InheritedWidget {
 }
 
 /// Establishes a scope in which widgets can receive focus.
-/// 
+///
 /// The focus tree keeps track of which widget is the user's current focus. The
 /// focused widget often listens for keyboard events.
-/// 
+///
 /// The a focus scope does not itself receive focus but instead helps remember
 /// previous focus states. A scope is currently active when its [node] is the
 /// first focus of its parent scope. To activate a [FocusScope], either use the
 /// [autofocus] property or explicitly make the [node] the first focus in the
 /// parent scope:
-/// 
+///
 /// ```dart
 /// FocusScope.of(context).setFirstFocus(node);
 /// ```
-/// 
+///
 /// When a [FocusScope] is removed from the tree, the previously active
 /// [FocusScope] becomes active again.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [FocusScopeNode], which is the associated node in the focus tree.
 ///  * [FocusNode], which is a leaf node in the focus tree that can receive
 ///    focus.
 class FocusScope extends StatefulWidget {
   /// Creates a scope in which widgets can receive focus.
-  /// 
+  ///
   /// The [node] argument must not be null.
   FocusScope({
     Key key,
@@ -73,6 +73,8 @@ class FocusScope extends StatefulWidget {
   /// The widget below this widget in the tree.
   final Widget child;
 
+  /// Returns the [node] of the [FocusScope] that most tightly encloses the
+  /// given [BuildContext].
   static FocusScopeNode of(BuildContext context) {
     final _FocusScopeMarker scope = context.inheritFromWidgetOfExactType(_FocusScopeMarker);
     return scope?.node ?? WidgetsBinding.instance.focusManager.rootScope;
