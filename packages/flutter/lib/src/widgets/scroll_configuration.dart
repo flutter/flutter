@@ -9,7 +9,14 @@ import 'framework.dart';
 import 'overscroll_indicator.dart';
 import 'scroll_physics.dart';
 
+const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
+
+/// Describes how [Scrollable] widgets should behave.
+///
+/// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
+/// subtree.
 class ScrollBehavior {
+  /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior();
 
   /// The platform whose scroll physics should be implemented.
@@ -17,13 +24,14 @@ class ScrollBehavior {
   /// Defaults to the current platform.
   TargetPlatform getPlatform(BuildContext context) => defaultTargetPlatform;
 
-  /// The color to use for the glow effect when [platform] indicates a platform
-  /// that uses a [GlowingOverscrollIndicator].
+  /// Wraps the given widget, which scrolls in the given [AxisDirection].
   ///
-  /// Defaults to white.
-  Color getGlowColor(BuildContext context) => const Color(0xFFFFFFFF);
-
+  /// For example, on Android, this method wraps the given widget with a
+  /// [GlowingOverscrollIndicator] to provide visual feedback when the user
+  /// overscrolls.
   Widget buildViewportChrome(BuildContext context, Widget child, AxisDirection axisDirection) {
+    // When modifying this function, consider modifying the implementation in
+    // _MaterialScrollBehavior as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
         return child;
@@ -32,7 +40,7 @@ class ScrollBehavior {
         return new GlowingOverscrollIndicator(
           child: child,
           axisDirection: axisDirection,
-          color: getGlowColor(context),
+          color: _kDefaultGlowColor,
         );
     }
     return null;
@@ -56,15 +64,24 @@ class ScrollBehavior {
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 }
 
+/// Controls how [Scrollable] widgets behave in a subtree.
+///
+/// The scroll configuration determines the [ScrollPhysics] and viewport
+/// decorations used by decendants of [child].
 class ScrollConfiguration extends InheritedWidget {
+  /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
+  ///
+  /// The [behavior] and [child] arguments must not be null.
   const ScrollConfiguration({
     Key key,
     @required this.behavior,
     @required Widget child,
   }) : super(key: key, child: child);
 
+  /// How [Scrollable] widgets that are decendants of [child] should behave.
   final ScrollBehavior behavior;
 
+  /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
     return configuration?.behavior ?? const ScrollBehavior();
