@@ -149,7 +149,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation) {
     final Widget result = builder(context);
     assert(() {
       if (result == null) {
@@ -164,17 +164,17 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> primaryAnimation, Animation<double> secondaryAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       if (fullscreenDialog)
         return new CupertinoFullscreenDialogTransition(
-          animation: animation,
+          animation: primaryAnimation,
           child: child,
         );
       else
         return new CupertinoPageTransition(
-          incomingRouteAnimation: animation,
-          outgoingRouteAnimation: forwardAnimation,
+          incomingRouteAnimation: primaryAnimation,
+          outgoingRouteAnimation: secondaryAnimation,
           child: child,
           // In the middle of a back gesture drag, let the transition be linear to match finger
           // motions.
@@ -182,7 +182,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
     } else {
       return new _MountainViewPageTransition(
-        routeAnimation: animation,
+        routeAnimation: primaryAnimation,
         child: child
       );
     }
