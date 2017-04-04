@@ -90,6 +90,13 @@ source_set("fml") {
       "platform/linux/timerfd.h",
     ]
   }
+
+  if (is_win) {
+    sources += [
+      "platform/win/message_loop_win.cc",
+      "platform/win/message_loop_win.h",
+    ]
+  }
 }
 
 executable("fml_unittests") {
