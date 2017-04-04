@@ -559,7 +559,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
 
   /// Override this method to wrap the [child] with one or more transition
-  /// widgets that define how the route arrives and leaves the screen.
+  /// widgets that define how the route arrives on and leaves the screen.
   ///
   /// By default, the child is not wrapped in any transition widgets.
   ///
