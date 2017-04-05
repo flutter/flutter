@@ -8,7 +8,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -262,6 +261,8 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
 ///  * [RenderSliverFloatingPersistentHeader.maybeStartSnapAnimation] and
 ///    [RenderSliverFloatingPersistentHeader.maybeStopSnapAnimation], which
 ///    start or stop the floating header's animation.
+///  * [SliverAppBar], which creates a header that can be pinned, floating,
+///    and snapped into view via the corresponding parameters.
 class FloatingHeaderSnapConfiguration {
   /// Creates an object that specifies how a floating header is to be "snapped"
   /// (animated) into or out of view.
@@ -304,7 +305,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   @override
   void detach() {
     _controller?.dispose();
-    _controller = null;
+    _controller = null; // lazily recreated if we're reattached.
     super.detach();
   }
 
@@ -318,12 +319,15 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   ///  * [RenderSliverFloatingPersistentHeader.maybeStartSnapAnimation] and
   ///    [RenderSliverFloatingPersistentHeader.maybeStopSnapAnimation], which
   ///    start or stop the floating header's animation.
+  ///  * [SliverAppBar], which creates a header that can be pinned, floating,
+  ///    and snapped into view via the corresponding parameters.
   FloatingHeaderSnapConfiguration get snapConfiguration => _snapConfiguration;
   FloatingHeaderSnapConfiguration _snapConfiguration;
   set snapConfiguration(FloatingHeaderSnapConfiguration value) {
+    if (value == _snapConfiguration)
+      return;
     if (value == null) {
       _controller?.dispose();
-      _controller = null;
     } else {
       if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
         _controller?.resync(value.vsync);

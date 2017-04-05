@@ -466,16 +466,19 @@ class ScrollPosition extends ViewportOffset {
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 
-  ChangeNotifier _activityChangedNotifier;
+  bool get isScrolling => _activity?.isScrolling ?? false;
 
-  void addActivityChangedListener(VoidCallback listener) {
-    _activityChangedNotifier ??= new ChangeNotifier();
-    _activityChangedNotifier.addListener(listener);
+  ValueNotifier<bool> _isScrollingNotifier;
+
+  void addIsScrollingListener(VoidCallback listener) {
+    _isScrollingNotifier ??= new ValueNotifier<bool>(isScrolling);
+    _isScrollingNotifier.addListener(listener);
   }
 
-  void removeActivityChangedListener(VoidCallback listener) {
-    _activityChangedNotifier?.removeListener(listener);
+  void removeIsScrollingListener(VoidCallback listener) {
+    _isScrollingNotifier?.removeListener(listener);
   }
+
 
   /// Change the current [activity], disposing of the old one and
   /// sending scroll notifications as necessary.
@@ -501,7 +504,8 @@ class ScrollPosition extends ViewportOffset {
     _activity = newActivity;
     if (oldIgnorePointer != shouldIgnorePointer)
       state.setIgnorePointer(shouldIgnorePointer);
-    _activityChangedNotifier?.notifyListeners();
+    if (_isScrollingNotifier != null)
+      _isScrollingNotifier.value = isScrolling;
     if (!activity.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
     if (!wasScrolling && activity.isScrolling)

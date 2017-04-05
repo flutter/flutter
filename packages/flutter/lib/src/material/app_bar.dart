@@ -509,18 +509,11 @@ class _FloatingAppBar extends StatefulWidget {
 class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollableState _scrollable;
   ScrollPosition _position;
-  ScrollActivity _activity;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _updateScrollable();
-  }
-
-  @override
-  void dispose() {
-    _position?.removeActivityChangedListener(_scrollPositionListener);
-    super.dispose();
   }
 
   void _updateScrollable() {
@@ -529,30 +522,32 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _updateScrollPosition() {
-    _position?.removeActivityChangedListener(_scrollPositionListener);
+    _position?.removeIsScrollingListener(_isScrollingListener);
     _position = _scrollable?.position;
-    _position?.addActivityChangedListener(_scrollPositionListener);
+    _position?.addIsScrollingListener(_isScrollingListener);
+  }
+
+  @override
+  void dispose() {
+    _position?.removeIsScrollingListener(_isScrollingListener);
+    super.dispose();
   }
 
   RenderSliverFloatingPersistentHeader _headerRenderer() {
     return context.ancestorRenderObjectOfType(const TypeMatcher<RenderSliverFloatingPersistentHeader>());
   }
 
-  void _scrollPositionListener() {
+  void _isScrollingListener() {
     if (_scrollable == null)
       return;
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
-    final ScrollActivity activity = _scrollable.position.activity;
-    if (_activity is! IdleScrollActivity && activity is IdleScrollActivity) {
-      final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-      header?.maybeStartSnapAnimation(_scrollable.position.userScrollDirection);
-    } else if (_activity is IdleScrollActivity && activity is! IdleScrollActivity) {
-      final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-      header?.maybeStopSnapAnimation(_scrollable.position.userScrollDirection);
-    }
-    _activity = activity;
+    final RenderSliverFloatingPersistentHeader header = _headerRenderer();
+    if (_position.isScrolling)
+      header?.maybeStopSnapAnimation(_position.userScrollDirection);
+    else
+      header?.maybeStartSnapAnimation(_position.userScrollDirection);
   }
 
   @override
@@ -886,21 +881,41 @@ class SliverAppBar extends StatefulWidget {
   _SliverAppBarState createState() => new _SliverAppBarState();
 }
 
+// This class is only Stateful because it owns the TickerProvider used
+// by the floating appbar snap animation (via FloatingHeaderSnapConfiguration).
 class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMixin {
+  FloatingHeaderSnapConfiguration _snapConfiguration;
+
+  void _updateSnapConfiguration() {
+    if (config.snap && config.floating) {
+      _snapConfiguration = new FloatingHeaderSnapConfiguration(
+        vsync: this,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 200),
+      );
+    } else {
+      _snapConfiguration = null;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateSnapConfiguration();
+  }
+
+  @override
+  void didUpdateConfig(SliverAppBar oldConfig) {
+    super.didUpdateConfig(oldConfig);
+    if (config.snap != oldConfig.snap || config.floating != oldConfig.floating)
+      _updateSnapConfiguration();
+  }
+
   @override
   Widget build(BuildContext context) {
     final double topPadding = config.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (config.pinned && config.floating && config.bottom != null)
       ? config.bottom.bottomHeight + topPadding : null;
-
-    FloatingHeaderSnapConfiguration snapConfiguration;
-    if (config.snap && config.floating) {
-      snapConfiguration = new FloatingHeaderSnapConfiguration(
-        vsync: this,
-        curve: Curves.easeOut,
-        duration: const Duration(milliseconds: 200),
-      );
-    }
 
     return new SliverPersistentHeader(
       floating: config.floating,
@@ -923,7 +938,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         topPadding: topPadding,
         floating: config.floating,
         pinned: config.pinned,
-        snapConfiguration: snapConfiguration,
+        snapConfiguration: _snapConfiguration,
       ),
     );
   }
