@@ -198,9 +198,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// This essentially waits for all animations to have completed.
   ///
-  /// This function will never return (and the test will hang and eventually
-  /// time out and fail) if there is an infinite animation in progress (for
-  /// example, if there is an indeterminate progress indicator spinning).
+  /// If it takes longer that the given `timeout` to settle, then the test will
+  /// fail (this method will throw an exception). In particular, this means that
+  /// if there is an infinite animation in progress (for example, if there is an
+  /// indeterminate progress indicator spinning), this method will throw.
+  ///
+  /// The default timeout is ten minutes, which is longer than most reasonable
+  /// finite animations would last.
   ///
   /// If the function returns, it returns the number of pumps that it performed.
   ///
@@ -213,13 +217,19 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
       Duration duration = const Duration(milliseconds: 100),
-      EnginePhase phase = EnginePhase.sendSemanticsTree
+      EnginePhase phase = EnginePhase.sendSemanticsTree,
+      Duration timeout = const Duration(minutes: 10),
     ]) {
     assert(duration != null);
     assert(duration > Duration.ZERO);
+    assert(timeout != null);
+    assert(timeout > Duration.ZERO);
     int count = 0;
     return TestAsyncUtils.guard(() async {
+      final DateTime endTime = binding.clock.fromNowBy(timeout);
       do {
+        if (binding.clock.now().isAfter(endTime))
+          throw new FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
       } while (hasRunningAnimations);

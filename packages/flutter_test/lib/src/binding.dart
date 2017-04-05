@@ -141,6 +141,16 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The default test timeout for tests when using this binding.
   test_package.Timeout get defaultTestTimeout;
 
+  /// The current time.
+  ///
+  /// In the automated test environment (`flutter test`), this is a fake clock
+  /// that begins in January 2015 at the start of the test and advances each
+  /// time [pump] is called with a non-zero duration.
+  ///
+  /// In the live testing environment (`flutter run`), this object shows the
+  /// actual current wall-clock time.
+  Clock get clock;
+
   /// Triggers a frame sequence (build/layout/paint/etc),
   /// then flushes microtasks.
   ///
@@ -466,6 +476,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   FakeAsync _fakeAsync;
+
+  @override
+  Clock get clock => _clock;
   Clock _clock;
 
   @override
@@ -490,7 +503,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _phase = newPhase;
       if (hasScheduledFrame) {
         handleBeginFrame(new Duration(
-          milliseconds: _clock.now().millisecondsSinceEpoch
+          milliseconds: _clock.now().millisecondsSinceEpoch,
         ));
       }
       _fakeAsync.flushMicrotasks();
@@ -614,6 +627,9 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get inTest => _inTest;
   bool _inTest = false;
+
+  @override
+  Clock get clock => const Clock();
 
   @override
   int get microtaskCount {
