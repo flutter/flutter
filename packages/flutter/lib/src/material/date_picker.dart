@@ -389,8 +389,7 @@ class _MonthPickerState extends State<MonthPicker> {
     final DateTime tomorrow = new DateTime(_todayDate.year, _todayDate.month, _todayDate.day + 1);
     Duration timeUntilTomorrow = tomorrow.difference(_todayDate);
     timeUntilTomorrow += const Duration(seconds: 1);  // so we don't miss it by rounding
-    if (_timer != null)
-      _timer.cancel();
+    _timer?.cancel();
     _timer = new Timer(timeUntilTomorrow, () {
       setState(() {
         _updateCurrentDate();
