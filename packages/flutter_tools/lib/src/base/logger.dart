@@ -248,15 +248,6 @@ enum _LogType {
 }
 
 class AnsiTerminal {
-  AnsiTerminal() {
-    if (platform.isWindows) {
-      supportsColor = platform.ansiSupported;
-    } else {
-      final String term = platform.environment['TERM'];
-      supportsColor = (term != null && term != 'dumb');
-    }
-  }
-
   static const String _bold  = '\u001B[1m';
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
@@ -275,7 +266,7 @@ class AnsiTerminal {
     _INVALID_HANDLE,
   ];
 
-  bool supportsColor;
+  bool supportsColor = platform.stdoutSupportsAnsi;
 
   String bolden(String message) {
     if (!supportsColor)
