@@ -221,6 +221,8 @@ class DefaultTabController extends StatefulWidget {
   /// Creates a default tab controller for the given [child] widget.
   ///
   /// The [length] argument must be great than one.
+  ///
+  /// The [initialIndex] argument must not be null.
   DefaultTabController({
     Key key,
     @required this.length,
@@ -232,6 +234,8 @@ class DefaultTabController extends StatefulWidget {
   final int length;
 
   /// The initial index of the selected tab.
+  ///
+  /// Defaults to zero.
   final int initialIndex;
 
   /// This widget's child. Often a [Scaffold] whose [AppBar] includes a [TabBar].

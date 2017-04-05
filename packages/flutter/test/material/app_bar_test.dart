@@ -9,25 +9,28 @@ import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight }) {
   return new Scaffold(
-    body: new CustomScrollView(
-      primary: true,
-      slivers: <Widget>[
-        new SliverAppBar(
-          title: new Text('AppBar Title'),
-          floating: floating,
-          pinned: pinned,
-          expandedHeight: expandedHeight,
-          bottom: new TabBar(
-            tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+    body: new DefaultTabController(
+      length: 3,
+      child: new CustomScrollView(
+        primary: true,
+        slivers: <Widget>[
+          new SliverAppBar(
+            title: new Text('AppBar Title'),
+            floating: floating,
+            pinned: pinned,
+            expandedHeight: expandedHeight,
+            bottom: new TabBar(
+              tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+            ),
           ),
-        ),
-        new SliverToBoxAdapter(
-          child: new Container(
-            height: 1200.0,
-            color: Colors.orange[400],
+          new SliverToBoxAdapter(
+            child: new Container(
+              height: 1200.0,
+              color: Colors.orange[400],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
