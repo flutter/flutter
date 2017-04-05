@@ -334,7 +334,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 ///
 /// See also:
 ///
-///  * [SliverFill], which determines the [itemExtent] based on
+///  * [SliverFillViewport], which determines the [itemExtent] based on
 ///    [SliverConstraints.viewportMainAxisExtent].
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
@@ -416,17 +416,18 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 
 /// A sliver that contains a multiple box children that each fill the viewport.
 ///
-/// [SliverFill] places its children in a linear array along the main axis. Each
-/// child is sized to fill the viewport, both in the main and cross axis.
+/// [SliverFillViewport] places its children in a linear array along the main
+/// axis. Each child is sized to fill the viewport, both in the main and cross
+/// axis.
 ///
 /// See also:
 ///
 ///  * [SliverFixedExtentList], which has a configurable [itemExtent].
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
-class SliverFill extends SliverMultiBoxAdaptorWidget {
+class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver whose box children that each fill the viewport.
-  SliverFill({
+  SliverFillViewport({
     Key key,
     @required SliverChildDelegate delegate,
     this.viewportFraction: 1.0,
@@ -443,13 +444,13 @@ class SliverFill extends SliverMultiBoxAdaptorWidget {
   final double viewportFraction;
 
   @override
-  RenderSliverFill createRenderObject(BuildContext context) {
+  RenderSliverFillViewport createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFill(childManager: element, viewportFraction: viewportFraction);
+    return new RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverFill renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
   }
 }
@@ -674,4 +675,29 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
+}
+
+/// A sliver that contains a single box child that fills the remaining space in
+/// the viewport.
+///
+/// [SliverFillRemaining] sizes its child to fill the viewport in the cross axis
+/// and to fill the remaining space in the viewport in the main axis.
+///
+/// Typically this will be the last sliver in a viewport, since (by definition)
+/// there is never any room for anything beyond this sliver.
+///
+/// See also:
+///
+///  * [SliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [SliverList], which shows a list of variable-sized children in a
+///    viewport.
+class SliverFillRemaining extends SingleChildRenderObjectWidget {
+  SliverFillRemaining({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
 }

@@ -412,7 +412,7 @@ class SliverConstraints extends Constraints {
              'scrollOffset: ${scrollOffset.toStringAsFixed(1)}, '
              'remainingPaintExtent: ${remainingPaintExtent.toStringAsFixed(1)}, ' +
              (overlap != 0.0 ? 'overlap: ${overlap.toStringAsFixed(1)}, ' : '') +
-             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}' +
+             'crossAxisExtent: ${crossAxisExtent.toStringAsFixed(1)}, ' +
              'viewportMainAxisExtent: ${viewportMainAxisExtent.toStringAsFixed(1)}' +
            ')';
   }
@@ -1218,19 +1218,19 @@ abstract class RenderSliverHelpers implements RenderSliver {
 // ADAPTER FOR RENDER BOXES INSIDE SLIVERS
 // Transitions from the RenderSliver world to the RenderBox world.
 
-/// A [RenderSliver] that contains a single [RenderBox].
-///
-/// The child will not be laid out if it is not visible.
+/// An abstract class for [RenderSliver]s that contains a single [RenderBox].
 ///
 /// See also:
 ///
 /// * [RenderSliver], which explains more about the Sliver protocol.
 /// * [RenderBox], which explains more about the Box protocol.
-/// * [RenderViewport], which allows [RenderSliver] objects to be placed inside
-///   a [RenderBox] (the opposite of this class).
-class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
+/// * [RenderSliverToBoxAdapter], which extends this class to size the child
+///   according to its preferred size.
+/// * [RenderSliverFillRemaining], which extends this class to size the child
+///   to fill the remaining space in the viewport.
+abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
   /// Creates a [RenderSliver] that wraps a [RenderBox].
-  RenderSliverToBoxAdapter({
+  RenderSliverSingleBoxAdapter({
     RenderBox child,
   }) {
     this.child = child;
@@ -1242,34 +1242,7 @@ class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMi
       child.parentData = new SliverPhysicalParentData();
   }
 
-  @override
-  void performLayout() {
-    if (child == null) {
-      geometry = SliverGeometry.zero;
-      return;
-    }
-    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-    double childExtent;
-    switch (constraints.axis) {
-      case Axis.horizontal:
-        childExtent = child.size.width;
-        break;
-      case Axis.vertical:
-        childExtent = child.size.height;
-        break;
-    }
-    assert(childExtent != null);
-    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
-    assert(paintedChildSize.isFinite);
-    assert(paintedChildSize >= 0.0);
-    geometry = new SliverGeometry(
-      scrollExtent: childExtent,
-      paintExtent: paintedChildSize,
-      maxPaintExtent: childExtent,
-      hitTestExtent: paintedChildSize,
-      hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
-    );
-
+  void setChildParentData(RenderObject child, SliverConstraints constraints, SliverGeometry geometry) {
     final SliverPhysicalParentData childParentData = child.parentData;
     assert(constraints.axisDirection != null);
     assert(constraints.growthDirection != null);
@@ -1320,4 +1293,53 @@ class RenderSliverToBoxAdapter extends RenderSliver with RenderObjectWithChildMi
   }
 
   // TODO(ianh): semantics - shouldn't walk the invisible children
+}
+
+/// A [RenderSliver] that contains a single [RenderBox].
+///
+/// The child will not be laid out if it is not visible. It is sized according
+/// to the child's preferences in the main axis, and with a tight constraint
+/// forcing it to the dimensions of the viewport in the cross axis.
+///
+/// See also:
+///
+/// * [RenderSliver], which explains more about the Sliver protocol.
+/// * [RenderBox], which explains more about the Box protocol.
+/// * [RenderViewport], which allows [RenderSliver] objects to be placed inside
+///   a [RenderBox] (the opposite of this class).
+class RenderSliverToBoxAdapter extends RenderSliverSingleBoxAdapter {
+  /// Creates a [RenderSliver] that wraps a [RenderBox].
+  RenderSliverToBoxAdapter({
+    RenderBox child,
+  }) : super(child: child);
+
+  @override
+  void performLayout() {
+    if (child == null) {
+      geometry = SliverGeometry.zero;
+      return;
+    }
+    child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+    double childExtent;
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        childExtent = child.size.width;
+        break;
+      case Axis.vertical:
+        childExtent = child.size.height;
+        break;
+    }
+    assert(childExtent != null);
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
+    assert(paintedChildSize.isFinite);
+    assert(paintedChildSize >= 0.0);
+    geometry = new SliverGeometry(
+      scrollExtent: childExtent,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: childExtent,
+      hitTestExtent: paintedChildSize,
+      hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+    );
+    setChildParentData(child, constraints, geometry);
+  }
 }

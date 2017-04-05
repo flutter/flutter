@@ -6,43 +6,54 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
-  testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
-    final List<Widget> children = new List<Widget>.generate(20, (int i) {
-      return new Container(child: new Text('$i'));
-    });
-
+  testWidgets('SliverFillRemaining - no siblings', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
     await tester.pumpWidget(
       new CustomScrollView(
+        controller: controller,
         slivers: <Widget>[
-          new SliverFill(
-            delegate: new SliverChildListDelegate(children),
-          ),
+          new SliverFillRemaining(child: new Container()),
         ],
       ),
     );
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(600.0));
 
-    final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container).first);
-    expect(box.size.height, equals(600.0));
-
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-    expect(find.text('2'), findsNothing);
-
-    await tester.drag(find.byType(Scrollable), const Offset(0.0, -700.0));
+    controller.jumpTo(50.0);
     await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(600.0));
 
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsOneWidget);
-    expect(find.text('3'), findsNothing);
-    expect(find.text('4'), findsNothing);
-
-    await tester.drag(find.byType(Scrollable), const Offset(0.0, 200.0));
+    controller.jumpTo(-100.0);
     await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(600.0));
 
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
-    expect(find.text('2'), findsNothing);
-    expect(find.text('3'), findsNothing);
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(600.0));
+  });
+
+  testWidgets('SliverFillRemaining - one sibling', (WidgetTester tester) async {
+    final ScrollController controller = new ScrollController();
+    await tester.pumpWidget(
+      new CustomScrollView(
+        controller: controller,
+        slivers: <Widget>[
+          new SliverToBoxAdapter(child: new SizedBox(height: 100.0)),
+          new SliverFillRemaining(child: new Container()),
+        ],
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));
+
+    controller.jumpTo(50.0);
+    await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(550.0));
+
+    controller.jumpTo(-100.0);
+    await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(400.0)); // (!)
+
+    controller.jumpTo(0.0);
+    await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));
   });
 }
