@@ -152,8 +152,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// The animation for the route being pushed on top of this route. This
   /// animation lets this route coordinate with the entrance and exit transition
   /// of routes pushed on top of this route.
-  Animation<double> get forwardAnimation => _forwardAnimation;
-  final ProxyAnimation _forwardAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
+  Animation<double> get secondaryAnimation => _secondaryAnimation;
+  final ProxyAnimation _secondaryAnimation = new ProxyAnimation(kAlwaysDismissedAnimation);
 
   @override
   void install(OverlayEntry insertionPoint) {
@@ -187,19 +187,19 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
-    _updateForwardAnimation(nextRoute);
+    _updateSecondaryAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
-    _updateForwardAnimation(nextRoute);
+    _updateSecondaryAnimation(nextRoute);
     super.didChangeNext(nextRoute);
   }
 
-  void _updateForwardAnimation(Route<dynamic> nextRoute) {
+  void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
-      final Animation<double> current = _forwardAnimation.parent;
+      final Animation<double> current = _secondaryAnimation.parent;
       if (current != null) {
         if (current is TrainHoppingAnimation) {
           TrainHoppingAnimation newAnimation;
@@ -207,22 +207,22 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
             current.currentTrain,
             nextRoute._animation,
             onSwitchedTrain: () {
-              assert(_forwardAnimation.parent == newAnimation);
+              assert(_secondaryAnimation.parent == newAnimation);
               assert(newAnimation.currentTrain == nextRoute._animation);
-              _forwardAnimation.parent = newAnimation.currentTrain;
+              _secondaryAnimation.parent = newAnimation.currentTrain;
               newAnimation.dispose();
             }
           );
-          _forwardAnimation.parent = newAnimation;
+          _secondaryAnimation.parent = newAnimation;
           current.dispose();
         } else {
-          _forwardAnimation.parent = new TrainHoppingAnimation(current, nextRoute._animation);
+          _secondaryAnimation.parent = new TrainHoppingAnimation(current, nextRoute._animation);
         }
       } else {
-        _forwardAnimation.parent = nextRoute._animation;
+        _secondaryAnimation.parent = nextRoute._animation;
       }
     } else {
-      _forwardAnimation.parent = kAlwaysDismissedAnimation;
+      _secondaryAnimation.parent = kAlwaysDismissedAnimation;
     }
   }
 
@@ -437,7 +437,7 @@ class _ModalScopeState extends State<_ModalScope> {
   void initState() {
     super.initState();
     config.route.animation?.addStatusListener(_animationStatusChanged);
-    config.route.forwardAnimation?.addStatusListener(_animationStatusChanged);
+    config.route.secondaryAnimation?.addStatusListener(_animationStatusChanged);
   }
 
   @override
@@ -448,7 +448,7 @@ class _ModalScopeState extends State<_ModalScope> {
   @override
   void dispose() {
     config.route.animation?.removeStatusListener(_animationStatusChanged);
-    config.route.forwardAnimation?.removeStatusListener(_animationStatusChanged);
+    config.route.secondaryAnimation?.removeStatusListener(_animationStatusChanged);
     super.dispose();
   }
 
@@ -483,7 +483,7 @@ class _ModalScopeState extends State<_ModalScope> {
           child: config.route.buildTransitions(
             context,
             config.route.animation,
-            config.route.forwardAnimation,
+            config.route.secondaryAnimation,
             new RepaintBoundary(
               child: new PageStorage(
                 key: config.route._subtreeKey,
@@ -577,26 +577,118 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// * [animation] The animation for this route's transition. When entering,
   ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
   ///   runs backwards from 1.0 to 0.0.
-  /// * [forwardAnimation] The animation for the route being pushed on top of
+  /// * [secondaryAnimation] The animation for the route being pushed on top of
   ///   this route. This animation lets this route coordinate with the entrance
   ///   and exit transition of routes pushed on top of this route.
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation);
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
 
-  /// Override this method to wrap the route in a number of transition widgets.
-  ///
-  /// For example, to create a fade entrance transition, wrap the given child
-  /// widget in a [FadeTransition] using the given animation as the opacity.
+  /// Override this method to wrap the [child] with one or more transition
+  /// widgets that define how the route arrives on and leaves the screen.
   ///
   /// By default, the child is not wrapped in any transition widgets.
   ///
-  /// * [context] The context in which the route is being built.
-  /// * [animation] The animation for this route's transition. When entering,
-  ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
-  ///   runs backwards from 1.0 to 0.0.
-  /// * [forwardAnimation] The animation for the route being pushed on top of
-  ///   this route. This animation lets this route coordinate with the entrance
-  ///   and exit transition of routes pushed on top of this route.
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+  /// The buildTransitions method is typically used to define transitions
+  /// that animate the new topmost route's comings and goings. When the
+  /// [Navigator] pushes a route on the top of its stack, the new route's
+  /// primary [animation] runs from 0.0 to 1.0. When the Navigator pops the
+  /// topmost route, e.g. because the use pressed the back button, the
+  /// primary animation runs from 1.0 to 0.0.
+  ///
+  /// The following example uses the primary animation to drive a
+  /// [SlideTransition] that translates the top of the new route vertically
+  /// from the bottom of the screen when it is pushed on the Navigator's
+  /// stack. When the route is popped the SlideTransition translates the
+  /// route from the top of the screen back to the bottom.
+  ///
+  /// ```dart
+  /// new PageRouteBuilder(
+  ///   pageBuilder: (BuildContext context,
+  ///       Animation<double> animation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child,
+  ///   ) {
+  ///     return new Scaffold(
+  ///       appBar: new AppBar(title: new Text('Hello')),
+  ///       body: new Center(
+  ///         child: new Text('Hello World'),
+  ///       ),
+  ///     );
+  ///   },
+  ///   transitionsBuilder: (
+  ///       BuildContext context,
+  ///       Animation<double> animation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child,
+  ///    ) {
+  ///     return new SlideTransition(
+  ///       position: new FractionalOffsetTween(
+  ///         begin: FractionalOffset.bottomLeft,
+  ///         end: FractionalOffset.topLeft
+  ///       ).animate(animation),
+  ///       child: child, // child is the value returned by pageBuilder
+  ///     );
+  ///   },
+  /// );
+  ///```
+  ///
+  /// We've used [PageRouteBuilder] to demonstrate the buildTransitions method
+  /// here. The body of an override of the buildTransitions method would be
+  /// defined in the same way.
+  ///
+  /// When the Navigator pushes a route on the top of its stack, the
+  /// [secondaryAnimation] can be used to define how the route that was on
+  /// the top of the stack leaves the screen. Similarly when the topmost route
+  /// is popped, the secondaryAnimation can be used to define how the route
+  /// below it reappears on the screen. When the Navigator pushes a new route
+  /// on the top of its stack, the old topmost route's secondaryAnimation
+  /// runs from 0.0 to 1.0.  When the Navigator pops the topmost route, the
+  /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
+  ///
+  /// The example below adds a transition that's driven by the
+  /// secondaryAnimation. When this route disappears because a new route has
+  /// been pushed on top of it, it translates in the opposite direction of
+  /// the new route. Likewise when the route is exposed because the topmost
+  /// route has been popped off.
+  ///
+  /// ```dart
+  ///   transitionsBuilder: (
+  ///       BuildContext context,
+  ///       Animation<double> animation,
+  ///       Animation<double> secondaryAnimation,
+  ///       Widget child,
+  ///   ) {
+  ///     return new SlideTransition(
+  ///       position: new FractionalOffsetTween(
+  ///         begin: FractionalOffset.bottomLeft,
+  ///         end: FractionalOffset.topLeft,
+  ///       ).animate(animation),
+  ///       child: new SlideTransition(
+  ///         position: new FractionalOffsetTween(
+  ///           begin: FractionalOffset.topLeft,
+  ///           end: FractionalOffset.bottomLeft,
+  ///         ).animate(secondaryAnimation),
+  ///         child: child,
+  ///       ),
+  ///     );
+  ///   }
+  ///```
+  ///
+  /// In practice the secondaryAnimation is used pretty rarely.
+  ///
+  ///  * [context] The context in which the route is being built.
+  ///  * [animation] When the [Navigator] pushes a route on the top of its stack,
+  ///    the new route's primary [animation] runs from 0.0 to 1.0. When the Navigator
+  ///    pops the topmost route this animation runs from 1.0 to 0.0.
+  ///  * [secondaryAnimation] When the Navigator pushes a new route
+  ///    on the top of its stack, the old topmost route's secondaryAnimation
+  ///    runs from 0.0 to 1.0.  When the Navigator pops the topmost route, the
+  ///    secondaryAnimation for the route below it runs from 1.0 to 0.0.
+  Widget buildTransitions(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child,
+  ) {
     return child;
   }
 
@@ -607,7 +699,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   void install(OverlayEntry insertionPoint) {
     super.install(insertionPoint);
     _animationProxy = new ProxyAnimation(super.animation);
-    _forwardAnimationProxy = new ProxyAnimation(super.forwardAnimation);
+    _secondaryAnimationProxy = new ProxyAnimation(super.secondaryAnimation);
   }
 
   @override
@@ -657,7 +749,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       _offstage = value;
     });
     _animationProxy.parent = _offstage ? kAlwaysCompleteAnimation : super.animation;
-    _forwardAnimationProxy.parent = _offstage ? kAlwaysDismissedAnimation : super.forwardAnimation;
+    _secondaryAnimationProxy.parent = _offstage ? kAlwaysDismissedAnimation : super.secondaryAnimation;
   }
 
   /// The build context for the subtree containing the primary content of this route.
@@ -668,8 +760,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ProxyAnimation _animationProxy;
 
   @override
-  Animation<double> get forwardAnimation => _forwardAnimationProxy;
-  ProxyAnimation _forwardAnimationProxy;
+  Animation<double> get secondaryAnimation => _secondaryAnimationProxy;
+  ProxyAnimation _secondaryAnimationProxy;
 
   /// Return the value of the first callback added with
   /// [addScopedWillPopCallback] that returns false. Otherwise return
@@ -845,7 +937,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return new _ModalScope(
       key: _scopeKey,
       route: this,
-      page: buildPage(context, animation, forwardAnimation)
+      page: buildPage(context, animation, secondaryAnimation)
       // _ModalScope calls buildTransitions(), defined above
     );
   }

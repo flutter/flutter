@@ -337,12 +337,12 @@ class _DialogRoute<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black54;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return theme != null ? new Theme(data: theme, child: child) : child;
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return new FadeTransition(
       opacity: new CurvedAnimation(
         parent: animation,

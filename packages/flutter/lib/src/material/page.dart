@@ -149,7 +149,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     final Widget result = builder(context);
     assert(() {
       if (result == null) {
@@ -164,7 +164,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     if (Theme.of(context).platform == TargetPlatform.iOS) {
       if (fullscreenDialog)
         return new CupertinoFullscreenDialogTransition(
@@ -174,7 +174,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       else
         return new CupertinoPageTransition(
           incomingRouteAnimation: animation,
-          outgoingRouteAnimation: forwardAnimation,
+          outgoingRouteAnimation: secondaryAnimation,
           child: child,
           // In the middle of a back gesture drag, let the transition be linear to match finger
           // motions.

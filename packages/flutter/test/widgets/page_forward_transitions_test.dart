@@ -41,7 +41,7 @@ class TestRoute<T> extends PageRoute<T> {
   bool get maintainState => false;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return child;
   }
 }
@@ -94,7 +94,7 @@ void main() {
                         new TestTransition(
                           childFirstHalf: new Text('C'),
                           childSecondHalf: new Text('D'),
-                          animation: route.forwardAnimation
+                          animation: route.secondaryAnimation
                         ),
                       ]
                     );
