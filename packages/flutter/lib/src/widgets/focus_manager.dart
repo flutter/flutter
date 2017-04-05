@@ -7,24 +7,24 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 /// A leaf node in the focus tree that can receive focus.
-/// 
+///
 /// The focus tree keeps track of which widget is the user's current focus. The
 /// focused widget often listens for keyboard events.
-/// 
+///
 /// To request focus, find the [FocusScopeNode] for the current [BuildContext]
 /// and call the [FocusScopeNode.requestFocus] method:
-/// 
+///
 /// ```dart
 /// FocusScope.of(context).requestFocus(focusNode);
 /// ```
-/// 
+///
 /// If your widget requests focus, be sure to call
 /// `FocusScope.of(context).reparentIfNeeded(focusNode);` in your `build`
 /// method to reparent your [FocusNode] if your widget moves from one
 /// location in the tree to another.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [FocusScopeNode], which is an interior node in the focus tree.
 ///  * [FocusScope.of], which provides the [FocusScopeNode] for a given
 ///    [BuildContext].
@@ -33,25 +33,25 @@ class FocusNode extends ChangeNotifier {
   FocusManager _manager;
 
   /// Whether this node has the overall focus.
-  /// 
+  ///
   /// A [FocusNode] has the overall focus when the node is focused in its
   /// parent [FocusScopeNode] and [FocusScopeNode.isFirstFocus] is true for
   /// that scope and all its ancestor scopes.
-  /// 
+  ///
   /// To request focus, find the [FocusScopeNode] for the current [BuildContext]
   /// and call the [FocusScopeNode.requestFocus] method:
-  /// 
+  ///
   /// ```dart
   /// FocusScope.of(context).requestFocus(focusNode);
   /// ```
-  /// 
+  ///
   /// This object notifies its listeners whenever this value changes.
   bool get hasFocus => _manager?._currentFocus == this;
 
-  /// Cancels any oustanding requests for focus.
-  /// 
+  /// Cancels any outstanding requests for focus.
+  ///
   /// This method is safe to call regardless of whether this node has ever
-  /// requested focus. 
+  /// requested focus.
   void unfocus() {
     _parent?._resignFocus(this);
     assert(_parent == null);
@@ -76,21 +76,21 @@ class FocusNode extends ChangeNotifier {
 }
 
 /// An interior node in the focus tree.
-/// 
+///
 /// The focus tree keeps track of which widget is the user's current focus. The
 /// focused widget often listens for keyboard events.
-/// 
+///
 /// The interior nodes in the focus tree cannot themselves be focused but
 /// instead remember previous focus states. A scope is currently active in its
 /// parent whenever [isFirstFocus] is true. If that scope is detached from its
 /// parent, its previous sibling becomes the parent's first focus.
-/// 
+///
 /// A [FocusNode] has the overall focus when the node is focused in its
 /// parent [FocusScopeNode] and [FocusScopeNode.isFirstFocus] is true for
 /// that scope and all its ancestor scopes.
-/// 
+///
 /// See also:
-/// 
+///
 ///  * [FocusNode], which is a leaf node in the focus tree that can receive
 ///    focus.
 ///  * [FocusScope.of], which provides the [FocusScopeNode] for a given
@@ -206,10 +206,10 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   /// Requests that the given node becomes the focus for this scope.
-  /// 
+  ///
   /// If the given node is currently focused in another scope, the node will
   /// first be unfocused in that scope.
-  /// 
+  ///
   /// The node will receive the overall focus if this [isFirstFocus] is true
   /// in this scope and all its ancestor scopes. The node is notified that it
   /// has received the overall focus in a microtask.
@@ -228,10 +228,10 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
 
   /// If this scope lacks a focus, request that the given node becomes the
   /// focus.
-  /// 
+  ///
   /// Useful for widgets that wish to grab the focus if no other widget already
   /// has the focus.
-  /// 
+  ///
   /// The node is notified that it has received the overall focus in a
   /// microtask.
   void autofocus(FocusNode node) {
@@ -241,7 +241,7 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   /// Adopts the given node if it is focused in another scope.
-  /// 
+  ///
   /// A widget that requests that a node is focused should call this method
   /// during its `build` method in case the widget is moved from one location
   /// in the tree to another location that has a different focus scope.
@@ -265,7 +265,7 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   /// Makes the given child the first focus of this scope.
-  /// 
+  ///
   /// If the child has another parent scope, the child is first removed from
   /// that scope. After this method returns [isFirstFocus] will be true for
   /// the child.
@@ -281,12 +281,12 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   /// Adopts the given scope if it is the first focus of another scope.
-  /// 
+  ///
   /// A widget that sets a scope as the first focus of another scope should
   /// call this method during its `build` method in case the widget is moved
   /// from one location in the tree to another location that has a different
   /// focus scope.
-  /// 
+  ///
   /// If the given scope is not the first focus of its old parent, the scope
   /// is simply detached from its old parent.
   void reparentScopeIfNeeded(FocusScopeNode child) {
@@ -300,9 +300,9 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   }
 
   /// Remove this scope from its parent child list.
-  /// 
+  ///
   /// This method is safe to call even if this scope does not have a parent.
-  /// 
+  ///
   /// A widget that sets a scope as the first focus of another scope should
   /// call this method during [State.dispose] to avoid leaving dangling
   /// children in their parent scope.
@@ -343,18 +343,18 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
 ///
 /// The focus tree keeps track of which widget is the user's current focus. The
 /// focused widget often listens for keyboard events.
-/// 
+///
 /// The focus manager is responsible for holding the [FocusScopeNode] that is
 /// the root of the focus tree and tracking which [FocusNode] has the overall
 /// focus.
-/// 
+///
 /// The [FocusManager] is held by the [WidgetBinding] as
 /// [WidgetBinding.focusManager]. The [FocusManager] is rarely accessed
 /// directly. Instead, to find the [FocusScopeNode] for a given [BuildContext],
 /// use [FocusScope.of].
 ///
 /// See also:
-/// 
+///
 ///  * [FocusNode], which is a leaf node in the focus tree that can receive
 ///    focus.
 ///  * [FocusScopeNode], which is an interior node in the focus tree.
@@ -362,7 +362,7 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
 ///    [BuildContext].
 class FocusManager {
   /// Creates an object that manages the focus tree.
-  /// 
+  ///
   /// This constructor is rarely called directly. To access the [FocusManager],
   /// consider using [WidgetBinding.focusManager] instead.
   FocusManager() {
@@ -372,7 +372,7 @@ class FocusManager {
   }
 
   /// The root [FocusScopeNode] in the focus tree.
-  /// 
+  ///
   /// This field is rarely used direction. Instead, to find the
   /// [FocusScopeNode] for a given [BuildContext], use [FocusScope.of].
   final FocusScopeNode rootScope = new FocusScopeNode();

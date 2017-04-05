@@ -61,6 +61,16 @@ class ScrollBehavior {
     return null;
   }
 
+  /// Called whenever a [ScrollConfiguration] is rebuilt with a new
+  /// [ScrollBehavior] of the same [runtimeType].
+  ///
+  /// If the new instance represents different information than the old
+  /// instance, then the method should return true, otherwise it should return
+  /// false.
+  ///
+  /// If this method returns true, all the widgets that inherit from the
+  /// [ScrollConfiguration] will rebuild using the new [ScrollBehavior]. If this
+  /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
 }
 
@@ -88,9 +98,9 @@ class ScrollConfiguration extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(ScrollConfiguration old) {
+  bool updateShouldNotify(ScrollConfiguration oldWidget) {
     assert(behavior != null);
-    return behavior.runtimeType != old.behavior.runtimeType
-        || behavior.shouldNotify(old.behavior);
+    return behavior.runtimeType != oldWidget.behavior.runtimeType
+        || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
   }
 }
