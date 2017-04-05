@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/create.dart';
@@ -16,6 +17,9 @@ import 'src/common.dart';
 import 'src/context.dart';
 
 void main() {
+
+  final String analyzerSeparator = platform.isWindows ? '-' : '•';
+
   group('analyze once', () {
     Directory tempDir;
     File libMain;
@@ -86,7 +90,7 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
+          'warning $analyzerSeparator The parameter \'child\' is required',
           '1 warning found.',
         ],
         toolExit: true,
@@ -100,7 +104,7 @@ void main() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
+          'warning $analyzerSeparator The parameter \'child\' is required',
           '1 warning found.',
         ],
         toolExit: true,
@@ -126,8 +130,8 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
-          '[lint] Only throw instances of classes extending either Exception or Error',
+          'warning $analyzerSeparator The parameter \'child\' is required',
+          'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
           '1 warning and 1 lint found.',
         ],
         toolExit: true,
@@ -141,8 +145,8 @@ void main() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          '[warning] The parameter \'child\' is required',
-          '[lint] Only throw instances of classes extending either Exception or Error',
+          'warning $analyzerSeparator The parameter \'child\' is required',
+          'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
           '1 warning and 1 lint found.',
         ],
         toolExit: true,
