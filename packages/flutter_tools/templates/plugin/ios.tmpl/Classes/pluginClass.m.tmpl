@@ -3,12 +3,12 @@
 @implementation {{pluginClass}} {
 }
 
-- (instancetype)initWithFlutterView:(FlutterViewController *)flutterView {
+- (instancetype)initWithController:(FlutterViewController *)controller {
   self = [super init];
   if (self) {
     FlutterMethodChannel *channel = [FlutterMethodChannel
         methodChannelWithName:@"{{projectName}}"
-           binaryMessenger:flutterView];
+           binaryMessenger:controller];
     [channel setMethodCallHandler:^(FlutterMethodCall *call,
                                     FlutterResultReceiver result) {
       if ([@"getPlatformVersion" isEqualToString:call.method]) {
