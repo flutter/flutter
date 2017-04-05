@@ -390,7 +390,8 @@ class FlutterDriver {
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.
-  Future<List<int>> screenshot({ Duration timeout: _kLongTimeout }) async {
+  Future<List<int>> screenshot({ Duration timeout }) async {
+    timeout ??= _kLongTimeout;
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return BASE64.decode(result['screenshot']);
   }
