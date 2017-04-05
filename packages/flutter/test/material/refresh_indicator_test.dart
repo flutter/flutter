@@ -30,7 +30,7 @@ void main() {
           children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
             return new SizedBox(
               height: 200.0,
-              child: new Text(item)
+              child: new Text(item),
             );
           }).toList(),
         ),
