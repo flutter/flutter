@@ -22,13 +22,14 @@ analyzer:
   language:
     enableStrictCallChecks: true
     enableSuperMixins: true
+    enableAssertInitializer: true
   strong-mode:
     implicit-dynamic: false
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
-    missing_return: warning    
+    missing_return: warning
     # allow overriding fields (if they use super, ideally...)
     strong_mode_invalid_field_override: ignore
     # allow having TODOs in the code
@@ -45,9 +46,10 @@ linter:
 
     # === error rules ===
     - avoid_empty_else
-    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
+    - avoid_slow_async_io
     - cancel_subscriptions
     # - close_sinks # https://github.com/flutter/flutter/issues/5789
+    # - comment_references # blocked on https://github.com/dart-lang/dartdoc/issues/1153
     - control_flow_in_finally
     - empty_statements
     - hash_and_equals
@@ -70,20 +72,22 @@ linter:
     - await_only_futures
     - camel_case_types
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
-    - control_flow_in_finally
+    - empty_catches
     - empty_constructor_bodies
     - implementation_imports
     - library_names
     - library_prefixes
     - non_constant_identifier_names
-    - one_member_abstracts
+    # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
     # - overridden_fields
     - package_api_docs
     - package_prefixed_library_names
+    # - parameter_assignments # we do this commonly
+    # - prefer_final_fields # https://github.com/dart-lang/sdk/issues/29197
     - prefer_final_locals
     - prefer_is_not_empty
-    - public_member_api_docs
+    - public_member_api_docs # this is the only difference from .analysis_options
     - slash_for_doc_comments
     - sort_constructors_first
     - sort_unnamed_constructors_first

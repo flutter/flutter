@@ -72,6 +72,7 @@ class Xcode {
           else
             _eulaSigned = true;
         } catch (error) {
+          _eulaSigned = false;
         }
       }
     } catch (error) {
