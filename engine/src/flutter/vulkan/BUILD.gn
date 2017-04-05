@@ -63,5 +63,5 @@ source_set("vulkan") {
     "//third_party/skia:gpu",
   ]
 
-  public_configs = [ ":vulkan_config" ]
+  public_configs = [ ":vulkan_config", "//third_party/skia:skia_private" ]
 }
