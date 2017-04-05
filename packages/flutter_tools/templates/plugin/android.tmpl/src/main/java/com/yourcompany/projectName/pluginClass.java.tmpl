@@ -12,8 +12,8 @@ import io.flutter.plugin.common.MethodCall;
 public class {{pluginClass}} implements MethodCallHandler {
   private FlutterActivity activity;
 
-  public static void register(FlutterActivity activity) {
-    new {{pluginClass}}(activity);
+  public static {{pluginClass}} register(FlutterActivity activity) {
+    return new {{pluginClass}}(activity);
   }
 
   private {{pluginClass}}(FlutterActivity activity) {
