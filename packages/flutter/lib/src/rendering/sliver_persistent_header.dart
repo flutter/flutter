@@ -371,6 +371,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
         markNeedsLayout();
       });
 
+    // Recreating the animation rather than updating a cached value, only
+    // to avoid the extra complexity of managing the animation's lifetime.
     _animation = new Tween<double>(
       begin: _effectiveScrollOffset,
       end: direction == ScrollDirection.forward ? 0.0 : maxExtent,

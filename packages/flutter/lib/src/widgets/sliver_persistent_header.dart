@@ -231,6 +231,8 @@ class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjec
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    // Not passing this snapConfiguration as a constructor parameter to avoid the
+    // additional layers added due to https://github.com/dart-lang/sdk/issues/15101
     return new _RenderSliverFloatingPersistentHeaderForWidgets()
       ..snapConfiguration = delegate.snapConfiguration;
   }
@@ -254,6 +256,8 @@ class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRende
 
   @override
   _RenderSliverPersistentHeaderForWidgetsMixin createRenderObject(BuildContext context) {
+    // Not passing this snapConfiguration as a constructor parameter to avoid the
+    // additional layers added due to https://github.com/dart-lang/sdk/issues/15101
     return new _RenderSliverFloatingPinnedPersistentHeaderForWidgets()
       ..snapConfiguration = delegate.snapConfiguration;
   }
