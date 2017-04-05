@@ -56,11 +56,19 @@ enum TimelineStream {
 
 const List<TimelineStream> _defaultStreams = const <TimelineStream>[TimelineStream.all];
 
-/// Default timeout for long-running RPCs.
-const Duration _kLongTimeout = const Duration(seconds: 20);
-
 /// Default timeout for short-running RPCs.
 const Duration _kShortTimeout = const Duration(seconds: 5);
+
+/// Default timeout for long-running RPCs.
+final Duration _kLongTimeout = _kShortTimeout * 6;
+
+/// Additional amount of time we give the command to finish or timeout remotely
+/// before timing out locally.
+final Duration _kRpcGraceTime = _kShortTimeout ~/ 2;
+
+/// The amount of time we wait prior to making the next attempt to connect to
+/// the VM service.
+final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
 
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
@@ -113,7 +121,6 @@ class FlutterDriver {
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
-  static const Duration _kRpcGraceTime = const Duration(seconds: 2);
 
   static int _nextDriverId = 0;
 
@@ -164,7 +171,7 @@ class FlutterDriver {
         isolate.pauseEvent is! VMPauseExceptionEvent &&
         isolate.pauseEvent is! VMPauseInterruptedEvent &&
         isolate.pauseEvent is! VMResumeEvent) {
-      await new Future<Null>.delayed(const Duration(milliseconds: 300));
+      await new Future<Null>.delayed(_kShortTimeout ~/ 10);
       isolate = await vm.isolates.first.loadRunnable();
     }
 
@@ -214,7 +221,7 @@ class FlutterDriver {
         waitForServiceExtension(),
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
-        new Future<String>.delayed(const Duration(seconds: 10), () => 'timeout')
+        new Future<String>.delayed(_kLongTimeout * 2, () => 'timeout')
       ]);
       await whenResumed;
       _log.trace('Waiting for service extension');
@@ -383,7 +390,8 @@ class FlutterDriver {
   }
 
   /// Take a screenshot.  The image will be returned as a PNG.
-  Future<List<int>> screenshot({ Duration timeout: _kLongTimeout }) async {
+  Future<List<int>> screenshot({ Duration timeout }) async {
+    timeout ??= _kLongTimeout;
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return BASE64.decode(result['screenshot']);
   }
@@ -553,9 +561,9 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       await ws1?.close();
       await ws2?.close();
 
-      if (timer.elapsed < const Duration(seconds: 30)) {
+      if (timer.elapsed < _kLongTimeout * 2) {
         _log.info('Waiting for application to start');
-        await new Future<Null>.delayed(const Duration(seconds: 1));
+        await new Future<Null>.delayed(_kPauseBetweenReconnectAttempts);
         return attemptConnection();
       } else {
         _log.critical(
