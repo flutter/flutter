@@ -28,7 +28,7 @@ enum TargetPlatform {
 /// originally written assuming Android-like behavior, and we added platform
 /// adaptations for iOS later). Tests can check iOS behavior by using the
 /// platform override APIs (such as [ThemeData.platform] in the material
-/// library) or by calling [debugSetDefaultTargetPlatformOverride]. The value
+/// library) or by setting [debugDefaultTargetPlatformOverride]. The value
 /// can only be explicitly set in debug mode.
 TargetPlatform get defaultTargetPlatform {
   TargetPlatform result;
