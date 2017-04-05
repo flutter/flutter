@@ -80,11 +80,13 @@ enum MainAxisAlignment {
   /// Place the free space evenly between the children.
   spaceBetween,
 
-  /// Place the free space evenly between the children as well as half of that space before and after the first and last child.
+  /// Place the free space evenly between the children as well as half of that
+  /// space before and after the first and last child.
   spaceAround,
 
-  /// Place the free space evenly between the children as well as before and after the first and last child.
-  spaceEvenly
+  /// Place the free space evenly between the children as well as before and
+  /// after the first and last child.
+  spaceEvenly,
 }
 
 /// How the children should be placed along the cross axis in a flex layout.

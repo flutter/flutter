@@ -444,6 +444,13 @@ class RenderStack extends RenderBox
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('overflow: $overflow');
+    description.add('alignment: $alignment');
+  }
 }
 
 /// Implements the same layout algorithm as RenderStack but only paints the child
@@ -460,8 +467,8 @@ class RenderIndexedStack extends RenderStack {
     FractionalOffset alignment: FractionalOffset.topLeft,
     int index: 0
   }) : _index = index, super(
-   children: children,
-   alignment: alignment
+    children: children,
+    alignment: alignment
   );
 
   /// The index of the child to show, null if nothing is to be displayed.
@@ -507,5 +514,11 @@ class RenderIndexedStack extends RenderStack {
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
     context.paintChild(child, childParentData.offset + offset);
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('index: $index');
   }
 }
