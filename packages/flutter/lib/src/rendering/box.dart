@@ -1719,8 +1719,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     });
-    if (position.dx >= 0.0 && position.dx < _size.width &&
-        position.dy >= 0.0 && position.dy < _size.height) {
+    if (_size.contains(position)) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
         return true;

@@ -939,7 +939,7 @@ void paintImage({
   }
   final double dx = (outputSize.width - destinationSize.width) * (alignment?.dx ?? 0.5);
   final double dy = (outputSize.height - destinationSize.height) * (alignment?.dy ?? 0.5);
-  final Offset destinationPosition = rect.topLeft + new Offset(dx, dy);
+  final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
   if (repeat != ImageRepeat.noRepeat) {
     canvas.save();
