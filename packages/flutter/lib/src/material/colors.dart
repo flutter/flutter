@@ -244,6 +244,9 @@ class Colors {
   /// White with 10% opacity.
   static const Color white10 = const Color(0x1AFFFFFF);
 
+  /// The official "Fuchsia shade" of the Fuchsia OS
+  static const Color fuchsia = const Color(0xFFFF0080);
+
   /// The red primary color and swatch.
   ///
   /// ```dart
