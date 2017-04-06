@@ -49,7 +49,7 @@ ftl::RefPtr<Vertices> Vertices::Create() {
   return ftl::MakeRefCounted<Vertices>();
 }
 
-void Vertices::init(SkCanvas::VertexMode vertex_mode,
+void Vertices::init(SkVertices::VertexMode vertex_mode,
                     const tonic::Float32List& positions,
                     const tonic::Float32List& texture_coordinates,
                     const tonic::Int32List& colors,

@@ -8,7 +8,6 @@
 #include "lib/tonic/dart_wrappable.h"
 #include "lib/tonic/typed_data/float32_list.h"
 #include "lib/tonic/typed_data/int32_list.h"
-#include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkVertices.h"
 
 namespace tonic {
@@ -30,7 +29,7 @@ class Vertices : public ftl::RefCountedThreadSafe<Vertices>,
   static ftl::RefPtr<Vertices> Create();
 
   void init(
-      SkCanvas::VertexMode vertex_mode,
+      SkVertices::VertexMode vertex_mode,
       const tonic::Float32List& positions,
       const tonic::Float32List& texture_coordinates,
       const tonic::Int32List& colors,
