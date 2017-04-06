@@ -117,7 +117,7 @@ class Material extends StatefulWidget {
     this.color,
     this.textStyle,
     this.borderRadius,
-    this.child
+    this.child,
   }) : super(key: key) {
     assert(type != null);
     assert(elevation != null);
@@ -180,8 +180,10 @@ class Material extends StatefulWidget {
     description.add('elevation: $elevation');
     if (color != null)
       description.add('color: $color');
-    if (textStyle != null)
-      description.add('textStyle: $textStyle');
+    if (textStyle != null) {
+      for (String entry in '$textStyle'.split('\n'))
+        description.add('textStyle.$entry');
+    }
     if (borderRadius != null)
       description.add('borderRadius: $borderRadius');
   }

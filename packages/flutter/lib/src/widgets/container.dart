@@ -55,6 +55,26 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
       ..configuration = createLocalImageConfiguration(context)
       ..position = position;
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    String label;
+    if (position != null) {
+      switch (position) {
+        case DecorationPosition.background:
+          label = 'bg';
+          break;
+        case DecorationPosition.foreground:
+          label = 'fg';
+          break;
+      }
+    } else {
+      description.add('position: NULL');
+      label = 'decoration';
+    }
+    description.add(decoration != null ? '$label: $decoration' : 'no decoration');
+  }
 }
 
 /// A convenience widget that combines common painting, positioning, and sizing
