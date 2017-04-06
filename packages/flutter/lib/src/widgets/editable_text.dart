@@ -239,9 +239,8 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (config.controller != oldConfig.controller) {
       oldConfig.controller.removeListener(_didChangeTextEditingValue);
       config.controller.addListener(_didChangeTextEditingValue);
-      if (_hasInputConnection && config.controller.value != oldConfig.controller.value)
-        _textInputConnection.setEditingState(config.controller.value);
-     }
+      _updateRemoteEditingValueIfNeeded();
+    }
     if (config.focusNode != oldConfig.focusNode) {
       oldConfig.focusNode.removeListener(_handleFocusChanged);
       config.focusNode.addListener(_handleFocusChanged);
@@ -263,10 +262,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   // TextInputClient implementation:
 
+  TextEditingValue _lastKnownRemoteTextEditingValue;
+
   @override
   void updateEditingValue(TextEditingValue value) {
     if (value.text != _value.text)
       _hideSelectionOverlayIfNeeded();
+    _lastKnownRemoteTextEditingValue = value;
     _value = value;
     if (config.onChanged != null)
       config.onChanged(value.text);
@@ -278,6 +280,16 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     config.focusNode.unfocus();
     if (config.onSubmitted != null)
       config.onSubmitted(_value.text);
+  }
+
+  void _updateRemoteEditingValueIfNeeded() {
+    if (!_hasInputConnection)
+      return;
+    final TextEditingValue localValue = _value;
+    if (localValue == _lastKnownRemoteTextEditingValue)
+      return;
+    _lastKnownRemoteTextEditingValue = localValue;
+    _textInputConnection.setEditingState(localValue);
   }
 
   TextEditingValue get _value => config.controller.value;
@@ -306,8 +318,10 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   void _openInputConnectionIfNeeded() {
     if (!_hasInputConnection) {
+      final TextEditingValue localValue = _value;
+      _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
-        ..setEditingState(_value)
+        ..setEditingState(localValue)
         ..show();
     }
   }
@@ -316,6 +330,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (_hasInputConnection) {
       _textInputConnection.close();
       _textInputConnection = null;
+      _lastKnownRemoteTextEditingValue = null;
     }
   }
 
@@ -429,6 +444,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   void _didChangeTextEditingValue() {
+    _updateRemoteEditingValueIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
