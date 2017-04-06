@@ -24,6 +24,7 @@ const String _kOptionPackages = 'packages';
 const String _kOptionOutput = 'output-file';
 const String _kOptionHeader = 'header';
 const String _kOptionSnapshot = 'snapshot';
+const String _kOptionDylib = 'dylib';
 const String _kOptionWorking = 'working-dir';
 const String _kOptionManifest = 'manifest';
 const String _kOptionDepFile = 'depfile';
@@ -32,7 +33,6 @@ const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionOutput,
   _kOptionHeader,
-  _kOptionSnapshot,
   _kOptionWorking,
   _kOptionDepFile,
   _kOptionBuildRoot,
@@ -60,6 +60,7 @@ Future<Null> run(List<String> args) async {
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionOutput, help: 'The generated flx file')
     ..addOption(_kOptionHeader, help: 'The header of the flx file')
+    ..addOption(_kOptionDylib, help: 'The generated AOT dylib file')
     ..addOption(_kOptionSnapshot, help: 'The generated snapshot file')
     ..addOption(_kOptionWorking,
         help: 'The directory where to put temporary files')
@@ -75,9 +76,12 @@ Future<Null> run(List<String> args) async {
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
   final String outputPath = argResults[_kOptionOutput];
   try {
+    final String snapshotPath = argResults[_kOptionSnapshot];
+    final String dylibPath = argResults[_kOptionDylib];
     final List<String> dependencies = await assemble(
       outputPath: outputPath,
-      snapshotFile: fs.file(argResults[_kOptionSnapshot]),
+      snapshotFile: snapshotPath == null ? null : fs.file(snapshotPath),
+      dylibFile: dylibPath == null ? null : fs.file(dylibPath),
       workingDirPath: argResults[_kOptionWorking],
       packagesPath: argResults[_kOptionPackages],
       manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,

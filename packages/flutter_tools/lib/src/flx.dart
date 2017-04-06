@@ -27,6 +27,7 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
+const String _kDylibKey = 'libapp.so';
 
 Future<int> createSnapshot({
   @required String mainPath,
@@ -114,6 +115,7 @@ Future<List<String>> assemble({
   String manifestPath,
   DevFSContent kernelContent,
   File snapshotFile,
+  File dylibFile,
   String outputPath,
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
@@ -151,6 +153,8 @@ Future<List<String>> assemble({
     zipBuilder.entries[_kKernelKey] = kernelContent;
   if (snapshotFile != null)
     zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
+  if (dylibFile != null)
+    zipBuilder.entries[_kDylibKey] = new DevFSFileContent(dylibFile);
 
   ensureDirectoryExists(outputPath);
 
