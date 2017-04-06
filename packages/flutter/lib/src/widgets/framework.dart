@@ -670,7 +670,7 @@ typedef void StateSetter(VoidCallback fn);
 ///  * The framework calls [initState]. Subclasses of [State] should override
 ///    [initState] to perform one-time initialization that depends on the
 ///    [BuildContext] or the widget, which are available as the [context] and
-///    [config] properties, respectively, when the [initState] method is
+///    [widget] properties, respectively, when the [initState] method is
 ///    called.
 ///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
 ///    override [didChangeDependencies] to perform initialization involving
@@ -687,12 +687,12 @@ typedef void StateSetter(VoidCallback fn);
 ///  * During this time, a parent widget might rebuild and request that this
 ///    location in the tree update to display a new widget with the same
 ///    [runtimeType] and [key]. When this happens, the framework will update the
-///    [config] property to refer to the new widget and then call the
-///    [didUpdateConfig] method with the previous widget as an argument.
-///    [State] objects should override [didUpdateConfig] to respond to changes
+///    [widget] property to refer to the new widget and then call the
+///    [didUpdateWidget] method with the previous widget as an argument.
+///    [State] objects should override [didUpdateWidget] to respond to changes
 ///    in their associated wiget (e.g., to start implicit animations).
-///    The framework always calls [build] after calling [didUpdateConfig], which
-///    means any calls to [setState] in [didUpdateConfig] are redundant.
+///    The framework always calls [build] after calling [didUpdateWidget], which
+///    means any calls to [setState] in [didUpdateWidget] are redundant.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
 ///    or [key]), the framework calls the [deactivate] method. Subclasses
@@ -720,7 +720,7 @@ typedef void StateSetter(VoidCallback fn);
 /// See also:
 ///
 ///  * [StatefulWidget], where the current configuration of a [State] is hosted
-///    (see [config]).
+///    (see [Widget]).
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 ///  * [InheritedWidget], for widgets that introduce ambient state that can
@@ -735,8 +735,8 @@ abstract class State<T extends StatefulWidget> {
   /// widget with the same [runtimeType] and [key] as the current configuration,
   /// the framework will update this property to refer to the new widget and
   /// then call [didUpdateConfig], passing the old configuration as an argument.
-  T get config => _config;
-  T _config;
+  T get widget => _widget;
+  T _widget;
 
   /// The current stage in the lifecycle for this state object.
   ///
@@ -779,14 +779,14 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// Override this method to perform initialization that depends on the
   /// location at which this object was inserted into the tree (i.e., [context])
-  /// or on the widget used to configure this object (i.e., [config]).
+  /// or on the widget used to configure this object (i.e., [widget]).
   ///
   /// If a [State]'s [build] method depends on an object that can itself change
   /// state, for example a [ChangeNotifier] or [Stream], or some other object to
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
@@ -801,32 +801,32 @@ abstract class State<T extends StatefulWidget> {
     assert(_debugLifecycleState == _StateLifecycle.created);
   }
 
-  /// Called whenever the configuration changes.
+  /// Called whenever the widget configuration changes.
   ///
   /// If the parent widget rebuilds and request that this location in the tree
   /// update to display a new widget with the same [runtimeType] and [key], the
-  /// framework will update the [config] property of this [State] object to
+  /// framework will update the [widget] property of this [State] object to
   /// refer to the new widget and then call the this method with the previous
   /// widget as an argument.
   ///
-  /// Override this method to respond to changes in the [config] widget (e.g.,
+  /// Override this method to respond to changes in the [widget] widget (e.g.,
   /// to start implicit animations).
   ///
-  /// The framework always calls [build] after calling [didUpdateConfig], which
-  /// means any calls to [setState] in [didUpdateConfig] are redundant.
+  /// The framework always calls [build] after calling [didUpdateWidget], which
+  /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
   /// If a [State]'s [build] method depends on an object that can itself change
   /// state, for example a [ChangeNotifier] or [Stream], or some other object to
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// If you override this, make sure your method starts with a call to
-  /// super.didUpdateConfig(oldConfig).
+  /// super.didUpdateWidget(oldWidget).
   // TODO(abarth): Add @mustCallSuper.
   @protected
-  void didUpdateConfig(covariant T oldConfig) { }
+  void didUpdateWidget(covariant T oldWidget) { }
 
   /// Called whenever the application is reassembled during debugging.
   ///
@@ -976,7 +976,7 @@ abstract class State<T extends StatefulWidget> {
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -994,7 +994,7 @@ abstract class State<T extends StatefulWidget> {
   /// The framework calls this method in a number of different situations:
   ///
   ///  * After calling [initState].
-  ///  * After calling [didUpdateConfig].
+  ///  * After calling [didUpdateWidget].
   ///  * After receiving a call to [setState].
   ///  * After a dependency of this [State] object changes (e.g., an
   ///    [InheritedWidget] referenced by the previous [build] changes).
@@ -1074,15 +1074,15 @@ abstract class State<T extends StatefulWidget> {
   ///   ...
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     ... () { print("color: ${config.color}"); } ...
+  ///     ... () { print("color: ${widget.color}"); } ...
   ///   }
   /// }
   /// ```
   ///
   /// Now when the parent rebuilds `MyButton` with green, the closure created by
   /// the first build still refers to [State] object, which is preserved across
-  /// rebuilds, but the framework has updated that [State] object's [config]
-  /// property to refer to the new `MyButton` instance and `${config.color}`
+  /// rebuilds, but the framework has updated that [State] object's [widget]
+  /// property to refer to the new `MyButton` instance and `${widget.color}`
   /// prints green, as expected.
   @protected
   Widget build(BuildContext context);
@@ -1129,8 +1129,8 @@ abstract class State<T extends StatefulWidget> {
         description.add('$_debugLifecycleState');
       return true;
     });
-    if (_config == null)
-      description.add('no config');
+    if (_widget == null)
+      description.add('no widget');
     if (_element == null)
       description.add('not mounted');
   }
@@ -2885,10 +2885,10 @@ abstract class Element implements BuildContext {
   // Whether we've already built or not. Set in [rebuild].
   bool _debugBuiltOnce = false;
 
-  // We let widget authors call setState from initState, didUpdateConfig, and
+  // We let widget authors call setState from initState, didUpdateWidget, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
-  // currently undergoing initState, didUpdateConfig, or build.
+  // currently undergoing initState, didUpdateWidget, or build.
   bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
   bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
     assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
@@ -3158,8 +3158,8 @@ class StatefulElement extends ComponentElement {
     });
     assert(_state._element == null);
     _state._element = this;
-    assert(_state._config == null);
-    _state._config = widget;
+    assert(_state._widget == null);
+    _state._widget = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
 
@@ -3199,15 +3199,15 @@ class StatefulElement extends ComponentElement {
   void update(StatefulWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    final StatefulWidget oldConfig = _state._config;
-    // Notice that we mark ourselves as dirty before calling didUpdateConfig to
-    // let authors call setState from within didUpdateConfig without triggering
+    final StatefulWidget oldWidget = _state._widget;
+    // Notice that we mark ourselves as dirty before calling didUpdateWidget to
+    // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
-    _state._config = widget;
+    _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.didUpdateConfig(oldConfig);
+      _state.didUpdateWidget(oldWidget);
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }

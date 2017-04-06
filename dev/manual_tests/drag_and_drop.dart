@@ -58,16 +58,16 @@ class DotState extends State<Dot> {
   @override
   Widget build(BuildContext context) {
     return new GestureDetector(
-      onTap: config.tappable ? () { setState(() { taps += 1; }); } : null,
+      onTap: widget.tappable ? () { setState(() { taps += 1; }); } : null,
       child: new Container(
-        width: config.size,
-        height: config.size,
+        width: widget.size,
+        height: widget.size,
         decoration: new BoxDecoration(
-          backgroundColor: config.color,
+          backgroundColor: widget.color,
           border: new Border.all(width: taps.toDouble()),
           shape: BoxShape.circle
         ),
-        child: config.child
+        child: widget.child
       )
     );
   }

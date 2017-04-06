@@ -147,13 +147,13 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
         ),
         delegate: new SliverChildBuilderDelegate(
           (BuildContext context, int index) {
-            final Recipe recipe = config.recipes[index];
+            final Recipe recipe = widget.recipes[index];
             return new RecipeCard(
               recipe: recipe,
               onTap: () { showRecipePage(context, recipe); },
             );
           },
-          childCount: config.recipes.length,
+          childCount: widget.recipes.length,
         ),
       ),
     );
@@ -209,7 +209,7 @@ class _PestoLogoState extends State<PestoLogo> {
   @override
   Widget build(BuildContext context) {
     return new Transform(
-      transform: new Matrix4.identity()..scale(config.height / kLogoHeight),
+      transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
       alignment: FractionalOffset.topCenter,
       child: new SizedBox(
         width: kLogoWidth,
@@ -217,13 +217,13 @@ class _PestoLogoState extends State<PestoLogo> {
           overflow: Overflow.visible,
           children: <Widget>[
             new Positioned.fromRect(
-              rect: _imageRectTween.lerp(config.t),
+              rect: _imageRectTween.lerp(widget.t),
               child: new Image.asset(_kSmallLogoImage, fit: BoxFit.contain),
             ),
             new Positioned.fromRect(
-              rect: _textRectTween.lerp(config.t),
+              rect: _textRectTween.lerp(widget.t),
               child: new Opacity(
-                opacity: _textOpacity.transform(config.t),
+                opacity: _textOpacity.transform(widget.t),
                 child: new Text('PESTO', style: titleStyle, textAlign: TextAlign.center),
               ),
             ),
@@ -311,7 +311,7 @@ class _RecipePageState extends State<RecipePage> {
     final double appBarHeight = _getAppBarHeight(context);
     final Size screenSize = MediaQuery.of(context).size;
     final bool fullWidth = (screenSize.width < _kRecipePageMaxWidth);
-    final bool isFavorite = _favoriteRecipes.contains(config.recipe);
+    final bool isFavorite = _favoriteRecipes.contains(widget.recipe);
     return new Scaffold(
       key: _scaffoldKey,
       body: new Stack(
@@ -322,9 +322,9 @@ class _RecipePageState extends State<RecipePage> {
             right: 0.0,
             height: appBarHeight + _kFabHalfSize,
             child: new Hero(
-              tag: config.recipe.imagePath,
+              tag: widget.recipe.imagePath,
               child: new Image.asset(
-                config.recipe.imagePath,
+                widget.recipe.imagePath,
                 fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
               ),
             ),
@@ -363,7 +363,7 @@ class _RecipePageState extends State<RecipePage> {
                     new Container(
                       padding: const EdgeInsets.only(top: _kFabHalfSize),
                       width: fullWidth ? null : _kRecipePageMaxWidth,
-                      child: new RecipeSheet(recipe: config.recipe),
+                      child: new RecipeSheet(recipe: widget.recipe),
                     ),
                     new Positioned(
                       right: 16.0,
@@ -398,10 +398,10 @@ class _RecipePageState extends State<RecipePage> {
 
   void _toggleFavorite() {
     setState(() {
-      if (_favoriteRecipes.contains(config.recipe))
-        _favoriteRecipes.remove(config.recipe);
+      if (_favoriteRecipes.contains(widget.recipe))
+        _favoriteRecipes.remove(widget.recipe);
       else
-        _favoriteRecipes.add(config.recipe);
+        _favoriteRecipes.add(widget.recipe);
     });
   }
 }

@@ -123,12 +123,12 @@ class _PointDemoState extends State<_PointDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
+    _animation = new CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
   void dispose() {
-    config.controller.value = 0.0;
+    widget.controller.value = 0.0;
     super.dispose();
   }
 
@@ -169,7 +169,7 @@ class _PointDemoState extends State<_PointDemo> {
 
   void _handleDragCancel()  {
     _dragTarget = null;
-    config.controller.value = 0.0;
+    widget.controller.value = 0.0;
   }
 
   void _handleDragEnd(DragEndDetails details)  {
@@ -288,12 +288,12 @@ class _RectangleDemoState extends State<_RectangleDemo> {
   @override
   void initState() {
     super.initState();
-    _animation = new CurvedAnimation(parent: config.controller, curve: Curves.fastOutSlowIn);
+    _animation = new CurvedAnimation(parent: widget.controller, curve: Curves.fastOutSlowIn);
   }
 
   @override
   void dispose() {
-    config.controller.value = 0.0;
+    widget.controller.value = 0.0;
     super.dispose();
   }
 
@@ -333,7 +333,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
 
   void _handleDragCancel()  {
     _dragTarget = null;
-    config.controller.value = 0.0;
+    widget.controller.value = 0.0;
   }
 
   void _handleDragEnd(DragEndDetails details)  {
