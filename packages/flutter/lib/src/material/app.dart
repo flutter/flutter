@@ -206,47 +206,47 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
-    WidgetBuilder builder = config.routes[settings.name];
-    if (builder == null && config.home != null && settings.name == Navigator.defaultRouteName)
-      builder = (BuildContext context) => config.home;
+    WidgetBuilder builder = widget.routes[settings.name];
+    if (builder == null && widget.home != null && settings.name == Navigator.defaultRouteName)
+      builder = (BuildContext context) => widget.home;
     if (builder != null) {
       return new MaterialPageRoute<Null>(
         builder: builder,
         settings: settings
       );
     }
-    if (config.onGenerateRoute != null)
-      return config.onGenerateRoute(settings);
+    if (widget.onGenerateRoute != null)
+      return widget.onGenerateRoute(settings);
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = config.theme ?? new ThemeData.fallback();
+    final ThemeData theme = widget.theme ?? new ThemeData.fallback();
     Widget result = new AnimatedTheme(
       data: theme,
       isMaterialAppTheme: true,
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
-        title: config.title,
+        title: widget.title,
         textStyle: _errorTextStyle,
         // blue is the primary color of the default theme
-        color: config.color ?? theme?.primaryColor ?? Colors.blue,
+        color: widget.color ?? theme?.primaryColor ?? Colors.blue,
         navigatorObservers:
-            new List<NavigatorObserver>.from(config.navigatorObservers)
+            new List<NavigatorObserver>.from(widget.navigatorObservers)
               ..add(_heroController),
-        initialRoute: config.initialRoute,
+        initialRoute: widget.initialRoute,
         onGenerateRoute: _onGenerateRoute,
-        onLocaleChanged: config.onLocaleChanged,
-        showPerformanceOverlay: config.showPerformanceOverlay,
-        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-        showSemanticsDebugger: config.showSemanticsDebugger,
-        debugShowCheckedModeBanner: config.debugShowCheckedModeBanner
+        onLocaleChanged: widget.onLocaleChanged,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        showSemanticsDebugger: widget.showSemanticsDebugger,
+        debugShowCheckedModeBanner: widget.debugShowCheckedModeBanner
       )
     );
 
     assert(() {
-      if (config.debugShowMaterialGrid) {
+      if (widget.debugShowMaterialGrid) {
         result = new GridPaper(
           color: const Color(0xE0F9BBE0),
           interval: 8.0,

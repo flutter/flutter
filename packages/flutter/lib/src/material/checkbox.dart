@@ -93,10 +93,10 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     return new _CheckboxRenderObjectWidget(
-      value: config.value,
-      activeColor: config.activeColor ?? themeData.accentColor,
-      inactiveColor: config.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
-      onChanged: config.onChanged,
+      value: widget.value,
+      activeColor: widget.activeColor ?? themeData.accentColor,
+      inactiveColor: widget.onChanged != null ? themeData.unselectedWidgetColor : themeData.disabledColor,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }

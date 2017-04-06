@@ -83,10 +83,10 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
   }
 
   @override
-  void didUpdateConfig(MarkdownWidget oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.data != oldConfig.data
-        || config.styleSheet != oldConfig.styleSheet)
+  void didUpdateWidget(MarkdownWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.data != oldWidget.data
+        || widget.styleSheet != oldWidget.styleSheet)
       _parseMarkdown();
   }
 
@@ -97,12 +97,12 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
   }
 
   void _parseMarkdown() {
-    final MarkdownStyleSheet styleSheet = config.styleSheet ?? new MarkdownStyleSheet.fromTheme(Theme.of(context));
+    final MarkdownStyleSheet styleSheet = widget.styleSheet ?? new MarkdownStyleSheet.fromTheme(Theme.of(context));
 
     _disposeRecognizers();
 
     // TODO: This can be optimized by doing the split and removing \r at the same time
-    final List<String> lines = config.data.replaceAll('\r\n', '\n').split('\n');
+    final List<String> lines = widget.data.replaceAll('\r\n', '\n').split('\n');
     final md.Document document = new md.Document();
     final MarkdownBuilder builder = new MarkdownBuilder(delegate: this, styleSheet: styleSheet);
     _children = builder.build(document.parseLines(lines));
@@ -121,8 +121,8 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
   GestureRecognizer createLink(String href) {
     final TapGestureRecognizer recognizer = new TapGestureRecognizer()
       ..onTap = () {
-      if (config.onTapLink != null)
-        config.onTapLink(href);
+      if (widget.onTapLink != null)
+        widget.onTapLink(href);
     };
     _recognizers.add(recognizer);
     return recognizer;
@@ -130,13 +130,13 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
 
   @override
   TextSpan formatText(MarkdownStyleSheet styleSheet, String code) {
-    if (config.syntaxHighlighter != null)
-      return config.syntaxHighlighter.format(code);
+    if (widget.syntaxHighlighter != null)
+      return widget.syntaxHighlighter.format(code);
     return new TextSpan(style: styleSheet.code, text: code);
   }
 
   @override
-  Widget build(BuildContext context) => config.build(context, _children);
+  Widget build(BuildContext context) => widget.build(context, _children);
 }
 
 /// A non-scrolling widget that parses and displays Markdown.

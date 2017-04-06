@@ -98,12 +98,12 @@ class _BottomSheetState extends State<BottomSheet> {
     return renderBox.size.height;
   }
 
-  bool get _dismissUnderway => config.animationController.status == AnimationStatus.reverse;
+  bool get _dismissUnderway => widget.animationController.status == AnimationStatus.reverse;
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_dismissUnderway)
       return;
-    config.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
+    widget.animationController.value -= details.primaryDelta / (_childHeight ?? details.primaryDelta);
   }
 
   void _handleDragEnd(DragEndDetails details) {
@@ -111,16 +111,16 @@ class _BottomSheetState extends State<BottomSheet> {
       return;
     if (details.velocity.pixelsPerSecond.dy > _kMinFlingVelocity) {
       final double flingVelocity = -details.velocity.pixelsPerSecond.dy / _childHeight;
-      if (config.animationController.value > 0.0)
-        config.animationController.fling(velocity: flingVelocity);
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: flingVelocity);
       if (flingVelocity < 0.0)
-        config.onClosing();
-    } else if (config.animationController.value < _kCloseProgressThreshold) {
-      if (config.animationController.value > 0.0)
-        config.animationController.fling(velocity: -1.0);
-      config.onClosing();
+        widget.onClosing();
+    } else if (widget.animationController.value < _kCloseProgressThreshold) {
+      if (widget.animationController.value > 0.0)
+        widget.animationController.fling(velocity: -1.0);
+      widget.onClosing();
     } else {
-      config.animationController.forward();
+      widget.animationController.forward();
     }
   }
 
@@ -131,7 +131,7 @@ class _BottomSheetState extends State<BottomSheet> {
       onVerticalDragEnd: _handleDragEnd,
       child: new Material(
         key: _childKey,
-        child: config.builder(context)
+        child: widget.builder(context)
       )
     );
   }
@@ -185,15 +185,15 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new AnimatedBuilder(
-        animation: config.route.animation,
+        animation: widget.route.animation,
         builder: (BuildContext context, Widget child) {
           return new ClipRect(
             child: new CustomSingleChildLayout(
-              delegate: new _ModalBottomSheetLayout(config.route.animation.value),
+              delegate: new _ModalBottomSheetLayout(widget.route.animation.value),
               child: new BottomSheet(
-                animationController: config.route._animationController,
+                animationController: widget.route._animationController,
                 onClosing: () => Navigator.pop(context),
-                builder: config.route.builder
+                builder: widget.route.builder
               )
             )
           );

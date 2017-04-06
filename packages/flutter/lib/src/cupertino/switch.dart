@@ -79,9 +79,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(
-      value: config.value,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged,
+      value: widget.value,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }

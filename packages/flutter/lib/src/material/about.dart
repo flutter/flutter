@@ -421,13 +421,13 @@ class _LicensePageState extends State<LicensePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String name = config.applicationName ?? _defaultApplicationName(context);
-    final String version = config.applicationVersion ?? _defaultApplicationVersion(context);
+    final String name = widget.applicationName ?? _defaultApplicationName(context);
+    final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
     final List<Widget> contents = <Widget>[
       new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
       new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 18.0),
-      new Text(config.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+      new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
       new Container(height: 18.0),
       new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 24.0),

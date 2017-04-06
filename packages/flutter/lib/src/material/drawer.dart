@@ -290,7 +290,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                     child: new FocusScope(
                       key: _drawerKey,
                       node: _focusScopeNode,
-                      child: config.child
+                      child: widget.child
                     ),
                   ),
                 ),
