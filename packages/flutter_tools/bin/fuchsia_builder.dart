@@ -76,8 +76,8 @@ Future<Null> run(List<String> args) async {
   Cache.flutterRoot = platform.environment['FLUTTER_ROOT'];
   final String outputPath = argResults[_kOptionOutput];
   try {
-    var snapshotPath = argResults[_kOptionSnapshot];
-    var dylibPath = argResults[_kOptionDylib];
+    final String snapshotPath = argResults[_kOptionSnapshot];
+    final String dylibPath = argResults[_kOptionDylib];
     final List<String> dependencies = await assemble(
       outputPath: outputPath,
       snapshotFile: snapshotPath == null ? null : fs.file(snapshotPath),
