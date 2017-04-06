@@ -1339,9 +1339,9 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// The [children] argument must not be null and must not contain any null
   /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
-    : super(key: key) {
-    assert(children != null);
-    assert(!children.any((Widget child) => child == null));
+    : assert(children != null),
+      super(key: key) {
+    assert(!children.any((Widget child) => child == null)); // https://github.com/dart-lang/sdk/issues/29276
   }
 
   /// The widgets below this widget in the tree.
