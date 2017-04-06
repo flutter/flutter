@@ -195,7 +195,7 @@ void main() {
     bool completed;
 
     completed = false;
-    PlatformMessages.setMockBinaryMessageHandler('flutter/assets', (ByteData message) async {
+    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(UTF8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return new ByteData(5); // 0x0000000000
@@ -214,7 +214,7 @@ void main() {
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
     expect(data, isFalse);
     expect(completed, isTrue);
-    PlatformMessages.setMockBinaryMessageHandler('flutter/assets', null);
+    BinaryMessages.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

@@ -7,7 +7,7 @@ import Flutter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate, FlutterStreamHandler {
-  private var eventReceiver: FlutterEventReceiver?;
+  private var eventSink: FlutterEventSink?;
 
   override func application(
     _ application: UIApplication,
@@ -16,14 +16,13 @@ import Flutter
     let batteryChannel = FlutterMethodChannel.init(name: "samples.flutter.io/battery",
                                                    binaryMessenger: controller);
     batteryChannel.setMethodCallHandler({
-      (call: FlutterMethodCall, result: FlutterResultReceiver) -> Void in
+      (call: FlutterMethodCall, result: FlutterResult) -> Void in
       if ("getBatteryLevel" == call.method) {
         self.receiveBatteryLevel(result: result);
       } else {
         result(FlutterMethodNotImplemented);
       }
-      }
-    );
+    });
 
     let chargingChannel = FlutterEventChannel.init(name: "samples.flutter.io/charging",
                                                    binaryMessenger: controller);
@@ -31,7 +30,7 @@ import Flutter
     return true
   }
 
-  private func receiveBatteryLevel(result: FlutterResultReceiver) {
+  private func receiveBatteryLevel(result: FlutterResult) {
     let device = UIDevice.current;
     device.isBatteryMonitoringEnabled = true;
     if (device.batteryState == UIDeviceBatteryState.unknown) {
@@ -44,8 +43,8 @@ import Flutter
   }
 
   public func onListen(withArguments arguments: Any?,
-                       eventReceiver: @escaping FlutterEventReceiver) -> FlutterError? {
-    self.eventReceiver = eventReceiver;
+                       eventSink: @escaping FlutterEventSink) -> FlutterError? {
+    self.eventSink = eventSink;
     UIDevice.current.isBatteryMonitoringEnabled = true;
     self.sendBatteryStateEvent();
     NotificationCenter.default.addObserver(
@@ -61,32 +60,32 @@ import Flutter
   }
 
   private func sendBatteryStateEvent() {
-    if (eventReceiver == nil) {
+    if (eventSink == nil) {
       return;
     }
 
     let state = UIDevice.current.batteryState;
     switch state {
     case UIDeviceBatteryState.full:
-      eventReceiver!("charging");
+      eventSink!("charging");
       break;
     case UIDeviceBatteryState.charging:
-      eventReceiver!("charging");
+      eventSink!("charging");
       break;
     case UIDeviceBatteryState.unplugged:
-      eventReceiver!("discharging");
+      eventSink!("discharging");
       break;
     default:
-      eventReceiver!(FlutterError.init(code: "UNAVAILABLE",
-                                       message: "Charging status unavailable",
-                                       details: nil));
+      eventSink!(FlutterError.init(code: "UNAVAILABLE",
+                                   message: "Charging status unavailable",
+                                   details: nil));
       break;
     }
   }
 
   public func onCancel(withArguments arguments: Any?) -> FlutterError? {
     NotificationCenter.default.removeObserver(self);
-    eventReceiver = nil;
+    eventSink = nil;
     return nil;
   }
 }

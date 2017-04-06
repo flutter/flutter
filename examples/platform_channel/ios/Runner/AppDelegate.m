@@ -7,7 +7,7 @@
 
 
 @implementation AppDelegate {
-  FlutterEventReceiver _eventReceiver;
+  FlutterEventSink _eventSink;
 }
 
 - (BOOL)application:(UIApplication*)application
@@ -19,7 +19,7 @@
       methodChannelWithName:@"samples.flutter.io/battery"
             binaryMessenger:controller];
   [batteryChannel setMethodCallHandler:^(FlutterMethodCall* call,
-                                         FlutterResultReceiver result) {
+                                         FlutterResult result) {
     if ([@"getBatteryLevel" isEqualToString:call.method]) {
       int batteryLevel = [self getBatteryLevel];
       if (batteryLevel == -1) {
@@ -52,8 +52,8 @@
 }
 
 - (FlutterError*)onListenWithArguments:(id)arguments
-                         eventReceiver:(FlutterEventReceiver)eventReceiver {
-  _eventReceiver = eventReceiver;
+                             eventSink:(FlutterEventSink)eventSink {
+  _eventSink = eventSink;
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
   [self sendBatteryStateEvent];
   [[NSNotificationCenter defaultCenter]
@@ -74,22 +74,22 @@
   switch (state) {
     case UIDeviceBatteryStateFull:
     case UIDeviceBatteryStateCharging:
-      _eventReceiver(@"charging");
+      _eventSink(@"charging");
       break;
     case UIDeviceBatteryStateUnplugged:
-      _eventReceiver(@"discharging");
+      _eventSink(@"discharging");
       break;
     default:
-      _eventReceiver([FlutterError errorWithCode:@"UNAVAILABLE"
-                                         message:@"Charging status unavailable"
-                                         details:nil]);
+      _eventSink([FlutterError errorWithCode:@"UNAVAILABLE"
+                                     message:@"Charging status unavailable"
+                                     details:nil]);
       break;
   }
 }
 
 - (FlutterError*)onCancelWithArguments:(id)arguments {
   [[NSNotificationCenter defaultCenter] removeObserver:self];
-  _eventReceiver = nil;
+  _eventSink = nil;
   return nil;
 }
 

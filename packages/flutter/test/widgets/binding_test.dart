@@ -39,7 +39,7 @@ void main() {
     WidgetsBinding.instance.addObserver(observer);
     final ByteData message = const JSONMessageCodec().encodeMessage(
       <String, dynamic>{'type': 'memoryPressure'});
-    await PlatformMessages.handlePlatformMessage('flutter/system', message, (_) {});
+    await BinaryMessages.handlePlatformMessage('flutter/system', message, (_) {});
     expect(observer.sawMemoryPressure, true);
     WidgetsBinding.instance.removeObserver(observer);
   });

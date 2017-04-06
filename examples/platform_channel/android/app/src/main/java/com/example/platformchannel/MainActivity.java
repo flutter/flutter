@@ -20,7 +20,7 @@ import io.flutter.plugin.common.FlutterEventChannel.EventSink;
 import io.flutter.plugin.common.FlutterEventChannel.StreamHandler;
 import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.FlutterMethodChannel.Response;
+import io.flutter.plugin.common.FlutterMethodChannel.Result;
 import io.flutter.plugin.common.MethodCall;
 
 public class MainActivity extends FlutterActivity {
@@ -52,17 +52,17 @@ public class MainActivity extends FlutterActivity {
     new FlutterMethodChannel(getFlutterView(), BATTERY_CHANNEL).setMethodCallHandler(
         new MethodCallHandler() {
           @Override
-          public void onMethodCall(MethodCall call, Response response) {
+          public void onMethodCall(MethodCall call, Result result) {
             if (call.method.equals("getBatteryLevel")) {
               int batteryLevel = getBatteryLevel();
 
               if (batteryLevel != -1) {
-                response.success(batteryLevel);
+                result.success(batteryLevel);
               } else {
-                response.error("UNAVAILABLE", "Battery level not available.", null);
+                result.error("UNAVAILABLE", "Battery level not available.", null);
               }
             } else {
-              response.notImplemented();
+              result.notImplemented();
             }
           }
         }

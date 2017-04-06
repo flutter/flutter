@@ -11,7 +11,7 @@ import 'asset_bundle.dart';
 import 'image_cache.dart';
 import 'platform_messages.dart';
 
-/// Listens for platform messages and directs them to [PlatformMessages].
+/// Listens for platform messages and directs them to [BinaryMessages].
 ///
 /// The ServicesBinding also registers a [LicenseEntryCollector] that exposes
 /// the licenses found in the `LICENSE` file stored at the root of the asset
@@ -21,7 +21,7 @@ abstract class ServicesBinding extends BindingBase {
   void initInstances() {
     super.initInstances();
     ui.window
-      ..onPlatformMessage = PlatformMessages.handlePlatformMessage;
+      ..onPlatformMessage = BinaryMessages.handlePlatformMessage;
     LicenseRegistry.addLicense(_addLicenses);
   }
 

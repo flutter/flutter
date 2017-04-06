@@ -9,42 +9,42 @@ import 'platform_channel.dart';
 class SystemChannels {
   SystemChannels._();
 
-  /// A JSON [PlatformMethodChannel] for navigation.
-  static const PlatformMethodChannel navigation = const PlatformMethodChannel(
+  /// A JSON [MethodChannel] for navigation.
+  static const MethodChannel navigation = const MethodChannel(
       'flutter/navigation',
       const JSONMethodCodec(),
   );
 
-  /// A JSON [PlatformMethodChannel] for invoking miscellaneous platform methods.
+  /// A JSON [MethodChannel] for invoking miscellaneous platform methods.
   ///
   /// Ignores missing plugins.
-  static const PlatformMethodChannel platform = const OptionalPlatformMethodChannel(
+  static const MethodChannel platform = const OptionalMethodChannel(
       'flutter/platform',
       const JSONMethodCodec(),
   );
 
-  /// A JSON [PlatformMethodChannel] for handling text input.
+  /// A JSON [MethodChannel] for handling text input.
   ///
   /// Ignores missing plugins.
-  static const PlatformMethodChannel textInput = const OptionalPlatformMethodChannel(
+  static const MethodChannel textInput = const OptionalMethodChannel(
       'flutter/textinput',
       const JSONMethodCodec(),
   );
 
-  /// A JSON [PlatformMessageChannel] for key events.
-  static const PlatformMessageChannel<dynamic> keyEvent = const PlatformMessageChannel<dynamic>(
+  /// A JSON [BasicMessageChannel] for key events.
+  static const BasicMessageChannel<dynamic> keyEvent = const BasicMessageChannel<dynamic>(
       'flutter/keyevent',
       const JSONMessageCodec(),
   );
 
-  /// A string [PlatformMessageChannel] for lifecycle events.
-  static const PlatformMessageChannel<String> lifecycle = const PlatformMessageChannel<String>(
+  /// A string [BasicMessageChannel] for lifecycle events.
+  static const BasicMessageChannel<String> lifecycle = const BasicMessageChannel<String>(
       'flutter/lifecycle',
       const StringCodec(),
   );
 
-  /// A JSON [PlatformMessageChannel] for system events.
-  static const PlatformMessageChannel<dynamic> system = const PlatformMessageChannel<dynamic>(
+  /// A JSON [BasicMessageChannel] for system events.
+  static const BasicMessageChannel<dynamic> system = const BasicMessageChannel<dynamic>(
       'flutter/system',
       const JSONMessageCodec(),
   );
