@@ -886,4 +886,59 @@ void main() {
 
     expect(topLeft.x, equals(399.0));
   });
+
+  testWidgets('Controller can update server', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController(
+      text: 'Initial Text',
+    );
+    final TextEditingController controller2 = new TextEditingController(
+      text: 'More Text',
+    );
+
+    TextEditingController currentController = controller;
+    StateSetter setState;
+
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return new TextField(controller: currentController);
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.testTextInput.editingState['text'], isEmpty);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('Initial Text'));
+
+    controller.text = 'Updated Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Updated Text'));
+
+    setState(() {
+      currentController = controller2;
+    });
+
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller.text = 'Ignored Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller2.text = 'Final Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Final Text'));
+  });
 }
