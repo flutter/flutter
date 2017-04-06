@@ -14,7 +14,9 @@ class FractionalOffset {
   /// Creates a fractional offset.
   ///
   /// The [dx] and [dy] arguments must not be null.
-  const FractionalOffset(this.dx, this.dy);
+  const FractionalOffset(this.dx, this.dy)
+    : assert(dx != null),
+      assert(dy != null);
 
   /// The distance fraction in the horizontal direction.
   ///
