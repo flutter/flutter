@@ -95,7 +95,7 @@ class MatrixUtils {
   /// This function assumes the given point has a z-coordinate of 0.0. The
   /// z-coordinate of the result is ignored.
   static Offset transformPoint(Matrix4 transform, Offset point) {
-    final Vector3 position3 = new Vector3(point.x, point.y, 0.0);
+    final Vector3 position3 = new Vector3(point.dx, point.dy, 0.0);
     final Vector3 transformed3 = transform.perspectiveTransform(position3);
     return new Offset(transformed3.x, transformed3.y);
   }
@@ -112,10 +112,10 @@ class MatrixUtils {
     final Offset point3 = transformPoint(transform, rect.bottomLeft);
     final Offset point4 = transformPoint(transform, rect.bottomRight);
     return new Rect.fromLTRB(
-        _min4(point1.x, point2.x, point3.x, point4.x),
-        _min4(point1.y, point2.y, point3.y, point4.y),
-        _max4(point1.x, point2.x, point3.x, point4.x),
-        _max4(point1.y, point2.y, point3.y, point4.y)
+        _min4(point1.dx, point2.dx, point3.dx, point4.dx),
+        _min4(point1.dy, point2.dy, point3.dy, point4.dy),
+        _max4(point1.dx, point2.dx, point3.dx, point4.dx),
+        _max4(point1.dy, point2.dy, point3.dy, point4.dy)
     );
   }
 

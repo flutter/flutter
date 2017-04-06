@@ -62,7 +62,7 @@ void main() {
 
     // drag the drawer out
     final Offset left = new Offset(0.0, ui.window.physicalSize.height / 2.0);
-    final Offset right = new Offset(ui.window.physicalSize.width, left.y);
+    final Offset right = new Offset(ui.window.physicalSize.width, left.dy);
     final TestGesture gesture = await tester.startGesture(left);
     await tester.pump();
     await gesture.moveTo(right);

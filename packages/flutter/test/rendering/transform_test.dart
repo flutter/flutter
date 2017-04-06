@@ -10,7 +10,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 Offset round(Offset value) {
-  return new Offset(value.x.roundToDouble(), value.y.roundToDouble());
+  return new Offset(value.dx.roundToDouble(), value.dy.roundToDouble());
 }
 
 void main() {
@@ -141,11 +141,11 @@ void main() {
     layout(sizer, constraints: new BoxConstraints.tight(const Size(100.0, 100.0)), alignment: FractionalOffset.topLeft);
 
     expect(round(inner.globalToLocal(const Offset(25.0, 50.0))), equals(const Offset(25.0, 50.0)));
-    expect(inner.globalToLocal(const Offset(25.0, 17.0)).y, greaterThan(0.0));
-    expect(inner.globalToLocal(const Offset(25.0, 17.0)).y, lessThan(10.0));
-    expect(inner.globalToLocal(const Offset(25.0, 73.0)).y, greaterThan(90.0));
-    expect(inner.globalToLocal(const Offset(25.0, 73.0)).y, lessThan(100.0));
-    expect(inner.globalToLocal(const Offset(25.0, 17.0)).y, equals(-inner.globalToLocal(const Offset(25.0, 73.0)).y));
+    expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, greaterThan(0.0));
+    expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, lessThan(10.0));
+    expect(inner.globalToLocal(const Offset(25.0, 73.0)).dy, greaterThan(90.0));
+    expect(inner.globalToLocal(const Offset(25.0, 73.0)).dy, lessThan(100.0));
+    expect(inner.globalToLocal(const Offset(25.0, 17.0)).dy, equals(-inner.globalToLocal(const Offset(25.0, 73.0)).dy));
   }, skip: true); // https://github.com/flutter/flutter/issues/6080
 
   test('RenderTransform - perspective - localToGlobal', () {

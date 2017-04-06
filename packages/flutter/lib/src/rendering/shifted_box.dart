@@ -73,9 +73,7 @@ abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixi
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (child != null) {
       final BoxParentData childParentData = child.parentData;
-      final Offset childPosition = new Offset(position.x - childParentData.offset.dx,
-                                            position.y - childParentData.offset.dy);
-      return child.hitTest(result, position: childPosition);
+      return child.hitTest(result, position: position - childParentData.offset);
     }
     return false;
   }

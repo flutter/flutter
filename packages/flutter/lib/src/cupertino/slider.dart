@@ -282,7 +282,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
 
   @override
   bool hitTestSelf(Offset position) {
-    return (position.x - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
+    return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override

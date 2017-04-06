@@ -555,9 +555,9 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
       if (point != pointArgument)
         throw 'called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
     } else {
-      if (x != null && pointArgument.x != x)
+      if (x != null && pointArgument.dx != x)
         throw 'called $methodName with a center coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
-      if (y != null && pointArgument.y != y)
+      if (y != null && pointArgument.dy != y)
         throw 'called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
     }
     final double radiusArgument = arguments[1];

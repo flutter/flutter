@@ -52,23 +52,23 @@ void main() {
     TimeOfDay result;
 
     Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.x, center.y - 50.0)); // 12:00 AM
+    await tester.tapAt(new Offset(center.dx, center.dy - 50.0)); // 12:00 AM
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 0, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.x + 50.0, center.y));
+    await tester.tapAt(new Offset(center.dx + 50.0, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 3, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.x, center.y + 50.0));
+    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 6, minute: 0)));
 
     center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    await tester.tapAt(new Offset(center.x, center.y + 50.0));
-    await tester.tapAt(new Offset(center.x - 50, center.y));
+    await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
+    await tester.tapAt(new Offset(center.dx - 50, center.dy));
     await finishPicker(tester);
     expect(result, equals(const TimeOfDay(hour: 9, minute: 0)));
   });
@@ -77,10 +77,10 @@ void main() {
     TimeOfDay result;
 
     final Offset center = await startPicker(tester, (TimeOfDay time) { result = time; });
-    final Offset hour0 = new Offset(center.x, center.y - 50.0); // 12:00 AM
-    final Offset hour3 = new Offset(center.x + 50.0, center.y);
-    final Offset hour6 = new Offset(center.x, center.y + 50.0);
-    final Offset hour9 = new Offset(center.x - 50.0, center.y);
+    final Offset hour0 = new Offset(center.dx, center.dy - 50.0); // 12:00 AM
+    final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
+    final Offset hour6 = new Offset(center.dx, center.dy + 50.0);
+    final Offset hour9 = new Offset(center.dx - 50.0, center.dy);
 
     TestGesture gesture;
 
@@ -130,35 +130,35 @@ void main() {
 
     testWidgets('tap-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.x, center.y - 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(hapticFeedbackCount, 1);
     });
 
     testWidgets('quick successive tap-selects vibrate once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.x, center.y - 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await tester.pump(kFastFeedbackInterval);
-      await tester.tapAt(new Offset(center.x, center.y + 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
       await finishPicker(tester);
       expect(hapticFeedbackCount, 1);
     });
 
     testWidgets('slow successive tap-selects vibrate once per tap', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      await tester.tapAt(new Offset(center.x, center.y - 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await tester.pump(kSlowFeedbackInterval);
-      await tester.tapAt(new Offset(center.x, center.y + 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy + 50.0));
       await tester.pump(kSlowFeedbackInterval);
-      await tester.tapAt(new Offset(center.x, center.y - 50.0));
+      await tester.tapAt(new Offset(center.dx, center.dy - 50.0));
       await finishPicker(tester);
       expect(hapticFeedbackCount, 3);
     });
 
     testWidgets('drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.x, center.y - 50.0);
-      final Offset hour3 = new Offset(center.x + 50.0, center.y);
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
@@ -169,8 +169,8 @@ void main() {
 
     testWidgets('quick drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.x, center.y - 50.0);
-      final Offset hour3 = new Offset(center.x + 50.0, center.y);
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);
@@ -185,8 +185,8 @@ void main() {
 
     testWidgets('slow drag-select vibrates once', (WidgetTester tester) async {
       final Offset center = await startPicker(tester, (TimeOfDay time) { });
-      final Offset hour0 = new Offset(center.x, center.y - 50.0);
-      final Offset hour3 = new Offset(center.x + 50.0, center.y);
+      final Offset hour0 = new Offset(center.dx, center.dy - 50.0);
+      final Offset hour3 = new Offset(center.dx + 50.0, center.dy);
 
       final TestGesture gesture = await tester.startGesture(hour3);
       await gesture.moveBy(hour0 - hour3);

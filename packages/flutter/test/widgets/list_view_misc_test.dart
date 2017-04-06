@@ -48,8 +48,8 @@ void main() {
     );
 
     final Offset middleOfContainer = tester.getCenter(find.text('Hello'));
-    expect(middleOfContainer.x, equals(400.0));
-    expect(middleOfContainer.y, equals(1000.0));
+    expect(middleOfContainer.dx, equals(400.0));
+    expect(middleOfContainer.dy, equals(1000.0));
 
     final Offset target = tester.getCenter(find.byKey(blockKey));
     final TestGesture gesture = await tester.startGesture(target);

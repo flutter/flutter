@@ -269,12 +269,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
-        mainAxisPosition = position.y;
-        crossAxisPosition = position.x;
+        mainAxisPosition = position.dy;
+        crossAxisPosition = position.dx;
         break;
       case Axis.horizontal:
-        mainAxisPosition = position.x;
-        crossAxisPosition = position.y;
+        mainAxisPosition = position.dx;
+        crossAxisPosition = position.dy;
         break;
     }
     assert(mainAxisPosition != null);

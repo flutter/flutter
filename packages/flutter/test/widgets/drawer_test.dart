@@ -106,20 +106,20 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     // drawer should be starting to animate away
     final RenderBox textBox = tester.renderObject(find.text('drawer'));
-    final double textLeft = textBox.localToGlobal(Offset.zero).x;
+    final double textLeft = textBox.localToGlobal(Offset.zero).dx;
     expect(textLeft, lessThan(0.0));
 
     final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     // drawer should be stopped.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
-    expect(textBox.localToGlobal(Offset.zero).x, equals(textLeft));
+    expect(textBox.localToGlobal(Offset.zero).dx, equals(textLeft));
 
     await gesture.moveBy(const Offset(0.0, 50.0));
     // drawer should be returning to visible
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(textBox.localToGlobal(Offset.zero).x, equals(0.0));
+    expect(textBox.localToGlobal(Offset.zero).dx, equals(0.0));
 
     await gesture.up();
   });

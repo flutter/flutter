@@ -170,10 +170,10 @@ void main() {
 
     // Settings text is heroing to its new location
     Offset settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, greaterThan(0.0));
-    expect(settingsOffset.x, lessThan(100.0));
-    expect(settingsOffset.y, greaterThan(0.0));
-    expect(settingsOffset.y, lessThan(100.0));
+    expect(settingsOffset.dx, greaterThan(0.0));
+    expect(settingsOffset.dx, lessThan(100.0));
+    expect(settingsOffset.dy, greaterThan(0.0));
+    expect(settingsOffset.dy, lessThan(100.0));
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -191,13 +191,13 @@ void main() {
 
     // Home page is sliding in from the left, no heroes.
     final Offset homeOffset = tester.getTopLeft(find.text('Home'));
-    expect(homeOffset.x, lessThan(0.0));
-    expect(homeOffset.y, 0.0);
+    expect(homeOffset.dx, lessThan(0.0));
+    expect(homeOffset.dy, 0.0);
 
     // Settings page is sliding off to the right, no heroes.
     settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, greaterThan(100.0));
-    expect(settingsOffset.y, 100.0);
+    expect(settingsOffset.dx, greaterThan(100.0));
+    expect(settingsOffset.dy, 100.0);
   });
 
   testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {

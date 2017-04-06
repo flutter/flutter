@@ -30,11 +30,11 @@ void main() {
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
     // Android transition is vertical only.
-    expect(widget1TopLeft.x == widget2TopLeft.x, true);
+    expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
     // Page 1 is above page 2 mid-transition.
-    expect(widget1TopLeft.y < widget2TopLeft.y, true);
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
     // Animation begins 3/4 of the way up the page.
-    expect(widget2TopLeft.y < widget2Size.height / 4.0, true);
+    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
     // Animation starts with page 2 being near transparent.
     expect(widget2Opacity.opacity < 0.01, true);
 
@@ -52,7 +52,7 @@ void main() {
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
-    expect(widget1TopLeft.y < widget2TopLeft.y, true);
+    expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
     // Page 2 starts to lose opacity.
     expect(widget2Opacity.opacity < 1.0, true);
 
@@ -85,13 +85,13 @@ void main() {
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 1 is moving to the left.
-    expect(widget1TransientTopLeft.x < widget1InitialTopLeft.x, true);
+    expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
     // Page 1 isn't moving vertically.
-    expect(widget1TransientTopLeft.y == widget1InitialTopLeft.y, true);
+    expect(widget1TransientTopLeft.dy == widget1InitialTopLeft.dy, true);
     // iOS transition is horizontal only.
-    expect(widget1InitialTopLeft.y == widget2TopLeft.y, true);
+    expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
-    expect(widget2TopLeft.x > widget1InitialTopLeft.x, true);
+    expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
 
     await tester.pumpAndSettle();
 
@@ -107,13 +107,13 @@ void main() {
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 1 is coming back from the left.
-    expect(widget1TransientTopLeft.x < widget1InitialTopLeft.x, true);
+    expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
     // Page 1 isn't moving vertically.
-    expect(widget1TransientTopLeft.y == widget1InitialTopLeft.y, true);
+    expect(widget1TransientTopLeft.dy == widget1InitialTopLeft.dy, true);
     // iOS transition is horizontal only.
-    expect(widget1InitialTopLeft.y == widget2TopLeft.y, true);
+    expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is leaving towards the right.
-    expect(widget2TopLeft.x > widget1InitialTopLeft.x, true);
+    expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
 
     await tester.pumpAndSettle();
 
@@ -152,9 +152,9 @@ void main() {
     // Page 1 doesn't move.
     expect(widget1TransientTopLeft == widget1InitialTopLeft, true);
     // Fullscreen dialogs transitions vertically only.
-    expect(widget1InitialTopLeft.x == widget2TopLeft.x, true);
+    expect(widget1InitialTopLeft.dx == widget2TopLeft.dx, true);
     // Page 2 is coming in from the bottom.
-    expect(widget2TopLeft.y > widget1InitialTopLeft.y, true);
+    expect(widget2TopLeft.dy > widget1InitialTopLeft.dy, true);
 
     await tester.pumpAndSettle();
 
@@ -172,9 +172,9 @@ void main() {
     // Page 1 doesn't move.
     expect(widget1TransientTopLeft == widget1InitialTopLeft, true);
     // Fullscreen dialogs transitions vertically only.
-    expect(widget1InitialTopLeft.x == widget2TopLeft.x, true);
+    expect(widget1InitialTopLeft.dx == widget2TopLeft.dx, true);
     // Page 2 is leaving towards the bottom.
-    expect(widget2TopLeft.y > widget1InitialTopLeft.y, true);
+    expect(widget2TopLeft.dy > widget1InitialTopLeft.dy, true);
 
     await tester.pumpAndSettle();
 

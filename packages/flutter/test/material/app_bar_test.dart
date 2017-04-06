@@ -72,7 +72,7 @@ void main() {
     final Finder title = find.text('X');
     Offset center = tester.getCenter(title);
     Size size = tester.getSize(title);
-    expect(center.x, lessThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 - size.width / 2.0));
 
     // Clear the widget tree to avoid animating between Android and iOS.
     await tester.pumpWidget(new Container(key: new UniqueKey()));
@@ -90,8 +90,8 @@ void main() {
 
     center = tester.getCenter(title);
     size = tester.getSize(title);
-    expect(center.x, greaterThan(400 - size.width / 2.0));
-    expect(center.x, lessThan(400 + size.width / 2.0));
+    expect(center.dx, greaterThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
   testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
@@ -111,8 +111,8 @@ void main() {
     final Finder title = find.text('X');
     final Offset center = tester.getCenter(title);
     final Size size = tester.getSize(title);
-    expect(center.x, greaterThan(400 - size.width / 2.0));
-    expect(center.x, lessThan(400 + size.width / 2.0));
+    expect(center.dx, greaterThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
   testWidgets('AppBar centerTitle:false title left edge is 16.0 ', (WidgetTester tester) async {
@@ -127,7 +127,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).x, 16.0);
+    expect(tester.getTopLeft(find.text('X')).dx, 16.0);
   });
 
   testWidgets(
@@ -146,7 +146,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).x, 72.0);
+    expect(tester.getTopLeft(find.text('X')).dx, 72.0);
   });
 
   testWidgets('AppBar centerTitle:false title overflow OK ', (WidgetTester tester) async {
@@ -176,7 +176,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // The toolbar's contents are padded on the right by 4.0
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
 
@@ -186,13 +186,13 @@ void main() {
     ];
     await tester.pumpWidget(buildApp());
 
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
   });
@@ -229,7 +229,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     expect(tester.getSize(title).width, equals(700.0));
 
     // Centering a title with width 620 within the 800 pixel wide test widget
@@ -245,7 +245,7 @@ void main() {
       const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 800 - 620 - 48 - 48 - 4);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -311,7 +311,7 @@ void main() {
     );
 
     // The vertical center of the widget with key, in global coordinates.
-    double yCenter(Key key) => tester.getCenter(find.byKey(key)).y;
+    double yCenter(Key key) => tester.getCenter(find.byKey(key)).dy;
 
     expect(yCenter(appBarKey), equals(yCenter(leadingKey)));
     expect(yCenter(appBarKey), equals(yCenter(titleKey)));

@@ -71,8 +71,8 @@ class Marker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Positioned(
-      left: position.x - size / 2.0,
-      top: position.y - size / 2.0,
+      left: position.dx - size / 2.0,
+      top: position.dy - size / 2.0,
       width: size,
       height: size,
       child: new IgnorePointer(
@@ -158,7 +158,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
         markersScrollOffset = notification.metrics.extentBefore;
         for (MarkerType type in markers.keys) {
           final Offset oldPosition = markers[type];
-          markers[type] = new Offset(oldPosition.x, oldPosition.y + dy);
+          markers[type] = oldPosition.translate(0.0, dy);
         }
       });
     }

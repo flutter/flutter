@@ -33,11 +33,10 @@ ui.Picture paint(ui.Rect paintBounds) {
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   canvas.save();
-  canvas.translate(-mid.x/2.0, logicalSize.height*2.0);
-  canvas.clipRect(
-      new ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
+  canvas.translate(-mid.dx / 2.0, logicalSize.height * 2.0);
+  canvas.clipRect(new ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
 
-  canvas.translate(mid.x, mid.y);
+  canvas.translate(mid.dx, mid.dy);
   paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
   canvas.rotate(math.PI/4.0);
 

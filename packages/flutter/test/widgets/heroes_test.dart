@@ -716,11 +716,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
@@ -729,13 +729,13 @@ void main() {
     await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
-    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(75.0));
 
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
-    final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(finalHeroY, 75.0); // 100 less 25 for the scroll
   });
 
@@ -793,11 +793,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
@@ -808,7 +808,7 @@ void main() {
 
     // Flight continues (the hero will fade out) even though the destination
     // no longer exists.
-    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(100.0));
 
@@ -894,11 +894,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 200));
-    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).y;
+    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).dy;
     // Hero AB is mid flight.
     expect(yAt200ms, lessThan(200.0));
     expect(yAt200ms, greaterThan(100.0));
@@ -911,7 +911,7 @@ void main() {
     // Hero AB's aborted flight finishes where it was expected although
     // it's been faded out.
     await tester.pump(const Duration(milliseconds: 100));
-    expect(tester.getTopLeft(find.byKey(heroABKey)).y, 100.0);
+    expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
     // One Opacity widget per Hero, only one now has opacity 0.0
     final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
@@ -920,7 +920,7 @@ void main() {
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
-    expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
+    expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {

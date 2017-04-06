@@ -72,7 +72,7 @@ void main() {
       if (method != #drawCircle)
         return false;
       final Offset center = arguments[0];
-      if (center.x < 400.0)
+      if (center.dx < 400.0)
         return true;
       throw 'Dragging on left hand side did not overscroll on left hand side.';
     }));
@@ -81,7 +81,7 @@ void main() {
       if (method != #drawCircle)
         return false;
       final Offset center = arguments[0];
-      if (center.x > 400.0)
+      if (center.dx > 400.0)
         return true;
       throw 'Dragging on right hand side did not overscroll on right hand side.';
     }));
@@ -110,9 +110,9 @@ void main() {
         if (method != #drawCircle)
           return false;
         final Offset center = arguments[0];
-        if (center.x <= oldX)
+        if (center.dx <= oldX)
           throw 'Sliding to the right did not make the center of the radius slide to the right.';
-        oldX = center.x;
+        oldX = center.dx;
         return true;
       }));
     }

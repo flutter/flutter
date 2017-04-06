@@ -101,8 +101,8 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.x - childSize.width/2.0;
-    double y = position.y - childSize.height;
+    double x = position.dx - childSize.width / 2.0;
+    double y = position.dy - childSize.height;
 
     if (x < _kToolbarScreenPadding)
       x = _kToolbarScreenPadding;

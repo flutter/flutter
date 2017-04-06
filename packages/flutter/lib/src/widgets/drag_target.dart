@@ -560,8 +560,8 @@ class _DragAvatar<T> extends Drag {
     final RenderBox box = overlayState.context.findRenderObject();
     final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return new Positioned(
-      left: _lastOffset.dx - overlayTopLeft.x,
-      top: _lastOffset.dy - overlayTopLeft.y,
+      left: _lastOffset.dx - overlayTopLeft.dx,
+      top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
         child: feedback
       )

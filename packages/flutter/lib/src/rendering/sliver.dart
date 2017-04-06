@@ -1018,7 +1018,7 @@ abstract class RenderSliver extends RenderObject {
     assert(() {
       if (p0 == p1)
         return true;
-      assert(p0.x == p1.x || p0.y == p1.y); // must be axis-aligned
+      assert(p0.dx == p1.dx || p0.dy == p1.dy); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
       Offset temp;
       double dx1, dx2, dy1, dy2;
@@ -1033,18 +1033,18 @@ abstract class RenderSliver extends RenderObject {
           dx1 = dx2 = dy1 = dy2 = -d;
           break;
       }
-      if (p0.x == p1.x) {
+      if (p0.dx == p1.dx) {
         dx2 = -dx2;
       } else {
         dy2 = -dy2;
       }
       canvas.drawPath(
         new Path()
-          ..moveTo(p0.x, p0.y)
-          ..lineTo(p1.x, p1.y)
-          ..moveTo(p1.x - dx1, p1.y - dy1)
-          ..lineTo(p1.x, p1.y)
-          ..lineTo(p1.x - dx2, p1.y - dy2),
+          ..moveTo(p0.dx, p0.dy)
+          ..lineTo(p1.dx, p1.dy)
+          ..moveTo(p1.dx - dx1, p1.dy - dy1)
+          ..lineTo(p1.dx, p1.dy)
+          ..lineTo(p1.dx - dx2, p1.dy - dy2),
         paint
       );
       return true;

@@ -187,8 +187,8 @@ class VelocityTracker {
 
       oldestSample = sample;
       final Offset position = sample.point;
-      x.add(position.x);
-      y.add(position.y);
+      x.add(position.dx);
+      y.add(position.dy);
       w.add(1.0);
       time.add(-age);
       index = (index == 0 ? _kHistorySize : index) - 1;

@@ -531,8 +531,10 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       items: widget.itemBuilder(context),
       initialValue: widget.initialValue,
       position: new RelativeRect.fromLTRB(
-        topLeft.x, topLeft.y + (widget.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
-        0.0, 0.0
+        topLeft.dx,
+        topLeft.dy + (widget.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
+        0.0,
+        0.0,
       )
     )
     .then<Null>((T newValue) {

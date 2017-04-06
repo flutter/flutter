@@ -1202,9 +1202,7 @@ class RenderTable extends RenderBox {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        final Offset transformed = new Offset(position.x - childParentData.offset.dx,
-                                      position.y - childParentData.offset.dy);
-        if (child.hitTest(result, position: transformed))
+        if (child.hitTest(result, position: position - childParentData.offset))
           return true;
       }
     }

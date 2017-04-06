@@ -175,7 +175,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     Offset focalPoint = Offset.zero;
     for (int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer];
-    _currentFocalPoint = count > 0 ? new Offset(focalPoint.x / count, focalPoint.y / count) : Offset.zero;
+    _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
 
     // Span is the average deviation from focal point
     double totalDeviation = 0.0;

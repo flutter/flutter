@@ -330,9 +330,9 @@ void main() {
     final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
     final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.x - snackBarBottomLeft.x, 24.0);
-    expect(actionTextBottomLeft.x - textBottomRight.x, 24.0);
-    expect(snackBarBottomRight.x - actionTextBottomRight.x, 24.0);
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0);
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0);
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {

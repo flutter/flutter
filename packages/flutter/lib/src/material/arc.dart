@@ -43,30 +43,30 @@ class MaterialPointArcTween extends Tween<Offset> {
     final double deltaX = delta.dx.abs();
     final double deltaY = delta.dy.abs();
     final double distanceFromAtoB = delta.distance;
-    final Offset c = new Offset(end.x, begin.y);
+    final Offset c = new Offset(end.dx, begin.dy);
 
     double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius));
 
     if (deltaX > _kOnAxisDelta && deltaY > _kOnAxisDelta) {
       if (deltaX < deltaY) {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - begin).distance / 2.0;
-        _center = new Offset(end.x + _radius * (begin.x - end.x).sign, end.y);
-        if (begin.x < end.x) {
-          _beginAngle = sweepAngle() * (begin.y - end.y).sign;
+        _center = new Offset(end.dx + _radius * (begin.dx - end.dx).sign, end.dy);
+        if (begin.dx < end.dx) {
+          _beginAngle = sweepAngle() * (begin.dy - end.dy).sign;
           _endAngle = 0.0;
         } else {
-          _beginAngle = math.PI + sweepAngle() * (end.y - begin.y).sign;
+          _beginAngle = math.PI + sweepAngle() * (end.dy - begin.dy).sign;
           _endAngle = math.PI;
         }
       } else {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - end).distance / 2.0;
-        _center = new Offset(begin.x, begin.y + (end.y - begin.y).sign * _radius);
-        if (begin.y < end.y) {
+        _center = new Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * _radius);
+        if (begin.dy < end.dy) {
           _beginAngle = -math.PI / 2.0;
-          _endAngle = _beginAngle + sweepAngle() * (end.x - begin.x).sign;
+          _endAngle = _beginAngle + sweepAngle() * (end.dx - begin.dx).sign;
         } else {
           _beginAngle = math.PI / 2.0;
-          _endAngle = _beginAngle + sweepAngle() * (begin.x - end.x).sign;
+          _endAngle = _beginAngle + sweepAngle() * (begin.dx - end.dx).sign;
         }
       }
     }

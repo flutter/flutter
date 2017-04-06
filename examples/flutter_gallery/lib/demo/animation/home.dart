@@ -225,8 +225,8 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
       // Layout the title for index.
       final Size titleSize = layoutChild('title$index', new BoxConstraints.loose(cardRect.size));
-      final double columnTitleY = columnCardRect.centerLeft.y - titleSize.height / 2.0;
-      final double rowTitleY = rowCardRect.centerLeft.y - titleSize.height / 2.0;
+      final double columnTitleY = columnCardRect.centerLeft.dy - titleSize.height / 2.0;
+      final double rowTitleY = rowCardRect.centerLeft.dy - titleSize.height / 2.0;
       final double centeredRowTitleX = rowTitleX + (rowTitleWidth - titleSize.width) / 2.0;
       final Offset columnTitleOrigin = new Offset(columnTitleX, columnTitleY);
       final Offset rowTitleOrigin = new Offset(centeredRowTitleX, rowTitleY);
@@ -235,12 +235,12 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
       // Layout the selection indicator for index.
       final Size indicatorSize = layoutChild('indicator$index', new BoxConstraints.loose(cardRect.size));
-      final double columnIndicatorX = cardRect.centerRight.x - indicatorSize.width - 16.0;
-      final double columnIndicatorY = cardRect.bottomRight.y - indicatorSize.height - 16.0;
+      final double columnIndicatorX = cardRect.centerRight.dx - indicatorSize.width - 16.0;
+      final double columnIndicatorY = cardRect.bottomRight.dy - indicatorSize.height - 16.0;
       final Offset columnIndicatorOrigin = new Offset(columnIndicatorX, columnIndicatorY);
       final Rect titleRect = new Rect.fromPoints(titleOrigin, titleSize.bottomRight(titleOrigin));
       final double centeredRowIndicatorX = rowIndicatorX + (rowIndicatorWidth - indicatorSize.width) / 2.0;
-      final double rowIndicatorY = titleRect.bottomCenter.y + 16.0;
+      final double rowIndicatorY = titleRect.bottomCenter.dy + 16.0;
       final Offset rowIndicatorOrigin = new Offset(centeredRowIndicatorX, rowIndicatorY);
       final Offset indicatorOrigin = _interpolatePoint(columnIndicatorOrigin, rowIndicatorOrigin);
       positionChild('indicator$index', indicatorOrigin + offset);
@@ -434,7 +434,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
           behavior: HitTestBehavior.opaque,
           child: new SectionCard(section: allSections[index]),
           onTapUp: (TapUpDetails details) {
-            final double xOffset = details.globalPosition.x;
+            final double xOffset = details.globalPosition.dx;
             setState(() {
               _maybeScroll(midScrollOffset, index, xOffset);
             });

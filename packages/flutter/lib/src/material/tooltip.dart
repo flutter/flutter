@@ -205,16 +205,16 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // VERTICAL DIRECTION
-    final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.y - verticalOffset - childSize.height >= _kScreenEdgeMargin;
+    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
+    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
     final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
     double y;
     if (tooltipBelow)
-      y = math.min(target.y + verticalOffset, size.height - _kScreenEdgeMargin);
+      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
     else
-      y = math.max(target.y - verticalOffset - childSize.height, _kScreenEdgeMargin);
+      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
     // HORIZONTAL DIRECTION
-    final double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
+    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
     double x;
     if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
       x = _kScreenEdgeMargin;

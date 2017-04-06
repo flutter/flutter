@@ -92,7 +92,7 @@ void main() {
     ));
 
     Size sizeOf(int i) => tester.getSize(find.byKey(new ValueKey<int>(i)));
-    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
+    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).dx;
 
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));

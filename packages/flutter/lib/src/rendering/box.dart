@@ -1719,8 +1719,8 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     });
-    if (position.x >= 0.0 && position.x < _size.width &&
-        position.y >= 0.0 && position.y < _size.height) {
+    if (position.dx >= 0.0 && position.dx < _size.width &&
+        position.dy >= 0.0 && position.dy < _size.height) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
         return true;
@@ -2044,9 +2044,7 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      final Offset transformed = new Offset(position.x - childParentData.offset.dx,
-                                    position.y - childParentData.offset.dy);
-      if (child.hitTest(result, position: transformed))
+      if (child.hitTest(result, position: position - childParentData.offset))
         return true;
       child = childParentData.previousSibling;
     }

@@ -152,8 +152,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     bool hitTarget = false;
-    if (position.x >= 0.0 && position.x < size.width &&
-        position.y >= 0.0 && position.y < size.height) {
+    if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
       if (hitTarget || behavior == HitTestBehavior.translucent)
         result.add(new BoxHitTestEntry(this, position));
@@ -1125,8 +1124,8 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
     assert(_clip != null);
     final Offset center = _clip.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = new Offset((position.x - center.x) / _clip.width,
-                               (position.y - center.y) / _clip.height);
+    final Offset offset = new Offset((position.dx - center.dx) / _clip.width,
+                                     (position.dy - center.dy) / _clip.height);
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -1761,7 +1760,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool hitTest(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     if (transformHitTests)
-      position = new Offset(position.x - translation.dx * size.width, position.y - translation.dy * size.height);
+      position = new Offset(position.dx - translation.dx * size.width, position.dy - translation.dy * size.height);
     return super.hitTest(result, position: position);
   }
 

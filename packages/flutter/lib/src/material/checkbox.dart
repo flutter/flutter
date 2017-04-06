@@ -208,9 +208,9 @@ class _RenderCheckbox extends RenderToggleable {
       final Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
       final Offset drawStart = Offset.lerp(start, mid, 1.0 - value);
       final Offset drawEnd = Offset.lerp(mid, end, value);
-      path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
-      path.lineTo(offsetX + mid.x, offsetY + mid.y);
-      path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);
+      path.moveTo(offsetX + drawStart.dx, offsetY + drawStart.dy);
+      path.lineTo(offsetX + mid.dx, offsetY + mid.dy);
+      path.lineTo(offsetX + drawEnd.dx, offsetY + drawEnd.dy);
       canvas.drawPath(path, paint);
     }
   }

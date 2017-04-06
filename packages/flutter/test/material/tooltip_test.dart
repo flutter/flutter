@@ -77,8 +77,8 @@ void main() {
     final Offset tipInGlobal = tip.localToGlobal(tip.size.topCenter(Offset.zero));
     // The exact position of the left side depends on the font the test framework
     // happens to pick, so we don't test that.
-    expect(tipInGlobal.x, 300.0);
-    expect(tipInGlobal.y, 20.0);
+    expect(tipInGlobal.dx, 300.0);
+    expect(tipInGlobal.dy, 20.0);
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
@@ -177,8 +177,8 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(100.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).y, equals(100.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).y, equals(200.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(100.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(200.0));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
@@ -239,8 +239,8 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).y, equals(399.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).y, equals(589.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(399.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(589.0));
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
@@ -289,8 +289,8 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(190.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).y, equals(400.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).y, equals(590.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(400.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(590.0));
   });
 
   testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
@@ -340,9 +340,9 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).y, equals(310.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).x, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).y, equals(320.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
   });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
@@ -392,9 +392,9 @@ void main() {
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(10.0));
-    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).y, equals(310.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).x, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).y, equals(320.0));
+    expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
   });
 
   testWidgets('Tooltip stays around', (WidgetTester tester) async {

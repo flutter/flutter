@@ -239,9 +239,9 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
     final Offset midpoint = new Offset(
       (endpoints.length == 1) ?
-        endpoints[0].point.x :
-        (endpoints[0].point.x + endpoints[1].point.x) / 2.0,
-      endpoints[0].point.y - renderObject.size.height
+        endpoints[0].point.dx :
+        (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
+      endpoints[0].point.dy - renderObject.size.height
     );
 
     return new FadeTransition(
@@ -385,8 +385,8 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
       child: new Stack(
         children: <Widget>[
           new Positioned(
-            left: point.x,
-            top: point.y,
+            left: point.dx,
+            top: point.dy,
             child: widget.selectionControls.buildHandle(context, type)
           )
         ]

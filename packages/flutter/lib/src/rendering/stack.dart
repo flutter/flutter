@@ -502,9 +502,7 @@ class RenderIndexedStack extends RenderStack {
     assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    final Offset transformed = new Offset(position.x - childParentData.offset.dx,
-                                  position.y - childParentData.offset.dy);
-    return child.hitTest(result, position: transformed);
+    return child.hitTest(result, position: position - childParentData.offset);
   }
 
   @override

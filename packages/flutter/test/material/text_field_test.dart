@@ -504,10 +504,10 @@ void main() {
     final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
     final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
     final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
-    expect(firstPos.x, secondPos.x);
-    expect(firstPos.x, thirdPos.x);
-    expect(firstPos.y, lessThan(secondPos.y));
-    expect(secondPos.y, lessThan(thirdPos.y));
+    expect(firstPos.dx, secondPos.dx);
+    expect(firstPos.dx, thirdPos.dx);
+    expect(firstPos.dy, lessThan(secondPos.dy));
+    expect(secondPos.dy, lessThan(thirdPos.dy));
 
     // Long press the 'n' in 'until' to select the word.
     final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
@@ -587,8 +587,8 @@ void main() {
     // Check that the last line of text is not displayed.
     final Offset firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
     final Offset fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
-    expect(firstPos.x, fourthPos.x);
-    expect(firstPos.y, lessThan(fourthPos.y));
+    expect(firstPos.dx, fourthPos.dx);
+    expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
 
@@ -607,7 +607,7 @@ void main() {
     Offset newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
     Offset newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
 
-    expect(newFirstPos.y, lessThan(firstPos.y));
+    expect(newFirstPos.dy, lessThan(firstPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
 
@@ -639,7 +639,7 @@ void main() {
     // cursor visible, back to its original position.
     newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
     newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
-    expect(newFirstPos.y, firstPos.y);
+    expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
@@ -804,13 +804,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     Offset newPos = tester.getTopLeft(find.text('Second'));
-    expect(newPos.y, lessThan(pos.y));
+    expect(newPos.dy, lessThan(pos.dy));
 
     // Label should still be sliding upward.
     await tester.pump(const Duration(milliseconds: 50));
     pos = newPos;
     newPos = tester.getTopLeft(find.text('Second'));
-    expect(newPos.y, lessThan(pos.y));
+    expect(newPos.dy, lessThan(pos.dy));
   });
 
   testWidgets('No space between Input icon and text', (WidgetTester tester) async {
@@ -827,9 +827,9 @@ void main() {
       ),
     );
 
-    final double iconRight = tester.getTopRight(find.byType(Icon)).x;
-    expect(iconRight, equals(tester.getTopLeft(find.text('label')).x));
-    expect(iconRight, equals(tester.getTopLeft(find.byType(EditableText)).x));
+    final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
+    expect(iconRight, equals(tester.getTopLeft(find.text('label')).dx));
+    expect(iconRight, equals(tester.getTopLeft(find.byType(EditableText)).dx));
   });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
@@ -868,7 +868,7 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(EditableText), 'abcd');
     await tester.pump();
@@ -877,7 +877,7 @@ void main() {
         editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -902,7 +902,7 @@ void main() {
         editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(EditableText), 'abcd');
     await tester.pump();
@@ -911,7 +911,7 @@ void main() {
         editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {

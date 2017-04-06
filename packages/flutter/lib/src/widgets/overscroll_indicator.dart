@@ -168,10 +168,10 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
             switch (notification.axis) {
               case Axis.horizontal:
-                controller.pull(notification.overscroll.abs(), size.width, position.y.clamp(0.0, size.height), size.height);
+                controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
                 break;
               case Axis.vertical:
-                controller.pull(notification.overscroll.abs(), size.height, position.x.clamp(0.0, size.width), size.width);
+                controller.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
                 break;
             }
           }

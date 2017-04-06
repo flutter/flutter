@@ -266,7 +266,7 @@ void main() {
       assert(itemBox.attached);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Offset.zero));
-      expect(buttonBoxCenter.y, equals(itemBoxCenter.y));
+      expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
 
     // The two RenderParagraph objects, for the 'two' items' Text children,

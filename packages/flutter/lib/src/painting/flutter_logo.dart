@@ -442,9 +442,9 @@ class _FlutterLogoPainter extends BoxPainter {
         if (_config._position < 1.0) {
           final Offset center = logoSquare.center;
           final Path path = new Path()
-            ..moveTo(center.x, center.y)
-            ..lineTo(center.x + rect.width, center.y - rect.width)
-            ..lineTo(center.x + rect.width, center.y + rect.width)
+            ..moveTo(center.dx, center.dy)
+            ..lineTo(center.dx + rect.width, center.dy - rect.width)
+            ..lineTo(center.dx + rect.width, center.dy + rect.width)
             ..close();
           canvas.clipPath(path);
         }
@@ -462,7 +462,7 @@ class _FlutterLogoPainter extends BoxPainter {
           canvas.save();
         }
         canvas.translate(
-          logoTargetSquare.center.x - (_textBoundingRect.width * scale / 2.0),
+          logoTargetSquare.center.dx - (_textBoundingRect.width * scale / 2.0),
           logoTargetSquare.bottom
         );
         canvas.scale(scale, scale);

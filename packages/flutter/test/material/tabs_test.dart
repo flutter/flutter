@@ -195,13 +195,13 @@ void main() {
 
     expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
     // The center of the FFFFFF item is to the right of the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).x, greaterThan(401.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, greaterThan(401.0));
 
     await tester.tap(find.text('FFFFFF'));
     await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, closeTo(400.0, 1.0));
   });
 
 
@@ -214,11 +214,11 @@ void main() {
     expect(controller.index, 0);
 
     // Fling-scroll the TabBar to the left
-    expect(tester.getCenter(find.text('HHHH')).x, lessThan(700.0));
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(700.0));
     await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(tester.getCenter(find.text('HHHH')).x, lessThan(500.0));
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(500.0));
 
     // Scrolling the TabBar doesn't change the selection
     expect(controller.index, 0);
@@ -440,7 +440,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     final RenderBox box = tester.renderObject(find.text('BBBBBB'));
-    expect(box.localToGlobal(Offset.zero).x, greaterThan(0.0));
+    expect(box.localToGlobal(Offset.zero).dx, greaterThan(0.0));
   });
 
   testWidgets('TabController change notification', (WidgetTester tester) async {

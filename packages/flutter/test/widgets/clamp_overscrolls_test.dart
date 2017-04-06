@@ -45,16 +45,16 @@ void main() {
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));
     Offset origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
-    expect(origin.y, greaterThan(0.0));
+    expect(origin.dy, greaterThan(0.0));
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
-    expect(origin.y, lessThan(500.0));
+    expect(origin.dy, lessThan(500.0));
 
 
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
     origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
-    expect(origin.y, equals(0.0));
+    expect(origin.dy, equals(0.0));
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
-    expect(origin.y, equals(500.0));
+    expect(origin.dy, equals(500.0));
   });
 
   testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {

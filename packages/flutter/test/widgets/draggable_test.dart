@@ -357,7 +357,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 2']));
-    expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dy, greaterThan(0.0));
     events.clear();
 
     // horizontal draggable drags horizontally
@@ -374,7 +374,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 1']));
-    expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dy, greaterThan(0.0));
     events.clear();
 
     // vertical draggable drags horizontally when there's no competition
@@ -392,7 +392,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 2']));
-    expect(tester.getCenter(find.text('Target')).y, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dy, greaterThan(0.0));
     events.clear();
 
     // horizontal draggable doesn't drag vertically when there is competition
@@ -464,7 +464,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 1']));
-    expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dx, greaterThan(0.0));
     events.clear();
 
     // vertical draggable drags vertically
@@ -481,7 +481,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 2']));
-    expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dx, greaterThan(0.0));
     events.clear();
 
     // horizontal draggable drags vertically when there's no competition
@@ -499,7 +499,7 @@ void main() {
     await gesture.up();
     await tester.pump();
     expect(events, equals(<String>['drop 1']));
-    expect(tester.getCenter(find.text('Target')).x, greaterThan(0.0));
+    expect(tester.getCenter(find.text('Target')).dx, greaterThan(0.0));
     events.clear();
 
     // vertical draggable doesn't drag horizontally when there is competition
@@ -646,7 +646,7 @@ void main() {
     expect(find.text('Target'), findsOneWidget);
     expect(onDraggableCanceledCalled, isTrue);
     expect(onDraggableCanceledVelocity, equals(Velocity.zero));
-    expect(onDraggableCanceledOffset, equals(new Offset(secondLocation.x, secondLocation.y)));
+    expect(onDraggableCanceledOffset, equals(new Offset(secondLocation.dx, secondLocation.dy)));
   });
 
   testWidgets('Drag and drop - onDraggableDropped called if dropped on non-accepting target with correct velocity', (WidgetTester tester) async {
@@ -696,7 +696,7 @@ void main() {
     expect(onDraggableCanceledCalled, isTrue);
     expect(onDraggableCanceledVelocity.pixelsPerSecond.dx.abs(), lessThan(0.0000001));
     expect((onDraggableCanceledVelocity.pixelsPerSecond.dy - 1000.0).abs(), lessThan(0.0000001));
-    expect(onDraggableCanceledOffset, equals(new Offset(flingStart.x, flingStart.y) + const Offset(0.0, 100.0)));
+    expect(onDraggableCanceledOffset, equals(new Offset(flingStart.dx, flingStart.dy) + const Offset(0.0, 100.0)));
   });
 
   testWidgets('Drag and drop - allow pass thru of unaccepted data test', (WidgetTester tester) async {
