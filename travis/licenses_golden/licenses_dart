@@ -1,4 +1,4 @@
-Signature: f28599a8aeda7c2f2acc3668627010a8
+Signature: 265ed27d39650480e34d11c8578d2651
 
 UNUSED LICENSES:
 
@@ -125,10 +125,11 @@ FILE: ../../../dart/runtime/bin/secure_socket_boringssl.h
 FILE: ../../../dart/runtime/bin/secure_socket_patch.dart
 FILE: ../../../dart/runtime/bin/secure_socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/socket_android.cc
-FILE: ../../../dart/runtime/bin/socket_android.h
-FILE: ../../../dart/runtime/bin/socket_linux.h
-FILE: ../../../dart/runtime/bin/socket_macos.h
-FILE: ../../../dart/runtime/bin/socket_win.h
+FILE: ../../../dart/runtime/bin/socket_base_android.cc
+FILE: ../../../dart/runtime/bin/socket_base_android.h
+FILE: ../../../dart/runtime/bin/socket_base_linux.h
+FILE: ../../../dart/runtime/bin/socket_base_macos.h
+FILE: ../../../dart/runtime/bin/socket_base_win.h
 FILE: ../../../dart/runtime/bin/test_extension.c
 FILE: ../../../dart/runtime/bin/test_extension_dllmain_win.cc
 FILE: ../../../dart/runtime/bin/thread.h
@@ -701,6 +702,9 @@ FILE: ../../../dart/runtime/bin/process.cc
 FILE: ../../../dart/runtime/bin/process_patch.dart
 FILE: ../../../dart/runtime/bin/socket.cc
 FILE: ../../../dart/runtime/bin/socket.h
+FILE: ../../../dart/runtime/bin/socket_base_linux.cc
+FILE: ../../../dart/runtime/bin/socket_base_macos.cc
+FILE: ../../../dart/runtime/bin/socket_base_win.cc
 FILE: ../../../dart/runtime/bin/socket_linux.cc
 FILE: ../../../dart/runtime/bin/socket_macos.cc
 FILE: ../../../dart/runtime/bin/socket_patch.dart
@@ -1313,8 +1317,9 @@ FILE: ../../../dart/runtime/bin/secure_socket_ios.cc
 FILE: ../../../dart/runtime/bin/secure_socket_ios.h
 FILE: ../../../dart/runtime/bin/secure_socket_macos.cc
 FILE: ../../../dart/runtime/bin/secure_socket_macos.h
+FILE: ../../../dart/runtime/bin/socket_base_fuchsia.cc
+FILE: ../../../dart/runtime/bin/socket_base_fuchsia.h
 FILE: ../../../dart/runtime/bin/socket_fuchsia.cc
-FILE: ../../../dart/runtime/bin/socket_fuchsia.h
 FILE: ../../../dart/runtime/bin/socket_unsupported.cc
 FILE: ../../../dart/runtime/bin/stdio_fuchsia.cc
 FILE: ../../../dart/runtime/bin/stdio_unsupported.cc
@@ -1504,6 +1509,7 @@ FILE: ../../../dart/runtime/vm/json_parser.h
 FILE: ../../../dart/runtime/vm/kernel.cc
 FILE: ../../../dart/runtime/vm/kernel.h
 FILE: ../../../dart/runtime/vm/kernel_binary.cc
+FILE: ../../../dart/runtime/vm/kernel_binary_flowgraph.cc
 FILE: ../../../dart/runtime/vm/kernel_isolate.cc
 FILE: ../../../dart/runtime/vm/kernel_isolate.h
 FILE: ../../../dart/runtime/vm/kernel_reader.cc
@@ -1580,6 +1586,9 @@ FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.cc
 FILE: ../../../dart/runtime/bin/snapshot_utils.h
+FILE: ../../../dart/runtime/bin/socket_base.cc
+FILE: ../../../dart/runtime/bin/socket_base.h
+FILE: ../../../dart/runtime/bin/socket_base_unsupported.cc
 FILE: ../../../dart/runtime/lib/async.cc
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
 FILE: ../../../dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
@@ -1602,6 +1611,8 @@ FILE: ../../../dart/runtime/vm/dwarf.cc
 FILE: ../../../dart/runtime/vm/dwarf.h
 FILE: ../../../dart/runtime/vm/fixed_cache.h
 FILE: ../../../dart/runtime/vm/fixed_cache_test.cc
+FILE: ../../../dart/runtime/vm/kernel_binary.h
+FILE: ../../../dart/runtime/vm/kernel_binary_flowgraph.h
 FILE: ../../../dart/runtime/vm/malloc_hooks.cc
 FILE: ../../../dart/runtime/vm/malloc_hooks.h
 FILE: ../../../dart/runtime/vm/malloc_hooks_arm.cc
