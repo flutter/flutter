@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new Center(
               child: new Text(
                 'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                style: new TextStyle(fontSize: 17.0))
+                style: const TextStyle(fontSize: 17.0))
             ),
           ),
           new Container(
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: new Row(
               children: <Widget>[
                 new Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                new Text('Flutter', style: new TextStyle(fontSize: 30.0)),
+                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
               ],
             ),
           ),
@@ -77,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _sendFlutterIncrement,
-        child: new Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }

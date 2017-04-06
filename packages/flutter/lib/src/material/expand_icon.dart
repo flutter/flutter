@@ -107,7 +107,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       onPressed: config.onPressed == null ? null : _handlePressed,
       icon: new RotationTransition(
         turns: _iconTurns,
-        child: new Icon(Icons.expand_more)
+        child: const Icon(Icons.expand_more)
       )
     );
   }

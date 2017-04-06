@@ -37,15 +37,15 @@ class _ListDemoState extends State<ListDemo> {
   void _showConfigurationSheet() {
     final PersistentBottomSheetController<Null> bottomSheet = scaffoldKey.currentState.showBottomSheet((BuildContext bottomSheetContext) {
       return new Container(
-        decoration: new BoxDecoration(
-          border: new Border(top: new BorderSide(color: Colors.black26)),
+        decoration: const BoxDecoration(
+          border: const Border(top: const BorderSide(color: Colors.black26)),
         ),
         child: new ListView(
           shrinkWrap: true,
           children: <Widget>[
             new ListTile(
               dense: true,
-              title: new Text('One-line'),
+              title: const Text('One-line'),
               trailing: new Radio<MaterialListType>(
                 value: _showAvatars ? MaterialListType.oneLineWithAvatar : MaterialListType.oneLine,
                 groupValue: _itemType,
@@ -54,7 +54,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Two-line'),
+              title: const Text('Two-line'),
               trailing: new Radio<MaterialListType>(
                 value: MaterialListType.twoLine,
                 groupValue: _itemType,
@@ -63,7 +63,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Three-line'),
+              title: const Text('Three-line'),
               trailing: new Radio<MaterialListType>(
                 value: MaterialListType.threeLine,
                 groupValue: _itemType,
@@ -72,7 +72,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Show avatar'),
+              title: const Text('Show avatar'),
               trailing: new Checkbox(
                 value: _showAvatars,
                 onChanged: (bool value) {
@@ -85,7 +85,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Show icon'),
+              title: const Text('Show icon'),
               trailing: new Checkbox(
                 value: _showIcons,
                 onChanged: (bool value) {
@@ -98,7 +98,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Show dividers'),
+              title: const Text('Show dividers'),
               trailing: new Checkbox(
                 value: _showDividers,
                 onChanged: (bool value) {
@@ -111,7 +111,7 @@ class _ListDemoState extends State<ListDemo> {
             ),
             new ListTile(
               dense: true,
-              title: new Text('Dense layout'),
+              title: const Text('Dense layout'),
               trailing: new Checkbox(
                 value: _dense,
                 onChanged: (bool value) {
@@ -143,9 +143,9 @@ class _ListDemoState extends State<ListDemo> {
   Widget buildListTile(BuildContext context, String item) {
     Widget secondary;
     if (_itemType == MaterialListType.twoLine) {
-      secondary = new Text("Additional item information.");
+      secondary = const Text("Additional item information.");
     } else if (_itemType == MaterialListType.threeLine) {
-      secondary = new Text(
+      secondary = const Text(
         "Even more additional list item information appears on line three.",
       );
     }
@@ -186,7 +186,7 @@ class _ListDemoState extends State<ListDemo> {
         title: new Text('Scrolling list\n$itemTypeText$layoutText'),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.sort_by_alpha),
+            icon: const Icon(Icons.sort_by_alpha),
             tooltip: 'Sort',
             onPressed: () {
               setState(() {
@@ -196,7 +196,7 @@ class _ListDemoState extends State<ListDemo> {
             },
           ),
           new IconButton(
-            icon: new Icon(Icons.more_vert),
+            icon: const Icon(Icons.more_vert),
             tooltip: 'Show menu',
             onPressed: _bottomSheet == null ? _showConfigurationSheet : null,
           ),

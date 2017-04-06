@@ -9,7 +9,7 @@ void main() {
   testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
     await tester.pumpWidget(new FlatButton(
       onPressed: null,
-      child: new Text('Go'),
+      child: const Text('Go'),
     ));
     expect(tester.takeException(), isFlutterError);
   });

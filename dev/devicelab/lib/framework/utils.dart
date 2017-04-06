@@ -15,7 +15,7 @@ import 'package:stack_trace/stack_trace.dart';
 String cwd = Directory.current.path;
 
 List<ProcessInfo> _runningProcesses = <ProcessInfo>[];
-ProcessManager _processManager = new LocalProcessManager();
+ProcessManager _processManager = const LocalProcessManager();
 
 class ProcessInfo {
   ProcessInfo(this.command, this.process);

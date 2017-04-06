@@ -17,12 +17,12 @@ void main() {
               new DrawerHeader(
                 child: new Container(
                   key: containerKey,
-                  child: new Text('header')
+                  child: const Text('header')
                 )
               ),
               new ListTile(
-                leading: new Icon(Icons.archive),
-                title: new Text('Archive')
+                leading: const Icon(Icons.archive),
+                title: const Text('Archive')
               )
             ]
           )

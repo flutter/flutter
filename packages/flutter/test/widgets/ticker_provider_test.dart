@@ -36,7 +36,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
-        '/test': (BuildContext context) => new Text('hello'),
+        '/test': (BuildContext context) => const Text('hello'),
       },
     ));
     expect(tester.binding.transientCallbackCount, 1);

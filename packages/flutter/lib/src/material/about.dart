@@ -290,7 +290,7 @@ class AboutDialog extends StatelessWidget {
       ),
       actions: <Widget>[
         new FlatButton(
-          child: new Text('VIEW LICENSES'),
+          child: const Text('VIEW LICENSES'),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -302,7 +302,7 @@ class AboutDialog extends StatelessWidget {
           }
         ),
         new FlatButton(
-          child: new Text('CLOSE'),
+          child: const Text('CLOSE'),
           onPressed: () {
             Navigator.pop(context);
           }
@@ -377,9 +377,9 @@ class _LicensePageState extends State<LicensePage> {
       if (!mounted)
         return;
       setState(() {
-        _licenses.add(new Padding(
+        _licenses.add(const Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: new Text(
+          child: const Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
@@ -443,7 +443,7 @@ class _LicensePageState extends State<LicensePage> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Licenses')
+        title: const Text('Licenses')
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,

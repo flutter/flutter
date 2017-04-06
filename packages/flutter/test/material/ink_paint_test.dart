@@ -10,8 +10,8 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Does the ink widget render a border radius', (WidgetTester tester) async {
-    final Color highlightColor = new Color(0xAAFF0000);
-    final Color splashColor = new Color(0xAA0000FF);
+    final Color highlightColor = const Color(0xAAFF0000);
+    final Color splashColor = const Color(0xAA0000FF);
     final BorderRadius borderRadius = new BorderRadius.circular(6.0);
 
     await tester.pumpWidget(
@@ -34,16 +34,16 @@ void main() {
     final Point center = tester.getCenter(find.byType(InkWell));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    await tester.pump(new Duration(milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
     expect(
       box,
       paints
-        ..clipRRect(rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, new Radius.circular(6.0)))
+        ..clipRRect(rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)))
         ..circle(x: 400.0, y: 300.0, radius: 21.0, color: splashColor)
         ..rrect(
-          rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, new Radius.circular(6.0)),
+          rrect: new RRect.fromLTRBR(300.0, 270.0, 500.0, 330.0, const Radius.circular(6.0)),
           color: highlightColor,
         )
     );

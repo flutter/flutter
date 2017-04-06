@@ -15,7 +15,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight 
         primary: true,
         slivers: <Widget>[
           new SliverAppBar(
-            title: new Text('AppBar Title'),
+            title: const Text('AppBar Title'),
             floating: floating,
             pinned: pinned,
             expandedHeight: expandedHeight,
@@ -63,7 +63,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
@@ -82,7 +82,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
@@ -101,7 +101,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: true,
-            title: new Text('X'),
+            title: const Text('X'),
           )
         )
       )
@@ -121,7 +121,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
@@ -138,7 +138,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: new Text('X'),
+            title: const Text('X'),
           ),
           // A drawer causes a leading hamburger.
           drawer: new Drawer(),
@@ -254,9 +254,9 @@ void main() {
       new SizedBox(
         height: kToolbarHeight,
         child: new AppBar(
-          leading: new Text('L'),
-          title: new Text('No Scaffold'),
-          actions: <Widget>[new Text('A1'), new Text('A2')],
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          actions: <Widget>[const Text('A1'), const Text('A2')],
         ),
       ),
     );
@@ -276,7 +276,7 @@ void main() {
           width: 0.0,
           child: new Scaffold(
             appBar: new AppBar(
-              title: new Text('X'),
+              title: const Text('X'),
             ),
           ),
         ),
@@ -325,7 +325,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
           drawer: new Column(), // Doesn't really matter. Triggers a hamburger regardless.
         ),
@@ -343,16 +343,16 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
             actions: <Widget> [
-              new IconButton(
-                icon: new Icon(Icons.share),
+              const IconButton(
+                icon: const Icon(Icons.share),
                 onPressed: null,
                 tooltip: 'Share',
                 iconSize: 20.0,
               ),
-              new IconButton(
-                icon: new Icon(Icons.add),
+              const IconButton(
+                icon: const Icon(Icons.add),
                 onPressed: null,
                 tooltip: 'Add',
                 iconSize: 60.0,

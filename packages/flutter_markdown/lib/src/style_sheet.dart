@@ -46,7 +46,7 @@ class MarkdownStyleSheet {
   /// Creates a [MarkdownStyleSheet] from the [TextStyle]s in the provided [ThemeData].
   factory MarkdownStyleSheet.fromTheme(ThemeData theme) {
     return new MarkdownStyleSheet(
-      a: new TextStyle(color: Colors.blue),
+      a: const TextStyle(color: Colors.blue),
       p: theme.textTheme.body1,
       code: new TextStyle(
         color: Colors.grey.shade700,
@@ -83,7 +83,7 @@ class MarkdownStyleSheet {
   /// [MarkdownStyle.fromTheme].
   factory MarkdownStyleSheet.largeFromTheme(ThemeData theme) {
     return new MarkdownStyleSheet(
-      a: new TextStyle(color: Colors.blue),
+      a: const TextStyle(color: Colors.blue),
       p: theme.textTheme.body1,
       code: new TextStyle(
         color: Colors.grey.shade700,

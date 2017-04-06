@@ -83,15 +83,15 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return await showDialog<bool>(
       context: context,
       child: new AlertDialog(
-        title: new Text('This form has errors'),
-        content: new Text('Really leave this form?'),
+        title: const Text('This form has errors'),
+        content: const Text('Really leave this form?'),
         actions: <Widget> [
           new FlatButton(
-            child: new Text('YES'),
+            child: const Text('YES'),
             onPressed: () { Navigator.of(context).pop(true); },
           ),
           new FlatButton(
-            child: new Text('NO'),
+            child: const Text('NO'),
             onPressed: () { Navigator.of(context).pop(false); },
           ),
         ],
@@ -104,7 +104,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Text fields'),
+        title: const Text('Text fields'),
       ),
       body: new Form(
         key: _formKey,
@@ -170,7 +170,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
               padding: const EdgeInsets.all(20.0),
               alignment: const FractionalOffset(0.5, 0.5),
               child: new RaisedButton(
-                child: new Text('SUBMIT'),
+                child: const Text('SUBMIT'),
                 onPressed: _handleSubmitted,
               ),
             ),

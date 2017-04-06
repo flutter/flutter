@@ -52,7 +52,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     child: new Row(
                       children: <Widget>[
                         new Image.network('https://flutter.io/images/favicon.png'),
-                        new Text('PRESS ME'),
+                        const Text('PRESS ME'),
                       ]
                     ),
                     onPressed: () {

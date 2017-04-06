@@ -30,7 +30,7 @@ void main() {
   runApp(new MaterialApp(
     title: "Markdown Demo",
     home: new Scaffold(
-      appBar: new AppBar(title: new Text('Markdown Demo')),
+      appBar: new AppBar(title: const Text('Markdown Demo')),
       body: new Markdown(data: _kMarkdownData)
     )
   ));

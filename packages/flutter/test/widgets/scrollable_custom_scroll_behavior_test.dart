@@ -121,7 +121,7 @@ void main() {
       child: new CustomScrollView(
         controller: new TestScrollController(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     ));
@@ -133,7 +133,7 @@ void main() {
       child: new CustomScrollView(
         controller: new TestScrollController(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     ));

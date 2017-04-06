@@ -11,12 +11,12 @@ void main() {
     await tester.pumpWidget(new ListView(
       controller: controller,
       children: <Widget>[
-        new Container(height: 400.0, child: new Text('1')),
-        new Container(height: 400.0, child: new Text('2')),
-        new Container(height: 400.0, child: new Text('3')),
-        new Container(height: 400.0, child: new Text('4')),
-        new Container(height: 400.0, child: new Text('5')),
-        new Container(height: 400.0, child: new Text('6')),
+        new Container(height: 400.0, child: const Text('1')),
+        new Container(height: 400.0, child: const Text('2')),
+        new Container(height: 400.0, child: const Text('3')),
+        new Container(height: 400.0, child: const Text('4')),
+        new Container(height: 400.0, child: const Text('5')),
+        new Container(height: 400.0, child: const Text('6')),
       ],
     ));
 
@@ -28,12 +28,12 @@ void main() {
     await tester.pumpWidget(new ListView(
       controller: controller,
       children: <Widget>[
-        new Container(height: 200.0, child: new Text('1')),
-        new Container(height: 400.0, child: new Text('2')),
-        new Container(height: 400.0, child: new Text('3')),
-        new Container(height: 400.0, child: new Text('4')),
-        new Container(height: 400.0, child: new Text('5')),
-        new Container(height: 400.0, child: new Text('6')),
+        new Container(height: 200.0, child: const Text('1')),
+        new Container(height: 400.0, child: const Text('2')),
+        new Container(height: 400.0, child: const Text('3')),
+        new Container(height: 400.0, child: const Text('4')),
+        new Container(height: 400.0, child: const Text('5')),
+        new Container(height: 400.0, child: const Text('6')),
       ],
     ));
 

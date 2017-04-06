@@ -129,7 +129,7 @@ class _DateAndTimePickerDemoState extends State<DateAndTimePickerDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Date and time pickers')),
+      appBar: new AppBar(title: const Text('Date and time pickers')),
       body: new DropdownButtonHideUnderline(
         child: new ListView(
           padding: const EdgeInsets.all(16.0),

@@ -27,38 +27,38 @@ class FooState extends State<Foo> {
                   setState(() { /* this is needed to trigger the original bug this is regression-testing */ });
                   scrollController.animateTo(200.0, duration: const Duration(milliseconds: 500), curve: Curves.linear);
                 },
-                child: new DecoratedBox(
+                child: const DecoratedBox(
                   decoration: const BoxDecoration(backgroundColor: const Color(0)),
                   child: const SizedBox(
                     height: 200.0,
                   ),
                 )
               ),
-              new DecoratedBox(
+              const DecoratedBox(
                 decoration: const BoxDecoration(backgroundColor: const Color(0)),
                 child: const SizedBox(
                   height: 200.0,
                 ),
               ),
-              new DecoratedBox(
+              const DecoratedBox(
                 decoration: const BoxDecoration(backgroundColor: const Color(0)),
                 child: const SizedBox(
                   height: 200.0,
                 ),
               ),
-              new DecoratedBox(
+              const DecoratedBox(
                 decoration: const BoxDecoration(backgroundColor: const Color(0)),
                 child: const SizedBox(
                   height: 200.0,
                 ),
               ),
-              new DecoratedBox(
+              const DecoratedBox(
                 decoration: const BoxDecoration(backgroundColor: const Color(0)),
                 child: const SizedBox(
                   height: 200.0,
                 ),
               ),
-              new DecoratedBox(
+              const DecoratedBox(
                 decoration: const BoxDecoration(backgroundColor: const Color(0)),
                 child: const SizedBox(
                   height: 200.0,

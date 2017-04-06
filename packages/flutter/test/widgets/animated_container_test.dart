@@ -119,7 +119,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 100.0,
           height: 100.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );
@@ -139,7 +139,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 200.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );
@@ -163,7 +163,7 @@ void main() {
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 100.0,
-          child: new Text('X')
+          child: const Text('X')
         )
       )
     );

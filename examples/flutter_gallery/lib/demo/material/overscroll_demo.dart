@@ -29,7 +29,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     new Timer(const Duration(seconds: 3), () { completer.complete(null); });
     return completer.future.then((_) {
        _scaffoldKey.currentState?.showSnackBar(new SnackBar(
-         content: new Text("Refresh complete"),
+         content: const Text("Refresh complete"),
          action: new SnackBarAction(
            label: 'RETRY',
            onPressed: () {
@@ -45,10 +45,10 @@ class OverscrollDemoState extends State<OverscrollDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Pull to refresh'),
+        title: const Text('Pull to refresh'),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.refresh),
+            icon: const Icon(Icons.refresh),
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
@@ -68,7 +68,7 @@ class OverscrollDemoState extends State<OverscrollDemo> {
               isThreeLine: true,
               leading: new CircleAvatar(child: new Text(item)),
               title: new Text('This item represents $item.'),
-              subtitle: new Text('Even more additional list item information appears on line three.'),
+              subtitle: const Text('Even more additional list item information appears on line three.'),
             );
           },
         ),

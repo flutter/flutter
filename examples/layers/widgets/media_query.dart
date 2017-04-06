@@ -51,8 +51,8 @@ class AdaptedGridItem extends StatelessWidget {
                 new Expanded(
                   child: new Text(name)
                 ),
-                new IconButton(
-                  icon: new Icon(Icons.more_vert),
+                const IconButton(
+                  icon: const Icon(Icons.more_vert),
                   onPressed: null
                 )
               ]
@@ -103,7 +103,7 @@ void main() {
     title: 'Media Query Example',
     home: new Scaffold(
       appBar: new AppBar(
-        title: new Text('Media Query Example')
+        title: const Text('Media Query Example')
       ),
       body: new Material(child: new AdaptiveContainer(names: _kNames))
     )

@@ -25,17 +25,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -56,17 +56,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('A'), new Text('B'), new Text('C')
+              const Text('A'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('F')
+              const Text('D'), const Text('E'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('I')
+              const Text('G'), const Text('H'), const Text('I')
             ]
           ),
         ]
@@ -81,12 +81,12 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('a'), new Text('b'), new Text('c'), new Text('d')
+              const Text('a'), const Text('b'), const Text('c'), const Text('d')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('e'), new Text('f'), new Text('g'), new Text('h')
+              const Text('e'), const Text('f'), const Text('g'), const Text('h')
             ]
           ),
         ]
@@ -106,17 +106,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -127,17 +127,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -159,17 +159,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -192,17 +192,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAAAAA'), new Text('B'), new Text('C')
+              const Text('AAAAAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -214,17 +214,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('A'), new Text('B'), new Text('C')
+              const Text('A'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('EEE'), new Text('F')
+              const Text('D'), const Text('EEE'), const Text('F')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -246,17 +246,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -268,17 +268,17 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('AAA'), new Text('B'), new Text('C')
+              const Text('AAA'), const Text('B'), const Text('C')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('D'), new Text('E'), new Text('FFFFFF')
+              const Text('D'), const Text('E'), const Text('FFFFFF')
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('G'), new Text('H'), new Text('III')
+              const Text('G'), const Text('H'), const Text('III')
             ]
           ),
         ]
@@ -305,14 +305,14 @@ void main() {
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   contexts.add(context);
-                  return new Text('A');
+                  return const Text('A');
                 }
               )
             ]
           ),
           new TableRow(
             children: <Widget>[
-              new Text('b')
+              const Text('b')
             ]
           ),
         ]
@@ -323,7 +323,7 @@ void main() {
         children: <TableRow>[
           new TableRow(
             children: <Widget>[
-              new Text('b')
+              const Text('b')
             ]
           ),
           new TableRow(
@@ -332,7 +332,7 @@ void main() {
               new StatefulBuilder(
                 builder: (BuildContext context, StateSetter setState) {
                   contexts.add(context);
-                  return new Text('A');
+                  return const Text('A');
                 }
               )
             ]

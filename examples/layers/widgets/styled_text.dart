@@ -124,7 +124,7 @@ void main() {
     theme: new ThemeData.light(),
     home: new Scaffold(
       appBar: new AppBar(
-        title: new Text('Hal and Dave')
+        title: const Text('Hal and Dave')
       ),
       body: new Material(
         color: Colors.grey.shade50,

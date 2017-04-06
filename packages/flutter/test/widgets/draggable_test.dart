@@ -15,15 +15,15 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
             onDragStarted: () {
               ++dragStartedCount;
             },
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Container(height: 100.0, child: new Text('Target'));
+              return new Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add
           ),
@@ -76,8 +76,8 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new Stack(
             children: <Widget>[
@@ -86,13 +86,13 @@ void main() {
                 onTap: () {
                   events.add('tap');
                 },
-                child: new Container(child: new Text('Button')
+                child: new Container(child: const Text('Button')
               )
             ),
             new DragTarget<int>(
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
                 return new IgnorePointer(
-                  child: new Container(child: new Text('Target'))
+                  child: new Container(child: const Text('Target'))
                 );
               },
               onAccept: (int data) {
@@ -171,13 +171,13 @@ void main() {
               onTap: () {
                 events.add('tap');
               },
-              child: new Container(child: new Text('Button'))
+              child: new Container(child: const Text('Button'))
             ),
-            feedback: new Text('Dragging')
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop');
@@ -220,12 +220,12 @@ void main() {
         children: <Widget>[
           new LongPressDraggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop');
@@ -266,12 +266,12 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop');
@@ -314,7 +314,7 @@ void main() {
         children: <Widget>[
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop $data');
@@ -323,14 +323,14 @@ void main() {
           new Container(height: 400.0),
           new Draggable<int>(
             data: 1,
-            child: new Text('H'),
-            feedback: new Text('Dragging'),
+            child: const Text('H'),
+            feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
           new Draggable<int>(
             data: 2,
-            child: new Text('V'),
-            feedback: new Text('Dragging'),
+            child: const Text('V'),
+            feedback: const Text('Dragging'),
             affinity: Axis.vertical,
           ),
           new Container(height: 500.0),
@@ -421,7 +421,7 @@ void main() {
         children: <Widget>[
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop $data');
@@ -430,14 +430,14 @@ void main() {
           new Container(width: 400.0),
           new Draggable<int>(
             data: 1,
-            child: new Text('H'),
-            feedback: new Text('Dragging'),
+            child: const Text('H'),
+            feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
           new Draggable<int>(
             data: 2,
-            child: new Text('V'),
-            feedback: new Text('Dragging'),
+            child: const Text('V'),
+            feedback: const Text('Dragging'),
             affinity: Axis.vertical,
           ),
           new Container(width: 500.0),
@@ -527,15 +527,15 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
             onDraggableCanceled: (Velocity velocity, Offset offset) {
               onDraggableCanceledCalled = true;
             }
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Container(height: 100.0, child: new Text('Target'));
+              return new Container(height: 100.0, child: const Text('Target'));
             },
             onAccept: accepted.add
           ),
@@ -590,8 +590,8 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging'),
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
             onDraggableCanceled: (Velocity velocity, Offset offset) {
               onDraggableCanceledCalled = true;
               onDraggableCanceledVelocity = velocity;
@@ -602,7 +602,7 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return new Container(
                 height: 100.0,
-                child: new Text('Target')
+                child: const Text('Target')
               );
             },
             onWillAccept: (int data) => false
@@ -659,8 +659,8 @@ void main() {
       home: new Column(children: <Widget>[
         new Draggable<int>(
           data: 1,
-          child: new Text('Source'),
-          feedback: new Text('Source'),
+          child: const Text('Source'),
+          feedback: const Text('Source'),
           onDraggableCanceled: (Velocity velocity, Offset offset) {
             onDraggableCanceledCalled = true;
             onDraggableCanceledVelocity = velocity;
@@ -671,7 +671,7 @@ void main() {
           builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
             return new Container(
               height: 100.0,
-              child: new Text('Target')
+              child: const Text('Target')
             );
           },
           onWillAccept: (int data) => false),
@@ -708,13 +708,13 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('IntSource'),
-            feedback: new Text('IntDragging')
+            child: const Text('IntSource'),
+            feedback: const Text('IntDragging')
           ),
           new Draggable<double>(
             data: 1.0,
-            child: new Text('DoubleSource'),
-            feedback: new Text('DoubleDragging')
+            child: const Text('DoubleSource'),
+            feedback: const Text('DoubleDragging')
           ),
           new Stack(
             children: <Widget>[
@@ -723,7 +723,7 @@ void main() {
                   return new IgnorePointer(
                     child: new Container(
                       height: 100.0,
-                      child: new Text('Target1')
+                      child: const Text('Target1')
                     )
                   );
                 },
@@ -734,7 +734,7 @@ void main() {
                   return new IgnorePointer(
                     child: new Container(
                       height: 100.0,
-                      child: new Text('Target2')
+                      child: const Text('Target2')
                     )
                   );
                 },
@@ -821,8 +821,8 @@ void main() {
         children: <Widget>[
           new Draggable<DragTargetData>(
             data: dragTargetData,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new Stack(
             children: <Widget>[
@@ -831,7 +831,7 @@ void main() {
                   return new IgnorePointer(
                     child: new Container(
                       height: 100.0,
-                      child: new Text('Target1')
+                      child: const Text('Target1')
                     )
                   );
                 }, onAccept: acceptedDragTargetDatas.add
@@ -841,7 +841,7 @@ void main() {
                   return new IgnorePointer(
                     child: new Container(
                       height: 100.0,
-                      child: new Text('Target2')
+                      child: const Text('Target2')
                     )
                   );
                 },
@@ -882,12 +882,12 @@ void main() {
             new Draggable<int>(
               data: 1,
               maxSimultaneousDrags: maxSimultaneousDrags,
-              child: new Text('Source'),
-              feedback: new Text('Dragging')
+              child: const Text('Source'),
+              feedback: const Text('Dragging')
             ),
             new DragTarget<int>(
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-                return new Container(height: 100.0, child: new Text('Target'));
+                return new Container(height: 100.0, child: const Text('Target'));
               },
               onAccept: accepted.add
             ),
@@ -1061,12 +1061,12 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
           new DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-              return new Text('Target');
+              return const Text('Target');
             },
             onAccept: (int data) {
               events.add('drop');
@@ -1099,8 +1099,8 @@ void main() {
         children: <Widget>[
           new Draggable<int>(
             data: 1,
-            child: new Text('Source'),
-            feedback: new Text('Dragging')
+            child: const Text('Source'),
+            feedback: const Text('Dragging')
           ),
         ]
       )
@@ -1119,12 +1119,12 @@ void main() {
             children: <Widget>[
               new Draggable<int>(
                   data: 1,
-                  child: new Text('Source'),
-                  feedback: new Text('Dragging')
+                  child: const Text('Source'),
+                  feedback: const Text('Dragging')
               ),
               new DragTarget<int>(
                   builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-                    return new Container(height: 100.0, child: new Text('Target'));
+                    return new Container(height: 100.0, child: const Text('Target'));
                   },
                   onAccept: accepted.add
               ),
@@ -1151,7 +1151,7 @@ void main() {
             children: <Widget>[
               new DragTarget<int>(
                   builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-                    return new Container(height: 100.0, child: new Text('Target'));
+                    return new Container(height: 100.0, child: const Text('Target'));
                   },
                   onAccept: accepted.add
               ),
@@ -1193,8 +1193,8 @@ void main() {
               events.add('tap');
             },
             child: new LongPressDraggable<int>(
-              feedback: new Text('Feedback'),
-              child: new Text('X'),
+              feedback: const Text('Feedback'),
+              child: const Text('X'),
             ),
           ),
         ),
@@ -1230,15 +1230,15 @@ Future<Null> _testChildAnchorFeedbackPosition({WidgetTester tester, double top: 
           children: <Widget>[
             new Draggable<int>(
               data: 1,
-              child: new Text('Source'),
-              feedback: new Text('Dragging'),
+              child: const Text('Source'),
+              feedback: const Text('Dragging'),
               onDragStarted: () {
                 ++dragStartedCount;
               },
             ),
             new DragTarget<int>(
               builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
-                return new Container(height: 100.0, child: new Text('Target'));
+                return new Container(height: 100.0, child: const Text('Target'));
               },
               onAccept: accepted.add
             ),

@@ -14,9 +14,9 @@ void main() {
           child: new Center(
             child: new Chip(
               avatar: new CircleAvatar(
-                child: new Text('C')
+                child: const Text('C')
               ),
-              label: new Text('Chip'),
+              label: const Text('Chip'),
               onDeleted: () {
                 didDeleteChip = true;
               }

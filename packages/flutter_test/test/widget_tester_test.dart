@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('findsOneWidget', () {
     testWidgets('finds exactly one widget', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
       expect(find.text('foo'), findsOneWidget);
     });
 
@@ -34,7 +34,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       TestFailure failure;
       try {
@@ -52,7 +52,7 @@ void main() {
     });
 
     testWidgets('fails with a descriptive message when skipping', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       TestFailure failure;
       try {
@@ -70,7 +70,7 @@ void main() {
     });
 
     testWidgets('pumping', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
       int count;
 
       final AnimationController test = new AnimationController(
@@ -106,7 +106,7 @@ void main() {
 
   group('find.byElementPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       final String customDescription = 'custom description';
       TestFailure failure;
@@ -123,7 +123,7 @@ void main() {
 
   group('find.byWidgetPredicate', () {
     testWidgets('fails with a custom description in the message', (WidgetTester tester) async {
-      await tester.pumpWidget(new Text('foo'));
+      await tester.pumpWidget(const Text('foo'));
 
       final String customDescription = 'custom description';
       TestFailure failure;
@@ -141,7 +141,7 @@ void main() {
   group('find.descendant', () {
     testWidgets('finds one descendant', (WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[new Text('foo'), new Text('bar')])
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
       ]));
 
       expect(find.descendant(
@@ -152,8 +152,8 @@ void main() {
 
     testWidgets('finds two descendants with different ancestors', (WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[new Text('foo'), new Text('bar')]),
-        new Column(children: <Text>[new Text('foo'), new Text('bar')]),
+        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
+        new Column(children: <Text>[const Text('foo'), const Text('bar')]),
       ]));
 
       expect(find.descendant(
@@ -164,8 +164,8 @@ void main() {
 
     testWidgets('fails with a descriptive message', (WidgetTester tester) async {
       await tester.pumpWidget(new Row(children: <Widget>[
-        new Column(children: <Text>[new Text('foo')]),
-        new Text('bar')
+        new Column(children: <Text>[const Text('foo')]),
+        const Text('bar')
       ]));
 
       TestFailure failure;

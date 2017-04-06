@@ -116,12 +116,12 @@ class TravelDestinationItem extends StatelessWidget {
                 alignment: MainAxisAlignment.start,
                 children: <Widget>[
                   new FlatButton(
-                    child: new Text('SHARE'),
+                    child: const Text('SHARE'),
                     textColor: Colors.amber.shade500,
                     onPressed: () { /* do nothing */ },
                   ),
                   new FlatButton(
-                    child: new Text('EXPLORE'),
+                    child: const Text('EXPLORE'),
                     textColor: Colors.amber.shade500,
                     onPressed: () { /* do nothing */ },
                   ),
@@ -142,7 +142,7 @@ class CardsDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Travel stream')
+        title: const Text('Travel stream')
       ),
       body: new ListView(
         itemExtent: TravelDestinationItem.height,

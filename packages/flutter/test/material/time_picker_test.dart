@@ -19,7 +19,7 @@ class _TimePickerLauncher extends StatelessWidget {
           child: new Builder(
             builder: (BuildContext context) {
               return new RaisedButton(
-                child: new Text('X'),
+                child: const Text('X'),
                 onPressed: () async {
                   onChanged(await showTimePicker(
                     context: context,

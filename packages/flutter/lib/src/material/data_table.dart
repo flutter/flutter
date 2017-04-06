@@ -450,7 +450,7 @@ class DataTable extends StatelessWidget {
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
-      final Widget icon = new Icon(Icons.edit, size: 18.0);
+      final Widget icon = const Icon(Icons.edit, size: 18.0);
       label = new Expanded(child: label);
       label = new Row(children: numeric ? <Widget>[ icon, label ] : <Widget>[ label, icon ]);
     }
@@ -523,7 +523,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = new FixedColumnWidth(_kTablePadding + Checkbox.width + _kTablePadding / 2.0);
+      tableColumns[0] = const FixedColumnWidth(_kTablePadding + Checkbox.width + _kTablePadding / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,

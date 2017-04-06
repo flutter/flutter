@@ -57,7 +57,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Advanced Layout'),
+        title: const Text('Advanced Layout'),
         actions: <Widget>[
           new IconButton(
             icon: new Icon(Icons.create),
@@ -356,9 +356,9 @@ class UserHeader extends StatelessWidget {
 class ItemDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Padding(
+    return const Padding(
       padding: const EdgeInsets.all(8.0),
-      child: new Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+      child: const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
 }
@@ -579,7 +579,7 @@ class GalleryDrawer extends StatelessWidget {
           new FancyDrawerHeader(),
           new ListTile(
             leading: new Icon(Icons.brightness_5),
-            title: new Text('Light'),
+            title: const Text('Light'),
             onTap: () { _changeTheme(context, true); },
             selected: ComplexLayoutApp.of(context).lightTheme,
             trailing: new Radio<bool>(
@@ -590,7 +590,7 @@ class GalleryDrawer extends StatelessWidget {
           ),
           new ListTile(
             leading: new Icon(Icons.brightness_7),
-            title: new Text('Dark'),
+            title: const Text('Dark'),
             onTap: () { _changeTheme(context, false); },
             selected: !ComplexLayoutApp.of(context).lightTheme,
             trailing: new Radio<bool>(
@@ -602,7 +602,7 @@ class GalleryDrawer extends StatelessWidget {
           new Divider(),
           new ListTile(
             leading: new Icon(Icons.hourglass_empty),
-            title: new Text('Animate Slowly'),
+            title: const Text('Animate Slowly'),
             selected: timeDilation != 1.0,
             onTap: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             trailing: new Checkbox(

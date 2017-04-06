@@ -49,7 +49,7 @@ void main() {
 
     await tester.pumpWidget(new MaterialApp(
       home: new PaginatedDataTable(
-        header: new Text('Test table'),
+        header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
         availableRowsPerPage: <int>[
@@ -62,9 +62,9 @@ void main() {
           log.add('page-changed: $rowIndex');
         },
         columns: <DataColumn>[
-          new DataColumn(label: new Text('Name')),
-          new DataColumn(label: new Text('Calories'), numeric: true),
-          new DataColumn(label: new Text('Generation')),
+          const DataColumn(label: const Text('Name')),
+          const DataColumn(label: const Text('Calories'), numeric: true),
+          const DataColumn(label: const Text('Generation')),
         ],
       )
     ));
@@ -113,32 +113,32 @@ void main() {
 
     Widget buildTable(TestDataSource source) {
       return new PaginatedDataTable(
-        header: new Text('Test table'),
+        header: const Text('Test table'),
         source: source,
         onPageChanged: (int rowIndex) {
           log.add('page-changed: $rowIndex');
         },
         columns: <DataColumn>[
-          new DataColumn(
-            label: new Text('Name'),
+          const DataColumn(
+            label: const Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
-            label: new Text('Calories'),
+            label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
             onSort: (int columnIndex, bool ascending) {
               log.add('column-sort: $columnIndex $ascending');
             }
           ),
-          new DataColumn(
-            label: new Text('Generation'),
+          const DataColumn(
+            label: const Text('Generation'),
             tooltip: 'Generation',
           ),
         ],
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.adjust),
+            icon: const Icon(Icons.adjust),
             onPressed: () {
               log.add('action: adjust');
             },
