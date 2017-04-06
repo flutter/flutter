@@ -1073,6 +1073,7 @@ FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/runtime/platform_impl.h
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.java
 FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_mac.xib
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
