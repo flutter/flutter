@@ -9,7 +9,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  test("TextPainter caret test", () {
+  test('TextPainter caret test', () {
     final TextPainter painter = new TextPainter();
 
     String text = 'A';
@@ -29,8 +29,23 @@ void main() {
     expect(caretOffset.dx, painter.width);
   }, skip: io.Platform.isMacOS); // TODO(goderbauer): Disabled because of https://github.com/flutter/flutter/issues/4273
 
-  test("TextPainter error test", () {
+  test('TextPainter error test', () {
     final TextPainter painter = new TextPainter();
     expect(() { painter.paint(null, Offset.zero); }, throwsFlutterError);
+  });
+
+  test('TextPainter size test', () {
+    final TextPainter painter = new TextPainter(
+      text: new TextSpan(
+        text: 'X',
+        style: new TextStyle(
+          inherit: false,
+          fontFamily: 'Ahem',
+          fontSize: 123.0,
+        ),
+      ),
+    );
+    painter.layout();
+    expect(painter.size, const Size(123.0, 123.0));
   });
 }
