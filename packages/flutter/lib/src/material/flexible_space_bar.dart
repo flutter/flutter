@@ -79,8 +79,8 @@ class FlexibleSpaceBar extends StatefulWidget {
 
 class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (config.centerTitle != null)
-      return config.centerTitle;
+    if (widget.centerTitle != null)
+      return widget.centerTitle;
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -106,7 +106,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     final double t = (1.0 - (settings.currentExtent - settings.minExtent) / (deltaExtent)).clamp(0.0, 1.0);
 
     // background image
-    if (config.background != null) {
+    if (widget.background != null) {
       final double fadeStart = math.max(0.0, 1.0 - kToolbarHeight / deltaExtent);
       final double fadeEnd = 1.0;
       assert(fadeStart <= fadeEnd);
@@ -120,13 +120,13 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           height: settings.maxExtent,
           child: new Opacity(
             opacity: opacity,
-            child: config.background
+            child: widget.background
           )
         ));
       }
     }
 
-    if (config.title != null) {
+    if (widget.title != null) {
       final ThemeData theme = Theme.of(context);
       final double opacity = settings.toolbarOpacity;
       if (opacity > 0.0) {
@@ -149,7 +149,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
             transform: scaleTransform,
             child: new Align(
               alignment: titleAlignment,
-              child: new DefaultTextStyle(style: titleStyle, child: config.title)
+              child: new DefaultTextStyle(style: titleStyle, child: widget.title)
             )
           )
         ));

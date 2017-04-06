@@ -155,8 +155,8 @@ class Slider extends StatefulWidget {
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(config.onChanged != null);
-    config.onChanged(value * (config.max - config.min) + config.min);
+    assert(widget.onChanged != null);
+    widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
 
   @override
@@ -164,13 +164,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData theme = Theme.of(context);
     return new _SliderRenderObjectWidget(
-      value: (config.value - config.min) / (config.max - config.min),
-      divisions: config.divisions,
-      label: config.label,
-      activeColor: config.activeColor ?? theme.accentColor,
-      thumbOpenAtMin: config.thumbOpenAtMin,
+      value: (widget.value - widget.min) / (widget.max - widget.min),
+      divisions: widget.divisions,
+      label: widget.label,
+      activeColor: widget.activeColor ?? theme.accentColor,
+      thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
-      onChanged: config.onChanged != null ? _handleChanged : null,
+      onChanged: widget.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
   }

@@ -491,25 +491,25 @@ class _AnimatedLabelState extends AnimatedWidgetBaseState<_AnimatedLabel> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _style = visitor(_style, config.style, (dynamic value) => new TextStyleTween(begin: value));
+    _style = visitor(_style, widget.style, (dynamic value) => new TextStyleTween(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     TextStyle style = _style.evaluate(animation);
     double scale = 1.0;
-    if (style.fontSize != config.style.fontSize) {
+    if (style.fontSize != widget.style.fontSize) {
       // While the fontSize is transitioning, use a scaled Transform as a
       // fraction of the original fontSize. That way we get a smooth scaling
       // effect with no snapping between discrete font sizes.
-      scale = style.fontSize / config.style.fontSize;
-      style = style.copyWith(fontSize: config.style.fontSize);
+      scale = style.fontSize / widget.style.fontSize;
+      style = style.copyWith(fontSize: widget.style.fontSize);
     }
 
     return new Transform(
       transform: new Matrix4.identity()..scale(scale),
       child: new Text(
-        config.text,
+        widget.text,
         style: style,
       ),
     );

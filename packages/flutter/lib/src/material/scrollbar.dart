@@ -75,7 +75,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         child: new CustomPaint(
           foregroundPainter: new _ScrollbarPainter(_controller),
           child: new RepaintBoundary(
-            child: config.child,
+            child: widget.child,
           ),
         ),
       ),
