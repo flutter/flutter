@@ -15,6 +15,16 @@ import 'framework.dart';
 typedef bool NotificationListenerCallback<T extends Notification>(T notification);
 
 /// A notification that can bubble up the widget tree.
+///
+/// You can determine the type of a notification using the `is` operator to
+/// check the [runtimeType] of the notification.
+///
+/// To listen for notifications in a subtree, use a [NotificationListener].
+///
+/// To send a notification, call [dispatch] on the notification you wish to
+/// send. The notification will be delivered to any [NotificationListener]
+/// widgets with the appropriate type parameters that are ancestors of the given
+/// [BuildContext].
 abstract class Notification {
   /// Applied to each ancestor of the [dispatch] target.
   ///
@@ -39,7 +49,9 @@ abstract class Notification {
 
   /// Start bubbling this notification at the given build context.
   ///
-  /// To receive notifications, use a [NotificationListener].
+  /// The notification will be delivered to any [NotificationListener] widgets
+  /// with the appropriate type parameters that are ancestors of the given
+  /// [BuildContext].
   void dispatch(BuildContext target) {
     assert(target != null); // Only call dispatch if the widget's State is still mounted.
     target.visitAncestorElements(visitAncestor);
@@ -67,6 +79,9 @@ abstract class Notification {
 }
 
 /// A widget that listens for [Notification]s bubbling up the tree.
+///
+/// Notifications will trigger the [onNotification] callback only if their
+/// [runtimeType] is a subtype of `T`.
 ///
 /// To dispatch notifications, use the [Notification.dispatch] method.
 class NotificationListener<T extends Notification> extends StatelessWidget {
@@ -121,6 +136,14 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
 /// assumptions about that layout are no longer valid.
 ///
 /// Useful if, for instance, you're trying to align multiple descendants.
+///
+/// To listen for notifications in a subtree, use a
+/// [NotificationListener<LayoutChangedNotification>].
+///
+/// To send a notification, call [dispatch] on the notification you wish to
+/// send. The notification will be delivered to any [NotificationListener]
+/// widgets with the appropriate type parameters that are ancestors of the given
+/// [BuildContext].
 ///
 /// In the widgets library, only the [SizeChangedLayoutNotifier] class and
 /// [Scrollable] classes dispatch this notification (specifically, they dispatch
