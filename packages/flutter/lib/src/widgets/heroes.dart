@@ -31,7 +31,7 @@ enum _HeroFlightType {
 Rect _globalRect(BuildContext context) {
   final RenderBox box = context.findRenderObject();
   assert(box != null && box.hasSize);
-  return MatrixUtils.transformRect(box.getTransformTo(null), Point.origin & box.size);
+  return MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
 }
 
 /// A widget that marks its child as being a candidate for hero animations.
@@ -250,7 +250,7 @@ class _HeroFlight {
           // The toHero has been laid out. If it's no longer where the hero animation is
           // supposed to end up (heroRect.end) then recreate the heroRect tween.
           final RenderBox routeBox = manifest.toRoute.subtreeContext?.findRenderObject();
-          final Point heroOriginEnd = toHeroBox.localToGlobal(Point.origin, ancestor: routeBox);
+          final Offset heroOriginEnd = toHeroBox.localToGlobal(Offset.zero, ancestor: routeBox);
           if (heroOriginEnd != heroRect.end.topLeft) {
             final Rect heroRectEnd = heroOriginEnd & heroRect.end.size;
             heroRect = _doCreateRectTween(heroRect.begin, heroRectEnd);

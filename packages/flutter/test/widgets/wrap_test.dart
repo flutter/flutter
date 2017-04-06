@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 
 import '../rendering/mock_canvas.dart';
 
-void verify(WidgetTester tester, List<Point> answerKey) {
-  final List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
-    (RenderBox target) => target.localToGlobal(Point.origin)
+void verify(WidgetTester tester, List<Offset> answerKey) {
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(Offset.zero)
   ).toList();
   expect(testAnswers, equals(answerKey));
 }
@@ -28,11 +28,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(300.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(300.0, 100.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(300.0, 100.0),
     ]);
 
     await tester.pumpWidget(
@@ -46,11 +46,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(100.0, 0.0),
-      const Point(400.0, 0.0),
-      const Point(100.0, 100.0),
-      const Point(400.0, 100.0),
+    verify(tester, <Offset>[
+      const Offset(100.0, 0.0),
+      const Offset(400.0, 0.0),
+      const Offset(100.0, 100.0),
+      const Offset(400.0, 100.0),
     ]);
 
     await tester.pumpWidget(
@@ -64,11 +64,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(200.0, 0.0),
-      const Point(500.0, 0.0),
-      const Point(200.0, 100.0),
-      const Point(500.0, 100.0),
+    verify(tester, <Offset>[
+      const Offset(200.0, 0.0),
+      const Offset(500.0, 0.0),
+      const Offset(200.0, 100.0),
+      const Offset(500.0, 100.0),
     ]);
 
     await tester.pumpWidget(
@@ -83,11 +83,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(300.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(300.0, 100.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(300.0, 100.0),
     ]);
 
     await tester.pumpWidget(
@@ -102,11 +102,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(0.0, 25.0),
-      const Point(300.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(300.0, 125.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 25.0),
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(300.0, 125.0),
     ]);
 
     await tester.pumpWidget(
@@ -121,11 +121,11 @@ void main() {
         ],
       ),
     );
-    verify(tester, <Point>[
-      const Point(0.0, 50.0),
-      const Point(300.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(300.0, 150.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 50.0),
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(300.0, 150.0),
     ]);
 
   });
@@ -146,10 +146,10 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(95.0, 0.0),
-      const Point(200.0, 0.0),
-      const Point(405.0, 0.0),
+    verify(tester, <Offset>[
+      const Offset(95.0, 0.0),
+      const Offset(200.0, 0.0),
+      const Offset(405.0, 0.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -162,10 +162,10 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(200.0, 0.0),
-      const Point(500.0, 0.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(200.0, 0.0),
+      const Offset(500.0, 0.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -178,10 +178,10 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(30.0, 0.0),
-      const Point(195.0, 0.0),
-      const Point(460.0, 0.0),
+    verify(tester, <Offset>[
+      const Offset(30.0, 0.0),
+      const Offset(195.0, 0.0),
+      const Offset(460.0, 0.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -194,10 +194,10 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(45.0, 0.0),
-      const Point(195.0, 0.0),
-      const Point(445.0, 0.0),
+    verify(tester, <Offset>[
+      const Offset(45.0, 0.0),
+      const Offset(195.0, 0.0),
+      const Offset(445.0, 0.0),
     ]);
   });
 
@@ -214,12 +214,12 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 230.0),
-      const Point(100.0, 230.0),
-      const Point(300.0, 230.0),
-      const Point(0.0, 265.0),
-      const Point(0.0, 310.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 230.0),
+      const Offset(100.0, 230.0),
+      const Offset(300.0, 230.0),
+      const Offset(0.0, 265.0),
+      const Offset(0.0, 310.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -234,12 +234,12 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(100.0, 0.0),
-      const Point(300.0, 0.0),
-      const Point(0.0, 265.0),
-      const Point(0.0, 540.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(100.0, 0.0),
+      const Offset(300.0, 0.0),
+      const Offset(0.0, 265.0),
+      const Offset(0.0, 540.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -254,12 +254,12 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 75.0),
-      const Point(100.0, 75.0),
-      const Point(300.0, 75.0),
-      const Point(0.0, 260.0),
-      const Point(0.0, 455.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 75.0),
+      const Offset(100.0, 75.0),
+      const Offset(300.0, 75.0),
+      const Offset(0.0, 260.0),
+      const Offset(0.0, 455.0),
     ]);
 
     await tester.pumpWidget(new Wrap(
@@ -274,12 +274,12 @@ void main() {
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 115.0),
-      const Point(100.0, 115.0),
-      const Point(300.0, 115.0),
-      const Point(0.0, 265.0),
-      const Point(0.0, 425.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 115.0),
+      const Offset(100.0, 115.0),
+      const Offset(300.0, 115.0),
+      const Offset(0.0, 265.0),
+      const Offset(0.0, 425.0),
     ]);
 
   });
@@ -301,11 +301,11 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(600.0, 70.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 20.0),
-      const Point(100.0, 10.0),
-      const Point(300.0, 0.0),
-      const Point(200.0, 30.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 20.0),
+      const Offset(100.0, 10.0),
+      const Offset(300.0, 0.0),
+      const Offset(200.0, 30.0),
     ]);
 
     await tester.pumpWidget(
@@ -324,11 +324,11 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(700.0, 60.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(400.0, 10.0),
-      const Point(400.0, 40.0),
-      const Point(600.0, 50.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(400.0, 10.0),
+      const Offset(400.0, 40.0),
+      const Offset(600.0, 50.0),
     ]);
   });
 
@@ -350,11 +350,11 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(500.0, 130.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 20.0),
-      const Point(0.0, 50.0),
-      const Point(0.0, 90.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 20.0),
+      const Offset(0.0, 50.0),
+      const Offset(0.0, 90.0),
     ]);
   });
 
@@ -380,13 +380,13 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(150.0, 510.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 260.0),
-      const Point(35.0, 0.0),
-      const Point(35.0, 260.0),
-      const Point(90.0, 0.0),
-      const Point(90.0, 260.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 260.0),
+      const Offset(35.0, 0.0),
+      const Offset(35.0, 260.0),
+      const Offset(90.0, 0.0),
+      const Offset(90.0, 260.0),
     ]);
 
     await tester.pumpWidget(
@@ -408,13 +408,13 @@ void main() {
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(270.0, 258.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(22.0, 0.0),
-      const Point(54.0, 0.0),
-      const Point(96.0, 0.0),
-      const Point(148.0, 0.0),
-      const Point(210.0, 0.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(22.0, 0.0),
+      const Offset(54.0, 0.0),
+      const Offset(96.0, 0.0),
+      const Offset(148.0, 0.0),
+      const Offset(210.0, 0.0),
     ]);
   });
 
@@ -459,16 +459,16 @@ void main() {
       ],
     ));
 
-    await tester.tapAt(const Point(209.0, 314.0));
+    await tester.tapAt(const Offset(209.0, 314.0));
     expect(log, isEmpty);
 
-    await tester.tapAt(const Point(211.0, 314.0));
+    await tester.tapAt(const Offset(211.0, 314.0));
     expect(log, isEmpty);
 
-    await tester.tapAt(const Point(209.0, 316.0));
+    await tester.tapAt(const Offset(209.0, 316.0));
     expect(log, isEmpty);
 
-    await tester.tapAt(const Point(211.0, 316.0));
+    await tester.tapAt(const Offset(211.0, 316.0));
     expect(log, equals(<String>['hit']));
   });
 

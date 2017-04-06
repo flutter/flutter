@@ -36,7 +36,7 @@ class TextSelectionPoint {
   }
 
   /// Screen coordinates of the lower left or lower right corner of the selection.
-  final Point point;
+  final Offset point;
 
   /// Direction of the text at this edge of the selection.
   final TextDirection direction;
@@ -271,12 +271,12 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      final Point start = new Point(0.0, _preferredLineHeight) + caretOffset + paintOffset;
+      final Offset start = new Offset(0.0, _preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[new TextSelectionPoint(localToGlobal(start), null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
-      final Point start = new Point(boxes.first.start, boxes.first.bottom) + paintOffset;
-      final Point end = new Point(boxes.last.end, boxes.last.bottom) + paintOffset;
+      final Offset start = new Offset(boxes.first.start, boxes.first.bottom) + paintOffset;
+      final Offset end = new Offset(boxes.last.end, boxes.last.bottom) + paintOffset;
       return <TextSelectionPoint>[
         new TextSelectionPoint(localToGlobal(start), boxes.first.direction),
         new TextSelectionPoint(localToGlobal(end), boxes.last.direction),
@@ -285,9 +285,9 @@ class RenderEditable extends RenderBox {
   }
 
   /// Returns the position in the text for the given global coordinate.
-  TextPosition getPositionForPoint(Point globalPosition) {
+  TextPosition getPositionForPoint(Offset globalPosition) {
     globalPosition += -_paintOffset;
-    return _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
+    return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
 
   /// Returns the Rect in local coordinates for the caret at the given text
@@ -311,7 +311,7 @@ class RenderEditable extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   TapGestureRecognizer _tap;
   LongPressGestureRecognizer _longPress;
@@ -325,18 +325,18 @@ class RenderEditable extends RenderBox {
     }
   }
 
-  Point _lastTapDownPosition;
-  Point _longPressPosition;
+  Offset _lastTapDownPosition;
+  Offset _longPressPosition;
   void _handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition + -_paintOffset;
   }
 
   void _handleTap() {
     assert(_lastTapDownPosition != null);
-    final Point globalPosition = _lastTapDownPosition;
+    final Offset globalPosition = _lastTapDownPosition;
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
       onSelectionChanged(new TextSelection.fromPosition(position), this, false);
     }
   }
@@ -348,10 +348,10 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleLongPress() {
-    final Point globalPosition = _longPressPosition;
+    final Offset globalPosition = _longPressPosition;
     _longPressPosition = null;
     if (onSelectionChanged != null) {
-      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition).toOffset());
+      final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
       onSelectionChanged(_selectWordAtOffset(position), this, true);
     }
   }
@@ -419,13 +419,13 @@ class RenderEditable extends RenderBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     else
       _paintContents(context, offset);
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
   void debugFillDescription(List<String> description) {

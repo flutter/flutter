@@ -340,7 +340,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -348,7 +348,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       final Canvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
-      canvas.clipRect(Point.origin & size);
+      canvas.clipRect(Offset.zero & size);
       for (InkFeature inkFeature in _inkFeatures)
         inkFeature._paint(canvas);
       canvas.restore();

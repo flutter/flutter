@@ -23,7 +23,7 @@ class Dot {
   Dot({ Color color }) : _paint = new Paint()..color = color;
 
   final Paint _paint;
-  Point position = Point.origin;
+  Offset position = Offset.zero;
   double radius = 0.0;
 
   void update(PointerEvent event) {
@@ -58,7 +58,7 @@ class RenderDots extends RenderBox {
 
   /// Makes this render object hittable so that it receives pointer events.
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   /// Processes pointer events by mutating state and invalidating its previous
   /// painting commands.

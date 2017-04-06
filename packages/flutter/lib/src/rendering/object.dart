@@ -2480,7 +2480,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // (with the signature being whatever passes for coordinates for this
   // particular class):
   //
-  // bool hitTest(HitTestResult result, { Point position }) {
+  // bool hitTest(HitTestResult result, { Offset position }) {
   //   // If the given position is not inside this node, then return false.
   //   // Otherwise:
   //   // For each child that intersects the position, in z-order starting from

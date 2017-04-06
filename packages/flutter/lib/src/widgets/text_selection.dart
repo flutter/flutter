@@ -74,7 +74,7 @@ abstract class TextSelectionControls {
   ///
   /// Typically displays buttons for copying and pasting text.
   // TODO(mpcomplete): A single position is probably insufficient.
-  Widget buildToolbar(BuildContext context, Point position, TextSelectionDelegate delegate);
+  Widget buildToolbar(BuildContext context, Offset position, TextSelectionDelegate delegate);
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -237,7 +237,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
     // Find the horizontal midpoint, just above the selected text.
     final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    final Point midpoint = new Point(
+    final Offset midpoint = new Offset(
       (endpoints.length == 1) ?
         endpoints[0].point.x :
         (endpoints[0].point.x + endpoints[1].point.x) / 2.0,
@@ -318,7 +318,7 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 }
 
 class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay> {
-  Point _dragPosition;
+  Offset _dragPosition;
 
   void _handleDragStart(DragStartDetails details) {
     _dragPosition = details.globalPosition + new Offset(0.0, -widget.selectionControls.handleSize.height);
@@ -361,8 +361,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
   @override
   Widget build(BuildContext context) {
-    final List<TextSelectionPoint> endpoints = widget.renderObject.getEndpointsForSelection(widget.selection);
-    Point point;
+    Offset point;
     TextSelectionHandleType type;
 
     switch (widget.position) {

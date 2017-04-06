@@ -1196,13 +1196,13 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        final Point transformed = new Point(position.x - childParentData.offset.dx,
+        final Offset transformed = new Offset(position.x - childParentData.offset.dx,
                                       position.y - childParentData.offset.dy);
         if (child.hitTest(result, position: transformed))
           return true;

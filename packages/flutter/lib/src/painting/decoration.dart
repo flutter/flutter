@@ -10,7 +10,7 @@ import 'edge_insets.dart';
 
 export 'package:flutter/services.dart' show ImageConfiguration;
 
-export 'basic_types.dart' show Point, Offset, Size;
+export 'basic_types.dart' show Offset, Size;
 export 'edge_insets.dart' show EdgeInsets;
 
 // This group of classes is intended for painting in cartesian coordinates.
@@ -71,7 +71,7 @@ abstract class Decoration {
   /// if the decoration only draws a circle, this function might
   /// return true if the point was inside the circle and false
   /// otherwise.
-  bool hitTest(Size size, Point position) => true;
+  bool hitTest(Size size, Offset position) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///

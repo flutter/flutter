@@ -62,7 +62,7 @@ class OutsideState extends State<Outside> {
 void main() {
   testWidgets('setState() smoke test', (WidgetTester tester) async {
     await tester.pumpWidget(new Outside());
-    final Point location = tester.getCenter(find.text('INSIDE'));
+    final Offset location = tester.getCenter(find.text('INSIDE'));
     final TestGesture gesture = await tester.startGesture(location);
     await tester.pump();
     await gesture.up();

@@ -89,18 +89,18 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
-    canvas.drawRect(Point.origin & size, paint);
+    canvas.drawRect(Offset.zero & size, paint);
 
     paint.color = valueColor;
     if (value != null) {
       final double width = value.clamp(0.0, 1.0) * size.width;
-      canvas.drawRect(Point.origin & new Size(width, size.height), paint);
+      canvas.drawRect(Offset.zero & new Size(width, size.height), paint);
     } else {
       final double startX = size.width * (1.5 * animationValue - 0.5);
       final double endX = startX + 0.5 * size.width;
       final double x = startX.clamp(0.0, size.width);
       final double width = endX.clamp(0.0, size.width) - x;
-      canvas.drawRect(new Point(x, 0.0) & new Size(width, size.height), paint);
+      canvas.drawRect(new Offset(x, 0.0) & new Size(width, size.height), paint);
     }
   }
 
@@ -239,7 +239,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     if (value == null) // Indeterminate
       paint.strokeCap = StrokeCap.square;
 
-    canvas.drawArc(Point.origin & size, arcStart, arcSweep, false, paint);
+    canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
 
   @override

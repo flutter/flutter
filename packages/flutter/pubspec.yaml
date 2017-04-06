@@ -13,7 +13,8 @@ dependencies:
   vector_math: '>=2.0.3 <3.0.0'
 
   sky_engine:
-    path: ../../bin/cache/pkg/sky_engine
+    path: ../../../engine/src/out/host_debug_unopt/gen/dart-pkg/sky_engine
+#    path: ../../bin/cache/pkg/sky_engine
 
 dev_dependencies:
   flutter_test:

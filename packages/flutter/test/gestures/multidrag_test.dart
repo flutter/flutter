@@ -17,23 +17,23 @@ void main() {
     final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
-    drag.onStart = (Point position) {
+    drag.onStart = (Offset position) {
       didStartDrag = true;
       return new TestDrag();
     };
 
     final TestPointer pointer = new TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
     tester.async.flushMicrotasks();
     expect(didStartDrag, isFalse);
-    tester.route(pointer.move(const Point(20.0, 20.0)));
+    tester.route(pointer.move(const Offset(20.0, 20.0)));
     expect(didStartDrag, isFalse);
     tester.async.elapse(kLongPressTimeout * 2);
     expect(didStartDrag, isFalse);
-    tester.route(pointer.move(const Point(30.0, 30.0)));
+    tester.route(pointer.move(const Offset(30.0, 30.0)));
     expect(didStartDrag, isFalse);
     drag.dispose();
   });

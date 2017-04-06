@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Point, Offset;
+import 'dart:ui' show Offset;
 
 import 'lsq_solver.dart';
 
-export 'dart:ui' show Point, Offset;
+export 'dart:ui' show Offset;
 
 /// A velocity in two dimensions.
 class Velocity {
@@ -119,7 +119,7 @@ class _PointAtTime {
   const _PointAtTime(this.point, this.time);
 
   final Duration time;
-  final Point point;
+  final Offset point;
 
   @override
   String toString() => '_PointAtTime($point at $time)';
@@ -148,7 +148,7 @@ class VelocityTracker {
   int _index = 0;
 
   /// Adds a position as the given time to the tracker.
-  void addPosition(Duration time, Point position) {
+  void addPosition(Duration time, Offset position) {
     _index += 1;
     if (_index == _kHistorySize)
       _index = 0;
@@ -186,7 +186,7 @@ class VelocityTracker {
         break;
 
       oldestSample = sample;
-      final Point position = sample.point;
+      final Offset position = sample.point;
       x.add(position.x);
       y.add(position.y);
       w.add(1.0);

@@ -525,12 +525,12 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     if (child != null) {
       final Rect bounds = offset & size;
       // we move the offset to the center of the circle for the RenderSectors
-      context.paintChild(child, bounds.center.toOffset());
+      context.paintChild(child, bounds.center);
     }
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child == null)
       return false;
     double x = position.x;

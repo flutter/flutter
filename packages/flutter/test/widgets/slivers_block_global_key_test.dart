@@ -36,9 +36,9 @@ Future<Null> test(WidgetTester tester, double offset, List<int> keys) {
   ));
 }
 
-void verify(WidgetTester tester, List<Point> answerKey, String text) {
-  final List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
-    (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
+void verify(WidgetTester tester, List<Offset> answerKey, String text) {
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
@@ -51,74 +51,74 @@ void verify(WidgetTester tester, List<Point> answerKey, String text) {
 void main() {
   testWidgets('Viewport+SliverBlock with GlobalKey reparenting', (WidgetTester tester) async {
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '1:1 2:1 3:1 4:1 5:1 6:1 ');
     // gen 2 - flipping the order:
     await test(tester, 0.0, <int>[9,8,7,6,5,4,3,2,1]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '9:2 8:2 7:2 6:1 5:1 4:1 ');
     // gen 3 - flipping the order back:
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '1:3 2:3 3:3 4:1 5:1 6:1 ');
     // gen 4 - removal:
     await test(tester, 0.0, <int>[1,2,3,5,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '1:3 2:3 3:3 5:1 6:1 7:4 ');
     // gen 5 - insertion:
     await test(tester, 0.0, <int>[1,2,3,4,5,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '1:3 2:3 3:3 4:5 5:1 6:1 ');
     // gen 6 - adjacent reordering:
     await test(tester, 0.0, <int>[1,2,3,5,4,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 100.0),
-      const Point(0.0, 200.0),
-      const Point(0.0, 300.0),
-      const Point(0.0, 400.0),
-      const Point(0.0, 500.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 100.0),
+      const Offset(0.0, 200.0),
+      const Offset(0.0, 300.0),
+      const Offset(0.0, 400.0),
+      const Offset(0.0, 500.0),
     ], '1:3 2:3 3:3 5:1 4:5 6:1 ');
     // gen 7 - scrolling:
     await test(tester, 120.0, <int>[1,2,3,5,4,6,7,8,9]);
-    verify(tester, <Point>[
-      const Point(0.0, -20.0),
-      const Point(0.0, 80.0),
-      const Point(0.0, 180.0),
-      const Point(0.0, 280.0),
-      const Point(0.0, 380.0),
-      const Point(0.0, 480.0),
-      const Point(0.0, 580.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, -20.0),
+      const Offset(0.0, 80.0),
+      const Offset(0.0, 180.0),
+      const Offset(0.0, 280.0),
+      const Offset(0.0, 380.0),
+      const Offset(0.0, 480.0),
+      const Offset(0.0, 580.0),
     ], '2:3 3:3 5:1 4:5 6:1 7:7 8:7 ');
   });
 }

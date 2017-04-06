@@ -61,8 +61,8 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
   assert(gestureDirection != DismissDirection.horizontal);
   assert(gestureDirection != DismissDirection.vertical);
 
-  Point downLocation;
-  Point upLocation;
+  Offset downLocation;
+  Offset upLocation;
   switch (gestureDirection) {
     case DismissDirection.endToStart:
       // getTopRight() returns a point that's just beyond itemWidget's right
@@ -263,7 +263,7 @@ void main() {
     dismissDirection = DismissDirection.down;
 
     await tester.pumpWidget(buildTest());
-    final Point location = tester.getTopLeft(find.text('0'));
+    final Offset location = tester.getTopLeft(find.text('0'));
     final Offset offset = const Offset(0.0, 5.0);
     final TestGesture gesture = await tester.startGesture(location, pointer: 5);
     await gesture.moveBy(offset);

@@ -190,9 +190,9 @@ class _RenderRadio extends RenderToggleable {
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
 
-    paintRadialReaction(canvas, offset, const Point(kRadialReactionRadius, kRadialReactionRadius));
+    paintRadialReaction(canvas, offset, const Offset(kRadialReactionRadius, kRadialReactionRadius));
 
-    final Point center = (offset & size).center;
+    final Offset center = (offset & size).center;
     final Color radioColor = onChanged != null ? activeColor : inactiveColor;
 
     // Outer circle

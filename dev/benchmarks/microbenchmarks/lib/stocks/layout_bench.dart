@@ -30,7 +30,7 @@ Future<Null> main() async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
-    await tester.tapAt(const Point(20.0, 40.0)); // Open drawer
+    await tester.tapAt(const Offset(20.0, 40.0)); // Open drawer
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 

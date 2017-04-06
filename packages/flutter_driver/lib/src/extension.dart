@@ -238,8 +238,8 @@ class FlutterDriverExtension {
     final int totalMoves = scrollCommand.duration.inMicroseconds * scrollCommand.frequency ~/ Duration.MICROSECONDS_PER_SECOND;
     final Offset delta = new Offset(scrollCommand.dx, scrollCommand.dy) / totalMoves.toDouble();
     final Duration pause = scrollCommand.duration ~/ totalMoves;
-    final Point startLocation = _prober.getCenter(target);
-    Point currentLocation = startLocation;
+    final Offset startLocation = _prober.getCenter(target);
+    Offset currentLocation = startLocation;
     final TestPointer pointer = new TestPointer(1);
     final HitTestResult hitTest = new HitTestResult();
 

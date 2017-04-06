@@ -70,7 +70,7 @@ void main() {
     );
 
     final Finder title = find.text('X');
-    Point center = tester.getCenter(title);
+    Offset center = tester.getCenter(title);
     Size size = tester.getSize(title);
     expect(center.x, lessThan(400 - size.width / 2.0));
 
@@ -109,7 +109,7 @@ void main() {
 
 
     final Finder title = find.text('X');
-    final Point center = tester.getCenter(title);
+    final Offset center = tester.getCenter(title);
     final Size size = tester.getSize(title);
     expect(center.x, greaterThan(400 - size.width / 2.0));
     expect(center.x, lessThan(400 + size.width / 2.0));
@@ -333,7 +333,7 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Point(0.0, 0.0));
+    expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
@@ -365,7 +365,7 @@ void main() {
 
     final Finder addButton = find.byTooltip('Add');
     // Right padding is 4dp.
-    expect(tester.getTopRight(addButton), const Point(800.0 - 4.0, 0.0));
+    expect(tester.getTopRight(addButton), const Offset(800.0 - 4.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 

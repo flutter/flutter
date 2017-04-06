@@ -524,7 +524,7 @@ class PopupMenuButton<T> extends StatefulWidget {
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final RenderBox renderBox = context.findRenderObject();
-    final Point topLeft = renderBox.localToGlobal(Point.origin);
+    final Offset topLeft = renderBox.localToGlobal(Offset.zero);
     showMenu<T>(
       context: context,
       elevation: widget.elevation,

@@ -257,8 +257,8 @@ void main() {
     );
 
     final RenderBox firstBox = tester.renderObject(find.text('0'));
-    final Point upperLeft = firstBox.localToGlobal(Point.origin);
-    expect(upperLeft, equals(const Point(7.0, 3.0)));
+    final Offset upperLeft = firstBox.localToGlobal(Offset.zero);
+    expect(upperLeft, equals(const Offset(7.0, 3.0)));
     expect(firstBox.size.width, equals(800.0 - 12.0));
   });
 

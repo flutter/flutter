@@ -27,11 +27,11 @@ class _GridPaperPainter extends CustomPainter {
     final double allDivisions = (divisions * subDivisions).toDouble();
     for (double x = 0.0; x <= size.width; x += interval / allDivisions) {
       linePaint.strokeWidth = (x % interval == 0.0) ? 1.0 : (x % (interval / subDivisions) == 0.0) ? 0.5: 0.25;
-      canvas.drawLine(new Point(x, 0.0), new Point(x, size.height), linePaint);
+      canvas.drawLine(new Offset(x, 0.0), new Offset(x, size.height), linePaint);
     }
     for (double y = 0.0; y <= size.height; y += interval / allDivisions) {
       linePaint.strokeWidth = (y % interval == 0.0) ? 1.0 : (y % (interval / subDivisions) == 0.0) ? 0.5: 0.25;
-      canvas.drawLine(new Point(0.0, y), new Point(size.width, y), linePaint);
+      canvas.drawLine(new Offset(0.0, y), new Offset(size.width, y), linePaint);
     }
   }
 
@@ -44,7 +44,7 @@ class _GridPaperPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Point position) => false;
+  bool hitTest(Offset position) => false;
 }
 
 /// A widget that draws a rectilinear grid of 1px wide lines.

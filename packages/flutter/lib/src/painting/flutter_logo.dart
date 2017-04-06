@@ -174,7 +174,7 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   // TODO(ianh): better hit testing
-  bool hitTest(Size size, Point position) => true;
+  bool hitTest(Size size, Offset position) => true;
 
   @override
   BoxPainter createBoxPainter([VoidCallback onChanged]) {
@@ -275,9 +275,9 @@ class _FlutterLogoPainter extends BoxPainter {
       ..color = _config.darkColor;
 
     final ui.Gradient triangleGradient = new ui.Gradient.linear(
-      const <Point>[
-        const Point(87.2623 + 37.9092, 28.8384 + 123.4389),
-        const Point(42.9205 + 37.9092, 35.0952 + 123.4389),
+      const <Offset>[
+        const Offset(87.2623 + 37.9092, 28.8384 + 123.4389),
+        const Offset(42.9205 + 37.9092, 35.0952 + 123.4389),
       ],
       <Color>[
         const Color(0xBFFFFFFF),
@@ -297,9 +297,9 @@ class _FlutterLogoPainter extends BoxPainter {
       ..blendMode = BlendMode.multiply;
 
     final ui.Gradient rectangleGradient = new ui.Gradient.linear(
-      const <Point>[
-        const Point(62.3643 + 37.9092, 40.135 + 123.4389),
-        const Point(54.0376 + 37.9092, 31.8083 + 123.4389),
+      const <Offset>[
+        const Offset(62.3643 + 37.9092, 40.135 + 123.4389),
+        const Offset(54.0376 + 37.9092, 31.8083 + 123.4389),
       ],
       <Color>[
         const Color(0x80FFFFFF),
@@ -440,7 +440,7 @@ class _FlutterLogoPainter extends BoxPainter {
         );
         canvas.save();
         if (_config._position < 1.0) {
-          final Point center = logoSquare.center;
+          final Offset center = logoSquare.center;
           final Path path = new Path()
             ..moveTo(center.x, center.y)
             ..lineTo(center.x + rect.width, center.y - rect.width)
@@ -471,7 +471,7 @@ class _FlutterLogoPainter extends BoxPainter {
           canvas.drawRect(_textBoundingRect.inflate(_textBoundingRect.width * 0.5), new Paint()
             ..blendMode = BlendMode.modulate
             ..shader = new ui.Gradient.linear(
-              <Point>[new Point(_textBoundingRect.width * -0.5, 0.0), new Point(_textBoundingRect.width * 1.5, 0.0)],
+              <Offset>[new Offset(_textBoundingRect.width * -0.5, 0.0), new Offset(_textBoundingRect.width * 1.5, 0.0)],
               <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF), const Color(0x00FFFFFF), const Color(0x00FFFFFF)],
               <double>[ 0.0, math.max(0.0, _config._position.abs() - 0.1), math.min(_config._position.abs() + 0.1, 1.0), 1.0 ],
             )

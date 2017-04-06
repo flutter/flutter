@@ -90,7 +90,7 @@ class RenderRotatedBox extends RenderBox with RenderObjectWithChildMixin<RenderB
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(_paintTransform != null || debugNeedsLayout || child == null);
     if (child == null || _paintTransform == null)
       return false;

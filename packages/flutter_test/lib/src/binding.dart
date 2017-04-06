@@ -197,12 +197,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Convert the given point from the global coodinate system (as used by
   /// pointer events from the device) to the coordinate system used by the
   /// tests (an 800 by 600 window).
-  Point globalToLocal(Point point) => point;
+  Offset globalToLocal(Offset point) => point;
 
   /// Convert the given point from the coordinate system used by the tests (an
   /// 800 by 600 window) to the global coodinate system (as used by pointer
   /// events from the device).
-  Point localToGlobal(Point point) => point;
+  Offset localToGlobal(Offset point) => point;
 
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result, {
@@ -852,16 +852,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Point globalToLocal(Point point) {
+  Offset globalToLocal(Offset point) {
     final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
-    final Point result = MatrixUtils.transformPoint(transform, point);
+    final Offset result = MatrixUtils.transformPoint(transform, point);
     return result;
   }
 
   @override
-  Point localToGlobal(Point point) {
+  Offset localToGlobal(Offset point) {
     final Matrix4 transform = renderView.configuration.toHitTestMatrix();
     return MatrixUtils.transformPoint(transform, point);
   }
@@ -932,7 +932,7 @@ class _LiveTestPointerRecord {
       decay = 1;
   final int pointer;
   final Color color;
-  Point position;
+  Offset position;
   int decay; // >0 means down, <0 means up, increases by one each time, removed at 0
 }
 
@@ -970,7 +970,7 @@ class _LiveTestRenderView extends RenderView {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     final Matrix4 transform = configuration.toHitTestMatrix();
     final double det = transform.invert();
     assert(det != 0.0);
@@ -985,7 +985,7 @@ class _LiveTestRenderView extends RenderView {
     if (_pointers.isNotEmpty) {
       final double radius = configuration.size.shortestSide * 0.05;
       final Path path = new Path()
-        ..addOval(new Rect.fromCircle(center: Point.origin, radius: radius))
+        ..addOval(new Rect.fromCircle(center: Offset.zero, radius: radius))
         ..moveTo(0.0, -radius * 2.0)
         ..lineTo(0.0, radius * 2.0)
         ..moveTo(-radius * 2.0, 0.0)
@@ -998,7 +998,7 @@ class _LiveTestRenderView extends RenderView {
       for (int pointer in _pointers.keys) {
         final _LiveTestPointerRecord record = _pointers[pointer];
         paint.color = record.color.withOpacity(record.decay < 0 ? (record.decay / (_kPointerDecay - 1)) : 1.0);
-        canvas.drawPath(path.shift(record.position.toOffset()), paint);
+        canvas.drawPath(path.shift(record.position), paint);
         if (record.decay < 0)
           dirty = true;
         record.decay += 1;

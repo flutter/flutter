@@ -28,7 +28,7 @@ void main() {
     tap.onTap = () { log.add('tap'); };
 
     void test(Offset delta) {
-      final Point origin = const Point(10.0, 10.0);
+      final Offset origin = const Offset(10.0, 10.0);
       final TestPointer pointer = new TestPointer(5);
       final PointerDownEvent down = pointer.down(origin);
       horizontalDrag.addPointer(down);

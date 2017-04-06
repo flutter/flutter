@@ -351,7 +351,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset)) {
-        context.pushClipRect(needsCompositing, offset, Point.origin & size, paintContents);
+        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents);
       } else {
         paintContents(context, offset);
       }
@@ -367,14 +367,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
     if (child != null && _shouldClipAtPaintOffset(_paintOffset))
-      return Point.origin & size;
+      return Offset.zero & size;
     return null;
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (child != null) {
-      final Point transformed = position + -_paintOffset;
+      final Offset transformed = position + -_paintOffset;
       return child.hitTest(result, position: transformed);
     }
     return false;

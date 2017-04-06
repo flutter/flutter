@@ -549,9 +549,9 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Point pointArgument = arguments[0];
+    final Offset pointArgument = arguments[0];
     if (x != null && y != null) {
-      final Point point = new Point(x, y);
+      final Offset point = new Offset(x, y);
       if (point != pointArgument)
         throw 'called $methodName with a center coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
     } else {
@@ -569,7 +569,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     if (x != null && y != null) {
-      description.add('point ${new Point(x, y)}');
+      description.add('point ${new Offset(x, y)}');
     } else {
       if (x != null)
         description.add('x-coordinate ${x.toStringAsFixed(1)}');

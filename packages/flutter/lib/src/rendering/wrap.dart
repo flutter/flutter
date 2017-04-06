@@ -560,7 +560,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -569,7 +569,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
     // TODO(ianh): move the debug flex overflow paint logic somewhere common so
     // it can be reused here
     if (_hasVisualOverflow)
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, defaultPaint);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
     else
       defaultPaint(context, offset);
   }

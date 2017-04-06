@@ -169,7 +169,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Settings text is heroing to its new location
-    Point settingsOffset = tester.getTopLeft(find.text('Settings'));
+    Offset settingsOffset = tester.getTopLeft(find.text('Settings'));
     expect(settingsOffset.x, greaterThan(0.0));
     expect(settingsOffset.x, lessThan(100.0));
     expect(settingsOffset.y, greaterThan(0.0));
@@ -181,7 +181,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -190,7 +190,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Home page is sliding in from the left, no heroes.
-    final Point homeOffset = tester.getTopLeft(find.text('Home'));
+    final Offset homeOffset = tester.getTopLeft(find.text('Home'));
     expect(homeOffset.x, lessThan(0.0));
     expect(homeOffset.y, 0.0);
 
@@ -224,7 +224,7 @@ void main() {
 
     // Drag from left edge to invoke the gesture. (near bottom so we grab
     // the Settings page as it comes up).
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 550.0));
+    TestGesture gesture = await tester.startGesture(const Offset(5.0, 550.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -236,7 +236,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Try again now that we're settled.
-    gesture = await tester.startGesture(const Point(5.0, 550.0));
+    gesture = await tester.startGesture(const Offset(5.0, 550.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -275,7 +275,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();

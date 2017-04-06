@@ -119,7 +119,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;  // Already visible.
     }
     final RenderBox box = context.findRenderObject();
-    final Point target = box.localToGlobal(box.size.center(Point.origin));
+    final Offset target = box.localToGlobal(box.size.center(Offset.zero));
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
@@ -195,7 +195,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     this.preferBelow
   });
 
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 
@@ -250,7 +250,7 @@ class _TooltipOverlay extends StatelessWidget {
   final double height;
   final EdgeInsets padding;
   final Animation<double> animation;
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 

@@ -24,8 +24,8 @@ Future<Null> test(WidgetTester tester, double offset, EdgeInsets padding, AxisDi
 void verify(WidgetTester tester, List<Rect> answerKey) {
   final List<Rect> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Rect>(
     (RenderBox target) {
-      final Point topLeft = target.localToGlobal(Point.origin);
-      final Point bottomRight = target.localToGlobal(target.size.bottomRight(Point.origin));
+      final Offset topLeft = target.localToGlobal(Offset.zero);
+      final Offset bottomRight = target.localToGlobal(target.size.bottomRight(Offset.zero));
       return new Rect.fromPoints(topLeft, bottomRight);
     }
   ).toList();
@@ -82,15 +82,15 @@ void main() {
       new Rect.fromLTWH(0.0, 510.0, 800.0, 400.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Point(10.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
-    result = tester.hitTestOnBinding(const Point(10.0, 60.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 60.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(100.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
-    result = tester.hitTestOnBinding(const Point(100.0, 490.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 490.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(10.0, 520.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
 
@@ -104,15 +104,15 @@ void main() {
       new Rect.fromLTWH(0.0, 600.0-510.0-400.0, 800.0, 400.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Point(10.0, 600.0-10.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
-    result = tester.hitTestOnBinding(const Point(10.0, 600.0-60.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-60.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(100.0, 600.0-100.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 600.0-100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
-    result = tester.hitTestOnBinding(const Point(100.0, 600.0-490.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 600.0-490.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(10.0, 600.0-520.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 600.0-520.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
 
@@ -126,15 +126,15 @@ void main() {
       new Rect.fromLTWH(800.0-510.0-400.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Point(800.0-10.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
-    result = tester.hitTestOnBinding(const Point(800.0-60.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-60.0, 10.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(800.0-100.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
-    result = tester.hitTestOnBinding(const Point(800.0-490.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-490.0, 100.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(800.0-520.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(800.0-520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
 
@@ -148,15 +148,15 @@ void main() {
       new Rect.fromLTWH(510.0, 0.0, 400.0, 600.0),
     ]);
     HitTestResult result;
-    result = tester.hitTestOnBinding(const Point(10.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(10.0, 10.0));
     expect(result.path.first.target, tester.firstRenderObject<RenderObject>(find.byType(Text)));
-    result = tester.hitTestOnBinding(const Point(60.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(60.0, 10.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(100.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(100.0, 100.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).skip(1).first);
-    result = tester.hitTestOnBinding(const Point(490.0, 100.0));
+    result = tester.hitTestOnBinding(const Offset(490.0, 100.0));
     expect(result.path.first.target, const isInstanceOf<RenderView>());
-    result = tester.hitTestOnBinding(const Point(520.0, 10.0));
+    result = tester.hitTestOnBinding(const Offset(520.0, 10.0));
     expect(result.path.first.target, tester.renderObjectList<RenderObject>(find.byType(Text)).last);
   });
 
@@ -168,7 +168,7 @@ void main() {
         const SliverToBoxAdapter(child: const SizedBox(width: 400.0, height: 400.0, child: const Text('x'))),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Point.origin), const Point(0.0, 200.0));
+    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(0.0, 200.0));
   });
 
   testWidgets('Viewport+SliverPadding changing padding', (WidgetTester tester) async {
@@ -180,7 +180,7 @@ void main() {
         const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Point.origin), const Point(399.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(399.0, 0.0));
     await tester.pumpWidget(new Viewport(
       axisDirection: AxisDirection.left,
       offset: new ViewportOffset.fixed(0.0),
@@ -189,7 +189,7 @@ void main() {
         const SliverToBoxAdapter(child: const SizedBox(width: 201.0, child: const Text('x'))),
       ],
     ));
-    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Point.origin), const Point(409.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.text('x')).localToGlobal(Offset.zero), const Offset(409.0, 0.0));
   });
 
   testWidgets('Viewport+SliverPadding changing direction', (WidgetTester tester) async {

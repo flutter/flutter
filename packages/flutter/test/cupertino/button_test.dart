@@ -133,7 +133,7 @@ void main() {
     )));
 
     // Keep a "down" gesture on the button
-    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    final Offset center = tester.getCenter(find.byType(CupertinoButton));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 
@@ -154,7 +154,7 @@ void main() {
     )));
 
     // Keep a "down" gesture on the button
-    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    final Offset center = tester.getCenter(find.byType(CupertinoButton));
     await tester.startGesture(center);
     await tester.pumpAndSettle();
 

@@ -344,7 +344,7 @@ class RenderCustomMultiChildLayoutBox extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

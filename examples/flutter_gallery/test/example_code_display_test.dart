@@ -20,7 +20,7 @@ void main() {
 
 
     // Scroll the Buttons demo into view so that a tap will succeed
-    final Point allDemosOrigin = tester.getTopRight(find.text('Demos'));
+    final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
       await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));

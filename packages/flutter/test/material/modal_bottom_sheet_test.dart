@@ -58,7 +58,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
 
     // Tap above the the bottom sheet to dismiss it
-    await tester.tapAt(const Point(20.0, 20.0));
+    await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pump(); // bottom sheet dismiss animation starts
     expect(showBottomSheetThenCalled, isTrue);
     await tester.pump(const Duration(seconds: 1)); // animation done

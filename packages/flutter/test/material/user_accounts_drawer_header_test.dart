@@ -63,12 +63,12 @@ void main() {
     box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
     expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge)
 
-    final Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
-    final Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
+    final Offset topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
+    final Offset topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
 
-    final Point avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
-    final Point avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
-    final Point avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
+    final Offset avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
+    final Offset avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
+    final Offset avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
 
     expect(avatarATopLeft.x - topLeft.x, equals(16.0));
     expect(avatarATopLeft.y - topLeft.y, equals(16.0));

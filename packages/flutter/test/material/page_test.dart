@@ -19,14 +19,14 @@ void main() {
       )
     );
 
-    final Point widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Offset widget1TopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
     Opacity widget2Opacity = tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
-    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
     // Android transition is vertical only.
@@ -75,14 +75,14 @@ void main() {
       )
     );
 
-    final Point widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    Point widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
-    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.x < widget1InitialTopLeft.x, true);
@@ -134,7 +134,7 @@ void main() {
       )
     );
 
-    final Point widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
+    final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
@@ -146,8 +146,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    Point widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
-    Point widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
+    Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
+    Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 1 doesn't move.
     expect(widget1TransientTopLeft == widget1InitialTopLeft, true);
@@ -207,7 +207,7 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -215,7 +215,7 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Page 2 didn't move
-    expect(tester.getTopLeft(find.text('Page 2')), Point.origin);
+    expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   });
 
   testWidgets('test back gesture on iOS', (WidgetTester tester) async {
@@ -238,7 +238,7 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -247,17 +247,17 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // The route widget position needs to track the finger position very exactly.
-    expect(tester.getTopLeft(find.text('Page 2')), const Point(400.0, 0.0));
+    expect(tester.getTopLeft(find.text('Page 2')), const Offset(400.0, 0.0));
 
     await gesture.moveBy(const Offset(-200.0, 0.0));
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Page 2')), const Point(200.0, 0.0));
+    expect(tester.getTopLeft(find.text('Page 2')), const Offset(200.0, 0.0));
 
     await gesture.moveBy(const Offset(-100.0, 200.0));
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Page 2')), const Point(100.0, 0.0));
+    expect(tester.getTopLeft(find.text('Page 2')), const Offset(100.0, 0.0));
   });
 
   testWidgets('test no back gesture on iOS fullscreen dialogs', (WidgetTester tester) async {
@@ -280,7 +280,7 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(400.0, 0.0));
     await tester.pump();
 
@@ -288,6 +288,6 @@ void main() {
     expect(find.text('Page 2'), isOnstage);
 
     // Page 2 didn't move
-    expect(tester.getTopLeft(find.text('Page 2')), Point.origin);
+    expect(tester.getTopLeft(find.text('Page 2')), Offset.zero);
   });
 }

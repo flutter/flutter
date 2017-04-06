@@ -90,7 +90,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   void _handleOnScaleStart(ScaleStartDetails details) {
     setState(() {
       _previousScale = _scale;
-      _normalizedOffset = (details.focalPoint.toOffset() - _offset) / _scale;
+      _normalizedOffset = (details.focalPoint - _offset) / _scale;
       // The fling animation stops if an input gesture starts.
       _controller.stop();
     });
@@ -100,7 +100,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     setState(() {
       _scale = (_previousScale * details.scale).clamp(1.0, 4.0);
       // Ensure that image location under the focal point stays in the same place despite scaling.
-      _offset = _clampOffset(details.focalPoint.toOffset() - _normalizedOffset * _scale);
+      _offset = _clampOffset(details.focalPoint - _normalizedOffset * _scale);
     });
   }
 
@@ -109,7 +109,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     if (magnitude < _kMinFlingVelocity)
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
-    final double distance = (Point.origin & context.size).shortestSide;
+    final double distance = (Offset.zero & context.size).shortestSide;
     _flingAnimation = new Tween<Offset>(
       begin: _offset,
       end: _clampOffset(_offset + direction * distance)
