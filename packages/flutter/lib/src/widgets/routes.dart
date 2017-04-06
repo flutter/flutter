@@ -723,6 +723,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// be transparent.
   Color get barrierColor;
 
+  /// Whether this route represents a fullscreen dialog. It allows the child
+  /// page to adapt its presentation accordingly. 
+  bool get fullscreenDialog => false;
+
   /// Whether the route should remain in memory when it is inactive. If this is
   /// true, then the route is maintained, so that any futures it is holding from
   /// the next route will properly resolve when the next route pops. If this is
