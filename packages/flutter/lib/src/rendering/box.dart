@@ -899,7 +899,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// [hitTestChildren]. When implementing hit testing, you can either override
 /// these latter two methods, or ignore them and just override [hitTest].
 ///
-/// The [hitTest] method itself is given a [Point], and must return true if the
+/// The [hitTest] method itself is given an [Offset], and must return true if the
 /// object or one of its children has absorbed the hit (preventing objects below
 /// this one from being hit), or false if the hit can continue to other objects
 /// below this one.

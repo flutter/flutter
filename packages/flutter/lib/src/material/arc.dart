@@ -13,7 +13,7 @@ import 'package:flutter/painting.dart';
 // vertical or horizontal.
 const double _kOnAxisDelta = 2.0;
 
-/// A [Tween] that animates a [Point] along a circular arc.
+/// A [Tween] that animates an [Offset] along a circular arc.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -28,7 +28,7 @@ const double _kOnAxisDelta = 2.0;
 ///
 /// * [MaterialRectArcTween]
 class MaterialPointArcTween extends Tween<Offset> {
-  /// Creates a [Tween] for animating [Point]s along a circular arc.
+  /// Creates a [Tween] for animating [Offset]s along a circular arc.
   ///
   /// The [begin] and [end] points are required, cannot be null, and are
   /// immutable.
@@ -186,7 +186,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///
 /// See also:
 ///
-/// * [MaterialPointArcTween]. the analogue for [Point] interporation.
+/// * [MaterialPointArcTween]. the analogue for [Offset] interporation.
 /// * [RectTween], which does a linear rectangle interpolation.
 class MaterialRectArcTween extends RectTween {
   /// Creates a [Tween] for animating [Rect]s along a circular arc.

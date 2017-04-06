@@ -1249,7 +1249,7 @@ class PipelineOwner {
 ///
 /// The general behaviour of your hit-testing method should be similar to the
 /// behavior described for [RenderBox]. The main difference is that the input
-/// need not be a [Point]. You are also allowed to use a different subclass of
+/// need not be an [Offset]. You are also allowed to use a different subclass of
 /// [HitTestEntry] when adding entries to the [HitTestResult]. When the
 /// [handleEvent] method is called, the same object that was added to the
 /// [HitTestResult] will be passed in, so it can be used to track information
