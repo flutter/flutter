@@ -143,6 +143,7 @@ tasks:
       Runs benchmarks from dev/benchmarks/microbenchmarks.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    timeout_in_minutes: 30
 
   flutter_view__start_up:
     description: >
@@ -195,6 +196,7 @@ tasks:
       Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    timeout_in_minutes: 30
 
   flutter_view_ios__start_up:
     description: >

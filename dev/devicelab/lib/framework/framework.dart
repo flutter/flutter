@@ -16,7 +16,7 @@ import 'utils.dart';
 /// Maximum amount of time a single task is allowed to take to run.
 ///
 /// If exceeded the task is considered to have failed.
-const Duration taskTimeout = const Duration(minutes: 25);
+const Duration _kDefaultTaskTimeout = const Duration(minutes: 15);
 
 /// Represents a unit of work performed in the CI environment that can
 /// succeed, fail and be retried independently of others.
@@ -63,7 +63,10 @@ class _TaskRunner {
   _TaskRunner(this.task) {
     registerExtension('ext.cocoonRunTask',
         (String method, Map<String, String> parameters) async {
-      final TaskResult result = await run();
+      final Duration taskTimeout = parameters.containsKey('timeoutInMinutes')
+        ? new Duration(minutes: int.parse(parameters['timeoutInMinutes']))
+        : _kDefaultTaskTimeout;
+      final TaskResult result = await run(taskTimeout);
       return new ServiceExtensionResponse.result(JSON.encode(result.toJson()));
     });
     registerExtension('ext.cocoonRunnerReady',
@@ -75,7 +78,7 @@ class _TaskRunner {
   /// Signals that this task runner finished running the task.
   Future<TaskResult> get whenDone => _completer.future;
 
-  Future<TaskResult> run() async {
+  Future<TaskResult> run(Duration taskTimeout) async {
     try {
       _taskStarted = true;
       final TaskResult result = await _performTask().timeout(taskTimeout);
