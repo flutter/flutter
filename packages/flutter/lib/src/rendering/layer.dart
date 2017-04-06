@@ -203,8 +203,7 @@ class ContainerLayer extends Layer {
     if (_lastChild != null)
       _lastChild._nextSibling = child;
     _lastChild = child;
-    if (_firstChild == null)
-      _firstChild = child;
+    _firstChild ??= child;
   }
 
   void _remove(Layer child) {

@@ -430,12 +430,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _AndroidDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _AndroidDevicePortForwarder(this);
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 

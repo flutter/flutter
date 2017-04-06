@@ -577,10 +577,8 @@ class BoxShadow {
   static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
     if (a == null && b == null)
       return null;
-    if (a == null)
-      a = <BoxShadow>[];
-    if (b == null)
-      b = <BoxShadow>[];
+    a ??= <BoxShadow>[];
+    b ??= <BoxShadow>[];
     final List<BoxShadow> result = <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
     for (int i = 0; i < commonLength; ++i)
