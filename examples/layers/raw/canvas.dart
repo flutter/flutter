@@ -41,8 +41,9 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.rotate(math.PI/4.0);
 
   final ui.Gradient yellowBlue = new ui.Gradient.linear(
-    <ui.Offset>[new ui.Offset(-radius, -radius), const ui.Offset(0.0, 0.0)],
-    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]
+    new ui.Offset(-radius, -radius),
+    const ui.Offset(0.0, 0.0),
+    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
   );
   canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
                   new ui.Paint()..shader = yellowBlue);

@@ -222,15 +222,17 @@ class RenderParagraph extends RenderBox {
             final double fadeStart = fadeEnd - fadeSizePainter.width;
             // TODO(abarth): This shader has an LTR bias.
             _overflowShader = new ui.Gradient.linear(
-              <Offset>[new Offset(fadeStart, 0.0), new Offset(fadeEnd, 0.0)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(fadeStart, 0.0),
+              new Offset(fadeEnd, 0.0),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           } else {
             final double fadeEnd = size.height;
             final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
             _overflowShader = new ui.Gradient.linear(
-              <Offset>[new Offset(0.0, fadeStart), new Offset(0.0, fadeEnd)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(0.0, fadeStart),
+              new Offset(0.0, fadeEnd),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
           break;

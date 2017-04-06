@@ -668,8 +668,9 @@ class LinearGradient extends Gradient {
   @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
-      <Offset>[begin.withinRect(rect), end.withinRect(rect)],
-      colors, stops, tileMode
+      begin.withinRect(rect),
+      end.withinRect(rect),
+      colors, stops, tileMode,
     );
   }
 
