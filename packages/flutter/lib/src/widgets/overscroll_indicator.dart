@@ -116,17 +116,17 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   @override
   void initState() {
     super.initState();
-    _leadingController = new _GlowController(vsync: this, color: config.color, axis: config.axis);
-    _trailingController = new _GlowController(vsync: this, color: config.color, axis: config.axis);
+    _leadingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
+    _trailingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
   }
 
   @override
-  void didUpdateConfig(GlowingOverscrollIndicator oldConfig) {
-    if (oldConfig.color != config.color || oldConfig.axis != config.axis) {
-      _leadingController.color = config.color;
-      _leadingController.axis = config.axis;
-      _trailingController.color = config.color;
-      _trailingController.axis = config.axis;
+  void didUpdateWidget(GlowingOverscrollIndicator oldWidget) {
+    if (oldWidget.color != widget.color || oldWidget.axis != widget.axis) {
+      _leadingController.color = widget.color;
+      _leadingController.axis = widget.axis;
+      _trailingController.color = widget.color;
+      _trailingController.axis = widget.axis;
     }
   }
 
@@ -152,7 +152,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         _accepted[isLeading] = confirmationNotification._accepted;
       }
       assert(controller != null);
-      assert(notification.axis == config.axis);
+      assert(notification.axis == widget.axis);
       if (_accepted[isLeading]) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
@@ -201,12 +201,12 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       child: new RepaintBoundary(
         child: new CustomPaint(
           foregroundPainter: new _GlowingOverscrollIndicatorPainter(
-            leadingController: config.showLeading ? _leadingController : null,
-            trailingController: config.showTrailing ? _trailingController : null,
-            axisDirection: config.axisDirection,
+            leadingController: widget.showLeading ? _leadingController : null,
+            trailingController: widget.showTrailing ? _trailingController : null,
+            axisDirection: widget.axisDirection,
           ),
           child: new RepaintBoundary(
-            child: config.child,
+            child: widget.child,
           ),
         ),
       ),

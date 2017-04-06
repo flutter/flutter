@@ -124,9 +124,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   void _updatePosition() {
     _configuration = ScrollConfiguration.of(context);
     _physics = _configuration.getScrollPhysics(context);
-    if (config.physics != null)
-      _physics = config.physics.applyTo(_physics);
-    final ScrollController controller = config.controller;
+    if (widget.physics != null)
+      _physics = widget.physics.applyTo(_physics);
+    final ScrollController controller = widget.controller;
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
@@ -148,27 +148,27 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     _updatePosition();
   }
 
-  bool _shouldUpdatePosition(Scrollable oldConfig) {
-    return config.physics?.runtimeType != oldConfig.physics?.runtimeType
-        || config.controller?.runtimeType != oldConfig.controller?.runtimeType;
+  bool _shouldUpdatePosition(Scrollable oldWidget) {
+    return widget.physics?.runtimeType != oldWidget.physics?.runtimeType
+        || widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
   @override
-  void didUpdateConfig(Scrollable oldConfig) {
-    super.didUpdateConfig(oldConfig);
+  void didUpdateWidget(Scrollable oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    if (config.controller != oldConfig.controller) {
-      oldConfig.controller?.detach(position);
-      config.controller?.attach(position);
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.detach(position);
+      widget.controller?.attach(position);
     }
 
-    if (_shouldUpdatePosition(oldConfig))
+    if (_shouldUpdatePosition(oldWidget))
       _updatePosition();
   }
 
   @override
   void dispose() {
-    config.controller?.detach(position);
+    widget.controller?.detach(position);
     position.dispose();
     super.dispose();
   }
@@ -189,12 +189,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   @protected
   void setCanDrag(bool canDrag) {
-    if (canDrag == _lastCanDrag && (!canDrag || config.axis == _lastAxisDirection))
+    if (canDrag == _lastCanDrag && (!canDrag || widget.axis == _lastAxisDirection))
       return;
     if (!canDrag) {
       _gestureRecognizers = const <Type, GestureRecognizerFactory>{};
     } else {
-      switch (config.axis) {
+      switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
             VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/7173
@@ -226,7 +226,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       }
     }
     _lastCanDrag = canDrag;
-    _lastAxisDirection = config.axis;
+    _lastAxisDirection = widget.axis;
     if (_gestureDetectorKey.currentState != null)
       _gestureDetectorKey.currentState.replaceGestureRecognizers(_gestureRecognizers);
   }
@@ -258,8 +258,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   DragScrollActivity _drag;
 
   bool get _reverseDirection {
-    assert(config.axisDirection != null);
-    switch (config.axisDirection) {
+    assert(widget.axisDirection != null);
+    switch (widget.axisDirection) {
       case AxisDirection.up:
       case AxisDirection.left:
         return true;
@@ -312,10 +312,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
-        child: config.viewportBuilder(context, position),
+        child: widget.viewportBuilder(context, position),
       ),
     );
-    return _configuration.buildViewportChrome(context, result, config.axisDirection);
+    return _configuration.buildViewportChrome(context, result, widget.axisDirection);
   }
 
   @override

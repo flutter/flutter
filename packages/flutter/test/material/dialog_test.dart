@@ -90,11 +90,11 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement widget = tester.element(find.byType(Material).last);
-    final Material materialconfig = widget.state.config;
+    final Material materialwidget = widget.state.widget;
     //first and second expect check that the material is the dialog's one
-    expect(materialconfig.type, MaterialType.card);
-    expect(materialconfig.elevation, 24);
-    expect(materialconfig.color, Colors.grey[800]);
+    expect(materialwidget.type, MaterialType.card);
+    expect(materialwidget.elevation, 24);
+    expect(materialwidget.color, Colors.grey[800]);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {

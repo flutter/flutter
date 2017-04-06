@@ -436,19 +436,19 @@ class _ModalScopeState extends State<_ModalScope> {
   @override
   void initState() {
     super.initState();
-    config.route.animation?.addStatusListener(_animationStatusChanged);
-    config.route.secondaryAnimation?.addStatusListener(_animationStatusChanged);
+    widget.route.animation?.addStatusListener(_animationStatusChanged);
+    widget.route.secondaryAnimation?.addStatusListener(_animationStatusChanged);
   }
 
   @override
-  void didUpdateConfig(_ModalScope oldConfig) {
-    assert(config.route == oldConfig.route);
+  void didUpdateWidget(_ModalScope oldWidget) {
+    assert(widget.route == oldWidget.route);
   }
 
   @override
   void dispose() {
-    config.route.animation?.removeStatusListener(_animationStatusChanged);
-    config.route.secondaryAnimation?.removeStatusListener(_animationStatusChanged);
+    widget.route.animation?.removeStatusListener(_animationStatusChanged);
+    widget.route.secondaryAnimation?.removeStatusListener(_animationStatusChanged);
     super.dispose();
   }
 
@@ -475,24 +475,24 @@ class _ModalScopeState extends State<_ModalScope> {
   @override
   Widget build(BuildContext context) {
     return new FocusScope(
-      node: config.route.focusScopeNode,
+      node: widget.route.focusScopeNode,
       child: new Offstage(
-        offstage: config.route.offstage,
+        offstage: widget.route.offstage,
         child: new IgnorePointer(
-          ignoring: config.route.animation?.status == AnimationStatus.reverse,
-          child: config.route.buildTransitions(
+          ignoring: widget.route.animation?.status == AnimationStatus.reverse,
+          child: widget.route.buildTransitions(
             context,
-            config.route.animation,
-            config.route.secondaryAnimation,
+            widget.route.animation,
+            widget.route.secondaryAnimation,
             new RepaintBoundary(
               child: new PageStorage(
-                key: config.route._subtreeKey,
-                bucket: config.route._storageBucket,
+                key: widget.route._subtreeKey,
+                bucket: widget.route._storageBucket,
                 child: new _ModalScopeStatus(
-                  route: config.route,
-                  isCurrent: config.route.isCurrent,
-                  canPop: config.route.canPop,
-                  child: config.page,
+                  route: widget.route,
+                  isCurrent: widget.route.isCurrent,
+                  canPop: widget.route.canPop,
+                  child: widget.page,
                 ),
               ),
             ),

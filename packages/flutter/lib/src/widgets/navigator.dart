@@ -704,22 +704,22 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    for (NavigatorObserver observer in config.observers) {
+    for (NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
-    push(config.onGenerateRoute(new RouteSettings(
-      name: config.initialRoute ?? Navigator.defaultRouteName,
+    push(widget.onGenerateRoute(new RouteSettings(
+      name: widget.initialRoute ?? Navigator.defaultRouteName,
       isInitialRoute: true
     )));
   }
 
   @override
-  void didUpdateConfig(Navigator oldConfig) {
-    if (oldConfig.observers != config.observers) {
-      for (NavigatorObserver observer in oldConfig.observers)
+  void didUpdateWidget(Navigator oldWidget) {
+    if (oldWidget.observers != widget.observers) {
+      for (NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;
-      for (NavigatorObserver observer in config.observers) {
+      for (NavigatorObserver observer in widget.observers) {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
@@ -730,7 +730,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void dispose() {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; });
-    for (NavigatorObserver observer in config.observers)
+    for (NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
     for (Route<dynamic> route in doomed)
@@ -759,10 +759,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(name: name);
-    Route<dynamic> route = config.onGenerateRoute(settings);
+    Route<dynamic> route = widget.onGenerateRoute(settings);
     if (route == null) {
-      assert(config.onUnknownRoute != null);
-      route = config.onUnknownRoute(settings);
+      assert(widget.onUnknownRoute != null);
+      route = widget.onUnknownRoute(settings);
       assert(route != null);
     }
     return route;
@@ -811,7 +811,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.didChangeNext(null);
       if (oldRoute != null)
         oldRoute.didChangeNext(route);
-      for (NavigatorObserver observer in config.observers)
+      for (NavigatorObserver observer in widget.observers)
         observer.didPush(route, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
@@ -896,7 +896,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute.didChangeNext(null);
       if (index > 0)
         _history[index - 1].didChangeNext(newRoute);
-      for (NavigatorObserver observer in config.observers)
+      for (NavigatorObserver observer in widget.observers)
         observer.didPush(newRoute, oldRoute);
     });
     assert(() { _debugLocked = false; return true; });
@@ -1015,7 +1015,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           if (route._navigator != null)
             _poppedRoutes.add(route);
           _history.last.didPopNext(route);
-          for (NavigatorObserver observer in config.observers)
+          for (NavigatorObserver observer in widget.observers)
             observer.didPop(route, _history.last);
         });
       } else {
@@ -1085,14 +1085,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Used for the iOS back gesture.
   void didStartUserGesture() {
     _userGestureInProgress = true;
-    for (NavigatorObserver observer in config.observers)
+    for (NavigatorObserver observer in widget.observers)
       observer.didStartUserGesture();
   }
 
   /// A user gesture is no longer controlling the navigator.
   void didStopUserGesture() {
     _userGestureInProgress = false;
-    for (NavigatorObserver observer in config.observers)
+    for (NavigatorObserver observer in widget.observers)
       observer.didStopUserGesture();
   }
 

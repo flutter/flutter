@@ -39,7 +39,7 @@ class OuterContainer extends StatefulWidget {
 class OuterContainerState extends State<OuterContainer> {
   @override
   Widget build(BuildContext context) {
-    return config.child;
+    return widget.child;
   }
 }
 
@@ -57,7 +57,7 @@ void main() {
 
     final StatefulElement innerElement = tester.element(find.byKey(innerKey));
     final InnerWidgetState innerElementState = innerElement.state;
-    expect(innerElementState.config, equals(inner1));
+    expect(innerElementState.widget, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject.attached, isTrue);
 
@@ -69,18 +69,18 @@ void main() {
     expect(tester.element(find.byKey(innerKey)), equals(innerElement));
     expect(innerElement.state, equals(innerElementState));
 
-    expect(innerElementState.config, equals(inner2));
+    expect(innerElementState.widget, equals(inner2));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject.attached, isTrue);
 
     final StatefulElement outerElement = tester.element(find.byKey(outerKey));
-    expect(outerElement.state.config, equals(outer2));
+    expect(outerElement.state.widget, equals(outer2));
     outerElement.markNeedsBuild();
     await tester.pump();
 
     expect(tester.element(find.byKey(innerKey)), equals(innerElement));
     expect(innerElement.state, equals(innerElementState));
-    expect(innerElementState.config, equals(inner2));
+    expect(innerElementState.widget, equals(inner2));
     expect(innerElement.renderObject.attached, isTrue);
   });
 }

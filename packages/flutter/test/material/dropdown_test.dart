@@ -191,7 +191,7 @@ void main() {
     expect(tester.elementList(find.text('19')), hasLength(1));
 
     expect(value, 4);
-    await tester.tap(find.byConfig(button));
+    await tester.tap(find.byWidget(button));
     expect(value, 4);
     // this waits for the route's completer to complete, which calls handleChanged
     await tester.idle();

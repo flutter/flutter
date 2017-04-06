@@ -186,8 +186,8 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
         _controller.reverse();
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
-    if (config.onOpenChanged != null)
-      config.onOpenChanged(_isExpanded);
+    if (widget.onOpenChanged != null)
+      widget.onOpenChanged(_isExpanded);
   }
 
   Widget buildList(BuildContext context, Widget child) {
@@ -206,10 +206,10 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
             data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
             child: new TwoLevelListItem(
               onTap: _handleOnTap,
-              leading: config.leading,
+              leading: widget.leading,
               title: new DefaultTextStyle(
                 style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
-                child: config.title
+                child: widget.title
               ),
               trailing: new RotationTransition(
                 turns: _iconTurns,
@@ -220,7 +220,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
           new ClipRect(
             child: new Align(
               heightFactor: _easeInAnimation.value,
-              child: new Column(children: config.children)
+              child: new Column(children: widget.children)
             )
           )
         ]
@@ -240,7 +240,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
       ..end = theme.accentColor;
     _backgroundColor
       ..begin = Colors.transparent
-      ..end = config.backgroundColor ?? Colors.transparent;
+      ..end = widget.backgroundColor ?? Colors.transparent;
 
     return new AnimatedBuilder(
       animation: _controller.view,

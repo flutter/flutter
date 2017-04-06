@@ -19,8 +19,8 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.child != null)
-      return config.child;
+    if (widget.child != null)
+      return widget.child;
     return new Container();
   }
 }
@@ -37,13 +37,13 @@ class DeactivateLogger extends StatefulWidget {
 class DeactivateLoggerState extends State<DeactivateLogger> {
   @override
   void deactivate() {
-    config.log.add('deactivate');
+    widget.log.add('deactivate');
     super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
-    config.log.add('build');
+    widget.log.add('build');
     return new Container();
   }
 }
@@ -75,7 +75,7 @@ void main() {
     final StateMarkerState rightState = right.currentState;
     rightState.marker = "right";
 
-    final StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
@@ -101,7 +101,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals("right"));
 
-    final StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));
@@ -144,7 +144,7 @@ void main() {
     final StateMarkerState rightState = right.currentState;
     rightState.marker = "right";
 
-    final StateMarkerState grandchildState = tester.state(find.byConfig(grandchild));
+    final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
@@ -166,7 +166,7 @@ void main() {
     expect(right.currentState, equals(rightState));
     expect(rightState.marker, equals("right"));
 
-    final StateMarkerState newGrandchildState = tester.state(find.byConfig(newGrandchild));
+    final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
     expect(newGrandchildState.marker, equals("grandchild"));

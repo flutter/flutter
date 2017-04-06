@@ -33,7 +33,7 @@ class SizeChangerState extends State<SizeChanger> {
         new SizedBox(
           height: _flag ? 50.0 : 100.0,
           width: 100.0,
-          child: config.child
+          child: widget.child
         )
       ],
     );

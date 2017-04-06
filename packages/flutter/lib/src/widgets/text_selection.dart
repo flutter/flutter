@@ -321,29 +321,29 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
   Point _dragPosition;
 
   void _handleDragStart(DragStartDetails details) {
-    _dragPosition = details.globalPosition + new Offset(0.0, -config.selectionControls.handleSize.height);
+    _dragPosition = details.globalPosition + new Offset(0.0, -widget.selectionControls.handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     _dragPosition += details.delta;
-    final TextPosition position = config.renderObject.getPositionForPoint(_dragPosition);
+    final TextPosition position = widget.renderObject.getPositionForPoint(_dragPosition);
 
-    if (config.selection.isCollapsed) {
-      config.onSelectionHandleChanged(new TextSelection.fromPosition(position));
+    if (widget.selection.isCollapsed) {
+      widget.onSelectionHandleChanged(new TextSelection.fromPosition(position));
       return;
     }
 
     TextSelection newSelection;
-    switch (config.position) {
+    switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         newSelection = new TextSelection(
           baseOffset: position.offset,
-          extentOffset: config.selection.extentOffset
+          extentOffset: widget.selection.extentOffset
         );
         break;
       case _TextSelectionHandlePosition.end:
         newSelection = new TextSelection(
-          baseOffset: config.selection.baseOffset,
+          baseOffset: widget.selection.baseOffset,
           extentOffset: position.offset
         );
         break;
@@ -352,20 +352,20 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     if (newSelection.baseOffset >= newSelection.extentOffset)
       return; // don't allow order swapping.
 
-    config.onSelectionHandleChanged(newSelection);
+    widget.onSelectionHandleChanged(newSelection);
   }
 
   void _handleTap() {
-    config.onSelectionHandleTapped();
+    widget.onSelectionHandleTapped();
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<TextSelectionPoint> endpoints = config.renderObject.getEndpointsForSelection(config.selection);
+    final List<TextSelectionPoint> endpoints = widget.renderObject.getEndpointsForSelection(widget.selection);
     Point point;
     TextSelectionHandleType type;
 
-    switch (config.position) {
+    switch (widget.position) {
       case _TextSelectionHandlePosition.start:
         point = endpoints[0].point;
         type = _chooseType(endpoints[0], TextSelectionHandleType.left, TextSelectionHandleType.right);
@@ -388,7 +388,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
           new Positioned(
             left: point.x,
             top: point.y,
-            child: config.selectionControls.buildHandle(context, type)
+            child: widget.selectionControls.buildHandle(context, type)
           )
         ]
       )
@@ -400,7 +400,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
     TextSelectionHandleType ltrType,
     TextSelectionHandleType rtlType
   ) {
-    if (config.selection.isCollapsed)
+    if (widget.selection.isCollapsed)
       return TextSelectionHandleType.collapsed;
 
     assert(endpoint.direction != null);

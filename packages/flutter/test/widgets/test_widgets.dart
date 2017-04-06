@@ -50,7 +50,7 @@ class FlipWidgetState extends State<FlipWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _showLeft ? config.left : config.right;
+    return _showLeft ? widget.left : widget.right;
   }
 }
 

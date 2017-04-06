@@ -26,7 +26,7 @@ void main() {
     ));
 
     children.forEach((Widget child) {
-      final RenderBox box = tester.renderObject(find.byConfig(child));
+      final RenderBox box = tester.renderObject(find.byWidget(child));
       expect(box.size.width, equals(100.0), reason: "child width");
       expect(box.size.height, equals(100.0), reason: "child height");
     });
@@ -49,7 +49,7 @@ void main() {
     ));
 
     children.forEach((Widget child) {
-      final RenderBox box = tester.renderObject(find.byConfig(child));
+      final RenderBox box = tester.renderObject(find.byWidget(child));
       expect(box.size.width, equals(50.0), reason: "child width");
       expect(box.size.height, equals(50.0), reason: "child height");
     });

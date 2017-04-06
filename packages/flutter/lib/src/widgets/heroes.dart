@@ -165,7 +165,7 @@ class _HeroState extends State<Hero> {
     }
     return new KeyedSubtree(
       key: _key,
-      child: config.child,
+      child: widget.child,
     );
   }
 }
@@ -182,7 +182,7 @@ class _HeroFlightManifest {
     @required this.toHero,
     @required this.createRectTween,
   }) {
-    assert(fromHero.config.tag == toHero.config.tag);
+    assert(fromHero.widget.tag == toHero.widget.tag);
   }
 
   final _HeroFlightType type;
@@ -194,7 +194,7 @@ class _HeroFlightManifest {
   final _HeroState toHero;
   final CreateRectTween createRectTween;
 
-  Object get tag => fromHero.config.tag;
+  Object get tag => fromHero.widget.tag;
 
   Animation<double> get animation {
     return new CurvedAnimation(
@@ -235,7 +235,7 @@ class _HeroFlight {
     assert(manifest != null);
     return new AnimatedBuilder(
       animation: _proxyAnimation,
-      child: manifest.toHero.config,
+      child: manifest.toHero.widget,
       builder: (BuildContext context, Widget child) {
         final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject();
         if (_aborted || toHeroBox == null || !toHeroBox.attached) {

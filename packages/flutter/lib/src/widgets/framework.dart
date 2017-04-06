@@ -734,7 +734,7 @@ abstract class State<T extends StatefulWidget> {
   /// [initState]. If the parent updates this location in the tree to a new
   /// widget with the same [runtimeType] and [key] as the current configuration,
   /// the framework will update this property to refer to the new widget and
-  /// then call [didUpdateConfig], passing the old configuration as an argument.
+  /// then call [didUpdateWidget], passing the old configuration as an argument.
   T get widget => _widget;
   T _widget;
 

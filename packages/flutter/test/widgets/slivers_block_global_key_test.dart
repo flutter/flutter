@@ -19,7 +19,7 @@ class _GenerationTextState extends State<GenerationText> {
   _GenerationTextState() : generation = globalGeneration;
   final int generation;
   @override
-  Widget build(BuildContext context) => new Text('${config.value}:$generation ');
+  Widget build(BuildContext context) => new Text('${widget.value}:$generation ');
 }
 
 Future<Null> test(WidgetTester tester, double offset, List<int> keys) {

@@ -470,7 +470,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       duration: _kDialAnimateDuration,
       vsync: this,
     );
-    _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
+    _thetaTween = new Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _theta = _thetaTween.animate(new CurvedAnimation(
       parent: _thetaController,
       curve: Curves.fastOutSlowIn
@@ -478,9 +478,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didUpdateConfig(_Dial oldConfig) {
-    if (config.mode != oldConfig.mode && !_dragging)
-      _animateTo(_getThetaForTime(config.selectedTime));
+  void didUpdateWidget(_Dial oldWidget) {
+    if (widget.mode != oldWidget.mode && !_dragging)
+      _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
@@ -511,7 +511,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
-    final double fraction = (config.mode == _TimePickerMode.hour) ?
+    final double fraction = (widget.mode == _TimePickerMode.hour) ?
         (time.hour / _kHoursPerPeriod) % _kHoursPerPeriod :
         (time.minute / _kMinutesPerHour) % _kMinutesPerHour;
     return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
@@ -519,24 +519,24 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   TimeOfDay _getTimeForTheta(double theta) {
     final double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
-    if (config.mode == _TimePickerMode.hour) {
+    if (widget.mode == _TimePickerMode.hour) {
       final int hourOfPeriod = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
-      return config.selectedTime.replacing(
-        hour: hourOfPeriod + config.selectedTime.periodOffset
+      return widget.selectedTime.replacing(
+        hour: hourOfPeriod + widget.selectedTime.periodOffset
       );
     } else {
-      return config.selectedTime.replacing(
+      return widget.selectedTime.replacing(
         minute: (fraction * _kMinutesPerHour).round() % _kMinutesPerHour
       );
     }
   }
 
   void _notifyOnChangedIfNeeded() {
-    if (config.onChanged == null)
+    if (widget.onChanged == null)
       return;
     final TimeOfDay current = _getTimeForTheta(_theta.value);
-    if (current != config.selectedTime)
-      config.onChanged(current);
+    if (current != widget.selectedTime)
+      widget.onChanged(current);
   }
 
   void _updateThetaForPan() {
@@ -573,7 +573,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _dragging = false;
     _position = null;
     _center = null;
-    _animateTo(_getThetaForTime(config.selectedTime));
+    _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
@@ -593,7 +593,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final ThemeData theme = Theme.of(context);
     List<TextPainter> primaryLabels;
     List<TextPainter> secondaryLabels;
-    switch (config.mode) {
+    switch (widget.mode) {
       case _TimePickerMode.hour:
         primaryLabels = _initHours(theme.textTheme);
         secondaryLabels = _initHours(theme.accentTextTheme);
@@ -640,7 +640,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedTime = config.initialTime;
+    _selectedTime = widget.initialTime;
   }
 
   _TimePickerMode _mode = _TimePickerMode.hour;

@@ -124,19 +124,19 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
     final Widget overlay = new _TooltipOverlay(
-      message: config.message,
-      height: config.height,
-      padding: config.padding,
+      message: widget.message,
+      height: widget.height,
+      padding: widget.padding,
       animation: new CurvedAnimation(
         parent: _controller,
         curve: Curves.fastOutSlowIn
       ),
       target: target,
-      verticalOffset: config.verticalOffset,
-      preferBelow: config.preferBelow
+      verticalOffset: widget.verticalOffset,
+      preferBelow: widget.preferBelow
     );
     _entry = new OverlayEntry(builder: (BuildContext context) => overlay);
-    Overlay.of(context, debugRequiredFor: config).insert(_entry);
+    Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     _controller.forward();
   }
@@ -175,14 +175,14 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    assert(Overlay.of(context, debugRequiredFor: config) != null);
+    assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
       onLongPress: ensureTooltipVisible,
       excludeFromSemantics: true,
       child: new Semantics(
-        label: config.message,
-        child: config.child,
+        label: widget.message,
+        child: widget.child,
       )
     );
   }

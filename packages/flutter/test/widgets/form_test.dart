@@ -180,14 +180,14 @@ void main() {
 
     // initial value should also be visible in the raw input line
     final EditableTextState editableText = tester.state(find.byType(EditableText));
-    expect(editableText.config.controller.text, equals(initialValue));
+    expect(editableText.widget.controller.text, equals(initialValue));
 
     // sanity check, make sure we can still edit the text and everything updates
     expect(inputKey.currentState.value, equals(initialValue));
     await tester.enterText(find.byType(EditableText), 'world');
     await tester.pump();
     expect(inputKey.currentState.value, equals('world'));
-    expect(editableText.config.controller.text, equals('world'));
+    expect(editableText.widget.controller.text, equals('world'));
   });
 
   testWidgets('No crash when a TextFormField is removed from the tree', (WidgetTester tester) async {

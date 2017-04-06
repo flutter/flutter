@@ -90,14 +90,14 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
     return new WillPopScope(
-      onWillPop: config.onWillPop,
+      onWillPop: widget.onWillPop,
       child: new _FormScope(
         formState: this,
         generation: _generation,
-        child: config.child,
+        child: widget.child,
       ),
     );
   }
@@ -148,7 +148,7 @@ class _FormScope extends InheritedWidget {
   final int _generation;
 
   /// The [Form] associated with this widget.
-  Form get form => _formState.config;
+  Form get form => _formState.widget;
 
   @override
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
@@ -250,14 +250,14 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (config.onSaved != null)
-      config.onSaved(value);
+    if (widget.onSaved != null)
+      widget.onSaved(value);
   }
 
   /// Resets the field to its initial value.
   void reset() {
     setState(() {
-      _value = config.initialValue;
+      _value = widget.initialValue;
       _errorText = null;
     });
   }
@@ -272,8 +272,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   bool _validate() {
-    if (config.validator != null)
-      _errorText = config.validator(_value);
+    if (widget.validator != null)
+      _errorText = widget.validator(_value);
     return !hasError;
   }
 
@@ -289,7 +289,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   void initState() {
     super.initState();
-    _value = config.initialValue;
+    _value = widget.initialValue;
   }
 
   @override
@@ -300,9 +300,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
     Form.of(context)?._register(this);
-    return config.builder(this);
+    return widget.builder(this);
   }
 }

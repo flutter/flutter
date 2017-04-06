@@ -168,8 +168,8 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeLocale(Locale locale) {
-    if (config.onLocaleChanged != null) {
-      config.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
+    if (widget.onLocaleChanged != null) {
+      widget.onLocaleChanged(locale).then<Null>((LocaleQueryData data) {
         if (mounted)
           setState(() { _localeData = data; });
       });
@@ -184,7 +184,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   Widget build(BuildContext context) {
-    if (config.onLocaleChanged != null && _localeData == null) {
+    if (widget.onLocaleChanged != null && _localeData == null) {
       // If the app expects a locale but we don't yet know the locale, then
       // don't build the widgets now.
       // TODO(ianh): Make this unnecessary. See https://github.com/flutter/flutter/issues/1865
@@ -198,20 +198,20 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: new LocaleQuery(
         data: _localeData,
         child: new Title(
-          title: config.title,
-          color: config.color,
+          title: widget.title,
+          color: widget.color,
           child: new Navigator(
             key: _navigator,
-            initialRoute: config.initialRoute ?? ui.window.defaultRouteName,
-            onGenerateRoute: config.onGenerateRoute,
-            observers: config.navigatorObservers
+            initialRoute: widget.initialRoute ?? ui.window.defaultRouteName,
+            onGenerateRoute: widget.onGenerateRoute,
+            observers: widget.navigatorObservers
           )
         )
       )
     );
-    if (config.textStyle != null) {
+    if (widget.textStyle != null) {
       result = new DefaultTextStyle(
-        style: config.textStyle,
+        style: widget.textStyle,
         child: result
       );
     }
@@ -219,10 +219,10 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     PerformanceOverlay performanceOverlay;
     // We need to push a performance overlay if any of the display or checkerboarding
     // options are set.
-    if (config.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
+    if (widget.showPerformanceOverlay || WidgetsApp.showPerformanceOverlayOverride) {
       performanceOverlay = new PerformanceOverlay.allEnabled(
-                  checkerboardRasterCacheImages: config.checkerboardRasterCacheImages);
-    } else if (config.checkerboardRasterCacheImages) {
+                  checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages);
+    } else if (widget.checkerboardRasterCacheImages) {
       performanceOverlay = new PerformanceOverlay(checkerboardRasterCacheImages: true);
     }
 
@@ -234,13 +234,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         ]
       );
     }
-    if (config.showSemanticsDebugger) {
+    if (widget.showSemanticsDebugger) {
       result = new SemanticsDebugger(
         child: result
       );
     }
     assert(() {
-      if (config.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
+      if (widget.debugShowCheckedModeBanner && WidgetsApp.debugAllowBannerOverride) {
         result = new CheckedModeBanner(
           child: result
         );
