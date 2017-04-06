@@ -21,7 +21,7 @@ public final class JSONMethodCodec implements MethodCodec {
        try {
           final JSONObject map = new JSONObject();
           map.put("method", methodCall.method);
-          map.put("args", JSONObject.wrap(methodCall.arguments));
+          map.put("args", JSONUtil.wrap(methodCall.arguments));
           return JSONMessageCodec.INSTANCE.encodeMessage(map);
        } catch (JSONException e) {
           throw new IllegalArgumentException("Invalid JSON", e);
@@ -49,7 +49,7 @@ public final class JSONMethodCodec implements MethodCodec {
     @Override
     public ByteBuffer encodeSuccessEnvelope(Object result) {
         return JSONMessageCodec.INSTANCE
-            .encodeMessage(new JSONArray().put(JSONObject.wrap(result)));
+            .encodeMessage(new JSONArray().put(JSONUtil.wrap(result)));
     }
 
     @Override
@@ -58,7 +58,7 @@ public final class JSONMethodCodec implements MethodCodec {
         return JSONMessageCodec.INSTANCE.encodeMessage(new JSONArray()
             .put(errorCode)
             .put(errorMessage)
-            .put(JSONObject.wrap(errorDetails)));
+            .put(JSONUtil.wrap(errorDetails)));
     }
 
     @Override

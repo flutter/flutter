@@ -15,6 +15,7 @@ import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.FlutterMethodChannel.Response;
 import io.flutter.plugin.common.JSONMethodCodec;
+import io.flutter.plugin.common.JSONUtil;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.view.FlutterView;
 
@@ -137,7 +138,7 @@ public class TextInputPlugin implements MethodCallHandler {
     }
 
     void setLatestEditingState(Map<String, Object> state) {
-        mLatestState = (JSONObject) JSONObject.wrap(state);
+        mLatestState = (JSONObject) JSONUtil.wrap(state);
     }
 
     private void clearTextInputClient() {

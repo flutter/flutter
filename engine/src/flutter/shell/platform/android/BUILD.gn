@@ -80,6 +80,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/common/FlutterMethodChannel.java",
     "io/flutter/plugin/common/JSONMessageCodec.java",
     "io/flutter/plugin/common/JSONMethodCodec.java",
+    "io/flutter/plugin/common/JSONUtil.java",
     "io/flutter/plugin/common/MessageCodec.java",
     "io/flutter/plugin/common/MethodCall.java",
     "io/flutter/plugin/common/MethodCodec.java",
