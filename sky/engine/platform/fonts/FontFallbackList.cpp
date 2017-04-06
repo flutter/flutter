@@ -28,6 +28,7 @@
 
 #include "flutter/sky/engine/platform/fonts/FontFallbackList.h"
 
+#include "flutter/common/settings.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
 #include "flutter/sky/engine/platform/fonts/FontFamily.h"
@@ -187,7 +188,7 @@ PassRefPtr<FontData> FontFallbackList::getFontData(const FontDescription& fontDe
     const FontFamily* currFamily = startFamily;
     while (currFamily && !result) {
         familyIndex++;
-        if (currFamily->family().length()) {
+        if (currFamily->family().length() || Settings::Get().use_test_fonts) {
             if (m_fontSelector)
                 result = m_fontSelector->getFontData(fontDescription, currFamily->family());
 
