@@ -108,6 +108,7 @@ linter:
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
     - unnecessary_null_aware_assignments
+    - unnecessary_null_in_if_null_operators
 
     # === pub rules ===
     - package_names
