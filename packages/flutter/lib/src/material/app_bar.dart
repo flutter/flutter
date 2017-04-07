@@ -17,6 +17,7 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'page.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'theme.dart';
@@ -341,7 +342,7 @@ class _AppBarState extends State<AppBar> {
     _hasDrawer = scaffold?.hasDrawer ?? false;
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
     _canPop = parentRoute?.canPop ?? false;
-    _useCloseButton = parentRoute?.fullscreenDialog ?? false;
+    _useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
   }
 
   void _handleDrawerButton() {

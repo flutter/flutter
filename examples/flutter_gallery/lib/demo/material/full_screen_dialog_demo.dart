@@ -107,9 +107,8 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _saveNeeded = false;
 
   Future<bool> _onWillPop() async {
-    if (!_saveNeeded) {
+    if (!_saveNeeded)
       return true;
-    }
 
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
@@ -136,7 +135,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           )
         ]
       )
-    );
+    ) ?? false;
   }
 
   @override

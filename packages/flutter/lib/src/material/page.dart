@@ -67,13 +67,11 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     @required this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
-    bool fullscreenDialog: false,
-  }) :
-      _fullscreenDialog = fullscreenDialog,
-      super(settings: settings) {
-        assert(builder != null);
-        assert(opaque);
-      }
+    this.fullscreenDialog: false,
+  }) : super(settings: settings) {
+    assert(builder != null);
+    assert(opaque);
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -91,9 +89,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   ///
   /// Prevents [startPopGesture] from poping the route using an edge swipe on
   /// iOS.
-  @override
-  bool get fullscreenDialog => _fullscreenDialog;
-  final bool _fullscreenDialog;
+  bool fullscreenDialog;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
