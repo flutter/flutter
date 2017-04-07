@@ -11,7 +11,7 @@ import 'dart:ui' as ui show lerpDouble;
 /// widget subtree.
 ///
 /// To obtain the current icon theme, use [IconTheme.of]. To convert an icon
-/// theme to a version with all the fields filled in, use [fallback].
+/// theme to a version with all the fields filled in, use [new fallback].
 class IconThemeData {
   /// Creates an icon theme data.
   ///
