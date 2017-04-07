@@ -110,7 +110,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   // Find ports where there is a view isolate with the given name
   Future<List<int>> _filterPorts(List<int> ports, String isolateFilter) async {
-    final List<int> result = new List<int>();
+    final List<int> result = <int>[];
     for (int port in ports) {
       final String addr = "http://$_address:$port";
       final Uri uri = Uri.parse(addr);
@@ -206,7 +206,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final FuchsiaDeviceCommandRunner runner =
         new FuchsiaDeviceCommandRunner(_fuchsiaRoot);
     final List<String> lsOutput = await runner.run("ls /tmp/dart.services");
-    final List<int> ports = new List<int>();
+    final List<int> ports = <int>[];
     for (String s in lsOutput) {
       final String trimmed = s.trim();
       final int lastSpace = trimmed.lastIndexOf(' ');
