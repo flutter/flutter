@@ -74,6 +74,7 @@ linter:
     - await_only_futures
     - camel_case_types
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
+    - directives_ordering
     - empty_catches
     - empty_constructor_bodies
     - implementation_imports

@@ -8,11 +8,11 @@ import 'dart:convert' show JSON;
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../base/context.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/logger.dart';
 import '../base/io.dart';
+import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';

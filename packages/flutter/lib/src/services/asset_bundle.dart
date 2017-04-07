@@ -9,8 +9,8 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import 'platform_messages.dart';
 import 'http_client.dart';
+import 'platform_messages.dart';
 
 /// A collection of resources used by the application.
 ///
