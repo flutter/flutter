@@ -2664,7 +2664,7 @@ abstract class Element implements BuildContext {
           'Cannot get size during build.\n'
           'The size of this render object has not yet been determined because '
           'the framework is still in the process of building widgets, which '
-          'means the render tree for this frame has not youet been determined. '
+          'means the render tree for this frame has not yet been determined. '
           'The size getter should only be called from paint callbacks or '
           'interaction event handlers (e.g. gesture callbacks).\n'
           '\n'
@@ -2686,10 +2686,23 @@ abstract class Element implements BuildContext {
         throw new FlutterError(
           'Cannot get size without a render object.\n'
           'In order for an element to have a valid size, the element must have '
-          'an assoicated render object. This element does not have an assoicated '
+          'an assoicated render object. This element does not have an associated '
           'render object, which typically means that the size getter was called '
           'too early in the pipeline (e.g., during the build phase) before the '
           'framework has created the render tree.\n'
+          'The size getter was called for the following element:\n'
+          '  $this\n'
+        );
+      }
+      if (renderObject is RenderSliver) {
+        throw new FlutterError(
+          'Cannot get size from a RenderSliver.\n'
+          'The render object associated with this element is a '
+          '${renderObject.runtimeType}, which is a subtype of RenderSliver. '
+          'Slivers do not have a size per se. They have a more elaborate '
+          'geometry description, which can be accessed by calling '
+          'findRenderObject and then using the "geometry" getter on the '
+          'resulting object.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
         );
