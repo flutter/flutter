@@ -50,7 +50,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         final String javaHomeOutput = runCheckedSync(<String>['/usr/libexec/java_home'], hideStdout: true);
         if (javaHomeOutput != null) {
           final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
-          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.length > 0)) {
+          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
             final String javaHome = javaHomeOutputSplit[0].trim();
             return fs.path.join(javaHome, 'bin', 'java');
           }
