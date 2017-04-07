@@ -83,6 +83,7 @@ class CupertinoPageTransition extends AnimatedWidget {
           decoration: new BoxDecoration(
             boxShadow: <BoxShadow>[
               new BoxShadow(
+                // Calculate directly from the route's 0.0 to 1.0 animation.
                 blurRadius: _primaryRouteAnimation.value * 10.0, // Linearly from 0.0 to 10.0.
                 spreadRadius: _primaryRouteAnimation.value * 4.0, // Linearly from 0.0 to 4.0
                 color: const Color(0x38000000),
