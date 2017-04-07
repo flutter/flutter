@@ -7,37 +7,39 @@ import 'dart:math' as math;
 import 'box.dart';
 import 'object.dart';
 
-/// Parent data for use with [RenderBlockBase].
-class BlockParentData extends ContainerBoxParentDataMixin<RenderBox> { }
+/// Parent data for use with [RenderListBody].
+class ListBodyParentData extends ContainerBoxParentDataMixin<RenderBox> { }
 
 typedef double _ChildSizingFunction(RenderBox child);
 
-/// Implements the block layout algorithm.
+/// Displays its children sequentially along a given axis, forcing them to the
+/// dimensions of the parent in the other axis.
 ///
-/// In block layout, children are arranged linearly along the main axis (either
-/// horizontally or vertically). In the cross axis, children are stretched to
-/// match the block's cross-axis extent. In the main axis, children are given
-/// unlimited space and the block expands its main axis to contain all its
-/// children. Because blocks expand in the main axis, blocks must be given
-/// unlimited space in the main axis, typically by being contained in a
-/// viewport with a scrolling direction that matches the block's main axis.
-class RenderBlock extends RenderBox
-    with ContainerRenderObjectMixin<RenderBox, BlockParentData>,
-         RenderBoxContainerDefaultsMixin<RenderBox, BlockParentData> {
-  /// Creates a block render object.
+/// This layout algorithm arranges its children linearly along the main axis
+/// (either horizontally or vertically). In the cross axis, children are
+/// stretched to match the box's cross-axis extent. In the main axis, children
+/// are given unlimited space and the box expands its main axis to contain all
+/// its children. Because [RenderListBody] boxes expand in the main axis, they
+/// must be given unlimited space in the main axis, typically by being contained
+/// in a viewport with a scrolling direction that matches the box's main axis.
+class RenderListBody extends RenderBox
+    with ContainerRenderObjectMixin<RenderBox, ListBodyParentData>,
+         RenderBoxContainerDefaultsMixin<RenderBox, ListBodyParentData> {
+  /// Creates a render object that arranges its children sequentially along a
+  /// given axis.
   ///
-  /// By default, the block positions children along the vertical axis.
-  RenderBlock({
+  /// By default, children are arranged along the vertical axis.
+  RenderListBody({
     List<RenderBox> children,
-    Axis mainAxis: Axis.vertical
+    Axis mainAxis: Axis.vertical,
   }) : _mainAxis = mainAxis {
     addAll(children);
   }
 
   @override
   void setupParentData(RenderBox child) {
-    if (child.parentData is! BlockParentData)
-      child.parentData = new BlockParentData();
+    if (child.parentData is! ListBodyParentData)
+      child.parentData = new ListBodyParentData();
   }
 
   /// The direction to use as the main axis.
@@ -90,10 +92,10 @@ class RenderBlock extends RenderBox
           break;
       }
       throw new FlutterError(
-        'RenderBlock must have unlimited space along its main axis.\n'
-        'RenderBlock does not clip or resize its children, so it must be '
-        'placed in a parent that does not constrain the block\'s main '
-        'axis. You probably want to put the RenderBlock inside a '
+        'RenderListBody must have unlimited space along its main axis.\n'
+        'RenderListBody does not clip or resize its children, so it must be '
+        'placed in a parent that does not constrain the main '
+        'axis. You probably want to put the RenderListBody inside a '
         'RenderViewport with a matching main axis.'
       );
     });
@@ -112,11 +114,11 @@ class RenderBlock extends RenderBox
       // more specific to the exact situation in that case, and don't mention
       // nesting blocks in the negative case.
       throw new FlutterError(
-        'RenderBlock must have a bounded constraint for its cross axis.\n'
-        'RenderBlock forces its children to expand to fit the block\'s container, '
-        'so it must be placed in a parent that does constrain the block\'s cross '
-        'axis to a finite dimension. If you are attempting to nest a block with '
-        'one direction inside a block of another direction, you will want to '
+        'RenderListBody must have a bounded constraint for its cross axis.\n'
+        'RenderListBody forces its children to expand to fit the RenderListBody\'s container, '
+        'so it must be placed in a parent that constrains the cross '
+        'axis to a finite dimension. If you are attempting to nest a RenderListBody with '
+        'one direction inside one of another direction, you will want to '
         'wrap the inner one inside a box that fixes the dimension in that direction, '
         'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '
         'This is relatively expensive, however.' // (that's why we don't do it automatically)
@@ -127,7 +129,7 @@ class RenderBlock extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       child.layout(innerConstraints, parentUsesSize: true);
-      final BlockParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData;
       switch (mainAxis) {
         case Axis.horizontal:
           childParentData.offset = new Offset(position, 0.0);
@@ -164,7 +166,7 @@ class RenderBlock extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       extent = math.max(extent, childSize(child));
-      final BlockParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
     return extent;
@@ -175,7 +177,7 @@ class RenderBlock extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       extent += childSize(child);
-      final BlockParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData;
       child = childParentData.nextSibling;
     }
     return extent;
