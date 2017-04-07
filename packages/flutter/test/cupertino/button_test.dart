@@ -23,13 +23,13 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10px character + 16px * 2 is smaller than the default 44px minimum.
-      const Size.square(44.0),
+      // 1 40px character + 16px * 2.
+      const Size.square(72.0),
     );
   });
 
   testWidgets('Minimum size parameter', (WidgetTester tester) async {
-    final double minSize = 60.0;
+    final double minSize = 80.0;
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(
         child: new Text('X', style: testStyle),
@@ -40,7 +40,7 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      // 1 10px character + 16px * 2 is smaller than defined 60.0px minimum
+      // 1 40px character + 16px * 2 is smaller than defined 80.0px minimum
       new Size.square(minSize),
     );
   });
@@ -55,8 +55,8 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
-      // 4 10px character + 16px * 2 = 72.
-      72.0,
+      // 4 40px character + 16px * 2 = 192.
+      192.0,
     );
   });
 
@@ -69,8 +69,8 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size.width,
-      // 1 10px character + 64 * 2 = 138 for buttons with background.
-      138.0,
+      // 1 40px character + 64 * 2 = 168 for buttons with background.
+      168.0,
     );
   });
 
@@ -83,7 +83,7 @@ void main() {
     final RenderBox buttonBox = tester.renderObject(find.byType(CupertinoButton));
     expect(
       buttonBox.size,
-      const Size.square(210.0),
+      const Size.square(240.0),
     );
   });
 
