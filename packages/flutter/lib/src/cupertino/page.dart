@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
-const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
 // Fractional offset from offscreen to the right to fully on screen.
 final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
@@ -20,11 +19,6 @@ final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
   end: const FractionalOffset(-1.0/3.0, 0.0),
 );
 
-final IntTween _kElevationTween = new IntTween(
-  begin: 0,
-  end: 42,
-);
-
 /// Provides the native iOS page transition animation.
 ///
 /// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
@@ -36,49 +30,44 @@ class CupertinoPageTransition extends AnimatedWidget {
   CupertinoPageTransition({
     Key key,
     // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
-    @required Animation<double> incomingRouteAnimation,
+    @required Animation<double> primaryRouteAnimation,
     // Linear route animation from 0.0 to 1.0 when another screen is being pushed on top of this
     // one.
-    @required Animation<double> outgoingRouteAnimation,
+    @required Animation<double> secondaryRouteAnimation,
     @required this.child,
-    // Perform incoming transition linearly. Use to precisely track back gesture drags.
+    // Perform primary transition linearly. Use to precisely track back gesture drags.
     bool linearTransition,
   }) :
-      _incomingPositionAnimation = linearTransition
-        ? _kRightMiddleTween.animate(incomingRouteAnimation)
+      _primaryPositionAnimation = linearTransition
+        ? _kRightMiddleTween.animate(primaryRouteAnimation)
         : _kRightMiddleTween.animate(
             new CurvedAnimation(
-              parent: incomingRouteAnimation,
+              parent: primaryRouteAnimation,
               curve: Curves.easeOut,
               reverseCurve: Curves.easeIn,
             )
           ),
-      _outgoingPositionAnimation = _kMiddleLeftTween.animate(
+      _secondaryPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
-          parent: outgoingRouteAnimation,
+          parent: secondaryRouteAnimation,
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
         )
       ),
-      _incomingElevationAnimation = _kElevationTween.animate(
-        new CurvedAnimation(
-          parent: incomingRouteAnimation,
-          curve: Curves.easeOut,
-        )
-      ),
+      _primaryRouteAnimation = primaryRouteAnimation,
       super(
         key: key,
         // Trigger a rebuild whenever any of the 2 animation route happens.
         listenable: new Listenable.merge(
-          <Listenable>[incomingRouteAnimation, outgoingRouteAnimation]
+          <Listenable>[primaryRouteAnimation, secondaryRouteAnimation]
         ),
       );
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> _incomingPositionAnimation;
+  final Animation<FractionalOffset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> _outgoingPositionAnimation;
-  final Animation<int> _incomingElevationAnimation;
+  final Animation<FractionalOffset> _secondaryPositionAnimation;
+  final Animation<double> _primaryRouteAnimation;
   final Widget child;
 
 
@@ -87,15 +76,21 @@ class CupertinoPageTransition extends AnimatedWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: _outgoingPositionAnimation,
+      position: _secondaryPositionAnimation,
       child: new SlideTransition(
-        position: _incomingPositionAnimation,
-        child: new PhysicalModel(
-          shape: BoxShape.rectangle,
-          color: _kBackgroundColor,
-          elevation: _incomingElevationAnimation.value,
+        position: _primaryPositionAnimation,
+        child: new DecoratedBox(
+          decoration: new BoxDecoration(
+            boxShadow: <BoxShadow>[
+              new BoxShadow(
+                blurRadius: _primaryRouteAnimation.value * 8.0, // 0.0 to 8.0
+                spreadRadius: _primaryRouteAnimation.value * 4.0, // 0.0 to 4.0
+                color: const Color(0x33000000),
+              ),
+            ],
+          ),
           child: child,
-        ),
+        )
       ),
     );
   }
