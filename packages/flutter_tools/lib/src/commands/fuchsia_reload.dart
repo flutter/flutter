@@ -74,7 +74,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
     // Find the network ports used on the device by VM service instances.
     final List<int> servicePorts = await _getServicePorts();
-    if (servicePorts.length == 0) {
+    if (servicePorts.isEmpty) {
       throwToolExit("Couldn't find any running Observatory instances.");
     }
     for (int port in servicePorts) {
@@ -85,7 +85,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     // ports, and find the Isolates that are running the target app.
     final String isolateName = "$_binaryName\$main";
     final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
-    if (targetPorts.length == 0) {
+    if (targetPorts.isEmpty) {
       throwToolExit("No VMs found running $_binaryName");
     }
     for (int port in targetPorts) {
