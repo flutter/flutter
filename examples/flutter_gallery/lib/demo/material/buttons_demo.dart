@@ -53,31 +53,31 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
       new ComponentDemoTabData(
         tabName: 'RAISED',
         description: _raisedText,
-        widget: buildRaisedButton(),
+        demoWidget: buildRaisedButton(),
         exampleCodeTag: _raisedCode,
       ),
       new ComponentDemoTabData(
         tabName: 'FLAT',
         description: _flatText,
-        widget: buildFlatButton(),
+        demoWidget: buildFlatButton(),
         exampleCodeTag: _flatCode,
       ),
       new ComponentDemoTabData(
         tabName: 'DROPDOWN',
         description: _dropdownText,
-        widget: buildDropdownButton(),
+        demoWidget: buildDropdownButton(),
         exampleCodeTag: _dropdownCode,
       ),
       new ComponentDemoTabData(
         tabName: 'ICON',
         description: _iconText,
-        widget: buildIconButton(),
+        demoWidget: buildIconButton(),
         exampleCodeTag: _iconCode,
       ),
       new ComponentDemoTabData(
         tabName: 'ACTION',
         description: _actionText,
-        widget: buildActionButton(),
+        demoWidget: buildActionButton(),
         exampleCodeTag: _actionCode,
       ),
     ];

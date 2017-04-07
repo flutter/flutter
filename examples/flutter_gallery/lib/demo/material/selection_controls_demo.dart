@@ -39,19 +39,19 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
       new ComponentDemoTabData(
         tabName: "CHECKBOX",
         description: _checkboxText,
-        widget: buildCheckbox(),
+        demoWidget: buildCheckbox(),
         exampleCodeTag: _checkboxCode
       ),
       new ComponentDemoTabData(
         tabName: "RADIO",
         description: _radioText,
-        widget: buildRadio(),
+        demoWidget: buildRadio(),
         exampleCodeTag: _radioCode
       ),
       new ComponentDemoTabData(
         tabName: "SWITCH",
         description: _switchText,
-        widget: buildSwitch(),
+        demoWidget: buildSwitch(),
         exampleCodeTag: _switchCode
       )
     ];

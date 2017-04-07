@@ -304,11 +304,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
     if (widget.actions != null) {
       headerWidgets.addAll(
-        widget.actions.map<Widget>((Widget widget) {
+        widget.actions.map<Widget>((Widget action) {
           return new Padding(
             // 8.0 is the default padding of an icon button
             padding: const EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
-            child: widget
+            child: action,
           );
         }).toList()
       );

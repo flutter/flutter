@@ -423,9 +423,9 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
 
   @override
   double get bottomHeight {
-    for (Widget widget in tabs) {
-      if (widget is Tab) {
-        final Tab tab = widget;
+    for (Widget item in tabs) {
+      if (item is Tab) {
+        final Tab tab = item;
         if (tab.text != null && tab.icon != null)
           return _kTextAndIconTabHeight + _kTabIndicatorHeight;
       }
