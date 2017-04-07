@@ -47,7 +47,6 @@ class TestFocusableState extends State<TestFocusable> {
       child: new AnimatedBuilder(
         animation: focusNode,
         builder: (BuildContext context, Widget child) {
-          // print('focusNode.hasFocus = ${focusNode.hasFocus} ${focusNode.hashCode} ${focusNode.hasFocus ? widget.yes : widget.no}');
           return new Text(focusNode.hasFocus ? widget.yes : widget.no);
         },
       ),

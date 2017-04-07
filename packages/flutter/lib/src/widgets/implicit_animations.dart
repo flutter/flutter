@@ -203,7 +203,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   /// 1. Call the visitor callback with three arguments, the first argument
   /// being the current value of the Tween<T> object that represents the
   /// tween (initially null), the second argument, of type T, being the value
-  /// on the Widget (widget) that represents the current target value of the
+  /// on the Widget that represents the current target value of the
   /// tween, and the third being a callback that takes a value T (which will
   /// be the second argument to the visitor callback), and that returns an
   /// Tween<T> object for the tween, configured with the given value
