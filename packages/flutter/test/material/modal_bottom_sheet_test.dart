@@ -25,7 +25,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<Null>(
       context: savedContext,
-      builder: (BuildContext context) => new Text('BottomSheet')
+      builder: (BuildContext context) => const Text('BottomSheet')
     ).then<Null>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
@@ -47,7 +47,7 @@ void main() {
     showBottomSheetThenCalled = false;
     showModalBottomSheet<Null>(
       context: savedContext,
-      builder: (BuildContext context) => new Text('BottomSheet'),
+      builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<Null>((Null result) {
       expectSync(result, isNull);
       showBottomSheetThenCalled = true;
@@ -73,7 +73,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: new Center(child: new Text('body'))
+        body: const Center(child: const Text('body'))
       )
     ));
 
@@ -83,7 +83,7 @@ void main() {
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         margin: const EdgeInsets.all(40.0),
-        child: new Text('BottomSheet')
+        child: const Text('BottomSheet')
       );
     }).closed.whenComplete(() {
       showBottomSheetThenCalled = true;
@@ -126,14 +126,14 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: new Center(child: new Text('body'))
+        body: const Center(child: const Text('body'))
       )
     ));
 
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new Container(
         margin: const EdgeInsets.all(40.0),
-        child: new Text('BottomSheet')
+        child: const Text('BottomSheet')
       );
     });
 

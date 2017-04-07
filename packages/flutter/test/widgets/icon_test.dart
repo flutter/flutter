@@ -13,7 +13,7 @@ void main() {
           color: Colors.green[500],
           opacity: 0.5
         ),
-        child: new Icon(Icons.add)
+        child: const Icon(Icons.add)
       )
     );
     final RichText text = tester.widget(find.byType(RichText));

@@ -88,7 +88,7 @@ class CardCollectionState extends State<CardCollection> {
         data: const IconThemeData(color: Colors.black),
         child: new ListView(
           children: <Widget>[
-            new DrawerHeader(child: new Center(child: new Text('Options'))),
+            const DrawerHeader(child: const Center(child: const Text('Options'))),
             buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
             buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
@@ -110,7 +110,7 @@ class CardCollectionState extends State<CardCollection> {
             new ListTile(
               leading: new Icon(Icons.dvr),
               onTap: () { debugDumpApp(); debugDumpRenderTree(); },
-              title: new Text('Dump App to Console'),
+              title: const Text('Dump App to Console'),
             ),
           ],
         ),

@@ -9,7 +9,7 @@ void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
     final Widget widget = new FadeTransition(
       opacity: kAlwaysCompleteAnimation,
-      child: new Text('Ready'),
+      child: const Text('Ready'),
     );
     expect(widget.toString, isNot(throwsException));
   });

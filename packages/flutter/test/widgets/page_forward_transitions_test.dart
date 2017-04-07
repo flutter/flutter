@@ -87,13 +87,13 @@ void main() {
                     return new Column(
                       children: <Widget>[
                         new TestTransition(
-                          childFirstHalf: new Text('A'),
-                          childSecondHalf: new Text('B'),
+                          childFirstHalf: const Text('A'),
+                          childSecondHalf: const Text('B'),
                           animation: route.animation
                         ),
                         new TestTransition(
-                          childFirstHalf: new Text('C'),
-                          childSecondHalf: new Text('D'),
+                          childFirstHalf: const Text('C'),
+                          childSecondHalf: const Text('D'),
                           animation: route.secondaryAnimation
                         ),
                       ]
@@ -101,9 +101,9 @@ void main() {
                   }
                 )
               );
-            case '/2': return new TestRoute<Null>(settings: settings, child: new Text('E'));
-            case '/3': return new TestRoute<Null>(settings: settings, child: new Text('F'));
-            case '/4': return new TestRoute<Null>(settings: settings, child: new Text('G'));
+            case '/2': return new TestRoute<Null>(settings: settings, child: const Text('E'));
+            case '/3': return new TestRoute<Null>(settings: settings, child: const Text('F'));
+            case '/4': return new TestRoute<Null>(settings: settings, child: const Text('G'));
           }
         }
       )

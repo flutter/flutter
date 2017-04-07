@@ -20,7 +20,7 @@ void main() {
         child: new Semantics(
           label: 'test',
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               checked: true
             )
           )
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         child: new Container(
-          child: new Semantics(
+          child: const Semantics(
             checked: true
           )
         )
@@ -58,7 +58,7 @@ void main() {
     await tester.pumpWidget(
       new Container(
         child: new Container(
-          child: new Semantics(
+          child: const Semantics(
             label: 'test'
           )
         )
@@ -78,7 +78,7 @@ void main() {
         child: new Semantics(
           checked: true,
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               label: 'test'
             )
           )
@@ -105,7 +105,7 @@ void main() {
         child: new Semantics(
           checked: true,
           child: new Container(
-            child: new Semantics(
+            child: const Semantics(
               label: 'test'
             )
           )

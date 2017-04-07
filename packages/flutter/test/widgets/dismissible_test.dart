@@ -313,7 +313,7 @@ void main() {
   testWidgets('Dismissible starts from the full size when collapsing', (WidgetTester tester) async {
     scrollDirection = Axis.vertical;
     dismissDirection = DismissDirection.horizontal;
-    background = new Text('background');
+    background = const Text('background');
 
     await tester.pumpWidget(buildTest());
     expect(dismissedItems, isEmpty);

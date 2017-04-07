@@ -10,7 +10,7 @@ void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Scaffold(
-      appBar: new AppBar(title: new Text('Title')),
+      appBar: new AppBar(title: const Text('Title')),
       body: new Container(key: bodyKey)
     ));
 
@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(new MediaQuery(
       data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
-        appBar: new AppBar(title: new Text('Title')),
+        appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey)
       )
     ));
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpWidget(new MediaQuery(
       data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
-        appBar: new AppBar(title: new Text('Title')),
+        appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey),
         resizeToAvoidBottomPadding: false
       )
@@ -72,7 +72,7 @@ void main() {
       ),
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Title'),
+          title: const Text('Title'),
         ),
         body: new Container(key: bodyKey),
       ),
@@ -83,20 +83,20 @@ void main() {
 
   testWidgets('Floating action animation', (WidgetTester tester) async {
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: new Text("1")
+        child: const Text("1")
       )
     ));
 
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('two'),
         onPressed: null,
-        child: new Text("2")
+        child: const Text("2")
       )
     ));
 
@@ -107,10 +107,10 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: new Text("1")
+        child: const Text("1")
       )
     ));
 
@@ -140,8 +140,8 @@ void main() {
               new SliverAppBar(
                 pinned: true,
                 expandedHeight: appBarHeight,
-                title: new Text('Title'),
-                flexibleSpace: new FlexibleSpaceBar(title: new Text('Title')),
+                title: const Text('Title'),
+                flexibleSpace: new FlexibleSpaceBar(title: const Text('Title')),
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
@@ -185,7 +185,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               new SliverAppBar(
-                title: new Text('Title')
+                title: const Text('Title')
               ),
               new SliverList(
                 delegate: new SliverChildListDelegate(new List<Widget>.generate(
@@ -228,7 +228,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('Title'),
+            title: const Text('Title'),
           ),
           body: new Builder(
             builder: (BuildContext context) {
@@ -241,7 +241,7 @@ void main() {
                     );
                   });
                 },
-                child: new Text('X'),
+                child: const Text('X'),
               );
             },
           ),
@@ -273,7 +273,7 @@ void main() {
                 backgroundColor: Colors.amber[500],
               ),
               height: 5000.0,
-              child: new Text('body'),
+              child: const Text('body'),
             ),
           ),
           persistentFooterButtons: <Widget>[
@@ -281,7 +281,7 @@ void main() {
               onPressed: () {
                 didPressButton = true;
               },
-              child: new Text('X'),
+              child: const Text('X'),
             )
           ],
         ),
@@ -298,10 +298,10 @@ void main() {
     Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
       final GlobalKey rootKey = new GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (_) => new Container(key: rootKey, child: new Text('Home')),
+        '/': (_) => new Container(key: rootKey, child: const Text('Home')),
         '/scaffold': (_) => new Scaffold(
             appBar: new AppBar(),
-            body: new Text('Scaffold'),
+            body: const Text('Scaffold'),
         )
       };
       await tester.pumpWidget(
@@ -360,7 +360,7 @@ void main() {
     testWidgets('body size with button', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: new Text('')))
+        new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: const Text('')))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));

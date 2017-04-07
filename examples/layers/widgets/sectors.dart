@@ -106,7 +106,7 @@ class SectorAppState extends State<SectorApp> {
                         margin: const EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorAddIcon)
                       ),
-                      new Text('ADD SECTOR'),
+                      const Text('ADD SECTOR'),
                     ]
                   )
                 )
@@ -121,7 +121,7 @@ class SectorAppState extends State<SectorApp> {
                         margin: const EdgeInsets.only(right: 10.0),
                         child: new WidgetToRenderBoxAdapter(renderBox: sectorRemoveIcon)
                       ),
-                      new Text('REMOVE SECTOR'),
+                      const Text('REMOVE SECTOR'),
                     ]
                   )
                 )
@@ -155,7 +155,7 @@ class SectorAppState extends State<SectorApp> {
       title: 'Sector Layout',
       home: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Sector Layout in a Widget Tree')
+          title: const Text('Sector Layout in a Widget Tree')
         ),
         body: buildBody()
       )

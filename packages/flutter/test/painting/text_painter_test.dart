@@ -36,9 +36,9 @@ void main() {
 
   test('TextPainter size test', () {
     final TextPainter painter = new TextPainter(
-      text: new TextSpan(
+      text: const TextSpan(
         text: 'X',
-        style: new TextStyle(
+        style: const TextStyle(
           inherit: false,
           fontFamily: 'Ahem',
           fontSize: 123.0,

@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -59,7 +59,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -94,7 +94,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -128,7 +128,7 @@ void main() {
         new CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
@@ -146,7 +146,7 @@ void main() {
           reverse: true,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
@@ -164,7 +164,7 @@ void main() {
       new CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
@@ -185,7 +185,7 @@ void main() {
         scrollDirection: Axis.horizontal,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
@@ -235,7 +235,7 @@ void main() {
           physics: const AlwaysScrollableScrollPhysics(),
           reverse: true,
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),
@@ -253,7 +253,7 @@ void main() {
           scrollDirection: Axis.horizontal,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),

@@ -10,7 +10,7 @@ import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final ProcessManager processManager = new LocalProcessManager();
+  final ProcessManager processManager = const LocalProcessManager();
 
   group('run.dart script', () {
     Future<int> runScript(List<String> testNames) async {

@@ -37,27 +37,27 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Cupertino Dialogs'),
+        title: const Text('Cupertino Dialogs'),
       ),
       body: new ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget> [
           new CupertinoButton(
-            child: new Text('Alert'),
+            child: const Text('Alert'),
             color: _kBlue,
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
                 child: new CupertinoAlertDialog(
-                  content: new Text('Discard draft?'),
+                  content: const Text('Discard draft?'),
                   actions: <Widget>[
                     new CupertinoDialogAction(
-                      child: new Text('Discard'),
+                      child: const Text('Discard'),
                       isDestructive: true,
                       onPressed: () { Navigator.pop(context, 'OK'); }
                     ),
                     new CupertinoDialogAction(
-                      child: new Text('Cancel', style: const TextStyle(fontWeight: FontWeight.w600)),
+                      child: const Text('Cancel', style: const TextStyle(fontWeight: FontWeight.w600)),
                       onPressed: () { Navigator.pop(context, 'Cancel'); }
                     ),
                   ]
@@ -65,27 +65,27 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
               );
             },
           ),
-          new Padding(padding: const EdgeInsets.all(8.0)),
+          const Padding(padding: const EdgeInsets.all(8.0)),
           new CupertinoButton(
-            child: new Text('Alert with Title'),
+            child: const Text('Alert with Title'),
             color: _kBlue,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 36.0),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
                 child: new CupertinoAlertDialog(
-                  title: new Text('Allow "Maps" to access your location while you use the app?'),
-                  content: new Text(
+                  title: const Text('Allow "Maps" to access your location while you use the app?'),
+                  content: const Text(
                     'Your current location will be displayed on the map and used for directions, '
                     'nearby search results, and estimated travel times.'
                   ),
                   actions: <Widget>[
                     new CupertinoDialogAction(
-                      child: new Text('Don\'t Allow'),
+                      child: const Text('Don\'t Allow'),
                       onPressed: () { Navigator.pop(context, 'Disallow'); }
                     ),
                     new CupertinoDialogAction(
-                      child: new Text('Allow'),
+                      child: const Text('Allow'),
                       onPressed: () { Navigator.pop(context, 'Allow'); }
                     ),
                   ]

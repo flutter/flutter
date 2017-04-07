@@ -127,7 +127,7 @@ void main() {
               onPressed: () {
                 buttonContext = context;
               },
-              child: new Text('Go'),
+              child: const Text('Go'),
             );
           },
         ),

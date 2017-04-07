@@ -14,7 +14,7 @@ void main() {
         child: new CircleAvatar(
           backgroundColor: backgroundColor,
           radius: 50.0,
-          child: new Text('Z'),
+          child: const Text('Z'),
         ),
       ),
     );
@@ -36,7 +36,7 @@ void main() {
       new Center(
         child: new CircleAvatar(
           foregroundColor: foregroundColor,
-          child: new Text('Z'),
+          child: const Text('Z'),
         ),
       ),
     );
@@ -64,7 +64,7 @@ void main() {
         data: theme,
         child: new Center(
           child: new CircleAvatar(
-            child: new Text('Z'),
+            child: const Text('Z'),
           ),
         ),
       ),

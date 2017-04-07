@@ -16,7 +16,7 @@ void main() {
           child: new TwoLevelList(
             children: <Widget>[
               new TwoLevelSublist(
-                title: new Text('Title'),
+                title: const Text('Title'),
               )
             ]
           )
@@ -36,16 +36,16 @@ void main() {
           child: new SingleChildScrollView(
             child: new TwoLevelList(
               children: <Widget>[
-                new TwoLevelListItem(title: new Text('Top'), key: topKey),
+                new TwoLevelListItem(title: const Text('Top'), key: topKey),
                 new TwoLevelSublist(
                   key: sublistKey,
-                  title: new Text('Sublist'),
+                  title: const Text('Sublist'),
                   children: <Widget>[
-                    new TwoLevelListItem(title: new Text('0')),
-                    new TwoLevelListItem(title: new Text('1'))
+                    new TwoLevelListItem(title: const Text('0')),
+                    new TwoLevelListItem(title: const Text('1'))
                   ]
                 ),
-                new TwoLevelListItem(title: new Text('Bottom'), key: bottomKey)
+                new TwoLevelListItem(title: const Text('Bottom'), key: bottomKey)
               ]
             )
           )
@@ -95,13 +95,13 @@ void main() {
             child: new TwoLevelList(
               children: <Widget>[
                 new TwoLevelSublist(
-                  title: new Text('Sublist'),
+                  title: const Text('Sublist'),
                   onOpenChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
                   children: <Widget>[
-                    new TwoLevelListItem(title: new Text('0')),
-                    new TwoLevelListItem(title: new Text('1'))
+                    new TwoLevelListItem(title: const Text('0')),
+                    new TwoLevelListItem(title: const Text('1'))
                   ]
                 ),
               ]

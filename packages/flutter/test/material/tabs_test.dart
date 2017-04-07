@@ -95,15 +95,15 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
       length: tabs.length,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('tabs'),
+          title: const Text('tabs'),
           bottom: new TabBar(
             tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
           ),
         ),
         body: new TabBarView(
           children: <Widget>[
-            new Center(child: new Text('LEFT CHILD')),
-            new Center(child: new Text('RIGHT CHILD'))
+            const Center(child: const Text('LEFT CHILD')),
+            const Center(child: const Text('RIGHT CHILD'))
           ]
         )
       )
@@ -419,7 +419,7 @@ void main() {
               length: tabs.length,
               child: new Scaffold(
                 appBar: new AppBar(
-                  title: new Text('tabs'),
+                  title: const Text('tabs'),
                   bottom: new TabBar(
                     isScrollable: true,
                     tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -486,7 +486,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('tabs'),
+            title: const Text('tabs'),
             bottom: new TabBar(
               controller: controller,
               tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -495,8 +495,8 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: <Widget>[
-              new Center(child: new Text('LEFT CHILD')),
-              new Center(child: new Text('RIGHT CHILD'))
+              const Center(child: const Text('LEFT CHILD')),
+              const Center(child: const Text('RIGHT CHILD'))
             ]
           ),
         ),
@@ -545,7 +545,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('tabs'),
+            title: const Text('tabs'),
             bottom: new TabBar(
               controller: controller,
               tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -554,9 +554,9 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: <Widget>[
-              new Center(child: new Text('CHILD A')),
-              new Center(child: new Text('CHILD B')),
-              new Center(child: new Text('CHILD C')),
+              const Center(child: const Text('CHILD A')),
+              const Center(child: const Text('CHILD B')),
+              const Center(child: const Text('CHILD C')),
             ]
           ),
         ),
@@ -618,13 +618,13 @@ void main() {
             new Builder(
               builder: (BuildContext context) {
                 firstColor = IconTheme.of(context).color;
-                return new Text('First');
+                return const Text('First');
               }
             ),
             new Builder(
               builder: (BuildContext context) {
                 secondColor = IconTheme.of(context).color;
-                return new Text('Second');
+                return const Text('Second');
               }
             ),
           ],
@@ -646,7 +646,7 @@ void main() {
       new Material(
         child: new TabBarView(
           controller: controller,
-          children: <Widget>[ new Text('First'), new Text('Second') ],
+          children: <Widget>[ const Text('First'), const Text('Second') ],
         ),
       ),
     );
@@ -745,7 +745,7 @@ void main() {
         child: new TabBar(
           key: new UniqueKey(),
           controller: controller,
-          tabs: <Widget>[ new Text('A'), new Text('B') ],
+          tabs: <Widget>[ const Text('A'), const Text('B') ],
         ),
       );
     }

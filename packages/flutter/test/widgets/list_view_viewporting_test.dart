@@ -27,7 +27,7 @@ void main() {
             );
           },
         ),
-        right: new Text('Not Today'),
+        right: const Text('Not Today'),
       );
     }
 
@@ -73,7 +73,7 @@ void main() {
           controller: new ScrollController(initialScrollOffset: 300.0),
           itemBuilder: itemBuilder,
         ),
-        right: new Text('Not Today'),
+        right: const Text('Not Today'),
       );
     }
 
@@ -123,7 +123,7 @@ void main() {
           controller: new ScrollController(initialScrollOffset: 300.0),
           itemBuilder: itemBuilder,
         ),
-        right: new Text('Not Today'),
+        right: const Text('Not Today'),
       );
     }
 

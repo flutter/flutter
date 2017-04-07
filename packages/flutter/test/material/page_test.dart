@@ -10,10 +10,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Material(child: new Text('Page 1')),
+        home: new Material(child: const Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Material(child: new Text('Page 2'));
+            return new Material(child: const Text('Page 2'));
           },
         },
       )
@@ -66,10 +66,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Material(child: new Text('Page 1')),
+        home: new Material(child: const Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Material(child: new Text('Page 2'));
+            return new Material(child: const Text('Page 2'));
           },
         },
       )
@@ -130,7 +130,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Material(child: new Text('Page 1')),
+        home: new Material(child: const Text('Page 1')),
       )
     );
 
@@ -138,7 +138,7 @@ void main() {
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
-        return new Material(child: new Text('Page 2'));
+        return new Material(child: const Text('Page 2'));
       },
       fullscreenDialog: true,
     ));
@@ -191,10 +191,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.android),
-        home: new Scaffold(body: new Text('Page 1')),
+        home: new Scaffold(body: const Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Scaffold(body: new Text('Page 2'));
+            return new Scaffold(body: const Text('Page 2'));
           },
         },
       )
@@ -222,10 +222,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(body: new Text('Page 1')),
+        home: new Scaffold(body: const Text('Page 1')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Scaffold(body: new Text('Page 2'));
+            return new Scaffold(body: const Text('Page 2'));
           },
         },
       )
@@ -264,13 +264,13 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         theme: new ThemeData(platform: TargetPlatform.iOS),
-        home: new Scaffold(body: new Text('Page 1')),
+        home: new Scaffold(body: const Text('Page 1')),
       )
     );
 
     tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
       builder: (BuildContext context) {
-        return new Scaffold(body: new Text('Page 2'));
+        return new Scaffold(body: const Text('Page 2'));
       },
       fullscreenDialog: true,
     ));

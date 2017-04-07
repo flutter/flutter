@@ -34,7 +34,7 @@ class SamplePageState extends State<SamplePage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Sample Page')),
+      appBar: new AppBar(title: const Text('Sample Page')),
     );
   }
 }
@@ -49,7 +49,7 @@ class SampleForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Sample Form')),
+      appBar: new AppBar(title: const Text('Sample Form')),
       body: new SizedBox.expand(
         child: new Form(
           onWillPop: () {
@@ -77,12 +77,12 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
-          appBar: new AppBar(title: new Text('Home')),
+          appBar: new AppBar(title: const Text('Home')),
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
                 child: new FlatButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
@@ -131,12 +131,12 @@ void main() {
     Widget buildFrame() {
       return new MaterialApp(
         home: new Scaffold(
-          appBar: new AppBar(title: new Text('Home')),
+          appBar: new AppBar(title: const Text('Home')),
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
                 child: new FlatButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
@@ -188,11 +188,11 @@ void main() {
         child: new AlertDialog(
           actions: <Widget> [
             new FlatButton(
-              child: new Text('YES'),
+              child: const Text('YES'),
               onPressed: () { Navigator.of(context).pop(true); },
             ),
             new FlatButton(
-              child: new Text('NO'),
+              child: const Text('NO'),
               onPressed: () { Navigator.of(context).pop(false); },
             ),
           ],
@@ -203,12 +203,12 @@ void main() {
     Widget buildFrame() {
       return new MaterialApp(
         home: new Scaffold(
-          appBar: new AppBar(title: new Text('Home')),
+          appBar: new AppBar(title: const Text('Home')),
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
                 child: new FlatButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(new MaterialPageRoute<Null>(
                       builder: (BuildContext context) {
@@ -289,12 +289,12 @@ void main() {
     Widget buildFrame() {
       return new MaterialApp(
         home: new Scaffold(
-          appBar: new AppBar(title: new Text('Home')),
+          appBar: new AppBar(title: const Text('Home')),
           body: new Builder(
             builder: (BuildContext context) {
               return new Center(
                 child: new FlatButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push(route);
                   },

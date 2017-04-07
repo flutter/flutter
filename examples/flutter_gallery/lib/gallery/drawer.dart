@@ -127,8 +127,8 @@ class GalleryDrawer extends StatelessWidget {
     final TextStyle linkStyle = themeData.textTheme.body2.copyWith(color: themeData.accentColor);
 
     final Widget lightThemeItem = new ListTile(
-      leading: new Icon(Icons.brightness_5),
-      title: new Text('Light'),
+      leading: const Icon(Icons.brightness_5),
+      title: const Text('Light'),
       trailing: new Radio<bool>(
         value: true,
         groupValue: useLightTheme,
@@ -141,8 +141,8 @@ class GalleryDrawer extends StatelessWidget {
     );
 
     final Widget darkThemeItem = new ListTile(
-      leading: new Icon(Icons.brightness_7),
-      title: new Text('Dark'),
+      leading: const Icon(Icons.brightness_7),
+      title: const Text('Dark'),
       trailing: new Radio<bool>(
         value: false,
         groupValue: useLightTheme,
@@ -157,7 +157,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget mountainViewItem = new ListTile(
       // on iOS, we don't want to show an Android phone icon
       leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      title: new Text('Android'),
+      title: const Text('Android'),
       trailing: new Radio<TargetPlatform>(
         value: TargetPlatform.android,
         groupValue: Theme.of(context).platform,
@@ -172,7 +172,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget cupertinoItem = new ListTile(
       // on iOS, we don't want to show the iPhone icon
       leading: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      title: new Text('iOS'),
+      title: const Text('iOS'),
       trailing: new Radio<TargetPlatform>(
         value: TargetPlatform.iOS,
         groupValue: Theme.of(context).platform,
@@ -185,8 +185,8 @@ class GalleryDrawer extends StatelessWidget {
     );
 
     final Widget animateSlowlyItem = new ListTile(
-      leading: new Icon(Icons.hourglass_empty),
-      title: new Text('Animate Slowly'),
+      leading: const Icon(Icons.hourglass_empty),
+      title: const Text('Animate Slowly'),
       trailing: new Checkbox(
         value: timeDilation != 1.0,
         onChanged: (bool value) {
@@ -200,8 +200,8 @@ class GalleryDrawer extends StatelessWidget {
     );
 
     final Widget sendFeedbackItem = new ListTile(
-      leading: new Icon(Icons.report),
-      title: new Text('Send feedback'),
+      leading: const Icon(Icons.report),
+      title: const Text('Send feedback'),
       onTap: onSendFeedback ?? () {
         UrlLauncher.launch('https://github.com/flutter/flutter/issues/new');
       },
@@ -266,8 +266,8 @@ class GalleryDrawer extends StatelessWidget {
 
     if (onShowPerformanceOverlayChanged != null) {
       allDrawerItems.insert(8, new ListTile(
-        leading: new Icon(Icons.assessment),
-        title: new Text('Performance Overlay'),
+        leading: const Icon(Icons.assessment),
+        title: const Text('Performance Overlay'),
         trailing: new Checkbox(
           value: showPerformanceOverlay,
           onChanged: (bool value) {
@@ -283,8 +283,8 @@ class GalleryDrawer extends StatelessWidget {
 
     if (onCheckerboardRasterCacheImagesChanged != null) {
       allDrawerItems.insert(8, new ListTile(
-        leading: new Icon(Icons.assessment),
-        title: new Text('Checkerboard Raster Cache Images'),
+        leading: const Icon(Icons.assessment),
+        title: const Text('Checkerboard Raster Cache Images'),
         trailing: new Checkbox(
           value: checkerboardRasterCacheImages,
           onChanged: (bool value) {

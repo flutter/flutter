@@ -10,7 +10,7 @@ class TestOverlayRoute extends OverlayRoute<Null> {
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield new OverlayEntry(builder: _build);
   }
-  Widget _build(BuildContext context) => new Text('Overlay');
+  Widget _build(BuildContext context) => const Text('Overlay');
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
@@ -27,7 +27,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
   void showBottomSheet() {
     _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Text('bottomSheet');
+      return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
       setState(() {
@@ -40,7 +40,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: new Text('Sheet')
+      body: const Text('Sheet')
     );
   }
 }
@@ -50,8 +50,8 @@ void main() {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Container(key: containerKey1, child: new Text('Home')),
-      '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
+      '/': (_) => new Container(key: containerKey1, child: const Text('Home')),
+      '/settings': (_) => new Container(key: containerKey2, child: const Text('Settings')),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
@@ -139,7 +139,7 @@ void main() {
           decoration: const BoxDecoration(backgroundColor: const Color(0xff00ffff)),
           child: new Hero(
             tag: kHeroTag,
-            child: new Text('Home')
+            child: const Text('Home')
           )
         )
       ),
@@ -150,7 +150,7 @@ void main() {
           decoration: const BoxDecoration(backgroundColor: const Color(0xffff00ff)),
           child: new Hero(
             tag: kHeroTag,
-            child: new Text('Settings')
+            child: const Text('Settings')
           )
         )
       ),
@@ -204,8 +204,8 @@ void main() {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
     await tester.pumpWidget(new MaterialApp(
@@ -251,7 +251,7 @@ void main() {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
       '/sheet': (_) => new PersistentBottomSheetTest(key: containerKey2),
     };
 
@@ -290,15 +290,15 @@ void main() {
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Center(child: new Text('home')),
-      '/next': (_) => new Center(child: new Text('next')),
+      '/': (_) => const Center(child: const Text('home')),
+      '/next': (_) => const Center(child: const Text('next')),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     final PageRoute<Null> route = new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: '/page'),
-      builder: (BuildContext context) => new Center(child: new Text('page')),
+      builder: (BuildContext context) => const Center(child: const Text('page')),
     );
 
     int popCount = 0;

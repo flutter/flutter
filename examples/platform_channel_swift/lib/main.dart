@@ -37,10 +37,10 @@ class _PlatformChannelState extends State<PlatformChannel> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
             new RaisedButton(
-              child: new Text('Get Battery Level'),
+              child: const Text('Get Battery Level'),
               onPressed: _getBatteryLevel,
             ),
-            new Text(_batteryLevel, key: new Key('Battery level label')),
+            new Text(_batteryLevel, key: const Key('Battery level label')),
           ],
         ),
       ),

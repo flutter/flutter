@@ -21,13 +21,13 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Cupertino Buttons'),
+        title: const Text('Cupertino Buttons'),
       ),
       body: new Column(
         children: <Widget> [
-          new Padding(
+          const Padding(
             padding: const EdgeInsets.all(16.0),
-            child: new Text('iOS themed buttons are flat. They can have borders or backgrounds but '
+            child: const Text('iOS themed buttons are flat. They can have borders or backgrounds but '
                 'only when necessary.'),
           ),
           new Expanded(
@@ -35,36 +35,36 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
                 new Text(_pressedCount > 0 ? "Button pressed $_pressedCount times" : " "),
-                new Padding(padding: const EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
                   alignment: const FractionalOffset(0.5, 0.4),
                   child: new Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       new CupertinoButton(
-                        child: new Text('Cupertino Button'),
+                        child: const Text('Cupertino Button'),
                         onPressed: () {
                           setState(() {_pressedCount++;});
                         }
                       ),
                       new CupertinoButton(
-                        child: new Text('Disabled'),
+                        child: const Text('Disabled'),
                         onPressed: null,
                       ),
                     ],
                   ),
                 ),
-                new Padding(padding: const EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
-                  child: new Text('With Background'),
+                  child: const Text('With Background'),
                   color: _kBlue,
                   onPressed: () {
                     setState(() {_pressedCount++;});
                   }
                 ),
-                new Padding(padding: const EdgeInsets.all(12.0)),
+                const Padding(padding: const EdgeInsets.all(12.0)),
                 new CupertinoButton(
-                  child: new Text('Disabled'),
+                  child: const Text('Disabled'),
                   color: _kBlue,
                   onPressed: null,
                 ),

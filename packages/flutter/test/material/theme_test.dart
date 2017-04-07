@@ -25,7 +25,7 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    new PopupMenuItem<String>(child: new Text('menuItem'))
+                    new PopupMenuItem<String>(child: const Text('menuItem'))
                   ];
                 }
               ),
@@ -71,7 +71,7 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      new PopupMenuItem<String>(child: new Text('menuItem'))
+                      new PopupMenuItem<String>(child: const Text('menuItem'))
                     ];
                   }
                 ),
@@ -105,7 +105,7 @@ void main() {
                   items: <DropdownMenuItem<String>>[
                     new DropdownMenuItem<String>(
                       value: 'menuItem',
-                      child: new Text('menuItem'),
+                      child: const Text('menuItem'),
                     ),
                   ],
                 )
@@ -137,10 +137,10 @@ void main() {
                     onPressed: () {
                       showModalBottomSheet<Null>(
                         context: context,
-                        builder: (BuildContext context) => new Text('bottomSheet'),
+                        builder: (BuildContext context) => const Text('bottomSheet'),
                       );
                     },
-                    child: new Text('SHOW'),
+                    child: const Text('SHOW'),
                   );
                 }
               )
@@ -174,10 +174,10 @@ void main() {
                     onPressed: () {
                       showDialog<Null>(
                         context: context,
-                        child: new Text('dialog'),
+                        child: const Text('dialog'),
                       );
                     },
-                    child: new Text('SHOW'),
+                    child: const Text('SHOW'),
                   );
                 }
               )
@@ -214,7 +214,7 @@ void main() {
                       )
                     );
                   },
-                  child: new Text('SHOW'),
+                  child: const Text('SHOW'),
                 );
               },
             ),

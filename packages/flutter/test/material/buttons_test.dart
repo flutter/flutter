@@ -18,7 +18,7 @@ void main() {
         child: new Center(
           child: new FlatButton(
             onPressed: () { },
-            child: new Text('ABC')
+            child: const Text('ABC')
           )
         )
       )
@@ -43,8 +43,8 @@ void main() {
   });
 
   testWidgets('Does button highlight + splash colors work if set directly', (WidgetTester tester) async {
-    final Color directSplashColor = new Color(0xFF000011);
-    final Color directHighlightColor = new Color(0xFF000011);
+    final Color directSplashColor = const Color(0xFF000011);
+    final Color directHighlightColor = const Color(0xFF000011);
 
     Widget buttonWidget = new Material(
       child: new Center(
@@ -66,7 +66,7 @@ void main() {
     final Point center = tester.getCenter(find.byType(MaterialButton));
     final TestGesture gesture = await tester.startGesture(center);
     await tester.pump(); // start gesture
-    await tester.pump(new Duration(milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
     expect(
       Material.of(tester.element(find.byType(MaterialButton))),
@@ -75,8 +75,8 @@ void main() {
         ..rrect(color: directHighlightColor)
     );
 
-    final Color themeSplashColor1 = new Color(0xFF001100);
-    final Color themeHighlightColor1 = new Color(0xFF001100);
+    final Color themeSplashColor1 = const Color(0xFF001100);
+    final Color themeHighlightColor1 = const Color(0xFF001100);
 
     buttonWidget = new Material(
       child: new Center(
@@ -103,8 +103,8 @@ void main() {
         ..rrect(color: themeHighlightColor1)
     );
 
-    final Color themeSplashColor2 = new Color(0xFF002200);
-    final Color themeHighlightColor2 = new Color(0xFF002200);
+    final Color themeSplashColor2 = const Color(0xFF002200);
+    final Color themeHighlightColor2 = const Color(0xFF002200);
 
     await tester.pumpWidget(
       new Theme(

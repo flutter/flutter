@@ -329,7 +329,7 @@ void main() {
     String value;
 
     // The hint will define the dropdown's width
-    Widget build() => buildFrame(buttonKey: buttonKey, value: value, hint: new Text('onetwothree'));
+    Widget build() => buildFrame(buttonKey: buttonKey, value: value, hint: const Text('onetwothree'));
 
     await tester.pumpWidget(build());
     expect(find.text('onetwothree'), findsOneWidget);

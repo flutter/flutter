@@ -15,7 +15,7 @@ class InsideState extends State<Inside> {
   Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
-      child: new Text('INSIDE')
+      child: const Text('INSIDE')
     );
   }
 

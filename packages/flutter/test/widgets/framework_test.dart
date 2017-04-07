@@ -162,14 +162,14 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(2)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(2)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -179,14 +179,14 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1)),
-        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -196,16 +196,16 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(1)),
-        new Container(key: new ValueKey<int>(2)),
+        new Container(key: const ValueKey<int>(0), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(2)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -215,16 +215,16 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1)),
-        new Container(key: new ValueKey<int>(2)),
-        new Container(key: new ValueKey<int>(3), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(2)),
+        new Container(key: const ValueKey<int>(3), child: new Container(key: key)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(2), child: new Container(key: key)),
-        new Container(key: new ValueKey<int>(3)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(3)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -329,14 +329,14 @@ void main() {
     await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(key: key),
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
       ],
     ));
   });
@@ -346,15 +346,15 @@ void main() {
     await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(key: key),
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1)),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
         new Container(key: key),
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
       ],
     ));
     expect(tester.takeException(), isFlutterError);
@@ -364,15 +364,15 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1)),
         new Container(key: key),
       ],
     ));
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
       ],
     ));
   });
@@ -381,8 +381,8 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1)),
         new Container(key: key),
       ],
     ));
@@ -394,8 +394,8 @@ void main() {
     };
     await tester.pumpWidget(new Stack(
       children: <Widget>[
-        new Container(key: new ValueKey<int>(0)),
-        new Container(key: new ValueKey<int>(1), child: new Container(key: key)),
+        new Container(key: const ValueKey<int>(0)),
+        new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
         new Container(key: key),
       ],
     ));

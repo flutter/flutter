@@ -62,22 +62,22 @@ class MenuDemoState extends State<MenuDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Menus'),
+        title: const Text('Menus'),
         actions: <Widget>[
           new PopupMenuButton<String>(
             onSelected: showMenuSelection,
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
               new PopupMenuItem<String>(
                 value: 'Toolbar menu',
-                child: new Text('Toolbar menu')
+                child: const Text('Toolbar menu')
               ),
               new PopupMenuItem<String>(
                 value: 'Right here',
-                child: new Text('Right here')
+                child: const Text('Right here')
               ),
               new PopupMenuItem<String>(
                 value: 'Hooray!',
-                child: new Text('Hooray!')
+                child: const Text('Hooray!')
               ),
             ]
           )
@@ -90,22 +90,22 @@ class MenuDemoState extends State<MenuDemo> {
           // a simple menu with one disabled item. Typically the contents
           // of this "contextual menu" would reflect the app's state.
           new ListTile(
-            title: new Text('An item with a context menu button'),
+            title: const Text('An item with a context menu button'),
             trailing: new PopupMenuButton<String>(
               padding: EdgeInsets.zero,
               onSelected: showMenuSelection,
               itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
                 new PopupMenuItem<String>(
                   value: _simpleValue1,
-                  child: new Text('Context menu item one')
+                  child: const Text('Context menu item one')
                 ),
                 new PopupMenuItem<String>(
                   enabled: false,
-                  child: new Text('A disabled menu item')
+                  child: const Text('A disabled menu item')
                 ),
                 new PopupMenuItem<String>(
                   value: _simpleValue3,
-                  child: new Text('Context menu item three')
+                  child: const Text('Context menu item three')
                 ),
               ]
             )
@@ -114,7 +114,7 @@ class MenuDemoState extends State<MenuDemo> {
           // a menu whose items have text labels and icons and a divider
           // That separates the first three items from the last one.
           new ListTile(
-            title: new Text('An item with a sectioned menu'),
+            title: const Text('An item with a sectioned menu'),
             trailing: new PopupMenuButton<String>(
               padding: EdgeInsets.zero,
               onSelected: showMenuSelection,
@@ -122,30 +122,30 @@ class MenuDemoState extends State<MenuDemo> {
                 new PopupMenuItem<String>(
                   value: 'Preview',
                   child: new ListTile(
-                    leading: new Icon(Icons.visibility),
-                    title: new Text('Preview')
+                    leading: const Icon(Icons.visibility),
+                    title: const Text('Preview')
                   )
                 ),
                 new PopupMenuItem<String>(
                   value: 'Share',
                   child: new ListTile(
-                    leading: new Icon(Icons.person_add),
-                    title: new Text('Share')
+                    leading: const Icon(Icons.person_add),
+                    title: const Text('Share')
                   )
                 ),
                 new PopupMenuItem<String>(
                   value: 'Get Link',
                   child: new ListTile(
-                    leading: new Icon(Icons.link),
-                    title: new Text('Get link')
+                    leading: const Icon(Icons.link),
+                    title: const Text('Get link')
                   )
                 ),
                 new PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
                 new PopupMenuItem<String>(
                   value: 'Remove',
                   child: new ListTile(
-                    leading: new Icon(Icons.delete),
-                    title: new Text('Remove')
+                    leading: const Icon(Icons.delete),
+                    title: const Text('Remove')
                   )
                 )
               ]
@@ -159,7 +159,7 @@ class MenuDemoState extends State<MenuDemo> {
             initialValue: _simpleValue,
             onSelected: showMenuSelection,
             child: new ListTile(
-              title: new Text('An item with a simple menu'),
+              title: const Text('An item with a simple menu'),
               subtitle: new Text(_simpleValue)
             ),
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
@@ -180,7 +180,7 @@ class MenuDemoState extends State<MenuDemo> {
           // Pressing the PopupMenuButton on the right of this item shows a menu
           // whose items have checked icons that reflect this app's state.
           new ListTile(
-            title: new Text('An item with a checklist menu'),
+            title: const Text('An item with a checklist menu'),
             trailing: new PopupMenuButton<String>(
               padding: EdgeInsets.zero,
               onSelected: showCheckedMenuSelections,

@@ -83,7 +83,7 @@ void main() {
         child: new Material(
           child: new TextField(
             key: textFieldKey,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
             onChanged: (String value) {
@@ -125,7 +125,7 @@ void main() {
       return new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -170,7 +170,7 @@ void main() {
         child: new Material(
           child: new TextField(
             obscureText: true,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -434,7 +434,7 @@ void main() {
             key: textFieldKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
             maxLines: maxLines,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -679,7 +679,7 @@ void main() {
         child: new Material(
           child: new TextField(
             key: textFieldKey,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
             onChanged: (String value) { textFieldValue = value; },
@@ -717,7 +717,7 @@ void main() {
           data: themeData,
           child: new Material(
             child: new TextField(
-              decoration: new InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Placeholder',
               ),
               style: style,
@@ -768,13 +768,13 @@ void main() {
           child: new Column(
             children: <Widget>[
               new TextField(
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'First',
                 ),
               ),
               new TextField(
                 key: secondKey,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Second',
                 ),
               ),
@@ -810,8 +810,8 @@ void main() {
       new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration(
-              icon: new Icon(Icons.phone),
+            decoration: const InputDecoration(
+              icon: const Icon(Icons.phone),
               labelText: 'label',
             ),
           ),
@@ -829,7 +829,7 @@ void main() {
       overlay(new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration.collapsed(
+            decoration: const InputDecoration.collapsed(
               hintText: 'hint',
             ),
           ),
@@ -857,7 +857,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -866,7 +866,7 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -891,7 +891,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -900,7 +900,7 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));

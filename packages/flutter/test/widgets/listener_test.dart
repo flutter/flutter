@@ -24,7 +24,7 @@ void main() {
               onPointerDown: (_) {
                 log.add('bottom');
               },
-              child: new Text('X')
+              child: const Text('X')
             )
           )
         )

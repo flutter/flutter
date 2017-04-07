@@ -547,7 +547,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   Widget build(BuildContext context) {
     if (config.child == null) {
       return new IconButton(
-        icon: new Icon(Icons.more_vert),
+        icon: const Icon(Icons.more_vert),
         padding: config.padding,
         tooltip: config.tooltip,
         onPressed: showButtonMenu,

@@ -16,7 +16,7 @@ void main() {
         children: <Widget>[
           new Container(
             height: 200.0, // less than 600, the height of the test area
-            child: new Text('Hello')
+            child: const Text('Hello')
           )
         ]
       )
@@ -41,7 +41,7 @@ void main() {
         children: <Widget>[
           new Container(
             height: 2000.0, // more than 600, the height of the test area
-            child: new Text('Hello')
+            child: const Text('Hello')
           )
         ]
       )
@@ -113,7 +113,7 @@ void main() {
     Widget buildBlock() {
       return new ListView(
         controller: controller,
-        children: <Widget>[new Text("A"), new Text("B"), new Text("C")]
+        children: <Widget>[const Text("A"), const Text("B"), const Text("C")]
       );
     }
     await tester.pumpWidget(buildBlock());

@@ -120,7 +120,7 @@ class TabsDemo extends StatelessWidget {
       length: _allPages.length,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Tabs and scrolling'),
+          title: const Text('Tabs and scrolling'),
           bottom: new TabBar(
             tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
           ),
