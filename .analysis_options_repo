@@ -92,6 +92,7 @@ linter:
     - prefer_const_constructors
     - prefer_contains
     - prefer_final_locals
+    - prefer_initializing_formals
     - prefer_is_empty
     - prefer_is_not_empty
     - public_member_api_docs # this is the only difference from .analysis_options
