@@ -621,8 +621,8 @@ class _AdbLogReader extends DeviceLogReader {
     });
   }
 
-  // 'W/ActivityManager: '
-  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.{8,}:\s');
+  // 'W/ActivityManager(pid): '
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.*?\(\s*(\d+)\):\s');
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
@@ -657,14 +657,19 @@ class _AdbLogReader extends DeviceLogReader {
     }
     // Chop off the time.
     line = line.substring(timeMatch.end + 1);
-    if (_logFormat.hasMatch(line)) {
-      // Filter on approved names and levels.
-      for (RegExp regex in _whitelistedTags) {
-        if (regex.hasMatch(line)) {
-          _acceptedLastLine = true;
-          _linesController.add(line);
-          return;
-        }
+    final Match logMatch = _logFormat.firstMatch(line);
+    if (logMatch != null) {
+      bool acceptLine = false;
+      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+        acceptLine = true;
+      } else {
+        // Filter on approved names and levels.
+        acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
+      }
+      if (acceptLine) {
+        _acceptedLastLine = true;
+        _linesController.add(line);
+        return;
       }
       _acceptedLastLine = false;
     } else if (line == '--------- beginning of system' ||

@@ -507,6 +507,7 @@ class VM extends ServiceObjectOwner {
     _loaded = true;
 
     // TODO(johnmccutchan): Extract any properties we care about here.
+    _pid = map['pid'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -520,6 +521,11 @@ class VM extends ServiceObjectOwner {
 
   /// The set of live views.
   final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
+
+  /// The pid of the VM's process.
+  int _pid;
+
+  int get pid => _pid;
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
