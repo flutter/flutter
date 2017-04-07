@@ -80,6 +80,7 @@ linter:
     - implementation_imports
     - library_names
     - library_prefixes
+    - no_adjacent_strings_in_list
     - non_constant_identifier_names
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
