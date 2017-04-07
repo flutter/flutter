@@ -103,7 +103,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
@@ -210,7 +209,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -249,7 +247,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
@@ -285,7 +282,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -349,7 +345,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -403,7 +398,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -456,13 +450,11 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     await tester.enterText(find.byType(EditableText), 'No wrapping here.');
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
     await tester.enterText(find.byType(EditableText), kThreeLines);
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
@@ -471,14 +463,12 @@ void main() {
 
     // An extra line won't increase the size because we max at 3.
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
@@ -504,7 +494,6 @@ void main() {
     final String testValue = kThreeLines;
     final String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -584,7 +573,6 @@ void main() {
     await tester.pumpWidget(builder());
 
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -672,7 +660,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
@@ -705,7 +692,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
