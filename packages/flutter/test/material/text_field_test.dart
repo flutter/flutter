@@ -191,6 +191,39 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new TextField(
+            controller: controller,
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    final String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.idle();
+
+    await tester.pumpWidget(builder());
+
+    // Tap to reposition the caret.
+    final int tapIndex = testValue.indexOf('e');
+    final Point ePos = textOffsetToPosition(tester, tapIndex);
+    await tester.tapAt(ePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, tapIndex);
+    expect(controller.selection.extentOffset, tapIndex);
+  });
+
   testWidgets('Can long press to select', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 
