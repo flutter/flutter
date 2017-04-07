@@ -724,8 +724,7 @@ class AppInstance {
   }
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
-    if (_logger == null)
-      _logger = new _AppRunLogger(domain, this, logToStdout: logToStdout);
+    _logger ??= new _AppRunLogger(domain, this, logToStdout: logToStdout);
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);

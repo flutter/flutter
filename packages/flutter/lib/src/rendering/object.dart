@@ -2697,8 +2697,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
         _firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
-      if (_lastChild == null)
-        _lastChild = child;
+      _lastChild ??= child;
     } else {
       assert(_firstChild != null);
       assert(_lastChild != null);

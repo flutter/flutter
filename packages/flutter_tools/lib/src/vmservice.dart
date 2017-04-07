@@ -266,11 +266,9 @@ abstract class ServiceObject {
         serviceObject = new Isolate._empty(owner.vm);
       break;
     }
-    if (serviceObject == null) {
-      // If we don't have a model object for this service object type, as a
-      // fallback return a ServiceMap object.
-      serviceObject = new ServiceMap._empty(owner);
-    }
+    // If we don't have a model object for this service object type, as a
+    // fallback return a ServiceMap object.
+    serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an emtpy service object, call update to
     // populate it.
     serviceObject.update(map);

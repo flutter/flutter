@@ -357,12 +357,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _IOSDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _IOSDevicePortForwarder(this);
 
   @override
   void clearLogs() {

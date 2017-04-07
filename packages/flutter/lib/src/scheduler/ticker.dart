@@ -199,8 +199,7 @@ class Ticker {
     assert(scheduled);
     _animationId = null;
 
-    if (_startTime == null)
-      _startTime = timeStamp;
+    _startTime ??= timeStamp;
 
     _onTick(timeStamp - _startTime);
 

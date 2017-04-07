@@ -60,9 +60,7 @@ abstract class SyntaxHighlighter { // ignore: one_member_abstracts
 class DartSyntaxHighlighter extends SyntaxHighlighter {
   DartSyntaxHighlighter([this._style]) {
     _spans = <_HighlightSpan>[];
-
-    if (_style == null)
-      _style = SyntaxHighlighterStyle.darkThemeStyle();
+    _style ??= SyntaxHighlighterStyle.darkThemeStyle();
   }
 
   SyntaxHighlighterStyle _style;
