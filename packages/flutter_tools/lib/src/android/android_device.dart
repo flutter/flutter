@@ -312,7 +312,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
-      await buildApk(targetPlatform,
+      await buildApk(
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
           kernelPath: kernelPath,
