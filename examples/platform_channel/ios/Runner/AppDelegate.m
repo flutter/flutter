@@ -5,11 +5,16 @@
 #import "AppDelegate.h"
 #import <Flutter/Flutter.h>
 
-@implementation AppDelegate
+
+@implementation AppDelegate {
+  FlutterEventReceiver _eventReceiver;
+}
+
 - (BOOL)application:(UIApplication*)application
     didFinishLaunchingWithOptions:(NSDictionary*)launchOptions {
   FlutterViewController* controller =
       (FlutterViewController*)self.window.rootViewController;
+
   FlutterMethodChannel* batteryChannel = [FlutterMethodChannel
       methodChannelWithName:@"samples.flutter.io/battery"
             binaryMessenger:controller];
@@ -28,6 +33,11 @@
       result(FlutterMethodNotImplemented);
     }
   }];
+
+  FlutterEventChannel* chargingChannel = [FlutterEventChannel
+      eventChannelWithName:@"samples.flutter.io/charging"
+           binaryMessenger:controller];
+  [chargingChannel setStreamHandler:self];
   return YES;
 }
 
@@ -39,6 +49,43 @@
   } else {
     return ((int)(device.batteryLevel * 100));
   }
+}
+
+- (FlutterError*)onListenWithArguments:(id)arguments
+                         eventReceiver:(FlutterEventReceiver)eventReceiver {
+  _eventReceiver = eventReceiver;
+  [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+  [[NSNotificationCenter defaultCenter]
+   addObserver:self
+      selector:@selector(onBatteryStateDidChange:)
+          name:UIDeviceBatteryStateDidChangeNotification
+        object:nil];
+  return nil;
+}
+
+- (void)onBatteryStateDidChange:(NSNotification*)notification {
+  if (!_eventReceiver) return;
+  UIDeviceBatteryState state = [[UIDevice currentDevice] batteryState];
+  switch (state) {
+    case UIDeviceBatteryStateFull:
+    case UIDeviceBatteryStateCharging:
+      _eventReceiver(@"charging");
+      break;
+    case UIDeviceBatteryStateUnplugged:
+      _eventReceiver(@"discharging");
+      break;
+    default:
+      _eventReceiver([FlutterError errorWithCode:@"UNAVAILABLE"
+                                          message:@"Charging status unavailable"
+                                          details:nil]);
+      break;
+  }
+}
+
+- (FlutterError*)onCancelWithArguments:(id)arguments {
+  [[NSNotificationCenter defaultCenter] removeObserver:self];
+  _eventReceiver = nil;
+  return nil;
 }
 
 @end

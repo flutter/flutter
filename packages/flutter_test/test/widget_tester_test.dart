@@ -201,4 +201,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.hasRunningAnimations, isFalse);
   });
+
+  testWidgets('pumpAndSettle control test', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(minutes: 525600),
+      vsync: const TestVSync()
+    );
+    expect(await tester.pumpAndSettle(), 1);
+    controller.forward();
+    try {
+      await tester.pumpAndSettle();
+      expect(true, isFalse);
+    } catch (e) {
+      expect(e, isFlutterError);
+    }
+    controller.stop();
+    expect(await tester.pumpAndSettle(), 1);
+    controller.duration = const Duration(seconds: 1);
+    controller.forward();
+    expect(await tester.pumpAndSettle(const Duration(milliseconds: 300)), 5); // 0, 300, 600, 900, 1200ms
+  });
 }

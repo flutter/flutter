@@ -53,6 +53,7 @@ void main() {
         ],
       ),
     );
+    expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
 
     await tester.tapAt(const Point(50.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));

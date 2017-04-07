@@ -191,6 +191,39 @@ void main() {
     await tester.pump();
   });
 
+  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new TextField(
+            controller: controller,
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    final String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.idle();
+
+    await tester.pumpWidget(builder());
+
+    // Tap to reposition the caret.
+    final int tapIndex = testValue.indexOf('e');
+    final Point ePos = textOffsetToPosition(tester, tapIndex);
+    await tester.tapAt(ePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, tapIndex);
+    expect(controller.selection.extentOffset, tapIndex);
+  });
+
   testWidgets('Can long press to select', (WidgetTester tester) async {
     final TextEditingController controller = new TextEditingController();
 
@@ -885,5 +918,60 @@ void main() {
     );
 
     expect(topLeft.x, equals(399.0));
+  });
+
+  testWidgets('Controller can update server', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController(
+      text: 'Initial Text',
+    );
+    final TextEditingController controller2 = new TextEditingController(
+      text: 'More Text',
+    );
+
+    TextEditingController currentController = controller;
+    StateSetter setState;
+
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return new TextField(controller: currentController);
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.testTextInput.editingState['text'], isEmpty);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('Initial Text'));
+
+    controller.text = 'Updated Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Updated Text'));
+
+    setState(() {
+      currentController = controller2;
+    });
+
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller.text = 'Ignored Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller2.text = 'Final Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Final Text'));
   });
 }

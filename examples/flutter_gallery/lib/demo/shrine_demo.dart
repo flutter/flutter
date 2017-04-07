@@ -29,8 +29,8 @@ class ShrinePageRoute<T> extends MaterialPageRoute<T> {
   }) : super(builder: builder, settings: settings);
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> forwardAnimation) {
-    return buildShrine(context, super.buildPage(context, animation, forwardAnimation));
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return buildShrine(context, super.buildPage(context, animation, secondaryAnimation));
   }
 }
 

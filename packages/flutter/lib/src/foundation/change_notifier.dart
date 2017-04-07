@@ -162,7 +162,7 @@ class _MergingListenable extends ChangeNotifier {
   @override
   String toString() {
     final StringBuffer buffer = new StringBuffer();
-    buffer.write('_MergingListenable([');
+    buffer.write('Listenable.merge([');
     for (int i = 0; i < _children.length; ++i) {
       buffer.write(_children[i].toString());
       if (i < _children.length - 1)
@@ -193,5 +193,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => '<$runtimeType>(value: $value)';
+  String toString() => '$runtimeType(value: $value)';
 }

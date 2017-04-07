@@ -115,7 +115,8 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       final File existingFile = fs.file("${temp.path.toString()}/bad");
-      if (!existingFile.existsSync()) existingFile.createSync();
+      if (!existingFile.existsSync())
+        existingFile.createSync();
       try {
         await runner.run(<String>['create', existingFile.path]);
         fail('expected ToolExit exception');

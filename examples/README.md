@@ -10,8 +10,10 @@ the `flutter` tool.
 
 **Tip:** To see examples of how to use a specific Flutter framework class,
 copy and paste a URL with this format in your browser. Replace `foo` with the
-classname you are searching for (for example, here's the [query](https://github.com/flutter/flutter/search?q=path%3Aexamples+new+AppBar) for examples of
-the [`AppBar`](https://docs.flutter.io/flutter/material/AppBar-class.html) class).
+classname you are searching for (for example, here's the
+[query](https://github.com/flutter/flutter/search?q=path%3Aexamples+new+AppBar)
+for examples of the
+[`AppBar`](https://docs.flutter.io/flutter/material/AppBar-class.html) class).
 
 ```
 https://github.com/flutter/flutter/search?q=path%3Aexamples+new+foo
@@ -23,11 +25,12 @@ Available examples include:
   the text "hello, world."
 
 - **Flutter gallery** The [flutter gallery app](flutter_gallery) showcases
-  Flutter's implementation of [material design](https://material.google.com/).
+  Flutter's widgets, including its implementation of
+  [material design](https://material.google.com/).
 
 - **Platform Channel** The [platform channel app](platform_channel)
   demonstrates how to connect a Flutter app to platform-specific APIs. For
-  documentation, see https://flutter.io/platform-channels/ .
+  documentation, see <https://flutter.io/platform-channels/>.
 
 - **Platform Channel Swift** The [platform channel swift
   app](platform_channel_swift) is the same as [platform
@@ -38,6 +41,7 @@ Available examples include:
   embed Flutter within an iOS or Android app.
 
 - **Layers** The [layers vignettes](layers) show how to use the various layers
-  in the Flutter framework. There is no main.dart in this directory because each
-  file is a standalone example. To run a particular file, use
-  `flutter run -t filename.dart`.
+  in the Flutter framework. For details, see the [layers README](layers/README).
+
+- **Stocks** The [stocks](stocks) demo shows how one might structure
+  an application with several screens.

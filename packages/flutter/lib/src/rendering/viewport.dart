@@ -21,7 +21,7 @@ import 'viewport_offset.dart';
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
 abstract class RenderAbstractViewport implements RenderObject {
-  /// Returns the [RenderAbstractViewport] that most closely encloses the given
+  /// Returns the [RenderAbstractViewport] that most tightly encloses the given
   /// render object.
   ///
   /// If the object does not have a [RenderAbstractViewport] as an ancestor,

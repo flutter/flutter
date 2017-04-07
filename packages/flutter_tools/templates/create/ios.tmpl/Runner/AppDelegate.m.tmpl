@@ -15,7 +15,7 @@
 {{#withPluginHook}}
   FlutterViewController *flutterController =
       (FlutterViewController *)self.window.rootViewController;
-  _{{pluginProjectName}} = [[{{pluginClass}} alloc] initWithFlutterView:flutterController];
+  _{{pluginProjectName}} = [[{{pluginClass}} alloc] initWithController:flutterController];
 {{/withPluginHook}}
     return YES;
 }

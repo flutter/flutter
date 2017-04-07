@@ -125,4 +125,44 @@ void main() {
     // Still doesn't animate.
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
   });
+
+  testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
+    await tester.pumpWidget(new Center(child: new CupertinoButton(
+      child: new Text('Tap me'),
+      onPressed: () { },
+    )));
+
+    // Keep a "down" gesture on the button
+    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Check opacity
+    final Opacity opacity = tester.widget(find.descendant(
+      of: find.byType(CupertinoButton),
+      matching: find.byType(Opacity),
+    ));
+    expect(opacity.opacity, 0.1);
+  });
+
+  testWidgets('pressedOpacity parameter', (WidgetTester tester) async {
+    final double pressedOpacity = 0.5;
+    await tester.pumpWidget(new Center(child: new CupertinoButton(
+      pressedOpacity: pressedOpacity,
+      child: new Text('Tap me'),
+      onPressed: () { },
+    )));
+
+    // Keep a "down" gesture on the button
+    final Point center = tester.getCenter(find.byType(CupertinoButton));
+    await tester.startGesture(center);
+    await tester.pumpAndSettle();
+
+    // Check opacity
+    final Opacity opacity = tester.widget(find.descendant(
+      of: find.byType(CupertinoButton),
+      matching: find.byType(Opacity),
+    ));
+    expect(opacity.opacity, pressedOpacity);
+  });
 }

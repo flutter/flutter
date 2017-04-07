@@ -19,6 +19,8 @@ import 'utils.dart';
 /// by this group as they become active. This mean simulations should not be
 /// shared among different groups that are active at the same time.
 abstract class SimulationGroup extends Simulation {
+  /// Initializes the [tolerance] field for subclasses.
+  SimulationGroup({ Tolerance tolerance: Tolerance.defaultTolerance }) : super(tolerance: tolerance);
 
   /// The currently active simulation.
   ///

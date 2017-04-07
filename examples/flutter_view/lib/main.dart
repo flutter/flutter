@@ -15,16 +15,12 @@ class FlutterView extends StatelessWidget {
       theme: new ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      home: new MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-
-  final String title;
-
   @override
   _MyHomePageState createState() => new _MyHomePageState();
 }

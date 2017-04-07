@@ -47,8 +47,11 @@ class CupertinoButton extends StatefulWidget {
     this.padding,
     this.color,
     this.minSize: 44.0,
+    this.pressedOpacity: 0.1,
     @required this.onPressed,
-  });
+  }) {
+    assert(pressedOpacity >= 0.0 && pressedOpacity <= 1.0);
+  }
 
   /// The widget below this widget in the tree.
   ///
@@ -80,6 +83,12 @@ class CupertinoButton extends StatefulWidget {
   /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/layout/>
   final double minSize;
 
+  /// The opacity that the button will fade to when it is pressed.
+  /// The button will have an opacity of 1.0 when it is not pressed.
+  ///
+  /// This defaults to 0.1.
+  final double pressedOpacity;
+
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To
   /// enable a button, set its [onPressed] property to a non-null value.
   bool get enabled => onPressed != null;
@@ -99,17 +108,26 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   // Eyeballed values. Feel free to tweak.
   static const Duration kFadeOutDuration = const Duration(milliseconds: 10);
   static const Duration kFadeInDuration = const Duration(milliseconds: 350);
+  Tween<double> _opacityTween;
 
   AnimationController _animationController;
+
+  void _setTween() {
+    _opacityTween = new Tween<double>(
+      begin: 1.0,
+      end: config.pressedOpacity,
+    );
+  }
 
   @override
   void initState() {
     super.initState();
     _animationController = new AnimationController(
       duration: const Duration(milliseconds: 200),
-      value: 1.0,
+      value: 0.0,
       vsync: this,
     );
+    _setTween();
   }
 
   @override
@@ -119,16 +137,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     super.dispose();
   }
 
+  @override
+  void didUpdateConfig(CupertinoButton old) {
+    super.didUpdateConfig(old);
+    _setTween();
+  }
+
   void _handleTapDown(PointerDownEvent event) {
-    _animationController.animateTo(0.1, duration: kFadeOutDuration);
+    _animationController.animateTo(1.0, duration: kFadeOutDuration);
   }
 
   void _handleTapUp(PointerUpEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeInDuration);
+    _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
   void _handleTapCancel(PointerCancelEvent event) {
-    _animationController.animateTo(1.0, duration: kFadeInDuration);
+    _animationController.animateTo(0.0, duration: kFadeInDuration);
   }
 
   @override
@@ -148,10 +172,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             minHeight: config.minSize,
           ),
           child: new FadeTransition(
-            opacity: new CurvedAnimation(
+            opacity: _opacityTween.animate(new CurvedAnimation(
               parent: _animationController,
               curve: Curves.decelerate,
-            ),
+            )),
             child: new DecoratedBox(
               decoration: new BoxDecoration(
                 borderRadius: const BorderRadius.all(const Radius.circular(8.0)),

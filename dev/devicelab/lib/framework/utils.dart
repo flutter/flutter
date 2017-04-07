@@ -306,7 +306,8 @@ Directory get flutterDirectory => dir('../..').absolute;
 String requireEnvVar(String name) {
   final String value = Platform.environment[name];
 
-  if (value == null) fail('$name environment variable is missing. Quitting.');
+  if (value == null)
+    fail('$name environment variable is missing. Quitting.');
 
   return value;
 }

@@ -113,9 +113,11 @@ class ButtonTheme extends InheritedWidget {
   }
 }
 
-/// A material design button.
+/// The framework for building material design buttons.
 ///
-/// Rather than using this class directly, consider using [FlatButton] or [RaisedButton].
+/// Rather than using this class directly, consider using [FlatButton] or
+/// [RaisedButton], which configure this class with appropriate defaults that
+/// match the material design specification.
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.

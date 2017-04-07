@@ -207,7 +207,8 @@ String findProjectRoot([String directory]) {
     if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
       return directory;
     final String parent = fs.path.dirname(directory);
-    if (directory == parent) return null;
+    if (directory == parent)
+      return null;
     directory = parent;
   }
 }

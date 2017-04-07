@@ -12,7 +12,8 @@ Future<String> mockUpdateUrlFetcher() {
 
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  if (binding is LiveTestWidgetsFlutterBinding) binding.allowAllFrames = true;
+  if (binding is LiveTestWidgetsFlutterBinding)
+    binding.allowAllFrames = true;
 
   // Regression test for https://github.com/flutter/flutter/pull/5168
   testWidgets('update dialog', (WidgetTester tester) async {

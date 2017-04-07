@@ -39,9 +39,9 @@ class Stock {
 }
 
 class StockData {
-  List<List<String>> _data;
-
   StockData(this._data);
+
+  final List<List<String>> _data;
 
   void appendTo(Map<String, Stock> stocks, List<String> symbols) {
     for (List<String> fields in _data) {

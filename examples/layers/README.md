@@ -18,8 +18,11 @@ Flutter's layered architecture.
  * [*services/*](services/) These examples use services available in Flutter to
    interact with the host platform.
 
-To run each example, use the `-t` argument to the `flutter` tool:
+To run each example, specify the demo file on the `flutter run`
+command line, for example:
 
 ```
-flutter run -t widgets/spinning_square.dart
+flutter run raw/spinning_square.dart
+flutter run rendering/spinning_square.dart
+flutter run widgets/spinning_square.dart
 ```

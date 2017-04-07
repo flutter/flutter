@@ -51,7 +51,7 @@ class RenderErrorBox extends RenderBox {
         );
         _paragraph = builder.build();
       }
-    } catch (e) { }
+    } catch (e) { } // ignore: empty_catches
   }
 
   /// The message to attempt to display at paint time.
@@ -114,6 +114,6 @@ class RenderErrorBox extends RenderBox {
 
         context.canvas.drawParagraph(_paragraph, offset);
       }
-    } catch (e) { }
+    } catch (e) { } // ignore: empty_catches
   }
 }

@@ -75,12 +75,12 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     return null;
   }
 
-  Future<bool> _warnUserAboutInvalidData() {
+  Future<bool> _warnUserAboutInvalidData() async {
     final FormState form = _formKey.currentState;
-    if (!_formWasEdited || form.validate())
-      return new Future<bool>.value(true);
+    if (form == null || !_formWasEdited || form.validate())
+      return true;
 
-    return showDialog<bool>(
+    return await showDialog<bool>(
       context: context,
       child: new AlertDialog(
         title: new Text('This form has errors'),
@@ -96,7 +96,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ),
         ],
       ),
-    );
+    ) ?? false;
   }
 
   @override

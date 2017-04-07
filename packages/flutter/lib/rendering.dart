@@ -22,13 +22,6 @@
 /// initialized with those features.
 library rendering;
 
-export 'package:flutter/foundation.dart' show
-  VoidCallback,
-  ValueChanged,
-  ValueGetter,
-  ValueSetter;
-export 'package:vector_math/vector_math_64.dart' show Matrix4;
-
 export 'src/rendering/animated_size.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/block.dart';
@@ -50,6 +43,7 @@ export 'src/rendering/rotated_box.dart';
 export 'src/rendering/semantics.dart';
 export 'src/rendering/shifted_box.dart';
 export 'src/rendering/sliver.dart';
+export 'src/rendering/sliver_fill.dart';
 export 'src/rendering/sliver_fixed_extent_list.dart';
 export 'src/rendering/sliver_grid.dart';
 export 'src/rendering/sliver_list.dart';
@@ -62,3 +56,11 @@ export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';
 export 'src/rendering/viewport_offset.dart';
+export 'src/rendering/wrap.dart';
+
+export 'package:flutter/foundation.dart' show
+  VoidCallback,
+  ValueChanged,
+  ValueGetter,
+  ValueSetter;
+export 'package:vector_math/vector_math_64.dart' show Matrix4;
