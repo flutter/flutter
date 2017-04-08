@@ -467,7 +467,7 @@ class _MonthPickerState extends State<MonthPicker> {
             top: 0.0,
             left: 8.0,
             child: new IconButton(
-              icon: new Icon(Icons.chevron_left),
+              icon: const Icon(Icons.chevron_left),
               tooltip: 'Previous month',
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
@@ -476,7 +476,7 @@ class _MonthPickerState extends State<MonthPicker> {
             top: 0.0,
             right: 8.0,
             child: new IconButton(
-              icon: new Icon(Icons.chevron_right),
+              icon: const Icon(Icons.chevron_right),
               tooltip: 'Next month',
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),

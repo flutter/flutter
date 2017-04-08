@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
-
-import 'dart:typed_data';
 
 void main() {
   group('Write and read buffer round-trip', () {
