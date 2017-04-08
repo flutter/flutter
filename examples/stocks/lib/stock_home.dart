@@ -20,21 +20,21 @@ class _NotImplementedDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new AlertDialog(
-      title: new Text('Not Implemented'),
-      content: new Text('This feature has not yet been implemented.'),
+      title: const Text('Not Implemented'),
+      content: const Text('This feature has not yet been implemented.'),
       actions: <Widget>[
         new FlatButton(
           onPressed: debugDumpApp,
           child: new Row(
             children: <Widget>[
-              new Icon(
+              const Icon(
                 Icons.dvr,
                 size: 18.0,
               ),
               new Container(
                 width: 8.0,
               ),
-              new Text('DUMP APP TO CONSOLE'),
+              const Text('DUMP APP TO CONSOLE'),
             ],
           ),
         ),
@@ -42,7 +42,7 @@ class _NotImplementedDialog extends StatelessWidget {
           onPressed: () {
             Navigator.pop(context, false);
           },
-          child: new Text('OH WELL'),
+          child: const Text('OH WELL'),
         ),
       ],
     );
@@ -117,20 +117,20 @@ class StockHomeState extends State<StockHome> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          new DrawerHeader(child: new Center(child: new Text('Stocks'))),
+          const DrawerHeader(child: const Center(child: const Text('Stocks'))),
           new ListTile(
-            leading: new Icon(Icons.assessment),
-            title: new Text('Stock List'),
+            leading: const Icon(Icons.assessment),
+            title: const Text('Stock List'),
             selected: true,
           ),
           new ListTile(
-            leading: new Icon(Icons.account_balance),
-            title: new Text('Account Balance'),
+            leading: const Icon(Icons.account_balance),
+            title: const Text('Account Balance'),
             enabled: false,
           ),
           new ListTile(
-            leading: new Icon(Icons.dvr),
-            title: new Text('Dump App to Console'),
+            leading: const Icon(Icons.dvr),
+            title: const Text('Dump App to Console'),
             onTap: () {
               try {
                 debugDumpApp();
@@ -144,8 +144,8 @@ class StockHomeState extends State<StockHome> {
           ),
           new Divider(),
           new ListTile(
-            leading: new Icon(Icons.thumb_up),
-            title: new Text('Optimistic'),
+            leading: const Icon(Icons.thumb_up),
+            title: const Text('Optimistic'),
             trailing: new Radio<StockMode>(
               value: StockMode.optimistic,
               groupValue: config.configuration.stockMode,
@@ -156,8 +156,8 @@ class StockHomeState extends State<StockHome> {
             },
           ),
           new ListTile(
-            leading: new Icon(Icons.thumb_down),
-            title: new Text('Pessimistic'),
+            leading: const Icon(Icons.thumb_down),
+            title: const Text('Pessimistic'),
             trailing: new Radio<StockMode>(
               value: StockMode.pessimistic,
               groupValue: config.configuration.stockMode,
@@ -169,13 +169,13 @@ class StockHomeState extends State<StockHome> {
           ),
           new Divider(),
           new ListTile(
-            leading: new Icon(Icons.settings),
-            title: new Text('Settings'),
+            leading: const Icon(Icons.settings),
+            title: const Text('Settings'),
             onTap: _handleShowSettings,
           ),
           new ListTile(
-            leading: new Icon(Icons.help),
-            title: new Text('About'),
+            leading: const Icon(Icons.help),
+            title: const Text('About'),
             onTap: _handleShowAbout,
           ),
         ],
@@ -197,7 +197,7 @@ class StockHomeState extends State<StockHome> {
       title: new Text(StockStrings.of(context).title()),
       actions: <Widget>[
         new IconButton(
-          icon: new Icon(Icons.search),
+          icon: const Icon(Icons.search),
           onPressed: _handleSearchBegin,
           tooltip: 'Search',
         ),
@@ -207,19 +207,19 @@ class StockHomeState extends State<StockHome> {
             new CheckedPopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.autorefresh,
               checked: _autorefresh,
-              child: new Text('Autorefresh'),
+              child: const Text('Autorefresh'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
-              child: new Text('Refresh'),
+              child: const Text('Refresh'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
-              child: new Text('Increase animation speed'),
+              child: const Text('Increase animation speed'),
             ),
             new PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
-              child: new Text('Decrease animation speed'),
+              child: const Text('Decrease animation speed'),
             ),
           ],
         ),
@@ -287,7 +287,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildSearchBar() {
     return new AppBar(
       leading: new IconButton(
-        icon: new Icon(Icons.arrow_back),
+        icon: const Icon(Icons.arrow_back),
         color: Theme.of(context).accentColor,
         onPressed: _handleSearchEnd,
         tooltip: 'Back',
@@ -313,7 +313,7 @@ class StockHomeState extends State<StockHome> {
   Widget buildFloatingActionButton() {
     return new FloatingActionButton(
       tooltip: 'Create company',
-      child: new Icon(Icons.add),
+      child: const Icon(Icons.add),
       backgroundColor: Colors.redAccent,
       onPressed: _handleCreateCompany,
     );

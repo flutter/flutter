@@ -27,17 +27,17 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: new Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: new Text('COPY'), onPressed: _handleCopy));
+      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
+      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
     }
     items.add(new FlatButton(
-      child: new Text('PASTE'),
+      child: const Text('PASTE'),
       // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
       onPressed: _handlePaste
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
+        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
     }
 
     return new Material(

@@ -106,7 +106,7 @@ class ListTileTheme extends InheritedWidget {
   /// ```
   static ListTileTheme of(BuildContext context) {
     final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
-    return result ?? new ListTileTheme();
+    return result ?? const ListTileTheme();
   }
 
   @override

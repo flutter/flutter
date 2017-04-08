@@ -18,7 +18,7 @@ class TestIconState extends State<TestIcon> {
   @override
   Widget build(BuildContext context) {
     iconTheme = IconTheme.of(context);
-    return new Icon(Icons.add);
+    return const Icon(Icons.add);
   }
 }
 
@@ -53,10 +53,10 @@ void main() {
         home: new Material(
           child: new Center(
             child: new ListTile(
-              leading: new Text('leading'),
-              title: new Text('title'),
-              subtitle: hasSubtitle ? new Text('subtitle') : null,
-              trailing: new Text('trailing'),
+              leading: const Text('leading'),
+              title: const Text('title'),
+              subtitle: hasSubtitle ? const Text('subtitle') : null,
+              trailing: const Text('trailing'),
               dense: dense,
               isThreeLine: isThreeLine,
             ),

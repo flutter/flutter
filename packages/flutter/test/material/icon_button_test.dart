@@ -26,7 +26,7 @@ void main() {
         child: new Center(
           child: new IconButton(
             onPressed: mockOnPressedFunction,
-            icon: new Icon(Icons.link),
+            icon: const Icon(Icons.link),
           ),
         ),
       ),
@@ -46,7 +46,7 @@ void main() {
           child: new IconButton(
             iconSize: 10.0,
             onPressed: mockOnPressedFunction,
-            icon: new Icon(Icons.link),
+            icon: const Icon(Icons.link),
           ),
         ),
       ),
@@ -64,7 +64,7 @@ void main() {
             iconSize: 10.0,
             padding: const EdgeInsets.all(30.0),
             onPressed: mockOnPressedFunction,
-            icon: new Icon(Icons.link),
+            icon: const Icon(Icons.link),
           ),
         ),
       ),
@@ -81,7 +81,7 @@ void main() {
           child: new IconButton(
             padding: EdgeInsets.zero,
             onPressed: mockOnPressedFunction,
-            icon: new Icon(Icons.ac_unit),
+            icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
         ),
@@ -102,7 +102,7 @@ void main() {
           children: <Widget> [
             new IconButton(
               onPressed: mockOnPressedFunction,
-              icon: new Icon(Icons.ac_unit),
+              icon: const Icon(Icons.ac_unit),
             ),
           ],
         ),
@@ -119,7 +119,7 @@ void main() {
         child: new Center(
           child: new IconButton(
             onPressed: mockOnPressedFunction,
-            icon: new Icon(Icons.ac_unit),
+            icon: const Icon(Icons.ac_unit),
             iconSize: 80.0,
           ),
         ),
@@ -137,7 +137,7 @@ void main() {
           child: new Center(
             child: new IconButton(
               onPressed: mockOnPressedFunction,
-              icon: new Icon(Icons.ac_unit),
+              icon: const Icon(Icons.ac_unit),
             ),
           ),
         ),
@@ -155,7 +155,7 @@ void main() {
           child: new Center(
             child: new IconButton(
               onPressed: mockOnPressedFunction,
-              icon: new Icon(Icons.ac_unit),
+              icon: const Icon(Icons.ac_unit),
               tooltip: 'Test tooltip',
             ),
           ),
@@ -178,7 +178,7 @@ void main() {
             new IconButton(
               padding: EdgeInsets.zero,
               onPressed: mockOnPressedFunction,
-              icon: new Icon(Icons.ac_unit),
+              icon: const Icon(Icons.ac_unit),
             ),
           ],
         ),

@@ -114,6 +114,7 @@ class ColdRunner extends ResidentRunner {
     printTrace('Application running.');
 
     if (vmService != null) {
+      device.getLogReader(app: package).appPid = vmService.vm.pid;
       await vmService.vm.refreshViews();
       printTrace('Connected to ${vmService.vm.firstView}\.');
     }

@@ -84,7 +84,7 @@ class ExpansionPanelList extends StatelessWidget {
   }
 
   /// The children of the expansion panel list. They are layed in a similar
-  /// fashion to [BlockBody].
+  /// fashion to [ListBody].
   final List<ExpansionPanel> children;
 
   /// The callback that gets called whenever one of the expand/collapse buttons

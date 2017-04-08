@@ -18,7 +18,7 @@ void main() {
             savedContext = context;
             return new Scaffold(
               key: scaffoldKey,
-              drawer: new Text('drawer'),
+              drawer: const Text('drawer'),
               body: new Container()
             );
           }
@@ -45,7 +45,7 @@ void main() {
       new MaterialApp(
         home: new Scaffold(
           key: scaffoldKey,
-          drawer: new Text('drawer'),
+          drawer: const Text('drawer'),
           body: new Container()
         )
       )
@@ -80,7 +80,7 @@ void main() {
           drawer: new Drawer(
             child: new ListView(
               children: <Widget>[
-                new Text('drawer'),
+                const Text('drawer'),
                 new Container(
                   height: 1000.0,
                   decoration: new BoxDecoration(
@@ -137,9 +137,9 @@ void main() {
               drawer: new Drawer(
                 child: new ListView(
                   children: <Widget>[
-                    new Text('drawer'),
+                    const Text('drawer'),
                     new FlatButton(
-                      child: new Text('close'),
+                      child: const Text('close'),
                       onPressed: () => Navigator.pop(context)
                     ),
                   ]
@@ -147,7 +147,7 @@ void main() {
               ),
               body: new Container(
                 child: new FlatButton(
-                  child: new Text('button'),
+                  child: const Text('button'),
                   onPressed: () { buttonPressed = true; }
                 )
               )

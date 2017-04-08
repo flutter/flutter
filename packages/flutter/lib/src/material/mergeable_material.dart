@@ -74,7 +74,7 @@ class MaterialGap extends MergeableMaterialItem {
 /// Displays a list of [MergeableMaterialItem] children. The list contains
 /// [MaterialSlice] items whose boundaries are either "merged" with adjacent
 /// items or separated by a [MaterialGap]. The [children] are distributed along
-/// the given [mainAxis] in the same way as the children of a [BlockBody]. When
+/// the given [mainAxis] in the same way as the children of a [ListBody]. When
 /// the list of children changes, gaps are automatically animated open or closed
 /// as needed.
 ///
@@ -522,7 +522,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle
             ),
-            child: new BlockBody(
+            child: new ListBody(
               mainAxis: config.mainAxis,
               children: slices
             )
@@ -593,7 +593,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle
           ),
-          child: new BlockBody(
+          child: new ListBody(
             mainAxis: config.mainAxis,
             children: slices
           )
@@ -602,7 +602,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       slices = <Widget>[];
     }
 
-    return new _MergeableMaterialBlockBody(
+    return new _MergeableMaterialListBody(
       mainAxis: config.mainAxis,
       boxShadows: kElevationToShadow[config.elevation],
       items: _children,
@@ -635,8 +635,8 @@ class _MergeableMaterialSliceKey extends GlobalKey {
   }
 }
 
-class _MergeableMaterialBlockBody extends BlockBody {
-  _MergeableMaterialBlockBody({
+class _MergeableMaterialListBody extends ListBody {
+  _MergeableMaterialListBody({
     List<Widget> children,
     Axis mainAxis: Axis.vertical,
     this.items,
@@ -647,24 +647,24 @@ class _MergeableMaterialBlockBody extends BlockBody {
   List<BoxShadow> boxShadows;
 
   @override
-  RenderBlock createRenderObject(BuildContext context) {
-    return new _MergeableMaterialRenderBlock(
+  RenderListBody createRenderObject(BuildContext context) {
+    return new _RenderMergeableMaterialListBody(
       mainAxis: mainAxis,
       boxShadows: boxShadows
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
-    final _MergeableMaterialRenderBlock materialRenderBlock = renderObject;
-    materialRenderBlock
+  void updateRenderObject(BuildContext context, RenderListBody renderObject) {
+    final _RenderMergeableMaterialListBody materialRenderListBody = renderObject;
+    materialRenderListBody
       ..mainAxis = mainAxis
       ..boxShadows = boxShadows;
   }
 }
 
-class _MergeableMaterialRenderBlock extends RenderBlock {
-  _MergeableMaterialRenderBlock({
+class _RenderMergeableMaterialListBody extends RenderListBody {
+  _RenderMergeableMaterialListBody({
     List<RenderBox> children,
     Axis mainAxis: Axis.vertical,
     this.boxShadows
@@ -692,7 +692,7 @@ class _MergeableMaterialRenderBlock extends RenderBlock {
     int i = 0;
 
     while (child != null) {
-      final BlockParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
       if (i % 2 == 0)
         _paintShadows(context.canvas, rect);

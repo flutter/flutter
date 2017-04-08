@@ -32,11 +32,11 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
     return new ListView(
       padding: const EdgeInsets.all(24.0),
       children: <Widget>[
-        new Text(_text1),
-        new Text(_text2),
+        const Text(_text1),
+        const Text(_text2),
         new Center(
           child: new RaisedButton(
-            child: new Text('SHOW A SNACKBAR'),
+            child: const Text('SHOW A SNACKBAR'),
             onPressed: () {
               final int thisSnackBarIndex = _snackBarIndex++;
               Scaffold.of(context).showSnackBar(new SnackBar(
@@ -53,7 +53,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
             }
           )
         ),
-        new Text(_text3),
+        const Text(_text3),
       ]
       .map((Widget child) {
         return new Container(
@@ -69,7 +69,7 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Snackbar')
+        title: const Text('Snackbar')
       ),
       body: new Builder(
         // Create an inner BuildContext so that the snackBar onPressed methods

@@ -83,7 +83,7 @@ void main() {
         child: new Material(
           child: new TextField(
             key: textFieldKey,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
             onChanged: (String value) {
@@ -103,7 +103,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
@@ -126,7 +125,7 @@ void main() {
       return new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -171,7 +170,7 @@ void main() {
         child: new Material(
           child: new TextField(
             obscureText: true,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -189,6 +188,38 @@ void main() {
     ));
 
     await tester.pump();
+  });
+
+  testWidgets('Caret position is updated on tap', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    Widget builder() {
+      return overlay(new Center(
+        child: new Material(
+          child: new TextField(
+            controller: controller,
+          ),
+        ),
+      ));
+    }
+
+    await tester.pumpWidget(builder());
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    final String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(EditableText), testValue);
+
+    await tester.pumpWidget(builder());
+
+    // Tap to reposition the caret.
+    final int tapIndex = testValue.indexOf('e');
+    final Point ePos = textOffsetToPosition(tester, tapIndex);
+    await tester.tapAt(ePos);
+    await tester.pump();
+
+    expect(controller.selection.baseOffset, tapIndex);
+    expect(controller.selection.extentOffset, tapIndex);
   });
 
   testWidgets('Can long press to select', (WidgetTester tester) async {
@@ -216,7 +247,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
@@ -252,7 +282,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -316,7 +345,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -370,7 +398,6 @@ void main() {
 
     final String testValue = 'abc def ghi';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -407,7 +434,7 @@ void main() {
             key: textFieldKey,
             style: const TextStyle(color: Colors.black, fontSize: 34.0),
             maxLines: maxLines,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
           ),
@@ -423,13 +450,11 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     await tester.enterText(find.byType(EditableText), 'No wrapping here.');
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
     await tester.enterText(find.byType(EditableText), kThreeLines);
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
@@ -438,14 +463,12 @@ void main() {
 
     // An extra line won't increase the size because we max at 3.
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
@@ -471,7 +494,6 @@ void main() {
     final String testValue = kThreeLines;
     final String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
     await tester.enterText(find.byType(EditableText), testValue);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -551,7 +573,6 @@ void main() {
     await tester.pumpWidget(builder());
 
     await tester.enterText(find.byType(EditableText), kFourLines);
-    await tester.idle();
 
     await tester.pumpWidget(builder());
 
@@ -639,7 +660,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
@@ -659,7 +679,7 @@ void main() {
         child: new Material(
           child: new TextField(
             key: textFieldKey,
-            decoration: new InputDecoration(
+            decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
             onChanged: (String value) { textFieldValue = value; },
@@ -672,7 +692,6 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       await tester.enterText(find.byType(EditableText), testValue);
-      await tester.idle();
 
       // Check that the onChanged event handler fired.
       expect(textFieldValue, equals(testValue));
@@ -698,7 +717,7 @@ void main() {
           data: themeData,
           child: new Material(
             child: new TextField(
-              decoration: new InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Placeholder',
               ),
               style: style,
@@ -749,13 +768,13 @@ void main() {
           child: new Column(
             children: <Widget>[
               new TextField(
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'First',
                 ),
               ),
               new TextField(
                 key: secondKey,
-                decoration: new InputDecoration(
+                decoration: const InputDecoration(
                   labelText: 'Second',
                 ),
               ),
@@ -791,8 +810,8 @@ void main() {
       new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration(
-              icon: new Icon(Icons.phone),
+            decoration: const InputDecoration(
+              icon: const Icon(Icons.phone),
               labelText: 'label',
             ),
           ),
@@ -810,7 +829,7 @@ void main() {
       overlay(new Center(
         child: new Material(
           child: new TextField(
-            decoration: new InputDecoration.collapsed(
+            decoration: const InputDecoration.collapsed(
               hintText: 'hint',
             ),
           ),
@@ -838,7 +857,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -847,7 +866,7 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -872,7 +891,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 0)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
@@ -881,9 +900,64 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(new TextPosition(offset: 2)).topLeft
+        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
     );
 
     expect(topLeft.x, equals(399.0));
+  });
+
+  testWidgets('Controller can update server', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController(
+      text: 'Initial Text',
+    );
+    final TextEditingController controller2 = new TextEditingController(
+      text: 'More Text',
+    );
+
+    TextEditingController currentController = controller;
+    StateSetter setState;
+
+    await tester.pumpWidget(
+      overlay(new Center(
+        child: new Material(
+          child: new StatefulBuilder(
+            builder: (BuildContext context, StateSetter setter) {
+              setState = setter;
+              return new TextField(controller: currentController);
+            }
+          ),
+        ),
+      ),
+    ));
+
+    expect(tester.testTextInput.editingState['text'], isEmpty);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('Initial Text'));
+
+    controller.text = 'Updated Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Updated Text'));
+
+    setState(() {
+      currentController = controller2;
+    });
+
+    await tester.pump();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller.text = 'Ignored Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('More Text'));
+
+    controller2.text = 'Final Text';
+    await tester.idle();
+
+    expect(tester.testTextInput.editingState['text'], equals('Final Text'));
   });
 }

@@ -84,22 +84,22 @@ class PageViewAppState extends State<PageViewApp> {
     return new Drawer(
       child: new ListView(
         children: <Widget>[
-          new DrawerHeader(child: new Center(child: new Text('Options'))),
+          const DrawerHeader(child: const Center(child: const Text('Options'))),
           new ListTile(
             leading: new Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,
-            trailing: new Text('Horizontal Layout'),
+            trailing: const Text('Horizontal Layout'),
             onTap: switchScrollDirection,
           ),
           new ListTile(
             leading: new Icon(Icons.more_vert),
             selected: scrollDirection == Axis.vertical,
-            trailing: new Text('Vertical Layout'),
+            trailing: const Text('Vertical Layout'),
             onTap: switchScrollDirection,
           ),
           new ListTile(
             onTap: toggleItemsWrap,
-            title: new Text('Scrolling wraps around'),
+            title: const Text('Scrolling wraps around'),
             // TODO(abarth): Actually make this checkbox change this value.
             trailing: new Checkbox(value: itemsWrap, onChanged: null),
           ),
@@ -110,7 +110,7 @@ class PageViewAppState extends State<PageViewApp> {
 
   Widget _buildAppBar() {
     return new AppBar(
-      title: new Text('PageView'),
+      title: const Text('PageView'),
       actions: <Widget>[
         new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical"),
       ],

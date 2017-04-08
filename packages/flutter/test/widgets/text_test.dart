@@ -9,8 +9,8 @@ void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(new MediaQuery(
       data: const MediaQueryData(textScaleFactor: 1.5),
-      child: new Center(
-        child: new Text('Hello')
+      child: const Center(
+        child: const Text('Hello')
       )
     ));
 
@@ -18,16 +18,16 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.5);
 
-    await tester.pumpWidget(new Center(
-      child: new Text('Hello')
+    await tester.pumpWidget(const Center(
+      child: const Text('Hello')
     ));
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.0);
 
-    await tester.pumpWidget(new Center(
-      child: new Text('Hello', textScaleFactor: 3.0)
+    await tester.pumpWidget(const Center(
+      child: const Text('Hello', textScaleFactor: 3.0)
     ));
 
     text = tester.firstWidget(find.byType(RichText));

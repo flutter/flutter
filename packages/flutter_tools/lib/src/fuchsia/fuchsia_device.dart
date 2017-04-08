@@ -19,7 +19,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
   Stream<String> _logLines;
   @override
   Stream<String> get logLines {
-    _logLines ??= new Stream<String>.empty();
+    _logLines ??= const Stream<String>.empty();
     return _logLines;
   }
 

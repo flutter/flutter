@@ -20,7 +20,7 @@ class _CupertinoSwitchDemoState extends State<CupertinoSwitchDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Cupertino Switch'),
+        title: const Text('Cupertino Switch'),
       ),
       body: new Center(
         child:  new CupertinoSwitch(

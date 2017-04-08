@@ -23,13 +23,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: false,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],
@@ -62,13 +62,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: true,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],
@@ -84,13 +84,13 @@ void main() {
         children: <Widget>[
           new Container(
             height: 10.0,
-            child: new Semantics(label: 'child1')
+            child: const Semantics(label: 'child1')
           ),
           new Container(
             height: 10.0,
-            child: new IgnorePointer(
+            child: const IgnorePointer(
               ignoring: false,
-              child: new Semantics(label: 'child2')
+              child: const Semantics(label: 'child2')
             )
           ),
         ],

@@ -61,7 +61,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
             new Builder(
               builder: (BuildContext context) {
                 return new IconButton(
-                  icon: new Icon(Icons.description),
+                  icon: const Icon(Icons.description),
                   tooltip: 'Show example code',
                   onPressed: () {
                     _showExampleCode(context);
@@ -150,10 +150,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: new Icon(Icons.clear),
+          icon: const Icon(Icons.clear),
           onPressed: () { Navigator.pop(context); }
         ),
-        title: new Text('Example code')
+        title: const Text('Example code')
       ),
       body: body
     );

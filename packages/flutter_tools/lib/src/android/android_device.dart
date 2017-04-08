@@ -312,7 +312,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
-      await buildApk(targetPlatform,
+      await buildApk(
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
           kernelPath: kernelPath,
@@ -430,12 +430,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _AndroidDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _AndroidDevicePortForwarder(this);
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
@@ -616,7 +611,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      final Utf8Decoder decoder = new Utf8Decoder(allowMalformed: true);
+      final Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
       _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
@@ -626,8 +621,8 @@ class _AdbLogReader extends DeviceLogReader {
     });
   }
 
-  // 'W/ActivityManager: '
-  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.{8,}:\s');
+  // 'W/ActivityManager(pid): '
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.*?\(\s*(\d+)\):\s');
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
@@ -662,14 +657,19 @@ class _AdbLogReader extends DeviceLogReader {
     }
     // Chop off the time.
     line = line.substring(timeMatch.end + 1);
-    if (_logFormat.hasMatch(line)) {
-      // Filter on approved names and levels.
-      for (RegExp regex in _whitelistedTags) {
-        if (regex.hasMatch(line)) {
-          _acceptedLastLine = true;
-          _linesController.add(line);
-          return;
-        }
+    final Match logMatch = _logFormat.firstMatch(line);
+    if (logMatch != null) {
+      bool acceptLine = false;
+      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+        acceptLine = true;
+      } else {
+        // Filter on approved names and levels.
+        acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
+      }
+      if (acceptLine) {
+        _acceptedLastLine = true;
+        _linesController.add(line);
+        return;
       }
       _acceptedLastLine = false;
     } else if (line == '--------- beginning of system' ||

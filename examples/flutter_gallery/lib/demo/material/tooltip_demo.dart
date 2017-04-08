@@ -18,7 +18,7 @@ class TooltipDemo extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Tooltips')
+        title: const Text('Tooltips')
       ),
       body: new Builder(
         builder: (BuildContext context) {
@@ -42,12 +42,12 @@ class TooltipDemo extends StatelessWidget {
               new Center(
                 child: new IconButton(
                   iconSize: 48.0,
-                  icon: new Icon(Icons.call),
+                  icon: const Icon(Icons.call),
                   color: theme.iconTheme.color,
                   tooltip: 'Place a phone call',
                   onPressed: () {
                     Scaffold.of(context).showSnackBar(new SnackBar(
-                       content: new Text('That was an ordinary tap.')
+                       content: const Text('That was an ordinary tap.')
                     ));
                   }
                 )

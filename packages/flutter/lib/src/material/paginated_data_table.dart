@@ -298,7 +298,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       }
     } else if (_selectedRowCount == 1) {
       // TODO(ianh): Real l10n.
-      headerWidgets.add(new Expanded(child: new Text('1 item selected')));
+      headerWidgets.add(const Expanded(child: const Text('1 item selected')));
     } else {
       headerWidgets.add(new Expanded(child: new Text('$_selectedRowCount items selected')));
     }
@@ -328,7 +328,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
-        new Text('Rows per page:'),
+        const Text('Rows per page:'),
         new DropdownButtonHideUnderline(
           child: new DropdownButton<int>(
             items: availableRowsPerPage,
@@ -347,7 +347,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       ),
       new Container(width: 32.0),
       new IconButton(
-        icon: new Icon(Icons.chevron_left),
+        icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
         tooltip: 'Previous page',
         onPressed: _firstRowIndex <= 0 ? null : () {
@@ -356,7 +356,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
       ),
       new Container(width: 24.0),
       new IconButton(
-        icon: new Icon(Icons.chevron_right),
+        icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: 'Next page',
         onPressed: (!_rowCountApproximate && (_firstRowIndex + config.rowsPerPage >= _rowCount)) ? null : () {

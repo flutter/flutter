@@ -12,11 +12,11 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
-          new Semantics(),
-          new Semantics(
+          const Semantics(),
+          const Semantics(
             container: true,
           ),
-          new Semantics(
+          const Semantics(
             label: 'label',
           ),
         ],
@@ -27,11 +27,11 @@ void main() {
       new SemanticsDebugger(
         child: new Stack(
           children: <Widget>[
-            new Semantics(),
-            new Semantics(
+            const Semantics(),
+            const Semantics(
               container: true,
             ),
-            new Semantics(
+            const Semantics(
               label: 'label',
             ),
           ],
@@ -50,14 +50,14 @@ void main() {
       new SemanticsDebugger(
         child: new Stack(
           children: <Widget>[
-            new Semantics(label: 'label1'),
+            const Semantics(label: 'label1'),
             new Positioned(
               key: key,
               left: 0.0,
               top: 0.0,
               width: 100.0,
               height: 100.0,
-              child: new Semantics(label: 'label2'),
+              child: const Semantics(label: 'label2'),
             ),
           ],
         ),
@@ -68,7 +68,7 @@ void main() {
       new SemanticsDebugger(
         child: new Stack(
           children: <Widget>[
-            new Semantics(label: 'label1'),
+            const Semantics(label: 'label1'),
             new Semantics(
               container: true,
               child: new Stack(
@@ -79,9 +79,9 @@ void main() {
                     top: 0.0,
                     width: 100.0,
                     height: 100.0,
-                    child: new Semantics(label: 'label2'),
+                    child: const Semantics(label: 'label2'),
                   ),
-                  new Semantics(label: 'label3'),
+                  const Semantics(label: 'label3'),
                 ],
               ),
             ),
@@ -94,7 +94,7 @@ void main() {
       new SemanticsDebugger(
         child: new Stack(
           children: <Widget>[
-            new Semantics(label: 'label1'),
+            const Semantics(label: 'label1'),
             new Semantics(
               container: true,
               child: new Stack(
@@ -105,9 +105,9 @@ void main() {
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: new Semantics(label: 'label2')),
-                  new Semantics(label: 'label3'),
-                  new Semantics(label: 'label4'),
+                      child: const Semantics(label: 'label2')),
+                  const Semantics(label: 'label3'),
+                  const Semantics(label: 'label4'),
                 ],
               ),
             ),
@@ -132,13 +132,13 @@ void main() {
                 onPressed: () {
                   log.add('top');
                 },
-                child: new Text('TOP'),
+                child: const Text('TOP'),
               ),
               new RaisedButton(
                 onPressed: () {
                   log.add('bottom');
                 },
-                child: new Text('BOTTOM'),
+                child: const Text('BOTTOM'),
               ),
             ],
           ),
@@ -205,7 +205,7 @@ void main() {
             expect(didLongPress, isFalse);
             didLongPress = true;
           },
-          child: new Text('target'),
+          child: const Text('target'),
         ),
       ),
     );

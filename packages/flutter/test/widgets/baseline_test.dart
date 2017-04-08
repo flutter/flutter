@@ -8,13 +8,13 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Baseline - control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new DefaultTextStyle(
+      const Center(
+        child: const DefaultTextStyle(
           style: const TextStyle(
             fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
-          child: new Text('X'),
+          child: const Text('X'),
         ),
       ),
     );
@@ -23,16 +23,16 @@ void main() {
 
   testWidgets('Baseline - position test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new Baseline(
+      const Center(
+        child: const Baseline(
           baseline: 180.0,
           baselineType: TextBaseline.alphabetic,
-          child: new DefaultTextStyle(
+          child: const DefaultTextStyle(
             style: const TextStyle(
               fontFamily: 'Ahem',
               fontSize: 100.0,
             ),
-            child: new Text('X'),
+            child: const Text('X'),
           ),
         ),
       ),

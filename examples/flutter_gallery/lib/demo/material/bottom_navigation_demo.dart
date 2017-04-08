@@ -23,7 +23,7 @@ class NavigationIconView {
        ) {
     _animation = new CurvedAnimation(
       parent: controller,
-      curve: new Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
+      curve: const Interval(0.5, 1.0, curve: Curves.fastOutSlowIn),
     );
   }
 
@@ -96,32 +96,32 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     super.initState();
     _navigationViews = <NavigationIconView>[
       new NavigationIconView(
-        icon: new Icon(Icons.access_alarm),
-        title: new Text('Alarm'),
+        icon: const Icon(Icons.access_alarm),
+        title: const Text('Alarm'),
         color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new CustomIcon(),
-        title: new Text('Box'),
+        title: const Text('Box'),
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new Icon(Icons.cloud),
-        title: new Text('Cloud'),
+        icon: const Icon(Icons.cloud),
+        title: const Text('Cloud'),
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new Icon(Icons.favorite),
-        title: new Text('Favorites'),
+        icon: const Icon(Icons.favorite),
+        title: const Text('Favorites'),
         color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
-        icon: new Icon(Icons.event_available),
-        title: new Text('Event'),
+        icon: const Icon(Icons.event_available),
+        title: const Text('Event'),
         color: Colors.pink,
         vsync: this,
       )
@@ -183,7 +183,7 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Bottom navigation'),
+        title: const Text('Bottom navigation'),
         actions: <Widget>[
           new PopupMenuButton<BottomNavigationBarType>(
             onSelected: (BottomNavigationBarType value) {
@@ -194,11 +194,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
-                child: new Text('Fixed'),
+                child: const Text('Fixed'),
               ),
               new PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
-                child: new Text('Shifting'),
+                child: const Text('Shifting'),
               )
             ],
           )

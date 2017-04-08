@@ -20,7 +20,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Cupertino Sliders'),
+        title: const Text('Cupertino Sliders'),
       ),
       body: new Center(
         child: new Column(
@@ -39,7 +39,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     });
                   }
                 ),
-                new Text('Cupertino Continuous'),
+                const Text('Cupertino Continuous'),
               ]
             ),
             new Column(
@@ -56,7 +56,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     });
                   }
                 ),
-                new Text('Cupertino Discrete'),
+                const Text('Cupertino Discrete'),
               ]
             ),
           ],

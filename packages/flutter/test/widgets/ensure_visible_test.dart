@@ -18,7 +18,7 @@ Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse: false })
       child: new SingleChildScrollView(
         scrollDirection: scrollDirection,
         reverse: reverse,
-        child: new BlockBody(
+        child: new ListBody(
           mainAxis: scrollDirection,
           children: <Widget>[
             new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
@@ -178,7 +178,7 @@ void main() {
             width: 600.0,
             height: 400.0,
             child: new SingleChildScrollView(
-              child: new BlockBody(
+              child: new ListBody(
                 children: <Widget>[
                   new Container(height: 200.0),
                   new Container(height: 200.0),

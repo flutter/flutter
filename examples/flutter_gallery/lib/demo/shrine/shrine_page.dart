@@ -54,9 +54,9 @@ class ShrinePageState extends State<ShrinePage> {
   void _showShoppingCart() {
     showModalBottomSheet<Null>(context: context, builder: (BuildContext context) {
       if (config.shoppingCart.isEmpty) {
-        return new Padding(
+        return const Padding(
           padding: const EdgeInsets.all(24.0),
-          child: new Text('The shopping cart is empty')
+          child: const Text('The shopping cart is empty')
         );
       }
       return new ListView(
@@ -82,7 +82,7 @@ class ShrinePageState extends State<ShrinePage> {
 
   void _emptyCart() {
     config.shoppingCart.clear();
-    config.scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text('Shopping cart is empty')));
+    config.scaffoldKey.currentState.showSnackBar(new SnackBar(content: const Text('Shopping cart is empty')));
   }
 
   @override
@@ -107,7 +107,7 @@ class ShrinePageState extends State<ShrinePage> {
         ),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.shopping_cart),
+            icon: const Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
             onPressed: _showShoppingCart
           ),
@@ -115,15 +115,15 @@ class ShrinePageState extends State<ShrinePage> {
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
               new PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByPrice,
-                child: new Text('Sort by price')
+                child: const Text('Sort by price')
               ),
               new PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByProduct,
-                child: new Text('Sort by product')
+                child: const Text('Sort by product')
               ),
               new PopupMenuItem<ShrineAction>(
                 value: ShrineAction.emptyCart,
-                child: new Text('Empty shopping cart')
+                child: const Text('Empty shopping cart')
               )
             ],
             onSelected: (ShrineAction action) {

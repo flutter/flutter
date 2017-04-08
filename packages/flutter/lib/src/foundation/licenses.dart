@@ -159,6 +159,11 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
               currentLineIndent += 1;
               state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
               break;
+            case '\t':
+              lineStart = currentPosition + 1;
+              currentLineIndent += 8;
+              state = _LicenseEntryWithLineBreaksParserState.beforeParagraph;
+              break;
             case '\n':
             case '\f':
               if (lines.isNotEmpty)

@@ -42,7 +42,7 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
 }
 
 class Dot extends StatefulWidget {
-  Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
+  const Dot({ Key key, this.color, this.size, this.child, this.tappable: false }) : super(key: key);
 
   final Color color;
   final double size;
@@ -193,13 +193,13 @@ class MovableBall extends StatelessWidget {
         color: Colors.blue.shade700,
         size: kBallSize,
         tappable: true,
-        child: new Center(child: new Text('BALL'))
+        child: const Center(child: const Text('BALL'))
       )
     );
     final Widget dashedBall = new Container(
       width: kBallSize,
       height: kBallSize,
-      child: new CustomPaint(
+      child: const CustomPaint(
         painter: const DashOutlineCirclePainter()
       )
     );
@@ -238,7 +238,7 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Drag and Drop Flutter Demo')
+        title: const Text('Drag and Drop Flutter Demo')
       ),
       body: new Column(
         children: <Widget>[
@@ -251,19 +251,19 @@ class DragAndDropAppState extends State<DragAndDropApp> {
                   color: Colors.yellow.shade300,
                   under: true,
                   heavy: false,
-                  child: new Text('under')
+                  child: const Text('under')
                 ),
                 new ExampleDragSource(
                   color: Colors.green.shade300,
                   under: false,
                   heavy: true,
-                  child: new Text('long-press above')
+                  child: const Text('long-press above')
                 ),
                 new ExampleDragSource(
                   color: Colors.indigo.shade300,
                   under: false,
                   heavy: false,
-                  child: new Text('above')
+                  child: const Text('above')
                 ),
               ],
             )

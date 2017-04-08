@@ -125,7 +125,7 @@ class ColorsDemo extends StatelessWidget {
       child: new Scaffold(
         appBar: new AppBar(
           elevation: 0,
-          title: new Text('Colors'),
+          title: const Text('Colors'),
           bottom: new TabBar(
             isScrollable: true,
             tabs: allPalettes.map((Palette swatch) => new Tab(text: swatch.name)).toList(),

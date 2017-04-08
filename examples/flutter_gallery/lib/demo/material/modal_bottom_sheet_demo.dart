@@ -10,10 +10,10 @@ class ModalBottomSheetDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Modal bottom sheet')),
+      appBar: new AppBar(title: const Text('Modal bottom sheet')),
       body: new Center(
         child: new RaisedButton(
-          child: new Text('SHOW BOTTOM SHEET'),
+          child: const Text('SHOW BOTTOM SHEET'),
           onPressed: () {
             showModalBottomSheet<Null>(context: context, builder: (BuildContext context) {
               return new Container(

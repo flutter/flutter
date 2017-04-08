@@ -184,4 +184,81 @@ void main() {
     scale.dispose();
     tap.dispose();
   });
+
+  testGesture('Scale gesture competes with drag', (GestureTester tester) {
+    final ScaleGestureRecognizer scale = new ScaleGestureRecognizer();
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    final List<String> log = <String>[];
+
+    scale.onStart = (ScaleStartDetails details) { log.add('scale-start'); };
+    scale.onUpdate = (ScaleUpdateDetails details) { log.add('scale-update'); };
+    scale.onEnd = (ScaleEndDetails details) { log.add('scale-end'); };
+
+    drag.onStart = (DragStartDetails details) { log.add('drag-start'); };
+    drag.onEnd = (DragEndDetails details) { log.add('drag-end'); };
+
+    final TestPointer pointer1 = new TestPointer(1);
+
+    final PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
+    scale.addPointer(down);
+    drag.addPointer(down);
+
+    tester.closeArena(1);
+    expect(log, isEmpty);
+
+    // Vertical moves are scales.
+    tester.route(down);
+    expect(log, isEmpty);
+
+    tester.route(pointer1.move(const Point(10.0, 30.0)));
+    expect(log, equals(<String>['scale-start', 'scale-update']));
+    log.clear();
+
+    final TestPointer pointer2 = new TestPointer(2);
+    final PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
+    scale.addPointer(down2);
+    drag.addPointer(down2);
+
+    tester.closeArena(2);
+    expect(log, isEmpty);
+
+    // Second pointer joins scale even though it moves horizontally.
+    tester.route(down2);
+    expect(log, <String>['scale-end']);
+    log.clear();
+
+    tester.route(pointer2.move(const Point(30.0, 20.0)));
+    expect(log, equals(<String>['scale-start', 'scale-update']));
+    log.clear();
+
+    tester.route(pointer1.up());
+    expect(log, equals(<String>['scale-end']));
+    log.clear();
+
+    tester.route(pointer2.up());
+    expect(log, isEmpty);
+    log.clear();
+
+    // Horizontal moves are drags.
+    final TestPointer pointer3 = new TestPointer(3);
+    final PointerDownEvent down3 = pointer3.down(const Point(30.0, 30.0));
+    scale.addPointer(down3);
+    drag.addPointer(down3);
+    tester.closeArena(3);
+    tester.route(down3);
+
+    expect(log, isEmpty);
+
+    tester.route(pointer3.move(const Point(50.0, 30.0)));
+    expect(log, equals(<String>['scale-start', 'scale-update']));
+    log.clear();
+
+    tester.route(pointer3.up());
+    expect(log, equals(<String>['scale-end']));
+    log.clear();
+
+    scale.dispose();
+    drag.dispose();
+  });
 }

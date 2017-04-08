@@ -31,8 +31,8 @@ void main() {
                           backgroundColor: const Color(0xFF0000FF)),
                       width: 100.0,
                       height: 100.0,
-                      child: new Center(
-                        child: new Text('X'),
+                      child: const Center(
+                        child: const Text('X'),
                       ),
                     ),
                   ),
@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: <Widget>[
-          new Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
+          const Flexible(child: const SizedBox(width: 100.0, height: 200.0)),
         ],
       ),
     );
@@ -65,8 +65,8 @@ void main() {
     await tester.pumpWidget(
       new Row(
         children: <Widget>[
-          new Expanded(flex: null, child: new Text('one')),
-          new Flexible(flex: null, child: new Text('two')),
+          const Expanded(flex: null, child: const Text('one')),
+          const Flexible(flex: null, child: const Text('two')),
         ],
       ),
     );

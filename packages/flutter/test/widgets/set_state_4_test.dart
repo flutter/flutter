@@ -16,7 +16,7 @@ class ChangerState extends State<Changer> {
   void test2() { setState(() async { }); }
 
   @override
-  Widget build(BuildContext context) => new Text('test');
+  Widget build(BuildContext context) => const Text('test');
 }
 
 void main() {

@@ -25,7 +25,7 @@ class StatefulLeafState extends State<StatefulLeaf> {
   void markNeedsBuild() { setState(() { }); }
 
   @override
-  Widget build(BuildContext context) => new Text('leaf');
+  Widget build(BuildContext context) => const Text('leaf');
 }
 
 class KeyedWrapper extends StatelessWidget {

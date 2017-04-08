@@ -71,7 +71,7 @@ class IconsDemoState extends State<IconsDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Icons')
+        title: const Text('Icons')
       ),
       body: new IconTheme(
         data: new IconThemeData(opacity: iconOpacity),

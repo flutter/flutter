@@ -19,12 +19,12 @@ void main() {
           log.add('select-all: $value');
         },
         columns: <DataColumn>[
-          new DataColumn(
-            label: new Text('Name'),
+          const DataColumn(
+            label: const Text('Name'),
             tooltip: 'Name',
           ),
           new DataColumn(
-            label: new Text('Calories'),
+            label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
             onSort: (int columnIndex, bool ascending) {

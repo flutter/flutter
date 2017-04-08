@@ -62,11 +62,11 @@ class _PlatformChannelState extends State<PlatformChannel> {
           new Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Text(_batteryLevel, key: new Key('Battery level label')),
+              new Text(_batteryLevel, key: const Key('Battery level label')),
               new Padding(
-                padding: new EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(16.0),
                 child: new RaisedButton(
-                  child: new Text('Refresh'),
+                  child: const Text('Refresh'),
                   onPressed: _getBatteryLevel,
                 ),
               ),

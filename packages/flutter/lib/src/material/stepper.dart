@@ -249,7 +249,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           color: isDarkActive ? _kCircleActiveDark : _kCircleActiveLight,
         );
       case StepState.error:
-        return new Text('!', style: _kStepStyle);
+        return const Text('!', style: _kStepStyle);
     }
     return null;
   }
@@ -351,7 +351,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: _isDark() ? themeData.backgroundColor : themeData.primaryColor,
               textColor: Colors.white,
               textTheme: ButtonTextTheme.normal,
-              child: new Text('CONTINUE'),
+              child: const Text('CONTINUE'),
             ),
             new Container(
               margin: const EdgeInsets.only(left: 8.0),
@@ -359,7 +359,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
                 onPressed: config.onStepCancel,
                 textColor: cancelColor,
                 textTheme: ButtonTextTheme.normal,
-                child: new Text('CANCEL'),
+                child: const Text('CANCEL'),
               ),
             ),
           ],

@@ -13,10 +13,10 @@ void main() {
     await tester.pumpWidget(new GridTile(
       header: new GridTileBar(
         key: headerKey,
-        leading: new Icon(Icons.thumb_up),
-        title: new Text('Header'),
-        subtitle: new Text('Subtitle'),
-        trailing: new Icon(Icons.thumb_up),
+        leading: const Icon(Icons.thumb_up),
+        title: const Text('Header'),
+        subtitle: const Text('Subtitle'),
+        trailing: const Icon(Icons.thumb_up),
       ),
       child: new DecoratedBox(
         decoration: new BoxDecoration(
@@ -25,7 +25,7 @@ void main() {
       ),
       footer: new GridTileBar(
         key: footerKey,
-        title: new Text('Footer'),
+        title: const Text('Footer'),
         backgroundColor: Colors.black38,
       ),
     ));
@@ -36,7 +36,7 @@ void main() {
     expect(tester.getBottomLeft(find.byKey(headerKey)).y,
            lessThan(tester.getTopLeft(find.byKey(footerKey)).y));
 
-    await tester.pumpWidget(new GridTile(child: new Text('Simple')));
+    await tester.pumpWidget(new GridTile(child: const Text('Simple')));
 
     expect(find.text('Simple'), findsOneWidget);
   });

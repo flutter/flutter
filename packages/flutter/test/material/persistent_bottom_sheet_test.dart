@@ -14,7 +14,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: new Center(child: new Text('body'))
+        body: const Center(child: const Text('body'))
       )
     ));
 
@@ -41,7 +41,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Scaffold(
         key: scaffoldKey,
-        body: new Center(child: new Text('body'))
+        body: const Center(child: const Text('body'))
       )
     ));
 
@@ -49,9 +49,9 @@ void main() {
       return new ListView(
         shrinkWrap: true,
         children: <Widget>[
-          new Container(height: 100.0, child: new Text('One')),
-          new Container(height: 100.0, child: new Text('Two')),
-          new Container(height: 100.0, child: new Text('Three')),
+          new Container(height: 100.0, child: const Text('One')),
+          new Container(height: 100.0, child: const Text('Two')),
+          new Container(height: 100.0, child: const Text('Three')),
         ],
       );
     });

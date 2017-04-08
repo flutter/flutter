@@ -6,14 +6,14 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('block and paragraph intrinsics', () {
+  test('list body and paragraph intrinsics', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
         style: const TextStyle(height: 1.0),
         text: 'Hello World'
       )
     );
-    final RenderBlock testBlock = new RenderBlock(
+    final RenderListBody testBlock = new RenderListBody(
       children: <RenderBox>[
         paragraph,
       ]

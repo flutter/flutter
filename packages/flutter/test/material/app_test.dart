@@ -30,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new MaterialApp(
-          home: new Text('Home sweet home'),
+          home: const Text('Home sweet home'),
         ),
       ),
     );
@@ -58,7 +58,7 @@ void main() {
       autofocus: true,
       node: focusScopeNode,
       child: new MaterialApp(
-        home: new Text('Home'),
+        home: const Text('Home'),
       ),
     ));
 
@@ -95,7 +95,7 @@ void main() {
           builder: (BuildContext context) {
             return new Material(
               child: new RaisedButton(
-                child: new Text('X'),
+                child: const Text('X'),
                 onPressed: () { Navigator.of(context).pushNamed('/next'); },
               ),
             );
@@ -132,7 +132,7 @@ void main() {
   });
 
   testWidgets('Cannot pop the initial route', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(home: new Text('Home')));
+    await tester.pumpWidget(new MaterialApp(home: const Text('Home')));
 
     expect(find.text('Home'), findsOneWidget);
 

@@ -14,7 +14,7 @@ class TestTestBinding extends AutomatedTestWidgetsFlutterBinding {
 
 Future<Null> guardedHelper(WidgetTester tester) {
   return TestAsyncUtils.guard(() async {
-    await tester.pumpWidget(new Text('Hello'));
+    await tester.pumpWidget(const Text('Hello'));
   });
 }
 

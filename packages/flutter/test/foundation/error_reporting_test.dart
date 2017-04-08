@@ -199,7 +199,7 @@ Future<Null> main() async {
 
   test('Error reporting - NoSuchMethodError', () async {
     expect(console, isEmpty);
-    FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
+    FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello',
     ));
     expect(console.join('\n'), matches(new RegExp(
@@ -209,7 +209,7 @@ Future<Null> main() async {
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
     )));
     console.clear();
-    FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
+    FlutterError.dumpErrorToConsole(const FlutterErrorDetails(
       exception: 'hello again',
     ));
     expect(console.join('\n'), 'Another exception was thrown: hello again');

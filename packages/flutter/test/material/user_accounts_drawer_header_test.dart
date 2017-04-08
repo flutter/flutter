@@ -18,26 +18,26 @@ void main() {
           child: new UserAccountsDrawerHeader(
             currentAccountPicture: new CircleAvatar(
               key: avatarA,
-              child: new Text('A'),
+              child: const Text('A'),
             ),
             otherAccountsPictures: <Widget>[
               new CircleAvatar(
-                child: new Text('B'),
+                child: const Text('B'),
               ),
               new CircleAvatar(
                 key: avatarC,
-                child: new Text('C'),
+                child: const Text('C'),
               ),
               new CircleAvatar(
                 key: avatarD,
-                child: new Text('D'),
+                child: const Text('D'),
               ),
               new CircleAvatar(
-                child: new Text('E'),
+                child: const Text('E'),
               )
             ],
-            accountName: new Text("name"),
-            accountEmail: new Text("email"),
+            accountName: const Text("name"),
+            accountEmail: const Text("email"),
           ),
         ),
       ),
@@ -112,7 +112,7 @@ void main() {
     expect(find.byType(Icon), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      accountName: new Text('accountName'),
+      accountName: const Text('accountName'),
       onDetailsPressed: () { },
     ));
     expect(
@@ -121,7 +121,7 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      accountEmail: new Text('accountEmail'),
+      accountEmail: const Text('accountEmail'),
       onDetailsPressed: () { },
     ));
     expect(
@@ -130,8 +130,8 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      accountName: new Text('accountName'),
-      accountEmail: new Text('accountEmail'),
+      accountName: const Text('accountName'),
+      accountEmail: const Text('accountEmail'),
       onDetailsPressed: () { },
     ));
     expect(
@@ -148,19 +148,19 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(child: new Text('A')),
+      currentAccountPicture: new CircleAvatar(child: const Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[new CircleAvatar(child: new Text('A'))],
+      otherAccountsPictures: <Widget>[new CircleAvatar(child: const Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 
     final Key avatarA = const Key('A');
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(key: avatarA, child: new Text('A')),
-      accountName: new Text('accountName'),
+      currentAccountPicture: new CircleAvatar(key: avatarA, child: const Text('A')),
+      accountName: const Text('accountName'),
     ));
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).x,

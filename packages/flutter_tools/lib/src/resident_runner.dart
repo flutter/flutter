@@ -406,8 +406,7 @@ class OperationResult {
 /// Given the value of the --target option, return the path of the Dart file
 /// where the app's main function should be.
 String findMainDartFile([String target]) {
-  if (target == null)
-    target = '';
+  target ??= '';
   final String targetPath = fs.path.absolute(target);
   if (fs.isDirectorySync(targetPath))
     return fs.path.join(targetPath, 'lib', 'main.dart');

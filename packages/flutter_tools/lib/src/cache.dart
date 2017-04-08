@@ -86,12 +86,7 @@ class Cache {
 
   static String _dartSdkVersion;
 
-  static String get dartSdkVersion {
-    if (_dartSdkVersion == null) {
-      _dartSdkVersion = platform.version;
-    }
-    return _dartSdkVersion;
-  }
+  static String get dartSdkVersion => _dartSdkVersion ??= platform.version;
 
   static String _engineRevision;
 
