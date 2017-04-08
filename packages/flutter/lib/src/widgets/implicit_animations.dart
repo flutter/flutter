@@ -79,6 +79,11 @@ class TextStyleTween extends Tween<TextStyle> {
 
 /// An abstract widget for building widgets that gradually change their
 /// values over a period of time.
+///
+/// Subclasses' States must provide a way to visit the subclass's relevant
+/// fields to animate. [ImplicitlyAnimatedWidget] will then automatically
+/// interpolate and animate those fields using the provided duration and
+/// curve when those fields change.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -118,6 +123,10 @@ typedef Tween<T> TweenConstructor<T>(T targetValue);
 typedef Tween<T> TweenVisitor<T>(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
 /// A base class for widgets with implicit animations.
+///
+/// Subclasses must implement the [forEachTween] method to help
+/// [AnimatedWidgetBaseState] iterate through the subclasses' widget's fields
+/// and animate them.
 abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin {
   AnimationController _controller;
 
@@ -217,12 +226,14 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 
 /// A container that gradually changes its values over a period of time.
 ///
+/// The [AnimatedContainer] will automatically animate between the old and
+/// new values of properties when they change using the provided curve and
+/// duration. Properties that are null are not animated.
+/// 
 /// This class is useful for generating simple implicit transitions between
-/// different parameters to [Container]. For more complex animations, you'll
-/// likely want to use a subclass of [Transition] or use an
-/// [AnimationController] yourself.
-///
-/// Properties that are null are not animated.
+/// different parameters to [Container] with its internal
+/// [AnimationController]. For more complex animations, you'll likely want to
+/// use a subclass of [Transition] or use your own [AnimationController].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
