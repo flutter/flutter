@@ -170,7 +170,7 @@ class FancyImageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new BlockBody(
+    return new ListBody(
       children: <Widget>[
         new UserHeader('Ali Connors $index'),
         new ItemDescription(),
@@ -193,7 +193,7 @@ class FancyGalleryItem extends StatelessWidget {
   final int index;
   @override
   Widget build(BuildContext context) {
-    return new BlockBody(
+    return new ListBody(
       children: <Widget>[
         new UserHeader('Ali Connors'),
         new ItemGalleryBox(index),

@@ -23,12 +23,12 @@ import 'scrollable.dart';
 /// It is also useful if you need to shrink-wrap in both axes (the main
 /// scrolling direction as well as the cross axis), as one might see in a dialog
 /// or pop-up menu. In that case, you might pair the [SingleChildScrollView]
-/// with a [BlockBody] child.
+/// with a [ListBody] child.
 ///
 /// When you have a list of children and do not require cross-axis
 /// shrink-wrapping behavior, for example a scrolling list that is always the
 /// width of the screen, consider [ListView], which is vastly more efficient
-/// that a [SingleChildScrollView] containing a [BlockBody] or [Column] with
+/// that a [SingleChildScrollView] containing a [ListBody] or [Column] with
 /// many children.
 ///
 /// See also:

@@ -266,7 +266,7 @@ class AboutDialog extends StatelessWidget {
     body.add(new Expanded(
       child: new Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: new BlockBody(
+        child: new ListBody(
           children: <Widget>[
             new Text(name, style: Theme.of(context).textTheme.headline),
             new Text(version, style: Theme.of(context).textTheme.body1),
@@ -286,7 +286,7 @@ class AboutDialog extends StatelessWidget {
       body.addAll(children);
     return new AlertDialog(
       content: new SingleChildScrollView(
-        child: new BlockBody(children: body),
+        child: new ListBody(children: body),
       ),
       actions: <Widget>[
         new FlatButton(
