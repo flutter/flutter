@@ -81,7 +81,7 @@ class TextStyleTween extends Tween<TextStyle> {
 /// values over a period of time.
 ///
 /// Subclasses' States must provide a way to visit the subclass's relevant
-/// fields to animate and [ImplicitlyAnimatedWidget] will automatically
+/// fields to animate. [ImplicitlyAnimatedWidget] will then automatically
 /// interpolate and animate those fields using the provided duration and
 /// curve when those fields change.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
@@ -226,14 +226,14 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 
 /// A container that gradually changes its values over a period of time.
 ///
+/// The [AnimatedContainer] will automatically animate between the old and
+/// new values of properties when they change using the provided curve and
+/// duration. Properties that are null are not animated.
+/// 
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container] with its internal
 /// [AnimationController]. For more complex animations, you'll likely want to
 /// use a subclass of [Transition] or use your own [AnimationController].
-///
-/// The [AnimatedContainer] will automatically animate between the old and
-/// new values of properties when they change using the provided curve and
-/// duration. Properties that are null are not animated.
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
