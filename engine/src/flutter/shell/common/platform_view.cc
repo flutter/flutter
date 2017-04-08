@@ -133,7 +133,7 @@ void PlatformView::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 void PlatformView::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   if (auto response = message->response())
-    response->CompleteWithError();
+    response->CompleteEmpty();
 }
 
 void PlatformView::SetupResourceContextOnIOThread() {

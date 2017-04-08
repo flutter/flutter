@@ -22,9 +22,6 @@ namespace blink {
 namespace {
 
 Dart_Handle ToByteData(const std::vector<uint8_t>& buffer) {
-  if (buffer.empty())
-    return Dart_Null();
-
   Dart_Handle data_handle =
       Dart_NewTypedData(Dart_TypedData_kByteData, buffer.size());
   if (Dart_IsError(data_handle))
@@ -72,18 +69,23 @@ void SendPlatformMessage(Dart_Handle window,
                          Dart_Handle callback,
                          const tonic::DartByteData& data) {
   UIDartState* dart_state = UIDartState::Current();
-  const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
 
   ftl::RefPtr<PlatformMessageResponse> response;
   if (!Dart_IsNull(callback)) {
     response = ftl::MakeRefCounted<PlatformMessageResponseDart>(
         tonic::DartPersistentValue(dart_state, callback));
   }
+  if (Dart_IsNull(data.dart_handle())) {
+    UIDartState::Current()->window()->client()->HandlePlatformMessage(
+        ftl::MakeRefCounted<PlatformMessage>(name, response));
+  } else {
+    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
 
-  UIDartState::Current()->window()->client()->HandlePlatformMessage(
-      ftl::MakeRefCounted<PlatformMessage>(
-          name, std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()),
-          response));
+    UIDartState::Current()->window()->client()->HandlePlatformMessage(
+        ftl::MakeRefCounted<PlatformMessage>(
+            name, std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()),
+            response));
+  }
 }
 
 void _SendPlatformMessage(Dart_NativeArguments args) {
@@ -93,10 +95,15 @@ void _SendPlatformMessage(Dart_NativeArguments args) {
 void RespondToPlatformMessage(Dart_Handle window,
                               int response_id,
                               const tonic::DartByteData& data) {
-  const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
-  UIDartState::Current()->window()->CompletePlatformMessageResponse(
-      response_id,
-      std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()));
+  if (Dart_IsNull(data.dart_handle())) {
+    UIDartState::Current()->window()->CompletePlatformMessageEmptyResponse(
+        response_id);
+  } else {
+    const uint8_t* buffer = static_cast<const uint8_t*>(data.data());
+    UIDartState::Current()->window()->CompletePlatformMessageResponse(
+        response_id,
+        std::vector<uint8_t>(buffer, buffer + data.length_in_bytes()));
+  }
 }
 
 void _RespondToPlatformMessage(Dart_NativeArguments args) {
@@ -162,8 +169,9 @@ void Window::DispatchPlatformMessage(ftl::RefPtr<PlatformMessage> message) {
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
-
-  Dart_Handle data_handle = ToByteData(message->data());
+  Dart_Handle data_handle = (message->hasData())
+      ? ToByteData(message->data())
+      : Dart_Null();
   if (Dart_IsError(data_handle))
     return;
 
@@ -213,6 +221,17 @@ void Window::BeginFrame(ftl::TimePoint frameTime) {
                   {
                       Dart_NewInteger(microseconds),
                   });
+}
+
+void Window::CompletePlatformMessageEmptyResponse(int response_id) {
+  if (!response_id)
+    return;
+  auto it = pending_responses_.find(response_id);
+  if (it == pending_responses_.end())
+    return;
+  auto response = std::move(it->second);
+  pending_responses_.erase(it);
+  response->CompleteEmpty();
 }
 
 void Window::CompletePlatformMessageResponse(int response_id,

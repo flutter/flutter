@@ -19,8 +19,7 @@ class PlatformMessageResponse
  public:
   // Callable on any thread.
   virtual void Complete(std::vector<uint8_t> data) = 0;
-  // TODO(abarth): You should be able to pass data with the error.
-  virtual void CompleteWithError() = 0;
+  virtual void CompleteEmpty() = 0;
 
   bool is_complete() const { return is_complete_; }
 

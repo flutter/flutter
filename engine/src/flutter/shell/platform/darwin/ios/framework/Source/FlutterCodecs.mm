@@ -14,14 +14,10 @@
 }
 
 - (NSData*)encode:(NSData*)message {
-  if (!message.length)
-    return nil;
   return message;
 }
 
 - (NSData*)decode:(NSData*)message {
-  if (!message.length)
-    return nil;
   return message;
 }
 @end
@@ -36,14 +32,14 @@
 }
 
 - (NSData*)encode:(NSString*)message {
-  if (!message.length)
+  if (message == nil)
     return nil;
   const char* utf8 = message.UTF8String;
   return [NSData dataWithBytes:utf8 length:strlen(utf8)];
 }
 
 - (NSString*)decode:(NSData*)message {
-  if (!message.length)
+  if (message == nil)
     return nil;
   return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding]
       autorelease];
@@ -69,7 +65,7 @@
 }
 
 - (id)decode:(NSData*)message {
-  if (!message.length)
+  if (message == nil)
     return nil;
   id decoded =
       [NSJSONSerialization JSONObjectWithData:message options:0 error:nil];

@@ -567,9 +567,13 @@ public class FlutterView extends SurfaceView
 
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
-    // Send a platform message to Dart.
+    // Send a data-carrying platform message to Dart.
     private static native void nativeDispatchPlatformMessage(long nativePlatformViewAndroid,
         String channel, ByteBuffer message, int position, int responseId);
+
+    // Send an empty platform message to Dart.
+    private static native void nativeDispatchEmptyPlatformMessage(long nativePlatformViewAndroid,
+        String channel, int responseId);
 
     private static native void nativeDispatchPointerDataPacket(long nativePlatformViewAndroid,
         ByteBuffer buffer, int position);
@@ -580,9 +584,13 @@ public class FlutterView extends SurfaceView
     private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid,
         boolean enabled);
 
-    // Send a response to a platform message received from Dart.
+    // Send a data-carrying response to a platform message received from Dart.
     private static native void nativeInvokePlatformMessageResponseCallback(
         long nativePlatformViewAndroid, int responseId, ByteBuffer message, int position);
+
+    // Send an empty response to a platform message received from Dart.
+    private static native void nativeInvokePlatformMessageEmptyResponseCallback(
+        long nativePlatformViewAndroid, int responseId);
 
     private void updateViewportMetrics() {
         nativeSetViewportMetrics(mNativePlatformView,
@@ -600,22 +608,27 @@ public class FlutterView extends SurfaceView
         OnBinaryMessageListenerAsync listener = mMessageListeners.get(channel);
         if (listener != null) {
             try {
-                listener.onMessage(this, ByteBuffer.wrap(message),
+                final ByteBuffer buffer = (message == null ? null : ByteBuffer.wrap(message));
+                listener.onMessage(this, buffer,
                     new BinaryMessageResponse() {
                         @Override
                         public void send(ByteBuffer response) {
-                            nativeInvokePlatformMessageResponseCallback(mNativePlatformView,
-                                responseId, response, response == null ? 0 : response.position());
+                            if (response == null) {
+                                nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView,
+                                    responseId);
+                            } else {
+                                nativeInvokePlatformMessageResponseCallback(mNativePlatformView,
+                                    responseId, response, response.position());
+                            }
                         }
                     });
             } catch (Exception ex) {
                 Log.e(TAG, "Uncaught exception in binary message listener", ex);
-                nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId,
-                    null, 0);
+                nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView, responseId);
             }
             return;
         }
-        nativeInvokePlatformMessageResponseCallback(mNativePlatformView, responseId, null, 0);
+        nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView, responseId);
     }
 
     private int mNextResponseId = 1;
@@ -626,7 +639,7 @@ public class FlutterView extends SurfaceView
         BinaryMessageReplyCallback callback = mPendingResponses.remove(responseId);
         if (callback != null) {
             try {
-                callback.onReply(ByteBuffer.wrap(response));
+                callback.onReply(response == null ? null : ByteBuffer.wrap(response));
             } catch (Exception ex) {
                 Log.e(TAG, "Uncaught exception in binary message listener reply", ex);
             }
@@ -767,8 +780,12 @@ public class FlutterView extends SurfaceView
             responseId = mNextResponseId++;
             mPendingResponses.put(responseId, callback);
         }
-        nativeDispatchPlatformMessage(mNativePlatformView, channel, message,
-            message == null ? 0 : message.position(), responseId);
+        if (message == null) {
+            nativeDispatchEmptyPlatformMessage(mNativePlatformView, channel, responseId);
+        } else {
+            nativeDispatchPlatformMessage(mNativePlatformView, channel, message,
+                message.position(), responseId);
+        }
     }
 
     /**
