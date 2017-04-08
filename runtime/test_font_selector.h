@@ -8,6 +8,7 @@
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/wtf/RefPtr.h"
 #include "lib/ftl/macros.h"
+#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
 
@@ -29,7 +30,7 @@ class TestFontSelector : public FontSelector {
   void fontCacheInvalidated() override;
 
  private:
-  WTF::RefPtr<FontData> test_font_data_;
+  sk_sp<SkTypeface> test_typeface_;
 
   TestFontSelector();
 
