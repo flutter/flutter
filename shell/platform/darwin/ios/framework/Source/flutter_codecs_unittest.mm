@@ -13,8 +13,8 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNil) {
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeEmptyString) {
   FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
-  ASSERT_TRUE([codec encode:@""] == nil);
-  ASSERT_TRUE([codec decode:[NSData data]] == nil);
+  ASSERT_TRUE([[codec encode:@""] isEqualTo:[NSData data]]);
+  ASSERT_TRUE([[codec decode:[NSData data]] isEqualTo:@""]);
 }
 
 TEST(FlutterStringCodec, CanEncodeAndDecodeAsciiString) {
@@ -42,10 +42,9 @@ TEST(FlutterStringCodec, CanEncodeAndDecodeNonBMPString) {
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
-  FlutterStringCodec* codec = [FlutterStringCodec sharedInstance];
+  FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   ASSERT_TRUE([codec encode:nil] == nil);
   ASSERT_TRUE([codec decode:nil] == nil);
-  ASSERT_TRUE([codec decode:[NSData data]] == nil);
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeArray) {
