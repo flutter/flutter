@@ -76,6 +76,12 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
+  /// Whether this route is a full-screen dialog.
+  ///
+  /// Prevents [startPopGesture] from poping the route using an edge swipe on
+  /// iOS.
+  bool fullscreenDialog;
+
   @override
   final bool maintainState;
 
@@ -84,12 +90,6 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Color get barrierColor => null;
-
-  /// Whether this route is a full-screen dialog.
-  ///
-  /// Prevents [startPopGesture] from poping the route using an edge swipe on
-  /// iOS.
-  bool fullscreenDialog;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
