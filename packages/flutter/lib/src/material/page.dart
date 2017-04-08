@@ -80,7 +80,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   ///
   /// Prevents [startPopGesture] from poping the route using an edge swipe on
   /// iOS.
-  bool fullscreenDialog;
+  final bool fullscreenDialog;
 
   @override
   final bool maintainState;
