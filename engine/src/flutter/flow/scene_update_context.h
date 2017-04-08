@@ -35,8 +35,15 @@ class SceneUpdateContext;
 
 class SceneUpdateContext {
  public:
+  class SurfaceProducer {
+   public:
+    virtual ~SurfaceProducer() {}
+    virtual sk_sp<SkSurface> ProduceSurface(SkISize size,
+                                            mozart::ImagePtr* out_image) = 0;
+  };
+
   SceneUpdateContext(mozart::SceneUpdate* update,
-                     mozart::BufferProducer* buffer_producer);
+                     SurfaceProducer* surface_producer);
   ~SceneUpdateContext();
 
   mozart::SceneUpdate* update() const { return update_; }
@@ -71,7 +78,7 @@ class SceneUpdateContext {
   };
 
   mozart::SceneUpdate* update_;
-  mozart::BufferProducer* buffer_producer_;
+  SurfaceProducer* surface_producer_;
 
   CurrentPaintTask current_paint_task_;
   std::vector<PaintTask> paint_tasks_;
