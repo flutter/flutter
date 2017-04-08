@@ -13,6 +13,9 @@ import 'item.dart';
 import 'updates.dart';
 
 final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
+  // For a different example of how to set up an application routing table,
+  // consider the Stocks example:
+  // https://github.com/flutter/flutter/blob/master/examples/stocks/lib/main.dart
   kAllGalleryItems,
   key: (GalleryItem item) => item.routeName,
   value: (GalleryItem item) => item.buildRoute,
