@@ -90,8 +90,12 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
 #endif  // OS_ANDROID
 
 #if OS_FUCHSIA
-  ACQUIRE_PROC(CreateMagmaSurfaceKHR, handle);
-  ACQUIRE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR, handle);
+  [this, &handle]() -> bool {
+    ACQUIRE_PROC(CreateMagmaSurfaceKHR, handle);
+    ACQUIRE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR, handle);
+    return true;
+  }();
+
 #endif  // OS_FUCHSIA
 
   // The debug report functions are optional. We don't want proc acquisition to

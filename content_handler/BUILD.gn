@@ -6,6 +6,7 @@ assert(is_fuchsia)
 
 declare_args() {
   flutter_enable_vulkan = false
+  flutter_use_vulkan_native_surface = false
 }
 
 executable("content_handler") {
@@ -66,16 +67,23 @@ executable("content_handler") {
   ]
 
   if (flutter_enable_vulkan) {
-    defines += [ "FLUTTER_ENABLE_VULKAN" ]
+    defines += [ "FLUTTER_ENABLE_VULKAN=1" ]
 
-    libs += [ "hid" ]
-
-    sources += [
-      "direct_input.cc",
-      "direct_input.h",
-      "vulkan_rasterizer.cc",
-      "vulkan_rasterizer.h",
-    ]
+    if (flutter_use_vulkan_native_surface) {
+      defines += [ "FLUTTER_USE_VULKAN_NATIVE_SURFACE=1" ]
+      sources += [
+        "direct_input.cc",
+        "direct_input.h",
+        "vulkan_native_rasterizer.cc",
+        "vulkan_native_rasterizer.h",
+      ]
+      libs += [ "hid" ]
+    } else {
+      sources += [
+        "vulkan_rasterizer.cc",
+        "vulkan_rasterizer.h",
+      ]
+    }
 
     deps += [
       "//flutter/vulkan",

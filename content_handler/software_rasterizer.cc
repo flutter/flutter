@@ -13,13 +13,23 @@
 
 namespace flutter_runner {
 
+SoftwareRasterizer::RasterSurfaceProducer::RasterSurfaceProducer() {
+  buffer_producer_.reset(new mozart::BufferProducer());
+}
+
+sk_sp<SkSurface> SoftwareRasterizer::RasterSurfaceProducer::ProduceSurface(
+    SkISize size,
+    mozart::ImagePtr* out_image) {
+  return mozart::MakeSkSurface(size, buffer_producer_.get(), out_image);
+}
+
 SoftwareRasterizer::SoftwareRasterizer() : compositor_context_(nullptr) {}
 
 SoftwareRasterizer::~SoftwareRasterizer() = default;
 
 void SoftwareRasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {
   scene_.Bind(std::move(scene));
-  buffer_producer_.reset(new mozart::BufferProducer());
+  surface_producer_.reset(new RasterSurfaceProducer());
 }
 
 void SoftwareRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
@@ -54,7 +64,7 @@ void SoftwareRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
 
   layer_tree->Preroll(frame);
 
-  flow::SceneUpdateContext context(update.get(), buffer_producer_.get());
+  flow::SceneUpdateContext context(update.get(), surface_producer_.get());
   auto root_node = mozart::Node::New();
   root_node->hit_test_behavior = mozart::HitTestBehavior::New();
   layer_tree->UpdateScene(context, root_node.get());
@@ -72,7 +82,7 @@ void SoftwareRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
   // The image buffer's fence is signalled automatically when the surface
   // goes out of scope.
   context.ExecutePaintTasks(frame);
-  buffer_producer_->Tick();
+  surface_producer_->Tick();
 
   callback();
 }

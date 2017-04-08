@@ -140,14 +140,14 @@ void RuntimeHolder::CreateView(
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetEventListener(std::move(input_listener));
 
-#if FLUTTER_ENABLE_VULKAN
+#if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   direct_input_ = std::make_unique<DirectInput>(
       [this](const blink::PointerDataPacket& packet) -> void {
         runtime_->DispatchPointerDataPacket(packet);
       });
   FTL_DCHECK(direct_input_->IsValid());
   direct_input_->WaitForReadAvailability();
-#endif  // FLUTTER_ENABLE_VULKAN
+#endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
 
   mozart::ScenePtr scene;
   view_->CreateScene(fidl::GetProxy(&scene));
@@ -158,9 +158,9 @@ void RuntimeHolder::CreateView(
   runtime_ = blink::RuntimeController::Create(this);
   runtime_->CreateDartController(script_uri);
   runtime_->SetViewportMetrics(viewport_metrics_);
-#if FLUTTER_ENABLE_VULKAN
+#if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   direct_input_->SetViewportMetrics(viewport_metrics_);
-#endif  // FLUTTER_ENABLE_VULKAN
+#endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   if (!kernel.empty()) {
     runtime_->dart_controller()->RunFromKernel(kernel.data(), kernel.size());
   } else {
@@ -377,11 +377,11 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
     // TODO(abarth): Use view_properties_->display_metrics->device_pixel_ratio
     // once that's reasonable.
     runtime_->SetViewportMetrics(viewport_metrics_);
-#if FLUTTER_ENABLE_VULKAN
+#if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
     if (direct_input_) {
       direct_input_->SetViewportMetrics(viewport_metrics_);
     }
-#endif  // FLUTTER_ENABLE_VULKAN
+#endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   }
 
   // Remember the scene version for rendering.

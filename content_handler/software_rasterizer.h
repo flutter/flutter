@@ -26,8 +26,20 @@ class SoftwareRasterizer : public Rasterizer {
             ftl::Closure callback) override;
 
  private:
+  class RasterSurfaceProducer
+      : public flow::SceneUpdateContext::SurfaceProducer {
+   public:
+    RasterSurfaceProducer();
+    sk_sp<SkSurface> ProduceSurface(SkISize size,
+                                    mozart::ImagePtr* out_image) override;
+    void Tick() { buffer_producer_->Tick(); }
+
+   private:
+    std::unique_ptr<mozart::BufferProducer> buffer_producer_;
+  };
+
   mozart::ScenePtr scene_;
-  std::unique_ptr<mozart::BufferProducer> buffer_producer_;
+  std::unique_ptr<RasterSurfaceProducer> surface_producer_;
   flow::CompositorContext compositor_context_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(SoftwareRasterizer);

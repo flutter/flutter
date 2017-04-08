@@ -1362,6 +1362,8 @@ FILE: ../../../flutter/content_handler/service_protocol_hooks.cc
 FILE: ../../../flutter/content_handler/service_protocol_hooks.h
 FILE: ../../../flutter/content_handler/software_rasterizer.cc
 FILE: ../../../flutter/content_handler/software_rasterizer.h
+FILE: ../../../flutter/content_handler/vulkan_native_rasterizer.cc
+FILE: ../../../flutter/content_handler/vulkan_native_rasterizer.h
 FILE: ../../../flutter/content_handler/vulkan_rasterizer.cc
 FILE: ../../../flutter/content_handler/vulkan_rasterizer.h
 FILE: ../../../flutter/flow/layers/physical_model_layer.cc
