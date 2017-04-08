@@ -5,7 +5,6 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 
 #include <UIKit/UIKit.h>
-#include <algorithm>
 
 static const char _kTextAffinityDownstream[] = "TextAffinity.downstream";
 static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
@@ -98,8 +97,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 }
 
 - (void)insertText:(NSString*)text {
-  int start = std::max(0, std::min(_selectionBase, _selectionExtent));
-  int end = std::max(0, std::max(_selectionBase, _selectionExtent));
+  int start = MAX(0, MIN(_selectionBase, _selectionExtent));
+  int end = MAX(0, MIN(_selectionBase, _selectionExtent));
   int len = end - start;
   [self.text replaceCharactersInRange:NSMakeRange(start, len) withString:text];
   int caret = start + text.length;
@@ -110,8 +109,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 }
 
 - (void)deleteBackward {
-  int start = std::max(0, std::min(_selectionBase, _selectionExtent));
-  int end = std::max(0, std::max(_selectionBase, _selectionExtent));
+  int start = MAX(0, MIN(_selectionBase, _selectionExtent));
+  int end = MAX(0, MIN(_selectionBase, _selectionExtent));
   NSRange deleteRange = NSMakeRange(start, end - start);
   if (deleteRange.length > 0) {
     deleteRange = [self.text rangeOfComposedCharacterSequencesForRange:deleteRange];
