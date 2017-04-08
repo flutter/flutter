@@ -160,7 +160,7 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and then the [placeholder]
   /// argument should be set to true.
-  const DataCell(this.widget, {
+  const DataCell(this.child, {
     this.placeholder: false,
     this.showEditIcon: false,
     this.onTap
@@ -176,9 +176,9 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
-  final Widget widget;
+  final Widget child;
 
-  /// Whether the [widget] is actually a placeholder.
+  /// Whether the [child] is actually a placeholder.
   ///
   /// If this is true, the default text style for the cell is changed
   /// to be appropriate for placeholder text.
@@ -571,7 +571,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
           padding: padding,
-          label: cell.widget,
+          label: cell.child,
           numeric: column.numeric,
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
