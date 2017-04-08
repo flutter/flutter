@@ -305,7 +305,7 @@ class InputDecorator extends StatelessWidget {
 
     if (decoration.hideDivider) {
       return new Container(
-        margin: margin + new EdgeInsets.only(bottom: bottomBorder),
+        margin: margin + const EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
         child: child,
       );

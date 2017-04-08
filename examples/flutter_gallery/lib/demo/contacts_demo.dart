@@ -113,11 +113,11 @@ class ContactsDemoState extends State<ContactsDemo> {
               floating: _appBarBehavior == AppBarBehavior.floating,
               actions: <Widget>[
                 new IconButton(
-                  icon: new Icon(Icons.create),
+                  icon: const Icon(Icons.create),
                   tooltip: 'Edit',
                   onPressed: () {
                     _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                      content: new Text('This is actually just a demo. Editing isn\'t supported.')
+                      content: const Text('This is actually just a demo. Editing isn\'t supported.')
                     ));
                   },
                 ),
@@ -130,21 +130,21 @@ class ContactsDemoState extends State<ContactsDemo> {
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
                     new PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
-                      child: new Text('App bar scrolls away')
+                      child: const Text('App bar scrolls away')
                     ),
                     new PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.pinned,
-                      child: new Text('App bar stays put')
+                      child: const Text('App bar stays put')
                     ),
                     new PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
-                      child: new Text('App bar floats')
+                      child: const Text('App bar floats')
                     ),
                   ],
                 ),
               ],
               flexibleSpace: new FlexibleSpaceBar(
-                title: new Text('Ali Connors'),
+                title: const Text('Ali Connors'),
                 background: new Stack(
                   children: <Widget>[
                     new Image.asset(
@@ -154,7 +154,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                     ),
                     // This gradient ensures that the toolbar icons are distinct
                     // against the background image.
-                    new DecoratedBox(
+                    const DecoratedBox(
                       decoration: const BoxDecoration(
                         gradient: const LinearGradient(
                           begin: const FractionalOffset(0.5, 0.0),
@@ -177,7 +177,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send message',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('Pretend that this opened your SMS application.')
+                          content: const Text('Pretend that this opened your SMS application.')
                         ));
                       },
                       lines: <String>[
@@ -190,7 +190,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send message',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('In this demo, this button doesn\'t do anything.')
+                          content: const Text('In this demo, this button doesn\'t do anything.')
                         ));
                       },
                       lines: <String>[
@@ -203,7 +203,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send message',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('Imagine if you will, a messaging application.')
+                          content: const Text('Imagine if you will, a messaging application.')
                         ));
                       },
                       lines: <String>[
@@ -221,7 +221,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send personal e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('Here, your e-mail application would open.')
+                          content: const Text('Here, your e-mail application would open.')
                         ));
                       },
                       lines: <String>[
@@ -234,7 +234,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Send work e-mail',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('This is a demo, so this button does not actually work.')
+                          content: const Text('This is a demo, so this button does not actually work.')
                         ));
                       },
                       lines: <String>[
@@ -252,7 +252,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('This would show a map of San Francisco.')
+                          content: const Text('This would show a map of San Francisco.')
                         ));
                       },
                       lines: <String>[
@@ -266,7 +266,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('This would show a map of Mountain View.')
+                          content: const Text('This would show a map of Mountain View.')
                         ));
                       },
                       lines: <String>[
@@ -280,7 +280,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       tooltip: 'Open map',
                       onPressed: () {
                         _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                          content: new Text('This would also show a map, if this was not a demo.')
+                          content: const Text('This would also show a map, if this was not a demo.')
                         ));
                       },
                       lines: <String>[

@@ -14,7 +14,7 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from the current default text style for a given [BuildContext].
-  DefaultTextStyle({
+  const DefaultTextStyle({
     Key key,
     @required this.style,
     this.textAlign,
@@ -22,12 +22,11 @@ class DefaultTextStyle extends InheritedWidget {
     this.overflow: TextOverflow.clip,
     this.maxLines,
     @required Widget child,
-  }) : super(key: key, child: child) {
-    assert(style != null);
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(child != null);
-  }
+  }) : assert(style != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
   ///
@@ -140,7 +139,7 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, {
+  const Text(this.data, {
     Key key,
     this.style,
     this.textAlign,
@@ -148,9 +147,8 @@ class Text extends StatelessWidget {
     this.overflow,
     this.textScaleFactor,
     this.maxLines,
-  }) : super(key: key) {
-    assert(data != null);
-  }
+  }) : assert(data != null),
+       super(key: key);
 
   /// The text to display.
   final String data;

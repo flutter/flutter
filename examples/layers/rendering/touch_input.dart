@@ -102,8 +102,8 @@ class RenderDots extends RenderBox {
 void main() {
   // Create some styled text to tell the user to interact with the app.
   final RenderParagraph paragraph = new RenderParagraph(
-    new TextSpan(
-      style: new TextStyle(color: Colors.black87),
+    const TextSpan(
+      style: const TextStyle(color: Colors.black87),
       text: "Touch me!"
     )
   );

@@ -101,6 +101,8 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    device.getLogReader(app: package).appPid = vmService.vm.pid;
+
     try {
       final Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {

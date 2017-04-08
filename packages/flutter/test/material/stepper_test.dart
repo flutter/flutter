@@ -17,14 +17,14 @@ void main() {
           },
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
             new Step(
-              title: new Text('Step 2'),
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -45,14 +45,14 @@ void main() {
           child: new Stepper(
             steps: <Step>[
               new Step(
-                title: new Text('Step 1'),
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
               new Step(
-                title: new Text('Step 2'),
+                title: const Text('Step 2'),
                 content: const SizedBox(
                   width: 200.0,
                   height: 200.0
@@ -74,14 +74,14 @@ void main() {
             currentStep: 1,
             steps: <Step>[
               new Step(
-                title: new Text('Step 1'),
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
                 )
               ),
               new Step(
-                title: new Text('Step 2'),
+                title: const Text('Step 2'),
                 content: const SizedBox(
                   width: 200.0,
                   height: 200.0
@@ -109,7 +109,7 @@ void main() {
             type: StepperType.horizontal,
             steps: <Step>[
               new Step(
-                title: new Text('Step 1'),
+                title: const Text('Step 1'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
@@ -132,12 +132,12 @@ void main() {
           type: StepperType.horizontal,
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
-              content: new Text('A')
+              title: const Text('Step 1'),
+              content: const Text('A')
             ),
             new Step(
-              title: new Text('Step 2'),
-              content: new Text('B')
+              title: const Text('Step 2'),
+              content: const Text('B')
             )
           ]
         )
@@ -154,12 +154,12 @@ void main() {
           type: StepperType.horizontal,
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
-              content: new Text('A')
+              title: const Text('Step 1'),
+              content: const Text('A')
             ),
             new Step(
-              title: new Text('Step 2'),
-              content: new Text('B')
+              title: const Text('Step 2'),
+              content: const Text('B')
             )
           ]
         )
@@ -186,14 +186,14 @@ void main() {
           },
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
             new Step(
-              title: new Text('Step 2'),
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 200.0,
                 height: 200.0
@@ -222,14 +222,14 @@ void main() {
           },
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
               )
             ),
             new Step(
-              title: new Text('Step 2'),
+              title: const Text('Step 2'),
               state: StepState.disabled,
               content: const SizedBox(
                 width: 100.0,
@@ -251,21 +251,21 @@ void main() {
         child: new Stepper(
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
-              title: new Text('Step 2'),
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
-              title: new Text('Step 3'),
+              title: const Text('Step 3'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -286,21 +286,21 @@ void main() {
           currentStep: 2,
           steps: <Step>[
             new Step(
-              title: new Text('Step 1'),
+              title: const Text('Step 1'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
-              title: new Text('Step 2'),
+              title: const Text('Step 2'),
               content: const SizedBox(
                 width: 100.0,
                 height: 300.0
               )
             ),
             new Step(
-              title: new Text('Step 3'),
+              title: const Text('Step 3'),
               content: const SizedBox(
                 width: 100.0,
                 height: 100.0
@@ -322,7 +322,7 @@ void main() {
           child: new Stepper(
             steps: <Step>[
               new Step(
-                title: new Text('A'),
+                title: const Text('A'),
                 state: StepState.complete,
                 content: const SizedBox(
                   width: 100.0,
@@ -330,7 +330,7 @@ void main() {
                 )
               ),
               new Step(
-                title: new Text('B'),
+                title: const Text('B'),
                 content: const SizedBox(
                   width: 100.0,
                   height: 100.0
@@ -353,7 +353,7 @@ void main() {
           child: new Stepper(
             steps: <Step>[
               new Step(
-                title: new Text('A'),
+                title: const Text('A'),
                 state: StepState.error,
                 content: const SizedBox(
                   width: 100.0,

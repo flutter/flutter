@@ -27,7 +27,7 @@ void main() {
             );
           },
         ),
-        right: new Text('Not Today'),
+        right: const Text('Not Today'),
       );
     }
 
@@ -74,7 +74,7 @@ void main() {
           itemExtent: 200.0,
           itemBuilder: itemBuilder,
         ),
-        right: new Text('Not Today')
+        right: const Text('Not Today')
       );
     }
 
@@ -135,7 +135,7 @@ void main() {
           itemExtent: 200.0,
           scrollDirection: Axis.horizontal
         ),
-        right: new Text('Not Today')
+        right: const Text('Not Today')
       );
     }
 

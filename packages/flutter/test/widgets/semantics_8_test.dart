@@ -22,10 +22,10 @@ void main() {
             container: true,
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
-                new Semantics(
+                const Semantics(
                   label: 'label'
                 )
               ]
@@ -52,10 +52,10 @@ void main() {
             container: true,
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   label: 'label'
                 ),
-                new Semantics(
+                const Semantics(
                   checked: true
                 )
               ]

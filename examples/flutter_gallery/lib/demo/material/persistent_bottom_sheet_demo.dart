@@ -57,11 +57,11 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
     showDialog<Null>(
       context: context,
       child: new AlertDialog(
-        content: new Text('You tapped the floating action button.'),
+        content: const Text('You tapped the floating action button.'),
         actions: <Widget>[
           new FlatButton(
             onPressed: () { Navigator.pop(context); },
-            child: new Text('OK')
+            child: const Text('OK')
           )
         ]
       )
@@ -72,16 +72,16 @@ class _PersistentBottomSheetDemoState extends State<PersistentBottomSheetDemo> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(title: new Text('Persistent bottom sheet')),
+      appBar: new AppBar(title: const Text('Persistent bottom sheet')),
       floatingActionButton: new FloatingActionButton(
         onPressed: _showMessage,
         backgroundColor: Colors.redAccent,
-        child: new Icon(Icons.add)
+        child: const Icon(Icons.add)
       ),
       body: new Center(
         child: new RaisedButton(
           onPressed: _showBottomSheetCallback,
-          child: new Text('SHOW BOTTOM SHEET')
+          child: const Text('SHOW BOTTOM SHEET')
         )
       )
     );

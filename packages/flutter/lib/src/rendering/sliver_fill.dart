@@ -116,17 +116,17 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    final double size = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
     if (child != null)
-      child.layout(constraints.asBoxConstraints(minExtent: size, maxExtent: size), parentUsesSize: true);
-    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: size);
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = new SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
-      hasVisualOverflow: size > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
       setChildParentData(child, constraints, geometry);

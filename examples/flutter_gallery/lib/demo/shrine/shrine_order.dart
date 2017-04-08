@@ -181,7 +181,7 @@ class _Heading extends StatelessWidget {
               ),
               new LayoutId(
                 id: _HeadingLayout.icon,
-                child: new Icon(
+                child: const Icon(
                   Icons.info_outline,
                   size: 24.0,
                   color: const Color(0xFFFFE0E0),
@@ -275,7 +275,7 @@ class _OrderPageState extends State<OrderPage> {
           );
         },
         backgroundColor: const Color(0xFF16F0F0),
-        child: new Icon(
+        child: const Icon(
           Icons.add_shopping_cart,
           color: Colors.black,
         ),

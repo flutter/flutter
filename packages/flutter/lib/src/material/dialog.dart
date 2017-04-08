@@ -293,7 +293,7 @@ class SimpleDialog extends StatelessWidget {
       body.add(new Flexible(
         child: new SingleChildScrollView(
           padding: contentPadding ?? const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 16.0),
-          child: new BlockBody(children: children),
+          child: new ListBody(children: children),
         )
       ));
     }

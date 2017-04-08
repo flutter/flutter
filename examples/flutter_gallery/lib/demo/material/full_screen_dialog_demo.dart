@@ -57,7 +57,7 @@ class DateTimeItem extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     new Text(new DateFormat('EEE, MMM d yyyy').format(date)),
-                    new Icon(Icons.arrow_drop_down, color: Colors.black54),
+                    const Icon(Icons.arrow_drop_down, color: Colors.black54),
                   ]
                 )
               )
@@ -82,7 +82,7 @@ class DateTimeItem extends StatelessWidget {
               child: new Row(
                 children: <Widget>[
                   new Text('$time'),
-                  new Icon(Icons.arrow_drop_down, color: Colors.black54),
+                  const Icon(Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )
             )
@@ -122,11 +122,11 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         ),
         actions: <Widget>[
           new FlatButton(
-            child: new Text('CANCEL'),
+            child: const Text('CANCEL'),
             onPressed: () { Navigator.pop(context, DismissDialogAction.cancel); }
           ),
           new FlatButton(
-            child: new Text('DISCARD'),
+            child: const Text('DISCARD'),
             onPressed: () {
               Navigator.of(context)
                 ..pop(DismissDialogAction.discard) // pop the cancel/discard dialog
@@ -145,10 +145,10 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: new Icon(Icons.clear),
+          icon: const Icon(Icons.clear),
           onPressed: () { handleDismissButton(context); }
         ),
-        title: new Text('New event'),
+        title: const Text('New event'),
         actions: <Widget> [
           new FlatButton(
             child: new Text('SAVE', style: theme.textTheme.body1.copyWith(color: Colors.white)),
@@ -222,7 +222,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     });
                   }
                 ),
-                new Text('All-day')
+                const Text('All-day')
               ]
             )
           )

@@ -23,7 +23,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
         new Container(height: 100.0, width: 100.0),
         new FlatButton(
-          child: new Text('two'),
+          child: const Text('two'),
           onPressed: () { Navigator.pushNamed(context, '/two'); }
         ),
       ]
@@ -34,14 +34,14 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       key: routeTwoKey,
       children: <Widget>[
         new FlatButton(
-          child: new Text('pop'),
+          child: const Text('pop'),
           onPressed: () { Navigator.pop(context); }
         ),
         new Container(height: 150.0, width: 150.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
         new Container(height: 150.0, width: 150.0),
         new FlatButton(
-          child: new Text('three'),
+          child: const Text('three'),
           onPressed: () { Navigator.push(context, new ThreeRoute()); },
         ),
       ]
@@ -66,7 +66,7 @@ class ThreeRoute extends MaterialPageRoute<Null> {
 
 class MutatingRoute extends MaterialPageRoute<Null> {
   MutatingRoute() : super(builder: (BuildContext context) {
-    return new Hero(tag: 'a', child: new Text('MutatingRoute'), key: new UniqueKey());
+    return new Hero(tag: 'a', child: const Text('MutatingRoute'), key: new UniqueKey());
   });
 
   void markNeedsBuild() {
@@ -200,9 +200,9 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: new Text('foo')),
+            new Hero(tag: 'a', child: const Text('foo')),
             new Builder(builder: (BuildContext context) {
-              return new FlatButton(child: new Text('two'), onPressed: () => Navigator.push(context, route));
+              return new FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             })
           ]
         )
@@ -272,7 +272,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              child: new Text('foo')
+              child: const Text('foo')
             )
           )
         )
@@ -290,7 +290,7 @@ void main() {
                 child: new Container(
                   width: 100.0,
                   height: 150.0,
-                  child: new Text('bar')
+                  child: const Text('bar')
                 )
               )
             )
@@ -393,16 +393,16 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: new Text('a')),
-            new Hero(tag: 'a', child: new Text('a too')),
+            new Hero(tag: 'a', child: const Text('a')),
+            new Hero(tag: 'a', child: const Text('a too')),
             new Builder(
               builder: (BuildContext context) {
                 return new FlatButton(
-                  child: new Text('push'),
+                  child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, new PageRouteBuilder<Null>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-                        return new Text('fail');
+                        return const Text('fail');
                       },
                     ));
                   },
@@ -577,7 +577,7 @@ void main() {
                 },
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
             ],
@@ -598,7 +598,7 @@ void main() {
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],
@@ -668,17 +668,17 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 key: routeContainerKey,
                 child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
-              new SizedBox(height: 600.0),
+              const SizedBox(height: 600.0),
             ],
           )
         );
@@ -693,16 +693,16 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
-                  new SizedBox(height: 600.0),
+                  const SizedBox(height: 600.0),
                 ],
               );
             },
@@ -750,13 +750,13 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 key: routeContainerKey,
                 child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -771,13 +771,13 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],
@@ -832,7 +832,7 @@ void main() {
               new Container(
                 child: new Hero(tag: 'BC', child: new Container(key: heroBCKey, height: 150.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -845,19 +845,19 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 child: new Hero(tag: 'AB', child: new Container(key: heroABKey, height: 200.0))
               ),
               new FlatButton(
-                child: new Text('PUSH C'),
+                child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); }
               ),
               new Container(
                 child: new Hero(tag: 'BC', child: new Container(height: 150.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -872,13 +872,13 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'AB', child: new Container(height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH B'),
+                    child: const Text('PUSH B'),
                     onPressed: () { Navigator.push(context, routeB); }
                   ),
                 ],
@@ -939,7 +939,7 @@ void main() {
                 ),
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
             ],
@@ -965,7 +965,7 @@ void main() {
                     ),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],

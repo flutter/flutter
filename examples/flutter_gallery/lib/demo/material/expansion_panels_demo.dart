@@ -30,8 +30,8 @@ class DualHeaderWithHint extends StatelessWidget {
     return new AnimatedCrossFade(
       firstChild: first,
       secondChild: second,
-      firstCurve: new Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
-      secondCurve: new Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
+      firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
+      secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
       sizeCurve: Curves.fastOutSlowIn,
       crossFadeState: isExpanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 200),
@@ -118,7 +118,7 @@ class CollapsibleBody extends StatelessWidget {
                 margin: const EdgeInsets.only(right: 8.0),
                 child: new FlatButton(
                   onPressed: onCancel,
-                  child: new Text('CANCEL', style: new TextStyle(
+                  child: const Text('CANCEL', style: const TextStyle(
                     color: Colors.black54,
                     fontSize: 15.0,
                     fontWeight: FontWeight.w500
@@ -130,7 +130,7 @@ class CollapsibleBody extends StatelessWidget {
                 child: new FlatButton(
                   onPressed: onSave,
                   textTheme: ButtonTextTheme.accent,
-                  child: new Text('SAVE')
+                  child: const Text('SAVE')
                 )
               )
             ]
@@ -254,7 +254,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                                 groupValue: field.value,
                                 onChanged: field.onChanged,
                               ),
-                              new Text('Bahamas')
+                              const Text('Bahamas')
                             ]
                           ),
                           new Row(
@@ -265,7 +265,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                                 groupValue: field.value,
                                 onChanged: field.onChanged,
                               ),
-                              new Text('Barbados')
+                              const Text('Barbados')
                             ]
                           ),
                           new Row(
@@ -276,7 +276,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
                                 groupValue: field.value,
                                 onChanged: field.onChanged,
                               ),
-                              new Text('Bermuda')
+                              const Text('Bermuda')
                             ]
                           )
                         ]
@@ -334,7 +334,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Expansion panels')),
+      appBar: new AppBar(title: const Text('Expansion panels')),
       body: new SingleChildScrollView(
         child: new Container(
           margin: const EdgeInsets.all(24.0),

@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Icon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
+      const Center(
         child: const Icon(null),
       ),
     );
@@ -21,7 +21,7 @@ void main() {
 
   testWidgets('Icon sizing - no theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
+      const Center(
         child: const Icon(
           null,
           size: 96.0,
@@ -81,7 +81,7 @@ void main() {
 
   testWidgets('Icon with custom font', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
+      const Center(
         child: const Icon(const IconData(0x41, fontFamily: 'Roboto')),
       ),
     );

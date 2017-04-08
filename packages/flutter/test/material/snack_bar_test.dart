@@ -266,7 +266,7 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('I am a snack bar.'),
+                  content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
@@ -276,7 +276,7 @@ void main() {
                   )
                 ));
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           }
         )
@@ -304,12 +304,12 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('I am a snack bar.'),
+                  content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(label: 'ACTION', onPressed: () {})
                 ));
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           }
         )
@@ -348,7 +348,7 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('snack'),
+                  content: const Text('snack'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
@@ -360,7 +360,7 @@ void main() {
                   closedReason = reason;
                 });
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           },
         )

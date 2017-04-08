@@ -381,12 +381,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
+    config.controller.selection = selection;
+
     // Note that this will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
     requestKeyboard();
 
     _hideSelectionOverlayIfNeeded();
-    widget.controller.selection = selection;
 
     if (widget.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(

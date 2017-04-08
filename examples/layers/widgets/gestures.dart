@@ -188,7 +188,7 @@ class _GestureDemoState extends State<GestureDemo> {
                         value: _scaleEnabled,
                         onChanged: (bool value) { setState(() { _scaleEnabled = value; }); }
                       ),
-                      new Text('Scale'),
+                      const Text('Scale'),
                     ]
                   ),
                   new Row(
@@ -197,7 +197,7 @@ class _GestureDemoState extends State<GestureDemo> {
                         value: _tapEnabled,
                         onChanged: (bool value) { setState(() { _tapEnabled = value; }); }
                       ),
-                      new Text('Tap'),
+                      const Text('Tap'),
                     ]
                   ),
                   new Row(
@@ -206,7 +206,7 @@ class _GestureDemoState extends State<GestureDemo> {
                         value: _doubleTapEnabled,
                         onChanged: (bool value) { setState(() { _doubleTapEnabled = value; }); }
                       ),
-                      new Text('Double Tap'),
+                      const Text('Double Tap'),
                     ]
                   ),
                   new Row(
@@ -215,7 +215,7 @@ class _GestureDemoState extends State<GestureDemo> {
                         value: _longPressEnabled,
                         onChanged: (bool value) { setState(() { _longPressEnabled = value; }); }
                       ),
-                      new Text('Long Press'),
+                      const Text('Long Press'),
                     ]
                   ),
                 ],
@@ -233,7 +233,7 @@ void main() {
   runApp(new MaterialApp(
     theme: new ThemeData.dark(),
     home: new Scaffold(
-      appBar: new AppBar(title: new Text('Gestures Demo')),
+      appBar: new AppBar(title: const Text('Gestures Demo')),
       body: new GestureDemo()
     )
   ));

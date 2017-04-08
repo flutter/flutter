@@ -23,10 +23,10 @@ void main() {
         maxHeight: 82.0,
       ),
       margin: const EdgeInsets.all(5.0),
-      child: new SizedBox(
+      child: const SizedBox(
         width: 25.0,
         height: 33.0,
-        child: new DecoratedBox(
+        child: const DecoratedBox(
           decoration: const BoxDecoration(backgroundColor: const Color(0xFFFFFF00)),
         ),
       ),

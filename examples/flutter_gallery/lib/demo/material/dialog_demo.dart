@@ -87,13 +87,13 @@ class DialogDemoState extends State<DialogDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Dialogs')
+        title: const Text('Dialogs')
       ),
       body: new ListView(
         padding: const EdgeInsets.symmetric(vertical: 24.0, horizontal: 72.0),
         children: <Widget>[
           new RaisedButton(
-            child: new Text('ALERT'),
+            child: const Text('ALERT'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
@@ -104,11 +104,11 @@ class DialogDemoState extends State<DialogDemo> {
                   ),
                   actions: <Widget>[
                     new FlatButton(
-                      child: new Text('CANCEL'),
+                      child: const Text('CANCEL'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); }
                     ),
                     new FlatButton(
-                      child: new Text('DISCARD'),
+                      child: const Text('DISCARD'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); }
                     )
                   ]
@@ -117,23 +117,23 @@ class DialogDemoState extends State<DialogDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('ALERT WITH TITLE'),
+            child: const Text('ALERT WITH TITLE'),
             onPressed: () {
               showDemoDialog<DialogDemoAction>(
                 context: context,
                 child: new AlertDialog(
-                  title: new Text('Use Google\'s location service?'),
+                  title: const Text('Use Google\'s location service?'),
                   content: new Text(
                     _alertWithTitleText,
                     style: dialogTextStyle
                   ),
                   actions: <Widget>[
                     new FlatButton(
-                      child: new Text('DISAGREE'),
+                      child: const Text('DISAGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); }
                     ),
                     new FlatButton(
-                      child: new Text('AGREE'),
+                      child: const Text('AGREE'),
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); }
                     )
                   ]
@@ -142,12 +142,12 @@ class DialogDemoState extends State<DialogDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('SIMPLE'),
+            child: const Text('SIMPLE'),
             onPressed: () {
               showDemoDialog<String>(
                 context: context,
                 child: new SimpleDialog(
-                  title: new Text('Set backup account'),
+                  title: const Text('Set backup account'),
                   children: <Widget>[
                     new DialogDemoItem(
                       icon: Icons.account_circle,
@@ -172,7 +172,7 @@ class DialogDemoState extends State<DialogDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('CONFIRMATION'),
+            child: const Text('CONFIRMATION'),
             onPressed: () {
               showTimePicker(
                 context: context,
@@ -189,7 +189,7 @@ class DialogDemoState extends State<DialogDemo> {
             }
           ),
           new RaisedButton(
-            child: new Text('FULLSCREEN'),
+            child: const Text('FULLSCREEN'),
             onPressed: () {
               Navigator.push(context, new MaterialPageRoute<DismissDialogAction>(
                 builder: (BuildContext context) => new FullScreenDialogDemo(),

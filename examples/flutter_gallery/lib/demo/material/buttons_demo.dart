@@ -95,13 +95,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new RaisedButton(
-            child: new Text('RAISED BUTTON'),
+            child: const Text('RAISED BUTTON'),
             onPressed: () {
               // Perform some action
             },
           ),
           new RaisedButton(
-            child: new Text('DISABLED'),
+            child: const Text('DISABLED'),
             onPressed: null,
           )
         ],
@@ -116,13 +116,13 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new FlatButton(
-            child: new Text('FLAT BUTTON'),
+            child: const Text('FLAT BUTTON'),
             onPressed: () {
               // Perform some action
             },
           ),
           new FlatButton(
-            child: new Text('DISABLED'),
+            child: const Text('DISABLED'),
             onPressed: null,
           )
         ],
@@ -142,7 +142,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           new ListTile(
-            title: new Text('Simple dropdown:'),
+            title: const Text('Simple dropdown:'),
             trailing: new DropdownButton<String>(
               value: dropdown1Value,
               onChanged: (String newValue) {
@@ -162,10 +162,10 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             height: 24.0,
           ),
           new ListTile(
-            title: new Text('Dropdown with a hint:'),
+            title: const Text('Dropdown with a hint:'),
             trailing: new DropdownButton<String>(
               value: dropdown2Value,
-              hint: new Text('Choose'),
+              hint: const Text('Choose'),
               onChanged: (String newValue) {
                 setState(() {
                   dropdown2Value = newValue;
@@ -183,7 +183,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
             height: 24.0,
           ),
           new ListTile(
-            title: new Text('Scrollable dropdown:'),
+            title: const Text('Scrollable dropdown:'),
             trailing: new DropdownButton<String>(
               value: dropdown3Value,
               onChanged: (String newValue) {
@@ -218,14 +218,14 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.thumb_up),
+            icon: const Icon(Icons.thumb_up),
             onPressed: () {
               setState(() => iconButtonToggle = !iconButtonToggle);
             },
             color: iconButtonToggle ? Theme.of(context).primaryColor : null,
           ),
-          new IconButton(
-            icon: new Icon(Icons.thumb_up),
+          const IconButton(
+            icon: const Icon(Icons.thumb_up),
             onPressed: null,
           )
         ]
@@ -239,7 +239,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
     return new Align(
       alignment: const FractionalOffset(0.5, 0.4),
       child: new FloatingActionButton(
-        child: new Icon(Icons.add),
+        child: const Icon(Icons.add),
         onPressed: () {
           // Perform some action
         },

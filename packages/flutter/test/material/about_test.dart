@@ -15,7 +15,7 @@ void main() {
         title: 'Pirate app',
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('Home'),
+            title: const Text('Home'),
           ),
           drawer: new Drawer(
             child: new ListView(
@@ -25,7 +25,7 @@ void main() {
                   applicationIcon: const FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
-                    new Text('About box'),
+                    const Text('About box'),
                   ]
                 ),
               ],
@@ -89,7 +89,7 @@ void main() {
       ]);
     });
 
-    await tester.pumpWidget(new Center(
+    await tester.pumpWidget(const Center(
       child: const LicensePage()
     ));
 

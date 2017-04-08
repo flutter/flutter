@@ -121,22 +121,18 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return new GestureDetector(
-          onScaleStart: _handleOnScaleStart,
-          onScaleUpdate: _handleOnScaleUpdate,
-          onScaleEnd: _handleOnScaleEnd,
-          child: new Transform(
-            transform: new Matrix4.identity()
-              ..translate(_offset.dx, _offset.dy)
-              ..scale(_scale),
-            child: new ClipRect(
-              child: new Image.asset(widget.photo.assetName, fit: BoxFit.cover),
-            ),
-          ),
-        );
-      }
+    return new GestureDetector(
+      onScaleStart: _handleOnScaleStart,
+      onScaleUpdate: _handleOnScaleUpdate,
+      onScaleEnd: _handleOnScaleEnd,
+      child: new ClipRect(
+        child: new Transform(
+          transform: new Matrix4.identity()
+            ..translate(_offset.dx, _offset.dy)
+            ..scale(_scale),
+          child: new Image.asset(widget.photo.assetName, fit: BoxFit.cover),
+        ),
+      ),
     );
   }
 }
@@ -316,22 +312,22 @@ class GridListDemoState extends State<GridListDemo> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Grid list'),
+        title: const Text('Grid list'),
         actions: <Widget>[
           new PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.imageOnly,
-                child: new Text('Image only'),
+                child: const Text('Image only'),
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.oneLine,
-                child: new Text('One line'),
+                child: const Text('One line'),
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.twoLine,
-                child: new Text('Two line'),
+                child: const Text('Two line'),
               ),
             ],
           ),

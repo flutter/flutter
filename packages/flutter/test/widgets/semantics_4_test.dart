@@ -23,17 +23,17 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
-          new Semantics(
+          const Semantics(
             label: 'L1'
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
-                new Semantics(
+                const Semantics(
                   checked: false
                 )
               ]
@@ -77,17 +77,17 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
-          new Semantics(
+          const Semantics(
             label: 'L1'
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
-                new Semantics()
+                const Semantics()
               ]
             )
           )
@@ -119,15 +119,15 @@ void main() {
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
-          new Semantics(),
+          const Semantics(),
           new Semantics(
             label: 'L2',
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
-                new Semantics()
+                const Semantics()
               ]
             )
           )

@@ -15,7 +15,7 @@ void main() {
           onPressed: () {
             didPressButton = true;
           },
-          child: new Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       ),
     );
@@ -29,10 +29,10 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
-          floatingActionButton: new FloatingActionButton(
+          floatingActionButton: const FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
-            child: new Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),

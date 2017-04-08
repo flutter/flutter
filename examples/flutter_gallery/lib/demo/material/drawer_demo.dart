@@ -68,7 +68,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
   void _showNotImplementedMessage() {
     Navigator.of(context).pop(); // Dismiss the drawer.
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text("The drawer's items don't do anything")
+      content: const Text("The drawer's items don't do anything")
     ));
   }
 
@@ -85,14 +85,14 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             Navigator.pop(context);
           },
         ),
-        title: new Text('Navigation drawer'),
+        title: const Text('Navigation drawer'),
       ),
       drawer: new Drawer(
         child: new ListView(
           children: <Widget>[
             new UserAccountsDrawerHeader(
-              accountName: new Text('Zach Widget'),
-              accountEmail: new Text('zach.widget@example.com'),
+              accountName: const Text('Zach Widget'),
+              accountEmail: const Text('zach.widget@example.com'),
               currentAccountPicture: new CircleAvatar(backgroundImage: new AssetImage(_kAsset0)),
               otherAccountsPictures: <Widget>[
                 new CircleAvatar(backgroundImage: new AssetImage(_kAsset1)),
@@ -134,13 +134,13 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: <Widget>[
                           new ListTile(
-                            leading: new Icon(Icons.add),
-                            title: new Text('Add account'),
+                            leading: const Icon(Icons.add),
+                            title: const Text('Add account'),
                             onTap: _showNotImplementedMessage,
                           ),
                           new ListTile(
-                            leading: new Icon(Icons.settings),
-                            title: new Text('Manage accounts'),
+                            leading: const Icon(Icons.settings),
+                            title: const Text('Manage accounts'),
                             onTap: _showNotImplementedMessage,
                           ),
                         ],

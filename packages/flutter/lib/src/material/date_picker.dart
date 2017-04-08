@@ -677,11 +677,11 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
-            child: new Text('CANCEL'),
+            child: const Text('CANCEL'),
             onPressed: _handleCancel,
           ),
           new FlatButton(
-            child: new Text('OK'),
+            child: const Text('OK'),
             onPressed: _handleOk,
           ),
         ],

@@ -21,10 +21,10 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.start,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
         ],
       ),
     );
@@ -39,10 +39,10 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.center,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
         ],
       ),
     );
@@ -57,10 +57,10 @@ void main() {
       new Wrap(
         alignment: WrapAlignment.end,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
         ],
       ),
     );
@@ -76,10 +76,10 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.start,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 50.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
         ],
       ),
     );
@@ -95,10 +95,10 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 50.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
         ],
       ),
     );
@@ -114,10 +114,10 @@ void main() {
         alignment: WrapAlignment.start,
         crossAxisAlignment: WrapCrossAlignment.end,
         children: <Widget>[
-          new SizedBox(width: 300.0, height: 50.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 100.0),
-          new SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 50.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 100.0),
+          const SizedBox(width: 300.0, height: 50.0),
         ],
       ),
     );
@@ -140,9 +140,9 @@ void main() {
       alignment: WrapAlignment.center,
       spacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -156,9 +156,9 @@ void main() {
       alignment: WrapAlignment.spaceBetween,
       spacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -172,9 +172,9 @@ void main() {
       alignment: WrapAlignment.spaceAround,
       spacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 310.0, height: 30.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 310.0, height: 30.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -188,9 +188,9 @@ void main() {
       alignment: WrapAlignment.spaceEvenly,
       spacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 310.0, height: 30.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 310.0, height: 30.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -206,11 +206,11 @@ void main() {
       runAlignment: WrapAlignment.center,
       runSpacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
-        new SizedBox(width: 400.0, height: 40.0),
-        new SizedBox(width: 500.0, height: 60.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -226,11 +226,11 @@ void main() {
       runAlignment: WrapAlignment.spaceBetween,
       runSpacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
-        new SizedBox(width: 400.0, height: 40.0),
-        new SizedBox(width: 500.0, height: 60.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -246,11 +246,11 @@ void main() {
       runAlignment: WrapAlignment.spaceAround,
       runSpacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
-        new SizedBox(width: 400.0, height: 40.0),
-        new SizedBox(width: 500.0, height: 70.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 70.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -266,11 +266,11 @@ void main() {
       runAlignment: WrapAlignment.spaceEvenly,
       runSpacing: 5.0,
       children: <Widget>[
-        new SizedBox(width: 100.0, height: 10.0),
-        new SizedBox(width: 200.0, height: 20.0),
-        new SizedBox(width: 300.0, height: 30.0),
-        new SizedBox(width: 400.0, height: 40.0),
-        new SizedBox(width: 500.0, height: 60.0),
+        const SizedBox(width: 100.0, height: 10.0),
+        const SizedBox(width: 200.0, height: 20.0),
+        const SizedBox(width: 300.0, height: 30.0),
+        const SizedBox(width: 400.0, height: 40.0),
+        const SizedBox(width: 500.0, height: 60.0),
       ],
     ));
     expect(tester.renderObject<RenderBox>(find.byType(Wrap)).size, equals(const Size(800.0, 600.0)));
@@ -292,10 +292,10 @@ void main() {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           children: <Widget>[
-            new SizedBox(width: 100.0, height: 10.0),
-            new SizedBox(width: 200.0, height: 20.0),
-            new SizedBox(width: 300.0, height: 30.0),
-            new SizedBox(width: 400.0, height: 40.0),
+            const SizedBox(width: 100.0, height: 10.0),
+            const SizedBox(width: 200.0, height: 20.0),
+            const SizedBox(width: 300.0, height: 30.0),
+            const SizedBox(width: 400.0, height: 40.0),
           ],
         ),
       ),
@@ -315,10 +315,10 @@ void main() {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           children: <Widget>[
-            new SizedBox(width: 400.0, height: 40.0),
-            new SizedBox(width: 300.0, height: 30.0),
-            new SizedBox(width: 200.0, height: 20.0),
-            new SizedBox(width: 100.0, height: 10.0),
+            const SizedBox(width: 400.0, height: 40.0),
+            const SizedBox(width: 300.0, height: 30.0),
+            const SizedBox(width: 200.0, height: 20.0),
+            const SizedBox(width: 100.0, height: 10.0),
           ],
         ),
       ),
@@ -341,10 +341,10 @@ void main() {
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
           children: <Widget>[
-            new SizedBox(width: 500.0, height: 10.0),
-            new SizedBox(width: 500.0, height: 20.0),
-            new SizedBox(width: 500.0, height: 30.0),
-            new SizedBox(width: 500.0, height: 40.0),
+            const SizedBox(width: 500.0, height: 10.0),
+            const SizedBox(width: 500.0, height: 20.0),
+            const SizedBox(width: 500.0, height: 30.0),
+            const SizedBox(width: 500.0, height: 40.0),
           ],
         ),
       ),
@@ -369,12 +369,12 @@ void main() {
           alignment: WrapAlignment.start,
           crossAxisAlignment: WrapCrossAlignment.start,
           children: <Widget>[
-            new SizedBox(width: 10.0, height: 250.0),
-            new SizedBox(width: 20.0, height: 250.0),
-            new SizedBox(width: 30.0, height: 250.0),
-            new SizedBox(width: 40.0, height: 250.0),
-            new SizedBox(width: 50.0, height: 250.0),
-            new SizedBox(width: 60.0, height: 250.0),
+            const SizedBox(width: 10.0, height: 250.0),
+            const SizedBox(width: 20.0, height: 250.0),
+            const SizedBox(width: 30.0, height: 250.0),
+            const SizedBox(width: 40.0, height: 250.0),
+            const SizedBox(width: 50.0, height: 250.0),
+            const SizedBox(width: 60.0, height: 250.0),
           ],
         ),
       ),
@@ -397,12 +397,12 @@ void main() {
           spacing: 12.0,
           runSpacing: 8.0,
           children: <Widget>[
-            new SizedBox(width: 10.0, height: 250.0),
-            new SizedBox(width: 20.0, height: 250.0),
-            new SizedBox(width: 30.0, height: 250.0),
-            new SizedBox(width: 40.0, height: 250.0),
-            new SizedBox(width: 50.0, height: 250.0),
-            new SizedBox(width: 60.0, height: 250.0),
+            const SizedBox(width: 10.0, height: 250.0),
+            const SizedBox(width: 20.0, height: 250.0),
+            const SizedBox(width: 30.0, height: 250.0),
+            const SizedBox(width: 40.0, height: 250.0),
+            const SizedBox(width: 50.0, height: 250.0),
+            const SizedBox(width: 60.0, height: 250.0),
           ],
         ),
       ),
@@ -421,7 +421,7 @@ void main() {
   testWidgets('Visual overflow generates a clip', (WidgetTester tester) async {
     await tester.pumpWidget(new Wrap(
       children: <Widget>[
-        new SizedBox(width: 500.0, height: 500.0),
+        const SizedBox(width: 500.0, height: 500.0),
       ],
     ));
 
@@ -429,8 +429,8 @@ void main() {
 
     await tester.pumpWidget(new Wrap(
       children: <Widget>[
-        new SizedBox(width: 500.0, height: 500.0),
-        new SizedBox(width: 500.0, height: 500.0),
+        const SizedBox(width: 500.0, height: 500.0),
+        const SizedBox(width: 500.0, height: 500.0),
       ],
     ));
 
@@ -444,10 +444,10 @@ void main() {
       spacing: 10.0,
       runSpacing: 15.0,
       children: <Widget>[
-        new SizedBox(width: 200.0, height: 300.0),
-        new SizedBox(width: 200.0, height: 300.0),
-        new SizedBox(width: 200.0, height: 300.0),
-        new SizedBox(width: 200.0, height: 300.0),
+        const SizedBox(width: 200.0, height: 300.0),
+        const SizedBox(width: 200.0, height: 300.0),
+        const SizedBox(width: 200.0, height: 300.0),
+        const SizedBox(width: 200.0, height: 300.0),
         new SizedBox(
           width: 200.0,
           height: 300.0,
@@ -484,10 +484,10 @@ void main() {
       direction: Axis.vertical,
       runSpacing: 7.0,
       children: <Widget>[
-        new SizedBox(width: 500.0, height: 400.0),
-        new SizedBox(width: 500.0, height: 400.0),
-        new SizedBox(width: 500.0, height: 400.0),
-        new SizedBox(width: 500.0, height: 400.0),
+        const SizedBox(width: 500.0, height: 400.0),
+        const SizedBox(width: 500.0, height: 400.0),
+        const SizedBox(width: 500.0, height: 400.0),
+        const SizedBox(width: 500.0, height: 400.0),
       ],
     ));
 
@@ -509,7 +509,7 @@ void main() {
             ),
             child: new Wrap(
               children: <Widget>[
-                new Text('X'),
+                const Text('X'),
               ],
             ),
           ),

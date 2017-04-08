@@ -1539,19 +1539,30 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
 // LAYOUT NODES
 
-/// A widget that uses the block layout algorithm for its children.
+/// A widget that arranges its children sequentially along a given axis, forcing
+/// them to the dimension of the parent in the other axis.
 ///
-/// This widget is rarely used directly. Instead, consider using [SliverList],
+/// This widget is rarely used directly. Instead, consider using [ListView],
 /// which combines a similar layout algorithm with scrolling behavior, or
 /// [Column], which gives you more flexible control over the layout of a
 /// vertical set of boxes.
 ///
-/// For details about the block layout algorithm, see [RenderBlockBase].
-class BlockBody extends MultiChildRenderObjectWidget {
-  /// Creates a block layout widget.
+/// See also:
+///
+///  * [RenderListBody], which implements this layout algorithm and the
+///    documentation for which describes some of its subtleties.
+///  * [SingleChildScrollView], which is sometimes used with [ListBody] to
+///    make the contents scrollable.
+///  * [Column] and [Row], which implement a more elaborate version of
+///    this layout algorithm (at the cost of being slightly less efficient).
+///  * [ListView], which implements an efficient scrolling version of this
+///    layout algorithm.
+class ListBody extends MultiChildRenderObjectWidget {
+  /// Creates a layout widget that arranges its children sequentially along a
+  /// given axis.
   ///
   /// By default, the [mainAxis] is [Axis.vertical].
-  BlockBody({
+  ListBody({
     Key key,
     this.mainAxis: Axis.vertical,
     List<Widget> children: const <Widget>[],
@@ -1562,10 +1573,10 @@ class BlockBody extends MultiChildRenderObjectWidget {
   final Axis mainAxis;
 
   @override
-  RenderBlock createRenderObject(BuildContext context) => new RenderBlock(mainAxis: mainAxis);
+  RenderListBody createRenderObject(BuildContext context) => new RenderListBody(mainAxis: mainAxis);
 
   @override
-  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
+  void updateRenderObject(BuildContext context, RenderListBody renderObject) {
     renderObject.mainAxis = mainAxis;
   }
 }

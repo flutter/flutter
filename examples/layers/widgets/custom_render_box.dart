@@ -46,5 +46,5 @@ class Dots extends SingleChildRenderObjectWidget {
 }
 
 void main() {
-  runApp(new Dots(child: new Center(child: new Text('Touch me!'))));
+  runApp(new Dots(child: const Center(child: const Text('Touch me!'))));
 }

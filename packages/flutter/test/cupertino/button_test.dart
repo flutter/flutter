@@ -16,7 +16,7 @@ void main() {
   testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(
-        child: new Text('X', style: testStyle),
+        child: const Text('X', style: testStyle),
         onPressed: null,
       ))
     );
@@ -32,7 +32,7 @@ void main() {
     final double minSize = 60.0;
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(
-        child: new Text('X', style: testStyle),
+        child: const Text('X', style: testStyle),
         onPressed: null,
         minSize: minSize,
       ))
@@ -48,7 +48,7 @@ void main() {
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Center(child: new CupertinoButton(
-        child: new Text('XXXX', style: testStyle),
+        child: const Text('XXXX', style: testStyle),
         onPressed: null,
       ))
     );
@@ -62,7 +62,7 @@ void main() {
 
   testWidgets('Button with background is wider', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
-      child: new Text('X', style: testStyle),
+      child: const Text('X', style: testStyle),
       onPressed: null,
       color: const Color(0xFFFFFFFF),
     )));
@@ -76,7 +76,7 @@ void main() {
 
   testWidgets('Custom padding', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
-      child: new Text(' ', style: testStyle),
+      child: const Text(' ', style: testStyle),
       onPressed: null,
       padding: const EdgeInsets.all(100.0),
     )));
@@ -94,7 +94,7 @@ void main() {
         builder: (BuildContext context, StateSetter setState) {
           return new Center(
             child: new CupertinoButton(
-              child: new Text('Tap me'),
+              child: const Text('Tap me'),
               onPressed: () {
                 setState(() {
                   value = true;
@@ -117,7 +117,7 @@ void main() {
 
   testWidgets('Disabled button doesn\'t animate', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
-      child: new Text('Tap me'),
+      child: const Text('Tap me'),
       onPressed: null,
     )));
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0));
@@ -128,7 +128,7 @@ void main() {
 
   testWidgets('pressedOpacity defaults to 0.1', (WidgetTester tester) async {
     await tester.pumpWidget(new Center(child: new CupertinoButton(
-      child: new Text('Tap me'),
+      child: const Text('Tap me'),
       onPressed: () { },
     )));
 
@@ -149,7 +149,7 @@ void main() {
     final double pressedOpacity = 0.5;
     await tester.pumpWidget(new Center(child: new CupertinoButton(
       pressedOpacity: pressedOpacity,
-      child: new Text('Tap me'),
+      child: const Text('Tap me'),
       onPressed: () { },
     )));
 

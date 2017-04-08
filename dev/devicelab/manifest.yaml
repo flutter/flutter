@@ -10,25 +10,24 @@
 # Each key in this dictionary is the unique name of a task, which also
 # corresponds to a file in the "bin/" directory that the task runner will run.
 #
-# Due to historic reasons that may go away at some point, the suffix of the task
-# name is significant. It is used by the dashboard to pick the right HTML
-# template to display the results in a card. If you use a known name suffix also
-# make sure that your task outputs data in the expected format for that card.
+# Required properties:
 #
-# Known suffixes:
+# * description: free form string
+#       describes what the task is about
+# * stage: one of "devicelab", "devicelab_ios", "devicelab_win"
+#       tasks are grouped by stage so they appear next to each on the dashboard and have a distinct
+#       icon attached to them. Stages can be used to create dependencies, e.g. we may decide to not
+#       run device tests on red Travis.
+# * required_agent_capabilities: a list of strings
+#       list of capabilities a devicelab agent must have to be able to run this task.
 #
-# __analysis_time:
-#     Analyzer performance benchmarks.
-# __refresh_time:
-#     Edit refresh cycle benchmarks.
-# __start_up:
-#     Application startup speed benchmarks.
-# __timeline_summary:
-#     Per-frame timings and missed/average/total counts.
-# __transition_perf:
-#     Flutter Gallery app transitions benchmark.
-# __size:
-#     Application size benchmarks.
+# Optional properties:
+#
+# * flaky: boolean true or false
+#       whether the task is considered flaky; the result of running a flaky task does not affect
+#       the overall build status.
+# * timeout_in_minutes: integer
+#       a custom task timeout, specified in minutes.
 
 tasks:
   # Deviceless tests

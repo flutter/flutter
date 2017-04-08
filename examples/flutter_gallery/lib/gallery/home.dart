@@ -170,7 +170,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
             pinned: true,
             expandedHeight: _kFlexibleSpaceMaxHeight,
             flexibleSpace: new FlexibleSpaceBar(
-              title: new Text('Flutter Gallery'),
+              title: const Text('Flutter Gallery'),
               // TODO(abarth): Wire up to the parallax in a way that doesn't pop during hero transition.
               background: new _AppBarBackground(animation: kAlwaysDismissedAnimation),
             ),
@@ -194,7 +194,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           home,
           new FadeTransition(
             opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-            child: new Banner(
+            child: const Banner(
               message: 'PREVIEW',
               location: BannerLocation.topRight,
             )

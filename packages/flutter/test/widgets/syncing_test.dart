@@ -111,8 +111,8 @@ void main() {
   });
 
   testWidgets('swap instances around', (WidgetTester tester) async {
-    final Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: new Text('apple'));
-    final Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: new Text('banana'));
+    final Widget a = new TestWidget(persistentState: 0x61, syncedState: 0x41, child: const Text('apple'));
+    final Widget b = new TestWidget(persistentState: 0x62, syncedState: 0x42, child: const Text('banana'));
     await tester.pumpWidget(new Column());
 
     final GlobalKey keyA = new GlobalKey();

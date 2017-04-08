@@ -300,7 +300,7 @@ class _PopupMenu<T> extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             vertical: _kMenuVerticalPadding
           ),
-          child: new BlockBody(children: children),
+          child: new ListBody(children: children),
         )
       )
     );
@@ -547,7 +547,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   Widget build(BuildContext context) {
     if (widget.child == null) {
       return new IconButton(
-        icon: new Icon(Icons.more_vert),
+        icon: const Icon(Icons.more_vert),
         padding: widget.padding,
         tooltip: widget.tooltip,
         onPressed: showButtonMenu,

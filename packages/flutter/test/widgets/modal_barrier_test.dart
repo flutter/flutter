@@ -16,10 +16,10 @@ void main() {
       onTap: () {
         tapped = true;
       },
-      child: new SizedBox(
+      child: const SizedBox(
         width: 10.0,
         height: 10.0,
-        child: new Text('target')
+        child: const Text('target')
       )
     );
   });
@@ -88,7 +88,7 @@ class FirstWidget extends StatelessWidget {
       Navigator.pushNamed(context, '/modal');
     },
     child: new Container(
-      child: new Text('X')
+      child: const Text('X')
     )
   );
   }

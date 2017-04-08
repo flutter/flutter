@@ -9,7 +9,7 @@ import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// The possible states of a [ScaleGestureRecognizer].
-enum ScaleState {
+enum _ScaleState {
   /// The recognizer is ready to start recognizing a gesture.
   ready,
 
@@ -39,6 +39,9 @@ class ScaleStartDetails {
   /// The initial focal point of the pointers in contact with the screen.
   /// Reported in global coordinates.
   final Point focalPoint;
+
+  @override
+  String toString() => 'ScaleStartDetails(focalPoint: $focalPoint)';
 }
 
 /// Details for [GestureScaleUpdateCallback].
@@ -59,6 +62,9 @@ class ScaleUpdateDetails {
   /// The scale implied by the pointers in contact with the screen. A value
   /// greater than or equal to zero.
   final double scale;
+
+  @override
+  String toString() => 'ScaleUpdateDetails(focalPoint: $focalPoint, scale: $scale)';
 }
 
 /// Details for [GestureScaleEndCallback].
@@ -72,6 +78,9 @@ class ScaleEndDetails {
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
+
+  @override
+  String toString() => 'ScaleEndDetails(velocity: $velocity)';
 }
 
 /// Signature for when the pointers in contact with the screen have established
@@ -110,8 +119,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   /// The pointers are no longer in contact with the screen.
   GestureScaleEndCallback onEnd;
 
-  ScaleState _state = ScaleState.ready;
+  _ScaleState _state = _ScaleState.ready;
 
+  Point _initialFocalPoint;
+  Point _currentFocalPoint;
   double _initialSpan;
   double _currentSpan;
   Map<int, Point> _pointerLocations;
@@ -123,8 +134,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   void addPointer(PointerEvent event) {
     startTrackingPointer(event.pointer);
     _velocityTrackers[event.pointer] = new VelocityTracker();
-    if (_state == ScaleState.ready) {
-      _state = ScaleState.possible;
+    if (_state == _ScaleState.ready) {
+      _state = _ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
       _pointerLocations = <int, Point>{};
@@ -133,104 +144,127 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void handleEvent(PointerEvent event) {
-    assert(_state != ScaleState.ready);
-    bool configChanged = false;
+    assert(_state != _ScaleState.ready);
+    bool didChangeConfiguration = false;
+    bool shouldStartIfAccepted = false;
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
       tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
+      shouldStartIfAccepted = true;
     } else if (event is PointerDownEvent) {
-      configChanged = true;
       _pointerLocations[event.pointer] = event.position;
-    } else if (event is PointerUpEvent) {
-      configChanged = true;
+      didChangeConfiguration = true;
+      shouldStartIfAccepted = true;
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       _pointerLocations.remove(event.pointer);
+      didChangeConfiguration = true;
     }
 
-    _update(configChanged, event.pointer);
-
+    _update();
+    if (!didChangeConfiguration || _reconfigure(event.pointer))
+      _advanceStateMachine(shouldStartIfAccepted);
     stopTrackingIfPointerNoLongerDown(event);
   }
 
-  void _update(bool configChanged, int pointer) {
+  void _update() {
     final int count = _pointerLocations.keys.length;
 
     // Compute the focal point
     Point focalPoint = Point.origin;
     for (int pointer in _pointerLocations.keys)
       focalPoint += _pointerLocations[pointer].toOffset();
-    focalPoint = new Point(focalPoint.x / count, focalPoint.y / count);
+    _currentFocalPoint = count > 0 ? new Point(focalPoint.x / count, focalPoint.y / count) : Point.origin;
 
     // Span is the average deviation from focal point
     double totalDeviation = 0.0;
     for (int pointer in _pointerLocations.keys)
-      totalDeviation += (focalPoint - _pointerLocations[pointer]).distance;
+      totalDeviation += (_currentFocalPoint - _pointerLocations[pointer]).distance;
     _currentSpan = count > 0 ? totalDeviation / count : 0.0;
+  }
 
-    if (configChanged) {
-      _initialSpan = _currentSpan;
-      if (_state == ScaleState.started) {
-        if (onEnd != null) {
-          final VelocityTracker tracker = _velocityTrackers[pointer];
-          assert(tracker != null);
+  bool _reconfigure(int pointer) {
+    _initialFocalPoint = _currentFocalPoint;
+    _initialSpan = _currentSpan;
+    if (_state == _ScaleState.started) {
+      if (onEnd != null) {
+        final VelocityTracker tracker = _velocityTrackers[pointer];
+        assert(tracker != null);
 
-          Velocity velocity = tracker.getVelocity();
-          if (velocity != null && _isFlingGesture(velocity)) {
-            final Offset pixelsPerSecond = velocity.pixelsPerSecond;
-            if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
-              velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
-            invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
-          } else {
-            invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
-          }
+        Velocity velocity = tracker.getVelocity();
+        if (velocity != null && _isFlingGesture(velocity)) {
+          final Offset pixelsPerSecond = velocity.pixelsPerSecond;
+          if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
+            velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);
+          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: velocity))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+        } else {
+          invokeCallback<Null>('onEnd', () => onEnd(new ScaleEndDetails(velocity: Velocity.zero))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
         }
-        _state = ScaleState.accepted;
       }
+      _state = _ScaleState.accepted;
+      return false;
     }
+    return true;
+  }
 
-    if (_state == ScaleState.ready)
-      _state = ScaleState.possible;
+  void _advanceStateMachine(bool shouldStartIfAccepted) {
+    if (_state == _ScaleState.ready)
+      _state = _ScaleState.possible;
 
-    if (_state == ScaleState.possible &&
-        (_currentSpan - _initialSpan).abs() > kScaleSlop) {
+    if (_state == _ScaleState.possible) {
+      final double spanDelta = (_currentSpan - _initialSpan).abs();
+      final double focalPointDelta = (_currentFocalPoint - _initialFocalPoint).distance;
+      if (spanDelta > kScaleSlop || focalPointDelta > kPanSlop)
+        resolve(GestureDisposition.accepted);
+    } else if (_state.index >= _ScaleState.accepted.index) {
       resolve(GestureDisposition.accepted);
     }
 
-    if (_state == ScaleState.accepted && !configChanged) {
-      _state = ScaleState.started;
-      if (onStart != null)
-        invokeCallback<Null>('onStart', () => onStart(new ScaleStartDetails(focalPoint: focalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+    if (_state == _ScaleState.accepted && shouldStartIfAccepted) {
+      _state = _ScaleState.started;
+      _dispatchOnStartCallbackIfNeeded();
     }
 
-    if (_state == ScaleState.started && onUpdate != null)
-      invokeCallback<Null>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: focalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+    if (_state == _ScaleState.started && onUpdate != null)
+      invokeCallback<Null>('onUpdate', () => onUpdate(new ScaleUpdateDetails(scale: _scaleFactor, focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+  }
+
+  void _dispatchOnStartCallbackIfNeeded() {
+    assert(_state == _ScaleState.started);
+    if (onStart != null)
+      invokeCallback<Null>('onStart', () => onStart(new ScaleStartDetails(focalPoint: _currentFocalPoint))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
   @override
   void acceptGesture(int pointer) {
-    if (_state != ScaleState.accepted) {
-      _state = ScaleState.accepted;
-      _update(false, pointer);
+    if (_state == _ScaleState.possible) {
+      _state = _ScaleState.started;
+      _dispatchOnStartCallbackIfNeeded();
     }
+  }
+
+  @override
+  void rejectGesture(int pointer) {
+    stopTrackingPointer(pointer);
   }
 
   @override
   void didStopTrackingLastPointer(int pointer) {
     switch(_state) {
-      case ScaleState.possible:
+      case _ScaleState.possible:
         resolve(GestureDisposition.rejected);
         break;
-      case ScaleState.ready:
+      case _ScaleState.ready:
         assert(false);  // We should have not seen a pointer yet
         break;
-      case ScaleState.accepted:
+      case _ScaleState.accepted:
         break;
-      case ScaleState.started:
+      case _ScaleState.started:
         assert(false);  // We should be in the accepted state when user is done
         break;
     }
-    _state = ScaleState.ready;
+    _state = _ScaleState.ready;
   }
 
   @override

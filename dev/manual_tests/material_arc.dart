@@ -444,7 +444,7 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
       length: _allDemos.length,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Animation'),
+          title: const Text('Animation'),
           bottom: new TabBar(
             tabs: _allDemos.map((_ArcDemo demo) => new Tab(text: demo.title)).toList(),
           ),

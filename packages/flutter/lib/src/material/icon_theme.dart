@@ -37,7 +37,7 @@ class IconTheme extends InheritedWidget {
   }) {
     return new IconTheme(
       key: key,
-      data: _getInheritedIconThemData(context).merge(data),
+      data: _getInheritedIconThemeData(context).merge(data),
       child: child
     );
   }
@@ -56,11 +56,11 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    final IconThemeData iconThemeData = _getInheritedIconThemData(context);
+    final IconThemeData iconThemeData = _getInheritedIconThemeData(context);
     return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
-  static IconThemeData _getInheritedIconThemData(BuildContext context) {
+  static IconThemeData _getInheritedIconThemeData(BuildContext context) {
     final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
     return iconTheme?.data ?? Theme.of(context).iconTheme;
   }

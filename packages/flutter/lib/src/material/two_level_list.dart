@@ -213,7 +213,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
               ),
               trailing: new RotationTransition(
                 turns: _iconTurns,
-                child: new Icon(Icons.expand_more)
+                child: const Icon(Icons.expand_more)
               )
             )
           ),
