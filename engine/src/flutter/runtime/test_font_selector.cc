@@ -6,7 +6,6 @@
 #include "flutter/lib/ui/ui_dart_state.h"
 #include "flutter/runtime/test_font_data.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
-#include "third_party/skia/include/core/SkTypeface.h"
 
 namespace blink {
 
@@ -22,26 +21,21 @@ TestFontSelector::~TestFontSelector() = default;
 PassRefPtr<FontData> TestFontSelector::getFontData(
     const FontDescription& fontDescription,
     const AtomicString& familyName) {
-  if (test_font_data_ != nullptr) {
-    return test_font_data_;
+  if (!test_typeface_) {
+    test_typeface_ = SkTypeface::MakeFromStream(GetTestFontData().release());
   }
-
-  auto typeface = SkTypeface::MakeFromStream(GetTestFontData().release());
 
   bool syntheticBold = (fontDescription.weight() >= FontWeight600 ||
                         fontDescription.isSyntheticBold());
   bool syntheticItalic = (fontDescription.style() ||
                           fontDescription.isSyntheticItalic());
-  FontPlatformData platform_data(typeface, "Ahem",
+  FontPlatformData platform_data(test_typeface_, "Ahem",
                                  fontDescription.effectiveFontSize(),
                                  syntheticBold, syntheticItalic,
                                  fontDescription.orientation(),
                                  fontDescription.useSubpixelPositioning());
 
-  test_font_data_ =
-      SimpleFontData::create(platform_data, CustomFontData::create());
-
-  return test_font_data_;
+  return SimpleFontData::create(platform_data, CustomFontData::create());
 }
 
 void TestFontSelector::willUseFontData(const FontDescription&,
