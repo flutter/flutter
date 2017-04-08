@@ -43,7 +43,16 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
         }));
   }
 
-  void CompleteWithError() override { Complete(std::vector<uint8_t>()); }
+  void CompleteEmpty() override {
+    ftl::RefPtr<PlatformMessageResponseAndroid> self(this);
+    blink::Threads::Platform()->PostTask(
+        ftl::MakeCopyable([ self ]() mutable {
+          if (!self->view_)
+            return;
+          static_cast<PlatformViewAndroid*>(self->view_.get())
+              ->HandlePlatformMessageEmptyResponse(self->response_id_);
+        }));
+  }
 
  private:
   PlatformMessageResponseAndroid(int response_id,
@@ -217,13 +226,10 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
                                                   jobject java_message_data,
                                                   jint java_message_position,
                                                   jint response_id) {
-  std::vector<uint8_t> message;
-  if (java_message_data) {
-    uint8_t* message_data =
-        static_cast<uint8_t*>(env->GetDirectBufferAddress(java_message_data));
-    message = std::vector<uint8_t>(message_data,
-                                   message_data + java_message_position);
-  }
+  uint8_t* message_data =
+      static_cast<uint8_t*>(env->GetDirectBufferAddress(java_message_data));
+  std::vector<uint8_t> message =
+      std::vector<uint8_t>(message_data, message_data + java_message_position);
 
   ftl::RefPtr<blink::PlatformMessageResponse> response;
   if (response_id) {
@@ -234,6 +240,20 @@ void PlatformViewAndroid::DispatchPlatformMessage(JNIEnv* env,
   PlatformView::DispatchPlatformMessage(
       ftl::MakeRefCounted<blink::PlatformMessage>(
           std::move(name), std::move(message), std::move(response)));
+}
+
+void PlatformViewAndroid::DispatchEmptyPlatformMessage(JNIEnv* env,
+                                                       std::string name,
+                                                       jint response_id) {
+  ftl::RefPtr<blink::PlatformMessageResponse> response;
+  if (response_id) {
+    response = ftl::MakeRefCounted<PlatformMessageResponseAndroid>(
+        response_id, GetWeakPtr());
+  }
+
+  PlatformView::DispatchPlatformMessage(
+      ftl::MakeRefCounted<blink::PlatformMessage>(
+          std::move(name), std::move(response)));
 }
 
 void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
@@ -260,16 +280,26 @@ void PlatformViewAndroid::InvokePlatformMessageResponseCallback(
   auto it = pending_responses_.find(response_id);
   if (it == pending_responses_.end())
     return;
-  std::vector<uint8_t> response;
-  if (java_response_data) {
-    uint8_t* response_data =
-        static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
-    response = std::vector<uint8_t>(response_data,
-                                    response_data + java_response_position);
-  }
+  uint8_t* response_data =
+     static_cast<uint8_t*>(env->GetDirectBufferAddress(java_response_data));
+  std::vector<uint8_t> response = std::vector<uint8_t>(response_data,
+                                                       response_data + java_response_position);
   auto message_response = std::move(it->second);
   pending_responses_.erase(it);
   message_response->Complete(std::move(response));
+}
+
+void PlatformViewAndroid::InvokePlatformMessageEmptyResponseCallback(
+    JNIEnv* env,
+    jint response_id) {
+  if (!response_id)
+    return;
+  auto it = pending_responses_.find(response_id);
+  if (it == pending_responses_.end())
+    return;
+  auto message_response = std::move(it->second);
+  pending_responses_.erase(it);
+  message_response->CompleteEmpty();
 }
 
 void PlatformViewAndroid::HandlePlatformMessage(
@@ -284,18 +314,25 @@ void PlatformViewAndroid::HandlePlatformMessage(
     response_id = next_response_id_++;
     pending_responses_[response_id] = response;
   }
-
-  fml::jni::ScopedJavaLocalRef<jbyteArray> message_array(env,
-      env->NewByteArray(message->data().size()));
-  env->SetByteArrayRegion(
-      message_array.obj(), 0, message->data().size(),
-      reinterpret_cast<const jbyte*>(message->data().data()));
   auto java_channel = fml::jni::StringToJavaString(env, message->channel());
-  message = nullptr;
+  if (message->hasData()) {
+    fml::jni::ScopedJavaLocalRef<jbyteArray> message_array(env,
+        env->NewByteArray(message->data().size()));
+    env->SetByteArrayRegion(
+        message_array.obj(), 0, message->data().size(),
+        reinterpret_cast<const jbyte*>(message->data().data()));
+    message = nullptr;
 
-  // This call can re-enter in InvokePlatformMessageResponseCallback.
-  FlutterViewHandlePlatformMessage(
-      env, view.obj(), java_channel.obj(), message_array.obj(), response_id);
+    // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
+    FlutterViewHandlePlatformMessage(
+        env, view.obj(), java_channel.obj(), message_array.obj(), response_id);
+  } else {
+    message = nullptr;
+
+    // This call can re-enter in InvokePlatformMessageXxxResponseCallback.
+    FlutterViewHandlePlatformMessage(
+        env, view.obj(), java_channel.obj(), nullptr, response_id);
+  }
 }
 
 void PlatformViewAndroid::HandlePlatformMessageResponse(
@@ -307,7 +344,6 @@ void PlatformViewAndroid::HandlePlatformMessageResponse(
 
   if (view.is_null())
     return;
-
   fml::jni::ScopedJavaLocalRef<jbyteArray> data_array(env,
       env->NewByteArray(data.size()));
   env->SetByteArrayRegion(data_array.obj(), 0, data.size(),
@@ -315,6 +351,18 @@ void PlatformViewAndroid::HandlePlatformMessageResponse(
 
   FlutterViewHandlePlatformMessageResponse(env, view.obj(), response_id,
                                            data_array.obj());
+}
+
+void PlatformViewAndroid::HandlePlatformMessageEmptyResponse(
+    int response_id) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+
+  fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+
+  if (view.is_null())
+    return;
+  FlutterViewHandlePlatformMessageResponse(env, view.obj(), response_id,
+                                           nullptr);
 }
 
 void PlatformViewAndroid::DispatchSemanticsAction(jint id, jint action) {

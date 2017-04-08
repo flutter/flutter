@@ -400,7 +400,7 @@ void Engine::HandleAssetPlatformMessage(
   if (GetAssetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
   } else {
-    response->CompleteWithError();
+    response->CompleteEmpty();
   }
 }
 

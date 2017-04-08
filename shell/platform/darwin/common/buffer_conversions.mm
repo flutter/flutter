@@ -7,8 +7,6 @@
 namespace shell {
 
 std::vector<uint8_t> GetVectorFromNSData(NSData* data) {
-  if (!data.length)
-    return std::vector<uint8_t>();
   const uint8_t* bytes = reinterpret_cast<const uint8_t*>(data.bytes);
   return std::vector<uint8_t>(bytes, bytes + data.length);
 }

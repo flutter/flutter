@@ -147,6 +147,15 @@ static void DispatchPlatformMessage(JNIEnv* env,
       responseId);
 }
 
+static void DispatchEmptyPlatformMessage(JNIEnv* env,
+                                         jobject jcaller,
+                                         jlong platform_view,
+                                         jstring channel,
+                                         jint responseId) {
+  return PLATFORM_VIEW->DispatchEmptyPlatformMessage(
+      env, fml::jni::JavaStringToString(env, channel), responseId);
+}
+
 static void DispatchPointerDataPacket(JNIEnv* env,
                                       jobject jcaller,
                                       jlong platform_view,
@@ -178,6 +187,14 @@ static void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                                   jint position) {
   return PLATFORM_VIEW->InvokePlatformMessageResponseCallback(
       env, responseId, message, position);
+}
+
+static void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
+                                                       jobject jcaller,
+                                                       jlong platform_view,
+                                                       jint responseId) {
+  return PLATFORM_VIEW->InvokePlatformMessageEmptyResponseCallback(
+      env, responseId);
 }
 
 bool PlatformViewAndroid::Register(JNIEnv* env) {
@@ -250,6 +267,11 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&shell::DispatchPlatformMessage),
       },
       {
+          .name = "nativeDispatchEmptyPlatformMessage",
+          .signature = "(JLjava/lang/String;I)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
+      },
+      {
           .name = "nativeDispatchPointerDataPacket",
           .signature = "(JLjava/nio/ByteBuffer;I)V",
           .fnPtr = reinterpret_cast<void*>(&shell::DispatchPointerDataPacket),
@@ -269,6 +291,12 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .signature = "(JILjava/nio/ByteBuffer;I)V",
           .fnPtr = reinterpret_cast<void*>(
               &shell::InvokePlatformMessageResponseCallback),
+      },
+      {
+          .name = "nativeInvokePlatformMessageEmptyResponseCallback",
+          .signature = "(JI)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &shell::InvokePlatformMessageEmptyResponseCallback),
       },
   };
 

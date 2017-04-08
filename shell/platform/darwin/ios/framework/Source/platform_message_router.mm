@@ -16,20 +16,26 @@ PlatformMessageRouter::~PlatformMessageRouter() = default;
 
 void PlatformMessageRouter::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
-  NSData* data = GetNSDataFromVector(message->data());
-
   ftl::RefPtr<blink::PlatformMessageResponse> completer = message->response();
   auto it = message_handlers_.find(message->channel());
   if (it != message_handlers_.end()) {
     FlutterBinaryMessageHandler handler = it->second;
+    NSData* data = nil;
+    if (message->hasData()) {
+      data = GetNSDataFromVector(message->data());
+    }
     handler(data, ^(NSData* reply) {
       if (completer) {
-        completer->Complete(GetVectorFromNSData(reply));
+        if (reply) {
+          completer->Complete(GetVectorFromNSData(reply));
+        } else {
+          completer->CompleteEmpty();
+        }
       }
     });
   } else {
     if (completer) {
-      completer->Complete(GetVectorFromNSData(nil));
+      completer->CompleteEmpty();
     }
   }
 }

@@ -57,12 +57,19 @@ class PlatformViewAndroid : public PlatformView {
                                jint message_position,
                                jint response_id);
 
+  void DispatchEmptyPlatformMessage(JNIEnv* env,
+                                    std::string name,
+                                    jint response_id);
+
   void DispatchPointerDataPacket(JNIEnv* env, jobject buffer, jint position);
 
   void InvokePlatformMessageResponseCallback(JNIEnv* env,
                                              jint response_id,
                                              jobject java_response_data,
                                              jint java_response_position);
+
+  void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
+                                                  jint response_id);
 
   void DispatchSemanticsAction(jint id, jint action);
 
@@ -81,6 +88,8 @@ class PlatformViewAndroid : public PlatformView {
 
   void HandlePlatformMessageResponse(int response_id,
                                      std::vector<uint8_t> data);
+
+  void HandlePlatformMessageEmptyResponse(int response_id);
 
   void RunFromSource(const std::string& assets_directory,
                      const std::string& main,

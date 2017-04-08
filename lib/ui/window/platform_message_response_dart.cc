@@ -38,32 +38,36 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
           return;
         tonic::DartState::Scope scope(dart_state);
 
-        Dart_Handle byte_buffer;
-        if (data.empty()) {
-          byte_buffer = Dart_Null();
-        } else {
-          byte_buffer =
-              Dart_NewTypedData(Dart_TypedData_kByteData, data.size());
-          DART_CHECK_VALID(byte_buffer);
+        Dart_Handle byte_buffer = Dart_NewTypedData(
+            Dart_TypedData_kByteData, data.size());
+        DART_CHECK_VALID(byte_buffer);
 
-          void* buffer;
-          intptr_t length;
-          Dart_TypedData_Type type;
-          DART_CHECK_VALID(
-              Dart_TypedDataAcquireData(byte_buffer, &type, &buffer, &length));
-          FTL_CHECK(type == Dart_TypedData_kByteData);
-          FTL_CHECK(static_cast<size_t>(length) == data.size());
-          memcpy(buffer, data.data(), length);
-          Dart_TypedDataReleaseData(byte_buffer);
-        }
-
+        void* buffer;
+        intptr_t length;
+        Dart_TypedData_Type type;
+        DART_CHECK_VALID(
+            Dart_TypedDataAcquireData(byte_buffer, &type, &buffer, &length));
+        FTL_CHECK(type == Dart_TypedData_kByteData);
+        FTL_CHECK(static_cast<size_t>(length) == data.size());
+        memcpy(buffer, data.data(), length);
+        Dart_TypedDataReleaseData(byte_buffer);
         tonic::DartInvoke(callback.Release(), {byte_buffer});
       }));
 }
 
-void PlatformMessageResponseDart::CompleteWithError() {
-  // TODO(abarth): We should have a dedicated error pathway.
-  Complete(std::vector<uint8_t>());
+void PlatformMessageResponseDart::CompleteEmpty() {
+  if (callback_.is_empty())
+    return;
+  FTL_DCHECK(!is_complete_);
+  is_complete_ = true;
+  Threads::UI()->PostTask(ftl::MakeCopyable(
+      [ callback = std::move(callback_) ]() mutable {
+        tonic::DartState* dart_state = callback.dart_state().get();
+        if (!dart_state)
+          return;
+        tonic::DartState::Scope scope(dart_state);
+        tonic::DartInvoke(callback.Release(), {Dart_Null()});
+      }));
 }
 
 }  // namespace blink

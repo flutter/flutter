@@ -16,7 +16,7 @@ class PlatformMessageResponseDart : public PlatformMessageResponse {
  public:
   // Callable on any thread.
   void Complete(std::vector<uint8_t> data) override;
-  void CompleteWithError() override;
+  void CompleteEmpty() override;
 
  protected:
   explicit PlatformMessageResponseDart(tonic::DartPersistentValue callback);
