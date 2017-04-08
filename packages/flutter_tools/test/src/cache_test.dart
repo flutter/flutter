@@ -21,6 +21,8 @@ void main() {
     });
 
     tearDown(() {
+      // Restore locking to prevent potential side-effects in
+      // tests outside this group (this option is globally shared).
       Cache.enableLocking();
     });
 
