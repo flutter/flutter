@@ -287,7 +287,7 @@ class VersionCheckStamp {
           printTrace('Warning: expected version stamp to be a Map but found: $json');
           return fromJson(json);
         }
-      } catch(error, stackTrace) {
+      } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
         printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
