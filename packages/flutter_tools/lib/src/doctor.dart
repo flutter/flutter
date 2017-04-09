@@ -108,14 +108,9 @@ class Doctor {
 
   /// Print verbose information about the state of installed tooling.
   Future<bool> diagnose() async {
-    bool firstLine = true;
     bool doctorResult = true;
 
     for (DoctorValidator validator in validators) {
-      if (!firstLine)
-        printStatus('');
-      firstLine = false;
-
       final ValidationResult result = await validator.validate();
 
       if (result.type == ValidationType.missing)
@@ -134,6 +129,8 @@ class Doctor {
           printStatus('    • $text');
         }
       }
+
+      printStatus('');
     }
 
     return doctorResult;
