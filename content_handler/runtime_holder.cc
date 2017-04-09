@@ -218,7 +218,7 @@ void RuntimeHolder::HandlePlatformMessage(
     return;
   }
   if (auto response = message->response())
-    response->CompleteWithError();
+    response->CompleteEmpty();
 }
 
 void RuntimeHolder::DidCreateMainIsolate(Dart_Isolate isolate) {
@@ -276,7 +276,7 @@ void RuntimeHolder::HandleAssetPlatformMessage(
   if (asset_store_ && asset_store_->GetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
   } else {
-    response->CompleteWithError();
+    response->CompleteEmpty();
   }
 }
 
