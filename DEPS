@@ -26,8 +26,8 @@ vars = {
 
   # Note: When updating the Dart revision, ensure that all entries that are
   # dependencies of dart are also updated
-  'dart_revision': '69fa11d912b5670079d02b0d76c1b5abcbe8a7a7',
-  'dart_boringssl_gen_revision': '1a810313a0290e1caace9da73fa3ab89995ad2c7',
+  'dart_revision': '42ec925a9e8be87e515f06440e01e11c832b8da7',
+  'dart_boringssl_gen_revision': '753224969dbe43dad29343146529727b5066c0f3',
   'dart_boringssl_revision': 'd519bf6be0b447fb80fbc539d4bff4479b5482a2',
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
@@ -57,7 +57,7 @@ deps = {
    Var('fuchsia_git') + '/ftl' + '@' + 'f1357b6eaa9a23cffec1645dfeba610b5f926b1d',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + '837a249e73593bd22c4a071778192d1b4f1f931d',
+   Var('fuchsia_git') + '/tonic' + '@' + '82075233dc0cd23b1c8af5f694eb86dd9bd10f35',
 
   'src/lib/zip':
    Var('fuchsia_git') + '/zip' + '@' + '92dc87ca645fe8e9f5151ef6dac86d8311a7222f',
