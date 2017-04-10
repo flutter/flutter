@@ -5,7 +5,6 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
-import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/time.dart';
@@ -25,12 +24,12 @@ final DateTime _upToDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeCon
 final DateTime _outOfDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeConsideredUpToDate * 2);
 final DateTime _stampUpToDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate ~/ 2);
 final DateTime _stampOutOfDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsideredUpToDate * 2);
-const String _stampMissing = '____stamp_missing____';
 
 void main() {
-  group('FlutterVersion', () {
+  group('$FlutterVersion', () {
     setUpAll(() {
       Cache.disableLocking();
+      FlutterVersion.kPauseToLetUserReadTheMessage = Duration.ZERO;
     });
 
     testFlutterVersion('prints nothing when Flutter installation looks fresh', () async {
@@ -44,12 +43,13 @@ void main() {
 
       fakeData(
         localCommitDate: _outOfDateVersion,
-        versionCheckStamp: _testStamp(
+        stamp: new VersionCheckStamp(
           lastTimeVersionWasChecked: _stampOutOfDate,
           lastKnownRemoteVersion: _outOfDateVersion,
         ),
         remoteCommitDate: _outOfDateVersion,
         expectSetStamp: true,
+        expectServerPing: true,
       );
 
       await version.checkFlutterVersionFreshness();
@@ -61,28 +61,57 @@ void main() {
 
       fakeData(
         localCommitDate: _outOfDateVersion,
-        versionCheckStamp: _testStamp(
+        stamp: new VersionCheckStamp(
           lastTimeVersionWasChecked: _stampUpToDate,
           lastKnownRemoteVersion: _upToDateVersion,
         ),
+        expectSetStamp: true,
       );
 
       await version.checkFlutterVersionFreshness();
       _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
     });
 
-    testFlutterVersion('pings server when version stamp is missing', () async {
+    testFlutterVersion('does not print warning if printed recently', () async {
       final FlutterVersion version = FlutterVersion.instance;
 
       fakeData(
           localCommitDate: _outOfDateVersion,
-          versionCheckStamp: _stampMissing,
-          remoteCommitDate: _upToDateVersion,
+          stamp: new VersionCheckStamp(
+              lastTimeVersionWasChecked: _stampUpToDate,
+              lastKnownRemoteVersion: _upToDateVersion,
+          ),
           expectSetStamp: true,
       );
 
       await version.checkFlutterVersionFreshness();
       _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+      expect((await VersionCheckStamp.load()).lastTimeWarningWasPrinted, _testClock.now());
+
+      await version.checkFlutterVersionFreshness();
+      _expectVersionMessage('');
+    });
+
+    testFlutterVersion('pings server when version stamp is missing then does not', () async {
+      final FlutterVersion version = FlutterVersion.instance;
+
+      fakeData(
+          localCommitDate: _outOfDateVersion,
+          remoteCommitDate: _upToDateVersion,
+          expectSetStamp: true,
+          expectServerPing: true,
+      );
+
+      await version.checkFlutterVersionFreshness();
+      _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(_outOfDateVersion)));
+
+      // Immediate subsequent check is not expected to ping the server.
+      fakeData(
+        localCommitDate: _outOfDateVersion,
+        stamp: await VersionCheckStamp.load(),
+      );
+      await version.checkFlutterVersionFreshness();
+      _expectVersionMessage('');
     });
 
     testFlutterVersion('pings server when version stamp is out-of-date', () async {
@@ -90,12 +119,13 @@ void main() {
 
       fakeData(
           localCommitDate: _outOfDateVersion,
-          versionCheckStamp: _testStamp(
+          stamp: new VersionCheckStamp(
               lastTimeVersionWasChecked: _stampOutOfDate,
               lastKnownRemoteVersion: _testClock.ago(days: 2),
           ),
           remoteCommitDate: _upToDateVersion,
           expectSetStamp: true,
+          expectServerPing: true,
       );
 
       await version.checkFlutterVersionFreshness();
@@ -107,12 +137,90 @@ void main() {
 
       fakeData(
           localCommitDate: _outOfDateVersion,
-          versionCheckStamp: _stampMissing,
           errorOnFetch: true,
+          expectServerPing: true,
       );
 
       await version.checkFlutterVersionFreshness();
       _expectVersionMessage('');
+    });
+  });
+
+  group('$VersionCheckStamp', () {
+    void _expectDefault(VersionCheckStamp stamp) {
+      expect(stamp.lastKnownRemoteVersion, isNull);
+      expect(stamp.lastTimeVersionWasChecked, isNull);
+      expect(stamp.lastTimeWarningWasPrinted, isNull);
+    }
+
+    testFlutterVersion('loads blank when stamp file missing', () async {
+      fakeData();
+      _expectDefault(await VersionCheckStamp.load());
+    });
+
+    testFlutterVersion('loads blank when stamp file is malformed JSON', () async {
+      fakeData(stampJson: '<');
+      _expectDefault(await VersionCheckStamp.load());
+    });
+
+    testFlutterVersion('loads blank when stamp file is well-formed but invalid JSON', () async {
+      fakeData(stampJson: '[]');
+      _expectDefault(await VersionCheckStamp.load());
+    });
+
+    testFlutterVersion('loads valid JSON', () async {
+      fakeData(stampJson: '''
+      {
+        "lastKnownRemoteVersion": "${_testClock.ago(days: 1)}",
+        "lastTimeVersionWasChecked": "${_testClock.ago(days: 2)}",
+        "lastTimeWarningWasPrinted": "${_testClock.now()}"
+      }
+      ''');
+
+      final VersionCheckStamp stamp = await VersionCheckStamp.load();
+      expect(stamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
+      expect(stamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(stamp.lastTimeWarningWasPrinted, _testClock.now());
+    });
+
+    testFlutterVersion('stores version stamp', () async {
+      fakeData(expectSetStamp: true);
+
+      _expectDefault(await VersionCheckStamp.load());
+
+      final VersionCheckStamp stamp = new VersionCheckStamp(
+        lastKnownRemoteVersion: _testClock.ago(days: 1),
+        lastTimeVersionWasChecked: _testClock.ago(days: 2),
+        lastTimeWarningWasPrinted: _testClock.now(),
+      );
+      await stamp.store();
+
+      final VersionCheckStamp storedStamp = await VersionCheckStamp.load();
+      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
+      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
+    });
+
+    testFlutterVersion('overwrites individual fields', () async {
+      fakeData(expectSetStamp: true);
+
+      _expectDefault(await VersionCheckStamp.load());
+
+      final VersionCheckStamp stamp = new VersionCheckStamp(
+        lastKnownRemoteVersion: _testClock.ago(days: 10),
+        lastTimeVersionWasChecked: _testClock.ago(days: 9),
+        lastTimeWarningWasPrinted: _testClock.ago(days: 8),
+      );
+      await stamp.store(
+        newKnownRemoteVersion: _testClock.ago(days: 1),
+        newTimeVersionWasChecked: _testClock.ago(days: 2),
+        newTimeWarningWasPrinted: _testClock.now(),
+      );
+
+      final VersionCheckStamp storedStamp = await VersionCheckStamp.load();
+      expect(storedStamp.lastKnownRemoteVersion, _testClock.ago(days: 1));
+      expect(storedStamp.lastTimeVersionWasChecked, _testClock.ago(days: 2));
+      expect(storedStamp.lastTimeWarningWasPrinted, _testClock.now());
     });
   });
 }
@@ -120,13 +228,7 @@ void main() {
 void _expectVersionMessage(String message) {
   final BufferLogger logger = context[Logger];
   expect(logger.statusText.trim(), message.trim());
-}
-
-String _testStamp({@required DateTime lastTimeVersionWasChecked, @required DateTime lastKnownRemoteVersion}) {
-  return _kPrettyJsonEncoder.convert(<String, String>{
-    'lastTimeVersionWasChecked': '$lastTimeVersionWasChecked',
-    'lastKnownRemoteVersion': '$lastKnownRemoteVersion',
-  });
+  logger.clear();
 }
 
 void testFlutterVersion(String description, dynamic testMethod()) {
@@ -135,21 +237,24 @@ void testFlutterVersion(String description, dynamic testMethod()) {
     testMethod,
     overrides: <Type, Generator>{
       FlutterVersion: () => new FlutterVersion(_testClock),
-      ProcessManager: () => new MockProcessManager(),
-      Cache: () => new MockCache(),
     },
   );
 }
 
 void fakeData({
-  @required DateTime localCommitDate,
+  DateTime localCommitDate,
   DateTime remoteCommitDate,
-  String versionCheckStamp,
-  bool expectSetStamp: false,
+  VersionCheckStamp stamp,
+  String stampJson,
   bool errorOnFetch: false,
+  bool expectSetStamp: false,
+  bool expectServerPing: false,
 }) {
-  final MockProcessManager pm = context[ProcessManager];
-  final MockCache cache = context[Cache];
+  final MockProcessManager pm = new MockProcessManager();
+  context.setVariable(ProcessManager, pm);
+
+  final MockCache cache = new MockCache();
+  context.setVariable(Cache, cache);
 
   ProcessResult success(String standardOutput) {
     return new ProcessResult(1, 0, standardOutput, '');
@@ -160,27 +265,22 @@ void fakeData({
   }
 
   when(cache.getStampFor(any)).thenAnswer((Invocation invocation) {
-    expect(invocation.positionalArguments.single, FlutterVersion.kFlutterVersionCheckStampFile);
+    expect(invocation.positionalArguments.single, VersionCheckStamp.kFlutterVersionCheckStampFile);
 
-    if (versionCheckStamp == _stampMissing) {
-      return null;
-    }
+    if (stampJson != null)
+      return stampJson;
 
-    if (versionCheckStamp != null) {
-      return versionCheckStamp;
-    }
+    if (stamp != null)
+      return JSON.encode(stamp.toJson());
 
-    throw new StateError('Unexpected call to Cache.getStampFor(${invocation.positionalArguments}, ${invocation.namedArguments})');
+    return null;
   });
 
   when(cache.setStampFor(any, any)).thenAnswer((Invocation invocation) {
-    expect(invocation.positionalArguments.first, FlutterVersion.kFlutterVersionCheckStampFile);
+    expect(invocation.positionalArguments.first, VersionCheckStamp.kFlutterVersionCheckStampFile);
 
     if (expectSetStamp) {
-      expect(invocation.positionalArguments[1], _testStamp(
-        lastKnownRemoteVersion: remoteCommitDate,
-        lastTimeVersionWasChecked: _testClock.now(),
-      ));
+      stamp = VersionCheckStamp.fromJson(JSON.decode(invocation.positionalArguments[1]));
       return null;
     }
 
@@ -205,6 +305,8 @@ void fakeData({
     } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__', 'https://github.com/flutter/flutter.git')) {
       return success('');
     } else if (argsAre('git', 'fetch', '__flutter_version_check__', 'master')) {
+      if (!expectServerPing)
+        fail('Did not expect server ping');
       return errorOnFetch ? failure(128) : success('');
     } else if (remoteCommitDate != null && argsAre('git', 'log', '__flutter_version_check__/master', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(remoteCommitDate.toString());

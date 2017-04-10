@@ -162,9 +162,18 @@ class FlutterVersion {
   @visibleForTesting
   static final Duration kVersionAgeConsideredUpToDate = kCheckAgeConsideredUpToDate * 4;
 
-  /// The prefix of the stamp file where we cache Flutter version check data.
+  /// The amount of time we wait between issuing a warning.
+  ///
+  /// This is to avoid annoying users who are unable to upgrade right away.
   @visibleForTesting
-  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
+  static const Duration kMaxTimeSinceLastWarning = const Duration(days: 1);
+
+  /// The amount of time we pause for to let the user read the message about
+  /// outdated Flutter installation.
+  ///
+  /// This can be customized in tests to speed them up.
+  @visibleForTesting
+  static Duration kPauseToLetUserReadTheMessage = const Duration(seconds: 2);
 
   /// Checks if the currently installed version of Flutter is up-to-date, and
   /// warns the user if it isn't.
@@ -185,8 +194,17 @@ class FlutterVersion {
       return latestFlutterCommitDate.isAfter(localFrameworkCommitDate);
     }
 
-    if (installationSeemsOutdated && await newerFrameworkVersionAvailable())
+    final VersionCheckStamp stamp = await VersionCheckStamp.load();
+    final DateTime lastTimeWarningWasPrinted = stamp.lastTimeWarningWasPrinted ?? _clock.agoBy(kMaxTimeSinceLastWarning * 2);
+    final bool beenAWhileSinceWarningWasPrinted = _clock.now().difference(lastTimeWarningWasPrinted) > kMaxTimeSinceLastWarning;
+
+    if (beenAWhileSinceWarningWasPrinted && installationSeemsOutdated && await newerFrameworkVersionAvailable()) {
       printStatus(versionOutOfDateMessage(frameworkAge), emphasis: true);
+      stamp.store(
+        newTimeWarningWasPrinted: _clock.now(),
+      );
+      await new Future<Null>.delayed(kPauseToLetUserReadTheMessage);
+    }
   }
 
   @visibleForTesting
@@ -213,26 +231,23 @@ class FlutterVersion {
   /// unable to reach the server to get the latest version.
   Future<DateTime> _getLatestAvailableFlutterVersion() async {
     Cache.checkLockAcquired();
-    const JsonEncoder kPrettyJsonEncoder = const JsonEncoder.withIndent('  ');
-    final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);
+    final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
-    if (versionCheckStamp != null) {
-      final Map<String, String> data = JSON.decode(versionCheckStamp);
-      final DateTime lastTimeVersionWasChecked = DateTime.parse(data['lastTimeVersionWasChecked']);
-      final Duration timeSinceLastCheck = _clock.now().difference(lastTimeVersionWasChecked);
+    if (versionCheckStamp.lastTimeVersionWasChecked != null) {
+      final Duration timeSinceLastCheck = _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
 
       // Don't ping the server too often. Return cached value if it's fresh.
       if (timeSinceLastCheck < kCheckAgeConsideredUpToDate)
-        return DateTime.parse(data['lastKnownRemoteVersion']);
+        return versionCheckStamp.lastKnownRemoteVersion;
     }
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
       final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate());
-      Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(<String, String>{
-        'lastTimeVersionWasChecked': '${_clock.now()}',
-        'lastKnownRemoteVersion': '$remoteFrameworkCommitDate',
-      }));
+      versionCheckStamp.store(
+        newTimeVersionWasChecked: _clock.now(),
+        newKnownRemoteVersion: remoteFrameworkCommitDate,
+      );
       return remoteFrameworkCommitDate;
     } on VersionCheckError catch (error) {
       // This happens when any of the git commands fails, which can happen when
@@ -241,6 +256,102 @@ class FlutterVersion {
       printTrace('Failed to check Flutter version in the remote repository: $error');
       return null;
     }
+  }
+}
+
+/// Contains data and load/save logic pertaining to Flutter version checks.
+@visibleForTesting
+class VersionCheckStamp {
+  /// The prefix of the stamp file where we cache Flutter version check data.
+  @visibleForTesting
+  static const String kFlutterVersionCheckStampFile = 'flutter_version_check';
+
+  const VersionCheckStamp({
+    this.lastTimeVersionWasChecked,
+    this.lastKnownRemoteVersion,
+    this.lastTimeWarningWasPrinted,
+  });
+
+  final DateTime lastTimeVersionWasChecked;
+  final DateTime lastKnownRemoteVersion;
+  final DateTime lastTimeWarningWasPrinted;
+
+  static Future<VersionCheckStamp> load() async {
+    final String versionCheckStamp = Cache.instance.getStampFor(kFlutterVersionCheckStampFile);
+
+    if (versionCheckStamp != null) {
+      // Attempt to parse stamp JSON.
+      try {
+        final dynamic json = JSON.decode(versionCheckStamp);
+        if (json is Map) {
+          printTrace('Warning: expected version stamp to be a Map but found: $json');
+          return fromJson(json);
+        }
+      } catch (error, stackTrace) {
+        // Do not crash if JSON is malformed.
+        printTrace('${error.runtimeType}: $error\n$stackTrace');
+      }
+    }
+
+    // Stamp is missing or is malformed.
+    return new VersionCheckStamp();
+  }
+
+  static VersionCheckStamp fromJson(Map<String, String> json) {
+    DateTime readDateTime(String property) {
+      return json.containsKey(property)
+        ? DateTime.parse(json[property])
+        : null;
+    }
+
+    return new VersionCheckStamp(
+      lastTimeVersionWasChecked: readDateTime('lastTimeVersionWasChecked'),
+      lastKnownRemoteVersion: readDateTime('lastKnownRemoteVersion'),
+      lastTimeWarningWasPrinted: readDateTime('lastTimeWarningWasPrinted'),
+    );
+  }
+
+  Future<Null> store({
+    DateTime newTimeVersionWasChecked,
+    DateTime newKnownRemoteVersion,
+    DateTime newTimeWarningWasPrinted,
+  }) async {
+    final Map<String, String> jsonData = toJson();
+
+    if (newTimeVersionWasChecked != null)
+      jsonData['lastTimeVersionWasChecked'] = '$newTimeVersionWasChecked';
+
+    if (newKnownRemoteVersion != null)
+      jsonData['lastKnownRemoteVersion'] = '$newKnownRemoteVersion';
+
+    if (newTimeWarningWasPrinted != null)
+      jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
+
+    const JsonEncoder kPrettyJsonEncoder = const JsonEncoder.withIndent('  ');
+    Cache.instance.setStampFor(kFlutterVersionCheckStampFile, kPrettyJsonEncoder.convert(jsonData));
+  }
+
+  Map<String, String> toJson({
+    DateTime updateTimeVersionWasChecked,
+    DateTime updateKnownRemoteVersion,
+    DateTime updateTimeWarningWasPrinted,
+  }) {
+    updateTimeVersionWasChecked = updateTimeVersionWasChecked ?? lastTimeVersionWasChecked;
+    updateKnownRemoteVersion = updateKnownRemoteVersion ?? lastKnownRemoteVersion;
+    updateTimeWarningWasPrinted = updateTimeWarningWasPrinted ?? lastTimeWarningWasPrinted;
+
+    final Map<String, String> jsonData = <String, String>{};
+
+    if (updateTimeVersionWasChecked != null)
+      jsonData['lastTimeVersionWasChecked'] = '$updateTimeVersionWasChecked';
+
+    if (updateKnownRemoteVersion != null)
+      jsonData['lastKnownRemoteVersion'] = '$updateKnownRemoteVersion';
+
+    if (updateTimeWarningWasPrinted != null)
+      jsonData['lastTimeWarningWasPrinted'] = '$updateTimeWarningWasPrinted';
+
+    return jsonData;
   }
 }
 
