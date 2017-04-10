@@ -217,7 +217,7 @@ void main() {
 
     // Tap to reposition the caret.
     final int tapIndex = testValue.indexOf('e');
-    final Point ePos = textOffsetToPosition(tester, tapIndex);
+    final Offset ePos = textOffsetToPosition(tester, tapIndex);
     await tester.tapAt(ePos);
     await tester.pump();
 
@@ -298,8 +298,7 @@ void main() {
     final TextSelection selection = controller.selection;
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(selection);
     expect(endpoints.length, 2);
 
     // Drag the right handle 2 letters to the right.
@@ -354,8 +353,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
     RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -407,8 +405,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -520,8 +517,7 @@ void main() {
     expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
@@ -865,7 +861,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Offset topLeft = editable.localToGlobal(
-      editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
     expect(topLeft.dx, equals(399.0));
@@ -874,7 +870,7 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
     expect(topLeft.dx, equals(399.0));
@@ -899,7 +895,7 @@ void main() {
 
     final RenderEditable editable = findRenderEditable(tester);
     Offset topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
     expect(topLeft.dx, equals(399.0));
@@ -908,7 +904,7 @@ void main() {
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
     expect(topLeft.dx, equals(399.0));

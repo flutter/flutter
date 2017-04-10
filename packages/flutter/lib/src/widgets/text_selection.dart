@@ -361,6 +361,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
 
   @override
   Widget build(BuildContext context) {
+    final List<TextSelectionPoint> endpoints = widget.renderObject.getEndpointsForSelection(widget.selection);
     Offset point;
     TextSelectionHandleType type;
 

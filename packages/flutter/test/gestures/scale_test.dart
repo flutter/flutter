@@ -200,7 +200,7 @@ void main() {
 
     final TestPointer pointer1 = new TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
     drag.addPointer(down);
 
@@ -211,12 +211,12 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    tester.route(pointer1.move(const Point(10.0, 30.0)));
+    tester.route(pointer1.move(const Offset(10.0, 30.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
     final TestPointer pointer2 = new TestPointer(2);
-    final PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     drag.addPointer(down2);
 
@@ -228,7 +228,7 @@ void main() {
     expect(log, <String>['scale-end']);
     log.clear();
 
-    tester.route(pointer2.move(const Point(30.0, 20.0)));
+    tester.route(pointer2.move(const Offset(30.0, 20.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -242,7 +242,7 @@ void main() {
 
     // Horizontal moves are drags.
     final TestPointer pointer3 = new TestPointer(3);
-    final PointerDownEvent down3 = pointer3.down(const Point(30.0, 30.0));
+    final PointerDownEvent down3 = pointer3.down(const Offset(30.0, 30.0));
     scale.addPointer(down3);
     drag.addPointer(down3);
     tester.closeArena(3);
@@ -250,7 +250,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    tester.route(pointer3.move(const Point(50.0, 30.0)));
+    tester.route(pointer3.move(const Offset(50.0, 30.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 

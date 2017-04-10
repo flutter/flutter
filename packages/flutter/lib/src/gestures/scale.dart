@@ -121,8 +121,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   _ScaleState _state = _ScaleState.ready;
 
-  Point _initialFocalPoint;
-  Point _currentFocalPoint;
+  Offset _initialFocalPoint;
+  Offset _currentFocalPoint;
   double _initialSpan;
   double _currentSpan;
   Map<int, Offset> _pointerLocations;
