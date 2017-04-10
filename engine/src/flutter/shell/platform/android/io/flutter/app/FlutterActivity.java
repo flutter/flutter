@@ -33,6 +33,9 @@ public class FlutterActivity extends Activity {
         if (intent.getBooleanExtra("start-paused", false)) {
             args.add("--start-paused");
         }
+        if (intent.getBooleanExtra("use-test-fonts", false)) {
+            args.add("--use-test-fonts");
+        }
         if (intent.getBooleanExtra("enable-dart-profiling", false)) {
             args.add("--enable-dart-profiling");
         }
