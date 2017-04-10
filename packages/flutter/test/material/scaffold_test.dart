@@ -329,6 +329,42 @@ void main() {
     });
   });
 
+  group('close button', () {
+    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          theme: new ThemeData(platform: platform),
+          home: new Scaffold(appBar: new AppBar(), body: new Text('Page 1')),
+        )
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+        builder: (BuildContext context) {
+          return new Scaffold(appBar: new AppBar(), body: new Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      ));
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final Icon icon = tester.widget(find.byType(Icon));
+      expect(icon.icon, expectedIcon);
+    }
+
+    testWidgets('Close button shows correctly on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close);
+    });
+
+    testWidgets('Close button shows correctly on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close);
+    });
+
+    testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close);
+    });
+  });
+
   group('body size', () {
     testWidgets('body size with container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();

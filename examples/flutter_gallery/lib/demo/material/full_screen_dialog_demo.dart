@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -104,16 +106,14 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
   bool _allDayValue = false;
   bool _saveNeeded = false;
 
-  void handleDismissButton(BuildContext context) {
-    if (!_saveNeeded) {
-      Navigator.pop(context, null);
-      return;
-    }
+  Future<bool> _onWillPop() async {
+    if (!_saveNeeded)
+      return true;
 
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
-    showDialog<DismissDialogAction>(
+    return await showDialog<bool>(
       context: context,
       child: new AlertDialog(
         content: new Text(
@@ -123,19 +123,19 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
         actions: <Widget>[
           new FlatButton(
             child: const Text('CANCEL'),
-            onPressed: () { Navigator.pop(context, DismissDialogAction.cancel); }
+            onPressed: () {
+              Navigator.of(context).pop(false); // Pops the confirmation dialog but not the page.
+            }
           ),
           new FlatButton(
             child: const Text('DISCARD'),
             onPressed: () {
-              Navigator.of(context)
-                ..pop(DismissDialogAction.discard) // pop the cancel/discard dialog
-                ..pop(); // pop this route
+              Navigator.of(context).pop(true); // Returning true to _onWillPop will pop again.
             }
           )
         ]
       )
-    );
+    ) ?? false;
   }
 
   @override
@@ -144,10 +144,6 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
 
     return new Scaffold(
       appBar: new AppBar(
-        leading: new IconButton(
-          icon: const Icon(Icons.clear),
-          onPressed: () { handleDismissButton(context); }
-        ),
         title: const Text('New event'),
         actions: <Widget> [
           new FlatButton(
@@ -158,84 +154,88 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
           )
         ]
       ),
-      body: new ListView(
-        padding: const EdgeInsets.all(16.0),
-        children: <Widget>[
-          new Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            decoration: new BoxDecoration(
-              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+      body: new Form(
+        onWillPop: _onWillPop,
+        child: new ListView(
+          padding: const EdgeInsets.all(16.0),
+          children: <Widget>[
+            new Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              decoration: new BoxDecoration(
+                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+              ),
+              alignment: FractionalOffset.bottomLeft,
+              child: new Text('Event name', style: theme.textTheme.display2)
             ),
-            alignment: FractionalOffset.bottomLeft,
-            child: new Text('Event name', style: theme.textTheme.display2)
-          ),
-          new Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            decoration: new BoxDecoration(
-              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+            new Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              decoration: new BoxDecoration(
+                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+              ),
+              alignment: FractionalOffset.bottomLeft,
+              child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
             ),
-            alignment: FractionalOffset.bottomLeft,
-            child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
-          ),
-          new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Text('From', style: theme.textTheme.caption),
-              new DateTimeItem(
-                dateTime: _fromDateTime,
-                onChanged: (DateTime value) {
-                  setState(() {
-                    _fromDateTime = value;
-                    _saveNeeded = true;
-                  });
-                }
-              )
-            ]
-          ),
-          new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Text('To', style: theme.textTheme.caption),
-              new DateTimeItem(
-                dateTime: _toDateTime,
-                onChanged: (DateTime value) {
-                  setState(() {
-                    _toDateTime = value;
-                    _saveNeeded = true;
-                  });
-                }
-              )
-            ]
-          ),
-          new Container(
-            decoration: new BoxDecoration(
-              border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-            ),
-            child: new Row(
-              children: <Widget> [
-                new Checkbox(
-                  value: _allDayValue,
-                  onChanged: (bool value) {
+            new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Text('From', style: theme.textTheme.caption),
+                new DateTimeItem(
+                  dateTime: _fromDateTime,
+                  onChanged: (DateTime value) {
                     setState(() {
-                      _allDayValue = value;
+                      _fromDateTime = value;
+                      _saveNeeded = true;
+                    });
+                  }
+                )
+              ]
+            ),
+            new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                new Text('To', style: theme.textTheme.caption),
+                new DateTimeItem(
+                  dateTime: _toDateTime,
+                  onChanged: (DateTime value) {
+                    setState(() {
+                      _toDateTime = value;
                       _saveNeeded = true;
                     });
                   }
                 ),
                 const Text('All-day')
               ]
+            ),
+            new Container(
+              decoration: new BoxDecoration(
+                border: new Border(bottom: new BorderSide(color: theme.dividerColor))
+              ),
+              child: new Row(
+                children: <Widget> [
+                  new Checkbox(
+                    value: _allDayValue,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _allDayValue = value;
+                        _saveNeeded = true;
+                      });
+                    }
+                  ),
+                  new Text('All-day')
+                ]
+              )
             )
-          )
-        ]
-        .map((Widget child) {
-          return new Container(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            height: 96.0,
-            child: child
-          );
-        })
-        .toList()
-      )
+          ]
+          .map((Widget child) {
+            return new Container(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              height: 96.0,
+              child: child
+            );
+          })
+          .toList()
+        )
+      ),
     );
   }
 }
