@@ -86,7 +86,7 @@ class PageViewAppState extends State<PageViewApp> {
         children: <Widget>[
           const DrawerHeader(child: const Center(child: const Text('Options'))),
           new ListTile(
-            leading: new Icon(Icons.more_horiz),
+            leading: const Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,
             trailing: const Text('Horizontal Layout'),
             onTap: switchScrollDirection,
