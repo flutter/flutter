@@ -152,7 +152,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  writeFlutterPluginsList();
+  injectPlugins();
 
   await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 

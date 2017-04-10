@@ -1,23 +1,16 @@
 #include "AppDelegate.h"
-{{#withPluginHook}}
-#include "{{pluginClass}}.h"
+#include "PluginRegistry.h"
 
 @implementation AppDelegate {
-  {{pluginClass}} *_{{pluginProjectName}};
+  PluginRegistry *plugins;
 }
-{{/withPluginHook}}
-{{^withPluginHook}}
-@implementation AppDelegate
-{{/withPluginHook}}
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
-{{#withPluginHook}}
+  // Override point for customization after application launch.
   FlutterViewController *flutterController =
       (FlutterViewController *)self.window.rootViewController;
-  _{{pluginProjectName}} = [[{{pluginClass}} alloc] initWithController:flutterController];
-{{/withPluginHook}}
-    return YES;
+  plugins = [[PluginRegistry alloc] initWithController:flutterController];
+  return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
