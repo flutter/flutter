@@ -2,16 +2,15 @@ package {{androidIdentifier}};
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
-{{#withPluginHook}}
-import {{androidPluginIdentifier}}.{{pluginClass}};
-{{/withPluginHook}}
+import io.flutter.plugins.PluginRegistry;
 
 public class MainActivity extends FlutterActivity {
+    PluginRegistry pluginRegistry;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-{{#withPluginHook}}
-        {{pluginClass}}.register(this);
-{{/withPluginHook}}
+        pluginRegistry = new PluginRegistry();
+        pluginRegistry.registerAll(this);
     }
 }

@@ -64,7 +64,7 @@ class Form extends StatefulWidget {
 
 /// State assocated with a [Form] widget.
 ///
-/// A [FormState] object can ve used to [save], [reset], and [validate] every
+/// A [FormState] object can be used to [save], [reset], and [validate] every
 /// [FormField] that is a descendant of the associated [Form].
 ///
 /// Typically obtained via [Form.of].
@@ -117,7 +117,7 @@ class FormState extends State<Form> {
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
-  /// returns true iff there are no errors.
+  /// returns true if there are no errors.
   bool validate() {
     _fieldDidChange();
     return _validate();
@@ -221,7 +221,7 @@ class FormField<T> extends StatefulWidget {
   /// An optional value to initialize the form field to, or null otherwise.
   final T initialValue;
 
-  /// If true, this form fields will validate and update its error text
+  /// If true, this form field will validate and update its error text
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// autovalidates, this value will be ignored.

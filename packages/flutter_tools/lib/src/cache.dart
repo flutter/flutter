@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -33,8 +35,17 @@ class Cache {
   ///
   /// This is used by the tests since they run simultaneously and all in one
   /// process and so it would be a mess if they had to use the lock.
+  @visibleForTesting
   static void disableLocking() {
     _lockEnabled = false;
+  }
+
+  /// Turn on the [lock]/[releaseLockEarly] mechanism.
+  ///
+  /// This is used by the tests.
+  @visibleForTesting
+  static void enableLocking() {
+    _lockEnabled = true;
   }
 
   /// Lock the cache directory.
@@ -48,7 +59,7 @@ class Cache {
     if (!_lockEnabled)
       return null;
     assert(_lock == null);
-    _lock = fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).openSync(mode: FileMode.WRITE);
+    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.WRITE);
     bool locked = false;
     bool printed = false;
     while (!locked) {
@@ -77,7 +88,7 @@ class Cache {
   /// Checks if the current process owns the lock for the cache directory at
   /// this very moment; throws a [StateError] if it doesn't.
   static void checkLockAcquired() {
-    if (_lockEnabled && _lock == null) {
+    if (_lockEnabled && _lock == null && platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       throw new StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );

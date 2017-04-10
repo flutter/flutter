@@ -3,7 +3,9 @@ dependencies:
   flutter:
     sdk: flutter
   intl: '>=0.14.0 <0.15.0'
+  intl_translation: '>=0.14.0 <0.15.0'
   http: '>=0.11.3+12'
+  isolate: '>=1.0.0'
 
 dev_dependencies:
   flutter_test:

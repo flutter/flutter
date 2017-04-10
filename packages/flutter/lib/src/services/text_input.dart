@@ -7,9 +7,9 @@ import 'dart:ui' show TextAffinity, hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import 'message_codec.dart';
 import 'system_channels.dart';
 import 'text_editing.dart';
-import 'message_codec.dart';
 
 export 'dart:ui' show TextAffinity;
 

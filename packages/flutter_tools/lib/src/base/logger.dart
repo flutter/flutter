@@ -271,10 +271,14 @@ class AnsiTerminal {
   String bolden(String message) {
     if (!supportsColor)
       return message;
-    final StringBuffer result = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer();
     for (String line in message.split('\n'))
-      result.writeln('$_bold$line$_reset');
-    return result.toString();
+      buffer.writeln('$_bold$line$_reset');
+    final String result = buffer.toString();
+    // avoid introducing a new newline to the emboldened text
+    return (!message.endsWith('\n') && result.endsWith('\n'))
+        ? result.substring(0, result.length - 1)
+        : result;
   }
 
   String clearScreen() => supportsColor ? _clear : '\n\n';

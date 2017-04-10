@@ -74,11 +74,14 @@ linter:
     - await_only_futures
     - camel_case_types
     # - constant_identifier_names # https://github.com/dart-lang/linter/issues/204
+    - directives_ordering
     - empty_catches
     - empty_constructor_bodies
     - implementation_imports
     - library_names
     - library_prefixes
+    - no_adjacent_strings_in_list
+    - no_duplicate_case_values
     - non_constant_identifier_names
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
@@ -87,7 +90,12 @@ linter:
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
     # - prefer_final_fields # https://github.com/dart-lang/sdk/issues/29197
+    - prefer_collection_literals
+    - prefer_const_constructors
+    - prefer_contains
     - prefer_final_locals
+    - prefer_initializing_formals
+    - prefer_is_empty
     - prefer_is_not_empty
     # - public_member_api_docs # this is the only difference from .analysis_options_repo
     - slash_for_doc_comments
@@ -99,6 +107,8 @@ linter:
     # - unawaited_futures # https://github.com/flutter/flutter/issues/5793
     - unnecessary_brace_in_string_interp
     - unnecessary_getters_setters
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_in_if_null_operators
 
     # === pub rules ===
     - package_names

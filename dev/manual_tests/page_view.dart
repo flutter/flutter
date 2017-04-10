@@ -92,7 +92,7 @@ class PageViewAppState extends State<PageViewApp> {
             onTap: switchScrollDirection,
           ),
           new ListTile(
-            leading: new Icon(Icons.more_vert),
+            leading: const Icon(Icons.more_vert),
             selected: scrollDirection == Axis.vertical,
             trailing: const Text('Vertical Layout'),
             onTap: switchScrollDirection,

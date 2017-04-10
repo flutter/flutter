@@ -17,6 +17,7 @@ import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 import 'icons.dart';
 import 'material.dart';
+import 'page.dart';
 import 'scaffold.dart';
 import 'tabs.dart';
 import 'theme.dart';
@@ -332,13 +333,16 @@ class AppBar extends StatefulWidget {
 class _AppBarState extends State<AppBar> {
   bool _hasDrawer = false;
   bool _canPop = false;
+  bool _useCloseButton = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     _hasDrawer = scaffold?.hasDrawer ?? false;
-    _canPop = ModalRoute.of(context)?.canPop ?? false;
+    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+    _canPop = parentRoute?.canPop ?? false;
+    _useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
   }
 
   void _handleDrawerButton() {
@@ -380,7 +384,7 @@ class _AppBarState extends State<AppBar> {
         );
       } else {
         if (_canPop)
-          leading = const BackButton();
+          leading = _useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {

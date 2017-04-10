@@ -156,7 +156,7 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
   settings.values['flutter.buildMode'] = buildModeName;
   settings.writeContents(localProperties);
 
-  writeFlutterPluginsList();
+  injectPlugins();
 
   final String gradle = ensureGradle();
 

@@ -108,7 +108,7 @@ class CardCollectionState extends State<CardCollection> {
             buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             new Divider(),
             new ListTile(
-              leading: new Icon(Icons.dvr),
+              leading: const Icon(Icons.dvr),
               onTap: () { debugDumpApp(); debugDumpRenderTree(); },
               title: const Text('Dump App to Console'),
             ),
@@ -281,7 +281,7 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     // TODO(abarth): This icon is wrong in RTL.
-    Widget leftArrowIcon =  new Icon(Icons.arrow_back, size: 36.0);
+    Widget leftArrowIcon =  const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
