@@ -203,7 +203,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                     });
                   }
                 ),
-                const Text('All-day')
+                const Text('All-day'),
               ]
             ),
             new Container(
@@ -221,7 +221,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
                       });
                     }
                   ),
-                  new Text('All-day')
+                  const Text('All-day'),
                 ]
               )
             )
