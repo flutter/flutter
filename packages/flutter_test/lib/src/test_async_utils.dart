@@ -282,9 +282,13 @@ class TestAsyncUtils {
     }
   }
 
+  static bool _stripAsynchronousSuspensions(String line) {
+    return line != '<asynchronous suspension>';
+  }
+
   static _StackEntry _findResponsibleMethod(StackTrace rawStack, String method, StringBuffer errors) {
     assert(method == 'guard' || method == 'guardSync');
-    final List<String> stack = rawStack.toString().split('\n');
+    final List<String> stack = rawStack.toString().split('\n').where(_stripAsynchronousSuspensions).toList();
     assert(stack.last == '');
     stack.removeLast();
     final RegExp getClassPattern = new RegExp(r'^#[0-9]+ +([^. ]+)');

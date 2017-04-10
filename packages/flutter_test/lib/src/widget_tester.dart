@@ -51,7 +51,17 @@ void testWidgets(String description, WidgetTesterCallback callback, {
   final WidgetTester tester = new WidgetTester._(binding);
   timeout ??= binding.defaultTestTimeout;
   test_package.group('-', () {
-    test_package.test(description, () => binding.runTest(() => callback(tester), tester._endOfTestVerifications), skip: skip);
+    test_package.test(
+      description,
+      () {
+        return binding.runTest(
+          () => callback(tester),
+          tester._endOfTestVerifications,
+          description: description ?? '',
+        );
+      },
+      skip: skip,
+    );
     test_package.tearDown(binding.postTest);
   }, timeout: timeout);
 }
@@ -109,7 +119,10 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = new WidgetTester._(binding);
-  return binding.runTest(() => callback(tester), tester._endOfTestVerifications) ?? new Future<Null>.value();
+  return binding.runTest(
+    () => callback(tester),
+    tester._endOfTestVerifications,
+  ) ?? new Future<Null>.value();
 }
 
 /// Assert that `actual` matches `matcher`.
@@ -163,6 +176,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Subsequent calls to this is different from [pump] in that it forces a full
   /// rebuild of the tree, even if [widget] is the same as the previous call.
   /// [pump] will only rebuild the widgets that have changed.
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
+  /// this method works when the test is run with `flutter run`.
   Future<Null> pumpWidget(Widget widget, [
     Duration duration,
     EnginePhase phase = EnginePhase.sendSemanticsTree
@@ -182,6 +198,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// This is a convenience function that just calls
   /// [TestWidgetsFlutterBinding.pump].
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
+  /// this method works when the test is run with `flutter run`.
   @override
   Future<Null> pump([
     Duration duration,
@@ -426,23 +445,25 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Tests that just need to add text to widgets like [Input] or [TextField]
   /// only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
-    // TODO(hansmuller): Once find.descendant (#7789) lands replace the following
-    // RHS with state(find.descendant(finder), find.byType(EditableText)).
-    final EditableTextState editable = state(finder);
-    if (editable != binding.focusedEditable) {
-      binding.focusedEditable = editable;
-      await pump();
-    }
-    return null;
+    return TestAsyncUtils.guard(() async {
+      // TODO(hansmuller): Once find.descendant (#7789) lands replace the following
+      // RHS with state(find.descendant(finder), find.byType(EditableText)).
+      final EditableTextState editable = state(finder);
+      if (editable != binding.focusedEditable) {
+        binding.focusedEditable = editable;
+        await pump();
+      }
+    });
   }
 
   /// Give the EditableText widget specified by [finder] the focus and
   /// enter [text] as if it been provided by the onscreen keyboard.
   Future<Null> enterText(Finder finder, String text) async {
-    await showKeyboard(finder);
-    testTextInput.enterText(text);
-    await idle();
-    return null;
+    return TestAsyncUtils.guard(() async {
+      await showKeyboard(finder);
+      testTextInput.enterText(text);
+      await idle();
+    });
   }
 }
 

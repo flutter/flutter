@@ -40,6 +40,17 @@ class TextSelectionPoint {
 
   /// Direction of the text at this edge of the selection.
   final TextDirection direction;
+
+  @override
+  String toString() {
+    switch (direction) {
+      case TextDirection.ltr:
+        return '$point-ltr';
+      case TextDirection.rtl:
+        return '$point-rtl';
+    }
+    return '$point';
+  }
 }
 
 /// A single line of editable text.

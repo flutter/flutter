@@ -2,21 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+
+const TextStyle testFont = const TextStyle(
+  color: const Color(0xFF00FF00),
+  fontFamily: 'Ahem',
+);
 
 Future<Null> pumpTest(WidgetTester tester, TargetPlatform platform) async {
   await tester.pumpWidget(new Container());
   await tester.pumpWidget(new MaterialApp(
     theme: new ThemeData(
-      platform: platform
+      platform: platform,
     ),
-    home: new ListView.builder(
-      itemBuilder: (BuildContext context, int index) {
-        return new Text('$index');
-      },
+    home: new Container(
+      color: const Color(0xFF111111),
+      child: new ListView.builder(
+        itemBuilder: (BuildContext context, int index) {
+          return new Text('$index', style: testFont);
+        },
+      ),
     ),
   ));
   return null;
@@ -53,44 +59,44 @@ void main() {
     final List<String> log = <String>[];
 
     final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i++)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
+    for (int i = 0; i < 250; i += 1)
+      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
     await tester.pumpWidget(new ListView(children: textWidgets));
 
     expect(log, equals(<String>[]));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18']));
+    expect(log, equals(<String>['tap 21']));
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18']));
+    expect(log, equals(<String>['tap 21']));
+    await tester.tap(find.byType(Scrollable)); // should stop the fling but not tap anything
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18']));
-    await tester.tap(find.byType(Scrollable));
-    await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18', 'tap 31']));
-  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
+    expect(log, equals(<String>['tap 21', 'tap 35']));
+  });
 
   testWidgets('fling and wait and tap', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     final List<Widget> textWidgets = <Widget>[];
-    for (int i = 0; i < 250; i++)
-      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i')));
+    for (int i = 0; i < 250; i += 1)
+      textWidgets.add(new GestureDetector(onTap: () { log.add('tap $i'); }, child: new Text('$i', style: testFont)));
     await tester.pumpWidget(new ListView(children: textWidgets));
 
     expect(log, equals(<String>[]));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18']));
+    expect(log, equals(<String>['tap 21']));
     await tester.fling(find.byType(Scrollable), const Offset(0.0, -200.0), 1000.0);
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18']));
-    await tester.pump(const Duration(seconds: 50));
-    expect(log, equals(<String>['tap 18']));
+    expect(log, equals(<String>['tap 21']));
+    await tester.pump(const Duration(seconds: 50)); // long wait, so the fling will have ended at the end of it
+    expect(log, equals(<String>['tap 21']));
     await tester.tap(find.byType(Scrollable));
     await tester.pump(const Duration(milliseconds: 50));
-    expect(log, equals(<String>['tap 18', 'tap 42']));
-  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
+    expect(log, equals(<String>['tap 21', 'tap 48']));
+  });
 }
