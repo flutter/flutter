@@ -334,13 +334,13 @@ void main() {
       await tester.pumpWidget(
         new MaterialApp(
           theme: new ThemeData(platform: platform),
-          home: new Scaffold(appBar: new AppBar(), body: new Text('Page 1')),
+          home: new Scaffold(appBar: new AppBar(), body: const Text('Page 1')),
         )
       );
 
       tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
         builder: (BuildContext context) {
-          return new Scaffold(appBar: new AppBar(), body: new Text('Page 2'));
+          return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
         },
         fullscreenDialog: true,
       ));
