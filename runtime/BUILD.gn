@@ -92,9 +92,10 @@ source_set("runtime") {
 
   defines = []
 
-  if (current_toolchain == host_toolchain) {
+  if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {
     # Though the test font data is small, we dont want to add to the binary size
-    # on the device. We only add the same on the host test shells.
+    # on the device (in profile and release modes). We only add the same on the
+    # host test shells and the debug device shell.
     defines += [ "EMBED_TEST_FONT_DATA=1" ]
   }
 
