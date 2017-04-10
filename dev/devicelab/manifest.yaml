@@ -157,6 +157,7 @@ tasks:
       Runs a driver test on the Platform Channel sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
@@ -164,18 +165,21 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_ios__start_up:
     description: >
       Measures the startup time of the Flutter Gallery app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   complex_layout_ios__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
@@ -183,12 +187,14 @@ tasks:
       iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   basic_material_app_ios__size:
     description: >
       Measures the IPA size of a basic material app.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   microbenchmarks_ios:
     description: >
@@ -196,12 +202,14 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
     timeout_in_minutes: 30
+    flaky: true
 
   flutter_view_ios__start_up:
     description: >
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   # Tests running on Windows host
 
