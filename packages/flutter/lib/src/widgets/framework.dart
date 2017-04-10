@@ -3221,6 +3221,7 @@ class StatefulElement extends ComponentElement {
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
       _state.didUpdateWidget(oldWidget);
+      // ignore: deprecated_member_use
       _state.didUpdateConfig(oldWidget);
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
