@@ -378,7 +378,7 @@ class _AppBarState extends State<AppBar> {
     if (leading == null) {
       if (_hasDrawer) {
         leading = new IconButton(
-          icon: new Icon(Icons.menu),
+          icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
