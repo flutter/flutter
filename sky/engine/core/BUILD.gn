@@ -14,9 +14,6 @@ static_library("core") {
   output_name = "sky_core"
 
   deps = [
-    "//dart/runtime:libdart",
-    "//dart/runtime/bin:embedded_dart_io",
-    "//dart/runtime/vm:libdart_platform",
     "//flutter/assets",
     "//flutter/sky/engine/platform",
   ]
