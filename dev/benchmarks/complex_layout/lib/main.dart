@@ -482,11 +482,11 @@ class ItemGalleryBox extends StatelessWidget {
                             new Row(
                               children: <Widget>[
                                 new IconButton(
-                                  icon: new Icon(Icons.share),
+                                  icon: const Icon(Icons.share),
                                   onPressed: () { print('Pressed share'); },
                                 ),
                                 new IconButton(
-                                  icon: new Icon(Icons.event),
+                                  icon: const Icon(Icons.event),
                                   onPressed: () { print('Pressed event'); },
                                 ),
                                 new Expanded(
@@ -620,7 +620,7 @@ class FancyDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: Colors.purple
       ),
       height: 200.0

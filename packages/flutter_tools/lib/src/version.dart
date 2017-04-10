@@ -294,7 +294,7 @@ class VersionCheckStamp {
     }
 
     // Stamp is missing or is malformed.
-    return new VersionCheckStamp();
+    return const VersionCheckStamp();
   }
 
   static VersionCheckStamp fromJson(Map<String, String> json) {
