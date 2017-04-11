@@ -108,7 +108,8 @@ def to_gn_args(args):
     # snapshotting and linking costs of the precompiler during development.
     # We can still use the JIT on the simulator though.
     use_dbc = args.target_os == 'ios' and not args.simulator and args.runtime_mode == 'debug'
-    gn_args['dart_experimental_interpreter'] = use_dbc
+    if use_dbc:
+      gn_args['dart_target_arch'] = 'dbc'
 
     gn_args['flutter_runtime_mode'] = args.runtime_mode
 

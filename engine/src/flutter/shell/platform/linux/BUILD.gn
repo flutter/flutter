@@ -10,6 +10,7 @@ executable("linux") {
   ]
 
   deps = [
+    "//dart/runtime:libdart_jit",
     "//dart/runtime/bin:embedded_dart_io",
     "//flutter/common",
     "//flutter/fml",
