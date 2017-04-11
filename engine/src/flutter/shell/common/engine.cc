@@ -4,6 +4,9 @@
 
 #include "flutter/shell/common/engine.h"
 
+#include <dlfcn.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <memory>
@@ -15,6 +18,7 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
+#include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
@@ -23,8 +27,10 @@
 #include "flutter/shell/common/animator.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/sky/engine/public/web/Sky.h"
+#include "lib/ftl/files/eintr_wrapper.h"
 #include "lib/ftl/files/file.h"
 #include "lib/ftl/files/path.h"
+#include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -77,8 +83,99 @@ ftl::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
+#if !FLUTTER_AOT
+#elif OS(IOS)
+#elif OS(ANDROID)
+static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
+                                     const std::string& default_file_name,
+                                     const std::string& settings_file_name,
+                                     bool executable) {
+  std::string asset_path;
+  if (settings_file_name.empty()) {
+    asset_path = aot_snapshot_path + "/" + default_file_name;
+  } else {
+    asset_path = aot_snapshot_path + "/" + settings_file_name;
+  }
+
+  struct stat info;
+  if (stat(asset_path.c_str(), &info) < 0) {
+    return nullptr;
+  }
+  int64_t asset_size = info.st_size;
+
+  ftl::UniqueFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
+  if (fd.get() == -1) {
+    return nullptr;
+  }
+
+  int mmap_flags = PROT_READ;
+  if (executable) mmap_flags |= PROT_EXEC;
+
+  void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd.get(), 0);
+  if (symbol == MAP_FAILED) {
+    return nullptr;
+  }
+  return reinterpret_cast<const uint8_t*>(symbol);
+}
+#endif
+
+static const uint8_t* default_isolate_snapshot_data = nullptr;
+static const uint8_t* default_isolate_snapshot_instr = nullptr;
+
 void Engine::Init() {
-  blink::InitRuntime();
+  const uint8_t* vm_snapshot_data;
+  const uint8_t* vm_snapshot_instr;
+#if !FLUTTER_AOT
+  vm_snapshot_data = ::kDartVmSnapshotData;
+  vm_snapshot_instr = ::kDartVmSnapshotInstructions;
+  default_isolate_snapshot_data = ::kDartIsolateCoreSnapshotData;
+  default_isolate_snapshot_instr = ::kDartIsolateCoreSnapshotInstructions;
+#elif OS(IOS)
+  const char* kDartApplicationLibraryPath = "App.framework/App";
+  const char* application_library_path = kDartApplicationLibraryPath;
+  const blink::Settings& settings = blink::Settings::Get();
+  const std::string& application_library_path_setting =
+      settings.application_library_path;
+  if (!application_library_path_setting.empty()) {
+    application_library_path = application_library_path_setting.c_str();
+  }
+  dlerror();  // clear previous errors on thread
+  void* library_handle = dlopen(application_library_path, RTLD_NOW);
+  const char* err = dlerror();
+  if (err != nullptr) {
+    FTL_LOG(FATAL) << "dlopen failed: " << err;
+  }
+  vm_snapshot_data = reinterpret_cast<const uint8_t*>(
+      dlsym(library_handle, "kDartVmSnapshotData"));
+  vm_snapshot_instr = reinterpret_cast<const uint8_t*>(
+      dlsym(library_handle, "kDartVmSnapshotInstructions"));
+  default_isolate_snapshot_data = reinterpret_cast<const uint8_t*>(
+      dlsym(library_handle, "kDartIsolateSnapshotData"));
+  default_isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
+      dlsym(library_handle, "kDartIsolateSnapshotInstructions"));
+#elif OS(ANDROID)
+  const blink::Settings& settings = blink::Settings::Get();
+  const std::string& aot_snapshot_path = settings.aot_snapshot_path;
+  FTL_CHECK(!aot_snapshot_path.empty());
+  vm_snapshot_data =
+      MemMapSnapshot(aot_snapshot_path, "vm_snapshot_data",
+                     settings.aot_vm_snapshot_data_filename, false);
+  vm_snapshot_instr =
+      MemMapSnapshot(aot_snapshot_path, "vm_snapshot_instr",
+                     settings.aot_vm_snapshot_instr_filename, true);
+  default_isolate_snapshot_data =
+      MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_data",
+                     settings.aot_isolate_snapshot_data_filename, false);
+  default_isolate_snapshot_instr =
+      MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_instr",
+                     settings.aot_isolate_snapshot_instr_filename, true);
+#else
+#error Unknown OS
+#endif
+
+  blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
+                     default_isolate_snapshot_data,
+                     default_isolate_snapshot_instr);
 }
 
 void Engine::RunBundle(const std::string& bundle_path) {
@@ -96,8 +193,8 @@ void Engine::RunBundle(const std::string& bundle_path) {
     std::vector<uint8_t> snapshot;
     if (!GetAssetAsBuffer(blink::kSnapshotAssetKey, &snapshot))
       return;
-    runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
-                                                 snapshot.size());
+    runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
+                                                       snapshot.size());
   }
 }
 
@@ -116,8 +213,8 @@ void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
     std::vector<uint8_t> snapshot;
     if (!files::ReadFileToVector(snapshot_override, &snapshot))
       return;
-    runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
-                                                 snapshot.size());
+    runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
+                                                       snapshot.size());
   }
 }
 
@@ -322,7 +419,9 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 
 void Engine::ConfigureRuntime(const std::string& script_uri) {
   runtime_ = blink::RuntimeController::Create(this);
-  runtime_->CreateDartController(std::move(script_uri));
+  runtime_->CreateDartController(std::move(script_uri),
+                                 default_isolate_snapshot_data,
+                                 default_isolate_snapshot_instr);
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
   runtime_->SetSemanticsEnabled(semantics_enabled_);

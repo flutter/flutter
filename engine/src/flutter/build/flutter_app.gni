@@ -5,6 +5,9 @@
 assert(is_fuchsia)
 
 import("//build/dart/dart_package.gni")
+import("//flutter/lib/ui/dart_ui.gni")
+import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
+import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
 
 # Defines a Flutter application
 #
@@ -58,14 +61,17 @@ template("flutter_app") {
     bundle_name = "${target_name}.flx"
   }
 
-  flutter_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
-  flutter_snapshot_dir = get_label_info(flutter_snapshot_label, "root_out_dir")
-  flutter_snapshot = "$flutter_snapshot_dir/gen_snapshot"
+  gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
+  gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
+  gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
 
   flutter_core_snapshot_label = "//flutter/lib/snapshot:generate_snapshot_bin"
-  flutter_core_snapshot_gen_dir = get_label_info(flutter_core_snapshot_label, "target_gen_dir")
-  flutter_core_snapshot_vm_data = "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
-  flutter_core_snapshot_isolate_data = "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
+  flutter_core_snapshot_gen_dir =
+      get_label_info(flutter_core_snapshot_label, "target_gen_dir")
+  flutter_core_snapshot_vm_data =
+      "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
+  flutter_core_snapshot_isolate_data =
+      "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
 
   flutter_root = "//lib/flutter"
   flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
@@ -80,9 +86,9 @@ template("flutter_app") {
 
   main_dart = invoker.main_dart
 
-  flutter_snapshot_name = target_name + "_snapshot"
+  script_snapshot_label = target_name + "_snapshot"
 
-  action(flutter_snapshot_name) {
+  action(script_snapshot_label) {
     depfile = snapshot_depfile
 
     inputs = [
@@ -97,11 +103,11 @@ template("flutter_app") {
       sources = invoker.sources
     }
 
-    script = "//flutter/build/snapshot.py"
+    script = "//flutter/build/script_snapshot.py"
 
     args = [
       "--snapshotter-path",
-      rebase_path(flutter_snapshot),
+      rebase_path(gen_snapshot),
       "--vm-snapshot-data",
       rebase_path(flutter_core_snapshot_vm_data),
       "--isolate-snapshot-data",
@@ -120,8 +126,8 @@ template("flutter_app") {
 
     deps = [
       ":$dart_package_name",
-      flutter_snapshot_label,
       flutter_core_snapshot_label,
+      gen_snapshot_label,
     ]
 
     if (defined(invoker.deps)) {
@@ -164,6 +170,8 @@ template("flutter_app") {
       rebase_path(root_build_dir),
       "--depfile",
       rebase_path(bundle_depfile),
+      "--interpreter",
+      "file:///system/apps/flutter_runner",
     ]
     if (defined(invoker.manifest)) {
       args += [
@@ -173,7 +181,179 @@ template("flutter_app") {
     }
 
     deps = [
-      ":$flutter_snapshot_name",
+      ":$script_snapshot_label",
+      flutter_tools_label,
+    ]
+  }
+}
+
+template("flutter_aot_app") {
+  assert(defined(invoker.main_dart), "Must define main_dart")
+
+  dart_package_name = target_name + "_dart_package"
+
+  dart_package(dart_package_name) {
+    forward_variables_from(invoker,
+                           [
+                             "analysis_options",
+                             "deps",
+                             "disable_analysis",
+                             "source_dir",
+                           ])
+    if (defined(invoker.package_name)) {
+      package_name = invoker.package_name
+    } else {
+      infer_package_name = true
+    }
+  }
+
+  if (defined(invoker.output_name)) {
+    bundle_name = invoker.output_name
+  } else {
+    bundle_name = "${target_name}.flx"
+  }
+
+  gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
+  gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
+  gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
+
+  flutter_root = "//lib/flutter"
+  flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
+  flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
+  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/flutter_tools"
+
+  dot_packages = "$target_gen_dir/$dart_package_name.packages"
+  bundle_path = "$root_out_dir/$bundle_name"
+  bundle_depfile = "$target_gen_dir/$bundle_name.d"
+  assembly_path = "$target_gen_dir/$target_name.S"
+  assembly_depfile = "${assembly_path}.d"
+
+  main_dart = invoker.main_dart
+
+  assembly_label = target_name + "_assembly"
+
+  action(assembly_label) {
+    depfile = assembly_depfile
+
+    inputs = [ main_dart ] + fidl_dart_sdk_ext_files + mozart_dart_sdk_ext_files
+
+    outputs = [
+      assembly_path,
+    ]
+
+    if (defined(invoker.sources)) {
+      sources = invoker.sources
+    }
+
+    script = "//flutter/build/aot_snapshot.py"
+    args = [
+      "--snapshotter-path",
+      rebase_path(gen_snapshot),
+      "--assembly",
+      rebase_path(assembly_path, root_build_dir),
+      "--packages",
+      rebase_path(dot_packages),
+      "--depfile",
+      rebase_path(assembly_depfile),
+
+      "--url-mapping",
+      "dart:ui," + rebase_path(dart_ui_path),
+      "--url-mapping",
+      "dart:fidl.internal," + rebase_path(fidl_dart_sdk_ext_lib),
+      "--url-mapping",
+      "dart:mozart.internal," + rebase_path(mozart_dart_sdk_ext_lib),
+      "--url-mapping",
+      "dart:vmservice_sky," + rebase_path(
+              "$root_gen_dir/dart-pkg/sky_engine/sdk_ext/vmservice_io.dart"),
+
+      "--entry-points-manifest",
+      rebase_path("//flutter/runtime/dart_vm_entry_points.txt"),
+      "--entry-points-manifest",
+      rebase_path("//flutter/runtime/dart_vm_entry_points_fuchsia.txt"),
+
+      "--main-dart",
+      rebase_path(main_dart),
+      "--root-build-dir",
+      rebase_path(root_build_dir),
+    ]
+
+    deps = [
+      ":$dart_package_name",
+      "//flutter/lib/snapshot:generate_dart_ui",
+      gen_snapshot_label,
+    ]
+
+    if (defined(invoker.deps)) {
+      deps += invoker.deps
+    }
+  }
+
+  dylib_label = target_name + "_dylib"
+
+  outer_target_name = target_name
+  shared_library(dylib_label) {
+    deps = [
+      ":$assembly_label",
+    ]
+    sources = [
+      assembly_path,
+    ]
+    cflags = [
+      "-nostdlib",
+      "-nostartfiles",
+    ]
+    output_name = outer_target_name
+  }
+
+  dylib_path = "$root_out_dir/lib.unstripped/lib$target_name.so"
+
+  action(target_name) {
+    depfile = bundle_depfile
+
+    inputs = [
+      dylib_path,
+    ]
+    if (defined(invoker.manifest)) {
+      inputs += [ rebase_path(invoker.manifest) ]
+    }
+
+    outputs = [
+      bundle_path,
+    ]
+
+    script = "//flutter/build/package.py"
+
+    args = [
+      "--flutter-root",
+      rebase_path(flutter_root),
+      "--flutter-tools",
+      rebase_path(flutter_tools_bin),
+      "--working-dir",
+      rebase_path("$target_gen_dir/build"),
+      "--app-dir",
+      rebase_path("."),
+      "--packages",
+      rebase_path(dot_packages),
+      "--output-file",
+      rebase_path(bundle_path),
+      "--dylib",
+      rebase_path(dylib_path),
+      "--build-root",
+      rebase_path(root_build_dir),
+      "--depfile",
+      rebase_path(bundle_depfile),
+      "--interpreter",
+      "file:///system/apps/flutter_aot_runner",
+    ]
+    if (defined(invoker.manifest)) {
+      args += [
+        "--manifest",
+        rebase_path(invoker.manifest),
+      ]
+    }
+
+    deps = [
+      ":$dylib_label",
       flutter_tools_label,
     ]
   }
