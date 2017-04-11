@@ -37,7 +37,7 @@ class TestTextState extends State<TestText> {
   @override
   Widget build(BuildContext context) {
     textStyle = DefaultTextStyle.of(context).style;
-    return new Text(config.text);
+    return new Text(widget.text);
   }
 }
 

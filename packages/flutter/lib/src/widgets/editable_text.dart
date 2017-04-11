@@ -220,43 +220,43 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   @override
   void initState() {
     super.initState();
-    config.controller.addListener(_didChangeTextEditingValue);
-    config.focusNode.addListener(_handleFocusChanged);
+    widget.controller.addListener(_didChangeTextEditingValue);
+    widget.focusNode.addListener(_handleFocusChanged);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didAutoFocus && config.autofocus) {
+    if (!_didAutoFocus && widget.autofocus) {
       _didRequestKeyboard = true;
-      FocusScope.of(context).autofocus(config.focusNode);
+      FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;
     }
   }
 
   @override
-  void didUpdateConfig(EditableText oldConfig) {
-    if (config.controller != oldConfig.controller) {
-      oldConfig.controller.removeListener(_didChangeTextEditingValue);
-      config.controller.addListener(_didChangeTextEditingValue);
+  void didUpdateWidget(EditableText oldWidget) {
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller.removeListener(_didChangeTextEditingValue);
+      widget.controller.addListener(_didChangeTextEditingValue);
       _updateRemoteEditingValueIfNeeded();
     }
-    if (config.focusNode != oldConfig.focusNode) {
-      oldConfig.focusNode.removeListener(_handleFocusChanged);
-      config.focusNode.addListener(_handleFocusChanged);
+    if (widget.focusNode != oldWidget.focusNode) {
+      oldWidget.focusNode.removeListener(_handleFocusChanged);
+      widget.focusNode.addListener(_handleFocusChanged);
     }
   }
 
   @override
   void dispose() {
-    config.controller.removeListener(_didChangeTextEditingValue);
+    widget.controller.removeListener(_didChangeTextEditingValue);
     _closeInputConnectionIfNeeded();
     assert(!_hasInputConnection);
     _stopCursorTimer();
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
-    config.focusNode.removeListener(_handleFocusChanged);
+    widget.focusNode.removeListener(_handleFocusChanged);
     super.dispose();
   }
 
@@ -270,16 +270,16 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       _hideSelectionOverlayIfNeeded();
     _lastKnownRemoteTextEditingValue = value;
     _value = value;
-    if (config.onChanged != null)
-      config.onChanged(value.text);
+    if (widget.onChanged != null)
+      widget.onChanged(value.text);
   }
 
   @override
   void performAction(TextInputAction action) {
-    config.controller.clearComposing();
-    config.focusNode.unfocus();
-    if (config.onSubmitted != null)
-      config.onSubmitted(_value.text);
+    widget.controller.clearComposing();
+    widget.focusNode.unfocus();
+    if (widget.onSubmitted != null)
+      widget.onSubmitted(_value.text);
   }
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -292,13 +292,13 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _textInputConnection.setEditingState(localValue);
   }
 
-  TextEditingValue get _value => config.controller.value;
+  TextEditingValue get _value => widget.controller.value;
   set _value(TextEditingValue value) {
-    config.controller.value = value;
+    widget.controller.value = value;
   }
 
-  bool get _hasFocus => config.focusNode.hasFocus;
-  bool get _isMultiline => config.maxLines > 1;
+  bool get _hasFocus => widget.focusNode.hasFocus;
+  bool get _isMultiline => widget.maxLines > 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
   double _getScrollOffsetForCaret(Rect caretRect) {
@@ -320,7 +320,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: config.keyboardType))
+      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType))
         ..setEditingState(localValue)
         ..show();
     }
@@ -339,7 +339,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       _openInputConnectionIfNeeded();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
-      config.controller.clearComposing();
+      widget.controller.clearComposing();
     }
     _didRequestKeyboard = false;
   }
@@ -359,7 +359,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
         _openInputConnectionIfNeeded();
       } else {
         _didRequestKeyboard = true;
-        FocusScope.of(context).requestFocus(config.focusNode);
+        FocusScope.of(context).requestFocus(widget.focusNode);
       }
     }
   }
@@ -381,7 +381,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
-    config.controller.selection = selection;
+    widget.controller.selection = selection;
 
     // Note that this will show the keyboard for all selection changes on the
     // EditableWidget, not just changes triggered by user gestures.
@@ -389,14 +389,14 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
     _hideSelectionOverlayIfNeeded();
 
-    if (config.selectionControls != null) {
+    if (widget.selectionControls != null) {
       _selectionOverlay = new TextSelectionOverlay(
         context: context,
         value: _value,
-        debugRequiredFor: config,
+        debugRequiredFor: widget,
         renderObject: renderObject,
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
-        selectionControls: config.selectionControls,
+        selectionControls: widget.selectionControls,
       );
       if (_value.text.isNotEmpty || longPress)
         _selectionOverlay.showHandles();
@@ -450,7 +450,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     _updateOrDisposeSelectionOverlayIfNeeded();
     // TODO(abarth): Teach RenderEditable about ValueNotifier<TextEditingValue>
     // to avoid this setState().
-    setState(() { /* We use config.controller.value in build(). */ });
+    setState(() { /* We use widget.controller.value in build(). */ });
   }
 
   void _handleFocusChanged() {
@@ -461,7 +461,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   @override
   Widget build(BuildContext context) {
-    FocusScope.of(context).reparentIfNeeded(config.focusNode);
+    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
     return new Scrollable(
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
       controller: _scrollController,
@@ -469,14 +469,14 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
       viewportBuilder: (BuildContext context, ViewportOffset offset) {
         return new _Editable(
           value: _value,
-          style: config.style,
-          cursorColor: config.cursorColor,
+          style: widget.style,
+          cursorColor: widget.cursorColor,
           showCursor: _showCursor,
-          maxLines: config.maxLines,
-          selectionColor: config.selectionColor,
-          textScaleFactor: config.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
-          textAlign: config.textAlign,
-          obscureText: config.obscureText,
+          maxLines: widget.maxLines,
+          selectionColor: widget.selectionColor,
+          textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+          textAlign: widget.textAlign,
+          obscureText: widget.obscureText,
           offset: offset,
           onSelectionChanged: _handleSelectionChanged,
         );

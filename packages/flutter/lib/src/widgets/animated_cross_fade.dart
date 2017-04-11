@@ -93,11 +93,11 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(duration: config.duration, vsync: this);
-    if (config.crossFadeState == CrossFadeState.showSecond)
+    _controller = new AnimationController(duration: widget.duration, vsync: this);
+    if (widget.crossFadeState == CrossFadeState.showSecond)
       _controller.value = 1.0;
-    _firstAnimation = _initAnimation(config.firstCurve, true);
-    _secondAnimation = _initAnimation(config.secondCurve, false);
+    _firstAnimation = _initAnimation(widget.firstCurve, true);
+    _secondAnimation = _initAnimation(widget.secondCurve, false);
   }
 
   Animation<double> _initAnimation(Curve curve, bool inverted) {
@@ -119,16 +119,16 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
   }
 
   @override
-  void didUpdateConfig(AnimatedCrossFade oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.duration != oldConfig.duration)
-      _controller.duration = config.duration;
-    if (config.firstCurve != oldConfig.firstCurve)
-      _firstAnimation = _initAnimation(config.firstCurve, true);
-    if (config.secondCurve != oldConfig.secondCurve)
-      _secondAnimation = _initAnimation(config.secondCurve, false);
-    if (config.crossFadeState != oldConfig.crossFadeState) {
-      switch (config.crossFadeState) {
+  void didUpdateWidget(AnimatedCrossFade oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.duration != oldWidget.duration)
+      _controller.duration = widget.duration;
+    if (widget.firstCurve != oldWidget.firstCurve)
+      _firstAnimation = _initAnimation(widget.firstCurve, true);
+    if (widget.secondCurve != oldWidget.secondCurve)
+      _secondAnimation = _initAnimation(widget.secondCurve, false);
+    if (widget.crossFadeState != oldWidget.crossFadeState) {
+      switch (widget.crossFadeState) {
         case CrossFadeState.showFirst:
           _controller.reverse();
           break;
@@ -148,7 +148,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       children = <Widget>[
         new FadeTransition(
           opacity: _secondAnimation,
-          child: config.secondChild
+          child: widget.secondChild
         ),
         new Positioned(
           // TODO(dragostis): Add a way to crop from top right for
@@ -158,7 +158,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           right: 0.0,
           child: new FadeTransition(
             opacity: _firstAnimation,
-            child: config.firstChild
+            child: widget.firstChild
           )
         )
       ];
@@ -166,7 +166,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
       children = <Widget>[
         new FadeTransition(
           opacity: _firstAnimation,
-          child: config.firstChild
+          child: widget.firstChild
         ),
         new Positioned(
           // TODO(dragostis): Add a way to crop from top right for
@@ -176,7 +176,7 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
           right: 0.0,
           child: new FadeTransition(
             opacity: _secondAnimation,
-            child: config.secondChild
+            child: widget.secondChild
           )
         )
       ];
@@ -184,10 +184,10 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
 
     return new ClipRect(
       child: new AnimatedSize(
-        key: new ValueKey<Key>(config.key),
+        key: new ValueKey<Key>(widget.key),
         alignment: FractionalOffset.topCenter,
-        duration: config.duration,
-        curve: config.sizeCurve,
+        duration: widget.duration,
+        curve: widget.sizeCurve,
         vsync: this,
         child: new Stack(
           overflow: Overflow.visible,

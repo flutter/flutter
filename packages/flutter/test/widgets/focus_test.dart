@@ -28,7 +28,7 @@ class TestFocusableState extends State<TestFocusable> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didAutofocus && config.autofocus) {
+    if (!_didAutofocus && widget.autofocus) {
       _didAutofocus = true;
       FocusScope.of(context).autofocus(focusNode);
     }
@@ -47,8 +47,7 @@ class TestFocusableState extends State<TestFocusable> {
       child: new AnimatedBuilder(
         animation: focusNode,
         builder: (BuildContext context, Widget child) {
-          // print('focusNode.hasFocus = ${focusNode.hasFocus} ${focusNode.hashCode} ${focusNode.hasFocus ? config.yes : config.no}');
-          return new Text(focusNode.hasFocus ? config.yes : config.no);
+          return new Text(focusNode.hasFocus ? widget.yes : widget.no);
         },
       ),
     );

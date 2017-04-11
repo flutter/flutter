@@ -167,7 +167,7 @@ class _OverlayEntry extends StatefulWidget {
 class _OverlayEntryState extends State<_OverlayEntry> {
   @override
   Widget build(BuildContext context) {
-    return config.entry.builder(context);
+    return widget.entry.builder(context);
   }
 
   void _markNeedsBuild() {
@@ -271,7 +271,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    insertAll(config.initialEntries);
+    insertAll(widget.initialEntries);
   }
 
   /// Insert the given entry into the overlay.

@@ -38,7 +38,7 @@ class UpdaterState extends State<Updater> {
     }
     _lastUpdateCheck = new DateTime.now();
 
-    final String updateUrl = await config.updateUrlFetcher();
+    final String updateUrl = await widget.updateUrlFetcher();
     if (updateUrl != null) {
       final bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
       if (wantsUpdate != null && wantsUpdate)
@@ -68,5 +68,5 @@ class UpdaterState extends State<Updater> {
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }

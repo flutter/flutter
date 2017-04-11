@@ -189,32 +189,32 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   void initState() {
     super.initState();
-    _firstRowIndex = PageStorage.of(context)?.readState(context) ?? config.initialFirstRowIndex ?? 0;
-    config.source.addListener(_handleDataSourceChanged);
+    _firstRowIndex = PageStorage.of(context)?.readState(context) ?? widget.initialFirstRowIndex ?? 0;
+    widget.source.addListener(_handleDataSourceChanged);
     _handleDataSourceChanged();
   }
 
   @override
-  void didUpdateConfig(PaginatedDataTable oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (oldConfig.source != config.source) {
-      oldConfig.source.removeListener(_handleDataSourceChanged);
-      config.source.addListener(_handleDataSourceChanged);
+  void didUpdateWidget(PaginatedDataTable oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.source != widget.source) {
+      oldWidget.source.removeListener(_handleDataSourceChanged);
+      widget.source.addListener(_handleDataSourceChanged);
       _handleDataSourceChanged();
     }
   }
 
   @override
   void dispose() {
-    config.source.removeListener(_handleDataSourceChanged);
+    widget.source.removeListener(_handleDataSourceChanged);
     super.dispose();
   }
 
   void _handleDataSourceChanged() {
     setState(() {
-      _rowCount = config.source.rowCount;
-      _rowCountApproximate = config.source.isRowCountApproximate;
-      _selectedRowCount = config.source.selectedRowCount;
+      _rowCount = widget.source.rowCount;
+      _rowCountApproximate = widget.source.isRowCountApproximate;
+      _selectedRowCount = widget.source.selectedRowCount;
       _rows.clear();
     });
   }
@@ -223,24 +223,24 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   void pageTo(int rowIndex) {
     final int oldFirstRowIndex = _firstRowIndex;
     setState(() {
-      final int rowsPerPage = config.rowsPerPage;
+      final int rowsPerPage = widget.rowsPerPage;
       _firstRowIndex = (rowIndex ~/ rowsPerPage) * rowsPerPage;
     });
-    if ((config.onPageChanged != null) &&
+    if ((widget.onPageChanged != null) &&
         (oldFirstRowIndex != _firstRowIndex))
-      config.onPageChanged(_firstRowIndex);
+      widget.onPageChanged(_firstRowIndex);
   }
 
   DataRow _getBlankRowFor(int index) {
     return new DataRow.byIndex(
       index: index,
-      cells: config.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList()
+      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList()
     );
   }
 
   DataRow _getProgressIndicatorRowFor(int index) {
     bool haveProgressIndicator = false;
-    final List<DataCell> cells = config.columns.map<DataCell>((DataColumn column) {
+    final List<DataCell> cells = widget.columns.map<DataCell>((DataColumn column) {
       if (!column.numeric) {
         haveProgressIndicator = true;
         return new DataCell(new CircularProgressIndicator());
@@ -264,7 +264,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     for (int index = firstRowIndex; index < nextPageFirstRowIndex; index += 1) {
       DataRow row;
       if (index < _rowCount || _rowCountApproximate) {
-        row = _rows.putIfAbsent(index, () => config.source.getRow(index));
+        row = _rows.putIfAbsent(index, () => widget.source.getRow(index));
         if (row == null && !haveProgressIndicator) {
           row ??= _getProgressIndicatorRowFor(index);
           haveProgressIndicator = true;
@@ -286,8 +286,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     final List<Widget> headerWidgets = <Widget>[];
     double leftPadding = 24.0;
     if (_selectedRowCount == 0) {
-      headerWidgets.add(new Expanded(child: config.header));
-      if (config.header is ButtonBar) {
+      headerWidgets.add(new Expanded(child: widget.header));
+      if (widget.header is ButtonBar) {
         // We adjust the padding when a button bar is present, because the
         // ButtonBar introduces 2 pixels of outside padding, plus 2 pixels
         // around each button on each side, and the button itself will have 8
@@ -302,13 +302,13 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     } else {
       headerWidgets.add(new Expanded(child: new Text('$_selectedRowCount items selected')));
     }
-    if (config.actions != null) {
+    if (widget.actions != null) {
       headerWidgets.addAll(
-        config.actions.map<Widget>((Widget widget) {
+        widget.actions.map<Widget>((Widget action) {
           return new Padding(
             // 8.0 is the default padding of an icon button
             padding: const EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
-            child: widget
+            child: action,
           );
         }).toList()
       );
@@ -317,8 +317,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     // FOOTER
     final TextStyle footerTextStyle = themeData.textTheme.caption;
     final List<Widget> footerWidgets = <Widget>[];
-    if (config.onRowsPerPageChanged != null) {
-      final List<Widget> availableRowsPerPage = config.availableRowsPerPage
+    if (widget.onRowsPerPageChanged != null) {
+      final List<Widget> availableRowsPerPage = widget.availableRowsPerPage
         .where((int value) => value <= _rowCount)
         .map<DropdownMenuItem<int>>((int value) {
           return new DropdownMenuItem<int>(
@@ -332,8 +332,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         new DropdownButtonHideUnderline(
           child: new DropdownButton<int>(
             items: availableRowsPerPage,
-            value: config.rowsPerPage,
-            onChanged: config.onRowsPerPageChanged,
+            value: widget.rowsPerPage,
+            onChanged: widget.onRowsPerPageChanged,
             style: footerTextStyle,
             iconSize: 24.0
           )
@@ -343,7 +343,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     footerWidgets.addAll(<Widget>[
       new Container(width: 32.0),
       new Text(
-        '${_firstRowIndex + 1}\u2013${_firstRowIndex + config.rowsPerPage} ${ _rowCountApproximate ? "of about" : "of" } $_rowCount'
+        '${_firstRowIndex + 1}\u2013${_firstRowIndex + widget.rowsPerPage} ${ _rowCountApproximate ? "of about" : "of" } $_rowCount'
       ),
       new Container(width: 32.0),
       new IconButton(
@@ -351,7 +351,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         padding: EdgeInsets.zero,
         tooltip: 'Previous page',
         onPressed: _firstRowIndex <= 0 ? null : () {
-          pageTo(math.max(_firstRowIndex - config.rowsPerPage, 0));
+          pageTo(math.max(_firstRowIndex - widget.rowsPerPage, 0));
         }
       ),
       new Container(width: 24.0),
@@ -359,8 +359,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: 'Next page',
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + config.rowsPerPage >= _rowCount)) ? null : () {
-          pageTo(_firstRowIndex + config.rowsPerPage);
+        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : () {
+          pageTo(_firstRowIndex + widget.rowsPerPage);
         }
       ),
       new Container(width: 14.0),
@@ -404,11 +404,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             scrollDirection: Axis.horizontal,
             child: new DataTable(
               key: _tableKey,
-              columns: config.columns,
-              sortColumnIndex: config.sortColumnIndex,
-              sortAscending: config.sortAscending,
-              onSelectAll: config.onSelectAll,
-              rows: _getRows(_firstRowIndex, config.rowsPerPage)
+              columns: widget.columns,
+              sortColumnIndex: widget.sortColumnIndex,
+              sortAscending: widget.sortAscending,
+              onSelectAll: widget.onSelectAll,
+              rows: _getRows(_firstRowIndex, widget.rowsPerPage)
             )
           ),
           new DefaultTextStyle(

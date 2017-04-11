@@ -265,8 +265,8 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     super.initState();
     _controller = new TabController(
       vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
     );
   }
 
@@ -281,7 +281,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     return new _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
-      child: config.child,
+      child: widget.child,
     );
   }
 }

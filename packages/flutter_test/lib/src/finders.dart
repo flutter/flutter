@@ -116,11 +116,11 @@ class CommonFinders {
   ///     );
   ///
   ///     // You can find and tap on it like this:
-  ///     tester.tap(find.byConfig(myButton));
+  ///     tester.tap(find.byWidget(myButton));
   ///
   /// If the `skipOffstage` argument is true (the default), then this skips
   /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder byConfig(Widget config, { bool skipOffstage: true }) => new _ConfigFinder(config, skipOffstage: skipOffstage);
+  Finder byWidget(Widget widget, { bool skipOffstage: true }) => new _WidgetFinder(widget, skipOffstage: skipOffstage);
 
   /// Finds widgets using a widget [predicate].
   ///
@@ -439,17 +439,17 @@ class _ElementTypeFinder extends MatchFinder {
   }
 }
 
-class _ConfigFinder extends MatchFinder {
-  _ConfigFinder(this.config, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+class _WidgetFinder extends MatchFinder {
+  _WidgetFinder(this.widget, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 
-  final Widget config;
+  final Widget widget;
 
   @override
-  String get description => 'the given configuration ($config)';
+  String get description => 'the given widget ($widget)';
 
   @override
   bool matches(Element candidate) {
-    return candidate.widget == config;
+    return candidate.widget == widget;
   }
 }
 

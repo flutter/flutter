@@ -85,7 +85,7 @@ class MyStatefulWidget extends StatefulWidget {
 
 class MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => new Text(config.value);
+  Widget build(BuildContext context) => new Text(widget.value);
 }
 
 void main() {

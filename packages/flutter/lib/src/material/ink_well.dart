@@ -130,10 +130,10 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
         _lastHighlight = new InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
-          color: config.highlightColor ?? Theme.of(context).highlightColor,
-          shape: config.highlightShape,
-          borderRadius: config.borderRadius,
-          rectCallback: config.getRectCallback(referenceBox),
+          color: widget.highlightColor ?? Theme.of(context).highlightColor,
+          shape: widget.highlightShape,
+          borderRadius: widget.borderRadius,
+          rectCallback: widget.getRectCallback(referenceBox),
           onRemoved: () {
             assert(_lastHighlight != null);
             _lastHighlight = null;
@@ -146,23 +146,23 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
       _lastHighlight.deactivate();
     }
     assert(value == (_lastHighlight != null && _lastHighlight.active));
-    if (config.onHighlightChanged != null)
-      config.onHighlightChanged(value);
+    if (widget.onHighlightChanged != null)
+      widget.onHighlightChanged(value);
   }
 
   void _handleTapDown(TapDownDetails details) {
     final RenderBox referenceBox = context.findRenderObject();
-    final RectCallback rectCallback = config.getRectCallback(referenceBox);
+    final RectCallback rectCallback = widget.getRectCallback(referenceBox);
     InkSplash splash;
     splash = new InkSplash(
       controller: Material.of(context),
       referenceBox: referenceBox,
       position: referenceBox.globalToLocal(details.globalPosition),
-      color: config.splashColor ?? Theme.of(context).splashColor,
-      containedInkWell: config.containedInkWell,
-      rectCallback: config.containedInkWell ? rectCallback : null,
-      radius: config.radius,
-      borderRadius: config.borderRadius ?? BorderRadius.zero,
+      color: widget.splashColor ?? Theme.of(context).splashColor,
+      containedInkWell: widget.containedInkWell,
+      rectCallback: widget.containedInkWell ? rectCallback : null,
+      radius: widget.radius,
+      borderRadius: widget.borderRadius ?? BorderRadius.zero,
       onRemoved: () {
         if (_splashes != null) {
           assert(_splashes.contains(splash));
@@ -182,8 +182,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
     _currentSplash?.confirm();
     _currentSplash = null;
     updateHighlight(false);
-    if (config.onTap != null)
-      config.onTap();
+    if (widget.onTap != null)
+      widget.onTap();
   }
 
   void _handleTapCancel() {
@@ -195,15 +195,15 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
   void _handleDoubleTap() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (config.onDoubleTap != null)
-      config.onDoubleTap();
+    if (widget.onDoubleTap != null)
+      widget.onDoubleTap();
   }
 
   void _handleLongPress() {
     _currentSplash?.confirm();
     _currentSplash = null;
-    if (config.onLongPress != null)
-      config.onLongPress();
+    if (widget.onLongPress != null)
+      widget.onLongPress();
   }
 
   @override
@@ -223,19 +223,19 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 
   @override
   Widget build(BuildContext context) {
-    assert(config.debugCheckContext(context));
+    assert(widget.debugCheckContext(context));
     final ThemeData themeData = Theme.of(context);
-    _lastHighlight?.color = config.highlightColor ?? themeData.highlightColor;
-    _currentSplash?.color = config.splashColor ?? themeData.splashColor;
-    final bool enabled = config.onTap != null || config.onDoubleTap != null || config.onLongPress != null;
+    _lastHighlight?.color = widget.highlightColor ?? themeData.highlightColor;
+    _currentSplash?.color = widget.splashColor ?? themeData.splashColor;
+    final bool enabled = widget.onTap != null || widget.onDoubleTap != null || widget.onLongPress != null;
     return new GestureDetector(
       onTapDown: enabled ? _handleTapDown : null,
       onTap: enabled ? _handleTap : null,
       onTapCancel: enabled ? _handleTapCancel : null,
-      onDoubleTap: config.onDoubleTap != null ? _handleDoubleTap : null,
-      onLongPress: config.onLongPress != null ? _handleLongPress : null,
+      onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
+      onLongPress: widget.onLongPress != null ? _handleLongPress : null,
       behavior: HitTestBehavior.opaque,
-      child: config.child
+      child: widget.child
     );
   }
 

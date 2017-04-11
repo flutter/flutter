@@ -22,7 +22,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
   }
 
   @override
-  void didUpdateConfig(ProbeWidget oldConfig) {
+  void didUpdateWidget(ProbeWidget oldWidget) {
     setState(() {});
   }
 
@@ -110,7 +110,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   Widget build(BuildContext context) {
     buildId += 1;
     built = buildId;
-    return config.child;
+    return widget.child;
   }
 }
 

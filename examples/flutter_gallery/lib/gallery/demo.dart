@@ -9,13 +9,13 @@ import 'syntax_highlighter.dart';
 
 class ComponentDemoTabData {
   ComponentDemoTabData({
-    this.widget,
+    this.demoWidget,
     this.exampleCodeTag,
     this.description,
     this.tabName
   });
 
-  final Widget widget;
+  final Widget demoWidget;
   final String exampleCodeTag;
   final String description;
   final String tabName;
@@ -85,7 +85,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     style: Theme.of(context).textTheme.subhead
                   )
                 ),
-                new Expanded(child: demo.widget)
+                new Expanded(child: demo.demoWidget)
               ],
             );
           }).toList(),
@@ -110,7 +110,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   void didChangeDependencies() {
-    getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
+    getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
           _exampleCode = code;

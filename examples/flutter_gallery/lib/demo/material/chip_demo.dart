@@ -42,10 +42,10 @@ class _ChipDemoState extends State<ChipDemo> {
     return new Scaffold(
       appBar: new AppBar(title: const Text('Chips')),
       body: new ListView(
-        children: chips.map((Widget widget) {
+        children: chips.map((Widget chip) {
           return new Container(
             height: 100.0,
-            child: new Center(child: widget)
+            child: new Center(child: chip)
           );
         }).toList()
       )

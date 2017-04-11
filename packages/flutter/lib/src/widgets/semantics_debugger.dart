@@ -142,7 +142,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
           behavior: HitTestBehavior.opaque,
           child: new IgnorePointer(
             ignoringSemantics: false,
-            child: config.child
+            child: widget.child
           )
         )
       )

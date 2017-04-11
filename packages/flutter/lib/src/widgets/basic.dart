@@ -3241,5 +3241,5 @@ class StatefulBuilder extends StatefulWidget {
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
-  Widget build(BuildContext context) => config.builder(context, setState);
+  Widget build(BuildContext context) => widget.builder(context, setState);
 }

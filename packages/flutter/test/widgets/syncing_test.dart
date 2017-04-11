@@ -24,20 +24,20 @@ class TestWidgetState extends State<TestWidget> {
   @override
   void initState() {
     super.initState();
-    persistentState = config.persistentState;
-    syncedState = config.syncedState;
+    persistentState = widget.persistentState;
+    syncedState = widget.syncedState;
   }
 
   @override
-  void didUpdateConfig(TestWidget oldConfig) {
-    syncedState = config.syncedState;
+  void didUpdateWidget(TestWidget oldWidget) {
+    syncedState = widget.syncedState;
     // we explicitly do NOT sync the persistentState from the new instance
     // because we're using that to track whether we got recreated
     updates += 1;
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }
 
 void main() {
@@ -135,13 +135,13 @@ void main() {
 
     TestWidgetState first, second;
 
-    first = tester.state(find.byConfig(a));
-    second = tester.state(find.byConfig(b));
+    first = tester.state(find.byWidget(a));
+    second = tester.state(find.byWidget(b));
 
-    expect(first.config, equals(a));
+    expect(first.widget, equals(a));
     expect(first.persistentState, equals(0x61));
     expect(first.syncedState, equals(0x41));
-    expect(second.config, equals(b));
+    expect(second.widget, equals(b));
     expect(second.persistentState, equals(0x62));
     expect(second.syncedState, equals(0x42));
 
@@ -160,14 +160,14 @@ void main() {
       )
     );
 
-    first = tester.state(find.byConfig(a));
-    second = tester.state(find.byConfig(b));
+    first = tester.state(find.byWidget(a));
+    second = tester.state(find.byWidget(b));
 
     // same as before
-    expect(first.config, equals(a));
+    expect(first.widget, equals(a));
     expect(first.persistentState, equals(0x61));
     expect(first.syncedState, equals(0x41));
-    expect(second.config, equals(b));
+    expect(second.widget, equals(b));
     expect(second.persistentState, equals(0x62));
     expect(second.syncedState, equals(0x42));
 
@@ -189,13 +189,13 @@ void main() {
       )
     );
 
-    first = tester.state(find.byConfig(b));
-    second = tester.state(find.byConfig(a));
+    first = tester.state(find.byWidget(b));
+    second = tester.state(find.byWidget(a));
 
-    expect(first.config, equals(b));
+    expect(first.widget, equals(b));
     expect(first.persistentState, equals(0x61));
     expect(first.syncedState, equals(0x42));
-    expect(second.config, equals(a));
+    expect(second.widget, equals(a));
     expect(second.persistentState, equals(0x62));
     expect(second.syncedState, equals(0x41));
   });

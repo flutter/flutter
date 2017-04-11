@@ -353,17 +353,17 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
 
-    IconThemeData appBarIconTheme = config.iconTheme ?? themeData.primaryIconTheme;
-    TextStyle centerStyle = config.textTheme?.title ?? themeData.primaryTextTheme.title;
-    TextStyle sideStyle = config.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
+    IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
+    TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
+    TextStyle sideStyle = widget.textTheme?.body1 ?? themeData.primaryTextTheme.body1;
 
-    final Brightness brightness = config.brightness ?? themeData.primaryColorBrightness;
+    final Brightness brightness = widget.brightness ?? themeData.primaryColorBrightness;
     SystemChrome.setSystemUIOverlayStyle(brightness == Brightness.dark
       ? SystemUiOverlayStyle.light
       : SystemUiOverlayStyle.dark);
 
-    if (config.toolbarOpacity != 1.0) {
-      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(config.toolbarOpacity);
+    if (widget.toolbarOpacity != 1.0) {
+      final double opacity = const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.toolbarOpacity);
       if (centerStyle?.color != null)
         centerStyle = centerStyle.copyWith(color: centerStyle.color.withOpacity(opacity));
       if (sideStyle?.color != null)
@@ -374,7 +374,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     final List<Widget> toolbarChildren = <Widget>[];
-    Widget leading = config.leading;
+    Widget leading = widget.leading;
     if (leading == null) {
       if (_hasDrawer) {
         leading = new IconButton(
@@ -396,7 +396,7 @@ class _AppBarState extends State<AppBar> {
       );
     }
 
-    if (config.title != null) {
+    if (widget.title != null) {
       toolbarChildren.add(
         new LayoutId(
           id: _ToolbarSlot.title,
@@ -404,19 +404,19 @@ class _AppBarState extends State<AppBar> {
             style: centerStyle,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
-            child: config.title,
+            child: widget.title,
           ),
         ),
       );
     }
-    if (config.actions != null && config.actions.isNotEmpty) {
+    if (widget.actions != null && widget.actions.isNotEmpty) {
       toolbarChildren.add(
         new LayoutId(
           id: _ToolbarSlot.actions,
           child: new Row(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: config.actions,
+            children: widget.actions,
           ),
         ),
       );
@@ -426,7 +426,7 @@ class _AppBarState extends State<AppBar> {
       padding: const EdgeInsets.only(right: 4.0),
       child: new CustomMultiChildLayout(
         delegate: new _ToolbarLayout(
-          centerTitle: config._getEffectiveCenterTitle(themeData),
+          centerTitle: widget._getEffectiveCenterTitle(themeData),
         ),
         children: toolbarChildren,
       ),
@@ -448,7 +448,7 @@ class _AppBarState extends State<AppBar> {
       ),
     );
 
-    if (config.bottom != null) {
+    if (widget.bottom != null) {
       appBar = new Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -458,34 +458,34 @@ class _AppBarState extends State<AppBar> {
               child: appBar,
             ),
           ),
-          config.bottomOpacity == 1.0 ? config.bottom : new Opacity(
-            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(config.bottomOpacity),
-            child: config.bottom,
+          widget.bottomOpacity == 1.0 ? widget.bottom : new Opacity(
+            opacity: const Interval(0.25, 1.0, curve: Curves.fastOutSlowIn).transform(widget.bottomOpacity),
+            child: widget.bottom,
           ),
         ],
       );
     }
 
     // The padding applies to the toolbar and tabbar, not the flexible space.
-    if (config.primary) {
+    if (widget.primary) {
       appBar = new Padding(
         padding: new EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: appBar,
       );
     }
 
-    if (config.flexibleSpace != null) {
+    if (widget.flexibleSpace != null) {
       appBar = new Stack(
         children: <Widget>[
-          config.flexibleSpace,
+          widget.flexibleSpace,
           new Positioned(top: 0.0, left: 0.0, right: 0.0, child: appBar),
         ],
       );
     }
 
     return new Material(
-      color: config.backgroundColor ?? themeData.primaryColor,
-      elevation: config.elevation,
+      color: widget.backgroundColor ?? themeData.primaryColor,
+      elevation: widget.elevation,
       child: new Align(
         alignment: FractionalOffset.topCenter,
         child: appBar,

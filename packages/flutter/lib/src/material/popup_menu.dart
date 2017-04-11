@@ -90,7 +90,7 @@ class PopupMenuDivider extends PopupMenuEntry<dynamic> {
 
 class _PopupMenuDividerState extends State<PopupMenuDivider> {
   @override
-  Widget build(BuildContext context) => new Divider(height: config.height);
+  Widget build(BuildContext context) => new Divider(height: widget.height);
 }
 
 /// An item in a material design popup menu.
@@ -136,29 +136,29 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
 
 class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
   // Override this to put something else in the menu entry.
-  Widget buildChild() => config.child;
+  Widget buildChild() => widget.child;
 
   void onTap() {
-    Navigator.pop(context, config.value);
+    Navigator.pop(context, widget.value);
   }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     TextStyle style = theme.textTheme.subhead;
-    if (!config.enabled)
+    if (!widget.enabled)
       style = style.copyWith(color: theme.disabledColor);
 
     Widget item = new AnimatedDefaultTextStyle(
       style: style,
       duration: kThemeChangeDuration,
       child: new Baseline(
-        baseline: config.height - _kBaselineOffsetFromBottom,
+        baseline: widget.height - _kBaselineOffsetFromBottom,
         baselineType: TextBaseline.alphabetic,
         child: buildChild()
       )
     );
-    if (!config.enabled) {
+    if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
       item = new IconTheme.merge(
         context: context,
@@ -168,10 +168,10 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
     }
 
     return new InkWell(
-      onTap: config.enabled ? onTap : null,
+      onTap: widget.enabled ? onTap : null,
       child: new MergeSemantics(
         child: new Container(
-          height: config.height,
+          height: widget.height,
           padding: const EdgeInsets.symmetric(horizontal: _kMenuHorizontalPadding),
           child: item
         )
@@ -225,14 +225,14 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   void initState() {
     super.initState();
     _controller = new AnimationController(duration: _kFadeDuration, vsync: this)
-      ..value = config.checked ? 1.0 : 0.0
+      ..value = widget.checked ? 1.0 : 0.0
       ..addListener(() => setState(() { /* animation changed */ }));
   }
 
   @override
   void onTap() {
     // This fades the checkmark in or out when tapped.
-    if (config.checked)
+    if (widget.checked)
       _controller.reverse();
     else
       _controller.forward();
@@ -242,12 +242,12 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
   @override
   Widget buildChild() {
     return new ListTile(
-      enabled: config.enabled,
+      enabled: widget.enabled,
       leading: new FadeTransition(
         opacity: _opacity,
         child: new Icon(_controller.isDismissed ? null : Icons.done)
       ),
-      title: config.child
+      title: widget.child
     );
   }
 }
@@ -527,35 +527,35 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     final Point topLeft = renderBox.localToGlobal(Point.origin);
     showMenu<T>(
       context: context,
-      elevation: config.elevation,
-      items: config.itemBuilder(context),
-      initialValue: config.initialValue,
+      elevation: widget.elevation,
+      items: widget.itemBuilder(context),
+      initialValue: widget.initialValue,
       position: new RelativeRect.fromLTRB(
-        topLeft.x, topLeft.y + (config.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
+        topLeft.x, topLeft.y + (widget.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
         0.0, 0.0
       )
     )
     .then<Null>((T newValue) {
       if (!mounted || newValue == null)
         return null;
-      if (config.onSelected != null)
-        config.onSelected(newValue);
+      if (widget.onSelected != null)
+        widget.onSelected(newValue);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (config.child == null) {
+    if (widget.child == null) {
       return new IconButton(
         icon: const Icon(Icons.more_vert),
-        padding: config.padding,
-        tooltip: config.tooltip,
+        padding: widget.padding,
+        tooltip: widget.tooltip,
         onPressed: showButtonMenu,
       );
     }
     return new InkWell(
       onTap: showButtonMenu,
-      child: config.child,
+      child: widget.child,
     );
   }
 }

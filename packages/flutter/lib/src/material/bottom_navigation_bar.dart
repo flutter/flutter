@@ -164,21 +164,21 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   void initState() {
     super.initState();
-    _controllers = new List<AnimationController>.generate(config.items.length, (int index) {
+    _controllers = new List<AnimationController>.generate(widget.items.length, (int index) {
       return new AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
       )..addListener(_rebuild);
     });
-    _animations = new List<CurvedAnimation>.generate(config.items.length, (int index) {
+    _animations = new List<CurvedAnimation>.generate(widget.items.length, (int index) {
       return new CurvedAnimation(
         parent: _controllers[index],
         curve: Curves.fastOutSlowIn,
         reverseCurve: Curves.fastOutSlowIn.flipped
       );
     });
-    _controllers[config.currentIndex].value = 1.0;
-    _backgroundColor = config.items[config.currentIndex].backgroundColor;
+    _controllers[widget.currentIndex].value = 1.0;
+    _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
   @override
@@ -198,12 +198,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   double get _maxWidth {
-    assert(config.type != null);
-    switch (config.type) {
+    assert(widget.type != null);
+    switch (widget.type) {
       case BottomNavigationBarType.fixed:
-        return config.items.length * _kActiveMaxWidth;
+        return widget.items.length * _kActiveMaxWidth;
       case BottomNavigationBarType.shifting:
-        return _kActiveMaxWidth + (config.items.length - 1) * _kInactiveMaxWidth;
+        return _kActiveMaxWidth + (widget.items.length - 1) * _kInactiveMaxWidth;
     }
     return null;
   }
@@ -257,7 +257,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   FractionalOffset _circleOffset(int index) {
-    final double iconSize = config.iconSize;
+    final double iconSize = widget.iconSize;
     final Tween<double> yOffsetTween = new Tween<double>(
       begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
       end: (6.0 + iconSize / 2.0) / kBottomNavigationBarHeight     // 6dp + icon center
@@ -270,12 +270,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   void _pushCircle(int index) {
-    if (config.items[index].backgroundColor != null)
+    if (widget.items[index].backgroundColor != null)
       _circles.add(
         new _Circle(
           state: this,
           index: index,
-          color: config.items[index].backgroundColor,
+          color: widget.items[index].backgroundColor,
           vsync: this,
         )..controller.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
@@ -290,37 +290,37 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   @override
-  void didUpdateConfig(BottomNavigationBar oldConfig) {
-    if (config.currentIndex != oldConfig.currentIndex) {
-      if (config.type == BottomNavigationBarType.shifting)
-        _pushCircle(config.currentIndex);
-      _controllers[oldConfig.currentIndex].reverse();
-      _controllers[config.currentIndex].forward();
+  void didUpdateWidget(BottomNavigationBar oldWidget) {
+    if (widget.currentIndex != oldWidget.currentIndex) {
+      if (widget.type == BottomNavigationBarType.shifting)
+        _pushCircle(widget.currentIndex);
+      _controllers[oldWidget.currentIndex].reverse();
+      _controllers[widget.currentIndex].forward();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     Widget bottomNavigation;
-    switch (config.type) {
+    switch (widget.type) {
       case BottomNavigationBarType.fixed:
         final List<Widget> children = <Widget>[];
         final ThemeData themeData = Theme.of(context);
         final TextTheme textTheme = themeData.textTheme;
         final ColorTween colorTween = new ColorTween(
           begin: textTheme.caption.color,
-          end: config.fixedColor ?? (
+          end: widget.fixedColor ?? (
             themeData.brightness == Brightness.light ?
                 themeData.primaryColor : themeData.accentColor
           )
         );
-        for (int i = 0; i < config.items.length; i += 1) {
+        for (int i = 0; i < widget.items.length; i += 1) {
           children.add(
             new Expanded(
               child: new InkResponse(
                 onTap: () {
-                  if (config.onTap != null)
-                    config.onTap(i);
+                  if (widget.onTap != null)
+                    widget.onTap(i);
                 },
                 child: new Stack(
                   alignment: FractionalOffset.center,
@@ -337,9 +337,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         child: new IconTheme(
                           data: new IconThemeData(
                             color: colorTween.evaluate(_animations[i]),
-                            size: config.iconSize,
+                            size: widget.iconSize,
                           ),
-                          child: config.items[i].icon,
+                          child: widget.items[i].icon,
                         ),
                       ),
                     ),
@@ -361,7 +361,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                               ).evaluate(_animations[i]),
                             )),
                             alignment: FractionalOffset.bottomCenter,
-                            child: config.items[i].title,
+                            child: widget.items[i].title,
                           ),
                         ),
                       ),
@@ -381,7 +381,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       case BottomNavigationBarType.shifting:
         final List<Widget> children = <Widget>[];
         _computeWeight();
-        for (int i = 0; i < config.items.length; i += 1) {
+        for (int i = 0; i < widget.items.length; i += 1) {
           children.add(
             new Expanded(
               // Since Flexible only supports integers, we're using large
@@ -389,8 +389,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
               flex: (_flex(_animations[i]) * 1000.0).round(),
               child: new InkResponse(
                 onTap: () {
-                  if (config.onTap != null)
-                    config.onTap(i);
+                  if (widget.onTap != null)
+                    widget.onTap(i);
                 },
                 child: new Stack(
                   alignment: FractionalOffset.center,
@@ -407,9 +407,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         child: new IconTheme(
                           data: new IconThemeData(
                             color: Colors.white,
-                            size: config.iconSize,
+                            size: widget.iconSize,
                           ),
-                          child: config.items[i].icon,
+                          child: widget.items[i].icon,
                         ),
                       ),
                     ),
@@ -425,7 +425,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                               fontSize: 14.0,
                               color: Colors.white
                             ),
-                            child: config.items[i].title
+                            child: widget.items[i].title
                           ),
                         ),
                       ),
@@ -450,7 +450,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         new Positioned.fill(
           child: new Material( // Casts shadow.
             elevation: 8,
-            color: config.type == BottomNavigationBarType.shifting ? _backgroundColor : null
+            color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null
           )
         ),
         new SizedBox(

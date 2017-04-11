@@ -83,9 +83,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   @override
-  void didUpdateConfig(ExpandIcon oldConfig) {
-    if (config.isExpanded != oldConfig.isExpanded) {
-      if (config.isExpanded) {
+  void didUpdateWidget(ExpandIcon oldWidget) {
+    if (widget.isExpanded != oldWidget.isExpanded) {
+      if (widget.isExpanded) {
         _controller.forward();
       } else {
         _controller.reverse();
@@ -94,17 +94,17 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   void _handlePressed() {
-    if (config.onPressed != null)
-      config.onPressed(config.isExpanded);
+    if (widget.onPressed != null)
+      widget.onPressed(widget.isExpanded);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new IconButton(
-      padding: config.padding,
+      padding: widget.padding,
       color: Colors.black38,
-      onPressed: config.onPressed == null ? null : _handlePressed,
+      onPressed: widget.onPressed == null ? null : _handlePressed,
       icon: new RotationTransition(
         turns: _iconTurns,
         child: const Icon(Icons.expand_more)

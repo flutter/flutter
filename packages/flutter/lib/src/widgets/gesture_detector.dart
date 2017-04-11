@@ -363,12 +363,12 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void initState() {
     super.initState();
-    _syncAll(config.gestures);
+    _syncAll(widget.gestures);
   }
 
   @override
-  void didUpdateConfig(RawGestureDetector oldConfig) {
-    _syncAll(config.gestures);
+  void didUpdateWidget(RawGestureDetector oldWidget) {
+    _syncAll(widget.gestures);
   }
 
   /// This method can be called after the build phase, during the
@@ -394,7 +394,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return true;
     });
     _syncAll(gestures);
-    if (!config.excludeFromSemantics) {
+    if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       context.visitChildElements((Element element) {
         final _GestureSemantics widget = element.widget;
@@ -433,17 +433,17 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
 
   HitTestBehavior get _defaultBehavior {
-    return config.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
+    return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
   @override
   Widget build(BuildContext context) {
     Widget result = new Listener(
       onPointerDown: _handlePointerDown,
-      behavior: config.behavior ?? _defaultBehavior,
-      child: config.child
+      behavior: widget.behavior ?? _defaultBehavior,
+      child: widget.child
     );
-    if (!config.excludeFromSemantics)
+    if (!widget.excludeFromSemantics)
       result = new _GestureSemantics(owner: this, child: result);
     return result;
   }
@@ -459,7 +459,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         gestures.add('<none>');
       description.add('gestures: ${gestures.join(", ")}');
     }
-    switch (config.behavior) {
+    switch (widget.behavior) {
       case HitTestBehavior.translucent:
         description.add('behavior: translucent');
         break;

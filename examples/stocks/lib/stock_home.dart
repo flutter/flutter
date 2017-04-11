@@ -87,8 +87,8 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockModeChange(StockMode value) {
-    if (config.updater != null)
-      config.updater(config.configuration.copyWith(stockMode: value));
+    if (widget.updater != null)
+      widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
@@ -148,7 +148,7 @@ class StockHomeState extends State<StockHome> {
             title: const Text('Optimistic'),
             trailing: new Radio<StockMode>(
               value: StockMode.optimistic,
-              groupValue: config.configuration.stockMode,
+              groupValue: widget.configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
             onTap: () {
@@ -160,7 +160,7 @@ class StockHomeState extends State<StockHome> {
             title: const Text('Pessimistic'),
             trailing: new Radio<StockMode>(
               value: StockMode.pessimistic,
-              groupValue: config.configuration.stockMode,
+              groupValue: widget.configuration.stockMode,
               onChanged: _handleStockModeChange,
             ),
             onTap: () {
@@ -234,7 +234,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   Iterable<Stock> _getStockList(Iterable<String> symbols) {
-    return symbols.map((String symbol) => config.stocks[symbol])
+    return symbols.map((String symbol) => widget.stocks[symbol])
         .where((Stock stock) => stock != null);
   }
 
@@ -330,7 +330,7 @@ class StockHomeState extends State<StockHome> {
         drawer: _buildDrawer(context),
         body: new TabBarView(
           children: <Widget>[
-            _buildStockTab(context, StockHomeTab.market, config.symbols),
+            _buildStockTab(context, StockHomeTab.market, widget.symbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
           ],
         ),

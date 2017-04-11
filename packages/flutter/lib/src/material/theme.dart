@@ -185,15 +185,15 @@ class _AnimatedThemeState extends AnimatedWidgetBaseState<AnimatedTheme> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _data = visitor(_data, config.data, (dynamic value) => new ThemeDataTween(begin: value));
+    _data = visitor(_data, widget.data, (dynamic value) => new ThemeDataTween(begin: value));
     assert(_data != null);
   }
 
   @override
   Widget build(BuildContext context) {
     return new Theme(
-      isMaterialAppTheme: config.isMaterialAppTheme,
-      child: config.child,
+      isMaterialAppTheme: widget.isMaterialAppTheme,
+      child: widget.child,
       data: _data.evaluate(animation)
     );
   }

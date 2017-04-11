@@ -285,7 +285,7 @@ class FlutterDriverExtension {
     final Finder target = await _waitForElement(_findEditableText(submitInputTextCommand.finder));
     final EditableTextState editable = _getEditableTextState(target);
     editable.performAction(TextInputAction.done);
-    return new SubmitInputTextResult(editable.config.controller.value.text);
+    return new SubmitInputTextResult(editable.widget.controller.value.text);
   }
 
   Future<GetTextResult> _getText(Command command) async {

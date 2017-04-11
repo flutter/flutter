@@ -22,8 +22,8 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.child != null)
-      return config.child;
+    if (widget.child != null)
+      return widget.child;
     return new Container();
   }
 }
@@ -70,8 +70,8 @@ class TabControllerFrameState extends State<TabControllerFrame> with SingleTicke
     super.initState();
     _controller = new TabController(
       vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
     );
   }
 
@@ -83,7 +83,7 @@ class TabControllerFrameState extends State<TabControllerFrame> with SingleTicke
 
   @override
   Widget build(BuildContext context) {
-    return config.builder(context, _controller);
+    return widget.builder(context, _controller);
   }
 }
 

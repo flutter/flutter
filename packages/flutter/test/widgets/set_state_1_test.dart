@@ -38,7 +38,7 @@ class MiddleState extends State<Middle> {
   Widget build(BuildContext context) {
     return new Listener(
       onPointerDown: _handlePointerDown,
-      child: config.child
+      child: widget.child
     );
   }
 

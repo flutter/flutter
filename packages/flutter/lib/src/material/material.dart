@@ -199,9 +199,9 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   final GlobalKey _inkFeatureRenderer = new GlobalKey(debugLabel: 'ink renderer');
 
   Color _getBackgroundColor(BuildContext context) {
-    if (config.color != null)
-      return config.color;
-    switch (config.type) {
+    if (widget.color != null)
+      return widget.color;
+    switch (widget.type) {
       case MaterialType.canvas:
         return Theme.of(context).canvasColor;
       case MaterialType.card:
@@ -214,12 +214,12 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _getBackgroundColor(context);
-    assert(backgroundColor != null || config.type == MaterialType.transparency);
-    Widget contents = config.child;
-    final BorderRadius radius = config.borderRadius ?? kMaterialEdges[config.type];
+    assert(backgroundColor != null || widget.type == MaterialType.transparency);
+    Widget contents = widget.child;
+    final BorderRadius radius = widget.borderRadius ?? kMaterialEdges[widget.type];
     if (contents != null) {
       contents = new AnimatedDefaultTextStyle(
-        style: config.textStyle ?? Theme.of(context).textTheme.body1,
+        style: widget.textStyle ?? Theme.of(context).textTheme.body1,
         duration: kThemeChangeDuration,
         child: contents
       );
@@ -239,14 +239,14 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     );
 
     if (Material.debugEnablePhysicalModel) {
-      if (config.type == MaterialType.circle) {
+      if (widget.type == MaterialType.circle) {
         contents = new PhysicalModel(
           shape: BoxShape.circle,
-          elevation: config.elevation,
+          elevation: widget.elevation,
           color: backgroundColor,
           child: contents,
         );
-      } else if (config.type == MaterialType.transparency) {
+      } else if (widget.type == MaterialType.transparency) {
         if (radius == null) {
           contents = new ClipRect(child: contents);
         } else {
@@ -259,15 +259,15 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         contents = new PhysicalModel(
           shape: BoxShape.rectangle,
           borderRadius: radius ?? BorderRadius.zero,
-          elevation: config.elevation,
+          elevation: widget.elevation,
           color: backgroundColor,
           child: contents,
         );
       }
     } else {
-      if (config.type == MaterialType.circle) {
+      if (widget.type == MaterialType.circle) {
         contents = new ClipOval(child: contents);
-      } else if (kMaterialEdges[config.type] != null) {
+      } else if (kMaterialEdges[widget.type] != null) {
         contents = new ClipRRect(
           borderRadius: radius,
           child: contents
@@ -275,21 +275,21 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       }
     }
 
-    if (config.type != MaterialType.transparency) {
+    if (widget.type != MaterialType.transparency) {
       contents = new AnimatedContainer(
         curve: Curves.fastOutSlowIn,
         duration: kThemeChangeDuration,
         decoration: new BoxDecoration(
           borderRadius: radius,
-          boxShadow: config.elevation == 0 || Material.debugEnablePhysicalModel ?
-              null : kElevationToShadow[config.elevation],
-          shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
+          boxShadow: widget.elevation == 0 || Material.debugEnablePhysicalModel ?
+              null : kElevationToShadow[widget.elevation],
+          shape: widget.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
         ),
         child: new Container(
           decoration: new BoxDecoration(
             borderRadius: radius,
             backgroundColor: backgroundColor,
-            shape: config.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
+            shape: widget.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
           ),
           child: contents
         )

@@ -138,8 +138,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   void initState() {
     super.initState();
     _controller = new AnimationController(
-      duration: config.duration,
-      debugLabel: '${config.toStringShort()}',
+      duration: widget.duration,
+      debugLabel: '${widget.toStringShort()}',
       vsync: this,
     )..addListener(_handleAnimationChanged);
     _updateCurve();
@@ -147,10 +147,10 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 
   @override
-  void didUpdateConfig(T oldConfig) {
-    if (config.curve != oldConfig.curve)
+  void didUpdateWidget(T oldWidget) {
+    if (widget.curve != oldWidget.curve)
       _updateCurve();
-    _controller.duration = config.duration;
+    _controller.duration = widget.duration;
     if (_constructTweens()) {
       forEachTween((Tween<dynamic> tween, dynamic targetValue, TweenConstructor<dynamic> constructor) {
         _updateTween(tween, targetValue);
@@ -163,8 +163,8 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   }
 
   void _updateCurve() {
-    if (config.curve != null)
-      _animation = new CurvedAnimation(parent: _controller, curve: config.curve);
+    if (widget.curve != null)
+      _animation = new CurvedAnimation(parent: _controller, curve: widget.curve);
     else
       _animation = _controller;
   }
@@ -212,7 +212,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
   /// 1. Call the visitor callback with three arguments, the first argument
   /// being the current value of the Tween<T> object that represents the
   /// tween (initially null), the second argument, of type T, being the value
-  /// on the Widget (config) that represents the current target value of the
+  /// on the Widget that represents the current target value of the
   /// tween, and the third being a callback that takes a value T (which will
   /// be the second argument to the visitor callback), and that returns an
   /// Tween<T> object for the tween, configured with the given value
@@ -324,20 +324,20 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _constraints = visitor(_constraints, config.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
-    _decoration = visitor(_decoration, config.decoration, (dynamic value) => new DecorationTween(begin: value));
-    _foregroundDecoration = visitor(_foregroundDecoration, config.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
-    _margin = visitor(_margin, config.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
-    _padding = visitor(_padding, config.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
-    _transform = visitor(_transform, config.transform, (dynamic value) => new Matrix4Tween(begin: value));
-    _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
-    _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
+    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
+    _decoration = visitor(_decoration, widget.decoration, (dynamic value) => new DecorationTween(begin: value));
+    _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
+    _margin = visitor(_margin, widget.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
+    _transform = visitor(_transform, widget.transform, (dynamic value) => new Matrix4Tween(begin: value));
+    _width = visitor(_width, widget.width, (dynamic value) => new Tween<double>(begin: value));
+    _height = visitor(_height, widget.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Container(
-      child: config.child,
+      child: widget.child,
       constraints: _constraints?.evaluate(animation),
       decoration: _decoration?.evaluate(animation),
       foregroundDecoration: _foregroundDecoration?.evaluate(animation),
@@ -476,18 +476,18 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _left = visitor(_left, config.left, (dynamic value) => new Tween<double>(begin: value));
-    _top = visitor(_top, config.top, (dynamic value) => new Tween<double>(begin: value));
-    _right = visitor(_right, config.right, (dynamic value) => new Tween<double>(begin: value));
-    _bottom = visitor(_bottom, config.bottom, (dynamic value) => new Tween<double>(begin: value));
-    _width = visitor(_width, config.width, (dynamic value) => new Tween<double>(begin: value));
-    _height = visitor(_height, config.height, (dynamic value) => new Tween<double>(begin: value));
+    _left = visitor(_left, widget.left, (dynamic value) => new Tween<double>(begin: value));
+    _top = visitor(_top, widget.top, (dynamic value) => new Tween<double>(begin: value));
+    _right = visitor(_right, widget.right, (dynamic value) => new Tween<double>(begin: value));
+    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => new Tween<double>(begin: value));
+    _width = visitor(_width, widget.width, (dynamic value) => new Tween<double>(begin: value));
+    _height = visitor(_height, widget.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Positioned(
-      child: config.child,
+      child: widget.child,
       left: _left?.evaluate(animation),
       top: _top?.evaluate(animation),
       right: _right?.evaluate(animation),
@@ -561,14 +561,14 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _opacity = visitor(_opacity, config.opacity, (dynamic value) => new Tween<double>(begin: value));
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => new Tween<double>(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Opacity(
       opacity: _opacity.evaluate(animation),
-      child: config.child
+      child: widget.child
     );
   }
 }
@@ -616,14 +616,14 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _style = visitor(_style, config.style, (dynamic value) => new TextStyleTween(begin: value));
+    _style = visitor(_style, widget.style, (dynamic value) => new TextStyleTween(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     return new DefaultTextStyle(
       style: _style.evaluate(animation),
-      child: config.child
+      child: widget.child
     );
   }
 }

@@ -98,7 +98,7 @@ class Radio<T> extends StatefulWidget {
 }
 
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
-  bool get _enabled => config.onChanged != null;
+  bool get _enabled => widget.onChanged != null;
 
   Color _getInactiveColor(ThemeData themeData) {
     return _enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
@@ -106,7 +106,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
   void _handleChanged(bool selected) {
     if (selected)
-      config.onChanged(config.value);
+      widget.onChanged(widget.value);
   }
 
   @override
@@ -114,10 +114,10 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     final ThemeData themeData = Theme.of(context);
     return new Semantics(
-      checked: config.value == config.groupValue,
+      checked: widget.value == widget.groupValue,
       child: new _RadioRenderObjectWidget(
-        selected: config.value == config.groupValue,
-        activeColor: config.activeColor ?? themeData.accentColor,
+        selected: widget.value == widget.groupValue,
+        activeColor: widget.activeColor ?? themeData.accentColor,
         inactiveColor: _getInactiveColor(themeData),
         onChanged: _enabled ? _handleChanged : null,
         vsync: this,

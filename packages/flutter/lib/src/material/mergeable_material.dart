@@ -153,7 +153,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _children = new List<MergeableMaterialItem>.from(config.children);
+    _children = new List<MergeableMaterialItem>.from(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
       if (_children[i] is MaterialGap) {
@@ -209,9 +209,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   bool _debugHasConsecutiveGaps(List<MergeableMaterialItem> children) {
-    for (int i = 0; i < config.children.length - 1; i += 1) {
-      if (config.children[i] is MaterialGap &&
-          config.children[i + 1] is MaterialGap)
+    for (int i = 0; i < widget.children.length - 1; i += 1) {
+      if (widget.children[i] is MaterialGap &&
+          widget.children[i + 1] is MaterialGap)
         return true;
     }
     return false;
@@ -270,19 +270,19 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   @override
-  void didUpdateConfig(MergeableMaterial oldConfig) {
-    super.didUpdateConfig(oldConfig);
+  void didUpdateWidget(MergeableMaterial oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldConfig.children.map(
+    final Set<LocalKey> oldKeys = oldWidget.children.map(
       (MergeableMaterialItem child) => child.key
     ).toSet();
-    final Set<LocalKey> newKeys = config.children.map(
+    final Set<LocalKey> newKeys = widget.children.map(
       (MergeableMaterialItem child) => child.key
     ).toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
 
-    final List<MergeableMaterialItem> newChildren = config.children;
+    final List<MergeableMaterialItem> newChildren = widget.children;
     int i = 0;
     int j = 0;
 
@@ -473,7 +473,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       );
     }
 
-    if (config.mainAxis == Axis.vertical) {
+    if (widget.mainAxis == Axis.vertical) {
       return new BorderRadius.vertical(
         top: start ? cardRadius : startRadius,
         bottom: end ? cardRadius : endRadius
@@ -523,7 +523,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               shape: BoxShape.rectangle
             ),
             child: new ListBody(
-              mainAxis: config.mainAxis,
+              mainAxis: widget.mainAxis,
               children: slices
             )
           )
@@ -532,15 +532,15 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
         widgets.add(
           new SizedBox(
-            width: config.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
-            height: config.mainAxis == Axis.vertical ? _getGapSize(i) : null
+            width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
+            height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null
           )
         );
       } else {
         final MaterialSlice slice = _children[i];
         Widget child = slice.child;
 
-        if (config.hasDividers) {
+        if (widget.hasDividers) {
           final bool hasTopDivider = _willNeedDivider(i - 1);
           final bool hasBottomDivider = _willNeedDivider(i + 1);
 
@@ -594,7 +594,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             shape: BoxShape.rectangle
           ),
           child: new ListBody(
-            mainAxis: config.mainAxis,
+            mainAxis: widget.mainAxis,
             children: slices
           )
         )
@@ -603,8 +603,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
     }
 
     return new _MergeableMaterialListBody(
-      mainAxis: config.mainAxis,
-      boxShadows: kElevationToShadow[config.elevation],
+      mainAxis: widget.mainAxis,
+      boxShadows: kElevationToShadow[widget.elevation],
       items: _children,
       children: widgets
     );

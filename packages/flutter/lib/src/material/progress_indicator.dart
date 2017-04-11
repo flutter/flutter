@@ -174,10 +174,10 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       ),
       child: new CustomPaint(
         painter: new _LinearProgressIndicatorPainter(
-          backgroundColor: config._getBackgroundColor(context),
-          valueColor: config._getValueColor(context),
-          value: config.value, // may be null
-          animationValue: animationValue // ignored if config.value is not null
+          backgroundColor: widget._getBackgroundColor(context),
+          valueColor: widget._getValueColor(context),
+          value: widget.value, // may be null
+          animationValue: animationValue // ignored if widget.value is not null
         )
       )
     );
@@ -185,7 +185,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
+    if (widget.value != null)
       return _buildIndicator(context, _animation.value);
 
     return new AnimatedBuilder(
@@ -332,9 +332,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       ),
       child: new CustomPaint(
         painter: new _CircularProgressIndicatorPainter(
-          valueColor: config._getValueColor(context),
-          value: config.value, // may be null
-          headValue: headValue, // remaining arguments are ignored if config.value is not null
+          valueColor: widget._getValueColor(context),
+          value: widget.value, // may be null
+          headValue: headValue, // remaining arguments are ignored if widget.value is not null
           tailValue: tailValue,
           stepValue: stepValue,
           rotationValue: rotationValue,
@@ -361,7 +361,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
+    if (widget.value != null)
       return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
     return _buildAnimation();
   }
@@ -463,8 +463,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   // starting from wherever we left it.
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
-      _controller.value = config.value / 10.0;
+    if (widget.value != null)
+      _controller.value = widget.value / 10.0;
     else
       _controller.forward();
     return _buildAnimation();
@@ -472,20 +472,20 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    final double arrowheadScale = config.value == null ? 0.0 : (config.value * 2.0).clamp(0.0, 1.0);
+    final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
     return new Container(
       width: _kIndicatorSize,
       height: _kIndicatorSize,
       margin: const EdgeInsets.all(4.0), // acommodate the shadow
       child: new Material(
         type: MaterialType.circle,
-        color: config.backgroundColor ?? Theme.of(context).canvasColor,
+        color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         elevation: 2,
         child: new Padding(
           padding: const EdgeInsets.all(12.0),
           child: new CustomPaint(
             painter: new _RefreshProgressIndicatorPainter(
-              valueColor: config._getValueColor(context),
+              valueColor: widget._getValueColor(context),
               value: null, // Draw the indeterminate progress indicator.
               headValue: headValue,
               tailValue: tailValue,

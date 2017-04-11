@@ -31,11 +31,11 @@ class OrderSwitcherState extends State<OrderSwitcher> {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
     if (_aFirst) {
-      children.add(new KeyedSubtree(child: config.a));
-      children.add(config.b);
+      children.add(new KeyedSubtree(child: widget.a));
+      children.add(widget.b);
     } else {
-      children.add(new KeyedSubtree(child: config.b));
-      children.add(config.a);
+      children.add(new KeyedSubtree(child: widget.b));
+      children.add(widget.a);
     }
     return new Stack(
       children: children
@@ -69,7 +69,7 @@ class RekeyableDummyStatefulWidgetWrapperState extends State<RekeyableDummyState
   @override
   void initState() {
     super.initState();
-    _key = config.initialKey;
+    _key = widget.initialKey;
   }
 
   void _setChild(GlobalKey value) {

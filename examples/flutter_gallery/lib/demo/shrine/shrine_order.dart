@@ -236,7 +236,7 @@ class _OrderPageState extends State<OrderPage> {
   @override
   void initState() {
     super.initState();
-    scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order ${config.order}');
+    scaffoldKey = new GlobalKey<ScaffoldState>(debugLabel: 'Shrine Order ${widget.order}');
   }
 
   Order get currentOrder => ShrineOrderRoute.of(context).order;
@@ -249,7 +249,7 @@ class _OrderPageState extends State<OrderPage> {
     final Order newOrder = currentOrder.copyWith(quantity: quantity, inCart: inCart);
     if (currentOrder != newOrder) {
       setState(() {
-        config.shoppingCart[newOrder.product] = newOrder;
+        widget.shoppingCart[newOrder.product] = newOrder;
         currentOrder = newOrder;
       });
     }
@@ -263,8 +263,8 @@ class _OrderPageState extends State<OrderPage> {
   Widget build(BuildContext context) {
     return new ShrinePage(
       scaffoldKey: scaffoldKey,
-      products: config.products,
-      shoppingCart: config.shoppingCart,
+      products: widget.products,
+      shoppingCart: widget.shoppingCart,
       floatingActionButton: new FloatingActionButton(
         onPressed: () {
           updateOrder(inCart: true);
@@ -284,7 +284,7 @@ class _OrderPageState extends State<OrderPage> {
         slivers: <Widget>[
           new SliverToBoxAdapter(
             child: new _Heading(
-              product: config.order.product,
+              product: widget.order.product,
               quantity: currentOrder.quantity,
               quantityChanged: (int value) { updateOrder(quantity: value); },
             ),
@@ -298,8 +298,8 @@ class _OrderPageState extends State<OrderPage> {
                 crossAxisSpacing: 8.0,
               ),
               delegate: new SliverChildListDelegate(
-                config.products
-                  .where((Product product) => product != config.order.product)
+                widget.products
+                  .where((Product product) => product != widget.order.product)
                   .map((Product product) {
                     return new Card(
                       elevation: 1,

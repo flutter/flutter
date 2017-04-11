@@ -423,7 +423,7 @@ void main() {
 
   testWidgets('State toString', (WidgetTester tester) async {
     final TestState state = new TestState();
-    expect(state.toString(), contains('no config'));
+    expect(state.toString(), contains('no widget'));
   });
 
   testWidgets('debugPrintGlobalKeyedWidgetLifecycle control test', (WidgetTester tester) async {

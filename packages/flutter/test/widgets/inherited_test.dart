@@ -44,7 +44,7 @@ class ExpectFailState extends State<ExpectFail> {
     try {
       context.inheritFromWidgetOfExactType(TestInherited); // should fail
     } catch (e) {
-      config.onError();
+      widget.onError();
     }
   }
 

@@ -246,14 +246,14 @@ class _MaterialButtonState extends State<MaterialButton> {
   bool _highlight = false;
 
   Brightness get _colorBrightness {
-    return config.colorBrightness ?? Theme.of(context).brightness;
+    return widget.colorBrightness ?? Theme.of(context).brightness;
   }
 
   Color get _textColor {
-    if (config.textColor != null)
-      return config.textColor;
-    if (config.enabled) {
-      switch (config.textTheme ?? ButtonTheme.of(context).textTheme) {
+    if (widget.textColor != null)
+      return widget.textColor;
+    if (widget.enabled) {
+      switch (widget.textTheme ?? ButtonTheme.of(context).textTheme) {
         case ButtonTextTheme.accent:
           return Theme.of(context).accentColor;
         case ButtonTextTheme.normal:
@@ -289,9 +289,9 @@ class _MaterialButtonState extends State<MaterialButton> {
     final Color textColor = _textColor;
     final TextStyle style = theme.textTheme.button.copyWith(color: textColor);
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
-    final double height = config.height ?? buttonTheme.height;
-    final int elevation = (_highlight ? config.highlightElevation : config.elevation) ?? 0;
-    final bool hasColorOrElevation = (config.color != null || elevation > 0);
+    final double height = widget.height ?? buttonTheme.height;
+    final int elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0;
+    final bool hasColorOrElevation = (widget.color != null || elevation > 0);
     Widget contents = new IconTheme.merge(
       context: context,
       data: new IconThemeData(
@@ -299,15 +299,15 @@ class _MaterialButtonState extends State<MaterialButton> {
       ),
       child: new InkWell(
         borderRadius: hasColorOrElevation ? null : kMaterialEdges[MaterialType.button],
-        highlightColor: config.highlightColor ?? theme.highlightColor,
-        splashColor: config.splashColor ?? theme.splashColor,
-        onTap: config.onPressed,
+        highlightColor: widget.highlightColor ?? theme.highlightColor,
+        splashColor: widget.splashColor ?? theme.splashColor,
+        onTap: widget.onPressed,
         onHighlightChanged: _handleHighlightChanged,
         child: new Container(
-          padding: config.padding ?? ButtonTheme.of(context).padding,
+          padding: widget.padding ?? ButtonTheme.of(context).padding,
           child: new Center(
             widthFactor: 1.0,
-            child: config.child
+            child: widget.child
           )
         )
       )
@@ -315,7 +315,7 @@ class _MaterialButtonState extends State<MaterialButton> {
     if (hasColorOrElevation) {
       contents = new Material(
         type: MaterialType.button,
-        color: config.color,
+        color: widget.color,
         elevation: elevation,
         textStyle: style,
         child: contents
@@ -329,7 +329,7 @@ class _MaterialButtonState extends State<MaterialButton> {
     }
     return new ConstrainedBox(
       constraints: new BoxConstraints(
-        minWidth: config.minWidth ?? buttonTheme.minWidth,
+        minWidth: widget.minWidth ?? buttonTheme.minWidth,
         minHeight: height,
         maxHeight: height
       ),

@@ -95,7 +95,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
   /// Creates a notification about scrolling.
   ScrollNotification({
     @required ScrollableState scrollable,
-  }) : axisDirection = scrollable.config.axisDirection,
+  }) : axisDirection = scrollable.widget.axisDirection,
        metrics = scrollable.position.getMetrics(),
        context = scrollable.context;
 

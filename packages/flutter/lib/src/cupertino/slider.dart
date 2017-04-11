@@ -123,17 +123,17 @@ class CupertinoSlider extends StatefulWidget {
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(config.onChanged != null);
-    config.onChanged(value * (config.max - config.min) + config.min);
+    assert(widget.onChanged != null);
+    widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
 
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSliderRenderObjectWidget(
-      value: (config.value - config.min) / (config.max - config.min),
-      divisions: config.divisions,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged != null ? _handleChanged : null,
+      value: (widget.value - widget.min) / (widget.max - widget.min),
+      divisions: widget.divisions,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
   }
