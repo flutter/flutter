@@ -4,7 +4,6 @@
 
 assert(is_ios)
 
-import("//flutter/common/config.gni")
 import("//build/config/ios/rules.gni")
 import("//build/config/ios/ios_sdk.gni")
 
@@ -64,6 +63,7 @@ shared_library("flutter_framework_dylib") {
   ]
 
   deps = [
+    "//dart/runtime:libdart",
     "//flutter/flow",
     "//flutter/fml",
     "//flutter/glue",
@@ -76,11 +76,6 @@ shared_library("flutter_framework_dylib") {
     "//lib/ftl",
     "//third_party/skia",
   ]
-  if (flutter_runtime_mode == "debug") {
-    deps += [ "//dart/runtime:libdart_jit" ]
-  } else {
-    deps += [ "//dart/runtime:libdart_precompiled_runtime" ]
-  }
 
   defines = [ "FLUTTER_FRAMEWORK" ]
 

@@ -35,6 +35,7 @@ source_set("flutter_channels") {
   set_sources_assignment_filter(sources_assignment_filter)
 
   deps = [
+    "//dart/runtime:libdart",
     "//flutter/common",
     "//flutter/flow",
     "//flutter/fml",
@@ -60,7 +61,6 @@ executable("flutter_channels_unittests") {
 
   deps = [
     ":flutter_channels",
-    "//dart/runtime:libdart_jit",
     "//flutter/testing",
   ]
 }
