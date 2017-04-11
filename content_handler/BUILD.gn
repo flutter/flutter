@@ -44,9 +44,8 @@ executable("content_handler") {
     "//apps/mozart/services/input",
     "//apps/mozart/services/views",
     "//apps/tracing/lib/trace:provider",
-    "//dart/runtime:dart_api",
+    "//dart/runtime:libdart",
 
-    "//dart/runtime:libdart_jit",
     # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
     # to link otherwise.
     "//dart/runtime/bin:libdart_builtin",

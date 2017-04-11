@@ -24,7 +24,6 @@ source_set("mac_desktop_platform") {
   ]
 
   deps = [
-    "//dart/runtime:libdart_jit",
     "//flutter/common",
     "//flutter/fml",
     "//flutter/shell/common",
