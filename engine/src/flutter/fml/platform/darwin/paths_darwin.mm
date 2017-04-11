@@ -12,8 +12,7 @@ namespace fml {
 namespace paths {
 
 std::pair<bool, std::string> GetExecutableDirectoryPath() {
-  return {true, files::GetDirectoryName(
-                    [NSBundle mainBundle].executablePath.UTF8String)};
+  return {true, files::GetDirectoryName([NSBundle mainBundle].executablePath.UTF8String)};
 }
 
 }  // namespace paths

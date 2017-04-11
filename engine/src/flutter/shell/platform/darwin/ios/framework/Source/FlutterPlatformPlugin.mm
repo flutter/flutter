@@ -14,8 +14,7 @@ namespace {
 constexpr char kTextPlainFormat[] = "text/plain";
 
 NSString* GetDirectoryOfType(NSSearchPathDirectory dir) {
-  NSArray* paths =
-      NSSearchPathForDirectoriesInDomains(dir, NSUserDomainMask, YES);
+  NSArray* paths = NSSearchPathForDirectoriesInDomains(dir, NSUserDomainMask, YES);
   if (paths.count == 0)
     return nil;
   return paths.firstObject;
@@ -41,7 +40,8 @@ using namespace shell;
 
 @implementation FlutterPlatformPlugin
 
-- (void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver {
+- (void)handleMethodCall:(FlutterMethodCall*)call
+          resultReceiver:(FlutterResultReceiver)resultReceiver {
   NSString* method = call.method;
   id args = call.arguments;
   if ([method isEqualToString:@"SystemSound.play"]) {
@@ -99,7 +99,7 @@ using namespace shell;
   NSURL* url = [NSURL URLWithString:urlString];
   UIApplication* application = [UIApplication sharedApplication];
   bool success = [application canOpenURL:url] && [application openURL:url];
-  return @{ @"succes": @(success) };
+  return @{ @"succes" : @(success) };
 }
 
 - (void)setSystemChromePreferredOrientations:(NSArray*)orientations {
@@ -122,13 +122,11 @@ using namespace shell;
 
   if (!mask)
     return;
-  [[NSNotificationCenter defaultCenter]
-      postNotificationName:@(kOrientationUpdateNotificationName)
-                    object:nil
-                  userInfo:@{
-                    @(kOrientationUpdateNotificationKey) : @(mask)
-                  }];
-
+  [[NSNotificationCenter defaultCenter] postNotificationName:@(kOrientationUpdateNotificationName)
+                                                      object:nil
+                                                    userInfo:@{
+                                                      @(kOrientationUpdateNotificationKey) : @(mask)
+                                                    }];
 }
 
 - (void)setSystemChromeApplicationSwitcherDescription:(NSDictionary*)object {
@@ -157,8 +155,7 @@ using namespace shell;
 
   NSNumber* infoValue = [[NSBundle mainBundle]
       objectForInfoDictionaryKey:@"UIViewControllerBasedStatusBarAppearance"];
-  Boolean delegateToViewController =
-      (infoValue == nil || [infoValue boolValue]);
+  Boolean delegateToViewController = (infoValue == nil || [infoValue boolValue]);
 
   if (delegateToViewController) {
     // This notification is respected by the iOS embedder
@@ -182,11 +179,11 @@ using namespace shell;
 - (NSDictionary*)getClipboardData:(NSString*)format {
   UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
   if (!format || [format isEqualToString:@(kTextPlainFormat)])
-    return @{ @"text": pasteboard.string };
+    return @{ @"text" : pasteboard.string };
   return nil;
 }
 
-- (void)setClipboardData:(NSDictionary *)data {
+- (void)setClipboardData:(NSDictionary*)data {
   UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
   pasteboard.string = data[@"text"];
 }

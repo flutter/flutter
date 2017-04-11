@@ -15,8 +15,7 @@
 
 @end
 
-static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
-    NSEventPhase phase) {
+static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPhase phase) {
   switch (phase) {
     case NSEventPhaseNone:
       return blink::PointerData::Change::kCancel;
@@ -54,13 +53,11 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 }
 
 - (void)setupPlatformView {
-  FTL_DCHECK(_platformView == nullptr)
-      << "The platform view must not already be set.";
+  FTL_DCHECK(_platformView == nullptr) << "The platform view must not already be set.";
 
   _platformView.reset(new shell::PlatformViewMac(self.renderSurface));
   _platformView->SetupResourceContextOnIOThread();
-  _platformView->NotifyCreated(
-      std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
+  _platformView->NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(_platformView.get()));
 }
 
 // TODO(eseidel): This does not belong in flutter_window!
@@ -81,12 +78,11 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
   metrics.physical_width = size.width;
   metrics.physical_height = size.height;
 
-  blink::Threads::UI()->PostTask(
-      [ engine = _platformView->engine().GetWeakPtr(), metrics ] {
-        if (engine.get()) {
-          engine->SetViewportMetrics(metrics);
-        }
-      });
+  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), metrics ] {
+    if (engine.get()) {
+      engine->SetViewportMetrics(metrics);
+    }
+  });
 }
 
 - (void)setupSurfaceIfNecessary {
@@ -103,8 +99,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
 #pragma mark - Responder overrides
 
 - (void)dispatchEvent:(NSEvent*)event phase:(NSEventPhase)phase {
-  NSPoint location =
-      [_renderSurface convertPoint:event.locationInWindow fromView:nil];
+  NSPoint location = [_renderSurface convertPoint:event.locationInWindow fromView:nil];
   location.y = _renderSurface.frame.size.height - location.y;
 
   blink::PointerData pointer_data;
@@ -138,14 +133,13 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(
       break;
   }
 
-  blink::Threads::UI()->PostTask(
-      [ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {
-        if (engine.get()) {
-          blink::PointerDataPacket packet(1);
-          packet.SetPointerData(0, pointer_data);
-          engine->DispatchPointerDataPacket(packet);
-        }
-      });
+  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {
+    if (engine.get()) {
+      blink::PointerDataPacket packet(1);
+      packet.SetPointerData(0, pointer_data);
+      engine->DispatchPointerDataPacket(packet);
+    }
+  });
 }
 
 - (void)mouseDown:(NSEvent*)event {

@@ -27,8 +27,7 @@
 - (id)decode:(NSData*)message {
   if (message == nil)
     return nil;
-  FlutterStandardReader* reader =
-      [FlutterStandardReader readerWithData:message];
+  FlutterStandardReader* reader = [FlutterStandardReader readerWithData:message];
   id value = [reader readValue];
   NSAssert(![reader hasMore], @"Corrupted standard message");
   return value;
@@ -73,19 +72,16 @@
 }
 
 - (FlutterMethodCall*)decodeMethodCall:(NSData*)message {
-  FlutterStandardReader* reader =
-      [FlutterStandardReader readerWithData:message];
+  FlutterStandardReader* reader = [FlutterStandardReader readerWithData:message];
   id value1 = [reader readValue];
   id value2 = [reader readValue];
   NSAssert(![reader hasMore], @"Corrupted standard method call");
-  NSAssert([value1 isKindOfClass:[NSString class]],
-           @"Corrupted standard method call");
+  NSAssert([value1 isKindOfClass:[NSString class]], @"Corrupted standard method call");
   return [FlutterMethodCall methodCallWithMethodName:value1 arguments:value2];
 }
 
 - (id)decodeEnvelope:(NSData*)envelope {
-  FlutterStandardReader* reader =
-      [FlutterStandardReader readerWithData:envelope];
+  FlutterStandardReader* reader = [FlutterStandardReader readerWithData:envelope];
   UInt8 flag = [reader readByte];
   NSAssert(flag <= 1, @"Corrupted standard envelope");
   id result;
@@ -99,8 +95,7 @@
       id message = [reader readValue];
       id details = [reader readValue];
       NSAssert(![reader hasMore], @"Corrupted standard envelope");
-      NSAssert([code isKindOfClass:[NSString class]],
-               @"Invalid standard envelope");
+      NSAssert([code isKindOfClass:[NSString class]], @"Invalid standard envelope");
       NSAssert(message == nil || [message isKindOfClass:[NSString class]],
                @"Invalid standard envelope");
       result = [FlutterError errorWithCode:code message:message details:details];
@@ -116,40 +111,29 @@ using namespace shell;
 
 @implementation FlutterStandardTypedData
 + (instancetype)typedDataWithBytes:(NSData*)data {
-  return
-      [FlutterStandardTypedData typedDataWithData:data
-                                             type:FlutterStandardDataTypeUInt8];
+  return [FlutterStandardTypedData typedDataWithData:data type:FlutterStandardDataTypeUInt8];
 }
 
 + (instancetype)typedDataWithInt32:(NSData*)data {
-  return
-      [FlutterStandardTypedData typedDataWithData:data
-                                             type:FlutterStandardDataTypeInt32];
+  return [FlutterStandardTypedData typedDataWithData:data type:FlutterStandardDataTypeInt32];
 }
 
 + (instancetype)typedDataWithInt64:(NSData*)data {
-  return
-      [FlutterStandardTypedData typedDataWithData:data
-                                             type:FlutterStandardDataTypeInt64];
+  return [FlutterStandardTypedData typedDataWithData:data type:FlutterStandardDataTypeInt64];
 }
 
 + (instancetype)typedDataWithFloat64:(NSData*)data {
-  return [FlutterStandardTypedData
-      typedDataWithData:data
-                   type:FlutterStandardDataTypeFloat64];
+  return [FlutterStandardTypedData typedDataWithData:data type:FlutterStandardDataTypeFloat64];
 }
 
-+ (instancetype)typedDataWithData:(NSData*)data
-                             type:(FlutterStandardDataType)type {
-  return [[[FlutterStandardTypedData alloc] initWithData:data type:type]
-      autorelease];
++ (instancetype)typedDataWithData:(NSData*)data type:(FlutterStandardDataType)type {
+  return [[[FlutterStandardTypedData alloc] initWithData:data type:type] autorelease];
 }
 
 - (instancetype)initWithData:(NSData*)data type:(FlutterStandardDataType)type {
   UInt8 elementSize = elementSizeForFlutterStandardDataType(type);
   NSAssert(data, @"Data cannot be nil");
-  NSAssert(data.length % elementSize == 0,
-           @"Data must contain integral number of elements");
+  NSAssert(data.length % elementSize == 0, @"Data must contain integral number of elements");
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   _data = [data retain];
@@ -218,8 +202,7 @@ using namespace shell;
 }
 
 + (instancetype)writerWithData:(NSMutableData*)data {
-  FlutterStandardWriter* writer =
-      [[FlutterStandardWriter alloc] initWithData:data];
+  FlutterStandardWriter* writer = [[FlutterStandardWriter alloc] initWithData:data];
   [writer autorelease];
   return writer;
 }
@@ -276,10 +259,8 @@ using namespace shell;
     const char* type = [number objCType];
     if ([self isBool:number type:type]) {
       BOOL b = number.boolValue;
-      [self
-          writeByte:(b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse)];
-    } else if (strcmp(type, @encode(signed int)) == 0 ||
-               strcmp(type, @encode(signed short)) == 0 ||
+      [self writeByte:(b ? FlutterStandardFieldTrue : FlutterStandardFieldFalse)];
+    } else if (strcmp(type, @encode(signed int)) == 0 || strcmp(type, @encode(signed short)) == 0 ||
                strcmp(type, @encode(unsigned short)) == 0 ||
                strcmp(type, @encode(signed char)) == 0 ||
                strcmp(type, @encode(unsigned char)) == 0) {
@@ -291,16 +272,14 @@ using namespace shell;
       SInt64 n = number.longValue;
       [self writeByte:FlutterStandardFieldInt64];
       [_data appendBytes:(UInt8*)&n length:8];
-    } else if (strcmp(type, @encode(double)) == 0 ||
-               strcmp(type, @encode(float)) == 0) {
+    } else if (strcmp(type, @encode(double)) == 0 || strcmp(type, @encode(float)) == 0) {
       Float64 f = number.doubleValue;
       [self writeByte:FlutterStandardFieldFloat64];
       [_data appendBytes:(UInt8*)&f length:8];
     } else if (strcmp(type, @encode(unsigned long)) == 0 ||
                strcmp(type, @encode(signed long long)) == 0 ||
                strcmp(type, @encode(unsigned long long)) == 0) {
-      NSString* hex =
-          [NSString stringWithFormat:@"%llx", number.unsignedLongLongValue];
+      NSString* hex = [NSString stringWithFormat:@"%llx", number.unsignedLongLongValue];
       [self writeByte:FlutterStandardFieldIntHex];
       [self writeUTF8:hex];
     } else {
@@ -354,8 +333,7 @@ using namespace shell;
 }
 
 + (instancetype)readerWithData:(NSData*)data {
-  FlutterStandardReader* reader =
-      [[FlutterStandardReader alloc] initWithData:data];
+  FlutterStandardReader* reader = [[FlutterStandardReader alloc] initWithData:data];
   [reader autorelease];
   return reader;
 }
@@ -413,8 +391,7 @@ using namespace shell;
 
 - (NSString*)readUTF8 {
   NSData* bytes = [self readData:[self readSize]];
-  return [[[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding]
-      autorelease];
+  return [[[NSString alloc] initWithData:bytes encoding:NSUTF8StringEncoding] autorelease];
 }
 
 - (void)readAlignment:(UInt8)alignment {
@@ -476,8 +453,7 @@ using namespace shell;
     }
     case FlutterStandardFieldMap: {
       UInt32 size = [self readSize];
-      NSMutableDictionary* dict =
-          [NSMutableDictionary dictionaryWithCapacity:size];
+      NSMutableDictionary* dict = [NSMutableDictionary dictionaryWithCapacity:size];
       for (UInt32 i = 0; i < size; i++) {
         id key = [self readValue];
         id val = [self readValue];

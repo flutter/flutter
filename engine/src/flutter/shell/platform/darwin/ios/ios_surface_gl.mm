@@ -8,8 +8,7 @@
 
 namespace shell {
 
-IOSSurfaceGL::IOSSurfaceGL(PlatformView::SurfaceConfig surface_config,
-                           CAEAGLLayer* layer)
+IOSSurfaceGL::IOSSurfaceGL(PlatformView::SurfaceConfig surface_config, CAEAGLLayer* layer)
     : IOSSurface(surface_config, reinterpret_cast<CALayer*>(layer)),
       context_(surface_config, layer) {}
 

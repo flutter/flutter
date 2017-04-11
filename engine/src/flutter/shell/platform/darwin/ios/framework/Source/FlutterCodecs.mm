@@ -41,8 +41,7 @@
 - (NSString*)decode:(NSData*)message {
   if (message == nil)
     return nil;
-  return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding]
-      autorelease];
+  return [[[NSString alloc] initWithData:message encoding:NSUTF8StringEncoding] autorelease];
 }
 @end
 
@@ -58,8 +57,7 @@
 - (NSData*)encode:(id)message {
   if (message == nil)
     return nil;
-  NSData* encoding =
-      [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
+  NSData* encoding = [NSJSONSerialization dataWithJSONObject:message options:0 error:nil];
   NSAssert(encoding, @"Invalid JSON message, encoding failed");
   return encoding;
 }
@@ -67,8 +65,7 @@
 - (id)decode:(NSData*)message {
   if (message == nil)
     return nil;
-  id decoded =
-      [NSJSONSerialization JSONObjectWithData:message options:0 error:nil];
+  id decoded = [NSJSONSerialization JSONObjectWithData:message options:0 error:nil];
   NSAssert(decoded, @"Invalid JSON message, decoding failed");
   return decoded;
 }
@@ -85,15 +82,14 @@
 
 - (NSData*)encodeMethodCall:(FlutterMethodCall*)call {
   return [[FlutterJSONMessageCodec sharedInstance] encode:@{
-    @"method": call.method,
-    @"args": (call.arguments == nil ? [NSNull null] : call.arguments),
+    @"method" : call.method,
+    @"args" : (call.arguments == nil ? [NSNull null] : call.arguments),
   }];
 }
 
 - (NSData*)encodeSuccessEnvelope:(id)result {
-  return [[FlutterJSONMessageCodec sharedInstance] encode:@[
-    result == nil ? [NSNull null] : result
-  ]];
+  return
+      [[FlutterJSONMessageCodec sharedInstance] encode:@[ result == nil ? [NSNull null] : result ]];
 }
 
 - (NSData*)encodeErrorEnvelope:(FlutterError*)error {

@@ -18,8 +18,7 @@
 namespace shell {
 
 PlatformViewIOS::PlatformViewIOS(CALayer* layer)
-    : PlatformView(
-          std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
+    : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       ios_surface_(IOSSurface::Create(surface_config_, layer)),
       weak_factory_(this) {
   CreateEngine();
@@ -43,10 +42,9 @@ void PlatformViewIOS::ToggleAccessibility(UIView* view, bool enabled) {
   SetSemanticsEnabled(enabled);
 }
 
-void PlatformViewIOS::SetupAndLoadFromSource(
-    const std::string& assets_directory,
-    const std::string& main,
-    const std::string& packages) {
+void PlatformViewIOS::SetupAndLoadFromSource(const std::string& assets_directory,
+                                             const std::string& main,
+                                             const std::string& packages) {
   blink::Threads::UI()->PostTask(
       [ engine = engine().GetWeakPtr(), assets_directory, main, packages ] {
         if (engine)
@@ -74,18 +72,15 @@ VsyncWaiter* PlatformViewIOS::GetVsyncWaiter() {
 }
 
 bool PlatformViewIOS::ResourceContextMakeCurrent() {
-  return ios_surface_ != nullptr ? ios_surface_->ResourceContextMakeCurrent()
-                                 : false;
+  return ios_surface_ != nullptr ? ios_surface_->ResourceContextMakeCurrent() : false;
 }
 
-void PlatformViewIOS::UpdateSemantics(
-    std::vector<blink::SemanticsNode> update) {
+void PlatformViewIOS::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
   if (accessibility_bridge_)
     accessibility_bridge_->UpdateSemantics(std::move(update));
 }
 
-void PlatformViewIOS::HandlePlatformMessage(
-    ftl::RefPtr<blink::PlatformMessage> message) {
+void PlatformViewIOS::HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message) {
   platform_message_router_.HandlePlatformMessage(std::move(message));
 }
 

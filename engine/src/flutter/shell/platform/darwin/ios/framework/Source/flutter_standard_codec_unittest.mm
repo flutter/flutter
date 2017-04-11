@@ -6,8 +6,7 @@
 #include "gtest/gtest.h"
 
 void checkEncodeDecode(id value, NSData* expectedEncoding) {
-  FlutterStandardMessageCodec* codec =
-      [FlutterStandardMessageCodec sharedInstance];
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   if (expectedEncoding == nil)
     ASSERT_TRUE(encoded == nil);
@@ -21,8 +20,7 @@ void checkEncodeDecode(id value, NSData* expectedEncoding) {
 }
 
 void checkEncodeDecode(id value) {
-  FlutterStandardMessageCodec* codec =
-      [FlutterStandardMessageCodec sharedInstance];
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   id decoded = [codec decode:encoded];
   if (value == nil || value == [NSNull null])
@@ -69,8 +67,7 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt32) {
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeUInt64AsHexString) {
-  FlutterStandardMessageCodec* codec =
-      [FlutterStandardMessageCodec sharedInstance];
+  FlutterStandardMessageCodec* codec = [FlutterStandardMessageCodec sharedInstance];
   UInt64 u64 = 0xfffffffffffffffa;
   NSData* encoded = [codec encode:@(u64)];
   FlutterStandardBigInteger* decoded = [codec decode:encoded];
@@ -96,13 +93,12 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeSInt32) {
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeSInt64) {
   char bytes[9] = {0x04, 0xef, 0xcd, 0xab, 0x90, 0x78, 0x56, 0x34, 0x12};
-  checkEncodeDecode(@(0x1234567890abcdef),
-                    [NSData dataWithBytes:bytes length:9]);
+  checkEncodeDecode(@(0x1234567890abcdef), [NSData dataWithBytes:bytes length:9]);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeBigInteger) {
-  FlutterStandardBigInteger* value = [FlutterStandardBigInteger
-      bigIntegerWithHex:@"-abcdef0123456789abcdef01234567890"];
+  FlutterStandardBigInteger* value =
+      [FlutterStandardBigInteger bigIntegerWithHex:@"-abcdef0123456789abcdef01234567890"];
   checkEncodeDecode(value);
 }
 
@@ -113,13 +109,11 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeFloat32) {
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeFloat64) {
   char bytes[9] = {0x06, 0x18, 0x2d, 0x44, 0x54, 0xfb, 0x21, 0x09, 0x40};
-  checkEncodeDecode(@3.14159265358979311599796346854,
-                    [NSData dataWithBytes:bytes length:9]);
+  checkEncodeDecode(@3.14159265358979311599796346854, [NSData dataWithBytes:bytes length:9]);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeString) {
-  char bytes[13] = {0x07, 0x0b, 0x68, 0x65, 0x6c, 0x6c, 0x6f,
-                    0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64};
+  char bytes[13] = {0x07, 0x0b, 0x68, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x77, 0x6f, 0x72, 0x6c, 0x64};
   checkEncodeDecode(@"hello world", [NSData dataWithBytes:bytes length:13]);
 }
 
@@ -134,43 +128,37 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeStringWithNonBMPCodePoint) {
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeArray) {
-  NSArray* value =
-      @[ [NSNull null], @"hello", @3.14, @47,
-         @{ @42 : @"nested" } ];
+  NSArray* value = @[ [NSNull null], @"hello", @3.14, @47, @{ @42 : @"nested" } ];
   checkEncodeDecode(value);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeDictionary) {
-  NSDictionary* value = @{
-    @"a" : @3.14,
-    @"b" : @47,
-    [NSNull null] : [NSNull null],
-    @3.14 : @[ @"nested" ]
-  };
+  NSDictionary* value =
+      @{ @"a" : @3.14,
+         @"b" : @47,
+         [NSNull null] : [NSNull null],
+         @3.14 : @[ @"nested" ] };
   checkEncodeDecode(value);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeByteArray) {
   char bytes[4] = {0xBA, 0x5E, 0xBA, 0x11};
   NSData* data = [NSData dataWithBytes:bytes length:4];
-  FlutterStandardTypedData* value =
-      [FlutterStandardTypedData typedDataWithBytes:data];
+  FlutterStandardTypedData* value = [FlutterStandardTypedData typedDataWithBytes:data];
   checkEncodeDecode(value);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeInt32Array) {
   char bytes[8] = {0xBA, 0x5E, 0xBA, 0x11, 0xff, 0xff, 0xff, 0xff};
   NSData* data = [NSData dataWithBytes:bytes length:8];
-  FlutterStandardTypedData* value =
-      [FlutterStandardTypedData typedDataWithInt32:data];
+  FlutterStandardTypedData* value = [FlutterStandardTypedData typedDataWithInt32:data];
   checkEncodeDecode(value);
 }
 
 TEST(FlutterStandardCodec, CanEncodeAndDecodeInt64Array) {
   char bytes[8] = {0xBA, 0x5E, 0xBA, 0x11, 0xff, 0xff, 0xff, 0xff};
   NSData* data = [NSData dataWithBytes:bytes length:8];
-  FlutterStandardTypedData* value =
-      [FlutterStandardTypedData typedDataWithInt64:data];
+  FlutterStandardTypedData* value = [FlutterStandardTypedData typedDataWithInt64:data];
   checkEncodeDecode(value);
 }
 
@@ -178,34 +166,28 @@ TEST(FlutterStandardCodec, CanEncodeAndDecodeFloat64Array) {
   char bytes[16] = {0xBA, 0x5E, 0xBA, 0x11, 0xff, 0xff, 0xff, 0xff,
                     0xBA, 0x5E, 0xBA, 0x11, 0xff, 0xff, 0xff, 0xff};
   NSData* data = [NSData dataWithBytes:bytes length:16];
-  FlutterStandardTypedData* value =
-      [FlutterStandardTypedData typedDataWithFloat64:data];
+  FlutterStandardTypedData* value = [FlutterStandardTypedData typedDataWithFloat64:data];
   checkEncodeDecode(value);
 }
 
 TEST(FlutterStandardCodec, HandlesMethodCallsWithNilArguments) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
-  FlutterMethodCall* call =
-      [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:nil];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:nil];
   NSData* encoded = [codec encodeMethodCall:call];
   FlutterMethodCall* decoded = [codec decodeMethodCall:encoded];
   ASSERT_TRUE([decoded isEqual:call]);
 }
 
 TEST(FlutterStandardCodec, HandlesMethodCallsWithSingleArgument) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
-  FlutterMethodCall* call =
-      [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:@42];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
+  FlutterMethodCall* call = [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:@42];
   NSData* encoded = [codec encodeMethodCall:call];
   FlutterMethodCall* decoded = [codec decodeMethodCall:encoded];
   ASSERT_TRUE([decoded isEqual:call]);
 }
 
 TEST(FlutterStandardCodec, HandlesMethodCallsWithArgumentList) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
   NSArray* arguments = @[ @42, @"world" ];
   FlutterMethodCall* call =
       [FlutterMethodCall methodCallWithMethodName:@"hello" arguments:arguments];
@@ -215,24 +197,21 @@ TEST(FlutterStandardCodec, HandlesMethodCallsWithArgumentList) {
 }
 
 TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithNilResult) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
   NSData* encoded = [codec encodeSuccessEnvelope:nil];
   id decoded = [codec decodeEnvelope:encoded];
   ASSERT_TRUE(decoded == nil);
 }
 
 TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithSingleResult) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
   NSData* encoded = [codec encodeSuccessEnvelope:@42];
   id decoded = [codec decodeEnvelope:encoded];
   ASSERT_TRUE([decoded isEqual:@42]);
 }
 
 TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithResultMap) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
   NSDictionary* result = @{ @"a" : @42, @42 : @"a" };
   NSData* encoded = [codec encodeSuccessEnvelope:result];
   id decoded = [codec decodeEnvelope:encoded];
@@ -240,12 +219,10 @@ TEST(FlutterStandardCodec, HandlesSuccessEnvelopesWithResultMap) {
 }
 
 TEST(FlutterStandardCodec, HandlesErrorEnvelopes) {
-  FlutterStandardMethodCodec* codec =
-      [FlutterStandardMethodCodec sharedInstance];
+  FlutterStandardMethodCodec* codec = [FlutterStandardMethodCodec sharedInstance];
   NSDictionary* details = @{ @"a" : @42, @42 : @"a" };
-  FlutterError* error = [FlutterError errorWithCode:@"errorCode"
-                                            message:@"something failed"
-                                            details:details];
+  FlutterError* error =
+      [FlutterError errorWithCode:@"errorCode" message:@"something failed" details:details];
   NSData* encoded = [codec encodeErrorEnvelope:error];
   id decoded = [codec decodeEnvelope:encoded];
   ASSERT_TRUE([decoded isEqual:error]);

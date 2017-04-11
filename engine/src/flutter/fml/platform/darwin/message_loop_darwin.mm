@@ -19,12 +19,12 @@ MessageLoopDarwin::MessageLoopDarwin()
   CFRunLoopTimerContext timer_context = {
       .info = this,
   };
-  delayed_wake_timer_.Reset(CFRunLoopTimerCreate(
-      kCFAllocatorDefault, kDistantFuture /* fire date */,
-      HUGE_VAL /* interval */, 0 /* flags */, 0 /* order */,
-      reinterpret_cast<CFRunLoopTimerCallBack>(&MessageLoopDarwin::OnTimerFire)
-      /* callout */,
-      &timer_context /* context */));
+  delayed_wake_timer_.Reset(
+      CFRunLoopTimerCreate(kCFAllocatorDefault, kDistantFuture /* fire date */,
+                           HUGE_VAL /* interval */, 0 /* flags */, 0 /* order */,
+                           reinterpret_cast<CFRunLoopTimerCallBack>(&MessageLoopDarwin::OnTimerFire)
+                           /* callout */,
+                           &timer_context /* context */));
   FTL_DCHECK(delayed_wake_timer_ != nullptr);
   CFRunLoopAddTimer(loop_, delayed_wake_timer_, kCFRunLoopCommonModes);
 }
@@ -41,8 +41,7 @@ void MessageLoopDarwin::Run() {
 
   while (running_) {
     @autoreleasepool {
-      int result =
-          CFRunLoopRunInMode(kCFRunLoopDefaultMode, kDistantFuture, YES);
+      int result = CFRunLoopRunInMode(kCFRunLoopDefaultMode, kDistantFuture, YES);
       if (result == kCFRunLoopRunStopped || result == kCFRunLoopRunFinished) {
         // This handles the case where the loop is terminated using
         // CoreFoundation APIs.
@@ -65,12 +64,10 @@ void MessageLoopDarwin::WakeUp(ftl::TimePoint time_point) {
   // different and must be accounted for.
   CFRunLoopTimerSetNextFireDate(
       delayed_wake_timer_,
-      CFAbsoluteTimeGetCurrent() +
-          (time_point - ftl::TimePoint::Now()).ToSecondsF());
+      CFAbsoluteTimeGetCurrent() + (time_point - ftl::TimePoint::Now()).ToSecondsF());
 }
 
-void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer,
-                                    MessageLoopDarwin* loop) {
+void MessageLoopDarwin::OnTimerFire(CFRunLoopTimerRef timer, MessageLoopDarwin* loop) {
   @autoreleasepool {
     // RunExpiredTasksNow rearms the timer as appropriate via a call to WakeUp.
     loop->RunExpiredTasksNow();

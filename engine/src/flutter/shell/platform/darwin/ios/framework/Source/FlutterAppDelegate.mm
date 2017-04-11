@@ -10,15 +10,14 @@
 // Returns the key window's rootViewController, if it's a FlutterViewController.
 // Otherwise, returns nil.
 - (FlutterViewController*)rootFlutterViewController {
-  UIViewController *viewController =
-      [UIApplication sharedApplication].keyWindow.rootViewController;
+  UIViewController* viewController = [UIApplication sharedApplication].keyWindow.rootViewController;
   if ([viewController isKindOfClass:[FlutterViewController class]]) {
     return (FlutterViewController*)viewController;
   }
   return nil;
 }
 
-- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+- (void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event {
   [super touchesBegan:touches withEvent:event];
 
   // Pass status bar taps to key window Flutter rootViewController.

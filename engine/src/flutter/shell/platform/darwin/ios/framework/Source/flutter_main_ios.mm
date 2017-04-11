@@ -11,10 +11,8 @@ namespace shell {
 void FlutterMain() {
   NSBundle* bundle = [NSBundle bundleForClass:[FlutterViewController class]];
   NSString* icuDataPath = [bundle pathForResource:@"icudtl" ofType:@"dat"];
-  NSString* libraryName =
-      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
-  shell::PlatformMacMain(icuDataPath.UTF8String,
-                         libraryName != nil ? libraryName.UTF8String : "");
+  NSString* libraryName = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTLibraryPath"];
+  shell::PlatformMacMain(icuDataPath.UTF8String, libraryName != nil ? libraryName.UTF8String : "");
 }
 
 }  // namespace shell

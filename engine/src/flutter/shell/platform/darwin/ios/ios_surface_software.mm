@@ -14,9 +14,7 @@
 
 namespace shell {
 
-IOSSurfaceSoftware::IOSSurfaceSoftware(
-    PlatformView::SurfaceConfig surface_config,
-    CALayer* layer)
+IOSSurfaceSoftware::IOSSurfaceSoftware(PlatformView::SurfaceConfig surface_config, CALayer* layer)
     : IOSSurface(surface_config, layer) {
   UpdateStorageSizeIfNecessary();
 }
@@ -63,8 +61,8 @@ sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
     return sk_surface_;
   }
 
-  sk_surface_ = SkSurface::MakeRasterN32Premul(
-      size.fWidth, size.fHeight, nullptr /* SkSurfaceProps as out */);
+  sk_surface_ = SkSurface::MakeRasterN32Premul(size.fWidth, size.fHeight,
+                                               nullptr /* SkSurfaceProps as out */);
   return sk_surface_;
 }
 

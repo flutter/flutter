@@ -13,13 +13,11 @@
 
 namespace shell {
 
-std::unique_ptr<IOSSurface> IOSSurface::Create(
-    PlatformView::SurfaceConfig surface_config,
-    CALayer* layer) {
+std::unique_ptr<IOSSurface> IOSSurface::Create(PlatformView::SurfaceConfig surface_config,
+                                               CALayer* layer) {
   // Check if we can use OpenGL.
   if ([layer isKindOfClass:[CAEAGLLayer class]]) {
-    return std::make_unique<IOSSurfaceGL>(
-        surface_config, reinterpret_cast<CAEAGLLayer*>(layer));
+    return std::make_unique<IOSSurfaceGL>(surface_config, reinterpret_cast<CAEAGLLayer*>(layer));
   }
 
   // If we ever support the metal rendering API, a check for CAMetalLayer would
@@ -29,8 +27,7 @@ std::unique_ptr<IOSSurface> IOSSurface::Create(
   return std::make_unique<IOSSurfaceSoftware>(surface_config, layer);
 }
 
-IOSSurface::IOSSurface(PlatformView::SurfaceConfig surface_config,
-                       CALayer* layer)
+IOSSurface::IOSSurface(PlatformView::SurfaceConfig surface_config, CALayer* layer)
     : surface_config_(surface_config), layer_([layer retain]) {}
 
 IOSSurface::~IOSSurface() = default;

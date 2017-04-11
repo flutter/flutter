@@ -27,8 +27,7 @@ int main(int argc, const char* argv[]) {
   }
 
   // Decide between interactive and non-interactive modes.
-  if (command_line.HasOption(
-          shell::FlagForSwitch(shell::Switch::NonInteractive))) {
+  if (command_line.HasOption(shell::FlagForSwitch(shell::Switch::NonInteractive))) {
     if (!shell::InitForTesting(std::move(command_line)))
       return 1;
     fml::MessageLoop::GetCurrent().Run();

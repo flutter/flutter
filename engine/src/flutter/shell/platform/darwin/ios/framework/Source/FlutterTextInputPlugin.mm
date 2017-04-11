@@ -188,8 +188,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   [_view removeFromSuperview];
 }
 
-- (void)setTextInputClient:(int)client
-         withConfiguration:(NSDictionary*)configuration {
+- (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
   [_view setTextInputClient:client];
   [_view reloadInputViews];
