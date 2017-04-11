@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
@@ -383,6 +384,76 @@ class RelativePositionedTransition extends AnimatedWidget {
       right: offsets.right,
       bottom: offsets.bottom,
       left: offsets.left,
+      child: child,
+    );
+  }
+}
+
+/// Animates the different properties of a [Container].
+class ContainerTransition extends AnimatedWidget {
+  ContainerTransition({
+    Key key,
+    this.alignment,
+    this.padding,
+    this.color,
+    this.decoration,
+    this.foregroundDecoration,
+    this.height,
+    this.width,
+    this.constraints,
+    this.margin,
+    this.transform,
+    @required this.child,
+  }) : super(key: key, listenable: new Listenable.merge(<Listenable>[
+    // Trigger update on change from any of the animation changes.
+    // Listenable automatically omits nulls in listenable lists.
+    alignment,
+    padding,
+    color,
+    decoration,
+    foregroundDecoration,
+    height,
+    width,
+    constraints,
+    margin,
+    transform,
+  ]));
+
+  final Animation<FractionalOffset> alignment;
+  final Animation<EdgeInsets> padding;
+  final Animation<Color> color;
+
+  /// An animation that controls the [Decoration] of this [Container] behind the
+  /// child.
+  /// 
+  /// The [Decoration] must implement lerp. 
+  /// 
+  /// Also see [Container.decoration].
+  final Animation<Decoration> decoration;
+
+  final Animation<Decoration> foregroundDecoration;
+  final Animation<double> height;
+  final Animation<double> width;
+  final Animation<BoxConstraints> constraints;
+  final Animation<EdgeInsets> margin;
+  final Animation<Matrix4> transform;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      alignment: alignment.value,
+      padding: padding.value,
+      color: color.value,
+      decoration: decoration.value,
+      foregroundDecoration: foregroundDecoration.value,
+      height: height.value,
+      width: width.value,
+      constraints: constraints.value,
+      margin: margin.value,
+      transform: transform.value,
       child: child,
     );
   }
