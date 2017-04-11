@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/common/config.gni")
 import("//flutter/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
@@ -34,7 +35,6 @@ shared_library("flutter_shell_native") {
   ]
 
   deps = [
-    "//dart/runtime:libdart",
     "//flutter/common",
     "//flutter/flow",
     "//flutter/fml",
@@ -45,6 +45,11 @@ shared_library("flutter_shell_native") {
     "//lib/ftl",
     "//third_party/skia",
   ]
+  if (flutter_runtime_mode == "debug") {
+    deps += [ "//dart/runtime:libdart_jit" ]
+  } else {
+    deps += [ "//dart/runtime:libdart_precompiled_runtime" ]
+  }
 
   defines = []
 
