@@ -507,23 +507,13 @@ class _FloatingAppBar extends StatefulWidget {
 // A wrapper for the widget created by _SliverAppBarDelegate that starts and
 /// stops the floating appbar's snap-into-view or snap-out-of-view animation.
 class _FloatingAppBarState extends State<_FloatingAppBar> {
-  ScrollableState _scrollable;
   ScrollPosition _position;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _updateScrollable();
-  }
-
-  void _updateScrollable() {
-    _scrollable = Scrollable.of(context);
-    _updateScrollPosition();
-  }
-
-  void _updateScrollPosition() {
     _position?.removeIsScrollingListener(_isScrollingListener);
-    _position = _scrollable?.position;
+    _position = Scrollable.of(context)?.position;
     _position?.addIsScrollingListener(_isScrollingListener);
   }
 
@@ -538,7 +528,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _isScrollingListener() {
-    if (_scrollable == null)
+    if (_position == null)
       return;
 
     // When a scroll stops, then maybe snap the appbar into view.
@@ -551,13 +541,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (_scrollable == null)
-      _updateScrollable();
-    if (_scrollable.position != _position)
-      _updateScrollPosition();
-    return config.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
@@ -887,7 +871,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   FloatingHeaderSnapConfiguration _snapConfiguration;
 
   void _updateSnapConfiguration() {
-    if (config.snap && config.floating) {
+    if (widget.snap && widget.floating) {
       _snapConfiguration = new FloatingHeaderSnapConfiguration(
         vsync: this,
         curve: Curves.easeOut,
@@ -905,39 +889,39 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   }
 
   @override
-  void didUpdateConfig(SliverAppBar oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.snap != oldConfig.snap || config.floating != oldConfig.floating)
+  void didUpdateWidget(SliverAppBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
   }
 
   @override
   Widget build(BuildContext context) {
-    final double topPadding = config.primary ? MediaQuery.of(context).padding.top : 0.0;
-    final double collapsedHeight = (config.pinned && config.floating && config.bottom != null)
-      ? config.bottom.bottomHeight + topPadding : null;
+    final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
+    final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
+      ? widget.bottom.bottomHeight + topPadding : null;
 
     return new SliverPersistentHeader(
-      floating: config.floating,
-      pinned: config.pinned,
+      floating: widget.floating,
+      pinned: widget.pinned,
       delegate: new _SliverAppBarDelegate(
-        leading: config.leading,
-        title: config.title,
-        actions: config.actions,
-        flexibleSpace: config.flexibleSpace,
-        bottom: config.bottom,
-        elevation: config.elevation,
-        backgroundColor: config.backgroundColor,
-        brightness: config.brightness,
-        iconTheme: config.iconTheme,
-        textTheme: config.textTheme,
-        primary: config.primary,
-        centerTitle: config.centerTitle,
-        expandedHeight: config.expandedHeight,
+        leading: widget.leading,
+        title: widget.title,
+        actions: widget.actions,
+        flexibleSpace: widget.flexibleSpace,
+        bottom: widget.bottom,
+        elevation: widget.elevation,
+        backgroundColor: widget.backgroundColor,
+        brightness: widget.brightness,
+        iconTheme: widget.iconTheme,
+        textTheme: widget.textTheme,
+        primary: widget.primary,
+        centerTitle: widget.centerTitle,
+        expandedHeight: widget.expandedHeight,
         collapsedHeight: collapsedHeight,
         topPadding: topPadding,
-        floating: config.floating,
-        pinned: config.pinned,
+        floating: widget.floating,
+        pinned: widget.pinned,
         snapConfiguration: _snapConfiguration,
       ),
     );
