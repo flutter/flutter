@@ -51,9 +51,13 @@ import 'platform_messages.dart';
 ///  * [rootBundle]
 abstract class AssetBundle {
   /// Retrieve a binary resource from the asset bundle as a data stream.
+  ///
+  /// Throws an exception if the asset is not found.
   Future<ByteData> load(String key);
 
   /// Retrieve a string from the asset bundle.
+  ///
+  /// Throws an exception if the asset is not found.
   ///
   /// If the `cache` argument is set to false, then the data will not be
   /// cached, and reading the data may bypass the cache. This is useful if the
@@ -97,15 +101,20 @@ class NetworkAssetBundle extends AssetBundle {
   @override
   Future<ByteData> load(String key) async {
     final http.Response response = await _httpClient.get(_urlFromKey(key));
-    if (response.statusCode == 200)
-      return null;
+    if (response.statusCode != 200)
+      throw new FlutterError('Unable to load asset: $key');
     return response.bodyBytes.buffer.asByteData();
   }
 
   @override
   Future<String> loadString(String key, { bool cache: true }) async {
     final http.Response response = await _httpClient.get(_urlFromKey(key));
-    return response.statusCode == 200 ? response.body : null;
+    if (response.statusCode != 200)
+      throw new FlutterError(
+          'Unable to load asset: $key\n'
+          'HTTP status code: ${response.statusCode}'
+      );
+    return response.body;
   }
 
   /// Retrieve a string from the asset bundle, parse it with the given function,
@@ -149,6 +158,8 @@ abstract class CachingAssetBundle extends AssetBundle {
 
   Future<String> _fetchString(String key) async {
     final ByteData data = await load(key);
+    if (data == null)
+      throw new FlutterError('Unable to load asset: $key');
     return UTF8.decode(data.buffer.asUint8List());
   }
 
@@ -202,9 +213,13 @@ abstract class CachingAssetBundle extends AssetBundle {
 /// An [AssetBundle] that loads resources using platform messages.
 class PlatformAssetBundle extends CachingAssetBundle {
   @override
-  Future<ByteData> load(String key) {
+  Future<ByteData> load(String key) async {
     final Uint8List encoded = UTF8.encoder.convert(key);
-    return PlatformMessages.sendBinary('flutter/assets', encoded.buffer.asByteData());
+    final ByteData asset =
+        await PlatformMessages.sendBinary('flutter/assets', encoded.buffer.asByteData());
+    if (asset == null)
+      throw new FlutterError('Unable to load asset: $key');
+    return asset;
   }
 }
 
