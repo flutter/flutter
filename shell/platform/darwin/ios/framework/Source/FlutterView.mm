@@ -60,10 +60,9 @@ void SnapshotRasterizer(ftl::WeakPtr<shell::Rasterizer> rasterizer,
   if (size.isEmpty()) {
     return;
   }
-  auto info =
-      SkImageInfo::MakeN32(size.width(), size.height(),
-                           is_opaque ? SkAlphaType::kOpaque_SkAlphaType
-                                     : SkAlphaType::kPremul_SkAlphaType);
+  auto info = SkImageInfo::MakeN32(
+      size.width(), size.height(),
+      is_opaque ? SkAlphaType::kOpaque_SkAlphaType : SkAlphaType::kPremul_SkAlphaType);
 
   // Create the backing store and prepare for use.
   SkBitmap bitmap;
@@ -80,8 +79,7 @@ void SnapshotRasterizer(ftl::WeakPtr<shell::Rasterizer> rasterizer,
 
   {
     flow::CompositorContext compositor_context(nullptr);
-    auto frame = compositor_context.AcquireFrame(nullptr, &canvas,
-                                                 false /* instrumentation */);
+    auto frame = compositor_context.AcquireFrame(nullptr, &canvas, false /* instrumentation */);
     layer_tree->Raster(frame, false /* ignore raster cache. */);
   }
 

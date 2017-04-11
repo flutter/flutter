@@ -31,10 +31,8 @@
 
     NSFileManager* fileManager = [NSFileManager defaultManager];
 
-    const BOOL dartMainExists =
-        [fileManager fileExistsAtPath:dartMain.absoluteURL.path];
-    const BOOL packagesExists =
-        [fileManager fileExistsAtPath:packages.absoluteURL.path];
+    const BOOL dartMainExists = [fileManager fileExistsAtPath:dartMain.absoluteURL.path];
+    const BOOL packagesExists = [fileManager fileExistsAtPath:packages.absoluteURL.path];
 
     if (!dartMainExists || !packagesExists) {
       // We cannot actually verify this without opening up the archive. This is
@@ -57,9 +55,7 @@
   return self;
 }
 
-static BOOL CheckDartProjectURL(NSMutableString* log,
-                                NSURL* url,
-                                NSString* logLabel) {
+static BOOL CheckDartProjectURL(NSMutableString* log, NSURL* url, NSString* logLabel) {
   if (url == nil) {
     [log appendFormat:@"The %@ was not specified.\n", logLabel];
     return false;
@@ -71,8 +67,7 @@ static BOOL CheckDartProjectURL(NSMutableString* log,
   }
 
   if (![[NSFileManager defaultManager] fileExistsAtPath:url.absoluteURL.path]) {
-    [log appendFormat:@"No file found at '%@' when looking for the %@.\n", url,
-                      logLabel];
+    [log appendFormat:@"No file found at '%@' when looking for the %@.\n", url, logLabel];
     return false;
   }
 

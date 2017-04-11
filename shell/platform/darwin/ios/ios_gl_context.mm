@@ -12,13 +12,11 @@ namespace shell {
     return;                           \
   };
 
-IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
-                           CAEAGLLayer* layer)
+IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* layer)
     : layer_([layer retain]),
       context_([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2]),
-      resource_context_([[EAGLContext alloc]
-          initWithAPI:kEAGLRenderingAPIOpenGLES2
-           sharegroup:context_.get().sharegroup]),
+      resource_context_([[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2
+                                              sharegroup:context_.get().sharegroup]),
       framebuffer_(GL_NONE),
       colorbuffer_(GL_NONE),
       depthbuffer_(GL_NONE),
@@ -53,8 +51,7 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   VERIFY(glGetError() == GL_NO_ERROR);
 
-  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                            GL_RENDERBUFFER, colorbuffer_);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorbuffer_);
   VERIFY(glGetError() == GL_NO_ERROR);
 
   // On iOS, if both depth and stencil attachments are requested, we are
@@ -67,10 +64,10 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_packed_buffer_);
     VERIFY(depth_stencil_packed_buffer_ != GL_NONE);
 
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                              GL_RENDERBUFFER, depth_stencil_packed_buffer_);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                              GL_RENDERBUFFER, depth_stencil_packed_buffer_);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                              depth_stencil_packed_buffer_);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                              depth_stencil_packed_buffer_);
     VERIFY(depth_stencil_packed_buffer_ != GL_NONE);
   } else {
     // Setup the depth attachment if necessary
@@ -81,8 +78,7 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
       glBindRenderbuffer(GL_RENDERBUFFER, depthbuffer_);
       VERIFY(glGetError() == GL_NO_ERROR);
 
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                GL_RENDERBUFFER, depthbuffer_);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthbuffer_);
       VERIFY(glGetError() == GL_NO_ERROR);
     }
 
@@ -94,8 +90,8 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config,
       glBindRenderbuffer(GL_RENDERBUFFER, stencilbuffer_);
       VERIFY(glGetError() == GL_NO_ERROR);
 
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT,
-                                GL_RENDERBUFFER, stencilbuffer_);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                                stencilbuffer_);
       VERIFY(glGetError() == GL_NO_ERROR);
     }
   }
@@ -139,8 +135,7 @@ bool IOSGLContext::PresentRenderBuffer() const {
       GL_DEPTH_ATTACHMENT, GL_STENCIL_ATTACHMENT,
   };
 
-  glDiscardFramebufferEXT(GL_FRAMEBUFFER, sizeof(discards) / sizeof(GLenum),
-                          discards);
+  glDiscardFramebufferEXT(GL_FRAMEBUFFER, sizeof(discards) / sizeof(GLenum), discards);
 
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   return [[EAGLContext currentContext] presentRenderbuffer:GL_RENDERBUFFER];
@@ -152,8 +147,7 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   const GLint size_width = layer_size.width;
   const GLint size_height = layer_size.height;
 
-  if (size_width == storage_size_width_ &&
-      size_height == storage_size_height_) {
+  if (size_width == storage_size_width_ && size_height == storage_size_height_) {
     // Nothing to since the stoage size is already consistent with the layer.
     return true;
   }
@@ -169,8 +163,7 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   glBindRenderbuffer(GL_RENDERBUFFER, colorbuffer_);
   FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
-  if (![context_.get() renderbufferStorage:GL_RENDERBUFFER
-                              fromDrawable:layer_.get()]) {
+  if (![context_.get() renderbufferStorage:GL_RENDERBUFFER fromDrawable:layer_.get()]) {
     return false;
   }
 
@@ -182,12 +175,10 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
       depth_stencil_packed_buffer_ != GL_NONE) {
     // Fetch the dimensions of the color buffer whose backing was just updated
     // so that backing of the attachments can be updated
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH,
-                                 &width);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
     FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
-    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT,
-                                 &height);
+    glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
     FTL_DCHECK(glGetError() == GL_NO_ERROR);
 
     rebind_color_buffer = true;
@@ -195,8 +186,7 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
 
   if (depth_stencil_packed_buffer_ != GL_NONE) {
     glBindRenderbuffer(GL_RENDERBUFFER, depth_stencil_packed_buffer_);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, width,
-                          height);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8_OES, width, height);
     FTL_DCHECK(glGetError() == GL_NO_ERROR);
   }
 
@@ -220,15 +210,13 @@ bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   storage_size_width_ = width;
   storage_size_height_ = height;
 
-  FTL_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) ==
-             GL_FRAMEBUFFER_COMPLETE);
+  FTL_DCHECK(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 
   return true;
 }
 
 bool IOSGLContext::MakeCurrent() {
-  return UpdateStorageSizeIfNecessary() &&
-         [EAGLContext setCurrentContext:context_.get()];
+  return UpdateStorageSizeIfNecessary() && [EAGLContext setCurrentContext:context_.get()];
 }
 
 bool IOSGLContext::ResourceMakeCurrent() {

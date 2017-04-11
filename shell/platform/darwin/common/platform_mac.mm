@@ -20,17 +20,14 @@
 
 namespace shell {
 
-static void RedirectIOConnectionsToSyslog(
-    const ftl::CommandLine& command_line) {
+static void RedirectIOConnectionsToSyslog(const ftl::CommandLine& command_line) {
 #if TARGET_OS_IPHONE
   if (command_line.HasOption(FlagForSwitch(Switch::NoRedirectToSyslog))) {
     return;
   }
 
-  asl_log_descriptor(NULL, NULL, ASL_LEVEL_NOTICE, STDOUT_FILENO,
-                     ASL_LOG_DESCRIPTOR_WRITE);
-  asl_log_descriptor(NULL, NULL, ASL_LEVEL_WARNING, STDERR_FILENO,
-                     ASL_LOG_DESCRIPTOR_WRITE);
+  asl_log_descriptor(NULL, NULL, ASL_LEVEL_NOTICE, STDOUT_FILENO, ASL_LOG_DESCRIPTOR_WRITE);
+  asl_log_descriptor(NULL, NULL, ASL_LEVEL_WARNING, STDERR_FILENO, ASL_LOG_DESCRIPTOR_WRITE);
 #endif
 }
 
@@ -46,8 +43,7 @@ static ftl::CommandLine InitializedCommandLine() {
 
 class EmbedderState {
  public:
-  EmbedderState(std::string icu_data_path,
-                std::string application_library_path) {
+  EmbedderState(std::string icu_data_path, std::string application_library_path) {
 #if TARGET_OS_IPHONE
     // This calls crashes on MacOS because we haven't run Dart_Initialize yet.
     // See https://github.com/flutter/flutter/issues/4006
@@ -64,8 +60,7 @@ class EmbedderState {
     // marker that can be used as a reference for startup.
     TRACE_EVENT_INSTANT0("flutter", "main");
 
-    shell::Shell::InitStandalone(std::move(command_line), icu_data_path,
-                                 application_library_path);
+    shell::Shell::InitStandalone(std::move(command_line), icu_data_path, application_library_path);
   }
 
   ~EmbedderState() {}
@@ -74,14 +69,12 @@ class EmbedderState {
   FTL_DISALLOW_COPY_AND_ASSIGN(EmbedderState);
 };
 
-void PlatformMacMain(std::string icu_data_path,
-                     std::string application_library_path) {
+void PlatformMacMain(std::string icu_data_path, std::string application_library_path) {
   static std::unique_ptr<EmbedderState> g_embedder;
   static std::once_flag once_main;
 
   std::call_once(once_main, [&]() {
-    g_embedder =
-        WTF::MakeUnique<EmbedderState>(icu_data_path, application_library_path);
+    g_embedder = WTF::MakeUnique<EmbedderState>(icu_data_path, application_library_path);
   });
 }
 
@@ -150,12 +143,9 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
     [defaults synchronize];
   }
 
-  std::string bundle_path =
-      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::FLX));
-  std::string main =
-      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::MainDartFile));
-  std::string packages =
-      ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::Packages));
+  std::string bundle_path = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::FLX));
+  std::string main = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::MainDartFile));
+  std::string packages = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::Packages));
 
   if (!FlagsValidForCommandLineLaunch(bundle_path, main, packages)) {
     return false;
@@ -164,20 +154,16 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
   // Save the newly resolved dart main file and the package root to user
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
-  [defaults setObject:@(bundle_path.c_str())
-               forKey:@(FlagForSwitch(Switch::FLX))];
-  [defaults setObject:@(main.c_str())
-               forKey:@(FlagForSwitch(Switch::MainDartFile))];
-  [defaults setObject:@(packages.c_str())
-               forKey:@(FlagForSwitch(Switch::Packages))];
+  [defaults setObject:@(bundle_path.c_str()) forKey:@(FlagForSwitch(Switch::FLX))];
+  [defaults setObject:@(main.c_str()) forKey:@(FlagForSwitch(Switch::MainDartFile))];
+  [defaults setObject:@(packages.c_str()) forKey:@(FlagForSwitch(Switch::Packages))];
 
   [defaults synchronize];
 
-  blink::Threads::UI()->PostTask(
-      [ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
-        if (engine)
-          engine->RunBundleAndSource(bundle_path, main, packages);
-      });
+  blink::Threads::UI()->PostTask([ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
+    if (engine)
+      engine->RunBundleAndSource(bundle_path, main, packages);
+  });
 
   return true;
 }

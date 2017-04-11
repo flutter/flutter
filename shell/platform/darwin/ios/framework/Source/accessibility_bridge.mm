@@ -4,13 +4,13 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 
-#include <vector>
 #include <utility>
+#include <vector>
 
 #import <UIKit/UIKit.h>
 
-#include "lib/ftl/logging.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
+#include "lib/ftl/logging.h"
 
 namespace {
 
@@ -20,17 +20,17 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
     UIAccessibilityScrollDirection direction) {
   switch (direction) {
     case UIAccessibilityScrollDirectionRight:
-    case UIAccessibilityScrollDirectionPrevious: // TODO(abarth): Support RTL.
+    case UIAccessibilityScrollDirectionPrevious:  // TODO(abarth): Support RTL.
       return blink::SemanticsAction::kScrollRight;
     case UIAccessibilityScrollDirectionLeft:
-    case UIAccessibilityScrollDirectionNext: // TODO(abarth): Support RTL.
+    case UIAccessibilityScrollDirectionNext:  // TODO(abarth): Support RTL.
       return blink::SemanticsAction::kScrollLeft;
     case UIAccessibilityScrollDirectionUp:
       return blink::SemanticsAction::kScrollUp;
     case UIAccessibilityScrollDirectionDown:
       return blink::SemanticsAction::kScrollDown;
   }
-  FTL_DCHECK(false); // Unreachable
+  FTL_DCHECK(false);  // Unreachable
   return blink::SemanticsAction::kScrollDown;
 }
 
@@ -53,8 +53,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 #pragma mark - Designated initializers
 
-- (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge
-                           uid:(int32_t)uid {
+- (instancetype)initWithBridge:(shell::AccessibilityBridge*)bridge uid:(int32_t)uid {
   FTL_DCHECK(bridge != nil) << "bridge must be set";
   FTL_DCHECK(uid >= kRootNodeId);
   self = [super init];
@@ -104,8 +103,8 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   if (_node.HasAction(blink::SemanticsAction::kTap)) {
     traits |= UIAccessibilityTraitButton;
   }
-  if (_node.HasAction(blink::SemanticsAction::kIncrease)
-      || _node.HasAction(blink::SemanticsAction::kDecrease)) {
+  if (_node.HasAction(blink::SemanticsAction::kIncrease) ||
+      _node.HasAction(blink::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
   }
   return traits;
@@ -128,8 +127,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
   rect.set(quad, 4);
 
   auto result = CGRectMake(rect.x(), rect.y(), rect.width(), rect.height());
-  return UIAccessibilityConvertFrameToScreenCoordinates(result,
-                                                        _bridge->view());
+  return UIAccessibilityConvertFrameToScreenCoordinates(result, _bridge->view());
 }
 
 #pragma mark - UIAccessibilityElement protocol
@@ -204,8 +202,7 @@ blink::SemanticsAction GetSemanticsActionForScrollDirection(
 
 namespace shell {
 
-AccessibilityBridge::AccessibilityBridge(UIView* view,
-                                         PlatformViewIOS* platform_view)
+AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view)
     : view_(view), platform_view_(platform_view) {}
 
 AccessibilityBridge::~AccessibilityBridge() {
@@ -252,13 +249,10 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
   } else {
     view_.accessibilityElements = nil;
   }
-  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification,
-                                  nil);
+  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
 }
 
-void AccessibilityBridge::DispatchSemanticsAction(
-    int32_t uid,
-    blink::SemanticsAction action) {
+void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
   platform_view_->DispatchSemanticsAction(uid, action);
 }
 
@@ -271,16 +265,14 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid) {
   return object;
 }
 
-void AccessibilityBridge::VisitObjectsRecursively(
-    SemanticsObject* object,
-    std::unordered_set<int>* visited_objects) {
+void AccessibilityBridge::VisitObjectsRecursively(SemanticsObject* object,
+                                                  std::unordered_set<int>* visited_objects) {
   visited_objects->insert(object.uid);
   for (SemanticsObject* child : *[object children])
     VisitObjectsRecursively(child, visited_objects);
 }
 
-void AccessibilityBridge::ReleaseObjects(
-    const std::unordered_map<int, SemanticsObject*>& objects) {
+void AccessibilityBridge::ReleaseObjects(const std::unordered_map<int, SemanticsObject*>& objects) {
   for (const auto& entry : objects) {
     SemanticsObject* object = entry.second;
     [object neuter];

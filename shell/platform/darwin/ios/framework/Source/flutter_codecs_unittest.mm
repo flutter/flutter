@@ -48,9 +48,7 @@ TEST(FlutterJSONCodec, CanEncodeAndDecodeNil) {
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeArray) {
-  NSArray* value =
-      @[ [NSNull null], @"hello", @3.14, @47,
-         @{ @"a" : @"nested" } ];
+  NSArray* value = @[ [NSNull null], @"hello", @3.14, @47, @{ @"a" : @"nested" } ];
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSArray* decoded = [codec decode:encoded];
@@ -58,12 +56,7 @@ TEST(FlutterJSONCodec, CanEncodeAndDecodeArray) {
 }
 
 TEST(FlutterJSONCodec, CanEncodeAndDecodeDictionary) {
-  NSDictionary* value = @{
-    @"a" : @3.14,
-    @"b" : @47,
-    @"c" : [NSNull null],
-    @"d" : @[ @"nested" ]
-  };
+  NSDictionary* value = @{ @"a" : @3.14, @"b" : @47, @"c" : [NSNull null], @"d" : @[ @"nested" ] };
   FlutterJSONMessageCodec* codec = [FlutterJSONMessageCodec sharedInstance];
   NSData* encoded = [codec encode:value];
   NSDictionary* decoded = [codec decode:encoded];

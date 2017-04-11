@@ -27,14 +27,12 @@
   self = [super init];
 
   if (self) {
-    _displayLink = [[CADisplayLink
-        displayLinkWithTarget:self
-                     selector:@selector(onDisplayLink:)] retain];
+    _displayLink =
+        [[CADisplayLink displayLinkWithTarget:self selector:@selector(onDisplayLink:)] retain];
     _displayLink.paused = YES;
 
     blink::Threads::UI()->PostTask([client = [self retain]]() {
-      [client->_displayLink addToRunLoop:[NSRunLoop currentRunLoop]
-                                 forMode:NSRunLoopCommonModes];
+      [client->_displayLink addToRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
       [client release];
     });
   }
