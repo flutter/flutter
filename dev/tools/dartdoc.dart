@@ -75,7 +75,6 @@ dependencies:
     '--use-categories'
   ];
 
-
   for (String libraryRef in libraryRefs(diskPath: true)) {
     args.add('--include-external');
     args.add(libraryRef);
