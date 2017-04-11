@@ -106,6 +106,8 @@ class CreateCommand extends FlutterCommand {
         flutterPackagesDirectory, renderDriverTest: argResults['with-driver-test'],
         withPluginHook: generatePlugin,
     );
+    templateContext['flutterJar'] =
+      "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar";
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
     int generatedCount = 0;
