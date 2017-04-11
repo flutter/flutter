@@ -209,6 +209,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
+      'flutterRootUri': fs.path.toUri(fs.path.absolute(Cache.flutterRoot)).toString(),
     };
   }
 
