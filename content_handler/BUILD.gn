@@ -9,86 +9,100 @@ declare_args() {
   flutter_use_vulkan_native_surface = false
 }
 
-executable("content_handler") {
-  output_name = "flutter_runner"
+template("flutter_content_handler") {
+  invoker_output_name = invoker.output_name
+  extra_deps = invoker.extra_deps
 
-  defines = []
+  executable(target_name) {
+    output_name = invoker_output_name
 
-  libs = []
+    defines = []
 
-  sources = [
-    "app.cc",
-    "app.h",
-    "application_controller_impl.cc",
-    "application_controller_impl.h",
-    "content_handler_thread.cc",
-    "content_handler_thread.h",
-    "main.cc",
-    "rasterizer.cc",
-    "rasterizer.h",
-    "runtime_holder.cc",
-    "runtime_holder.h",
-    "service_protocol_hooks.cc",
-    "service_protocol_hooks.h",
-    "software_rasterizer.cc",
-    "software_rasterizer.h",
-  ]
+    libs = []
 
-  deps = [
-    "//application/lib/app",
-    "//apps/icu_data/lib",
-    "//apps/mozart/lib/skia:vmo",
-    "//apps/mozart/services/buffers",
-    "//apps/mozart/services/buffers/cpp",
-    "//apps/mozart/services/composition",
-    "//apps/mozart/services/input",
-    "//apps/mozart/services/views",
-    "//apps/tracing/lib/trace:provider",
-    "//dart/runtime:dart_api",
+    sources = [
+      "app.cc",
+      "app.h",
+      "application_controller_impl.cc",
+      "application_controller_impl.h",
+      "content_handler_thread.cc",
+      "content_handler_thread.h",
+      "main.cc",
+      "rasterizer.cc",
+      "rasterizer.h",
+      "runtime_holder.cc",
+      "runtime_holder.h",
+      "service_protocol_hooks.cc",
+      "service_protocol_hooks.h",
+      "software_rasterizer.cc",
+      "software_rasterizer.h",
+    ]
 
-    "//dart/runtime:libdart_jit",
-    # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
-    # to link otherwise.
-    "//dart/runtime/bin:libdart_builtin",
-    "//dart/runtime/vm:libdart_platform",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/lib/ui",
-    "//flutter/runtime",
-    "//flutter/sky/engine/platform",
-    "//lib/fidl/dart/sdk_ext",
-    "//lib/ftl",
-    "//lib/mtl",
-    "//lib/tonic/mx",
-    "//lib/zip",
-    "//third_party/rapidjson",
-    "//third_party/skia",
-  ]
+    deps = [
+      "//application/lib/app",
+      "//apps/icu_data/lib",
+      "//apps/mozart/lib/skia:vmo",
+      "//apps/mozart/services/buffers",
+      "//apps/mozart/services/buffers/cpp",
+      "//apps/mozart/services/composition",
+      "//apps/mozart/services/input",
+      "//apps/mozart/services/views",
+      "//apps/tracing/lib/trace:provider",
 
-  if (flutter_enable_vulkan) {
-    defines += [ "FLUTTER_ENABLE_VULKAN=1" ]
+      # TODO(abarth): We shouldn't need to depend on libdart_builtin but we fail
+      # to link otherwise.
+      "//dart/runtime/bin:libdart_builtin",
+      "//dart/runtime/vm:libdart_platform",
+      "//flutter/assets",
+      "//flutter/common",
+      "//flutter/flow",
+      "//flutter/glue",
+      "//flutter/lib/ui",
+      "//flutter/runtime",
+      "//flutter/sky/engine/platform",
+      "//lib/fidl/dart/sdk_ext",
+      "//lib/ftl",
+      "//lib/mtl",
+      "//lib/tonic/mx",
+      "//lib/zip",
+      "//third_party/rapidjson",
+      "//third_party/skia",
+    ]
+    deps += extra_deps
 
-    if (flutter_use_vulkan_native_surface) {
-      defines += [ "FLUTTER_USE_VULKAN_NATIVE_SURFACE=1" ]
-      sources += [
-        "direct_input.cc",
-        "direct_input.h",
-        "vulkan_native_rasterizer.cc",
-        "vulkan_native_rasterizer.h",
-      ]
-      libs += [ "hid" ]
-    } else {
-      sources += [
-        "vulkan_rasterizer.cc",
-        "vulkan_rasterizer.h",
+    if (flutter_enable_vulkan) {
+      defines += [ "FLUTTER_ENABLE_VULKAN=1" ]
+
+      if (flutter_use_vulkan_native_surface) {
+        defines += [ "FLUTTER_USE_VULKAN_NATIVE_SURFACE=1" ]
+        sources += [
+          "direct_input.cc",
+          "direct_input.h",
+          "vulkan_native_rasterizer.cc",
+          "vulkan_native_rasterizer.h",
+        ]
+        libs += [ "hid" ]
+      } else {
+        sources += [
+          "vulkan_rasterizer.cc",
+          "vulkan_rasterizer.h",
+        ]
+      }
+
+      deps += [
+        "//flutter/vulkan",
+        "//magma:vulkan",
       ]
     }
-
-    deps += [
-      "//flutter/vulkan",
-      "//magma:vulkan",
-    ]
   }
+}
+
+flutter_content_handler("content_handler") {
+  output_name = "flutter_runner"
+  extra_deps = [ "//dart/runtime:libdart_jit" ]
+}
+
+flutter_content_handler("aot_content_handler") {
+  output_name = "flutter_aot_runner"
+  extra_deps = [ "//dart/runtime:libdart_precompiled_runtime" ]
 }

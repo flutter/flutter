@@ -17,13 +17,18 @@ PlatformImpl* g_platform_impl = nullptr;
 
 }  // namespace
 
-void InitRuntime() {
+void InitRuntime(const uint8_t* vm_snapshot_data,
+                 const uint8_t* vm_snapshot_instructions,
+                 const uint8_t* default_isolate_snapshot_data,
+                 const uint8_t* default_isolate_snapshot_instructions) {
   TRACE_EVENT0("flutter", "InitRuntime");
 
   FTL_CHECK(!g_platform_impl);
   g_platform_impl = new PlatformImpl();
   InitEngine(g_platform_impl);
-  InitDartVM();
+  InitDartVM(vm_snapshot_data, vm_snapshot_instructions,
+             default_isolate_snapshot_data,
+             default_isolate_snapshot_instructions);
 }
 
 }  // namespace blink

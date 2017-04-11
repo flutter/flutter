@@ -4,10 +4,7 @@
 
 #include "flutter/runtime/dart_init.h"
 
-#include <dlfcn.h>
-#include <fcntl.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -31,8 +28,6 @@
 #include "flutter/runtime/start_up.h"
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/build_config.h"
-#include "lib/ftl/files/eintr_wrapper.h"
-#include "lib/ftl/files/unique_fd.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -115,9 +110,11 @@ static const char* kDartEndlessTraceBufferArgs[]{
 constexpr char kFileUriPrefix[] = "file://";
 constexpr size_t kFileUriPrefixLength = sizeof(kFileUriPrefix) - 1;
 
-bool g_service_isolate_initialized = false;
-ServiceIsolateHook g_service_isolate_hook = nullptr;
-RegisterNativeServiceProtocolExtensionHook
+static const uint8_t* g_default_isolate_snapshot_data = nullptr;
+static const uint8_t* g_default_isolate_snapshot_instructions = nullptr;
+static bool g_service_isolate_initialized = false;
+static ServiceIsolateHook g_service_isolate_hook = nullptr;
+static RegisterNativeServiceProtocolExtensionHook
     g_register_native_service_protocol_extensions_hook = nullptr;
 
 void IsolateShutdownCallback(void* callback_data) {
@@ -177,24 +174,16 @@ static bool StringEndsWith(const std::string& string,
          0;
 }
 
+Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
+                                          char** error) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
-
-Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
-                                          char** error) {
+  // No VM-service in release mode.
   return nullptr;
-}
-
 #else  // FLUTTER_RUNTIME_MODE
-
-Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
-                                          char** error) {
   tonic::DartState* dart_state = new tonic::DartState();
   Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri, "main",
-      reinterpret_cast<const uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotData)),
-      reinterpret_cast<const uint8_t*>(
-          DART_SYMBOL(kDartIsolateSnapshotInstructions)),
-      nullptr, dart_state, error);
+      script_uri, "main", g_default_isolate_snapshot_data,
+      g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(Dart_IsServiceIsolate(isolate));
@@ -228,9 +217,9 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
         IsRunningPrecompiledCode());
   }
   return isolate;
+#endif  // FLUTTER_RUNTIME_MODE
 }
 
-#endif  // FLUTTER_RUNTIME_MODE
 
 Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                    const char* main,
@@ -275,10 +264,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   UIDartState* dart_state = parent_dart_state->CreateForChildIsolate();
 
   Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri, main,
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotData)),
-      reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartIsolateSnapshotInstructions)),
-      nullptr, dart_state, error);
+      script_uri, main, g_default_isolate_snapshot_data,
+      g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
   FTL_CHECK(isolate) << error;
   dart_state->SetIsolate(isolate);
   FTL_CHECK(!LogIfError(
@@ -360,147 +347,9 @@ static void ServiceStreamCancelCallback(const char* stream_id) {
 
 }  // namespace
 
-#if DART_ALLOW_DYNAMIC_RESOLUTION
-
-constexpr char kDartVmSnapshotDataName[] = "kDartVmSnapshotData";
-constexpr char kDartVmSnapshotInstructionsName[] =
-    "kDartVmSnapshotInstructions";
-constexpr char kDartIsolateSnapshotDataName[] = "kDartIsolateSnapshotData";
-constexpr char kDartIsolateSnapshotInstructionsName[] =
-    "kDartIsolateSnapshotInstructions";
-
-#if OS(IOS)
-
-const char* kDartApplicationLibraryPath = "app.dylib";
-
-static void* DartLookupSymbolInLibrary(const char* symbol_name,
-                                       const char* library) {
-  TRACE_EVENT0("flutter", __func__);
-  if (symbol_name == nullptr) {
-    return nullptr;
-  }
-  dlerror();  // clear previous errors on thread
-  void* library_handle = dlopen(library, RTLD_NOW);
-  if (dlerror() != nullptr) {
-    return nullptr;
-  }
-  void* sym = dlsym(library_handle, symbol_name);
-  return dlerror() != nullptr ? nullptr : sym;
-}
-
-void* _DartSymbolLookup(const char* symbol_name) {
-  TRACE_EVENT0("flutter", __func__);
-  if (symbol_name == nullptr) {
-    return nullptr;
-  }
-
-  const char* application_library_path = kDartApplicationLibraryPath;
-  const Settings& settings = Settings::Get();
-  const std::string& application_library_path_setting =
-      settings.application_library_path;
-  if (!application_library_path_setting.empty()) {
-    application_library_path = application_library_path_setting.c_str();
-  }
-
-  // First the application library is checked for the valid symbols. This
-  // library may not necessarily exist. If it does exist, it is loaded and the
-  // symbols resolved. Once the application library is loaded, there is
-  // currently no provision to unload the same.
-  void* symbol =
-      DartLookupSymbolInLibrary(symbol_name, application_library_path);
-  if (symbol != nullptr) {
-    return symbol;
-  }
-
-  // Check inside the default library
-  return DartLookupSymbolInLibrary(symbol_name, nullptr);
-}
-
-#elif OS(ANDROID)
-
-// Describes an asset file that holds a part of the precompiled snapshot.
-struct SymbolAsset {
-  const char* symbol_name;
-  const char* file_name;
-  bool is_executable;
-  size_t settings_offset;
-  void* mapping;
-};
-
-static SymbolAsset g_symbol_assets[] = {
-    {kDartVmSnapshotDataName, "vm_snapshot_data", false,
-     offsetof(Settings, aot_vm_snapshot_data_filename)},
-    {kDartVmSnapshotInstructionsName, "vm_snapshot_instr", true,
-     offsetof(Settings, aot_vm_snapshot_instr_filename)},
-    {kDartIsolateSnapshotDataName, "isolate_snapshot_data", false,
-     offsetof(Settings, aot_isolate_snapshot_data_filename)},
-    {kDartIsolateSnapshotInstructionsName, "isolate_snapshot_instr", true,
-     offsetof(Settings, aot_isolate_snapshot_instr_filename)},
-};
-
-// Resolve a precompiled snapshot symbol by mapping the corresponding asset
-// file into memory.
-void* _DartSymbolLookup(const char* symbol_name) {
-  for (SymbolAsset& symbol_asset : g_symbol_assets) {
-    if (strcmp(symbol_name, symbol_asset.symbol_name))
-      continue;
-
-    if (symbol_asset.mapping) {
-      return symbol_asset.mapping;
-    }
-
-    const Settings& settings = Settings::Get();
-    const std::string& aot_snapshot_path = settings.aot_snapshot_path;
-    FTL_CHECK(!aot_snapshot_path.empty());
-
-    const char* file_name = symbol_asset.file_name;
-    const std::string* settings_override = reinterpret_cast<const std::string*>(
-        reinterpret_cast<const uint8_t*>(&settings) +
-        symbol_asset.settings_offset);
-    if (!settings_override->empty())
-      file_name = settings_override->c_str();
-
-    std::string asset_path = aot_snapshot_path + "/" + file_name;
-    struct stat info;
-    if (stat(asset_path.c_str(), &info) < 0)
-      return nullptr;
-    int64_t asset_size = info.st_size;
-
-    ftl::UniqueFD fd(HANDLE_EINTR(open(asset_path.c_str(), O_RDONLY)));
-    if (fd.get() == -1)
-      return nullptr;
-
-    int mmap_flags = PROT_READ;
-    if (symbol_asset.is_executable)
-      mmap_flags |= PROT_EXEC;
-
-    void* symbol = mmap(NULL, asset_size, mmap_flags, MAP_PRIVATE, fd.get(), 0);
-    symbol_asset.mapping = symbol == MAP_FAILED ? nullptr : symbol;
-
-    return symbol_asset.mapping;
-  }
-
-  return nullptr;
-}
-
-#else
-
-#error "AOT mode is not supported on this platform"
-
-#endif
-
 bool IsRunningPrecompiledCode() {
-  TRACE_EVENT0("flutter", __func__);
   return Dart_IsPrecompiledRuntime();
 }
-
-#else  // DART_ALLOW_DYNAMIC_RESOLUTION
-
-bool IsRunningPrecompiledCode() {
-  return false;
-}
-
-#endif  // DART_ALLOW_DYNAMIC_RESOLUTION
 
 EmbedderTracingCallbacks* g_tracing_callbacks = nullptr;
 
@@ -567,8 +416,15 @@ void PushBackAll(std::vector<const char*>* args,
   }
 }
 
-void InitDartVM() {
+void InitDartVM(const uint8_t* vm_snapshot_data,
+                const uint8_t* vm_snapshot_instructions,
+                const uint8_t* default_isolate_snapshot_data,
+                const uint8_t* default_isolate_snapshot_instructions) {
   TRACE_EVENT0("flutter", __func__);
+
+  g_default_isolate_snapshot_data = default_isolate_snapshot_data;
+  g_default_isolate_snapshot_instructions =
+      default_isolate_snapshot_instructions;
 
   const Settings& settings = Settings::Get();
 
@@ -642,7 +498,7 @@ void InitDartVM() {
   FTL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
 
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
-  {
+  if (!IsRunningPrecompiledCode()) {
     TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
     // This should be called before calling Dart_Initialize.
     tonic::DartDebugger::InitDebugger();
@@ -662,10 +518,8 @@ void InitDartVM() {
     TRACE_EVENT0("flutter", "Dart_Initialize");
     Dart_InitializeParams params = {};
     params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
-    params.vm_snapshot_data =
-        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmSnapshotData));
-    params.vm_snapshot_instructions =
-        reinterpret_cast<uint8_t*>(DART_SYMBOL(kDartVmSnapshotInstructions));
+    params.vm_snapshot_data = vm_snapshot_data;
+    params.vm_snapshot_instructions = vm_snapshot_instructions;
     params.create = IsolateCreateCallback;
     params.shutdown = IsolateShutdownCallback;
     params.thread_exit = ThreadExitCallback;

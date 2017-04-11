@@ -11,9 +11,6 @@
 #include "apps/tracing/lib/trace/provider.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
-#include "flutter/content_handler/service_protocol_hooks.h"
-#include "flutter/runtime/dart_init.h"
-#include "flutter/runtime/runtime_init.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/tasks/task_runner.h"
@@ -60,10 +57,6 @@ App::App() {
   blink::Settings settings;
   settings.enable_observatory = true;
   blink::Settings::Set(settings);
-  blink::InitRuntime();
-
-  blink::SetRegisterNativeServiceProtocolExtensionHook(
-      ServiceProtocolHooks::RegisterHooks);
 
   blink::SetFontProvider(
       context_->ConnectToEnvironmentService<fonts::FontProvider>());

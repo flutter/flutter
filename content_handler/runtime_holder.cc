@@ -4,6 +4,8 @@
 
 #include "flutter/content_handler/runtime_holder.h"
 
+#include <dlfcn.h>
+#include <magenta/dlfcn.h>
 #include <utility>
 
 #include "application/lib/app/connect.h"
@@ -11,13 +13,18 @@
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/rasterizer.h"
+#include "flutter/content_handler/service_protocol_hooks.h"
+#include "flutter/lib/snapshot/snapshot.h"
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/runtime/asset_font_selector.h"
 #include "flutter/runtime/dart_controller.h"
+#include "flutter/runtime/dart_init.h"
+#include "flutter/runtime/runtime_init.h"
 #include "lib/fidl/dart/sdk_ext/src/natives.h"
 #include "lib/ftl/functional/make_copyable.h"
 #include "lib/ftl/logging.h"
 #include "lib/ftl/time/time_delta.h"
+#include "lib/mtl/vmo/vector.h"
 #include "lib/tonic/mx/mx_converter.h"
 #include "lib/zip/create_unzipper.h"
 #include "third_party/rapidjson/rapidjson/document.h"
@@ -32,6 +39,7 @@ namespace {
 
 constexpr char kKernelKey[] = "kernel_blob.bin";
 constexpr char kSnapshotKey[] = "snapshot_blob.bin";
+constexpr char kDylibKey[] = "libapp.so";
 constexpr char kAssetChannel[] = "flutter/assets";
 
 // Maximum number of frames in flight.
@@ -103,6 +111,57 @@ void RuntimeHolder::Init(
   outgoing_services_ = std::move(outgoing_services);
 
   InitRootBundle(std::move(bundle));
+
+  const uint8_t* vm_snapshot_data;
+  const uint8_t* vm_snapshot_instr;
+  const uint8_t* default_isolate_snapshot_data;
+  const uint8_t* default_isolate_snapshot_instr;
+  if (!Dart_IsPrecompiledRuntime()) {
+    vm_snapshot_data = ::kDartVmSnapshotData;
+    vm_snapshot_instr = ::kDartVmSnapshotInstructions;
+    default_isolate_snapshot_data = ::kDartIsolateCoreSnapshotData;
+    default_isolate_snapshot_instr = ::kDartIsolateCoreSnapshotInstructions;
+  } else {
+    std::vector<uint8_t> dylib_blob;
+    if (!asset_store_->GetAsBuffer(kDylibKey, &dylib_blob)) {
+      FTL_LOG(ERROR) << "Failed to extract app dylib";
+      return;
+    }
+
+    mx::vmo dylib_vmo;
+    if (!mtl::VmoFromVector(dylib_blob, &dylib_vmo)) {
+      FTL_LOG(ERROR) << "Failed to load app dylib";
+      return;
+    }
+
+    dlerror();
+    dylib_handle_ = dlopen_vmo(dylib_vmo.get(), RTLD_LAZY);
+    if (dylib_handle_ == nullptr) {
+      FTL_LOG(ERROR) << "dlopen failed: " << dlerror();
+      return;
+    }
+    vm_snapshot_data = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartVmSnapshotData"));
+    vm_snapshot_instr = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartVmSnapshotInstructions"));
+    default_isolate_snapshot_data = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartIsolateSnapshotData"));
+    default_isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartIsolateSnapshotInstructions"));
+  }
+
+  // TODO(rmacnak): We should generate the AOT vm snapshot separately from
+  // each app so we can initialize before receiving the first app bundle.
+  static bool first_app = true;
+  if (first_app) {
+    first_app = false;
+    blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
+                       default_isolate_snapshot_data,
+                       default_isolate_snapshot_instr);
+
+    blink::SetRegisterNativeServiceProtocolExtensionHook(
+        ServiceProtocolHooks::RegisterHooks);
+  }
 }
 
 void RuntimeHolder::CreateView(
@@ -118,8 +177,9 @@ void RuntimeHolder::CreateView(
 
   std::vector<uint8_t> kernel;
   std::vector<uint8_t> snapshot;
-  if (!asset_store_->GetAsBuffer(kKernelKey, &kernel)) {
-    if (!asset_store_->GetAsBuffer(kSnapshotKey, &snapshot)) {
+  if (!Dart_IsPrecompiledRuntime()) {
+    if (!asset_store_->GetAsBuffer(kKernelKey, &kernel) &&
+        !asset_store_->GetAsBuffer(kSnapshotKey, &snapshot)) {
       FTL_LOG(ERROR) << "Unable to load kernel or snapshot from root bundle.";
       return;
     }
@@ -156,16 +216,33 @@ void RuntimeHolder::CreateView(
   ]() mutable { rasterizer->SetScene(std::move(scene)); }));
 
   runtime_ = blink::RuntimeController::Create(this);
-  runtime_->CreateDartController(script_uri);
+
+  const uint8_t* isolate_snapshot_data;
+  const uint8_t* isolate_snapshot_instr;
+  if (!Dart_IsPrecompiledRuntime()) {
+    isolate_snapshot_data = ::kDartIsolateCoreSnapshotData;
+    isolate_snapshot_instr = ::kDartIsolateCoreSnapshotInstructions;
+  } else {
+    isolate_snapshot_data = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartIsolateSnapshotData"));
+    isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
+        dlsym(dylib_handle_, "_kDartIsolateSnapshotInstructions"));
+  }
+  runtime_->CreateDartController(script_uri, isolate_snapshot_data,
+                                 isolate_snapshot_instr);
+
   runtime_->SetViewportMetrics(viewport_metrics_);
 #if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   direct_input_->SetViewportMetrics(viewport_metrics_);
 #endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
-  if (!kernel.empty()) {
+
+  if (Dart_IsPrecompiledRuntime()) {
+    runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+  } else if (!kernel.empty()) {
     runtime_->dart_controller()->RunFromKernel(kernel.data(), kernel.size());
   } else {
-    runtime_->dart_controller()->RunFromSnapshot(snapshot.data(),
-                                                 snapshot.size());
+    runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
+                                                       snapshot.size());
   }
 }
 

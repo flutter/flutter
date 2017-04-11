@@ -1520,6 +1520,7 @@ FILE: ../../../flutter/flow/layers/transform_layer.cc
 FILE: ../../../flutter/flow/layers/transform_layer.h
 FILE: ../../../flutter/lib/snapshot/snapshot.c.tmpl
 FILE: ../../../flutter/lib/snapshot/snapshot.dart
+FILE: ../../../flutter/lib/snapshot/snapshot.h
 FILE: ../../../flutter/lib/snapshot/snapshot_fuchsia.dart
 FILE: ../../../flutter/lib/ui/compositing.dart
 FILE: ../../../flutter/lib/ui/compositing/scene.cc

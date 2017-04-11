@@ -84,6 +84,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   std::vector<char> root_bundle_data_;
   ftl::RefPtr<blink::ZipAssetStore> asset_store_;
+  void* dylib_handle_ = nullptr;
 
   std::unique_ptr<Rasterizer> rasterizer_;
   std::unique_ptr<blink::RuntimeController> runtime_;
