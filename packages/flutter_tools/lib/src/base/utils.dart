@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:math' show Random;
 
 import 'package:crypto/crypto.dart';
+import 'package:intl/intl.dart';
 
 import 'file_system.dart';
 import 'platform.dart';
@@ -82,7 +83,17 @@ String getSizeAsMB(int bytesLength) {
   return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
-String getElapsedAsMilliseconds(Duration duration) => '${duration.inMilliseconds} ms';
+final NumberFormat kSecondsFormat = new NumberFormat('0.0');
+final NumberFormat kMillisecondsFormat = new NumberFormat.decimalPattern();
+
+String getElapsedAsSeconds(Duration duration) {
+  final double seconds = duration.inMilliseconds / Duration.MILLISECONDS_PER_SECOND;
+  return '${kSecondsFormat.format(seconds)}s';
+}
+
+String getElapsedAsMilliseconds(Duration duration) {
+  return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
+}
 
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
