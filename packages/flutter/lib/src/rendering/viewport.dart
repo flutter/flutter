@@ -223,7 +223,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (firstChild == null)
       return;
     if (hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintContents);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintContents);
     } else {
       _paintContents(context, offset);
     }
@@ -265,16 +265,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
-        mainAxisPosition = position.y;
-        crossAxisPosition = position.x;
+        mainAxisPosition = position.dy;
+        crossAxisPosition = position.dx;
         break;
       case Axis.horizontal:
-        mainAxisPosition = position.x;
-        crossAxisPosition = position.y;
+        mainAxisPosition = position.dx;
+        crossAxisPosition = position.dy;
         break;
     }
     assert(mainAxisPosition != null);

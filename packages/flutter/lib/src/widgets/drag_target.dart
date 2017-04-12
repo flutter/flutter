@@ -234,7 +234,7 @@ class LongPressDraggable<T> extends Draggable<T> {
   @override
   DelayedMultiDragGestureRecognizer createRecognizer(GestureMultiDragStartCallback onStart) {
     return new DelayedMultiDragGestureRecognizer()
-      ..onStart = (Point position) {
+      ..onStart = (Offset position) {
         final Drag result = onStart(position);
         if (result != null)
           HapticFeedback.vibrate();
@@ -281,17 +281,17 @@ class _DraggableState<T> extends State<Draggable<T>> {
     _recognizer.addPointer(event);
   }
 
-  _DragAvatar<T> _startDrag(Point position) {
+  _DragAvatar<T> _startDrag(Offset position) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags)
       return null;
-    Point dragStartPoint;
+    Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
         final RenderBox renderObject = context.findRenderObject();
         dragStartPoint = renderObject.globalToLocal(position);
         break;
       case DragAnchor.pointer:
-        dragStartPoint = Point.origin;
+        dragStartPoint = Offset.zero;
       break;
     }
     setState(() {
@@ -439,8 +439,8 @@ class _DragAvatar<T> extends Drag {
   _DragAvatar({
     @required this.overlayState,
     this.data,
-    Point initialPosition,
-    this.dragStartPoint: Point.origin,
+    Offset initialPosition,
+    this.dragStartPoint: Offset.zero,
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.onDragEnd
@@ -455,7 +455,7 @@ class _DragAvatar<T> extends Drag {
   }
 
   final T data;
-  final Point dragStartPoint;
+  final Offset dragStartPoint;
   final Widget feedback;
   final Offset feedbackOffset;
   final _OnDragEnd onDragEnd;
@@ -463,7 +463,7 @@ class _DragAvatar<T> extends Drag {
 
   _DragTargetState<T> _activeTarget;
   final List<_DragTargetState<T>> _enteredTargets = <_DragTargetState<T>>[];
-  Point _position;
+  Offset _position;
   Offset _lastOffset;
   OverlayEntry _entry;
 
@@ -483,7 +483,7 @@ class _DragAvatar<T> extends Drag {
     finishDrag(_DragEndKind.canceled);
   }
 
-  void updateDrag(Point globalPosition) {
+  void updateDrag(Offset globalPosition) {
     _lastOffset = globalPosition - dragStartPoint;
     _entry.markNeedsBuild();
     final HitTestResult result = new HitTestResult();
@@ -558,10 +558,10 @@ class _DragAvatar<T> extends Drag {
 
   Widget _build(BuildContext context) {
     final RenderBox box = overlayState.context.findRenderObject();
-    final Point overlayTopLeft = box.localToGlobal(Point.origin);
+    final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return new Positioned(
-      left: _lastOffset.dx - overlayTopLeft.x,
-      top: _lastOffset.dy - overlayTopLeft.y,
+      left: _lastOffset.dx - overlayTopLeft.dx,
+      top: _lastOffset.dy - overlayTopLeft.dy,
       child: new IgnorePointer(
         child: feedback
       )

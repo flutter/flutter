@@ -42,7 +42,7 @@ class StockArrowPainter extends CustomPainter {
 
     // Draw a circle that circumscribes the arrow.
     paint.style = PaintingStyle.stroke;
-    canvas.drawCircle(new Point(centerX, centerY), r, paint);
+    canvas.drawCircle(new Offset(centerX, centerY), r, paint);
   }
 
   @override

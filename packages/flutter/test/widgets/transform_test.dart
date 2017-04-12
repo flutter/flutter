@@ -51,9 +51,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -100,9 +100,9 @@ void main() {
     );
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -148,9 +148,9 @@ void main() {
     ));
 
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(110.0, 110.0));
+    await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
-    await tester.tapAt(const Point(190.0, 150.0));
+    await tester.tapAt(const Offset(190.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 

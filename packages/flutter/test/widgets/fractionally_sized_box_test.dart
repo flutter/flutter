@@ -27,6 +27,6 @@ void main() {
     ));
     final RenderBox box = inner.currentContext.findRenderObject();
     expect(box.size, equals(const Size(50.0, 25.0)));
-    expect(box.localToGlobal(Point.origin), equals(const Point(25.0, 37.5)));
+    expect(box.localToGlobal(Offset.zero), equals(const Offset(25.0, 37.5)));
   });
 }

@@ -42,7 +42,7 @@ class PaintRecorder extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     log.add(size);
     final Paint paint = new Paint()..color = const Color(0xFF0000FF);
-    canvas.drawRect(Point.origin & size, paint);
+    canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override

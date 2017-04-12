@@ -296,6 +296,7 @@ class AppDomain extends Domain {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
     final String projectDirectory = _getStringArg(args, 'projectDirectory', required: true);
     final bool startPaused = _getBoolArg(args, 'startPaused') ?? false;
+    final bool useTestFonts = _getBoolArg(args, 'useTestFonts') ?? false;
     final String route = _getStringArg(args, 'route');
     final String mode = _getStringArg(args, 'mode');
     final String target = _getStringArg(args, 'target');
@@ -309,10 +310,25 @@ class AppDomain extends Domain {
       throw "'$projectDirectory' does not exist";
 
     final BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+    DebuggingOptions options;
+    if (buildMode == BuildMode.release) {
+      options = new DebuggingOptions.disabled(buildMode);
+    } else {
+      options = new DebuggingOptions.enabled(
+        buildMode,
+        startPaused: startPaused,
+        useTestFonts: useTestFonts,
+      );
+    }
 
     final AppInstance app = await startApp(
-        device, projectDirectory, target, route,
-        buildMode, startPaused, enableHotReload);
+      device,
+      projectDirectory,
+      target,
+      route,
+      options,
+      enableHotReload,
+    );
 
     return <String, dynamic>{
       'appId': app.id,
@@ -324,28 +340,14 @@ class AppDomain extends Domain {
 
   Future<AppInstance> startApp(
     Device device, String projectDirectory, String target, String route,
-    BuildMode buildMode, bool startPaused, bool enableHotReload, {
+    DebuggingOptions options, bool enableHotReload, {
     String applicationBinary,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
   }) async {
-    DebuggingOptions options;
-
-    switch (buildMode) {
-      case BuildMode.debug:
-      case BuildMode.profile:
-        options = new DebuggingOptions.enabled(buildMode, startPaused: startPaused);
-        break;
-      case BuildMode.release:
-        options = new DebuggingOptions.disabled(buildMode);
-        break;
-      default:
-        throw 'unhandle build mode: $buildMode';
-    }
-
-    if (device.isLocalEmulator && !isEmulatorBuildMode(buildMode))
-      throw '${toTitleCase(getModeName(buildMode))} mode is not supported for emulators.';
+    if (device.isLocalEmulator && !isEmulatorBuildMode(options.buildMode))
+      throw '${toTitleCase(getModeName(options.buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;

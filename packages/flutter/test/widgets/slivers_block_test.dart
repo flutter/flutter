@@ -25,9 +25,9 @@ Future<Null> test(WidgetTester tester, double offset) {
   ));
 }
 
-void verify(WidgetTester tester, List<Point> answerKey, String text) {
-  final List<Point> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Point>(
-    (RenderBox target) => target.localToGlobal(const Point(0.0, 0.0))
+void verify(WidgetTester tester, List<Offset> answerKey, String text) {
+  final List<Offset> testAnswers = tester.renderObjectList<RenderBox>(find.byType(SizedBox)).map<Offset>(
+    (RenderBox target) => target.localToGlobal(const Offset(0.0, 0.0))
   ).toList();
   expect(testAnswers, equals(answerKey));
   final String foundText =
@@ -41,33 +41,33 @@ void main() {
   testWidgets('Viewport+SliverBlock basic test', (WidgetTester tester) async {
     await test(tester, 0.0);
     expect(tester.renderObject<RenderBox>(find.byType(Viewport)).size, equals(const Size(800.0, 600.0)));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 400.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 400.0),
     ], 'ab');
 
     await test(tester, 200.0);
-    verify(tester, <Point>[
-      const Point(0.0, -200.0),
-      const Point(0.0, 200.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
     ], 'ab');
 
     await test(tester, 600.0);
-    verify(tester, <Point>[
-      const Point(0.0, -200.0),
-      const Point(0.0, 200.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
     ], 'bc');
 
     await test(tester, 900.0);
-    verify(tester, <Point>[
-      const Point(0.0, -100.0),
-      const Point(0.0, 300.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, -100.0),
+      const Offset(0.0, 300.0),
     ], 'cd');
 
     await test(tester, 200.0);
-    verify(tester, <Point>[
-      const Point(0.0, -200.0),
-      const Point(0.0, 200.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, -200.0),
+      const Offset(0.0, 200.0),
     ], 'ab');
   });
 
@@ -86,10 +86,10 @@ void main() {
         ),
       ],
     ));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 251.0),
-      const Point(0.0, 503.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 503.0),
     ], 'abc');
     await tester.pumpWidget(new Viewport(
       offset: offset,
@@ -103,10 +103,10 @@ void main() {
         ),
       ],
     ));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 253.0),
-      const Point(0.0, 504.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 253.0),
+      const Offset(0.0, 504.0),
     ], 'cab');
     await tester.pumpWidget(new Viewport(
       offset: offset,
@@ -120,10 +120,10 @@ void main() {
         ),
       ],
     ));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 251.0),
-      const Point(0.0, 504.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 504.0),
     ], 'acb');
     await tester.pumpWidget(new Viewport(
       offset: offset,
@@ -136,9 +136,9 @@ void main() {
         ),
       ],
     ));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 251.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 251.0),
     ], 'ab');
     await tester.pumpWidget(new Viewport(
       offset: offset,
@@ -152,10 +152,10 @@ void main() {
         ),
       ],
     ));
-    verify(tester, <Point>[
-      const Point(0.0, 0.0),
-      const Point(0.0, 251.0),
-      const Point(0.0, 504.0),
+    verify(tester, <Offset>[
+      const Offset(0.0, 0.0),
+      const Offset(0.0, 251.0),
+      const Offset(0.0, 504.0),
     ], 'acb');
   });
 

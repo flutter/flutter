@@ -83,7 +83,7 @@ abstract class GestureBinding extends BindingBase implements HitTestable, HitTes
 
   /// Determine which [HitTestTarget] objects are located at a given position.
   @override // from HitTestable
-  void hitTest(HitTestResult result, Point position) {
+  void hitTest(HitTestResult result, Offset position) {
     result.add(new HitTestEntry(this));
   }
 

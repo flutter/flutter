@@ -652,7 +652,7 @@ class _TrianglePainter extends CustomPainter {
   final Color color;
 
   @override
-  bool hitTest(Point point) => true; // Hitting the rectangle is fine enough.
+  bool hitTest(Offset point) => true; // Hitting the rectangle is fine enough.
 
   @override
   bool shouldRepaint(_TrianglePainter oldPainter) {
@@ -664,10 +664,10 @@ class _TrianglePainter extends CustomPainter {
     final double base = size.width;
     final double halfBase = size.width / 2.0;
     final double height = size.height;
-    final List<Point> points = <Point>[
-      new Point(0.0, height),
-      new Point(base, height),
-      new Point(halfBase, 0.0),
+    final List<Offset> points = <Offset>[
+      new Offset(0.0, height),
+      new Offset(base, height),
+      new Offset(halfBase, 0.0),
     ];
 
     canvas.drawPath(

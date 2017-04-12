@@ -143,13 +143,13 @@ class _ScrollbarController extends ChangeNotifier {
   Paint get _paint => new Paint()..color = color.withOpacity(_opacity.value);
 
   void _paintVerticalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Point thumbOrigin = new Point(size.width - _kThumbGirth, thumbOffset);
+    final Offset thumbOrigin = new Offset(size.width - _kThumbGirth, thumbOffset);
     final Size thumbSize = new Size(_kThumbGirth, thumbExtent);
     canvas.drawRect(thumbOrigin & thumbSize, _paint);
   }
 
   void _paintHorizontalThumb(Canvas canvas, Size size, double thumbOffset, double thumbExtent) {
-    final Point thumbOrigin = new Point(thumbOffset, size.height - _kThumbGirth);
+    final Offset thumbOrigin = new Offset(thumbOffset, size.height - _kThumbGirth);
     final Size thumbSize = new Size(thumbExtent, _kThumbGirth);
     canvas.drawRect(thumbOrigin & thumbSize, _paint);
   }

@@ -21,9 +21,9 @@ void main() {
     );
 
     final Finder title = find.text('X');
-    Point center = tester.getCenter(title);
+    Offset center = tester.getCenter(title);
     Size size = tester.getSize(title);
-    expect(center.x, lessThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400.0 - size.width / 2.0));
 
     // Clear the widget tree to avoid animating between Android and iOS.
     await tester.pumpWidget(new Container(key: new UniqueKey()));
@@ -43,7 +43,7 @@ void main() {
 
     center = tester.getCenter(title);
     size = tester.getSize(title);
-    expect(center.x, greaterThan(400 - size.width / 2.0));
-    expect(center.x, lessThan(400 + size.width / 2.0));
+    expect(center.dx, greaterThan(400.0 - size.width / 2.0));
+    expect(center.dx, lessThan(400.0 + size.width / 2.0));
   });
 }

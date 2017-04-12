@@ -10,9 +10,9 @@ class RenderDots extends RenderConstrainedBox {
 
   // Makes this render box hittable so that we'll get pointer events.
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
-  final Map<int, Point> _dots = <int, Point>{};
+  final Map<int, Offset> _dots = <int, Offset>{};
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -31,7 +31,7 @@ class RenderDots extends RenderConstrainedBox {
     canvas.drawRect(offset & size, new Paint()..color = const Color(0xFF0000FF));
 
     final Paint paint = new Paint()..color = const Color(0xFF00FF00);
-    for (Point point in _dots.values)
+    for (Offset point in _dots.values)
       canvas.drawCircle(point, 50.0, paint);
 
     super.paint(context, offset);

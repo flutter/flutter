@@ -35,7 +35,7 @@ void main() {
     };
 
     final TestPointer pointer = new TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     pan.addPointer(down);
     tap.addPointer(down);
     tester.closeArena(5);
@@ -50,7 +50,7 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer.move(const Point(20.0, 20.0)));
+    tester.route(pointer.move(const Offset(20.0, 20.0)));
     expect(didStartPan, isTrue);
     didStartPan = false;
     expect(updatedScrollDelta, const Offset(10.0, 10.0));
@@ -58,7 +58,7 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer.move(const Point(20.0, 25.0)));
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartPan, isFalse);
     expect(updatedScrollDelta, const Offset(0.0, 5.0));
     updatedScrollDelta = null;
@@ -95,7 +95,7 @@ void main() {
     };
 
     final TestPointer pointer = new TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
     drag.addPointer(down);
     tester.closeArena(5);
     expect(didStartDrag, isFalse);
@@ -107,14 +107,14 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndDrag, isFalse);
 
-    tester.route(pointer.move(const Point(20.0, 25.0)));
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartDrag, isTrue);
     didStartDrag = false;
     expect(updatedDelta, 10.0);
     updatedDelta = null;
     expect(didEndDrag, isFalse);
 
-    tester.route(pointer.move(const Point(20.0, 25.0)));
+    tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartDrag, isFalse);
     expect(updatedDelta, 0.0);
     updatedDelta = null;
@@ -140,21 +140,21 @@ void main() {
     };
 
     final TestPointer pointer = new TestPointer(5);
-    final PointerDownEvent down = pointer.down(const Point(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
     drag.addPointer(down);
     tester.closeArena(5);
     tester.route(down);
-    tester.route(pointer.move(const Point(20.0, 25.0), timeStamp: const Duration(milliseconds: 10)));
-    tester.route(pointer.move(const Point(30.0, 25.0), timeStamp: const Duration(milliseconds: 11)));
-    tester.route(pointer.move(const Point(40.0, 25.0), timeStamp: const Duration(milliseconds: 12)));
-    tester.route(pointer.move(const Point(50.0, 25.0), timeStamp: const Duration(milliseconds: 13)));
-    tester.route(pointer.move(const Point(60.0, 25.0), timeStamp: const Duration(milliseconds: 14)));
-    tester.route(pointer.move(const Point(70.0, 25.0), timeStamp: const Duration(milliseconds: 15)));
-    tester.route(pointer.move(const Point(80.0, 25.0), timeStamp: const Duration(milliseconds: 16)));
-    tester.route(pointer.move(const Point(90.0, 25.0), timeStamp: const Duration(milliseconds: 17)));
-    tester.route(pointer.move(const Point(100.0, 25.0), timeStamp: const Duration(milliseconds: 18)));
-    tester.route(pointer.move(const Point(110.0, 25.0), timeStamp: const Duration(milliseconds: 19)));
-    tester.route(pointer.move(const Point(120.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 10)));
+    tester.route(pointer.move(const Offset(30.0, 25.0), timeStamp: const Duration(milliseconds: 11)));
+    tester.route(pointer.move(const Offset(40.0, 25.0), timeStamp: const Duration(milliseconds: 12)));
+    tester.route(pointer.move(const Offset(50.0, 25.0), timeStamp: const Duration(milliseconds: 13)));
+    tester.route(pointer.move(const Offset(60.0, 25.0), timeStamp: const Duration(milliseconds: 14)));
+    tester.route(pointer.move(const Offset(70.0, 25.0), timeStamp: const Duration(milliseconds: 15)));
+    tester.route(pointer.move(const Offset(80.0, 25.0), timeStamp: const Duration(milliseconds: 16)));
+    tester.route(pointer.move(const Offset(90.0, 25.0), timeStamp: const Duration(milliseconds: 17)));
+    tester.route(pointer.move(const Offset(100.0, 25.0), timeStamp: const Duration(milliseconds: 18)));
+    tester.route(pointer.move(const Offset(110.0, 25.0), timeStamp: const Duration(milliseconds: 19)));
+    tester.route(pointer.move(const Offset(120.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
     tester.route(pointer.up(timeStamp: const Duration(milliseconds: 20)));
     expect(velocity.pixelsPerSecond.dx, inInclusiveRange(0.99 * kMaxFlingVelocity, kMaxFlingVelocity));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
@@ -166,7 +166,7 @@ void main() {
   testGesture('Drag details', (GestureTester tester) {
     expect(new DragDownDetails(), hasOneLineDescription);
     expect(new DragStartDetails(), hasOneLineDescription);
-    expect(new DragUpdateDetails(globalPosition: Point.origin), hasOneLineDescription);
+    expect(new DragUpdateDetails(globalPosition: Offset.zero), hasOneLineDescription);
     expect(new DragEndDetails(), hasOneLineDescription);
   });
 }

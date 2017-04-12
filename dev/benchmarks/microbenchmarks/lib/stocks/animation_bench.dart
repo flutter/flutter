@@ -53,12 +53,12 @@ Future<Null> main() async {
     while (wallClockWatch.elapsed < kBenchmarkTime) {
       cpuWatch.reset();
       if (drawerIsOpen) {
-        await tester.tapAt(const Point(780.0, 250.0)); // Close drawer
+        await tester.tapAt(const Offset(780.0, 250.0)); // Close drawer
         await tester.pump();
         totalCloseIterationCount += 1;
         totalCloseFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;
       } else {
-        await tester.tapAt(const Point(20.0, 50.0)); // Open drawer
+        await tester.tapAt(const Offset(20.0, 50.0)); // Open drawer
         await tester.pump();
         totalOpenIterationCount += 1;
         totalOpenFrameElapsedMicroseconds += cpuWatch.elapsedMicroseconds;

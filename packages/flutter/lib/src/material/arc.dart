@@ -13,7 +13,7 @@ import 'package:flutter/painting.dart';
 // vertical or horizontal.
 const double _kOnAxisDelta = 2.0;
 
-/// A [Tween] that animates a [Point] along a circular arc.
+/// A [Tween] that animates an [Offset] along a circular arc.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -27,14 +27,14 @@ const double _kOnAxisDelta = 2.0;
 /// See also:
 ///
 /// * [MaterialRectArcTween]
-class MaterialPointArcTween extends Tween<Point> {
-  /// Creates a [Tween] for animating [Point]s along a circular arc.
+class MaterialPointArcTween extends Tween<Offset> {
+  /// Creates a [Tween] for animating [Offset]s along a circular arc.
   ///
   /// The [begin] and [end] points are required, cannot be null, and are
   /// immutable.
   MaterialPointArcTween({
-    @required Point begin,
-    @required Point end
+    @required Offset begin,
+    @required Offset end
   }) : super(begin: begin, end: end) {
     assert(begin != null);
     assert(end != null);
@@ -43,43 +43,43 @@ class MaterialPointArcTween extends Tween<Point> {
     final double deltaX = delta.dx.abs();
     final double deltaY = delta.dy.abs();
     final double distanceFromAtoB = delta.distance;
-    final Point c = new Point(end.x, begin.y);
+    final Offset c = new Offset(end.dx, begin.dy);
 
     double sweepAngle() => 2.0 * math.asin(distanceFromAtoB / (2.0 * _radius));
 
     if (deltaX > _kOnAxisDelta && deltaY > _kOnAxisDelta) {
       if (deltaX < deltaY) {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - begin).distance / 2.0;
-        _center = new Point(end.x + _radius * (begin.x - end.x).sign, end.y);
-        if (begin.x < end.x) {
-          _beginAngle = sweepAngle() * (begin.y - end.y).sign;
+        _center = new Offset(end.dx + _radius * (begin.dx - end.dx).sign, end.dy);
+        if (begin.dx < end.dx) {
+          _beginAngle = sweepAngle() * (begin.dy - end.dy).sign;
           _endAngle = 0.0;
         } else {
-          _beginAngle = math.PI + sweepAngle() * (end.y - begin.y).sign;
+          _beginAngle = math.PI + sweepAngle() * (end.dy - begin.dy).sign;
           _endAngle = math.PI;
         }
       } else {
         _radius = distanceFromAtoB * distanceFromAtoB / (c - end).distance / 2.0;
-        _center = new Point(begin.x, begin.y + (end.y - begin.y).sign * _radius);
-        if (begin.y < end.y) {
+        _center = new Offset(begin.dx, begin.dy + (end.dy - begin.dy).sign * _radius);
+        if (begin.dy < end.dy) {
           _beginAngle = -math.PI / 2.0;
-          _endAngle = _beginAngle + sweepAngle() * (end.x - begin.x).sign;
+          _endAngle = _beginAngle + sweepAngle() * (end.dx - begin.dx).sign;
         } else {
           _beginAngle = math.PI / 2.0;
-          _endAngle = _beginAngle + sweepAngle() * (begin.x - end.x).sign;
+          _endAngle = _beginAngle + sweepAngle() * (begin.dx - end.dx).sign;
         }
       }
     }
   }
 
-  Point _center;
+  Offset _center;
   double _radius;
   double _beginAngle;
   double _endAngle;
 
   /// The center of the circular arc, null if [begin] and [end] are horiztonally or
   /// vertically aligned.
-  Point get center => _center;
+  Offset get center => _center;
 
   /// The radius of the circular arc, null if begin and end are horiztonally or
   /// vertically aligned.
@@ -96,24 +96,24 @@ class MaterialPointArcTween extends Tween<Point> {
 
   /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
   @override
-  set begin(Point value) {
+  set begin(Offset value) {
     assert(false); // not supported
   }
 
   /// Setting the arc's [end] parameter is not supported. Construct a new arc instead.
   @override
-  set end(Point value) {
+  set end(Offset value) {
     assert(false); // not supported
   }
 
   @override
-  Point lerp(double t) {
+  Offset lerp(double t) {
     if (t == 0.0)
       return begin;
     if (t == 1.0)
       return end;
     if (_beginAngle == null || _endAngle == null)
-      return Point.lerp(begin, end, t);
+      return Offset.lerp(begin, end, t);
     final double angle = lerpDouble(_beginAngle, _endAngle, t);
     final double x = math.cos(angle) * _radius;
     final double y = math.sin(angle) * _radius;
@@ -186,7 +186,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///
 /// See also:
 ///
-/// * [MaterialPointArcTween]. the analogue for [Point] interporation.
+/// * [MaterialPointArcTween]. the analogue for [Offset] interporation.
 /// * [RectTween], which does a linear rectangle interpolation.
 class MaterialRectArcTween extends RectTween {
   /// Creates a [Tween] for animating [Rect]s along a circular arc.
@@ -215,14 +215,14 @@ class MaterialRectArcTween extends RectTween {
   MaterialPointArcTween _beginArc;
   MaterialPointArcTween _endArc;
 
-  Point _cornerFor(Rect rect, _CornerId id) {
+  Offset _cornerFor(Rect rect, _CornerId id) {
     switch (id) {
       case _CornerId.topLeft: return rect.topLeft;
       case _CornerId.topRight: return rect.topRight;
       case _CornerId.bottomLeft: return rect.bottomLeft;
       case _CornerId.bottomRight: return rect.bottomRight;
     }
-    return Point.origin;
+    return Offset.zero;
   }
 
   double _diagonalSupport(Offset centersVector, _Diagonal diagonal) {

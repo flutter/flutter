@@ -44,11 +44,11 @@ void main() {
     expect(box.size.width, equals(65.0));
     expect(box.size.height, equals(175.0));
 
-    await tester.tapAt(const Point(420.0, 280.0));
+    await tester.tapAt(const Offset(420.0, 280.0));
     expect(log, equals(<String>['left']));
     log.clear();
 
-    await tester.tapAt(const Point(380.0, 320.0));
+    await tester.tapAt(const Offset(380.0, 320.0));
     expect(log, equals(<String>['right']));
     log.clear();
   });

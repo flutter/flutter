@@ -393,7 +393,7 @@ class _DialPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
     final Offset center = new Offset(size.width / 2.0, size.height / 2.0);
-    final Point centerPoint = center.toPoint();
+    final Offset centerPoint = center;
     canvas.drawCircle(centerPoint, radius, new Paint()..color = backgroundColor);
 
     const double labelPadding = 24.0;
@@ -418,7 +418,7 @@ class _DialPainter extends CustomPainter {
 
     final Paint selectorPaint = new Paint()
       ..color = accentColor;
-    final Point focusedPoint = getOffsetForTheta(theta).toPoint();
+    final Offset focusedPoint = getOffsetForTheta(theta);
     final double focusedRadius = labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
@@ -549,15 +549,15 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     });
   }
 
-  Point _position;
-  Point _center;
+  Offset _position;
+  Offset _center;
 
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
     final RenderBox box = context.findRenderObject();
     _position = box.globalToLocal(details.globalPosition);
-    _center = box.size.center(Point.origin);
+    _center = box.size.center(Offset.zero);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }

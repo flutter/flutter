@@ -15,7 +15,7 @@ void main() {
     final TapGestureRecognizer tap = new TapGestureRecognizer();
 
     bool didStartScale = false;
-    Point updatedFocalPoint;
+    Offset updatedFocalPoint;
     scale.onStart = (ScaleStartDetails details) {
       didStartScale = true;
       updatedFocalPoint = details.focalPoint;
@@ -39,7 +39,7 @@ void main() {
 
     final TestPointer pointer1 = new TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
     tap.addPointer(down);
 
@@ -58,10 +58,10 @@ void main() {
     expect(didEndScale, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer1.move(const Point(20.0, 30.0)));
+    tester.route(pointer1.move(const Offset(20.0, 30.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Point(20.0, 30.0));
+    expect(updatedFocalPoint, const Offset(20.0, 30.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -70,7 +70,7 @@ void main() {
 
     // Two-finger scaling
     final TestPointer pointer2 = new TestPointer(2);
-    final PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     tap.addPointer(down2);
     tester.closeArena(2);
@@ -83,10 +83,10 @@ void main() {
     expect(didStartScale, isFalse);
 
     // Zoom in
-    tester.route(pointer2.move(const Point(0.0, 10.0)));
+    tester.route(pointer2.move(const Offset(0.0, 10.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Point(10.0, 20.0));
+    expect(updatedFocalPoint, const Offset(10.0, 20.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
@@ -94,8 +94,8 @@ void main() {
     expect(didTap, isFalse);
 
     // Zoom out
-    tester.route(pointer2.move(const Point(15.0, 25.0)));
-    expect(updatedFocalPoint, const Point(17.5, 27.5));
+    tester.route(pointer2.move(const Offset(15.0, 25.0)));
+    expect(updatedFocalPoint, const Offset(17.5, 27.5));
     updatedFocalPoint = null;
     expect(updatedScale, 0.5);
     updatedScale = null;
@@ -103,7 +103,7 @@ void main() {
 
     // Three-finger scaling
     final TestPointer pointer3 = new TestPointer(3);
-    final PointerDownEvent down3 = pointer3.down(const Point(25.0, 35.0));
+    final PointerDownEvent down3 = pointer3.down(const Offset(25.0, 35.0));
     scale.addPointer(down3);
     tap.addPointer(down3);
     tester.closeArena(3);
@@ -116,10 +116,10 @@ void main() {
     expect(didStartScale, isFalse);
 
     // Zoom in
-    tester.route(pointer3.move(const Point(55.0, 65.0)));
+    tester.route(pointer3.move(const Offset(55.0, 65.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Point(30.0, 40.0));
+    expect(updatedFocalPoint, const Offset(30.0, 40.0));
     updatedFocalPoint = null;
     expect(updatedScale, 5.0);
     updatedScale = null;
@@ -127,11 +127,11 @@ void main() {
     expect(didTap, isFalse);
 
     // Return to original positions but with different fingers
-    tester.route(pointer1.move(const Point(25.0, 35.0)));
-    tester.route(pointer2.move(const Point(20.0, 30.0)));
-    tester.route(pointer3.move(const Point(15.0, 25.0)));
+    tester.route(pointer1.move(const Offset(25.0, 35.0)));
+    tester.route(pointer2.move(const Offset(20.0, 30.0)));
+    tester.route(pointer3.move(const Offset(15.0, 25.0)));
     expect(didStartScale, isFalse);
-    expect(updatedFocalPoint, const Point(20.0, 30.0));
+    expect(updatedFocalPoint, const Offset(20.0, 30.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -147,10 +147,10 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue scaling with two fingers
-    tester.route(pointer3.move(const Point(10.0, 20.0)));
+    tester.route(pointer3.move(const Offset(10.0, 20.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Point(15.0, 25.0));
+    expect(updatedFocalPoint, const Offset(15.0, 25.0));
     updatedFocalPoint = null;
     expect(updatedScale, 2.0);
     updatedScale = null;
@@ -164,10 +164,10 @@ void main() {
     expect(didTap, isFalse);
 
     // Continue panning with one finger
-    tester.route(pointer3.move(const Point(0.0, 0.0)));
+    tester.route(pointer3.move(const Offset(0.0, 0.0)));
     expect(didStartScale, isTrue);
     didStartScale = false;
-    expect(updatedFocalPoint, const Point(0.0, 0.0));
+    expect(updatedFocalPoint, const Offset(0.0, 0.0));
     updatedFocalPoint = null;
     expect(updatedScale, 1.0);
     updatedScale = null;
@@ -200,7 +200,7 @@ void main() {
 
     final TestPointer pointer1 = new TestPointer(1);
 
-    final PointerDownEvent down = pointer1.down(const Point(10.0, 10.0));
+    final PointerDownEvent down = pointer1.down(const Offset(10.0, 10.0));
     scale.addPointer(down);
     drag.addPointer(down);
 
@@ -211,12 +211,12 @@ void main() {
     tester.route(down);
     expect(log, isEmpty);
 
-    tester.route(pointer1.move(const Point(10.0, 30.0)));
+    tester.route(pointer1.move(const Offset(10.0, 30.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
     final TestPointer pointer2 = new TestPointer(2);
-    final PointerDownEvent down2 = pointer2.down(const Point(10.0, 20.0));
+    final PointerDownEvent down2 = pointer2.down(const Offset(10.0, 20.0));
     scale.addPointer(down2);
     drag.addPointer(down2);
 
@@ -228,7 +228,7 @@ void main() {
     expect(log, <String>['scale-end']);
     log.clear();
 
-    tester.route(pointer2.move(const Point(30.0, 20.0)));
+    tester.route(pointer2.move(const Offset(30.0, 20.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 
@@ -242,7 +242,7 @@ void main() {
 
     // Horizontal moves are drags.
     final TestPointer pointer3 = new TestPointer(3);
-    final PointerDownEvent down3 = pointer3.down(const Point(30.0, 30.0));
+    final PointerDownEvent down3 = pointer3.down(const Offset(30.0, 30.0));
     scale.addPointer(down3);
     drag.addPointer(down3);
     tester.closeArena(3);
@@ -250,7 +250,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    tester.route(pointer3.move(const Point(50.0, 30.0)));
+    tester.route(pointer3.move(const Offset(50.0, 30.0)));
     expect(log, equals(<String>['scale-start', 'scale-update']));
     log.clear();
 

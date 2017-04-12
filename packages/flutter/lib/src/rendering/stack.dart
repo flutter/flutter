@@ -420,7 +420,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -436,14 +436,14 @@ class RenderStack extends RenderBox
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_overflow == Overflow.clip && _hasVisualOverflow) {
-      context.pushClipRect(needsCompositing, offset, Point.origin & size, paintStack);
+      context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintStack);
     } else {
       paintStack(context, offset);
     }
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Point.origin & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _hasVisualOverflow ? Offset.zero & size : null;
 
   @override
   void debugFillDescription(List<String> description) {
@@ -496,15 +496,13 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Point position }) {
+  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    final Point transformed = new Point(position.x - childParentData.offset.dx,
-                                  position.y - childParentData.offset.dy);
-    return child.hitTest(result, position: transformed);
+    return child.hitTest(result, position: position - childParentData.offset);
   }
 
   @override

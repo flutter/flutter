@@ -204,7 +204,7 @@ void main() {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
-    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
   });
@@ -214,7 +214,7 @@ void main() {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
-    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(scrollable.position.pixels, equals(500.0));
@@ -256,8 +256,8 @@ void main() {
     final RenderBox appBarBox = tester.renderObject(find.byType(AppBar));
     final RenderBox sheetBox = tester.renderObject(find.byKey(sheetKey));
 
-    final Point appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Point.origin));
-    final Point sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Point.origin));
+    final Offset appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Offset.zero));
+    final Offset sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Offset.zero));
 
     expect(appBarBottomRight, equals(sheetTopRight));
   });
@@ -372,7 +372,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
@@ -381,7 +381,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey, height: 100.0))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
@@ -390,7 +390,7 @@ void main() {
         new Scaffold(body: new Center(child: new Container(key: testKey)))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
@@ -399,7 +399,7 @@ void main() {
         new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: const Text('')))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
   });
 }

@@ -66,7 +66,7 @@ void main() {
     expect(find.text('Pennsylvania'), findsNothing);
 
     expect(tester.getCenter(find.text('Tennessee')),
-        equals(const Point(300.0, 100.0)));
+        equals(const Offset(300.0, 100.0)));
 
     await tester.tap(find.text('Tennessee'));
     expect(log, equals(<String>['Tennessee']));
@@ -120,7 +120,7 @@ void main() {
     expect(find.text('Alabama'), findsNothing);
 
     expect(tester.getCenter(find.text('Tennessee')),
-        equals(const Point(300.0, 100.0)));
+        equals(const Offset(300.0, 100.0)));
 
     await tester.tap(find.text('Tennessee'));
     expect(log, equals(<String>['Tennessee']));

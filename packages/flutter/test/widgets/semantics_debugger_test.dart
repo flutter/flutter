@@ -172,27 +172,27 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byKey(childKey)).y, equals(0.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
 
     await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 200.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
     await tester.fling(find.byType(ListView), const Offset(200.0, 0.0), 200.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
     await tester.fling(find.byType(ListView), const Offset(-200.0, 0.0), 200.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).y, equals(-480.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(-480.0));
 
     await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 200.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byKey(childKey)).y, equals(0.0));
+    expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
   });
 
   testWidgets('SemanticsDebugger long press', (WidgetTester tester) async {

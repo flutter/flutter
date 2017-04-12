@@ -35,10 +35,10 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    final Point insidePoint = insideBox.localToGlobal(const Point(100.0, 50.0));
-    final Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 100.0));
+    final Offset insidePoint = insideBox.localToGlobal(const Offset(100.0, 50.0));
+    final Offset outsidePoint = outsideBox.localToGlobal(const Offset(200.0, 100.0));
 
-    expect(outsidePoint, equals(const Point(500.0, 350.0)));
+    expect(outsidePoint, equals(const Offset(500.0, 350.0)));
     expect(insidePoint, equals(outsidePoint));
   });
 
@@ -71,8 +71,8 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    final Point insidePoint = insideBox.localToGlobal(const Point(100.0, 0.0));
-    final Point outsidePoint = outsideBox.localToGlobal(const Point(200.0, 50.0));
+    final Offset insidePoint = insideBox.localToGlobal(const Offset(100.0, 0.0));
+    final Offset outsidePoint = outsideBox.localToGlobal(const Offset(200.0, 50.0));
 
     expect(insidePoint, equals(outsidePoint));
   });
@@ -107,8 +107,8 @@ void main() {
     expect(insideBox.size.width, 100.0);
     expect(insideBox.size.height, 50.0);
 
-    final Point insidePoint = insideBox.localToGlobal(const Point(50.0, 25.0));
-    final Point outsidePoint = outsideBox.localToGlobal(const Point(100.0, 100.0));
+    final Offset insidePoint = insideBox.localToGlobal(const Offset(50.0, 25.0));
+    final Offset outsidePoint = outsideBox.localToGlobal(const Offset(100.0, 100.0));
 
     expect(insidePoint, equals(outsidePoint));
   });

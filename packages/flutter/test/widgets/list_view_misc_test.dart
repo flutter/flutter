@@ -22,8 +22,8 @@ void main() {
       )
     );
 
-    final Point middleOfContainer = tester.getCenter(find.text('Hello'));
-    final Point target = tester.getCenter(find.byKey(blockKey));
+    final Offset middleOfContainer = tester.getCenter(find.text('Hello'));
+    final Offset target = tester.getCenter(find.byKey(blockKey));
     final TestGesture gesture = await tester.startGesture(target);
     await gesture.moveBy(const Offset(0.0, -10.0));
 
@@ -47,11 +47,11 @@ void main() {
       )
     );
 
-    final Point middleOfContainer = tester.getCenter(find.text('Hello'));
-    expect(middleOfContainer.x, equals(400.0));
-    expect(middleOfContainer.y, equals(1000.0));
+    final Offset middleOfContainer = tester.getCenter(find.text('Hello'));
+    expect(middleOfContainer.dx, equals(400.0));
+    expect(middleOfContainer.dy, equals(1000.0));
 
-    final Point target = tester.getCenter(find.byKey(blockKey));
+    final Offset target = tester.getCenter(find.byKey(blockKey));
     final TestGesture gesture = await tester.startGesture(target);
     await gesture.moveBy(const Offset(0.0, -10.0));
 
@@ -95,7 +95,7 @@ void main() {
 
     await tester.pumpWidget(buildBlock(reverse: true));
 
-    final Point target = const Point(200.0, 200.0);
+    final Offset target = const Offset(200.0, 200.0);
     await tester.tapAt(target);
     expect(first, equals(0));
     expect(second, equals(1));

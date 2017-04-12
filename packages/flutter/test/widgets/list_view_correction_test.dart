@@ -23,7 +23,7 @@ void main() {
     controller.jumpTo(1000.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('4')).y, equals(200.0));
+    expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
     await tester.pumpWidget(new ListView(
       controller: controller,
@@ -38,19 +38,19 @@ void main() {
     ));
 
     expect(controller.offset, equals(1000.0));
-    expect(tester.getTopLeft(find.text('4')).y, equals(200.0));
+    expect(tester.getTopLeft(find.text('4')).dy, equals(200.0));
 
     controller.jumpTo(300.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('2')).y, equals(100.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(100.0));
 
     controller.jumpTo(50.0);
 
     await tester.pump();
 
     expect(controller.offset, equals(0.0));
-    expect(tester.getTopLeft(find.text('2')).y, equals(200.0));
+    expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
   });
 
 }

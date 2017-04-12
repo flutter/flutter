@@ -28,14 +28,14 @@ class DragDownDetails {
   /// Creates details for a [GestureDragDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragDownDetails({ this.globalPosition: Point.origin }) {
+  DragDownDetails({ this.globalPosition: Offset.zero }) {
     assert(globalPosition != null);
   }
 
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
-  final Point globalPosition;
+  final Offset globalPosition;
 
   @override
   String toString() => '$runtimeType($globalPosition)';
@@ -61,14 +61,14 @@ class DragStartDetails {
   /// Creates details for a [GestureDragStartCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  DragStartDetails({ this.globalPosition: Point.origin }) {
+  DragStartDetails({ this.globalPosition: Offset.zero }) {
     assert(globalPosition != null);
   }
 
   /// The global position at which the pointer contacted the screen.
   ///
   /// Defaults to the origin if not specified in the constructor.
-  final Point globalPosition;
+  final Offset globalPosition;
 
   @override
   String toString() => '$runtimeType($globalPosition)';
@@ -131,7 +131,7 @@ class DragUpdateDetails {
   final double primaryDelta;
 
   /// The pointer's global position when it triggered this update.
-  final Point globalPosition;
+  final Offset globalPosition;
 
   @override
   String toString() => '$runtimeType($delta)';
@@ -270,7 +270,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   double maxFlingVelocity;
 
   _DragState _state = _DragState.ready;
-  Point _initialPosition;
+  Offset _initialPosition;
   Offset _pendingDragOffset;
 
   bool _isFlingGesture(VelocityEstimate estimate);

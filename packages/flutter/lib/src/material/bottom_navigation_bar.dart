@@ -571,7 +571,7 @@ class _RadialPainter extends CustomPainter {
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
       final double navWidth = math.min(bottomNavMaxWidth, size.width);
-      final Point center = new Point(
+      final Offset center = new Offset(
         (size.width - navWidth) / 2.0 + circle.offset.dx * navWidth,
         circle.offset.dy * size.height
       );

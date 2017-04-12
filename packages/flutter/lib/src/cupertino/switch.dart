@@ -321,7 +321,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {

@@ -47,12 +47,12 @@ void checkSelectedItemTextGeometry(WidgetTester tester, String value) {
   expect(boxes.length, equals(2));
   final RenderBox box0 = boxes[0];
   final RenderBox box1 = boxes[1];
-  expect(box0.localToGlobal(Point.origin), equals(box1.localToGlobal(Point.origin)));
+  expect(box0.localToGlobal(Offset.zero), equals(box1.localToGlobal(Offset.zero)));
   expect(box0.size, equals(box1.size));
 }
 
 bool sameGeometry(RenderBox box1, RenderBox box2) {
-  expect(box1.localToGlobal(Point.origin), equals(box2.localToGlobal(Point.origin)));
+  expect(box1.localToGlobal(Offset.zero), equals(box2.localToGlobal(Offset.zero)));
   expect(box1.size.height, equals(box2.size.height));
   return true;
 }
@@ -212,14 +212,14 @@ void main() {
     await tester.pumpWidget(build());
     final RenderBox buttonBox = tester.renderObject(find.byKey(buttonKey));
     assert(buttonBox.attached);
-    final Point buttonOriginBeforeTap = buttonBox.localToGlobal(Point.origin);
+    final Offset buttonOriginBeforeTap = buttonBox.localToGlobal(Offset.zero);
 
     await tester.tap(find.text('two'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     // Tapping the dropdown button should not cause it to move.
-    expect(buttonBox.localToGlobal(Point.origin), equals(buttonOriginBeforeTap));
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonOriginBeforeTap));
 
     // The selected dropdown item is both in menu we just popped up, and in
     // the IndexedStack contained by the dropdown button. Both of them should
@@ -228,7 +228,7 @@ void main() {
     expect(itemBoxes.length, equals(2));
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
-      expect(buttonBox.localToGlobal(Point.origin), equals(itemBox.localToGlobal(Point.origin)));
+      expect(buttonBox.localToGlobal(Offset.zero), equals(itemBox.localToGlobal(Offset.zero)));
       expect(buttonBox.size.height, equals(itemBox.size.height));
     }
 
@@ -264,9 +264,9 @@ void main() {
 
     for(RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
-      final Point buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Point.origin));
-      final Point itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Point.origin));
-      expect(buttonBoxCenter.y, equals(itemBoxCenter.y));
+      final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
+      final Offset itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Offset.zero));
+      expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
 
     // The two RenderParagraph objects, for the 'two' items' Text children,
@@ -292,7 +292,7 @@ void main() {
 
     // A Dropdown button with a null value should be the same size as a
     // one with a non-null value.
-    expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxNullValue.localToGlobal(Point.origin)));
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxNullValue.localToGlobal(Offset.zero)));
     expect(buttonBox.size, equals(buttonBoxNullValue.size));
   });
 
@@ -344,7 +344,7 @@ void main() {
 
     // A Dropdown button with a null value and a hint should be the same size as a
     // one with a non-null value.
-    expect(buttonBox.localToGlobal(Point.origin), equals(buttonBoxHintValue.localToGlobal(Point.origin)));
+    expect(buttonBox.localToGlobal(Offset.zero), equals(buttonBoxHintValue.localToGlobal(Offset.zero)));
     expect(buttonBox.size, equals(buttonBoxHintValue.size));
   });
 

@@ -389,8 +389,8 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
 
   bool get isInteractive => onChanged != null;
 
-  double _getValueFromGlobalPosition(Point globalPosition) {
-    return (globalToLocal(globalPosition).x - _kReactionRadius) / _trackLength;
+  double _getValueFromGlobalPosition(Offset globalPosition) {
+    return (globalToLocal(globalPosition).dx - _kReactionRadius) / _trackLength;
   }
 
   double _discretize(double value) {
@@ -430,7 +430,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -461,7 +461,7 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
     final Paint primaryPaint = new Paint()..color = enabled ? _activeColor : _kInactiveTrackColor;
     final Paint trackPaint = new Paint()..color = _kTrackColorTween.evaluate(_reaction);
 
-    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackCenter);
     final double thumbRadius = enabled ? _kThumbRadiusTween.evaluate(_reaction) : _kDisabledThumbRadius;
 
     if (enabled) {
@@ -495,22 +495,22 @@ class _RenderSlider extends RenderConstrainedBox implements SemanticsActionHandl
       }
 
       if (label != null) {
-        final Point center = new Point(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
+        final Offset center = new Offset(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
         final double radius = _kLabelBalloonRadiusTween.evaluate(_reaction);
-        final Point tip = new Point(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
+        final Offset tip = new Offset(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
         final double tipAttachment = _kLabelBalloonTipAttachmentRatio * radius;
 
         canvas.drawCircle(center, radius, primaryPaint);
         final Path path = new Path()
-          ..moveTo(tip.x, tip.y)
-          ..lineTo(center.x - tipAttachment, center.y + tipAttachment)
-          ..lineTo(center.x + tipAttachment, center.y + tipAttachment)
+          ..moveTo(tip.dx, tip.dy)
+          ..lineTo(center.dx - tipAttachment, center.dy + tipAttachment)
+          ..lineTo(center.dx + tipAttachment, center.dy + tipAttachment)
           ..close();
         canvas.drawPath(path, primaryPaint);
         _labelPainter.layout();
         final Offset labelOffset = new Offset(
-          center.x - _labelPainter.width / 2.0,
-          center.y - _labelPainter.height / 2.0
+          center.dx - _labelPainter.width / 2.0,
+          center.dy - _labelPainter.height / 2.0
         );
         _labelPainter.paint(canvas, labelOffset);
         return;

@@ -337,7 +337,7 @@ class AndroidDevice extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-      // port forwarding).
+      // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = new ProtocolDiscovery.observatory(
         getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
       diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
@@ -363,6 +363,8 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+      if (debuggingOptions.useTestFonts)
+        cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
     }
     cmd.add(apk.launchActivity);
     final String result = runCheckedSync(cmd);
@@ -372,9 +374,8 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    if (!debuggingOptions.debuggingEnabled) {
+    if (!debuggingOptions.debuggingEnabled)
       return new LaunchResult.succeeded();
-    }
 
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".

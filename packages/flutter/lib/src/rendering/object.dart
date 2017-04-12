@@ -1249,7 +1249,7 @@ class PipelineOwner {
 ///
 /// The general behaviour of your hit-testing method should be similar to the
 /// behavior described for [RenderBox]. The main difference is that the input
-/// need not be a [Point]. You are also allowed to use a different subclass of
+/// need not be an [Offset]. You are also allowed to use a different subclass of
 /// [HitTestEntry] when adding entries to the [HitTestResult]. When the
 /// [handleEvent] method is called, the same object that was added to the
 /// [HitTestResult] will be passed in, so it can be used to track information
@@ -2480,7 +2480,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // (with the signature being whatever passes for coordinates for this
   // particular class):
   //
-  // bool hitTest(HitTestResult result, { Point position }) {
+  // bool hitTest(HitTestResult result, { Offset position }) {
   //   // If the given position is not inside this node, then return false.
   //   // Otherwise:
   //   // For each child that intersects the position, in z-order starting from

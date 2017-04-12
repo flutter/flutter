@@ -68,7 +68,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
     });
   }
 
-  Point _lastPointerDownLocation;
+  Offset _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
       _lastPointerDownLocation = event.position;
@@ -115,7 +115,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
     });
   }
 
-  void _performAction(Point position, SemanticsAction action) {
+  void _performAction(Offset position, SemanticsAction action) {
     _pipelineOwner.semanticsOwner?.performActionAt(position, action);
   }
 
@@ -241,7 +241,7 @@ void _paintMessage(Canvas canvas, SemanticsNode node) {
     ..text = new TextSpan(style: _messageStyle, text: message)
     ..layout(maxWidth: rect.width);
 
-  textPainter.paint(canvas, FractionalOffset.center.inscribe(textPainter.size, rect).topLeft.toOffset());
+  textPainter.paint(canvas, FractionalOffset.center.inscribe(textPainter.size, rect).topLeft);
   canvas.restore();
 }
 
@@ -297,7 +297,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
   final PipelineOwner owner;
   final int generation;
-  final Point pointerPosition;
+  final Offset pointerPosition;
 
   SemanticsNode get _rootSemanticsNode {
     return owner.semanticsOwner?.rootSemanticsNode;

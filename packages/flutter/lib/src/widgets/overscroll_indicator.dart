@@ -165,13 +165,13 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;
-            final Point position = renderer.globalToLocal(notification.dragDetails.globalPosition);
+            final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
             switch (notification.axis) {
               case Axis.horizontal:
-                controller.pull(notification.overscroll.abs(), size.width, position.y.clamp(0.0, size.height), size.height);
+                controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
                 break;
               case Axis.vertical:
-                controller.pull(notification.overscroll.abs(), size.height, position.x.clamp(0.0, size.width), size.width);
+                controller.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
                 break;
             }
           }
@@ -423,7 +423,7 @@ class _GlowController extends ChangeNotifier {
     final double height = math.min(size.height, size.width * _kWidthToHeightFactor);
     final double scaleY = _glowSize.value * baseGlowScale;
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, height);
-    final Point center = new Point((size.width / 2.0) * (0.5 + _displacement), height - radius);
+    final Offset center = new Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
     final Paint paint = new Paint()..color = color.withOpacity(_glowOpacity.value);
     canvas.save();
     canvas.scale(1.0, scaleY);

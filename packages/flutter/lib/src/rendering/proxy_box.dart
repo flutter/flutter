@@ -105,7 +105,7 @@ abstract class RenderProxyBoxMixin implements RenderBox, RenderObjectWithChildMi
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
@@ -150,10 +150,9 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   HitTestBehavior behavior;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     bool hitTarget = false;
-    if (position.x >= 0.0 && position.x < size.width &&
-        position.y >= 0.0 && position.y < size.height) {
+    if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
       if (hitTarget || behavior == HitTestBehavior.translucent)
         result.add(new BoxHitTestEntry(this, position));
@@ -162,7 +161,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => behavior == HitTestBehavior.opaque;
+  bool hitTestSelf(Offset position) => behavior == HitTestBehavior.opaque;
 
   @override
   void debugFillDescription(List<String> description) {
@@ -821,7 +820,7 @@ class RenderShaderMask extends RenderProxyBox {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       assert(needsCompositing);
-      final Rect rect = Point.origin & size;
+      final Rect rect = Offset.zero & size;
       context.pushShaderMask(offset, _shaderCallback(rect), rect, _blendMode, super.paint);
     }
   }
@@ -908,7 +907,7 @@ abstract class CustomClipper<T> {
   /// the RenderObject. If getClip returns a shape that is roughly the
   /// same size as the RenderObject (e.g. it's a rounded rectangle
   /// with very small arcs in the corners), then this may be adequate.
-  Rect getApproximateClipRect(Size size) => Point.origin & size;
+  Rect getApproximateClipRect(Size size) => Offset.zero & size;
 
   /// Called whenever a new instance of the custom clipper delegate class is
   /// provided to the clip object, or any time that a new clip object is created
@@ -989,7 +988,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
-    return _clipper?.getApproximateClipRect(size) ?? Point.origin & size;
+    return _clipper?.getApproximateClipRect(size) ?? Offset.zero & size;
   }
 }
 
@@ -1009,10 +1008,10 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   }) : super(child: child, clipper: clipper);
 
   @override
-  Rect get _defaultClip => Point.origin & size;
+  Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1068,10 +1067,10 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   }
 
   @override
-  RRect get _defaultClip => _borderRadius.toRRect(Point.origin & size);
+  RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1117,16 +1116,16 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   }
 
   @override
-  Rect get _defaultClip => Point.origin & size;
+  Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     _updateClip();
     assert(_clip != null);
-    final Point center = _clip.center;
+    final Offset center = _clip.center;
     // convert the position to an offset from the center of the unit circle
-    final Offset offset = new Offset((position.x - center.x) / _clip.width,
-                               (position.y - center.y) / _clip.height);
+    final Offset offset = new Offset((position.dx - center.dx) / _clip.width,
+                                     (position.dy - center.dy) / _clip.height);
     // check if the point is outside the unit circle
     if (offset.distanceSquared > 0.25) // x^2 + y^2 > r^2
       return false;
@@ -1166,10 +1165,10 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }) : super(child: child, clipper: clipper);
 
   @override
-  Path get _defaultClip => new Path()..addRect(Point.origin & size);
+  Path get _defaultClip => new Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1183,7 +1182,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushClipPath(needsCompositing, offset, Point.origin & size, _clip, super.paint);
+      context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint);
     }
   }
 }
@@ -1260,15 +1259,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     if (_shape == BoxShape.rectangle) {
-      return _borderRadius.toRRect(Point.origin & size);
+      return _borderRadius.toRRect(Offset.zero & size);
     } else {
-      final Rect rect = Point.origin & size;
+      final Rect rect = Offset.zero & size;
       return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1368,7 +1367,7 @@ class RenderDecoratedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestSelf(Point position) {
+  bool hitTestSelf(Offset position) {
     return _decoration.hitTest(size, position);
   }
 
@@ -1543,7 +1542,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (transformHitTests) {
       Matrix4 inverse;
       try {
@@ -1660,8 +1659,8 @@ class RenderFittedBox extends RenderProxyBox {
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
-      final Rect sourceRect = _alignment.inscribe(sizes.source, Point.origin & childSize);
-      final Rect destinationRect = _alignment.inscribe(sizes.destination, Point.origin & size);
+      final Rect sourceRect = _alignment.inscribe(sizes.source, Offset.zero & childSize);
+      final Rect destinationRect = _alignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
@@ -1684,14 +1683,14 @@ class RenderFittedBox extends RenderProxyBox {
     _updatePaintData();
     if (child != null) {
       if (_hasVisualOverflow)
-        context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintChildWithTransform);
+        context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform);
       else
         _paintChildWithTransform(context, offset);
     }
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     _updatePaintData();
     Matrix4 inverse;
     try {
@@ -1758,10 +1757,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     if (transformHitTests)
-      position = new Point(position.x - translation.dx * size.width, position.y - translation.dy * size.height);
+      position = new Offset(position.dx - translation.dx * size.width, position.dy - translation.dy * size.height);
     return super.hitTest(result, position: position);
   }
 
@@ -1882,7 +1881,7 @@ abstract class CustomPainter {
   /// image that should be considered a "hit", false if it corresponds to a
   /// point that should be considered outside the painted image, and null to use
   /// the default behavior.
-  bool hitTest(Point position) => null;
+  bool hitTest(Offset position) => null;
 
   @override
   String toString() => '$runtimeType#$hashCode';
@@ -2024,14 +2023,14 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);
   }
 
   @override
-  bool hitTestSelf(Point position) {
+  bool hitTestSelf(Offset position) {
     return _painter != null && (_painter.hitTest(position) ?? true);
   }
 
@@ -2361,7 +2360,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return ignoring ? false : super.hitTest(result, position: position);
   }
 
@@ -2465,7 +2464,7 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return !offstage && super.hitTest(result, position: position);
   }
 
@@ -2521,7 +2520,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   bool absorbing;
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     return absorbing ? true : super.hitTest(result, position: position);
   }
 
@@ -2674,7 +2673,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
           final double primaryDelta = size.width * -scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Point.origin)),
+            globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
@@ -2683,7 +2682,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
           final double primaryDelta = size.width * scrollFactor;
           onHorizontalDragUpdate(new DragUpdateDetails(
             delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Point.origin)),
+            globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
@@ -2692,7 +2691,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
           final double primaryDelta = size.height * -scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Point.origin)),
+            globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;
@@ -2701,7 +2700,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
           final double primaryDelta = size.height * scrollFactor;
           onVerticalDragUpdate(new DragUpdateDetails(
             delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Point.origin)),
+            globalPosition: localToGlobal(size.center(Offset.zero)),
           ));
         }
         break;

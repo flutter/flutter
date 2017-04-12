@@ -216,7 +216,7 @@ class RenderImage extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void performLayout() {

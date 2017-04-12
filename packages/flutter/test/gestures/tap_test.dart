@@ -22,39 +22,39 @@ void main() {
   // Down/up pair 1: normal tap sequence
   const PointerDownEvent down1 = const PointerDownEvent(
     pointer: 1,
-    position: const Point(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
   const PointerUpEvent up1 = const PointerUpEvent(
     pointer: 1,
-    position: const Point(11.0, 9.0)
+    position: const Offset(11.0, 9.0)
   );
 
   // Down/up pair 2: normal tap sequence far away from pair 1
   const PointerDownEvent down2 = const PointerDownEvent(
     pointer: 2,
-    position: const Point(30.0, 30.0)
+    position: const Offset(30.0, 30.0)
   );
 
   const PointerUpEvent up2 = const PointerUpEvent(
     pointer: 2,
-    position: const Point(31.0, 29.0)
+    position: const Offset(31.0, 29.0)
   );
 
   // Down/move/up sequence 3: intervening motion
   const PointerDownEvent down3 = const PointerDownEvent(
     pointer: 3,
-    position: const Point(10.0, 10.0)
+    position: const Offset(10.0, 10.0)
   );
 
   const PointerMoveEvent move3 = const PointerMoveEvent(
     pointer: 3,
-    position: const Point(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   const PointerUpEvent up3 = const PointerUpEvent(
     pointer: 3,
-    position: const Point(25.0, 25.0)
+    position: const Offset(25.0, 25.0)
   );
 
   testGesture('Should recognize tap', (GestureTester tester) {

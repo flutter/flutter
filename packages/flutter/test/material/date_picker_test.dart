@@ -55,19 +55,19 @@ void main() {
     );
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
 
-    await tester.tapAt(const Point(50.0, 100.0));
+    await tester.tapAt(const Offset(50.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 26)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tapAt(const Point(300.0, 100.0));
+    await tester.tapAt(const Offset(300.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
     await tester.pump(const Duration(seconds: 2));
 
-    await tester.tapAt(const Point(380.0, 20.0));
+    await tester.tapAt(const Offset(380.0, 20.0));
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
-    await tester.tapAt(const Point(300.0, 100.0));
+    await tester.tapAt(const Offset(300.0, 100.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
     await tester.pump(const Duration(seconds: 2));
 
@@ -75,7 +75,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 5)));
 
-    await tester.tapAt(const Point(45.0, 270.0));
+    await tester.tapAt(const Offset(45.0, 270.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
     await tester.pump(const Duration(seconds: 2));
 
@@ -83,7 +83,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.SEPTEMBER, 25)));
 
-    await tester.tapAt(const Point(210.0, 180.0));
+    await tester.tapAt(const Offset(210.0, 180.0));
     expect(_selectedDate, equals(new DateTime(2016, DateTime.AUGUST, 17)));
   });
 
