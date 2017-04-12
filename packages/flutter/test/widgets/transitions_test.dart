@@ -57,7 +57,7 @@ void main() {
       (WidgetTester tester) async {
         final ContainerTransition transitionUnderTest = new ContainerTransition(
           decoration: decorationTween.animate(controller),
-          child: new Text("Doesn't matter"),
+          child: const Text("Doesn't matter"),
         );
         
         await tester.pumpWidget(transitionUnderTest);
@@ -107,7 +107,7 @@ void main() {
        
       final ContainerTransition transitionUnderTest = new ContainerTransition(
         foregroundDecoration: curvedDecorationAnimation,
-        child: new Text("Doesn't matter"),
+        child: const Text("Doesn't matter"),
       );
 
       await tester.pumpWidget(transitionUnderTest);
@@ -154,7 +154,7 @@ void main() {
       final ContainerTransition transitionUnderTest = new ContainerTransition(
         padding: paddingTween.animate(controller),
         height: heightTween.animate(controller),
-        child: new Text("Doesn't matter"),
+        child: const Text("Doesn't matter"),
       );
       
       await tester.pumpWidget(transitionUnderTest);
