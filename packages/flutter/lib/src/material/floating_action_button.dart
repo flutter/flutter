@@ -124,8 +124,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
     }
 
     Widget result = new Center(
-      child: new IconTheme.merge(
-        context: context,
+      child: IconTheme.merge(
         data: new IconThemeData(color: iconColor),
         child: widget.child
       )

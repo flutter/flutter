@@ -41,15 +41,15 @@ class DefaultTextStyle extends InheritedWidget {
       maxLines = null,
       overflow = TextOverflow.clip;
 
-  /// Creates a default text style that inherits from the given [BuildContext].
+  /// Creates a default text style that overrides the text styles in scope at
+  /// this point in the widget tree.
   ///
   /// The given [style] is merged with the [style] from the default text style
-  /// for the given [BuildContext] and, if non-null, the given [textAlign]
-  /// replaces the [textAlign] from the default text style for the given
-  /// [BuildContext].
-  factory DefaultTextStyle.merge({
+  /// for the [BuildContext] where the widget is inserted, and any of the other
+  /// arguments that are not null replace the corresponding properties on that
+  /// same default text style.
+  static Widget merge({
     Key key,
-    @required BuildContext context,
     TextStyle style,
     TextAlign textAlign,
     bool softWrap,
@@ -57,17 +57,20 @@ class DefaultTextStyle extends InheritedWidget {
     int maxLines,
     @required Widget child,
   }) {
-    assert(context != null);
     assert(child != null);
-    final DefaultTextStyle parent = DefaultTextStyle.of(context);
-    return new DefaultTextStyle(
-      key: key,
-      style: parent.style.merge(style),
-      textAlign: textAlign ?? parent.textAlign,
-      softWrap: softWrap ?? parent.softWrap,
-      overflow: overflow ?? parent.overflow,
-      maxLines: maxLines ?? parent.maxLines,
-      child: child
+    return new Builder(
+      builder: (BuildContext context) {
+        final DefaultTextStyle parent = DefaultTextStyle.of(context);
+        return new DefaultTextStyle(
+          key: key,
+          style: parent.style.merge(style),
+          textAlign: textAlign ?? parent.textAlign,
+          softWrap: softWrap ?? parent.softWrap,
+          overflow: overflow ?? parent.overflow,
+          maxLines: maxLines ?? parent.maxLines,
+          child: child
+        );
+      },
     );
   }
 

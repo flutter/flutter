@@ -138,8 +138,7 @@ class _TabStyle extends AnimatedWidget {
 
     return new DefaultTextStyle(
       style: textStyle.copyWith(color: color),
-      child: new IconTheme.merge(
-        context: context,
+      child: IconTheme.merge(
         data: new IconThemeData(
           size: 24.0,
           color: color,

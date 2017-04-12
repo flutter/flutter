@@ -248,8 +248,7 @@ class CardCollectionState extends State<CardCollection> {
                 controller: cardModel.textController,
               ),
             )
-          : new DefaultTextStyle.merge(
-              context: context,
+          : DefaultTextStyle.merge(
               style: cardLabelStyle.copyWith(
                 fontSize: _varyFontSizes ? 5.0 + index : null
               ),

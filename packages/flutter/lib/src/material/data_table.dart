@@ -466,8 +466,7 @@ class DataTable extends StatelessWidget {
             ? (placeholder ? Colors.black38 : Colors.black87)
             : (placeholder ? Colors.white30 : Colors.white70)
         ),
-        child: new IconTheme.merge(
-          context: context,
+        child: IconTheme.merge(
           data: new IconThemeData(
             color: isLightTheme ? Colors.black54 : Colors.white70
           ),

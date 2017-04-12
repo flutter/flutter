@@ -292,8 +292,7 @@ class _MaterialButtonState extends State<MaterialButton> {
     final double height = widget.height ?? buttonTheme.height;
     final int elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0;
     final bool hasColorOrElevation = (widget.color != null || elevation > 0);
-    Widget contents = new IconTheme.merge(
-      context: context,
+    Widget contents = IconTheme.merge(
       data: new IconThemeData(
         color: textColor
       ),
