@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight }) {
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new Scaffold(
     body: new DefaultTabController(
       length: 3,
@@ -19,6 +19,7 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight 
             floating: floating,
             pinned: pinned,
             expandedHeight: expandedHeight,
+            snap: snap,
             bottom: new TabBar(
               tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
             ),
@@ -44,17 +45,11 @@ bool appBarIsVisible(WidgetTester tester) {
   return sliver.geometry.visible;
 }
 
-double appBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(AppBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar)).height;
+double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).y;
+double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar)).y;
 
-double tabBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(TabBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
 
 void main() {
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
@@ -459,7 +454,7 @@ void main() {
     final double initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
-    // Scroll the not-pinned appbar, collapsing the expanded height. At this
+    // Scroll the floating-pinned appbar, collapsing the expanded height. At this
     // point only the tabBar is visible.
     controller.jumpTo(600.0);
     await tester.pump();
@@ -468,11 +463,178 @@ void main() {
     expect(appBarHeight(tester), lessThan(initialAppBarHeight));
     expect(appBarHeight(tester), initialTabBarHeight);
 
-    // Scroll the not-pinned appbar back into view
+    // Scroll the floating-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: false,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Scroll to the middle of the list. The (floating) appbar is no longer visible.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(256.00);
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), false);
+    expect(appBarTop(tester), lessThanOrEqualTo(-128.0));
+
+    // Drag the scrollable up and down. The app bar should not snap open, its
+    // height should just track the the drag offset.
+    TestGesture gesture = await tester.startGesture(const Point(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
+    await tester.pump();
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+
+    await gesture.moveBy(const Offset(0.0, -50.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 78.0); // 78 == 128 - 50
+
+    // Trigger the snap open animation: drag down and release
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating open
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    double bottom = appBarBottom(tester);
+    expect(bottom, greaterThan(88.0)); // 88 = 78 + 10
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), greaterThan(bottom));
+
+    // The animation finishes when the appbar is full height.
+    await tester.pumpAndSettle();
+    expect(appBarHeight(tester), 128.0);
+
+    // Now that the app bar is open, perform the same drag scenario
+    // in reverse: drag the appbar up and down and then trigger the
+    // snap closed animation.
+    gesture = await tester.startGesture(const Point(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, -128.0)); // drag the appbar closed
+    await tester.pump();
+    expect(appBarBottom(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 100.0);
+
+    // Trigger the snap close animation: drag upwards and release
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating closed
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    bottom = appBarBottom(tester);
+    expect(bottom, lessThan(90.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), lessThan(bottom));
+
+    // The animation finishes when the appbar is off screen.
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), lessThanOrEqualTo(0.0));
+    expect(appBarBottom(tester), lessThanOrEqualTo(0.0));
+  });
+
+  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: true,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Scroll to the middle of the list. The only the tab bar is visible
+    // because this is a pinned appbar.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(256.0);
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kTextTabBarHeight);
+
+    // Drag the scrollable up and down. The app bar should not snap open, the
+    // bottof of the appbar should just track the drag offset.
+    TestGesture gesture = await tester.startGesture(const Point(50.0, 200.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarHeight(tester), 100.0);
+
+    await gesture.moveBy(const Offset(0.0, -25.0));
+    await tester.pump();
+    expect(appBarHeight(tester), 75.0);
+
+    // Trigger the snap animation: drag down and release
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating open
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    final double height = appBarHeight(tester);
+    expect(height, greaterThan(85.0));
+    expect(height, lessThan(128.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarHeight(tester), greaterThan(height));
+    expect(appBarHeight(tester), lessThan(128.0));
+
+    // The animation finishes when the appbar is fully expanded
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Now that the appbar is fully expanded, Perform the same drag
+    // scenario in reverse: drag the appbar up and down and then trigger
+    // the snap closed animation.
+    gesture = await tester.startGesture(const Point(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, -128.0));
+    await tester.pump();
+    expect(appBarBottom(tester), kTextTabBarHeight);
+
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 100.0);
+
+    // Trigger the snap close animation: drag upwards and release
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating closed
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    final double bottom = appBarBottom(tester);
+    expect(bottom, lessThan(90.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), lessThan(bottom));
+
+    // The animation finishes when the appbar shrinks back to its pinned height
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), lessThanOrEqualTo(0.0));
+    expect(appBarBottom(tester), kTextTabBarHeight);
   });
 }

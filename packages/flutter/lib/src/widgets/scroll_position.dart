@@ -466,6 +466,13 @@ class ScrollPosition extends ViewportOffset {
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 
+  /// This notifier's value is true if a scroll is underway and false if the scroll
+  /// position is idle.
+  ///
+  /// Listeners added by stateful widgets should be in the widget's
+  /// [State.dispose] method.
+  final ValueNotifier<bool> isScrollingNotifier = new ValueNotifier<bool>(false);
+
   /// Change the current [activity], disposing of the old one and
   /// sending scroll notifications as necessary.
   ///
@@ -490,6 +497,7 @@ class ScrollPosition extends ViewportOffset {
     _activity = newActivity;
     if (oldIgnorePointer != shouldIgnorePointer)
       state.setIgnorePointer(shouldIgnorePointer);
+    isScrollingNotifier.value = _activity?.isScrolling ?? false;
     if (!activity.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
     if (!wasScrolling && activity.isScrolling)

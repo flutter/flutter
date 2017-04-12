@@ -65,7 +65,8 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   static ScrollableState of(BuildContext context) {
-    return context.ancestorStateOfType(const TypeMatcher<ScrollableState>());
+    final _ScrollableScope widget = context.inheritFromWidgetOfExactType(_ScrollableScope);
+    return widget?.scrollable;
   }
 
   /// Scrolls the closest enclosing scrollable to make the given context visible.
@@ -93,6 +94,28 @@ class Scrollable extends StatefulWidget {
     if (futures.length == 1)
       return futures.first;
     return Future.wait<Null>(futures);
+  }
+}
+
+// Enable Scrollable.of() to work as if ScrollableState was an inherited widget.
+// ScrollableState.build() always rebuilds its _ScrollableScope.
+class _ScrollableScope extends InheritedWidget {
+  _ScrollableScope({
+    Key key,
+    @required this.scrollable,
+    @required this.position,
+    @required Widget child
+  }) : super(key: key, child: child) {
+    assert(scrollable != null);
+    assert(child != null);
+  }
+
+  final ScrollableState scrollable;
+  final ScrollPosition position;
+
+  @override
+  bool updateShouldNotify(_ScrollableScope old) {
+    return position != old.position;
   }
 }
 
@@ -312,7 +335,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
-        child: widget.viewportBuilder(context, position),
+        child: new _ScrollableScope(
+          scrollable: this,
+          position: position,
+          child: widget.viewportBuilder(context, position),
+        ),
       ),
     );
     return _configuration.buildViewportChrome(context, result, widget.axisDirection);
