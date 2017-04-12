@@ -20,7 +20,7 @@ class _MountainViewPageTransition extends StatelessWidget {
     Key key,
     @required Animation<double> routeAnimation,
     @required this.child,
-  }) : _positionAnimation = _kTween.animate(new CurvedAnimation(
+  }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn
        )),
