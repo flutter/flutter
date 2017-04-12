@@ -23,6 +23,7 @@ RESULTS=`dartanalyzer                                                          \
   | grep -v "Analyzing \[out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart\]\.\.\."`
 
 echo "$RESULTS"
-if [ -n "$RESULTS" ];
-  then exit 1;
+if [ -n "$RESULTS" ]; then
+  echo "Failed."
+  exit 1;
 fi

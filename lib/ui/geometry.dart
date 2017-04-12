@@ -10,21 +10,30 @@ abstract class OffsetBase {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   ///
-  /// The first argument sets the horizontal dimension, and the second the
-  /// vertical dimension.
+  /// The first argument sets the horizontal component, and the second the
+  /// vertical component.
   const OffsetBase(this._dx, this._dy);
 
   final double _dx;
   final double _dy;
 
-  /// Returns true if either dimension is [double.INFINITY], and false if both
+  /// Returns true if either component is [double.INFINITY], and false if both
   /// are finite (or negative infinity, or NaN).
   ///
   /// This is different than comparing for equality with an instance that has
-  /// _both_ dimensions set to [double.INFINITY].
+  /// _both_ components set to [double.INFINITY].
+  ///
+  /// See also:
+  ///
+  ///  * [isFinite], which is true if both components are finite (and not NaN).
   bool get isInfinite => _dx >= double.INFINITY || _dy >= double.INFINITY;
 
-  /// Whether both dimensions are finite.
+  /// Whether both components are finite (neither infinite nor NaN).
+  ///
+  /// See also:
+  ///
+  ///  * [isInfinite], which returns true if either component is equal to
+  ///    positive infinity.
   bool get isFinite => _dx.isFinite && _dy.isFinite;
 
   /// Less-than operator. Compares an [Offset] or [Size] to another [Offset] or
@@ -81,26 +90,51 @@ abstract class OffsetBase {
 
   @override
   int get hashCode => hashValues(_dx, _dy);
+
+  @override
+  String toString() => "$runtimeType(${_dx?.toStringAsFixed(1)}, ${_dy?.toStringAsFixed(1)})";
 }
 
 /// An immutable 2D floating-point offset.
 ///
-/// An Offset represents a vector from an unspecified [Point].
+/// Generally speaking, Offsets can be interpreted in two ways:
 ///
-/// Adding an offset to a [Point] returns the [Point] that is indicated by the
-/// vector from that first point.
+/// 1. As representing a point in Cartesian space a specified distance from a
+///    separately-maintained origin. For example, the top-left position of
+///    children in the [RenderBox] protocol is typically represented as an
+///    [Offset] from the top left of the parent box.
+///
+/// 2. As a vector that can be applied to coordinates. For example, when
+///    painting a [RenderObject], the parent is passed an [Offset] from the
+///    screen's origin which it can add to the offsets of its children to find
+///    the [Offset] from the screen's origin to each of the children.
+///
+/// Because a particular [Offset] can be interpreted as one sense at one time
+/// then as the other sense at a later time, the same class is used for both
+/// senses.
+///
+/// See also:
+///
+///  * [Size], which represents a vector describing the size of a rectangle.
 class Offset extends OffsetBase {
   /// Creates an offset. The first argument sets [dx], the horizontal component,
   /// and the second sets [dy], the vertical component.
   const Offset(double dx, double dy) : super(dx, dy);
 
   /// The x component of the offset.
+  ///
+  /// The y component is given by [dy].
   double get dx => _dx;
 
   /// The y component of the offset.
+  ///
+  /// The x component is given by [dx].
   double get dy => _dy;
 
   /// The magnitude of the offset.
+  ///
+  /// If you need this value to compare it to another [Offset]'s distance,
+  /// consider using [distanceSquared] instead, since it is cheaper to compute.
   double get distance => math.sqrt(_dx * _dx + _dy * _dy);
 
   /// The square of the magnitude of the offset.
@@ -109,67 +143,122 @@ class Offset extends OffsetBase {
   double get distanceSquared => _dx * _dx + _dy * _dy;
 
   /// An offset with zero magnitude.
+  ///
+  /// This can be used to represent the origin of a coordinate space.
   static const Offset zero = const Offset(0.0, 0.0);
 
   /// An offset with infinite x and y components.
+  ///
+  /// See also:
+  ///
+  ///  * [isInfinite], which checks whether either component is infinite.
+  ///  * [isFinite], which checks whether both components are finite.
+  // This is included for completeness, because [Size.infinite] exists.
   static const Offset infinite = const Offset(double.INFINITY, double.INFINITY);
 
-  /// Returns a new offset with the x component scaled by scaleX and the y component scaled by scaleY.
-  Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
-
-  /// Returns a new offset with translateX added to the x component and translateY added to the y component.
-  Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
-
-  /// Unary negation operator. Returns an offset with the coordinates negated.
-  Offset operator -() => new Offset(-dx, -dy);
-
-  /// Binary subtraction operator. Returns an offset whose [dx] value is the
-  /// left-hand-side operand's [dx] minus the right-hand-side operand's [dx] and
-  /// whose [dy] value is the left-hand-side operand's [dy] minus the
-  /// right-hand-side operand's [dy].
-  Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
-
-  /// Binary addition operator. Returns an offset whose [dx] value is the sum of
-  /// the [dx] values of the two operands, and whose [dy] value is the sum of
-  /// the [dy] values of the two operands.
-  Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
-
-  /// Multiplication operator. Returns an offset whose coordinates are the
-  /// coordinates of the left-hand-side operand (an Offset) multiplied by the
-  /// scalar right-hand-side operand (a double).
-  Offset operator *(double operand) => new Offset(dx * operand, dy * operand);
-
-  /// Division operator. Returns an offset whose coordinates are the
-  /// coordinates of the left-hand-side operand (an Offset) divided by the
-  /// scalar right-hand-side operand (a double).
-  Offset operator /(double operand) => new Offset(dx / operand, dy / operand);
-
-  /// Integer (truncating) division operator. Returns an offset whose
-  /// coordinates are the coordinates of the left-hand-side operand (an Offset)
-  /// divided by the scalar right-hand-side operand (a double), rounded towards
-  /// zero.
-  Offset operator ~/(double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
-
-  /// Modulo (remainder) operator. Returns an offset whose coordinates are the
-  /// remainder of dividing the coordinates of the left-hand-side operand (an
-  /// Offset) by the scalar right-hand-side operand (a double).
-  Offset operator %(double operand) => new Offset(dx % operand, dy % operand);
-
-  /// Rectangle constructor operator. Combines an offset and a [Size] to form a
-  /// [Rect] whose top-left coordinate is the point given by adding this offset,
-  /// the left-hand-side operand, to the origin, and whose size is the
-  /// right-hand-side operand.
+  /// Returns a new offset with the x component scaled by `scaleX` and the y
+  /// component scaled by `scaleY`.
+  ///
+  /// If the two scale arguments are the same, consider using the `*` operator
+  /// instead:
   ///
   /// ```dart
-  ///   Rect myRect = Offset.zero & const Size(100.0, 100.0);
-  ///   // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
+  /// Offset a = const Offset(10.0, 10.0);
+  /// Offset b = a * 2.0; // same as: a.scale(2.0, 2.0)
   /// ```
   ///
-  /// See also: [Point.&]
-  Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
+  /// If the two arguments are -1, consider using the unary `-` operator
+  /// instead:
+  ///
+  /// ```dart
+  /// Offset a = const Offset(10.0, 10.0);
+  /// Offset b = -a; // same as: a.scale(-1.0, -1.0)
+  /// ```
+  Offset scale(double scaleX, double scaleY) => new Offset(dx * scaleX, dy * scaleY);
 
-  /// Returns the point at (0, 0) plus this offset.
-  Point toPoint() => new Point(dx, dy);
+  /// Returns a new offset with translateX added to the x component and
+  /// translateY added to the y component.
+  ///
+  /// If the arguments come from another [Offset], consider using the `+` or `-`
+  /// operators instead:
+  ///
+  /// ```dart
+  /// Offset a = const Offset(10.0, 10.0);
+  /// Offset b = const Offset(10.0, 10.0);
+  /// Offset c = a + b; // same as: a.translate(b.dx, b.dy)
+  /// Offset d = a - b; // same as: a.translate(-b.dx, -b.dy)
+  /// ```
+  Offset translate(double translateX, double translateY) => new Offset(dx + translateX, dy + translateY);
+
+  /// Unary negation operator.
+  ///
+  /// Returns an offset with the coordinates negated.
+  ///
+  /// If the [Offset] represents an arrow on a plane, this operator returns the
+  /// same arrow but pointing in the reverse direction.
+  Offset operator -() => new Offset(-dx, -dy);
+
+  /// Binary subtraction operator.
+  ///
+  /// Returns an offset whose [dx] value is the left-hand-side operand's [dx]
+  /// minus the right-hand-side operand's [dx] and whose [dy] value is the
+  /// left-hand-side operand's [dy] minus the right-hand-side operand's [dy].
+  ///
+  /// See also [translate].
+  Offset operator -(Offset other) => new Offset(dx - other.dx, dy - other.dy);
+
+  /// Binary addition operator.
+  ///
+  /// Returns an offset whose [dx] value is the sum of the [dx] values of the
+  /// two operands, and whose [dy] value is the sum of the [dy] values of the
+  /// two operands.
+  ///
+  /// See also [translate].
+  Offset operator +(Offset other) => new Offset(dx + other.dx, dy + other.dy);
+
+  /// Multiplication operator.
+  ///
+  /// Returns an offset whose coordinates are the coordinates of the
+  /// left-hand-side operand (an Offset) multiplied by the scalar
+  /// right-hand-side operand (a double).
+  ///
+  /// See also [scale].
+  Offset operator *(double operand) => new Offset(dx * operand, dy * operand);
+
+  /// Division operator.
+  ///
+  /// Returns an offset whose coordinates are the coordinates of the
+  /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
+  /// operand (a double).
+  ///
+  /// See also [scale].
+  Offset operator /(double operand) => new Offset(dx / operand, dy / operand);
+
+  /// Integer (truncating) division operator.
+  ///
+  /// Returns an offset whose coordinates are the coordinates of the
+  /// left-hand-side operand (an Offset) divided by the scalar right-hand-side
+  /// operand (a double), rounded towards zero.
+  Offset operator ~/(double operand) => new Offset((dx ~/ operand).toDouble(), (dy ~/ operand).toDouble());
+
+  /// Modulo (remainder) operator.
+  ///
+  /// Returns an offset whose coordinates are the remainder of dividing the
+  /// coordinates of the left-hand-side operand (an Offset) by the scalar
+  /// right-hand-side operand (a double).
+  Offset operator %(double operand) => new Offset(dx % operand, dy % operand);
+
+  /// Rectangle constructor operator.
+  ///
+  /// Combines an [Offset] and a [Size] to form a [Rect] whose top-left
+  /// coordinate is the point given by adding this offset, the left-hand-side
+  /// operand, to the origin, and whose size is the right-hand-side operand.
+  ///
+  /// ```dart
+  /// Rect myRect = Offset.zero & const Size(100.0, 100.0);
+  /// // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
+  /// ```
+  Rect operator &(Size other) => new Rect.fromLTWH(dx, dy, other.width, other.height);
 
   /// Linearly interpolate between two offsets.
   ///
@@ -186,7 +275,13 @@ class Offset extends OffsetBase {
 
   /// Compares two Offsets for equality.
   @override
-  bool operator ==(dynamic other) => other is Offset && super == other;
+  bool operator ==(dynamic other) {
+    if (other is! Offset)
+      return false;
+    final Offset typedOther = other;
+    return _dx == typedOther._dx &&
+           _dy == typedOther._dy;
+  }
 
   @override
   String toString() => "Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})";
@@ -194,28 +289,37 @@ class Offset extends OffsetBase {
 
 /// Holds a 2D floating-point size.
 ///
-/// You can think of this as a vector from Point(0,0) to Point(size.width,
-/// size.height).
+/// You can think of this as an [Offset] from the origin.
 class Size extends OffsetBase {
-  /// Creates a Size with the given width and height.
+  /// Creates a [Size] with the given [width] and [height].
   const Size(double width, double height) : super(width, height);
 
-  /// Creates an instance of Size that has the same values as another.
+  /// Creates an instance of [Size] that has the same values as another.
   // Used by the rendering library's _DebugSize hack.
   Size.copy(Size source) : super(source.width, source.height);
 
-  /// Creates a square Size whose width and height are the given dimension.
+  /// Creates a square [Size] whose [width] and [height] are the given dimension.
+  ///
+  /// See also:
+  ///
+  ///  * [new Size.fromRadius], which is more convenient when the available size
+  ///    is the radius of a circle.
   const Size.square(double dimension) : super(dimension, dimension);
 
-  /// Creates a Size with the given width and an infinite height.
+  /// Creates a [Size] with the given [width] and an infinite [height].
   const Size.fromWidth(double width) : super(width, double.INFINITY);
 
-  /// Creates a Size with the given height and an infinite width.
+  /// Creates a [Size] with the given [height] and an infinite [width].
   const Size.fromHeight(double height) : super(double.INFINITY, height);
 
-  /// Creates a square Size whose width and height are twice the given dimension.
+  /// Creates a square [Size] whose [width] and [height] are twice the given
+  /// dimension.
   ///
   /// This is a square that contains a circle with the given radius.
+  ///
+  /// See also:
+  ///
+  ///  * [new Size.square], which creates a square with the given dimension.
   const Size.fromRadius(double radius) : super(radius * 2.0, radius * 2.0);
 
   /// The horizontal extent of this size.
@@ -227,28 +331,36 @@ class Size extends OffsetBase {
   /// An empty size, one with a zero width and a zero height.
   static const Size zero = const Size(0.0, 0.0);
 
-  /// A size whose width and height are infinite.
+  /// A size whose [width] and [height] are infinite.
   ///
-  /// See also [isInfinite], which checks whether either dimension is infinite.
+  /// See also:
+  ///
+  ///  * [isInfinite], which checks whether either dimension is infinite.
+  ///  * [isFinite], which checks whether both dimensions are finite.
   static const Size infinite = const Size(double.INFINITY, double.INFINITY);
 
-  /// Binary subtraction operator for Size.
+  /// Whether this size encloses a non-zero area.
   ///
-  /// Subtracting a Size from a Size returns the [Offset] that describes how
+  /// Negative areas are considered empty.
+  bool get isEmpty => width <= 0.0 || height <= 0.0;
+
+  /// Binary subtraction operator for [Size].
+  ///
+  /// Subtracting a [Size] from a [Size] returns the [Offset] that describes how
   /// much bigger the left-hand-side operand is than the right-hand-side
-  /// operand. Adding that resulting Offset to the Size that was the
-  /// right-hand-side operand would return a Size equal to the Size that was the
-  /// left-hand-side operand. (i.e. if `sizeA - sizeB -> offsetA`, then `offsetA
-  /// + sizeB -> sizeA`)
+  /// operand. Adding that resulting [Offset] to the [Size] that was the
+  /// right-hand-side operand would return a [Size] equal to the [Size] that was
+  /// the left-hand-side operand. (i.e. if `sizeA - sizeB -> offsetA`, then
+  /// `offsetA + sizeB -> sizeA`)
   ///
-  /// Subtracting an [Offset] from a Size returns the Size that is smaller than
-  /// the Size operand by the difference given by the Offset operand. In other
-  /// words, the returned Size has a [width] consisting of the [width] of the
+  /// Subtracting an [Offset] from a [Size] returns the [Size] that is smaller than
+  /// the [Size] operand by the difference given by the [Offset] operand. In other
+  /// words, the returned [Size] has a [width] consisting of the [width] of the
   /// left-hand-side operand minus the [Offset.dx] dimension of the
   /// right-hand-side operand, and a [height] consisting of the [height] of the
   /// left-hand-side operand minus the [Offset.dy] dimension of the
   /// right-hand-side operand.
-  dynamic operator -(OffsetBase other) {
+  OffsetBase operator -(OffsetBase other) {
     if (other is Size)
       return new Offset(width - other.width, height - other.height);
     if (other is Offset)
@@ -256,38 +368,42 @@ class Size extends OffsetBase {
     throw new ArgumentError(other);
   }
 
-  /// Binary addition operator for adding an Offset to a Size. Returns a Size
-  /// whose [width] is the sum of the [width] of the left-hand-side operand, a
-  /// Size, and the [Offset.dx] dimension of the right-hand-side operand, an
-  /// [Offset], and whose [height] is the sum of the [height] of the
-  /// left-hand-side operand and the [Offset.dy] dimension of the
-  /// right-hand-side operand.
+  /// Binary addition operator for adding an [Offset] to a [Size].
+  ///
+  /// Returns a [Size] whose [width] is the sum of the [width] of the
+  /// left-hand-side operand, a [Size], and the [Offset.dx] dimension of the
+  /// right-hand-side operand, an [Offset], and whose [height] is the sum of the
+  /// [height] of the left-hand-side operand and the [Offset.dy] dimension of
+  /// the right-hand-side operand.
   Size operator +(Offset other) => new Size(width + other.dx, height + other.dy);
 
-  /// Multiplication operator. Returns a size whose dimensions are the
-  /// dimensions of the left-hand-side operand (a Size) multiplied by the
-  /// scalar right-hand-side operand (a double).
+  /// Multiplication operator.
+  ///
+  /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+  /// operand (a [Size]) multiplied by the scalar right-hand-side operand (a
+  /// [double]).
   Size operator *(double operand) => new Size(width * operand, height * operand);
 
-  /// Division operator. Returns a size whose dimensions are the dimensions of
-  /// the left-hand-side operand (a Size) divided by the scalar right-hand-side
-  /// operand (a double).
+  /// Division operator.
+  ///
+  /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+  /// operand (a [Size]) divided by the scalar right-hand-side operand (a
+  /// [double]).
   Size operator /(double operand) => new Size(width / operand, height / operand);
 
-  /// Integer (truncating) division operator. Returns a size whose dimensions
-  /// are the dimensions of the left-hand-side operand (a Size) divided by the
-  /// scalar right-hand-side operand (a double), rounded towards zero.
+  /// Integer (truncating) division operator.
+  ///
+  /// Returns a [Size] whose dimensions are the dimensions of the left-hand-side
+  /// operand (a [Size]) divided by the scalar right-hand-side operand (a
+  /// [double]), rounded towards zero.
   Size operator ~/(double operand) => new Size((width ~/ operand).toDouble(), (height ~/ operand).toDouble());
 
-  /// Modulo (remainder) operator. Returns a size whose dimensions are the
-  /// remainder of dividing the left-hand-side operand (a Size) by the scalar
-  /// right-hand-side operand (a double).
-  Size operator %(double operand) => new Size(width % operand, height % operand);
-
-  /// Whether this size encloses a non-zero area.
+  /// Modulo (remainder) operator.
   ///
-  /// Negative areas are considered empty.
-  bool get isEmpty => width <= 0.0 || height <= 0.0;
+  /// Returns a [Size] whose dimensions are the remainder of dividing the
+  /// left-hand-side operand (a [Size]) by the scalar right-hand-side operand (a
+  /// [double]).
+  Size operator %(double operand) => new Size(width % operand, height % operand);
 
   /// The lesser of the [width] and the [height].
   double get shortestSide {
@@ -299,67 +415,77 @@ class Size extends OffsetBase {
   // Convenience methods that do the equivalent of calling the similarly named
   // methods on a Rect constructed from the given origin and this size.
 
-  /// The point at the intersection of the top and left edges of the rectangle
-  /// described by the given point (which is interpreted as the top-left corner)
-  /// and this size.
+  /// The offset to the intersection of the top and left edges of the rectangle
+  /// described by the given [Offset] (which is interpreted as the top-left corner)
+  /// and this [Size].
   ///
   /// See also [Rect.topLeft].
-  Point topLeft(Point origin) => origin;
+  Offset topLeft(Offset origin) => origin;
 
-  /// The point at the center of the top edge of the rectangle described by the
-  /// given point (which is interpreted as the top-left corner) and this size.
+  /// The offset to the center of the top edge of the rectangle described by the
+  /// given offset (which is interpreted as the top-left corner) and this size.
   ///
   /// See also [Rect.topCenter].
-  Point topCenter(Point origin) => new Point(origin.x + width / 2.0, origin.y);
+  Offset topCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy);
 
-  /// The point at the intersection of the top and right edges of the rectangle
-  /// described by the given point (which is interpreted as the top-left corner)
+  /// The offset to the intersection of the top and right edges of the rectangle
+  /// described by the given offset (which is interpreted as the top-left corner)
   /// and this size.
   ///
   /// See also [Rect.topRight].
-  Point topRight(Point origin) => new Point(origin.x + width, origin.y);
+  Offset topRight(Offset origin) => new Offset(origin.dx + width, origin.dy);
 
-  /// The point at the center of the left edge of the rectangle described by the
-  /// given point (which is interpreted as the top-left corner) and this size.
+  /// The offset to the center of the left edge of the rectangle described by the
+  /// given offset (which is interpreted as the top-left corner) and this size.
   ///
   /// See also [Rect.centerLeft].
-  Point centerLeft(Point origin) => new Point(origin.x, origin.y + height / 2.0);
+  Offset centerLeft(Offset origin) => new Offset(origin.dx, origin.dy + height / 2.0);
 
-  /// The point halfway between the left and right and the top and bottom edges
-  /// of the rectangle described by the given point (which is interpreted as the
-  /// top-left corner) and this size.
+  /// The offset to the point halfway between the left and right and the top and
+  /// bottom edges of the rectangle described by the given offset (which is
+  /// interpreted as the top-left corner) and this size.
   ///
   /// See also [Rect.center].
-  Point center(Point origin) => new Point(origin.x + width / 2.0, origin.y + height / 2.0);
+  Offset center(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height / 2.0);
 
-  /// The point at the center of the right edge of the rectangle described by the
-  /// given point (which is interpreted as the top-left corner) and this size.
+  /// The offset to the center of the right edge of the rectangle described by the
+  /// given offset (which is interpreted as the top-left corner) and this size.
   ///
   /// See also [Rect.centerLeft].
-  Point centerRight(Point origin) => new Point(origin.x + width, origin.y + height / 2.0);
+  Offset centerRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height / 2.0);
 
-  /// The point at the intersection of the bottom and left edges of the
-  /// rectangle described by the given point (which is interpreted as the
+  /// The offset to the intersection of the bottom and left edges of the
+  /// rectangle described by the given offset (which is interpreted as the
   /// top-left corner) and this size.
   ///
   /// See also [Rect.bottomLeft].
-  Point bottomLeft(Point origin) => new Point(origin.x, origin.y + height);
+  Offset bottomLeft(Offset origin) => new Offset(origin.dx, origin.dy + height);
 
-  /// The point at the center of the bottom edge of the rectangle described by
-  /// the given point (which is interpreted as the top-left corner) and this
+  /// The offset to the center of the bottom edge of the rectangle described by
+  /// the given offset (which is interpreted as the top-left corner) and this
   /// size.
   ///
   /// See also [Rect.bottomLeft].
-  Point bottomCenter(Point origin) => new Point(origin.x + width / 2.0, origin.y + height);
+  Offset bottomCenter(Offset origin) => new Offset(origin.dx + width / 2.0, origin.dy + height);
 
-  /// The point at the intersection of the bottom and right edges of the
-  /// rectangle described by the given point (which is interpreted as the
+  /// The offset to the intersection of the bottom and right edges of the
+  /// rectangle described by the given offset (which is interpreted as the
   /// top-left corner) and this size.
   ///
   /// See also [Rect.bottomRight].
-  Point bottomRight(Point origin) => new Point(origin.x + width, origin.y + height);
+  Offset bottomRight(Offset origin) => new Offset(origin.dx + width, origin.dy + height);
 
-  /// A size with the width and height swapped.
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the top left of the size) lies between the left and right and
+  /// the top and bottom edges of a rectangle of this size.
+  ///
+  /// Rectangles include their top and left edges but exclude their bottom and
+  /// right edges.
+  bool contains(Offset offset) {
+    return offset.dx >= 0.0 && offset.dx < width && offset.dy >= 0.0 && offset.dy < height;
+  }
+
+  /// A [Size] with the [width] and [height] swapped.
   Size get flipped => new Size(height, width);
 
   /// Linearly interpolate between two sizes
@@ -376,120 +502,29 @@ class Size extends OffsetBase {
   }
 
   /// Compares two Sizes for equality.
+  // We don't compare the runtimeType because of _DebugSize in the framework.
   @override
-  bool operator ==(dynamic other) => other is Size && super == other;
+  bool operator ==(dynamic other) {
+    if (other is! Size)
+      return false;
+    final Size typedOther = other;
+    return _dx == typedOther._dx &&
+           _dy == typedOther._dy;
+  }
 
   @override
   String toString() => "Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})";
 }
 
-/// An immutable 2D floating-point x,y coordinate pair.
+/// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
+/// are relative to a given origin.
 ///
-/// A Point represents a specific position in Cartesian space.
+/// A Rect can be created with one its constructors or from an [Offset] and a
+/// [Size] using the `&` operator:
 ///
-/// Subtracting a point from another returns the [Offset] that represents the
-/// vector between the two points.
-class Point {
-  /// Creates a point. The first argument sets [x], the horizontal component,
-  /// and the second sets [y], the vertical component.
-  const Point(this.x, this.y);
-
-  /// The horizontal component of the point.
-  final double x;
-
-  /// The vertical component of the point.
-  final double y;
-
-  /// The point at the origin, (0, 0).
-  static const Point origin = const Point(0.0, 0.0);
-
-  /// Unary negation operator. Returns a point with the coordinates negated.
-  Point operator -() => new Point(-x, -y);
-
-  /// Binary subtraction operator. Returns an [Offset] representing the
-  /// direction and distance from the other point (the right-hand-side operand)
-  /// to this point (the left-hand-side operand).
-  Offset operator -(Point other) => new Offset(x - other.x, y - other.y);
-
-  /// Binary addition operator. Returns a point that is this point (the
-  /// left-hand-side operand) plus a vector [Offset] (the right-hand-side
-  /// operand).
-  Point operator +(Offset other) => new Point(x + other.dx, y + other.dy);
-
-  /// Rectangle constructor operator. Combines a point and a [Size] to form a
-  /// [Rect] whose top-left coordinate is this point, the left-hand-side
-  /// operand, and whose size is the right-hand-side operand.
-  ///
-  /// ```dart
-  ///   Rect myRect = Point.origin & const Size(100.0, 100.0);
-  ///   // same as: new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0)
-  /// ```
-  ///
-  /// See also: [Offset.&]
-  Rect operator &(Size other) => new Rect.fromLTWH(x, y, other.width, other.height);
-
-  /// Multiplication operator. Returns a point whose coordinates are the
-  /// coordinates of the left-hand-side operand (a Point) multiplied by the
-  /// scalar right-hand-side operand (a double).
-  Point operator *(double operand) => new Point(x * operand, y * operand);
-
-  /// Division operator. Returns a point whose coordinates are the
-  /// coordinates of the left-hand-side operand (a point) divided by the
-  /// scalar right-hand-side operand (a double).
-  Point operator /(double operand) => new Point(x / operand, y / operand);
-
-  /// Integer (truncating) division operator. Returns a point whose
-  /// coordinates are the coordinates of the left-hand-side operand (a point)
-  /// divided by the scalar right-hand-side operand (a double), rounded towards
-  /// zero.
-  Point operator ~/(double operand) => new Point((x ~/ operand).toDouble(), (y ~/ operand).toDouble());
-
-  /// Modulo (remainder) operator. Returns a point whose coordinates are the
-  /// remainder of the coordinates of the left-hand-side operand (a point)
-  /// divided by the scalar right-hand-side operand (a double).
-  Point operator %(double operand) => new Point(x % operand, y % operand);
-
-  /// Converts this point to an [Offset] with the same coordinates.
-  // does the equivalent of "return this - Point.origin"
-  Offset toOffset() => new Offset(x, y);
-
-  /// Linearly interpolate between two points.
-  ///
-  /// If either point is null, this function interpolates from [Point.origin].
-  static Point lerp(Point a, Point b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b * t;
-    if (b == null)
-      return a * (1.0 - t);
-    return new Point(lerpDouble(a.x, b.x, t), lerpDouble(a.y, b.y, t));
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! Point)
-      return false;
-    final Point typedOther = other;
-    return x == typedOther.x &&
-           y == typedOther.y;
-  }
-
-  @override
-  int get hashCode => hashValues(x, y);
-
-  @override
-  String toString() => "Point(${x?.toStringAsFixed(1)}, ${y?.toStringAsFixed(1)})";
-}
-
-/// An immutable 2D, axis-aligned, floating-point rectangle whose coordinates
-/// are relative to an origin point.
-///
-/// A Rect can be created with one its constructors or with a [Point] and
-/// a [Size] using the `&` operator:
 /// ```dart
-/// Rect myRect = const Point(1.0, 2.0) & const Size(3.0, 4.0);
-///```
+/// Rect myRect = const Offset(1.0, 2.0) & const Size(3.0, 4.0);
+/// ```
 class Rect {
   Rect._();
 
@@ -502,10 +537,11 @@ class Rect {
       ..[3] = bottom;
   }
 
-  /// Construct a rectangle from its left and top edges, its width, and its height.
+  /// Construct a rectangle from its left and top edges, its width, and its
+  /// height.
   ///
-  /// To construct a [Rect] from a [Point] or [Offset] and a [Size], you can use
-  /// the rectangle constructor operator `&`. See [Point.&] and [Offset.&].
+  /// To construct a [Rect] from an [Offset] and a [Size], you can use the
+  /// rectangle constructor operator `&`. See [Offset.&].
   Rect.fromLTWH(double left, double top, double width, double height) {
     _value
       ..[0] = left
@@ -515,21 +551,24 @@ class Rect {
   }
 
   /// Construct a rectangle that bounds the given circle.
-  Rect.fromCircle({ Point center, double radius }) {
+  ///
+  /// The `center` argument is assumed to be an offset from the origin.
+  Rect.fromCircle({ Offset center, double radius }) {
     _value
-      ..[0] = center.x - radius
-      ..[1] = center.y - radius
-      ..[2] = center.x + radius
-      ..[3] = center.y + radius;
+      ..[0] = center.dx - radius
+      ..[1] = center.dy - radius
+      ..[2] = center.dx + radius
+      ..[3] = center.dy + radius;
   }
 
-  /// Construct the smallest rectangle that encloses the given points.
-  Rect.fromPoints(Point a, Point b) {
+  /// Construct the smallest rectangle that encloses the given offsets, treating
+  /// them as vectors from the origin.
+  Rect.fromPoints(Offset a, Offset b) {
     _value
-      ..[0] = math.min(a.x, b.x)
-      ..[1] = math.min(a.y, b.y)
-      ..[2] = math.max(a.x, b.x)
-      ..[3] = math.max(a.y, b.y);
+      ..[0] = math.min(a.dx, b.dx)
+      ..[1] = math.min(a.dy, b.dy)
+      ..[2] = math.max(a.dx, b.dx)
+      ..[3] = math.max(a.dy, b.dy);
   }
 
   static const int _kDataSize = 4;
@@ -547,12 +586,50 @@ class Rect {
   /// The offset of the bottom edge of this rectangle from the y axis.
   double get bottom => _value[3];
 
+  /// The distance between the left and right edges of this rectangle.
+  double get width => right - left;
+
+  /// The distance between the top and bottom edges of this rectangle.
+  double get height => bottom - top;
+
+  /// The distance between the upper-left corner and the lower-right corner of
+  /// this rectangle.
+  Size get size => new Size(width, height);
+
   /// A rectangle with left, top, right, and bottom edges all at zero.
   static final Rect zero = new Rect._();
 
+  /// Whether any of the coordinates of this rectangle are equal to positive infinity.
+  // included for consistency with Offset and Size
+  bool get isInfinite {
+    return left >= double.INFINITY
+        || top >= double.INFINITY
+        || right >= double.INFINITY
+        || bottom >= double.INFINITY;
+  }
+
+  /// Whether all coordinates of this rectangle are finite.
+  bool get isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
+
+  /// Whether this rectangle encloses a non-zero area. Negative areas are
+  /// considered empty.
+  bool get isEmpty => left >= right || top >= bottom;
+
   /// Returns a new rectangle translated by the given offset.
+  ///
+  /// To translate a rectangle by separate x and y components rather than by an
+  /// [Offset], consider [translate].
   Rect shift(Offset offset) {
     return new Rect.fromLTRB(left + offset.dx, top + offset.dy, right + offset.dx, bottom + offset.dy);
+  }
+
+  /// Returns a new rectangle with translateX added to the x components and
+  /// translateY added to the y components.
+  ///
+  /// To translate a rectangle by an [Offset] rather than by separate x and y
+  /// components, consider [shift].
+  Rect translate(double translateX, double translateY) {
+    return new Rect.fromLTRB(left + translateX, top + translateY, right + translateX, bottom + translateY);
   }
 
   /// Returns a new rectangle with edges moved outwards by the given delta.
@@ -576,22 +653,6 @@ class Rect {
     );
   }
 
-  /// The distance between the left and right edges of this rectangle.
-  double get width => right - left;
-
-  /// The distance between the top and bottom edges of this rectangle.
-  double get height => bottom - top;
-
-  /// The distance between upper-left corner and the lower-right corner of this rectangle.
-  Size get size => new Size(width, height);
-
-  /// Whether this rectangle encloses a non-zero area.
-  /// Negative areas are considered empty.
-  bool get isEmpty => left >= right || top >= bottom;
-
-  /// Whether all coordinates of this rectangle are finite.
-  bool get isFinite => left.isFinite && top.isFinite && right.isFinite && bottom.isFinite;
-
   /// The lesser of the magnitudes of the width and the height of this
   /// rectangle.
   double get shortestSide {
@@ -600,58 +661,60 @@ class Rect {
     return w < h ? w : h;
   }
 
-
-  /// The point at the intersection of the top and left edges of this rectangle.
+  /// The offset to the intersection of the top and left edges of this rectangle.
   ///
   /// See also [Size.topLeft].
-  Point get topLeft => new Point(left, top);
+  Offset get topLeft => new Offset(left, top);
 
-  /// The point at the center of the top edge of this rectangle.
+  /// The offset to the center of the top edge of this rectangle.
   ///
   /// See also [Size.topCenter].
-  Point get topCenter => new Point(left + width / 2.0, top);
+  Offset get topCenter => new Offset(left + width / 2.0, top);
 
-  /// The point at the intersection of the top and right edges of this rectangle.
+  /// The offset to the intersection of the top and right edges of this rectangle.
   ///
   /// See also [Size.topRight].
-  Point get topRight => new Point(right, top);
+  Offset get topRight => new Offset(right, top);
 
-  /// The point at the center of the left edge of this rectangle.
+  /// The offset to the center of the left edge of this rectangle.
   ///
   /// See also [Size.centerLeft].
-  Point get centerLeft => new Point(left, top + height / 2.0);
+  Offset get centerLeft => new Offset(left, top + height / 2.0);
 
-  /// The point halfway between the left and right and the top and bottom edges of this rectangle.
+  /// The offset to the point halfway between the left and right and the top and
+  /// bottom edges of this rectangle.
   ///
   /// See also [Size.center].
-  Point get center => new Point(left + width / 2.0, top + height / 2.0);
+  Offset get center => new Offset(left + width / 2.0, top + height / 2.0);
 
-  /// The point at the center of the right edge of this rectangle.
+  /// The offset to the center of the right edge of this rectangle.
   ///
   /// See also [Size.centerLeft].
-  Point get centerRight => new Point(right, top + height / 2.0);
+  Offset get centerRight => new Offset(right, top + height / 2.0);
 
-  /// The point at the intersection of the bottom and left edges of this rectangle.
+  /// The offset to the intersection of the bottom and left edges of this rectangle.
   ///
   /// See also [Size.bottomLeft].
-  Point get bottomLeft => new Point(left, bottom);
+  Offset get bottomLeft => new Offset(left, bottom);
 
-  /// The point at the center of the bottom edge of this rectangle.
+  /// The offset to the center of the bottom edge of this rectangle.
   ///
   /// See also [Size.bottomLeft].
-  Point get bottomCenter => new Point(left + width / 2.0, bottom);
+  Offset get bottomCenter => new Offset(left + width / 2.0, bottom);
 
-  /// The point at the intersection of the bottom and right edges of this rectangle.
+  /// The offset to the intersection of the bottom and right edges of this rectangle.
   ///
   /// See also [Size.bottomRight].
-  Point get bottomRight => new Point(right, bottom);
+  Offset get bottomRight => new Offset(right, bottom);
 
-
-  /// Whether the given point lies between the left and right and the top and bottom edges of this rectangle.
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the origin) lies between the left and right and the top and
+  /// bottom edges of this rectangle.
   ///
-  /// Rectangles include their top and left edges but exclude their bottom and right edges.
-  bool contains(Point point) {
-    return point.x >= left && point.x < right && point.y >= top && point.y < bottom;
+  /// Rectangles include their top and left edges but exclude their bottom and
+  /// right edges.
+  bool contains(Offset offset) {
+    return offset.dx >= left && offset.dx < right && offset.dy >= top && offset.dy < bottom;
   }
 
   /// Linearly interpolate between two rectangles.
@@ -678,7 +741,7 @@ class Rect {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! Rect)
+    if (runtimeType != other.runtimeType)
       return false;
     final Rect typedOther = other;
     for (int i = 0; i < _kDataSize; i += 1) {
@@ -703,16 +766,16 @@ class Radius {
   /// Constructs an elliptical radius with the given radii.
   const Radius.elliptical(this.x, this.y);
 
-  /// A radius with [x] and [y] values set to zero.
-  ///
-  /// You can use [Radius.zero] with [RRect] to have right-angle corners.
-  static const Radius zero = const Radius.circular(0.0);
-
   /// The radius value on the horizontal axis.
   final double x;
 
   /// The radius value on the vertical axis.
   final double y;
+
+  /// A radius with [x] and [y] values set to zero.
+  ///
+  /// You can use [Radius.zero] with [RRect] to have right-angle corners.
+  static const Radius zero = const Radius.circular(0.0);
 
   /// Linearly interpolate between two radii.
   ///
@@ -736,7 +799,7 @@ class Radius {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! Radius)
+    if (runtimeType != other.runtimeType)
       return false;
     final Radius typedOther = other;
     return typedOther.x == x && typedOther.y == y;
@@ -753,7 +816,7 @@ class Radius {
   }
 }
 
-/// A rounded rectangle with the custom radii for all four corners.
+/// An immutable rounded rectangle with the custom radii for all four corners.
 class RRect {
   RRect._();
 
@@ -779,7 +842,7 @@ class RRect {
   /// Construct a rounded rectangle from its left, top, right, and bottom edges,
   /// and the same radius in each corner.
   RRect.fromLTRBR(double left, double top, double right, double bottom,
-                      Radius radius) {
+                  Radius radius) {
     _value
       ..[0] = left
       ..[1] = top
@@ -839,14 +902,12 @@ class RRect {
     double left,
     double top,
     double right,
-    double bottom,
-    {
-      Radius topLeft: Radius.zero,
-      Radius topRight: Radius.zero,
-      Radius bottomRight: Radius.zero,
-      Radius bottomLeft: Radius.zero
-    }
-  ) {
+    double bottom, {
+    Radius topLeft: Radius.zero,
+    Radius topRight: Radius.zero,
+    Radius bottomRight: Radius.zero,
+    Radius bottomLeft: Radius.zero,
+  }) {
     _value
       ..[0] = left
       ..[1] = top
@@ -950,7 +1011,7 @@ class RRect {
   /// A rounded rectangle with all the values set to zero.
   static final RRect zero = new RRect._();
 
-  /// Returns a new RRect translated by the given offset.
+  /// Returns a new [RRect] translated by the given offset.
   RRect shift(Offset offset) {
     return new RRect.fromLTRBAndCorners(
       _value[0] + offset.dx,
@@ -976,7 +1037,7 @@ class RRect {
     );
   }
 
-  /// Returns a new RRect with edges and radii moved outwards by the given
+  /// Returns a new [RRect] with edges and radii moved outwards by the given
   /// delta.
   RRect inflate(double delta) {
     return new RRect.fromLTRBAndCorners(
@@ -1003,7 +1064,7 @@ class RRect {
     );
   }
 
-  /// Returns a new RRect with edges and radii moved inwards by the given delta.
+  /// Returns a new [RRect] with edges and radii moved inwards by the given delta.
   RRect deflate(double delta) => inflate(-delta);
 
   /// The distance between the left and right edges of this rectangle.
@@ -1115,9 +1176,9 @@ class RRect {
     return w < h ? w : h;
   }
 
-  /// The point halfway between the left and right and the top and bottom edges
-  /// of this rectangle.
-  Point get center => new Point(left + width / 2.0, top + height / 2.0);
+  /// The offset to the point halfway between the left and right and the top and
+  /// bottom edges of this rectangle.
+  Offset get center => new Offset(left + width / 2.0, top + height / 2.0);
 
   // Returns the minimum between min and scale to which radius1 and radius2
   // should be scaled with in order not to exceed the limit.
@@ -1152,11 +1213,15 @@ class RRect {
     }
   }
 
-  /// Whether the given point lies inside the rounded rectangle. This method
-  /// works by normalizing the sizes of the radii in case they overflow the
-  /// sizes of the side.
-  bool contains(Point point) {
-    if (point.x < left || point.x >= right || point.y < top || point.y >= bottom)
+  /// Whether the point specified by the given offset (which is assumed to be
+  /// relative to the origin) lies inside the rounded rectangle.
+  ///
+  /// This method may allocate (and cache) a copy of the object with normalized
+  /// radii the first time it is called on a particular [RRect] instance. When
+  /// using this method, prefer to reuse existing [RRect]s rather than
+  /// recreating the object each time.
+  bool contains(Offset point) {
+    if (point.dx < left || point.dx >= right || point.dy < top || point.dy >= bottom)
       return false; // outside bounding box
 
     _scaleRadii();
@@ -1167,28 +1232,28 @@ class RRect {
     double radiusY;
     // check whether point is in one of the rounded corner areas
     // x, y -> translate to ellipse center
-    if (point.x < left + _scaled.tlRadiusX &&
-        point.y < top + _scaled.tlRadiusY) {
-      x = point.x - left - _scaled.tlRadiusX;
-      y = point.y - top - _scaled.tlRadiusY;
+    if (point.dx < left + _scaled.tlRadiusX &&
+        point.dy < top + _scaled.tlRadiusY) {
+      x = point.dx - left - _scaled.tlRadiusX;
+      y = point.dy - top - _scaled.tlRadiusY;
       radiusX = _scaled.tlRadiusX;
       radiusY = _scaled.tlRadiusY;
-    } else if (point.x > right - _scaled.trRadiusX &&
-               point.y < top + _scaled.trRadiusY) {
-      x = point.x - right + _scaled.trRadiusX;
-      y = point.y - top - _scaled.trRadiusY;
+    } else if (point.dx > right - _scaled.trRadiusX &&
+               point.dy < top + _scaled.trRadiusY) {
+      x = point.dx - right + _scaled.trRadiusX;
+      y = point.dy - top - _scaled.trRadiusY;
       radiusX = _scaled.trRadiusX;
       radiusY = _scaled.trRadiusY;
-    } else if (point.x > right - _scaled.brRadiusX &&
-               point.y > bottom - _scaled.brRadiusY) {
-      x = point.x - right + _scaled.brRadiusX;
-      y = point.y - bottom + _scaled.brRadiusY;
+    } else if (point.dx > right - _scaled.brRadiusX &&
+               point.dy > bottom - _scaled.brRadiusY) {
+      x = point.dx - right + _scaled.brRadiusX;
+      y = point.dy - bottom + _scaled.brRadiusY;
       radiusX = _scaled.brRadiusX;
       radiusY = _scaled.brRadiusY;
-    } else if (point.x < left + _scaled.blRadiusX &&
-               point.y > bottom - _scaled.blRadiusY) {
-      x = point.x - left - _scaled.blRadiusX;
-      y = point.y - bottom + _scaled.blRadiusY;
+    } else if (point.dx < left + _scaled.blRadiusX &&
+               point.dy > bottom - _scaled.blRadiusY) {
+      x = point.dx - left - _scaled.blRadiusX;
+      y = point.dy - bottom + _scaled.blRadiusY;
       radiusX = _scaled.blRadiusX;
       radiusY = _scaled.blRadiusY;
     } else {
@@ -1262,7 +1327,7 @@ class RRect {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! RRect)
+    if (runtimeType != other.runtimeType)
       return false;
     final RRect typedOther = other;
     for (int i = 0; i < _kDataSize; i += 1) {
@@ -1278,10 +1343,10 @@ class RRect {
   @override
   String toString() {
     return 'RRect.fromLTRBAndCorners(${left.toStringAsFixed(1)}, '
-        '${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, '
-        '${bottom.toStringAsFixed(1)}, '
-        'topLeft: $tlRadius, topRight: $trRadius, '
-        'bottomRight: $brRadius, bottomLeft: $blRadius)';
+           '${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, '
+           '${bottom.toStringAsFixed(1)}, '
+           'topLeft: $tlRadius, topRight: $trRadius, '
+           'bottomRight: $brRadius, bottomLeft: $blRadius)';
   }
 }
 

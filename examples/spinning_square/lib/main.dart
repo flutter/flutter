@@ -21,7 +21,7 @@ void beginFrame(Duration timeStamp) {
 
   // PAINT
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
-  final ui.Rect paintBounds = ui.Point.origin & logicalSize;
+  final ui.Rect paintBounds = ui.Offset.zero & logicalSize;
   final ui.PictureRecorder recorder = new ui.PictureRecorder();
   final ui.Canvas canvas = new ui.Canvas(recorder, paintBounds);
   canvas.translate(paintBounds.width / 2.0, paintBounds.height / 2.0);

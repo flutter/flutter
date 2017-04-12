@@ -17,11 +17,11 @@ void beginFrame(Duration timeStamp) {
   final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(new ui.ParagraphConstraints(width: logicalSize.width));
 
-  final ui.Rect physicalBounds = ui.Point.origin & physicalSize;
+  final ui.Rect physicalBounds = ui.Offset.zero & physicalSize;
   final ui.PictureRecorder recorder = new ui.PictureRecorder();
   final ui.Canvas canvas = new ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);
-  canvas.drawRect(ui.Point.origin & logicalSize, new ui.Paint()..color = const ui.Color(0xFF0000FF));
+  canvas.drawRect(ui.Offset.zero & logicalSize, new ui.Paint()..color = const ui.Color(0xFF0000FF));
   canvas.drawParagraph(paragraph, new ui.Offset(
     (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
     (logicalSize.height - paragraph.height) / 2.0
