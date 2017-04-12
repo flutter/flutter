@@ -103,6 +103,7 @@ class _ScrollableScope extends InheritedWidget {
   _ScrollableScope({
     Key key,
     @required this.scrollable,
+    @required this.position,
     @required Widget child
   }) : super(key: key, child: child) {
     assert(scrollable != null);
@@ -110,9 +111,12 @@ class _ScrollableScope extends InheritedWidget {
   }
 
   final ScrollableState scrollable;
+  final ScrollPosition position;
 
   @override
-  bool updateShouldNotify(_ScrollableScope old) => true;
+  bool updateShouldNotify(_ScrollableScope old) {
+    return position != old.position;
+  }
 }
 
 /// State object for a [Scrollable] widget.
@@ -333,6 +337,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
         ignoring: _shouldIgnorePointer,
         child: new _ScrollableScope(
           scrollable: this,
+          position: position,
           child: widget.viewportBuilder(context, position),
         ),
       ),
