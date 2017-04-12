@@ -391,6 +391,16 @@ class RelativePositionedTransition extends AnimatedWidget {
 
 /// Animates the different properties of a [Container].
 class ContainerTransition extends AnimatedWidget {
+  /// Creates a widget that animates painting, positioning, and sizing around
+  /// its child.
+  /// 
+  /// The `color` animation's value is a shorthand for
+  /// `decoration: new BoxDecoration(backgroundColor: color)`, which means you
+  /// cannot supply both a `color` and a `decoration` argument. If you want to
+  /// have both a `color` and a `decoration`, you can have your `decoration`
+  /// animation also control the `backgroundColor` of the `BoxDecoration`.
+  /// 
+  /// Also see [Container].
   ContainerTransition({
     Key key,
     this.alignment,
