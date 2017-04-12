@@ -109,7 +109,6 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 @property(nonatomic) UIKeyboardType keyboardType;
 @property(nonatomic) UIReturnKeyType returnKeyType;
 @property(nonatomic, getter=isSecureTextEntry) BOOL secureTextEntry;
-@property(nonatomic, copy) UITextContentType textContentType;
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
 
