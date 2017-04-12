@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/animation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -52,7 +53,7 @@ void main() {
     });
 
     testWidgets(
-      'ContainerTransition decoration test', 
+      'decoration test', 
       (WidgetTester tester) async {
         final ContainerTransition transitionUnderTest = new ContainerTransition(
           decoration: decorationTween.animate(controller),
@@ -97,18 +98,90 @@ void main() {
       }
     );
 
+    testWidgets('animations work with curves test', (WidgetTester tester) async {
+      final Animation<Decoration> curvedDecorationAnimation = 
+          decorationTween.animate(new CurvedAnimation(
+            parent: controller,
+            curve: Curves.easeOut,
+          ));
+       
+      final ContainerTransition transitionUnderTest = new ContainerTransition(
+        foregroundDecoration: curvedDecorationAnimation,
+        child: new Text("Doesn't matter"),
+      );
+
+      await tester.pumpWidget(transitionUnderTest);
+      RenderDecoratedBox actualBox = 
+          tester.renderObject(find.byType(DecoratedBox));
+      BoxDecoration actualDecoration = actualBox.decoration;
+
+      expect(actualDecoration.backgroundColor, const Color(0xFFFFFFFF));
+      expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
+      expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
+      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+
+      controller.value = 0.5;
+
+      await tester.pump();
+      actualBox = tester.renderObject(find.byType(DecoratedBox));
+      actualDecoration = actualBox.decoration;
+
+      // Same as the test above but the values should be much closer to the 
+      // tween's end values given the easeOut curve.
+      expect(actualDecoration.backgroundColor, const Color(0xFF505050));
+      expect(actualDecoration.border.left.width, closeTo(1.9, 0.1));
+      expect(actualDecoration.border.left.style, BorderStyle.solid);
+      expect(actualDecoration.border.left.color, const Color(0xFF151515));
+      expect(actualDecoration.borderRadius.topLeft.x, closeTo(6.8, 0.1));
+      expect(actualDecoration.shape, BoxShape.rectangle);
+      expect(actualDecoration.boxShadow[0].blurRadius, closeTo(3.1, 0.1));
+      expect(actualDecoration.boxShadow[0].spreadRadius, closeTo(1.2, 0.1));
+      // Scaling a shadow doesn't change the color.
+      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+    });
+
     testWidgets('animate multiple properties test', (WidgetTester tester) async {
       final EdgeInsetsTween paddingTween = new EdgeInsetsTween(
         begin: const EdgeInsets.all(10.0),
         end: const EdgeInsets.all(20.0),
       );
 
+      final Tween<double> heightTween = new Tween<double>(
+        begin: 0.0,
+        end: 20.0,
+      );
+
       final ContainerTransition transitionUnderTest = new ContainerTransition(
         padding: paddingTween.animate(controller),
+        height: heightTween.animate(controller),
         child: new Text("Doesn't matter"),
       );
       
       await tester.pumpWidget(transitionUnderTest);
+
+      controller.value = 0.5;
+
+      await tester.pump();
+      RenderConstrainedBox actualConstraint = 
+          tester.renderObject(find.byType(ConstrainedBox));
+      RenderPadding actualPadding = tester.renderObject(find.byType(Padding));
+      
+      expect(
+        actualConstraint.additionalConstraints,
+        const BoxConstraints.tightFor(height: 10.0), // (20.0 - 0.0) / 2.
+      );
+      expect(actualPadding.padding, const EdgeInsets.all(15.0));
+
+      controller.value = 1.0;
+
+      await tester.pump();
+      actualConstraint = tester.renderObject(find.byType(ConstrainedBox));
+      actualPadding = tester.renderObject(find.byType(Padding));
+      expect(
+        actualConstraint.additionalConstraints,
+        const BoxConstraints.tightFor(height: 20.0),
+      );
+      expect(actualPadding.padding, const EdgeInsets.all(20.0));
     });
   });
 }
