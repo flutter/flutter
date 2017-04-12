@@ -7,6 +7,9 @@
 #include <utility>
 
 #include <unistd.h>
+#include <chrono>
+#include <thread>
+
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/src/gpu/vk/GrVkUtil.h"
@@ -16,21 +19,12 @@ namespace flutter_runner {
 VulkanRasterizer::VulkanSurfaceProducer::VulkanSurfaceProducer() {
   valid_ = Initialize();
   if (!valid_)
-    FTL_DLOG(INFO) << "VulkanSurfaceProducer failed to initialize";
+    FTL_LOG(ERROR) << "VulkanSurfaceProducer failed to initialize";
 }
 
-sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
-    SkISize size,
-    mozart::ImagePtr* out_image) {
-  if (size.isEmpty()) {
-    FTL_DLOG(INFO) << "Attempting to create surface with empty size";
-    return nullptr;
-  }
-
-  // these casts are safe because of the early out on frame_size.isEmpty()
-  auto width = static_cast<uint32_t>(size.width());
-  auto height = static_cast<uint32_t>(size.height());
-
+std::unique_ptr<VulkanRasterizer::VulkanSurfaceProducer::Surface>
+VulkanRasterizer::VulkanSurfaceProducer::CreateSurface(uint32_t width,
+                                                       uint32_t height) {
   VkResult vk_result;
 
   VkImageCreateInfo image_create_info = {
@@ -109,7 +103,7 @@ sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
   auto sk_surface = SkSurface::MakeFromBackendRenderTarget(
       context_.get(), desc, SkColorSpace::MakeSRGB(), &props);
   if (!sk_surface) {
-    FTL_DLOG(INFO) << "MakeFromBackendRenderTarget Failed";
+    FTL_LOG(ERROR) << "MakeFromBackendRenderTarget Failed";
     return nullptr;
   }
 
@@ -119,34 +113,71 @@ sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
   if (vk_result)
     return nullptr;
 
+  mx::vmo vmo(vmo_handle);
+
+  size_t vmo_size;
+  vmo.get_size(&vmo_size);
+
+  FTL_DCHECK(vmo_size >= memory_reqs.size);
+
   mx::eventpair retention_events[2];
   auto mx_status =
       mx::eventpair::create(0, &retention_events[0], &retention_events[1]);
   if (mx_status) {
-    FTL_DLOG(INFO) << "Failed to create retention eventpair";
+    FTL_LOG(ERROR) << "Failed to create retention eventpair";
     return nullptr;
   }
 
   if (!sk_surface || sk_surface->getCanvas() == nullptr) {
-    FTL_DLOG(INFO) << "surface invalid";
+    FTL_LOG(ERROR) << "surface invalid";
     return nullptr;
   }
 
-  surfaces_.emplace_back(
-      sk_surface,                      // sk_sp<SkSurface> sk_surface
-      mx::vmo(vmo_handle),             // mx::vmo vmo
-      std::move(retention_events[0]),  // mx::eventpair local_retention_event;
-      std::move(retention_events[1]),  // mx::eventpair remote_retention_event;
-      mx::eventpair(),                 // mx::eventpair fence_event
-      vk_image, vk_memory);
+  return std::make_unique<Surface>(backend_context_, sk_surface, std::move(vmo),
+                                   std::move(retention_events[0]),
+                                   std::move(retention_events[1]), vk_image,
+                                   vk_memory);
+}
 
-  auto surface = &surfaces_.back();
+sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
+    SkISize size,
+    mozart::ImagePtr* out_image) {
+  if (size.isEmpty()) {
+    FTL_LOG(ERROR) << "Attempting to create surface with empty size";
+    return nullptr;
+  }
 
-  size_t vmo_size;
-  surface->vmo.get_size(&vmo_size);
+  // these casts are safe because of the early out on frame_size.isEmpty()
+  auto width = static_cast<uint32_t>(size.width());
+  auto height = static_cast<uint32_t>(size.height());
 
-  if (vmo_size < memory_reqs.size) {
-    FTL_DLOG(INFO) << "Failed to allocate sufficiently large vmo";
+  std::unique_ptr<Surface> surface;
+  // try and find a Swapchain with surfaces of the right size
+  auto it = available_surfaces_.find(MakeSizeKey(width, height));
+  if (it == available_surfaces_.end()) {
+    // No matching Swapchain exists, create a new surfaces
+    surface = CreateSurface(width, height);
+  } else {
+    auto& swapchain = it->second;
+    if (swapchain.queue.size() == 0) {
+      // matching Swapchain exists, but does not have any buffers available in
+      // it
+      surface = CreateSurface(width, height);
+    } else {
+      surface = std::move(swapchain.queue.front());
+      swapchain.queue.pop();
+      swapchain.tick_count = 0;
+
+      // Need to do some skia foo here to clear all the canvas state from the
+      // last frame
+      surface->sk_surface->getCanvas()->restoreToCount(0);
+      surface->sk_surface->getCanvas()->save();
+      surface->sk_surface->getCanvas()->resetMatrix();
+    }
+  }
+
+  if (!surface) {
+    FTL_LOG(ERROR) << "Failed to produce surface";
     return nullptr;
   }
 
@@ -154,22 +185,27 @@ sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
   auto buffer = mozart::Buffer::New();
   status = surface->vmo.duplicate(MX_RIGHT_SAME_RIGHTS, &buffer->vmo);
   if (status) {
-    FTL_DLOG(INFO) << "failed to duplicate vmo";
+    FTL_LOG(ERROR) << "failed to duplicate vmo";
     return nullptr;
   }
 
   buffer->memory_type = mozart::Buffer::MemoryType::VK_DEVICE_MEMORY;
 
-  status = mx::eventpair::create(0, &surface->fence_event, &buffer->fence);
+  mx::eventpair fence_event;
+  status = mx::eventpair::create(0, &fence_event, &buffer->fence);
   if (status) {
-    FTL_DLOG(INFO) << "failed to create fence eventpair";
+    FTL_LOG(ERROR) << "failed to create fence eventpair";
     return nullptr;
   }
+
+  mtl::MessageLoop::HandlerKey handler_key =
+      mtl::MessageLoop::GetCurrent()->AddHandler(this, fence_event.get(),
+                                                 MX_EPAIR_PEER_CLOSED);
 
   status = surface->remote_retention_event.duplicate(MX_RIGHT_SAME_RIGHTS,
                                                      &buffer->retention);
   if (status) {
-    FTL_DLOG(INFO) << "failed to duplicate retention eventpair";
+    FTL_LOG(ERROR) << "failed to duplicate retention eventpair";
     return nullptr;
   }
 
@@ -184,35 +220,85 @@ sk_sp<SkSurface> VulkanRasterizer::VulkanSurfaceProducer::ProduceSurface(
   image->buffer = std::move(buffer);
   *out_image = std::move(image);
 
+  auto sk_surface = surface->sk_surface;
+  PendingSurfaceInfo info;
+  info.handler_key = handler_key;
+  info.surface = std::move(surface);
+  info.production_fence = std::move(fence_event);
+  outstanding_surfaces_.push_back(std::move(info));
+
   return sk_surface;
 }
 
-bool VulkanRasterizer::VulkanSurfaceProducer::Tick() {
+bool VulkanRasterizer::VulkanSurfaceProducer::FinishFrame() {
   mx_status_t status;
 
-  for (auto& surface : surfaces_) {
-    GrVkImageInfo* image_info = nullptr;
-    if (!surface.sk_surface->getRenderTargetHandle(
-            reinterpret_cast<GrBackendObject*>(&image_info),
-            SkSurface::kFlushRead_BackendHandleAccess)) {
-      FTL_DLOG(INFO) << "Could not get render target handle.";
-      return false;
-    }
-    (void)image_info;
+  // Finish Rendering
+  context_->flush();
+  VkResult result =
+      VK_CALL_LOG_ERROR(vkQueueWaitIdle(backend_context_->fQueue));
+  if (result)
+    return false;
 
-    status = surface.fence_event.signal_peer(0u, MX_EPAIR_SIGNALED);
+  for (auto& info : outstanding_surfaces_) {
+    // info.surface->sk_surface->prepareForExternalIO();
+    // Signal the compositor
+    status = info.production_fence.signal_peer(0u, MX_EPAIR_SIGNALED);
     if (status) {
-      FTL_DLOG(INFO) << "failed to signal fence event";
+      FTL_LOG(ERROR) << "failed to signal fence event";
       return false;
     }
 
-    vkFreeMemory(backend_context_->fDevice, surface.vk_memory, NULL);
+    pending_surfaces_.insert(
+        std::make_pair(info.production_fence.get(), std::move(info)));
+  }
+  outstanding_surfaces_.clear();
+  return true;
+}
 
-    vkDestroyImage(backend_context_->fDevice, surface.vk_image, NULL);
+void VulkanRasterizer::VulkanSurfaceProducer::Tick() {
+  for (auto it = available_surfaces_.begin();
+       it != available_surfaces_.end();) {
+    auto& swapchain = it->second;
+    swapchain.tick_count++;
+    if (swapchain.tick_count > Swapchain::kMaxTickBeforeDiscard)
+      it = available_surfaces_.erase(it);
+    else
+      it++;
+  }
+}
+
+void VulkanRasterizer::VulkanSurfaceProducer::OnHandleReady(
+    mx_handle_t handle,
+    mx_signals_t pending) {
+  FTL_DCHECK(pending & MX_EPAIR_PEER_CLOSED);
+
+  auto it = pending_surfaces_.find(handle);
+  FTL_DCHECK(it != pending_surfaces_.end());
+
+  // Add the newly available buffer to the swapchain.
+  PendingSurfaceInfo& info = it->second;
+  mtl::MessageLoop::GetCurrent()->RemoveHandler(info.handler_key);
+
+  // try and find a Swapchain with surfaces of the right size
+  size_key_t key = MakeSizeKey(info.surface->sk_surface->width(),
+                               info.surface->sk_surface->height());
+  auto swapchain_it = available_surfaces_.find(key);
+  if (swapchain_it == available_surfaces_.end()) {
+    // No matching Swapchain exists, create one
+    Swapchain swapchain;
+    if (swapchain.queue.size() + 1 <= Swapchain::kMaxSurfaces) {
+      swapchain.queue.push(std::move(info.surface));
+    }
+    available_surfaces_.insert(std::make_pair(key, std::move(swapchain)));
+  } else {
+    auto& swapchain = swapchain_it->second;
+    if (swapchain.queue.size() + 1 <= Swapchain::kMaxSurfaces) {
+      swapchain.queue.push(std::move(info.surface));
+    }
   }
 
-  surfaces_.clear();
-  return true;
+  pending_surfaces_.erase(it);
 }
 
 bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
@@ -225,7 +311,7 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
   if (!application_->IsValid() || !vk->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it setup the
     // instance proc table entries.
-    FTL_DLOG(INFO) << "Instance proc addresses have not been setup.";
+    FTL_LOG(ERROR) << "Instance proc addresses have not been setup.";
     return false;
   }
 
@@ -237,30 +323,30 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
       !vk->AreDeviceProcsSetup()) {
     // Make certain the device was created and it setup the device proc table
     // entries.
-    FTL_DLOG(INFO) << "Device proc addresses have not been setup.";
+    FTL_LOG(ERROR) << "Device proc addresses have not been setup.";
     return false;
   }
 
   if (!vk->HasAcquiredMandatoryProcAddresses()) {
-    FTL_DLOG(INFO) << "Failed to acquire mandatory proc addresses";
+    FTL_LOG(ERROR) << "Failed to acquire mandatory proc addresses";
     return false;
   }
 
   if (!vk->IsValid()) {
-    FTL_DLOG(INFO) << "VulkanProcTable invalid";
+    FTL_LOG(ERROR) << "VulkanProcTable invalid";
     return false;
   }
 
   auto interface = vk->CreateSkiaInterface();
 
   if (interface == nullptr || !interface->validate(0)) {
-    FTL_DLOG(INFO) << "interface invalid";
+    FTL_LOG(ERROR) << "interface invalid";
     return false;
   }
 
   uint32_t skia_features = 0;
   if (!logical_device_->GetPhysicalDeviceFeaturesSkia(&skia_features)) {
-    FTL_DLOG(INFO) << "Failed to get physical device features";
+    FTL_LOG(ERROR) << "Failed to get physical device features";
 
     return false;
   }
@@ -281,20 +367,26 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
       kVulkan_GrBackend,
       reinterpret_cast<GrBackendContext>(backend_context_.get())));
 
+  FTL_DLOG(INFO) << "Successfully initialized VulkanRasterizer";
   return true;
 }
 
-VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {}
+VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {
+  // todo(SY-88) We need to not create this surface producer until
+  // the graphics driver finishes coming up. Not sure where thats going to
+  // happen eventually but for now we paper over the race by sleeping for 10 ms
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  surface_producer_.reset(new VulkanSurfaceProducer());
+}
 
 VulkanRasterizer::~VulkanRasterizer() = default;
 
 bool VulkanRasterizer::IsValid() const {
-  return !surface_producer_ || surface_producer_->IsValid();
+  return surface_producer_ && surface_producer_->IsValid();
 }
 
 void VulkanRasterizer::SetScene(fidl::InterfaceHandle<mozart::Scene> scene) {
   scene_.Bind(std::move(scene));
-  surface_producer_.reset(new VulkanSurfaceProducer());
 }
 
 void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
@@ -305,12 +397,12 @@ void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
 
 bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
   if (layer_tree == nullptr) {
-    FTL_DLOG(INFO) << "Layer tree was not valid.";
+    FTL_LOG(ERROR) << "Layer tree was not valid.";
     return false;
   }
 
   if (!scene_) {
-    FTL_DLOG(INFO) << "Scene was not valid.";
+    FTL_LOG(ERROR) << "Scene was not valid.";
     return false;
   }
 
@@ -329,7 +421,7 @@ bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
     auto metadata = mozart::SceneMetadata::New();
     metadata->version = layer_tree->scene_version();
     scene_->Publish(std::move(metadata));
-    FTL_DLOG(INFO) << "Publishing empty node";
+    FTL_LOG(ERROR) << "Publishing empty node";
 
     return false;
   }
@@ -355,10 +447,11 @@ bool VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree) {
   // Draw the contents of the scene to a surface.
   // We do this after publishing to take advantage of pipelining.
   context.ExecutePaintTasks(frame);
-  if (!surface_producer_->Tick()) {
-    FTL_DLOG(INFO) << "Failed to tick surface producer";
+  if (!surface_producer_->FinishFrame()) {
+    FTL_LOG(ERROR) << "Failed to Finish Frame";
     return false;
   }
+  surface_producer_->Tick();
 
   return true;
 }
