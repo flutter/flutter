@@ -33,7 +33,6 @@ class Demo {
 // kAllGalleryItems.map((GalleryItem item) => item.title).toList();
 const List<Demo> demos = const <Demo>[
   // Demos
-  const Demo('Pesto', profiled: true),
   const Demo('Shrine', profiled: true),
   const Demo('Contact profile', profiled: true),
   const Demo('Animation', profiled: true),
