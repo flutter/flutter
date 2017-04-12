@@ -46,8 +46,8 @@ bool appBarIsVisible(WidgetTester tester) {
 }
 
 double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar)).height;
-double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).y;
-double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar)).y;
+double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).dy;
+double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar)).dy;
 
 double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
 
@@ -492,7 +492,7 @@ void main() {
 
     // Drag the scrollable up and down. The app bar should not snap open, its
     // height should just track the the drag offset.
-    TestGesture gesture = await tester.startGesture(const Point(50.0, 256.0));
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 256.0));
     await gesture.moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
     await tester.pump();
     expect(appBarTop(tester), 0.0);
@@ -523,7 +523,7 @@ void main() {
     // Now that the app bar is open, perform the same drag scenario
     // in reverse: drag the appbar up and down and then trigger the
     // snap closed animation.
-    gesture = await tester.startGesture(const Point(50.0, 256.0));
+    gesture = await tester.startGesture(const Offset(50.0, 256.0));
     await gesture.moveBy(const Offset(0.0, -128.0)); // drag the appbar closed
     await tester.pump();
     expect(appBarBottom(tester), 0.0);
@@ -575,7 +575,7 @@ void main() {
 
     // Drag the scrollable up and down. The app bar should not snap open, the
     // bottof of the appbar should just track the drag offset.
-    TestGesture gesture = await tester.startGesture(const Point(50.0, 200.0));
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 200.0));
     await gesture.moveBy(const Offset(0.0, 100.0));
     await tester.pump();
     expect(appBarHeight(tester), 100.0);
@@ -609,7 +609,7 @@ void main() {
     // Now that the appbar is fully expanded, Perform the same drag
     // scenario in reverse: drag the appbar up and down and then trigger
     // the snap closed animation.
-    gesture = await tester.startGesture(const Point(50.0, 256.0));
+    gesture = await tester.startGesture(const Offset(50.0, 256.0));
     await gesture.moveBy(const Offset(0.0, -128.0));
     await tester.pump();
     expect(appBarBottom(tester), kTextTabBarHeight);
