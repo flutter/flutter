@@ -512,14 +512,17 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _position?.removeIsScrollingListener(_isScrollingListener);
+    if (_position != null)
+      _position.isScrollingNotifier.removeListener(_isScrollingListener);
     _position = Scrollable.of(context)?.position;
-    _position?.addIsScrollingListener(_isScrollingListener);
+    if (_position != null)
+      _position.isScrollingNotifier.addListener(_isScrollingListener);
   }
 
   @override
   void dispose() {
-    _position?.removeIsScrollingListener(_isScrollingListener);
+    if (_position != null)
+      _position.isScrollingNotifier.removeListener(_isScrollingListener);
     super.dispose();
   }
 
@@ -534,7 +537,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
     final RenderSliverFloatingPersistentHeader header = _headerRenderer();
-    if (_position.isScrolling)
+    if (_position.isScrollingNotifier.value)
       header?.maybeStopSnapAnimation(_position.userScrollDirection);
     else
       header?.maybeStartSnapAnimation(_position.userScrollDirection);
