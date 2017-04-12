@@ -210,9 +210,8 @@ abstract class ResidentRunner {
   }
 
   Future<Null> connectToServiceProtocol(Uri uri, {String isolateFilter}) async {
-    if (!debuggingOptions.debuggingEnabled) {
+    if (!debuggingOptions.debuggingEnabled)
       return new Future<Null>.error('Error the service protocol is not enabled.');
-    }
     vmService = VMService.connect(uri);
     printTrace('Connected to service protocol: $uri');
     await vmService.getVM();

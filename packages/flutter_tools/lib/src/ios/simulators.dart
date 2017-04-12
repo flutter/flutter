@@ -455,6 +455,8 @@ class IOSSimulator extends Device {
         args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.useTestFonts)
+        args.add('--use-test-fonts');
 
       final int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add('--observatory-port=$observatoryPort');

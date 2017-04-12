@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -41,12 +40,12 @@ void main() {
   SystemChannels.platform.setMockMethodCallHandler(mockClipboard.handleMethodCall);
 
   const String kThreeLines =
-    'First line of text is here abcdef ghijkl mnopqrst. ' +
-    'Second line of text goes until abcdef ghijkl mnopq. ' +
-    'Third line of stuff keeps going until abcdef ghijk. ';
+    'First line of text is ' +
+    'Second line goes until ' +
+    'Third line of stuff ';
   const String kFourLines =
     kThreeLines +
-    'Fourth line won\'t display and ends at abcdef ghi. ';
+    'Fourth line won\'t display and ends at';
 
   // Returns the first RenderEditable.
   RenderEditable findRenderEditable(WidgetTester tester) {
@@ -69,7 +68,8 @@ void main() {
   Point textOffsetToPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        new TextSelection.collapsed(offset: offset));
+      new TextSelection.collapsed(offset: offset),
+    );
     expect(endpoints.length, 1);
     return endpoints[0].point + const Offset(0.0, -2.0);
   }
@@ -102,15 +102,18 @@ void main() {
     final Size emptyInputSize = inputBox.size;
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText), testValue);
+      return TestAsyncUtils.guard(() async {
+        await tester.enterText(find.byType(EditableText), testValue);
 
-      // Check that the onChanged event handler fired.
-      expect(textFieldValue, equals(testValue));
+        // Check that the onChanged event handler fired.
+        expect(textFieldValue, equals(testValue));
 
-      return await tester.pumpWidget(builder());
+        await tester.pumpWidget(builder());
+      });
     }
 
     await checkText(' ');
+
     expect(findTextFieldBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
@@ -492,7 +495,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     final String testValue = kThreeLines;
-    final String cutValue = 'First line of stuff keeps going until abcdef ghijk. ';
+    final String cutValue = 'First line of stuff ';
     await tester.enterText(find.byType(EditableText), testValue);
 
     await tester.pumpWidget(builder());
@@ -513,8 +516,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 76);
-    expect(controller.selection.extentOffset, 81);
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
@@ -531,8 +534,8 @@ void main() {
     await gesture.up();
     await tester.pumpWidget(builder());
 
-    expect(controller.selection.baseOffset, 76);
-    expect(controller.selection.extentOffset, 108);
+    expect(controller.selection.baseOffset, 39);
+    expect(controller.selection.extentOffset, 50);
 
     // Drag the left handle to the first line, just after 'First'.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
@@ -545,13 +548,13 @@ void main() {
     await tester.pumpWidget(builder());
 
     expect(controller.selection.baseOffset, 5);
-    expect(controller.selection.extentOffset, 108);
+    expect(controller.selection.extentOffset, 50);
 
     await tester.tap(find.text('CUT'));
     await tester.pumpWidget(builder());
     expect(controller.selection.isCollapsed, true);
     expect(controller.text, cutValue);
-  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
+  });
 
   testWidgets('Can scroll multiline input', (WidgetTester tester) async {
     final Key textFieldKey = new UniqueKey();
@@ -571,10 +574,12 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(seconds: 1));
 
     await tester.enterText(find.byType(EditableText), kFourLines);
 
     await tester.pumpWidget(builder());
+    await tester.pump(const Duration(seconds: 1));
 
     RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
     final RenderBox inputBox = findInputBox();
@@ -590,11 +595,11 @@ void main() {
     TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
     await gesture.moveBy(const Offset(0.0, -1000.0));
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
     // Wait and drag again to trigger https://github.com/flutter/flutter/issues/6329
     // (No idea why this is necessary, but the bug wouldn't repro without it.)
     await gesture.moveBy(const Offset(0.0, -1000.0));
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
     await gesture.up();
     await tester.pump();
 
@@ -609,27 +614,26 @@ void main() {
     // Now try scrolling by dragging the selection handle.
 
     // Long press the 'i' in 'Fourth line' to select the word.
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
     final Point untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
     gesture = await tester.startGesture(untilPos, pointer: 7);
-    await tester.pump(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 1));
     await gesture.up();
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
     final Point handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
     final Point newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
     await gesture.up();
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     // The text should have scrolled up with the handle to keep the active
     // cursor visible, back to its original position.
@@ -638,7 +642,7 @@ void main() {
     expect(newFirstPos.y, firstPos.y);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
-  }, skip: Platform.isMacOS); // Skip due to https://github.com/flutter/flutter/issues/6961
+  });
 
   testWidgets('InputField smoke test', (WidgetTester tester) async {
     String textFieldValue;
@@ -658,16 +662,18 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText), testValue);
+    Future<Null> checkText(String testValue) {
+      return TestAsyncUtils.guard(() async {
+        await tester.enterText(find.byType(EditableText), testValue);
 
-      // Check that the onChanged event handler fired.
-      expect(textFieldValue, equals(testValue));
+        // Check that the onChanged event handler fired.
+        expect(textFieldValue, equals(testValue));
 
-      return await tester.pumpWidget(builder());
+        await tester.pumpWidget(builder());
+      });
     }
 
-    checkText('Hello World');
+    await checkText('Hello World');
   });
 
   testWidgets('InputField with global key', (WidgetTester tester) async {
@@ -691,15 +697,17 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText), testValue);
+      return TestAsyncUtils.guard(() async {
+        await tester.enterText(find.byType(EditableText), testValue);
 
-      // Check that the onChanged event handler fired.
-      expect(textFieldValue, equals(testValue));
+        // Check that the onChanged event handler fired.
+        expect(textFieldValue, equals(testValue));
 
-      return await tester.pumpWidget(builder());
+        await tester.pumpWidget(builder());
+      });
     }
 
-    checkText('Hello World');
+    await checkText('Hello World');
   });
 
   testWidgets('TextField with default hintStyle', (WidgetTester tester) async {
@@ -929,35 +937,28 @@ void main() {
         ),
       ),
     ));
-
     expect(tester.testTextInput.editingState['text'], isEmpty);
 
     await tester.tap(find.byType(TextField));
     await tester.pump();
-
     expect(tester.testTextInput.editingState['text'], equals('Initial Text'));
 
     controller.text = 'Updated Text';
     await tester.idle();
-
     expect(tester.testTextInput.editingState['text'], equals('Updated Text'));
 
     setState(() {
       currentController = controller2;
     });
-
     await tester.pump();
-
     expect(tester.testTextInput.editingState['text'], equals('More Text'));
 
     controller.text = 'Ignored Text';
     await tester.idle();
-
     expect(tester.testTextInput.editingState['text'], equals('More Text'));
 
     controller2.text = 'Final Text';
     await tester.idle();
-
     expect(tester.testTextInput.editingState['text'], equals('Final Text'));
   });
 }

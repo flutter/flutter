@@ -159,6 +159,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The supplied EnginePhase is the final phase reached during the pump pass;
   /// if not supplied, the whole pass is executed.
+  ///
+  /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
+  /// this method works when the test is run with `flutter run`.
   Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]);
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
@@ -175,13 +178,20 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// Acts as if the application went idle.
   ///
   /// Runs all remaining microtasks, including those scheduled as a result of
-  /// running them, until there are no more microtasks scheduled.
+  /// running them, until there are no more microtasks scheduled. Then, runs any
+  /// previously scheduled timers with zero time, and completes the returned future.
   ///
-  /// Does not run timers. May result in an infinite loop or run out of memory
-  /// if microtasks continue to recursively schedule new microtasks.
+  /// May result in an infinite loop or run out of memory if microtasks continue
+  /// to recursively schedule new microtasks. Will not run any timers scheduled
+  /// after this method was invoked, even if they are zero-time timers.
   Future<Null> idle() {
-    TestAsyncUtils.guardSync();
-    return new Future<Null>.value();
+    return TestAsyncUtils.guard(() {
+      final Completer<Null> completer = new Completer<Null>();
+      Timer.run(() {
+        completer.complete(null);
+      });
+      return completer.future;
+    });
   }
 
   /// Convert the given point from the global coodinate system (as used by
@@ -272,7 +282,11 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `invariantTester` argument is called after the `testBody`'s [Future]
   /// completes. If it throws, then the test is marked as failed.
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester);
+  ///
+  /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
+  /// show a label on the screen during the test. The description comes from
+  /// the value passed to [testWidgets]. It must not be null.
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -305,7 +319,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       _currentTestCompleter.complete(null);
   }
 
-  Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester) {
+  Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
+    assert(description != null);
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
@@ -392,6 +407,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
               information.writeln('At the time of the failure, the widget tree looked as follows:');
               information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
             }
+            if (description.isNotEmpty)
+              information.writeln('The test description was:\n$description');
           }
         ));
         assert(_parentZone != null);
@@ -514,7 +531,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   Future<Null> idle() {
     final Future<Null> result = super.idle();
-    _fakeAsync.flushMicrotasks();
+    _fakeAsync.elapse(const Duration());
     return result;
   }
 
@@ -551,7 +568,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester) {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) {
+    assert(description != null);
     assert(!inTest);
     assert(_fakeAsync == null);
     assert(_clock == null);
@@ -560,7 +578,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<Null> testBodyResult;
     _fakeAsync.run((FakeAsync fakeAsync) {
       assert(fakeAsync == _fakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester);
+      testBodyResult = _runTest(testBody, invariantTester, description);
       assert(inTest);
     });
     // testBodyResult is a Future that was created in the Zone of the fakeAsync.
@@ -603,6 +621,35 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
 }
 
+/// Available policies for how a [LiveTestWidgetsFlutterBinding] should paint
+/// frames.
+///
+/// These values are set on the binding's
+/// [LiveTestWidgetsFlutterBinding.framePolicy] property. The default is
+/// [fadePointers].
+enum LiveTestWidgetsFlutterBindingFramePolicy {
+  /// Strictly show only frames that are explicitly pumped. This most closely
+  /// matches the behavior of tests when run under `flutter test`.
+  onlyPumps,
+
+  /// Show pumped frames, and additionally schedule and run frames to fade
+  /// out the pointer crosshairs and other debugging information shown by
+  /// the binding.
+  ///
+  /// This can result in additional frames being pumped beyond those that
+  /// the test itself requests, which can cause differences in behavior.
+  fadePointers,
+
+  /// Show every frame that the framework requests, even if the frames are not
+  /// explicitly pumped.
+  ///
+  /// This can help with orienting the developer when looking at
+  /// heavily-animated situations, and will almost certainly result in
+  /// additional frames being pumped beyond those that the test itself requests,
+  /// which can cause differences in behavior.
+  fullyLive,
+}
+
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
 /// the `flutter run` environment, on a device. This is intended to
 /// allow interactive test development.
@@ -611,13 +658,21 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 /// a device from a development computer, see the [flutter_driver]
 /// package and the `flutter drive` command.
 ///
-/// This binding overrides the default [SchedulerBinding] behavior to
-/// ensure that tests work in the same way in this environment as they
-/// would under the [AutomatedTestWidgetsFlutterBinding]. To override
-/// this (and see intermediate frames that the test does not
-/// explicitly trigger), set [allowAllFrames] to true. (This is likely
-/// to make tests fail, though, especially if e.g. they test how many
-/// times a particular widget was built.)
+/// When running tests using `flutter run`, consider adding the
+/// `--use-test-fonts` argument so that the fonts used match those used under
+/// `flutter test`. (This forces all text to use the "Ahem" font, which is a
+/// font that covers ASCII characters and gives them all the appearance of a
+/// square whose size equals the font size.)
+///
+/// This binding overrides the default [SchedulerBinding] behavior to ensure
+/// that tests work in the same way in this environment as they would under the
+/// [AutomatedTestWidgetsFlutterBinding]. To override this (and see intermediate
+/// frames that the test does not explicitly trigger), set [framePolicy] to
+/// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive]. (This is likely to
+/// make tests fail, though, especially if e.g. they test how many times a
+/// particular widget was built.) The default behavior is to show pumped frames
+/// and a few additional frames when pointers are triggered (to animate the
+/// pointer crosshairs).
 ///
 /// This binding does not support the [EnginePhase] argument to
 /// [pump]. (There would be no point setting it to a value that
@@ -644,6 +699,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   Completer<Null> _pendingFrame;
   bool _expectingFrame = false;
+  bool _viewNeedsPaint = false;
 
   /// Whether to have [pump] with a duration only pump a single frame
   /// (as would happen in a normal test environment using
@@ -652,31 +708,46 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// asynchronous pause in the test (as would normally happen when
   /// running an application with [WidgetsFlutterBinding]).
   ///
-  /// `false` is the default behavior, which is to only pump once.
+  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fadePointers] is the default
+  ///   behavior, which is to only pump once, except when there has been some
+  ///   activity with [TestPointer]s, in which case those are shown and may pump
+  ///   additional frames.
   ///
-  /// `true` allows all frame requests from the engine to be serviced.
+  /// * [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] is the strictest
+  ///   behavior, which is to only pump once. This most closely matches the
+  ///   [AutomatedTestWidgetsFlutterBinding] (`flutter test`) behavior.
   ///
-  /// Setting this to `true` means pumping extra frames, which might
-  /// involve calling builders more, or calling paint callbacks more,
-  /// etc, which might interfere with the test. If you know your test
-  /// file wouldn't be affected by this, you can set it to true
-  /// persistently in that particular test file. To set this to `true`
-  /// while still allowing the test file to work as a normal test, add
-  /// the following code to your test file at the top of your `void
-  /// main() { }` function, before calls to `testWidgets`:
+  /// * [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] allows all frame
+  ///   requests from the engine to be serviced, even those the test did not
+  ///   explicitly pump.
+  ///
+  /// Setting this to anything other than
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
+  /// frames, which might involve calling builders more, or calling paint
+  /// callbacks more, etc, which might interfere with the test. If you know your
+  /// test file wouldn't be affected by this, you can set it to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] persistently in that
+  /// particular test file. To set this to
+  /// [LiveTestWidgetsFlutterBindingFramePolicy.fullyLive] while still allowing
+  /// the test file to work as a normal test, add the following code to your
+  /// test file at the top of your `void main() { }` function, before calls to
+  /// [testWidgets]:
   ///
   /// ```dart
   /// TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   /// if (binding is LiveTestWidgetsFlutterBinding)
-  ///   binding.allowAllFrames = true;
+  ///   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
   /// ```
-  bool allowAllFrames = false;
+  LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
-    if (_expectingFrame || allowAllFrames)
+    if (_expectingFrame ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint))
       super.handleBeginFrame(rawTimeStamp);
-    if (_expectingFrame) {
+    _viewNeedsPaint = false;
+    if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
       _pendingFrame.complete(); // unlocks the test API
       _pendingFrame = null;
@@ -689,12 +760,20 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void initRenderView() {
     assert(renderView == null);
-    renderView = new _LiveTestRenderView(configuration: createViewConfiguration());
+    renderView = new _LiveTestRenderView(
+      configuration: createViewConfiguration(),
+      onNeedPaint: _handleViewNeedsPaint,
+    );
     renderView.scheduleInitialFrame();
   }
 
   @override
   _LiveTestRenderView get renderView => super.renderView;
+
+  void _handleViewNeedsPaint() {
+    _viewNeedsPaint = true;
+    renderView.markNeedsPaint();
+  }
 
   /// An object to which real device events should be routed.
   ///
@@ -719,7 +798,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           if (!event.down)
             renderView._pointers[event.pointer].decay = _kPointerDecay;
         }
-        renderView.markNeedsPaint();
+        _handleViewNeedsPaint();
         super.dispatchEvent(event, result, source: source);
         break;
       case TestBindingEventSource.device:
@@ -751,10 +830,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester) async {
+  Future<Null> runTest(Future<Null> testBody(), VoidCallback invariantTester, { String description: '' }) async {
+    assert(description != null);
     assert(!inTest);
     _inTest = true;
-    return _runTest(testBody, invariantTester);
+    renderView._setDescription(description);
+    return _runTest(testBody, invariantTester, description);
   }
 
   @override
@@ -857,7 +938,8 @@ class _LiveTestPointerRecord {
 
 class _LiveTestRenderView extends RenderView {
   _LiveTestRenderView({
-    ViewConfiguration configuration
+    ViewConfiguration configuration,
+    this.onNeedPaint,
   }) : super(configuration: configuration);
 
   @override
@@ -865,7 +947,27 @@ class _LiveTestRenderView extends RenderView {
   @override
   set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
 
+  final VoidCallback onNeedPaint;
+
   final Map<int, _LiveTestPointerRecord> _pointers = <int, _LiveTestPointerRecord>{};
+
+  TextPainter _label;
+  static const TextStyle _labelStyle = const TextStyle(
+    fontFamily: 'sans-serif',
+    fontSize: 10.0,
+  );
+  void _setDescription(String value) {
+    assert(value != null);
+    if (value.isEmpty) {
+      _label = null;
+      return;
+    }
+    _label ??= new TextPainter(textAlign: TextAlign.left);
+    _label.text = new TextSpan(text: value, style: _labelStyle);
+    _label.layout();
+    if (onNeedPaint != null)
+      onNeedPaint();
+  }
 
   @override
   bool hitTest(HitTestResult result, { Point position }) {
@@ -906,9 +1008,10 @@ class _LiveTestRenderView extends RenderView {
         .where((int pointer) => _pointers[pointer].decay == 0)
         .toList()
         .forEach(_pointers.remove);
-      if (dirty)
-        scheduleMicrotask(markNeedsPaint);
+      if (dirty && onNeedPaint != null)
+        scheduleMicrotask(onNeedPaint);
     }
+    _label?.paint(context.canvas, offset - const Offset(0.0, 10.0));
   }
 }
 

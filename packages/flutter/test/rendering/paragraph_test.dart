@@ -76,7 +76,10 @@ void main() {
 
   test('overflow test', () {
     final RenderParagraph paragraph = new RenderParagraph(
-      const TextSpan(text: 'This is\na wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.'),
+      const TextSpan(
+        text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
+              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
       maxLines: 1,
       softWrap: true,
     );
@@ -90,7 +93,7 @@ void main() {
     }
 
     // Lay out in a narrow box to force wrapping.
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0)); // enough to fit "This" but not "This is"
     final double lineHeight = paragraph.size.height;
 
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);

@@ -228,6 +228,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.startPaused)
       launchArguments.add("--start-paused");
 
+    if (debuggingOptions.useTestFonts)
+      launchArguments.add("--use-test-fonts");
+
     if (debuggingOptions.debuggingEnabled) {
       launchArguments.add("--enable-checked-mode");
 

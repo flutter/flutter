@@ -21,7 +21,7 @@ Future<Null> main() async {
   // This allows us to call onBeginFrame even when the engine didn't request it,
   // and have it actually do something:
   final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  binding.allowAllFrames = true;
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   final Stopwatch watch = new Stopwatch();
   int iterations = 0;
