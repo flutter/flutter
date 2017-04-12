@@ -771,9 +771,13 @@ class Path extends NativeFieldWrapperClass2 {
                double startAngle, double sweepAngle) native "Path_addArc";
 
   /// Adds a new subpath with a sequence of line segments that connect the given
-  /// points. If `close` is true, a final line segment will be added that
-  /// connects the last point to the first point.
-  void addPolygon(List<Point> points, bool close) {
+  /// points.
+  ///
+  /// If `close` is true, a final line segment will be added that connects the
+  /// last point to the first point.
+  ///
+  /// The `points` argument is interpreted as offsets from the origin.
+  void addPolygon(List<Offset> points, bool close) {
     _addPolygon(_encodePointList(points), close);
   }
   void _addPolygon(Float32List points, bool close) native "Path_addPolygon";
@@ -803,12 +807,14 @@ class Path extends NativeFieldWrapperClass2 {
   /// reset to the origin.
   void reset() native "Path_reset";
 
-  /// Tests to see if the point is within the path. (That is, whether
-  /// the point would be in the visible portion of the path if the
-  /// path was used with [Canvas.clipPath].)
+  /// Tests to see if the given point is within the path. (That is, whether the
+  /// point would be in the visible portion of the path if the path was used
+  /// with [Canvas.clipPath].)
+  ///
+  /// The `point` argument is interpreted as an offset from the origin.
   ///
   /// Returns true if the point is in the path, and false otherwise.
-  bool contains(Point position) => _contains(position.x, position.y);
+  bool contains(Offset point) => _contains(point.dx, point.dy);
   bool _contains(double x, double y) native "Path_contains";
 
   /// Returns a copy of the path with all the segments of every
@@ -963,16 +969,25 @@ Int32List _encodeColorList(List<Color> colors) {
   return result;
 }
 
-Float32List _encodePointList(List<Point> points) {
+Float32List _encodePointList(List<Offset> points) {
   final int pointCount = points.length;
   final Float32List result = new Float32List(pointCount * 2);
   for (int i = 0; i < pointCount; ++i) {
     final int xIndex = i * 2;
     final int yIndex = xIndex + 1;
-    final Point point = points[i];
-    result[xIndex] = point.x;
-    result[yIndex] = point.y;
+    final Offset point = points[i];
+    result[xIndex] = point.dx;
+    result[yIndex] = point.dy;
   }
+  return result;
+}
+
+Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
+  final Float32List result = new Float32List(4);
+  result[0] = pointA.dx;
+  result[1] = pointA.dy;
+  result[2] = pointB.dx;
+  result[3] = pointB.dy;
   return result;
 }
 
@@ -988,21 +1003,28 @@ class Gradient extends Shader {
   Gradient();
   void _constructor() native "Gradient_constructor";
 
-  /// Creates a linear gradient from `endPoint[0]` to `endPoint[1]`. If
-  /// `colorStops` is provided, `colorStops[i]` is a number from 0 to 1 that
-  /// specifies where `color[i]` begins in the gradient. If `colorStops` is not
-  /// provided, then two stops at 0.0 and 1.0 are implied. The behavior before
-  /// and after the radius is described by the `tileMode` argument.
-  // TODO(mpcomplete): Consider passing a list of (color, colorStop) pairs
-  // instead.
-  Gradient.linear(List<Point> endPoints,
-                  List<Color> colors,
-                  [List<double> colorStops = null,
-                  TileMode tileMode = TileMode.clamp]) {
-    if (endPoints == null || endPoints.length != 2)
-      throw new ArgumentError("Expected exactly 2 [endPoints].");
+  /// Creates a linear gradient from `from` to `to`.
+  ///
+  /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
+  /// that specifies where `color[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
+  /// `color` must therefore only have two entries).
+  ///
+  /// The behavior before `from` and after `to` is described by the `tileMode`
+  /// argument.
+  ///
+  /// If `from`, `to`, `colors`, or `tileMode` are null, or if `colors` or
+  /// `colorStops` contain null values, this constructor will throw a
+  /// [NoSuchMethodError].
+  Gradient.linear(
+    Offset from,
+    Offset to,
+    List<Color> colors, [
+    List<double> colorStops = null,
+    TileMode tileMode = TileMode.clamp
+  ]) {
     _validateColorStops(colors, colorStops);
-    final Float32List endPointsBuffer = _encodePointList(endPoints);
+    final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
     _constructor();
@@ -1011,12 +1033,20 @@ class Gradient extends Shader {
   void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initLinear";
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
-  /// distance from the center. If `colorStops` is provided, `colorStops[i]` is
-  /// a number from 0 to 1 that specifies where `color[i]` begins in the
-  /// gradient. If `colorStops` is not provided, then two stops at 0.0 and 1.0
-  /// are implied. The behavior before and after the radius is described by the
-  /// `tileMode` argument.
-  Gradient.radial(Point center,
+  /// distance from the center.
+  ///
+  /// If `colorStops` is provided, `colorStops[i]` is a number from 0.0 to 1.0
+  /// that specifies where `color[i]` begins in the gradient. If `colorStops` is
+  /// not provided, then only two stops, at 0.0 and 1.0, are implied (and
+  /// `color` must therefore only have two entries).
+  ///
+  /// The behavior before and after the radius is described by the `tileMode`
+  /// argument.
+  ///
+  /// If `center`, `radius`, `colors`, or `tileMode` are null, or if `colors` or
+  /// `colorStops` contain null values, this constructor will throw a
+  /// [NoSuchMethodError].
+  Gradient.radial(Offset center,
                   double radius,
                   List<Color> colors,
                   [List<double> colorStops = null,
@@ -1025,13 +1055,18 @@ class Gradient extends Shader {
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
     _constructor();
-    _initRadial(center.x, center.y, radius, colorsBuffer, colorStopsBuffer, tileMode.index);
+    _initRadial(center.dx, center.dy, radius, colorsBuffer, colorStopsBuffer, tileMode.index);
   }
   void _initRadial(double centerX, double centerY, double radius, Int32List colors, Float32List colorStops, int tileMode) native "Gradient_initRadial";
 
   static void _validateColorStops(List<Color> colors, List<double> colorStops) {
-    if (colorStops != null && colors.length != colorStops.length)
-      throw new ArgumentError("[colors] and [colorStops] parameters must be equal length.");
+    if (colorStops == null) {
+      if (colors.length != 2)
+        throw new ArgumentError("[colors] must have length 2 if [colorStops] is omitted.");
+    } else {
+      if (colors.length != colorStops.length)
+        throw new ArgumentError("[colors] and [colorStops] arguments must have equal length.");
+    }
   }
 }
 
@@ -1078,13 +1113,11 @@ enum VertexMode {
 class Vertices extends NativeFieldWrapperClass2 {
   Vertices(
     VertexMode mode,
-    List<Point> positions,
-    {
-      List<Point> textureCoordinates,
-      List<Color> colors,
-      List<int> indices,
-    }
-  ) {
+    List<Offset> positions, {
+    List<Offset> textureCoordinates,
+    List<Color> colors,
+    List<int> indices,
+  }) {
     if (textureCoordinates != null && textureCoordinates.length != positions.length)
       throw new ArgumentError("[positions] and [textureCoordinates] lengths must match");
     if (colors != null && colors.length != positions.length)
@@ -1294,10 +1327,12 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
   void _drawColor(int color, int blendMode) native "Canvas_drawColor";
 
-  /// Draws a line between the given [Point]s using the given paint. The line is
+  /// Draws a line between the given points using the given paint. The line is
   /// stroked, the value of the [Paint.style] is ignored for this call.
-  void drawLine(Point p1, Point p2, Paint paint) {
-    _drawLine(p1.x, p1.y, p2.x, p2.y, paint._objects, paint._data);
+  ///
+  /// The `p1` and `p2` arguments are interpreted as offsets from the origin.
+  void drawLine(Offset p1, Offset p2, Paint paint) {
+    _drawLine(p1.dx, p1.dy, p2.dx, p2.dy, paint._objects, paint._data);
   }
   void _drawLine(double x1,
                  double y1,
@@ -1362,12 +1397,12 @@ class Canvas extends NativeFieldWrapperClass2 {
                  List<dynamic> paintObjects,
                  ByteData paintData) native "Canvas_drawOval";
 
-  /// Draws a circle centered at the point given by the first two arguments and
-  /// that has the radius given by the third argument, with the [Paint] given in
-  /// the fourth argument. Whether the circle is filled or stroked (or both) is
+  /// Draws a circle centered at the point given by the first argument and
+  /// that has the radius given by the second argument, with the [Paint] given in
+  /// the third argument. Whether the circle is filled or stroked (or both) is
   /// controlled by [Paint.style].
-  void drawCircle(Point c, double radius, Paint paint) {
-    _drawCircle(c.x, c.y, radius, paint._objects, paint._data);
+  void drawCircle(Offset c, double radius, Paint paint) {
+    _drawCircle(c.dx, c.dy, radius, paint._objects, paint._data);
   }
   void _drawCircle(double x,
                    double y,
@@ -1410,9 +1445,9 @@ class Canvas extends NativeFieldWrapperClass2 {
                  ByteData paintData) native "Canvas_drawPath";
 
   /// Draws the given [Image] into the canvas with its top-left corner at the
-  /// given [Point]. The image is composited into the canvas using the given [Paint].
-  void drawImage(Image image, Point p, Paint paint) {
-    _drawImage(image, p.x, p.y, paint._objects, paint._data);
+  /// given [Offset]. The image is composited into the canvas using the given [Paint].
+  void drawImage(Image image, Offset p, Paint paint) {
+    _drawImage(image, p.dx, p.dy, paint._objects, paint._data);
   }
   void _drawImage(Image image,
                   double x,
@@ -1500,7 +1535,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   }
 
   /// Draws a sequence of points according to the given [PointMode].
-  void drawPoints(PointMode pointMode, List<Point> points, Paint paint) {
+  ///
+  /// The `points` argument is interpreted as offsets from the origin.
+  void drawPoints(PointMode pointMode, List<Offset> points, Paint paint) {
     _drawPoints(paint._objects, paint._data, pointMode.index, _encodePointList(points));
   }
   void _drawPoints(List<dynamic> paintObjects,
