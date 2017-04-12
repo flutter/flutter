@@ -96,5 +96,19 @@ void main() {
         expect(actualDecoration.boxShadow, null);
       }
     );
+
+    testWidgets('animate multiple properties test', (WidgetTester tester) async {
+      final EdgeInsetsTween paddingTween = new EdgeInsetsTween(
+        begin: const EdgeInsets.all(10.0),
+        end: const EdgeInsets.all(20.0),
+      );
+
+      final ContainerTransition transitionUnderTest = new ContainerTransition(
+        padding: paddingTween.animate(controller),
+        child: new Text("Doesn't matter"),
+      );
+      
+      await tester.pumpWidget(transitionUnderTest);
+    });
   });
 }

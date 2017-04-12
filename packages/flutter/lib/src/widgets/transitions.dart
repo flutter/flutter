@@ -417,25 +417,65 @@ class ContainerTransition extends AnimatedWidget {
     constraints,
     margin,
     transform,
-  ]));
+  ])) {
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
+  }
 
+  /// Animation controlling the alignment of the [child] in the container.
+  /// 
+  /// Also see [Container.alignment].
   final Animation<FractionalOffset> alignment;
+  /// Animation controlling the empty space inscribed inside the [decoration].
+  /// 
+  /// Also see [Container.padding].
   final Animation<EdgeInsets> padding;
+  /// Animation controlling the shorthand 
+  /// `decoration: new BoxDecoration(backgroundColor: color)`
+  /// 
+  /// Supply only either `color` or `decoration`. 
+  /// 
+  /// Also see [Container].
   final Animation<Color> color;
-
-  /// An animation that controls the [Decoration] of this [Container] behind the
+  /// Animation that controls the [Decoration] of this [Container] behind the
   /// child.
   /// 
   /// The [Decoration] must implement lerp. 
   /// 
   /// Also see [Container.decoration].
   final Animation<Decoration> decoration;
-
+  /// Animation that controls the [Decoration] of this [Container] in front of
+  /// the child.
+  /// 
+  /// The [Decoration] must implement lerp. 
+  /// 
+  /// Also see [Container.foregroundDecoration].
   final Animation<Decoration> foregroundDecoration;
+  /// Animation controlling the height value to be combined with the 
+  /// [constraints] value.
+  /// 
+  /// Also see [Container].
   final Animation<double> height;
+  /// Animation controlling the width value to be combined with the 
+  /// [constraints] value.
+  /// 
+  /// Also see [Container].
   final Animation<double> width;
+  /// Animation controlling the constraints to apply to the [child]. 
+  /// 
+  /// Also see [Container.constraints].
   final Animation<BoxConstraints> constraints;
+  /// Animation controlling the empty space surrounding the [decoration] and 
+  /// [child].
+  /// 
+  /// Also see [Container.margin].
   final Animation<EdgeInsets> margin;
+  /// Animation controlling the transformation matrix to apply before painting
+  /// the container.
+  /// 
+  /// Also see [Container.transform].
   final Animation<Matrix4> transform;
 
   /// The widget below this widget in the tree.
@@ -444,16 +484,16 @@ class ContainerTransition extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      alignment: alignment.value,
-      padding: padding.value,
-      color: color.value,
-      decoration: decoration.value,
-      foregroundDecoration: foregroundDecoration.value,
-      height: height.value,
-      width: width.value,
-      constraints: constraints.value,
-      margin: margin.value,
-      transform: transform.value,
+      alignment: alignment?.value,
+      padding: padding?.value,
+      color: color?.value,
+      decoration: decoration?.value,
+      foregroundDecoration: foregroundDecoration?.value,
+      height: height?.value,
+      width: width?.value,
+      constraints: constraints?.value,
+      margin: margin?.value,
+      transform: transform?.value,
       child: child,
     );
   }
