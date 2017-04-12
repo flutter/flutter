@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';  
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -22,9 +22,10 @@ class _MountainViewPageTransition extends StatelessWidget {
     @required this.child,
   }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
-         curve: Curves.fastOutSlowIn
+         curve: Curves.fastOutSlowIn,
        )),
-       _opacityAnimation = new CurvedAnimation(parent: routeAnimation,
+       _opacityAnimation = new CurvedAnimation(
+         parent: routeAnimation,
          curve: Curves.easeIn, // Eyeballed from other Material apps.
        ),
        super(key: key);
