@@ -15,7 +15,8 @@ When the exception was thrown, this was the stack:
 <<skip until matching line>>
 \(elided .+\)
 
-
+The test description was:
+TestAsyncUtils - custom guarded sections
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 .*(this line has more of the test framework's output)?
   Test failed\. See exception logs above\.
