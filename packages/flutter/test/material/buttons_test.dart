@@ -32,8 +32,8 @@ void main() {
             id: 1,
             actions: SemanticsAction.tap.index,
             label: 'ABC',
-            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0)
+            rect: new Rect.fromLTRB(0.0, 0.0, 152.0, 36.0),
+            transform: new Matrix4.translationValues(324.0, 282.0, 0.0)
           )
         ]
       )
