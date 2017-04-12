@@ -20,14 +20,17 @@ final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
   end: const FractionalOffset(-1.0/3.0, 0.0),
 );
 
+// Fractional offset from offscreen below to fully on screen.
+final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+  begin: FractionalOffset.bottomLeft,
+  end: FractionalOffset.topLeft,
+);
+
 /// Provides the native iOS page transition animation.
-///
-/// Takes in a page widget and a route animation from a [TransitionRoute] and produces an
-/// AnimatedWidget wrapping that animates the page transition.
 ///
 /// The page slides in from the right and exits in reverse. It also shifts to the left in
 /// a parallax motion when another page enters to cover it.
-class CupertinoPageTransition extends AnimatedWidget {
+class CupertinoPageTransition extends StatelessWidget {
   CupertinoPageTransition({
     Key key,
     // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
@@ -55,13 +58,7 @@ class CupertinoPageTransition extends AnimatedWidget {
           reverseCurve: Curves.easeIn,
         )
       ),
-      super(
-        key: key,
-        // Trigger a rebuild whenever any of the 2 animation route happens.
-        listenable: new Listenable.merge(
-          <Listenable>[incomingRouteAnimation, outgoingRouteAnimation]
-        ),
-      );
+      super(key: key);
 
   // When this page is coming in to cover another page.
   final Animation<FractionalOffset> _incomingPositionAnimation;
@@ -91,32 +88,26 @@ class CupertinoPageTransition extends AnimatedWidget {
 
 /// Transitions used for summoning fullscreen dialogs in iOS such as creating a new
 /// calendar event etc by bringing in the next screen from the bottom.
-class CupertinoFullscreenDialogTransition extends AnimatedWidget {
+class CupertinoFullscreenDialogTransition extends StatelessWidget {
   CupertinoFullscreenDialogTransition({
     Key key,
     @required Animation<double> animation,
     @required this.child,
-  }) : super(
-    key: key,
-    listenable: _kBottomUpTween.animate(
-      new CurvedAnimation(
-        parent: animation,
-        curve: Curves.easeInOut,
-      )
-    ),
-  );
+  }) : _positionAnimation = _kBottomUpTween.animate(
+         new CurvedAnimation(
+           parent: animation,
+           curve: Curves.easeInOut,
+         )
+       ),
+       super(key: key);
 
-  static final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-    begin: FractionalOffset.bottomLeft,
-    end: FractionalOffset.topLeft,
-  );
-
+  final Animation<FractionalOffset> _positionAnimation;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return new SlideTransition(
-      position: listenable,
+      position: _positionAnimation,
       child: child,
     );
   }
