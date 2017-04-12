@@ -191,7 +191,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   bool get isInteractive => onChanged != null;
 
   TapGestureRecognizer _tap;
-  Point _downPosition;
+  Offset _downPosition;
 
   @override
   void attach(PipelineOwner owner) {
@@ -257,7 +257,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -272,11 +272,11 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// origin is the center point of the reaction (usually distinct from the
   /// point at which the user interacted with the control, which is handled
   /// automatically).
-  void paintRadialReaction(Canvas canvas, Offset offset, Point origin) {
+  void paintRadialReaction(Canvas canvas, Offset offset, Offset origin) {
     if (!_reaction.isDismissed) {
       // TODO(abarth): We should have a different reaction color when position is zero.
       final Paint reactionPaint = new Paint()..color = activeColor.withAlpha(kRadialReactionAlpha);
-      final Point center = Point.lerp(_downPosition ?? origin, origin, _reaction.value);
+      final Offset center = Offset.lerp(_downPosition ?? origin, origin, _reaction.value);
       final double radius = _kRadialReactionRadiusTween.evaluate(_reaction);
       canvas.drawCircle(center + offset, radius, reactionPaint);
     }

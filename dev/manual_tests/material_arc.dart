@@ -54,7 +54,7 @@ class _PointDemoPainter extends CustomPainter {
   final MaterialPointArcTween arc;
   Animation<double> _repaint;
 
-  void drawPoint(Canvas canvas, Point point, Color color) {
+  void drawPoint(Canvas canvas, Offset point, Color color) {
     final Paint paint = new Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
@@ -93,7 +93,7 @@ class _PointDemoPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Point position) {
+  bool hitTest(Offset position) {
     return (arc.begin - position).distanceSquared < _kTargetSlop
         || (arc.end - position).distanceSquared < _kTargetSlop;
   }
@@ -117,8 +117,8 @@ class _PointDemoState extends State<_PointDemo> {
   CurvedAnimation _animation;
   _DragTarget _dragTarget;
   Size _screenSize;
-  Point _begin;
-  Point _end;
+  Offset _begin;
+  Offset _end;
 
   @override
   void initState() {
@@ -132,7 +132,7 @@ class _PointDemoState extends State<_PointDemo> {
     super.dispose();
   }
 
-  Drag _handleOnStart(Point position) {
+  Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null)
       return new _IgnoreDrag();
@@ -181,8 +181,8 @@ class _PointDemoState extends State<_PointDemo> {
     final Size screenSize = MediaQuery.of(context).size;
     if (_screenSize == null || _screenSize != screenSize) {
       _screenSize = screenSize;
-      _begin = new Point(screenSize.width * 0.5, screenSize.height * 0.2);
-      _end = new Point(screenSize.width * 0.1, screenSize.height * 0.4);
+      _begin = new Offset(screenSize.width * 0.5, screenSize.height * 0.2);
+      _end = new Offset(screenSize.width * 0.1, screenSize.height * 0.4);
     }
 
     final MaterialPointArcTween arc = new MaterialPointArcTween(begin: _begin, end: _end);
@@ -229,7 +229,7 @@ class _RectangleDemoPainter extends CustomPainter {
   final MaterialRectArcTween arc;
   Animation<double> _repaint;
 
-  void drawPoint(Canvas canvas, Point p, Color color) {
+  void drawPoint(Canvas canvas, Offset p, Color color) {
     final Paint paint = new Paint()
       ..color = color.withOpacity(0.25)
       ..style = PaintingStyle.fill;
@@ -258,7 +258,7 @@ class _RectangleDemoPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Point position) {
+  bool hitTest(Offset position) {
     return (arc.begin.center - position).distanceSquared < _kTargetSlop
         || (arc.end.center - position).distanceSquared < _kTargetSlop;
   }
@@ -297,7 +297,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     super.dispose();
   }
 
-  Drag _handleOnStart(Point position) {
+  Drag _handleOnStart(Offset position) {
     // TODO(hansmuller): allow the user to drag both points at the same time.
     if (_dragTarget != null)
       return new _IgnoreDrag();

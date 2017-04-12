@@ -141,28 +141,28 @@ void main() {
     // they grow.
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
-    final Point originalOrigin = actions.elementAt(3).localToGlobal(Point.origin);
+    final Offset originalOrigin = actions.elementAt(3).localToGlobal(Offset.zero);
 
     await tester.tap(find.text('AC'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Point.origin), equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
     await tester.tap(find.text('Alarm'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Point.origin), equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
 
     await tester.tap(find.text('Time'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
     actions = tester.renderObjectList(find.byType(InkResponse));
-    expect(actions.elementAt(3).localToGlobal(Point.origin), equals(originalOrigin));
+    expect(actions.elementAt(3).localToGlobal(Offset.zero), equals(originalOrigin));
   });
 
   testWidgets('BottomNavigationBar inherits shadowed app theme for shifting navbar', (WidgetTester tester) async {

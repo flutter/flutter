@@ -27,18 +27,16 @@ class _GesturePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Point center = (size.center(Point.origin).toOffset() * zoom + offset).toPoint();
+    final Offset center = (size.center(Offset.zero) * zoom + offset);
     final double radius = size.width / 2.0 * zoom;
     final Gradient gradient = new RadialGradient(
       colors: forward ? <Color>[swatch.shade50, swatch.shade900]
                       : <Color>[swatch.shade900, swatch.shade50]
     );
     final Paint paint = new Paint()
-      ..shader = gradient.createShader(new Rect.fromLTWH(
-        center.x - radius,
-        center.y - radius,
-        radius * 2.0,
-        radius * 2.0
+      ..shader = gradient.createShader(new Rect.fromCircle(
+        center: center,
+        radius: radius,
       ));
     canvas.drawCircle(center, radius, paint);
   }
@@ -63,7 +61,7 @@ class GestureDemo extends StatefulWidget {
 
 class _GestureDemoState extends State<GestureDemo> {
 
-  Point _startingFocalPoint;
+  Offset _startingFocalPoint;
 
   Offset _previousOffset;
   Offset _offset = Offset.zero;
@@ -92,8 +90,8 @@ class _GestureDemoState extends State<GestureDemo> {
       _zoom = (_previousZoom * details.scale);
 
       // Ensure that item under the focal point stays in the same place despite zooming
-      final Offset normalizedOffset = (_startingFocalPoint.toOffset() - _previousOffset) / _previousZoom;
-      _offset = details.focalPoint.toOffset() - normalizedOffset * _zoom;
+      final Offset normalizedOffset = (_startingFocalPoint - _previousOffset) / _previousZoom;
+      _offset = details.focalPoint - normalizedOffset * _zoom;
     });
   }
 

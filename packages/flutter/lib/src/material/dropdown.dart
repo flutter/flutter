@@ -62,7 +62,7 @@ class _DropdownMenuPainter extends CustomPainter {
 
     final Rect rect = new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
 
-    _painter.paint(canvas, rect.topLeft.toOffset(), new ImageConfiguration(size: rect.size));
+    _painter.paint(canvas, rect.topLeft, new ImageConfiguration(size: rect.size));
   }
 
   @override
@@ -231,7 +231,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       top = bottom - childSize.height;
     }
     assert(() {
-      final Rect container = Point.origin & size;
+      final Rect container = Offset.zero & size;
       if (container.intersect(buttonRect) == buttonRect) {
         // If the button was entirely on-screen, then verify
         // that the menu is also on-screen.
@@ -499,7 +499,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
 
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
-    final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
+    final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     Navigator.push(context, new _DropdownRoute<T>(
       items: widget.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),

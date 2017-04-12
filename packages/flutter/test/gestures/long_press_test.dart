@@ -9,12 +9,12 @@ import 'gesture_tester.dart';
 
 const PointerDownEvent down = const PointerDownEvent(
   pointer: 5,
-  position: const Point(10.0, 10.0)
+  position: const Offset(10.0, 10.0)
 );
 
 const PointerUpEvent up = const PointerUpEvent(
   pointer: 5,
-  position: const Point(11.0, 9.0)
+  position: const Offset(11.0, 9.0)
 );
 
 void main() {

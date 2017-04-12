@@ -65,7 +65,7 @@ void main() {
     return renderEditable;
   }
 
-  Point textOffsetToPosition(WidgetTester tester, int offset) {
+  Offset textOffsetToPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
       new TextSelection.collapsed(offset: offset),
@@ -217,7 +217,7 @@ void main() {
 
     // Tap to reposition the caret.
     final int tapIndex = testValue.indexOf('e');
-    final Point ePos = textOffsetToPosition(tester, tapIndex);
+    final Offset ePos = textOffsetToPosition(tester, tapIndex);
     await tester.tapAt(ePos);
     await tester.pump();
 
@@ -257,7 +257,7 @@ void main() {
     expect(controller.selection.isCollapsed, true);
 
     // Long press the 'e' to select 'def'.
-    final Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -289,7 +289,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     // Long press the 'e' to select 'def'.
-    final Point ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
     TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -298,15 +298,14 @@ void main() {
     final TextSelection selection = controller.selection;
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(selection);
     expect(endpoints.length, 2);
 
     // Drag the right handle 2 letters to the right.
     // Note: use a small offset because the endpoint is on the very corner
     // of the handle.
-    Point handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Point newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
+    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    Offset newHandlePos = textOffsetToPosition(tester, selection.extentOffset+2);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -354,8 +353,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
     RenderEditable renderEditable = findRenderEditable(tester);
-    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -407,8 +405,7 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pumpWidget(builder());
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pumpWidget(builder());
 
@@ -501,16 +498,16 @@ void main() {
     await tester.pumpWidget(builder());
 
     // Check that the text spans multiple lines.
-    final Point firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
-    final Point secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
-    final Point thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
-    expect(firstPos.x, secondPos.x);
-    expect(firstPos.x, thirdPos.x);
-    expect(firstPos.y, lessThan(secondPos.y));
-    expect(secondPos.y, lessThan(thirdPos.y));
+    final Offset firstPos = textOffsetToPosition(tester, testValue.indexOf('First'));
+    final Offset secondPos = textOffsetToPosition(tester, testValue.indexOf('Second'));
+    final Offset thirdPos = textOffsetToPosition(tester, testValue.indexOf('Third'));
+    expect(firstPos.dx, secondPos.dx);
+    expect(firstPos.dx, thirdPos.dx);
+    expect(firstPos.dy, lessThan(secondPos.dy));
+    expect(secondPos.dy, lessThan(thirdPos.dy));
 
     // Long press the 'n' in 'until' to select the word.
-    final Point untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
+    final Offset untilPos = textOffsetToPosition(tester, testValue.indexOf('until')+1);
     TestGesture gesture = await tester.startGesture(untilPos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -520,13 +517,12 @@ void main() {
     expect(controller.selection.extentOffset, 44);
 
     final RenderEditable renderEditable = findRenderEditable(tester);
-    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(
-        controller.selection);
+    final List<TextSelectionPoint> endpoints = renderEditable.getEndpointsForSelection(controller.selection);
     expect(endpoints.length, 2);
 
     // Drag the right handle to the third line, just after 'Third'.
-    Point handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Point newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
+    Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.indexOf('Third') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -585,10 +581,10 @@ void main() {
     final RenderBox inputBox = findInputBox();
 
     // Check that the last line of text is not displayed.
-    final Point firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    final Point fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
-    expect(firstPos.x, fourthPos.x);
-    expect(firstPos.y, lessThan(fourthPos.y));
+    final Offset firstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
+    final Offset fourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    expect(firstPos.dx, fourthPos.dx);
+    expect(firstPos.dy, lessThan(fourthPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
 
@@ -604,10 +600,10 @@ void main() {
     await tester.pump();
 
     // Now the first line is scrolled up, and the fourth line is visible.
-    Point newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
-    Point newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
+    Offset newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
+    Offset newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
 
-    expect(newFirstPos.y, lessThan(firstPos.y));
+    expect(newFirstPos.dy, lessThan(firstPos.dy));
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
 
@@ -615,7 +611,7 @@ void main() {
 
     // Long press the 'i' in 'Fourth line' to select the word.
     await tester.pump(const Duration(seconds: 1));
-    final Point untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
+    final Offset untilPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth line')+8);
     gesture = await tester.startGesture(untilPos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.up();
@@ -626,8 +622,8 @@ void main() {
     expect(endpoints.length, 2);
 
     // Drag the left handle to the first line, just after 'First'.
-    final Point handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    final Point newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
+    final Offset handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
+    final Offset newHandlePos = textOffsetToPosition(tester, kFourLines.indexOf('First') + 5);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump(const Duration(seconds: 1));
     await gesture.moveTo(newHandlePos + const Offset(0.0, -10.0));
@@ -639,7 +635,7 @@ void main() {
     // cursor visible, back to its original position.
     newFirstPos = textOffsetToPosition(tester, kFourLines.indexOf('First'));
     newFourthPos = textOffsetToPosition(tester, kFourLines.indexOf('Fourth'));
-    expect(newFirstPos.y, firstPos.y);
+    expect(newFirstPos.dy, firstPos.dy);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
@@ -795,7 +791,7 @@ void main() {
 
     await tester.pumpWidget(builder());
 
-    Point pos = tester.getTopLeft(find.text('Second'));
+    Offset pos = tester.getTopLeft(find.text('Second'));
 
     // Focus the Input. The label should start animating upwards.
     await tester.tap(find.byKey(secondKey));
@@ -803,14 +799,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
 
-    Point newPos = tester.getTopLeft(find.text('Second'));
-    expect(newPos.y, lessThan(pos.y));
+    Offset newPos = tester.getTopLeft(find.text('Second'));
+    expect(newPos.dy, lessThan(pos.dy));
 
     // Label should still be sliding upward.
     await tester.pump(const Duration(milliseconds: 50));
     pos = newPos;
     newPos = tester.getTopLeft(find.text('Second'));
-    expect(newPos.y, lessThan(pos.y));
+    expect(newPos.dy, lessThan(pos.dy));
   });
 
   testWidgets('No space between Input icon and text', (WidgetTester tester) async {
@@ -827,9 +823,9 @@ void main() {
       ),
     );
 
-    final double iconRight = tester.getTopRight(find.byType(Icon)).x;
-    expect(iconRight, equals(tester.getTopLeft(find.text('label')).x));
-    expect(iconRight, equals(tester.getTopLeft(find.byType(EditableText)).x));
+    final double iconRight = tester.getTopRight(find.byType(Icon)).dx;
+    expect(iconRight, equals(tester.getTopLeft(find.text('label')).dx));
+    expect(iconRight, equals(tester.getTopLeft(find.byType(EditableText)).dx));
   });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
@@ -864,20 +860,20 @@ void main() {
     );
 
     final RenderEditable editable = findRenderEditable(tester);
-    Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(EditableText), 'abcd');
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Can align to center within center', (WidgetTester tester) async {
@@ -898,20 +894,20 @@ void main() {
     );
 
     final RenderEditable editable = findRenderEditable(tester);
-    Point topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft
+    Offset topLeft = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)).topLeft,
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
 
     await tester.enterText(find.byType(EditableText), 'abcd');
     await tester.pump();
 
     topLeft = editable.localToGlobal(
-        editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft
+      editable.getLocalRectForCaret(const TextPosition(offset: 2)).topLeft,
     );
 
-    expect(topLeft.x, equals(399.0));
+    expect(topLeft.dx, equals(399.0));
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {

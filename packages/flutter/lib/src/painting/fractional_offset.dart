@@ -103,8 +103,8 @@ class FractionalOffset {
   }
 
   /// Returns the point that is this fraction within the given rect.
-  Point withinRect(Rect rect) {
-    return new Point(rect.left + dx * rect.width, rect.top + dy * rect.height);
+  Offset withinRect(Rect rect) {
+    return new Offset(rect.left + dx * rect.width, rect.top + dy * rect.height);
   }
 
   /// Returns a rect of the given size, centered at this fraction of the given rect.

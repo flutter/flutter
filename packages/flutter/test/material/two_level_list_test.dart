@@ -59,7 +59,7 @@ void main() {
     expect(find.text('Sublist'), findsOneWidget);
     expect(find.text('Bottom'), findsOneWidget);
 
-    double getY(Key key) => tester.getTopLeft(find.byKey(key)).y;
+    double getY(Key key) => tester.getTopLeft(find.byKey(key)).dy;
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;
 
     expect(getY(topKey), lessThan(getY(sublistKey)));

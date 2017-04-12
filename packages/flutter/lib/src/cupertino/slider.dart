@@ -281,8 +281,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) {
-    return (position.x - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
+  bool hitTestSelf(Offset position) {
+    return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override
@@ -319,7 +319,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
       canvas.drawRRect(new RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 
-    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackCenter);
     _thumbPainter.paint(canvas, new Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 

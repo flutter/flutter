@@ -99,7 +99,7 @@ class BannerPainter extends CustomPainter {
       ..drawRect(_kRect, _paintBanner);
     final double width = _kOffset * 2.0;
     _textPainter.layout(minWidth: width, maxWidth: width);
-    _textPainter.paint(canvas, _kRect.topLeft.toOffset() + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
+    _textPainter.paint(canvas, _kRect.topLeft + new Offset(0.0, (_kRect.height - _textPainter.height) / 2.0));
   }
 
   @override
@@ -111,7 +111,7 @@ class BannerPainter extends CustomPainter {
   }
 
   @override
-  bool hitTest(Point position) => false;
+  bool hitTest(Offset position) => false;
 
   double _translationX(double width) {
     assert(location != null);

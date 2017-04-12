@@ -32,13 +32,13 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint: Point.origin }) {
+  ScaleStartDetails({ this.focalPoint: Offset.zero }) {
     assert(focalPoint != null);
   }
 
   /// The initial focal point of the pointers in contact with the screen.
   /// Reported in global coordinates.
-  final Point focalPoint;
+  final Offset focalPoint;
 
   @override
   String toString() => 'ScaleStartDetails(focalPoint: $focalPoint)';
@@ -50,14 +50,14 @@ class ScaleUpdateDetails {
   ///
   /// The [focalPoint] and [scale] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
-  ScaleUpdateDetails({ this.focalPoint: Point.origin, this.scale: 1.0 }) {
+  ScaleUpdateDetails({ this.focalPoint: Offset.zero, this.scale: 1.0 }) {
     assert(focalPoint != null);
     assert(scale != null && scale >= 0.0);
   }
 
   /// The focal point of the pointers in contact with the screen. Reported in
   /// global coordinates.
-  final Point focalPoint;
+  final Offset focalPoint;
 
   /// The scale implied by the pointers in contact with the screen. A value
   /// greater than or equal to zero.
@@ -121,11 +121,11 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   _ScaleState _state = _ScaleState.ready;
 
-  Point _initialFocalPoint;
-  Point _currentFocalPoint;
+  Offset _initialFocalPoint;
+  Offset _currentFocalPoint;
   double _initialSpan;
   double _currentSpan;
-  Map<int, Point> _pointerLocations;
+  Map<int, Offset> _pointerLocations;
   final Map<int, VelocityTracker> _velocityTrackers = <int, VelocityTracker>{};
 
   double get _scaleFactor => _initialSpan > 0.0 ? _currentSpan / _initialSpan : 1.0;
@@ -138,7 +138,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
       _state = _ScaleState.possible;
       _initialSpan = 0.0;
       _currentSpan = 0.0;
-      _pointerLocations = <int, Point>{};
+      _pointerLocations = <int, Offset>{};
     }
   }
 
@@ -172,10 +172,10 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     final int count = _pointerLocations.keys.length;
 
     // Compute the focal point
-    Point focalPoint = Point.origin;
+    Offset focalPoint = Offset.zero;
     for (int pointer in _pointerLocations.keys)
-      focalPoint += _pointerLocations[pointer].toOffset();
-    _currentFocalPoint = count > 0 ? new Point(focalPoint.x / count, focalPoint.y / count) : Point.origin;
+      focalPoint += _pointerLocations[pointer];
+    _currentFocalPoint = count > 0 ? focalPoint / count.toDouble() : Offset.zero;
 
     // Span is the average deviation from focal point
     double totalDeviation = 0.0;

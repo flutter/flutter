@@ -172,7 +172,7 @@ class _RenderCheckbox extends RenderToggleable {
     final double offsetX = offset.dx + (size.width - _kEdgeSize) / 2.0;
     final double offsetY = offset.dy + (size.height - _kEdgeSize) / 2.0;
 
-    paintRadialReaction(canvas, offset, size.center(Point.origin));
+    paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final double t = position.value;
 
@@ -203,14 +203,14 @@ class _RenderCheckbox extends RenderToggleable {
         ..style = PaintingStyle.stroke
         ..strokeWidth = _kStrokeWidth;
       final Path path = new Path();
-      final Point start = const Point(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
-      final Point mid = const Point(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
-      final Point end = const Point(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
-      final Point drawStart = Point.lerp(start, mid, 1.0 - value);
-      final Point drawEnd = Point.lerp(mid, end, value);
-      path.moveTo(offsetX + drawStart.x, offsetY + drawStart.y);
-      path.lineTo(offsetX + mid.x, offsetY + mid.y);
-      path.lineTo(offsetX + drawEnd.x, offsetY + drawEnd.y);
+      final Offset start = const Offset(_kEdgeSize * 0.15, _kEdgeSize * 0.45);
+      final Offset mid = const Offset(_kEdgeSize * 0.4, _kEdgeSize * 0.7);
+      final Offset end = const Offset(_kEdgeSize * 0.85, _kEdgeSize * 0.25);
+      final Offset drawStart = Offset.lerp(start, mid, 1.0 - value);
+      final Offset drawEnd = Offset.lerp(mid, end, value);
+      path.moveTo(offsetX + drawStart.dx, offsetY + drawStart.dy);
+      path.lineTo(offsetX + mid.dx, offsetY + mid.dy);
+      path.lineTo(offsetX + drawEnd.dx, offsetY + drawEnd.dy);
       canvas.drawPath(path, paint);
     }
   }

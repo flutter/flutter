@@ -163,7 +163,7 @@ class DashOutlineCirclePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = radius / 10.0;
     final Path path = new Path();
-    final Rect box = Point.origin & size;
+    final Rect box = Offset.zero & size;
     for (double theta = 0.0; theta < math.PI * 2.0; theta += deltaTheta)
       path.addArc(box, theta + startOffset, segmentArc);
     canvas.drawPath(path, paint);

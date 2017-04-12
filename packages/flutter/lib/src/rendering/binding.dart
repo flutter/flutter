@@ -243,7 +243,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   }
 
   @override
-  void hitTest(HitTestResult result, Point position) {
+  void hitTest(HitTestResult result, Offset position) {
     assert(renderView != null);
     renderView.hitTest(result, position: position);
     // This super call is safe since it will be bound to a mixed-in declaration.

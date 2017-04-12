@@ -365,7 +365,7 @@ class _RenderSwitch extends RenderToggleable {
     final RRect trackRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    final Point thumbPosition = new Point(
+    final Offset thumbPosition = new Offset(
       kRadialReactionRadius + currentPosition * _trackInnerLength,
       size.height / 2.0
     );
@@ -389,7 +389,7 @@ class _RenderSwitch extends RenderToggleable {
       final double radius = _kThumbRadius - inset;
       thumbPainter.paint(
         canvas,
-        thumbPosition.toOffset() + offset - new Offset(radius, radius),
+        thumbPosition + offset - new Offset(radius, radius),
         configuration.copyWith(size: new Size.fromRadius(radius))
       );
     } finally {

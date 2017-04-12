@@ -364,11 +364,11 @@ class RenderFlow extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.pushClipRect(needsCompositing, offset, Point.origin & size, _paintWithDelegate);
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintWithDelegate);
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
     for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
       final int childIndex = _lastPaintOrder[i];
@@ -386,7 +386,7 @@ class RenderFlow extends RenderBox
         // on screen and cannot be hit.
         continue;
       }
-      final Point childPosition = MatrixUtils.transformPoint(inverse, position);
+      final Offset childPosition = MatrixUtils.transformPoint(inverse, position);
       if (child.hitTest(result, position: childPosition))
         return true;
     }

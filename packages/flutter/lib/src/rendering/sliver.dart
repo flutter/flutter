@@ -1014,13 +1014,13 @@ abstract class RenderSliver extends RenderObject {
     return null;
   }
 
-  void _debugDrawArrow(Canvas canvas, Paint paint, Point p0, Point p1, GrowthDirection direction) {
+  void _debugDrawArrow(Canvas canvas, Paint paint, Offset p0, Offset p1, GrowthDirection direction) {
     assert(() {
       if (p0 == p1)
         return true;
-      assert(p0.x == p1.x || p0.y == p1.y); // must be axis-aligned
+      assert(p0.dx == p1.dx || p0.dy == p1.dy); // must be axis-aligned
       final double d = (p1 - p0).distance * 0.2;
-      Point temp;
+      Offset temp;
       double dx1, dx2, dy1, dy2;
       switch (direction) {
         case GrowthDirection.forward:
@@ -1033,18 +1033,18 @@ abstract class RenderSliver extends RenderObject {
           dx1 = dx2 = dy1 = dy2 = -d;
           break;
       }
-      if (p0.x == p1.x) {
+      if (p0.dx == p1.dx) {
         dx2 = -dx2;
       } else {
         dy2 = -dy2;
       }
       canvas.drawPath(
         new Path()
-          ..moveTo(p0.x, p0.y)
-          ..lineTo(p1.x, p1.y)
-          ..moveTo(p1.x - dx1, p1.y - dy1)
-          ..lineTo(p1.x, p1.y)
-          ..lineTo(p1.x - dx2, p1.y - dy2),
+          ..moveTo(p0.dx, p0.dy)
+          ..lineTo(p1.dx, p1.dy)
+          ..moveTo(p1.dx - dx1, p1.dy - dy1)
+          ..lineTo(p1.dx, p1.dy)
+          ..lineTo(p1.dx - dx2, p1.dy - dy2),
         paint
       );
       return true;
@@ -1065,50 +1065,50 @@ abstract class RenderSliver extends RenderObject {
         final double padding = math.max(2.0, strokeWidth);
         final Canvas canvas = context.canvas;
         canvas.drawCircle(
-          offset.translate(padding, padding).toPoint(),
+          offset.translate(padding, padding),
           padding * 0.5,
           paint,
         );
         switch (constraints.axis) {
           case Axis.vertical:
             canvas.drawLine(
-              offset.toPoint(),
-              offset.translate(constraints.crossAxisExtent, 0.0).toPoint(),
+              offset,
+              offset.translate(constraints.crossAxisExtent, 0.0),
               paint,
             );
             _debugDrawArrow(
               canvas,
               paint,
-              offset.translate(constraints.crossAxisExtent * 1.0 / 4.0, padding).toPoint(),
-              offset.translate(constraints.crossAxisExtent * 1.0 / 4.0, arrowExtent - padding).toPoint(),
+              offset.translate(constraints.crossAxisExtent * 1.0 / 4.0, padding),
+              offset.translate(constraints.crossAxisExtent * 1.0 / 4.0, arrowExtent - padding),
               constraints.normalizedGrowthDirection,
             );
             _debugDrawArrow(
               canvas,
               paint,
-              offset.translate(constraints.crossAxisExtent * 3.0 / 4.0, padding).toPoint(),
-              offset.translate(constraints.crossAxisExtent * 3.0 / 4.0, arrowExtent - padding).toPoint(),
+              offset.translate(constraints.crossAxisExtent * 3.0 / 4.0, padding),
+              offset.translate(constraints.crossAxisExtent * 3.0 / 4.0, arrowExtent - padding),
               constraints.normalizedGrowthDirection,
             );
             break;
           case Axis.horizontal:
             canvas.drawLine(
-              offset.toPoint(),
-              offset.translate(0.0, constraints.crossAxisExtent).toPoint(),
+              offset,
+              offset.translate(0.0, constraints.crossAxisExtent),
               paint,
             );
             _debugDrawArrow(
               canvas,
               paint,
-              offset.translate(padding, constraints.crossAxisExtent * 1.0 / 4.0).toPoint(),
-              offset.translate(arrowExtent - padding, constraints.crossAxisExtent * 1.0 / 4.0).toPoint(),
+              offset.translate(padding, constraints.crossAxisExtent * 1.0 / 4.0),
+              offset.translate(arrowExtent - padding, constraints.crossAxisExtent * 1.0 / 4.0),
               constraints.normalizedGrowthDirection,
             );
             _debugDrawArrow(
               canvas,
               paint,
-              offset.translate(padding, constraints.crossAxisExtent * 3.0 / 4.0).toPoint(),
-              offset.translate(arrowExtent - padding, constraints.crossAxisExtent * 3.0 / 4.0).toPoint(),
+              offset.translate(padding, constraints.crossAxisExtent * 3.0 / 4.0),
+              offset.translate(arrowExtent - padding, constraints.crossAxisExtent * 3.0 / 4.0),
               constraints.normalizedGrowthDirection,
             );
             break;
@@ -1177,11 +1177,11 @@ abstract class RenderSliverHelpers implements RenderSliver {
       case Axis.horizontal:
         if (!rightWayUp)
           absolutePosition = child.size.width - absolutePosition;
-        return child.hitTest(result, position: new Point(absolutePosition, absoluteCrossAxisPosition));
+        return child.hitTest(result, position: new Offset(absolutePosition, absoluteCrossAxisPosition));
       case Axis.vertical:
         if (!rightWayUp)
           absolutePosition = child.size.height - absolutePosition;
-        return child.hitTest(result, position: new Point(absoluteCrossAxisPosition, absolutePosition));
+        return child.hitTest(result, position: new Offset(absoluteCrossAxisPosition, absolutePosition));
     }
     return false;
   }

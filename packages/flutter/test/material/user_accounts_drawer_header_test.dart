@@ -63,18 +63,18 @@ void main() {
     box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
     expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge)
 
-    final Point topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
-    final Point topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
+    final Offset topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
+    final Offset topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
 
-    final Point avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
-    final Point avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
-    final Point avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
+    final Offset avatarATopLeft = tester.getTopLeft(find.byKey(avatarA));
+    final Offset avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
+    final Offset avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
 
-    expect(avatarATopLeft.x - topLeft.x, equals(16.0));
-    expect(avatarATopLeft.y - topLeft.y, equals(16.0));
-    expect(topRight.x - avatarDTopRight.x, equals(16.0));
-    expect(avatarDTopRight.y - topRight.y, equals(16.0));
-    expect(avatarDTopRight.x - avatarCTopRight.x, equals(40.0 + 16.0)); // size + space between
+    expect(avatarATopLeft.dx - topLeft.dx, equals(16.0));
+    expect(avatarATopLeft.dy - topLeft.dy, equals(16.0));
+    expect(topRight.dx - avatarDTopRight.dx, equals(16.0));
+    expect(avatarDTopRight.dy - topRight.dy, equals(16.0));
+    expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 
 
@@ -116,8 +116,8 @@ void main() {
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountName')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountName')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
 
     await tester.pumpWidget(buildFrame(
@@ -125,8 +125,8 @@ void main() {
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountEmail')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
 
     await tester.pumpWidget(buildFrame(
@@ -135,16 +135,16 @@ void main() {
       onDetailsPressed: () { },
     ));
     expect(
-      tester.getCenter(find.text('accountEmail')).y,
-      tester.getCenter(find.byType(Icon)).y
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
     );
     expect(
-      tester.getBottomLeft(find.text('accountEmail')).y,
-      greaterThan(tester.getBottomLeft(find.text('accountName')).y)
+      tester.getBottomLeft(find.text('accountEmail')).dy,
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
     );
     expect(
-      tester.getBottomLeft(find.text('accountEmail')).x,
-      tester.getBottomLeft(find.text('accountName')).x
+      tester.getBottomLeft(find.text('accountEmail')).dx,
+      tester.getBottomLeft(find.text('accountName')).dx
     );
 
     await tester.pumpWidget(buildFrame(
@@ -163,12 +163,12 @@ void main() {
       accountName: const Text('accountName'),
     ));
     expect(
-      tester.getBottomLeft(find.byKey(avatarA)).x,
-      tester.getBottomLeft(find.text('accountName')).x
+      tester.getBottomLeft(find.byKey(avatarA)).dx,
+      tester.getBottomLeft(find.text('accountName')).dx
     );
     expect(
-      tester.getBottomLeft(find.text('accountName')).y,
-      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).y)
+      tester.getBottomLeft(find.text('accountName')).dy,
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
     );
   });
 }

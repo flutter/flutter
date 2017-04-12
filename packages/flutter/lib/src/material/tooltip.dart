@@ -119,7 +119,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       return;  // Already visible.
     }
     final RenderBox box = context.findRenderObject();
-    final Point target = box.localToGlobal(box.size.center(Point.origin));
+    final Offset target = box.localToGlobal(box.size.center(Offset.zero));
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
@@ -195,7 +195,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     this.preferBelow
   });
 
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 
@@ -205,16 +205,16 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
   @override
   Offset getPositionForChild(Size size, Size childSize) {
     // VERTICAL DIRECTION
-    final bool fitsBelow = target.y + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.y - verticalOffset - childSize.height >= _kScreenEdgeMargin;
+    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
+    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
     final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
     double y;
     if (tooltipBelow)
-      y = math.min(target.y + verticalOffset, size.height - _kScreenEdgeMargin);
+      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
     else
-      y = math.max(target.y - verticalOffset - childSize.height, _kScreenEdgeMargin);
+      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
     // HORIZONTAL DIRECTION
-    final double normalizedTargetX = target.x.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
+    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
     double x;
     if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
       x = _kScreenEdgeMargin;
@@ -250,7 +250,7 @@ class _TooltipOverlay extends StatelessWidget {
   final double height;
   final EdgeInsets padding;
   final Animation<double> animation;
-  final Point target;
+  final Offset target;
   final double verticalOffset;
   final bool preferBelow;
 

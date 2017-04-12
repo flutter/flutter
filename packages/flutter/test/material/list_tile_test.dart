@@ -73,10 +73,10 @@ void main() {
       expect(find.text('trailing'), findsOneWidget);
     }
 
-    double left(String text) => tester.getTopLeft(find.text(text)).x;
-    double right(String text) => tester.getTopRight(find.text(text)).x;
-    double top(String text) => tester.getTopLeft(find.text(text)).y;
-    double bottom(String text) => tester.getBottomLeft(find.text(text)).y;
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+    double bottom(String text) => tester.getBottomLeft(find.text(text)).dy;
 
     // 16.0 padding to the left and right of the leading and trailing widgets
     void testHorizontalGeometry() {

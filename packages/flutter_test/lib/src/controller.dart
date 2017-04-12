@@ -257,7 +257,7 @@ class WidgetController {
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<Null> tapAt(Point location, { int pointer }) {
+  Future<Null> tapAt(Offset location, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await gesture.up();
@@ -277,7 +277,7 @@ class WidgetController {
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<Null> longPressAt(Point location, { int pointer }) {
+  Future<Null> longPressAt(Offset location, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(location, pointer: pointer);
       await pump(kLongPressTimeout + kPressTimeout);
@@ -324,7 +324,7 @@ class WidgetController {
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
-  Future<Null> flingFrom(Point startLocation, Offset offset, double speed, { int pointer, Duration frameInterval: const Duration(milliseconds: 16) }) {
+  Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, { int pointer, Duration frameInterval: const Duration(milliseconds: 16) }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard(() async {
@@ -336,7 +336,7 @@ class WidgetController {
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(testPointer.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
       for (int i = 0; i <= kMoveCount; i += 1) {
-        final Point location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+        final Offset location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
         await sendEventToBinding(testPointer.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
@@ -377,7 +377,7 @@ class WidgetController {
   /// If you want the drag to end with a speed so that the gesture recognition
   /// system identifies the gesture as a fling, consider using [flingFrom]
   /// instead.
-  Future<Null> dragFrom(Point startLocation, Offset offset, { int pointer }) {
+  Future<Null> dragFrom(Offset startLocation, Offset offset, { int pointer }) {
     return TestAsyncUtils.guard(() async {
       final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
       assert(gesture != null);
@@ -401,7 +401,7 @@ class WidgetController {
 
   /// Begins a gesture at a particular point, and returns the
   /// [TestGesture] object which you can use to continue the gesture.
-  Future<TestGesture> startGesture(Point downLocation, { int pointer }) {
+  Future<TestGesture> startGesture(Offset downLocation, { int pointer }) {
     return TestGesture.down(
       downLocation,
       pointer: pointer ?? _getNextPointer(),
@@ -411,7 +411,7 @@ class WidgetController {
   }
 
   /// Forwards the given location to the binding's hitTest logic.
-  HitTestResult hitTestOnBinding(Point location) {
+  HitTestResult hitTestOnBinding(Offset location) {
     final HitTestResult result = new HitTestResult();
     binding.hitTest(result, location);
     return result;
@@ -429,34 +429,34 @@ class WidgetController {
   // GEOMETRY
 
   /// Returns the point at the center of the given widget.
-  Point getCenter(Finder finder) {
-    return _getElementPoint(finder, (Size size) => size.center(Point.origin));
+  Offset getCenter(Finder finder) {
+    return _getElementPoint(finder, (Size size) => size.center(Offset.zero));
   }
 
   /// Returns the point at the top left of the given widget.
-  Point getTopLeft(Finder finder) {
-    return _getElementPoint(finder, (Size size) => Point.origin);
+  Offset getTopLeft(Finder finder) {
+    return _getElementPoint(finder, (Size size) => Offset.zero);
   }
 
   /// Returns the point at the top right of the given widget. This
   /// point is not inside the object's hit test area.
-  Point getTopRight(Finder finder) {
-    return _getElementPoint(finder, (Size size) => size.topRight(Point.origin));
+  Offset getTopRight(Finder finder) {
+    return _getElementPoint(finder, (Size size) => size.topRight(Offset.zero));
   }
 
   /// Returns the point at the bottom left of the given widget. This
   /// point is not inside the object's hit test area.
-  Point getBottomLeft(Finder finder) {
-    return _getElementPoint(finder, (Size size) => size.bottomLeft(Point.origin));
+  Offset getBottomLeft(Finder finder) {
+    return _getElementPoint(finder, (Size size) => size.bottomLeft(Offset.zero));
   }
 
   /// Returns the point at the bottom right of the given widget. This
   /// point is not inside the object's hit test area.
-  Point getBottomRight(Finder finder) {
-    return _getElementPoint(finder, (Size size) => size.bottomRight(Point.origin));
+  Offset getBottomRight(Finder finder) {
+    return _getElementPoint(finder, (Size size) => size.bottomRight(Offset.zero));
   }
 
-  Point _getElementPoint(Finder finder, Point sizeToPoint(Size size)) {
+  Offset _getElementPoint(Finder finder, Offset sizeToPoint(Size size)) {
     TestAsyncUtils.guardSync();
     final Element element = finder.evaluate().single;
     final RenderBox box = element.renderObject;

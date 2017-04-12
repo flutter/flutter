@@ -92,7 +92,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, lessThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
@@ -117,7 +117,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, greaterThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
   });
 
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {

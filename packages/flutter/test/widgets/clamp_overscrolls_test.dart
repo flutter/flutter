@@ -34,27 +34,27 @@ void main() {
 
     // Scroll the target text widget by offset and then return its origin
     // in global coordinates.
-    Future<Point> locationAfterScroll(String target, Offset offset) async {
+    Future<Offset> locationAfterScroll(String target, Offset offset) async {
       await tester.dragFrom(tester.getTopLeft(find.text(target)), offset);
       await tester.pump();
       final RenderBox textBox = tester.renderObject(find.text(target));
-      final Point widgetOrigin = textBox.localToGlobal(Point.origin);
+      final Offset widgetOrigin = textBox.localToGlobal(Offset.zero);
       await tester.pump(const Duration(seconds: 1)); // Allow overscroll to settle
-      return new Future<Point>.value(widgetOrigin);
+      return new Future<Offset>.value(widgetOrigin);
     }
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));
-    Point origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
-    expect(origin.y, greaterThan(0.0));
+    Offset origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
+    expect(origin.dy, greaterThan(0.0));
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
-    expect(origin.y, lessThan(500.0));
+    expect(origin.dy, lessThan(500.0));
 
 
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
     origin = await locationAfterScroll('top', const Offset(0.0, 400.0));
-    expect(origin.y, equals(0.0));
+    expect(origin.dy, equals(0.0));
     origin = await locationAfterScroll('bottom', const Offset(0.0, -400.0));
-    expect(origin.y, equals(500.0));
+    expect(origin.dy, equals(500.0));
   });
 
   testWidgets('ClampingScrollPhysics affects ScrollPosition', (WidgetTester tester) async {

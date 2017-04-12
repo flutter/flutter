@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Point, Offset;
+import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -16,7 +16,7 @@ import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
-typedef Drag GestureMultiDragStartCallback(Point position);
+typedef Drag GestureMultiDragStartCallback(Offset position);
 
 /// Interface for receiving updates about drags from a [MultiDragGestureRecognizer].
 abstract class Drag {
@@ -49,7 +49,7 @@ abstract class MultiDragPointerState {
   }
 
   /// The global coordinates of the pointer when the pointer contacted the screen.
-  final Point initialPosition;
+  final Offset initialPosition;
 
   final VelocityTracker _velocityTracker = new VelocityTracker();
   Drag _client;
@@ -251,10 +251,10 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
     final T state = _pointers[pointer];
     if (state == null)
       return; // We might already have canceled this drag if the up comes before the accept.
-    state.accepted((Point initialPosition) => _startDrag(initialPosition, pointer));
+    state.accepted((Offset initialPosition) => _startDrag(initialPosition, pointer));
   }
 
-  Drag _startDrag(Point initialPosition, int pointer) {
+  Drag _startDrag(Offset initialPosition, int pointer) {
     assert(_pointers != null);
     final T state = _pointers[pointer];
     assert(state != null);
@@ -303,7 +303,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 }
 
 class _ImmediatePointerState extends MultiDragPointerState {
-  _ImmediatePointerState(Point initialPosition) : super(initialPosition);
+  _ImmediatePointerState(Offset initialPosition) : super(initialPosition);
 
   @override
   void checkForResolutionAfterMove() {
@@ -340,7 +340,7 @@ class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Im
 
 
 class _HorizontalPointerState extends MultiDragPointerState {
-  _HorizontalPointerState(Point initialPosition) : super(initialPosition);
+  _HorizontalPointerState(Offset initialPosition) : super(initialPosition);
 
   @override
   void checkForResolutionAfterMove() {
@@ -377,7 +377,7 @@ class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_H
 
 
 class _VerticalPointerState extends MultiDragPointerState {
-  _VerticalPointerState(Point initialPosition) : super(initialPosition);
+  _VerticalPointerState(Offset initialPosition) : super(initialPosition);
 
   @override
   void checkForResolutionAfterMove() {
@@ -413,7 +413,7 @@ class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Ver
 }
 
 class _DelayedPointerState extends MultiDragPointerState {
-  _DelayedPointerState(Point initialPosition, Duration delay) : super(initialPosition) {
+  _DelayedPointerState(Offset initialPosition, Duration delay) : super(initialPosition) {
     assert(delay != null);
     _timer = new Timer(delay, _delayPassed);
   }

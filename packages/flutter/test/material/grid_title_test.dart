@@ -33,8 +33,8 @@ void main() {
     expect(find.text('Header'), findsOneWidget);
     expect(find.text('Footer'), findsOneWidget);
 
-    expect(tester.getBottomLeft(find.byKey(headerKey)).y,
-           lessThan(tester.getTopLeft(find.byKey(footerKey)).y));
+    expect(tester.getBottomLeft(find.byKey(headerKey)).dy,
+           lessThan(tester.getTopLeft(find.byKey(footerKey)).dy));
 
     await tester.pumpWidget(new GridTile(child: const Text('Simple')));
 

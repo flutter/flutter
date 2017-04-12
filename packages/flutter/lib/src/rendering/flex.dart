@@ -681,7 +681,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -693,7 +693,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // We have overflow. Clip it.
-    context.pushClipRect(needsCompositing, offset, Point.origin & size, defaultPaint);
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
       // In debug mode, if you have overflow, we highlight where the
@@ -729,7 +729,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Point.origin & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Offset.zero & size : null;
 
   @override
   String toString() {

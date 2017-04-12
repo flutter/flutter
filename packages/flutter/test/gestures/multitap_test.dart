@@ -26,7 +26,7 @@ void main() {
 
 
     final TestPointer pointer5 = new TestPointer(5);
-    final PointerDownEvent down5 = pointer5.down(const Point(10.0, 10.0));
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
     tap.addPointer(down5);
     tester.closeArena(5);
     expect(log, <String>['tap-down 5']);
@@ -35,7 +35,7 @@ void main() {
     expect(log, isEmpty);
 
     final TestPointer pointer6 = new TestPointer(6);
-    final PointerDownEvent down6 = pointer6.down(const Point(15.0, 15.0));
+    final PointerDownEvent down6 = pointer6.down(const Offset(15.0, 15.0));
     tap.addPointer(down6);
     tester.closeArena(6);
     expect(log, <String>['tap-down 6']);
@@ -43,10 +43,10 @@ void main() {
     tester.route(down6);
     expect(log, isEmpty);
 
-    tester.route(pointer5.move(const Point(11.0, 12.0)));
+    tester.route(pointer5.move(const Offset(11.0, 12.0)));
     expect(log, isEmpty);
 
-    tester.route(pointer6.move(const Point(14.0, 13.0)));
+    tester.route(pointer6.move(const Offset(14.0, 13.0)));
     expect(log, isEmpty);
 
     tester.route(pointer5.up());
@@ -60,7 +60,7 @@ void main() {
     expect(log, <String>['long-tap-down 6']);
     log.clear();
 
-    tester.route(pointer6.move(const Point(4.0, 3.0)));
+    tester.route(pointer6.move(const Offset(4.0, 3.0)));
     expect(log, <String>['tap-cancel 6']);
     log.clear();
 
