@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
@@ -383,6 +384,126 @@ class RelativePositionedTransition extends AnimatedWidget {
       right: offsets.right,
       bottom: offsets.bottom,
       left: offsets.left,
+      child: child,
+    );
+  }
+}
+
+/// Animates the different properties of a [Container].
+class ContainerTransition extends AnimatedWidget {
+  /// Creates a widget that animates painting, positioning, and sizing around
+  /// its child.
+  /// 
+  /// The `color` animation's value is a shorthand for
+  /// `decoration: new BoxDecoration(backgroundColor: color)`, which means you
+  /// cannot supply both a `color` and a `decoration` argument. If you want to
+  /// have both a `color` and a `decoration`, you can have your `decoration`
+  /// animation also control the `backgroundColor` of the `BoxDecoration`.
+  /// 
+  /// Also see [Container].
+  ContainerTransition({
+    Key key,
+    this.alignment,
+    this.padding,
+    this.color,
+    this.decoration,
+    this.foregroundDecoration,
+    this.height,
+    this.width,
+    this.constraints,
+    this.margin,
+    this.transform,
+    @required this.child,
+  }) : super(key: key, listenable: new Listenable.merge(<Listenable>[
+    // Trigger update on change from any of the animation changes.
+    // Listenable automatically omits nulls in listenable lists.
+    alignment,
+    padding,
+    color,
+    decoration,
+    foregroundDecoration,
+    height,
+    width,
+    constraints,
+    margin,
+    transform,
+  ])) {
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
+  }
+
+  /// Animation controlling the alignment of the [child] in the container.
+  /// 
+  /// Also see [Container.alignment].
+  final Animation<FractionalOffset> alignment;
+  /// Animation controlling the empty space inscribed inside the [decoration].
+  /// 
+  /// Also see [Container.padding].
+  final Animation<EdgeInsets> padding;
+  /// Animation controlling the shorthand 
+  /// `decoration: new BoxDecoration(backgroundColor: color)`
+  /// 
+  /// Supply only either `color` or `decoration`. 
+  /// 
+  /// Also see [Container].
+  final Animation<Color> color;
+  /// Animation that controls the [Decoration] of this [Container] behind the
+  /// child.
+  /// 
+  /// The [Decoration] must implement lerp. 
+  /// 
+  /// Also see [Container.decoration].
+  final Animation<Decoration> decoration;
+  /// Animation that controls the [Decoration] of this [Container] in front of
+  /// the child.
+  /// 
+  /// The [Decoration] must implement lerp. 
+  /// 
+  /// Also see [Container.foregroundDecoration].
+  final Animation<Decoration> foregroundDecoration;
+  /// Animation controlling the height value to be combined with the 
+  /// [constraints] value.
+  /// 
+  /// Also see [Container].
+  final Animation<double> height;
+  /// Animation controlling the width value to be combined with the 
+  /// [constraints] value.
+  /// 
+  /// Also see [Container].
+  final Animation<double> width;
+  /// Animation controlling the constraints to apply to the [child]. 
+  /// 
+  /// Also see [Container.constraints].
+  final Animation<BoxConstraints> constraints;
+  /// Animation controlling the empty space surrounding the [decoration] and 
+  /// [child].
+  /// 
+  /// Also see [Container.margin].
+  final Animation<EdgeInsets> margin;
+  /// Animation controlling the transformation matrix to apply before painting
+  /// the container.
+  /// 
+  /// Also see [Container.transform].
+  final Animation<Matrix4> transform;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      alignment: alignment?.value,
+      padding: padding?.value,
+      color: color?.value,
+      decoration: decoration?.value,
+      foregroundDecoration: foregroundDecoration?.value,
+      height: height?.value,
+      width: width?.value,
+      constraints: constraints?.value,
+      margin: margin?.value,
+      transform: transform?.value,
       child: child,
     );
   }
