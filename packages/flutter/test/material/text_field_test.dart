@@ -953,8 +953,17 @@ void main() {
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('More Text'));
 
-    controller2.text = 'Final Text';
+    controller2.text = 'Additional Text';
     await tester.idle();
-    expect(tester.testTextInput.editingState['text'], equals('Final Text'));
+    expect(tester.testTextInput.editingState['text'], equals('Additional Text'));
+
+    controller2.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
+    await tester.idle();
+    expect(tester.testTextInput.editingState['selectionBase'], equals(0));
+    expect(tester.testTextInput.editingState['selectionExtent'], equals(5));
+
+    controller2.clear();
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals(''));
   });
 }
