@@ -18,6 +18,7 @@ import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'stack_manipulation.dart';
@@ -353,7 +354,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
           // will see them in the logs at some point.
           FlutterError.dumpErrorToConsole(new FlutterErrorDetails(
             exception: exception,
-            stack: stack,
+            stack: _unmangle(stack),
             context: 'running a test (but after the test had completed)',
             library: 'Flutter test framework'
           ), forceReport: true);
@@ -394,7 +395,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         final int stackLinesToOmit = reportExpectCall(stack, expectLine);
         FlutterError.reportError(new FlutterErrorDetails(
           exception: exception,
-          stack: stack,
+          stack: _unmangle(stack),
           context: 'running a test',
           library: 'Flutter test framework',
           stackFilter: (Iterable<String> frames) {
@@ -1020,4 +1021,12 @@ class _EmptyStack implements StackTrace {
   static const _EmptyStack instance = const _EmptyStack._();
   @override
   String toString() => '';
+}
+
+StackTrace _unmangle(StackTrace stack) {
+  if (stack is stack_trace.Trace)
+    return stack.vmTrace;
+  if (stack is stack_trace.Chain)
+    return stack.toTrace().vmTrace;
+  return stack;
 }
