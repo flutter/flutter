@@ -96,6 +96,8 @@ class VulkanRasterizer : public Rasterizer {
              static_cast<uint64_t>(height);
     }
 
+    ftl::RefPtr<vulkan::VulkanProcTable> vk_;
+
     // These three containers hold surfaces in various stages of recycling
 
     // Buffers exist in available_surfaces_ when they are ready to be recycled

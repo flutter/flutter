@@ -302,13 +302,13 @@ void VulkanRasterizer::VulkanSurfaceProducer::OnHandleReady(
 }
 
 bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
-  auto vk = ftl::MakeRefCounted<vulkan::VulkanProcTable>();
+  vk_ = ftl::MakeRefCounted<vulkan::VulkanProcTable>();
 
   std::vector<std::string> extensions = {VK_KHR_SURFACE_EXTENSION_NAME};
   application_ = std::make_unique<vulkan::VulkanApplication>(
-      *vk, "Flutter", std::move(extensions));
+      *vk_, "Flutter", std::move(extensions));
 
-  if (!application_->IsValid() || !vk->AreInstanceProcsSetup()) {
+  if (!application_->IsValid() || !vk_->AreInstanceProcsSetup()) {
     // Make certain the application instance was created and it setup the
     // instance proc table entries.
     FTL_LOG(ERROR) << "Instance proc addresses have not been setup.";
@@ -320,24 +320,24 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
   logical_device_ = application_->AcquireFirstCompatibleLogicalDevice();
 
   if (logical_device_ == nullptr || !logical_device_->IsValid() ||
-      !vk->AreDeviceProcsSetup()) {
+      !vk_->AreDeviceProcsSetup()) {
     // Make certain the device was created and it setup the device proc table
     // entries.
     FTL_LOG(ERROR) << "Device proc addresses have not been setup.";
     return false;
   }
 
-  if (!vk->HasAcquiredMandatoryProcAddresses()) {
+  if (!vk_->HasAcquiredMandatoryProcAddresses()) {
     FTL_LOG(ERROR) << "Failed to acquire mandatory proc addresses";
     return false;
   }
 
-  if (!vk->IsValid()) {
+  if (!vk_->IsValid()) {
     FTL_LOG(ERROR) << "VulkanProcTable invalid";
     return false;
   }
 
-  auto interface = vk->CreateSkiaInterface();
+  auto interface = vk_->CreateSkiaInterface();
 
   if (interface == nullptr || !interface->validate(0)) {
     FTL_LOG(ERROR) << "interface invalid";
