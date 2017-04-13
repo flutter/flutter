@@ -87,21 +87,21 @@ class HotRunner extends ResidentRunner {
     return true;
   }
 
-  Future<int> attach(Uri observatoryUri, {
+  Future<int> attach(List<Uri> observatoryUris, {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<Null> appStartedCompleter,
     String isolateFilter,
   }) async {
-    _observatoryUri = observatoryUri;
+    _observatoryUri = observatoryUris[0];
     try {
       await connectToServiceProtocol(
-          _observatoryUri, isolateFilter: isolateFilter);
+          observatoryUris, isolateFilter: isolateFilter);
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
       return 2;
     }
 
-    device.getLogReader(app: package).appPid = vmService.vm.pid;
+    device.getLogReader(app: package).appPid = vmServices[0].vm.pid;
 
     try {
       final Uri baseUri = await _initDevFS();
@@ -109,7 +109,7 @@ class HotRunner extends ResidentRunner {
         connectionInfoCompleter.complete(
           new DebugConnectionInfo(
             httpUri: _observatoryUri,
-            wsUri: vmService.wsAddress,
+            wsUri: vmServices[0].wsAddress,
             baseUri: baseUri.toString()
           )
         );
@@ -124,8 +124,9 @@ class HotRunner extends ResidentRunner {
       return 3;
     }
 
-    await vmService.vm.refreshViews();
-    printTrace('Connected to $currentView.');
+    await refreshViews();
+    for (FlutterView view in currentViews)
+      printTrace('Connected to $view.');
 
     if (stayResident) {
       setupTerminal();
@@ -140,7 +141,7 @@ class HotRunner extends ResidentRunner {
       // Measure time to perform a hot restart.
       printStatus('Benchmarking hot restart');
       await restart(fullRestart: true);
-      await vmService.vm.refreshViews();
+      await refreshViews();
       // TODO(johnmccutchan): Modify script entry point.
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
@@ -219,7 +220,7 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
-    return attach(result.observatoryUri,
+    return attach(<Uri>[result.observatoryUri],
                   connectionInfoCompleter: connectionInfoCompleter,
                   appStartedCompleter: appStartedCompleter);
   }
@@ -241,7 +242,7 @@ class HotRunner extends ResidentRunner {
 
   Future<Uri> _initDevFS() {
     final String fsName = fs.path.basename(projectRootPath);
-    _devFS = new DevFS(vmService,
+    _devFS = new DevFS(vmServices[0],
                        fsName,
                        fs.directory(projectRootPath),
                        packagesFilePath: packagesFilePath);
@@ -425,11 +426,18 @@ class HotRunner extends ResidentRunner {
       final Uri devicePackagesUri = _devFS.baseUri.resolve('.packages');
       if (benchmarkMode)
         vmReloadTimer.start();
-      final Map<String, dynamic> reloadReport =
-          await currentView.uiIsolate.reloadSources(
-              pause: pause,
-              rootLibUri: deviceEntryUri,
-              packagesUri: devicePackagesUri);
+
+      Map<String, dynamic> reloadReport;
+      for (FlutterView view in currentViews) {
+        final Map<String, dynamic> report = await view.uiIsolate.reloadSources(
+          pause: pause,
+          rootLibUri: deviceEntryUri,
+          packagesUri: devicePackagesUri
+        );
+        // Just take the first one until we think of something smart to do.
+        if (reloadReport == null)
+          reloadReport = report;
+      }
       if (!validateReloadReport(reloadReport)) {
         // Reload failed.
         flutterUsage.sendEvent('hot', 'reload-reject');
@@ -464,29 +472,43 @@ class HotRunner extends ResidentRunner {
     if (benchmarkMode)
       reassembleTimer.start();
     // Reload the isolate.
-    await currentView.uiIsolate.reload();
+    for (FlutterView view in currentViews)
+      await view.uiIsolate.reload();
     // We are now running from source.
     _runningFromSnapshot = false;
     // Check if the isolate is paused.
-    final ServiceEvent pauseEvent = currentView.uiIsolate.pauseEvent;
-    if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
-      // Isolate is paused. Stop here.
-      printTrace('Skipping reassemble because isolate is paused.');
+
+    final List<FlutterView> reassembleViews = <FlutterView>[];
+    for (FlutterView view in currentViews) {
+      final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+      if ((pauseEvent != null) && (pauseEvent.isPauseEvent)) {
+        // Isolate is paused. Don't reassemble.
+        continue;
+      }
+      reassembleViews.add(view);
+    }
+    if (reassembleViews.isEmpty) {
+      printTrace('Skipping reassemble because all isolates are paused.');
       return new OperationResult(OperationResult.ok.code, reloadMessage);
     }
     await _evictDirtyAssets();
     printTrace('Reassembling application');
-    try {
-      await currentView.uiIsolate.flutterReassemble();
-    } catch (_) {
-      printError('Reassembling application failed.');
-      return new OperationResult(1, 'error reassembling application');
-    }
-    try {
-      /* ensure that a frame is scheduled */
-      await currentView.uiIsolate.uiWindowScheduleFrame();
-    } catch (_) {
-      /* ignore any errors */
+    bool reassembleAndScheduleErrors = false;
+    for (FlutterView view in reassembleViews) {
+      try {
+        await view.uiIsolate.flutterReassemble();
+      } catch (error) {
+        reassembleAndScheduleErrors = true;
+        printError('Reassembling ${view.uiIsolate.name} failed: $error');
+        continue;
+      }
+      try {
+        /* ensure that a frame is scheduled */
+        await view.uiIsolate.uiWindowScheduleFrame();
+      } catch (error) {
+        reassembleAndScheduleErrors = true;
+        printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
+      }
     }
     reloadTimer.stop();
     printTrace('Hot reload performed in '
@@ -503,7 +525,10 @@ class HotRunner extends ResidentRunner {
     }
     if (shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
-    return new OperationResult(OperationResult.ok.code, reloadMessage);
+    return new OperationResult(
+      reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
+      reloadMessage
+    );
   }
 
   @override

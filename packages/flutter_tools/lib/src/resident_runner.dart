@@ -64,8 +64,7 @@ abstract class ResidentRunner {
   bool get isRunningRelease => debuggingOptions.buildMode == BuildMode.release;
   bool get supportsServiceProtocol => isRunningDebug || isRunningProfile;
 
-  VMService vmService;
-  FlutterView currentView;
+  List<VMService> vmServices;
   StreamSubscription<String> _loggingSubscription;
 
   /// Start the app and keep the process running during its lifetime.
@@ -77,6 +76,25 @@ abstract class ResidentRunner {
   });
 
   bool get supportsRestart => false;
+
+  String isolateFilter;
+
+  List<FlutterView> _currentViewsCache;
+  List<FlutterView> get currentViews {
+    if (_currentViewsCache == null) {
+      if ((vmServices == null) || vmServices.isEmpty)
+        return null;
+      if (isolateFilter == null)
+        return vmServices[0].vm.views.toList();
+      final List<FlutterView> result = <FlutterView>[];
+      for (VMService service in vmServices)
+        result.addAll(service.vm.allViewsWithName(isolateFilter));
+      _currentViewsCache = result;
+    }
+    return _currentViewsCache;
+  }
+
+  FlutterView get currentView => (currentViews != null) ? currentViews[0] : null;
 
   Future<OperationResult> restart({ bool fullRestart: false, bool pauseAfterRestart: false }) {
     throw 'unsupported';
@@ -94,21 +112,26 @@ abstract class ResidentRunner {
     appFinished();
   }
 
+  Future<Null> refreshViews() async {
+    if ((vmServices == null) || vmServices.isEmpty)
+      return;
+    for (VMService service in vmServices)
+      await service.vm.refreshViews();
+    _currentViewsCache = null;
+  }
+
   Future<Null> _debugDumpApp() async {
-    if (vmService != null)
-      await vmService.vm.refreshViews();
+    await refreshViews();
     await currentView.uiIsolate.flutterDebugDumpApp();
   }
 
   Future<Null> _debugDumpRenderTree() async {
-    if (vmService != null)
-      await vmService.vm.refreshViews();
+    await refreshViews();
     await currentView.uiIsolate.flutterDebugDumpRenderTree();
   }
 
   Future<Null> _debugToggleDebugPaintSizeEnabled() async {
-    if (vmService != null)
-      await vmService.vm.refreshViews();
+    await refreshViews();
     await currentView.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
@@ -117,8 +140,7 @@ abstract class ResidentRunner {
     final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {
-        if (vmService != null)
-          await vmService.vm.refreshViews();
+        await refreshViews();
         try {
           await currentView.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
@@ -148,8 +170,7 @@ abstract class ResidentRunner {
   }
 
   Future<String> _debugRotatePlatform() async {
-    if (vmService != null)
-      await vmService.vm.refreshViews();
+    await refreshViews();
     switch (await currentView.uiIsolate.flutterPlatformOverride()) {
       case 'iOS':
         return await currentView.uiIsolate.flutterPlatformOverride('android');
@@ -209,25 +230,37 @@ abstract class ResidentRunner {
     _loggingSubscription = null;
   }
 
-  Future<Null> connectToServiceProtocol(Uri uri, {String isolateFilter}) async {
-    if (!debuggingOptions.debuggingEnabled)
+  Future<Null> connectToServiceProtocol(
+    List<Uri> uris, {
+    String isolateFilter
+  }) async {
+    if (!debuggingOptions.debuggingEnabled) {
       return new Future<Null>.error('Error the service protocol is not enabled.');
-    vmService = VMService.connect(uri);
-    printTrace('Connected to service protocol: $uri');
-    await vmService.getVM();
+    }
+    final List<VMService> services = new List<VMService>(uris.length);
+    for (int i = 0; i < uris.length; i++) {
+      services[i] = VMService.connect(uris[i]);
+      printTrace('Connected to service protocol: ${uris[i]}');
+    }
+    vmServices = services;
+    for (VMService service in services)
+      await service.getVM();
+
+    this.isolateFilter = isolateFilter;
 
     // Refresh the view list, and wait a bit for the list to populate.
-    await vmService.waitForViews();
-    currentView = (isolateFilter == null)
-                ? vmService.vm.firstView
-                : vmService.vm.firstViewWithName(isolateFilter);
+    for (VMService service in services)
+      await service.waitForViews();
     if (currentView == null)
       throwToolExit('No Flutter view is available');
 
     // Listen for service protocol connection to close.
-    vmService.done.then<Null>(
+    for (VMService service in services) {
+      service.done.then<Null>(
         _serviceProtocolDone,
-        onError: _serviceProtocolError).whenComplete(appFinished);
+        onError: _serviceProtocolError
+      ).whenComplete(appFinished);
+    }
   }
 
   Future<Null> _serviceProtocolDone(dynamic object) {
@@ -357,7 +390,10 @@ abstract class ResidentRunner {
   Future<Null> preStop() async { }
 
   Future<Null> stopApp() async {
-    if (vmService != null && !vmService.isClosed) {
+    if (vmServices != null &&
+        vmServices.isNotEmpty &&
+        !vmServices[0].isClosed) {
+      // TODO(zra): iterate over all the views.
       if ((currentView != null) && (currentView.uiIsolate != null)) {
         // TODO(johnmccutchan): Wait for the exit command to complete.
         currentView.uiIsolate.flutterExit();

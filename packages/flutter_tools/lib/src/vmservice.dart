@@ -764,13 +764,12 @@ class VM extends ServiceObjectOwner {
     return _viewCache.values.isEmpty ? null : _viewCache.values.first;
   }
 
-  FlutterView firstViewWithName(String isolateFilter) {
-    if (_viewCache.values.isEmpty) {
+  List<FlutterView> allViewsWithName(String isolateFilter) {
+    if (_viewCache.values.isEmpty)
       return null;
-    }
-    return _viewCache.values.firstWhere(
-        (FlutterView v) => v.uiIsolate.name.contains(isolateFilter),
-        orElse: () => null);
+    return _viewCache.values.where(
+      (FlutterView v) => v.uiIsolate.name.contains(isolateFilter)
+    ).toList();
   }
 }
 
