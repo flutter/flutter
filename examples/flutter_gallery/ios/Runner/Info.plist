@@ -43,6 +43,8 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>FLTBuildMode</key>
+	<string>$(FLUTTER_BUILD_MODE)</string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 </dict>
