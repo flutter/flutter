@@ -23,6 +23,11 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
+    testUsingContext('Exception handling in test harness', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
+    });
+
     testUsingContext('TestAsyncUtils guarded function test', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
