@@ -151,8 +151,7 @@ class IconButton extends StatelessWidget {
           width: iconSize,
           child: new Align(
             alignment: alignment,
-            child: new IconTheme.merge(
-              context: context,
+            child: IconTheme.merge(
               data: new IconThemeData(
                 size: iconSize,
                 color: currentColor

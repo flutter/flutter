@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Navigator.push works within a PopupMenuButton', (WidgetTester tester) async {
+    final Key targetKey = new UniqueKey();
     await tester.pumpWidget(
       new MaterialApp(
         routes: <String, WidgetBuilder> {
@@ -17,6 +18,7 @@ void main() {
         home: new Material(
           child: new Center(
             child: new Builder(
+              key: targetKey,
               builder: (BuildContext context) {
                 return new PopupMenuButton<int>(
                   onSelected: (int value) {
@@ -38,7 +40,7 @@ void main() {
       )
     );
 
-    await tester.tap(find.byType(Builder));
+    await tester.tap(find.byKey(targetKey));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 

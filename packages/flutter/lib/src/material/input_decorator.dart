@@ -439,8 +439,7 @@ class InputDecorator extends StatelessWidget {
           new Container(
             margin: new EdgeInsets.only(top: iconTop),
             width: isDense ? 40.0 : 48.0,
-            child: new IconTheme.merge(
-              context: context,
+            child: IconTheme.merge(
               data: new IconThemeData(
                 color: isFocused ? activeColor : Colors.black45,
                 size: isDense ? 18.0 : 24.0,

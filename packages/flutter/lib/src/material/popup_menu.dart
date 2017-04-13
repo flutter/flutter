@@ -160,8 +160,7 @@ class _PopupMenuItemState<T extends PopupMenuItem<dynamic>> extends State<T> {
     );
     if (!widget.enabled) {
       final bool isDark = theme.brightness == Brightness.dark;
-      item = new IconTheme.merge(
-        context: context,
+      item = IconTheme.merge(
         data: new IconThemeData(opacity: isDark ? 0.5 : 0.38),
         child: item
       );

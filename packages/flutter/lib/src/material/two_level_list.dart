@@ -201,8 +201,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
       ),
       child: new Column(
         children: <Widget>[
-          new IconTheme.merge(
-            context: context,
+          IconTheme.merge(
             data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
             child: new TwoLevelListItem(
               onTap: _handleOnTap,

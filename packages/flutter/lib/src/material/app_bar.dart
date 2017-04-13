@@ -438,8 +438,7 @@ class _AppBarState extends State<AppBar> {
     Widget appBar = new ClipRect(
       child: new CustomSingleChildLayout(
         delegate: const _ToolbarContainerLayout(),
-        child: new IconTheme.merge(
-          context: context,
+        child: IconTheme.merge(
           data: appBarIconTheme,
           child: new DefaultTextStyle(
             style: sideStyle,

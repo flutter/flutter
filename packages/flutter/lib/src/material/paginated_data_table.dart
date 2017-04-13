@@ -377,8 +377,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             // See https://material.google.com/components/data-tables.html#data-tables-tables-within-cards
             style: _selectedRowCount > 0 ? themeData.textTheme.subhead.copyWith(color: themeData.accentColor)
                                          : themeData.textTheme.title.copyWith(fontWeight: FontWeight.w400),
-            child: new IconTheme.merge(
-              context: context,
+            child: IconTheme.merge(
               data: const IconThemeData(
                 opacity: 0.54
               ),
@@ -413,8 +412,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           ),
           new DefaultTextStyle(
             style: footerTextStyle,
-            child: new IconTheme.merge(
-              context: context,
+            child: IconTheme.merge(
               data: const IconThemeData(
                 opacity: 0.54
               ),

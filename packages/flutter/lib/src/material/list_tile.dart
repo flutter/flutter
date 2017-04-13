@@ -345,8 +345,7 @@ class ListTile extends StatelessWidget {
     final List<Widget> children = <Widget>[];
 
     if (leading != null) {
-      children.add(new IconTheme.merge(
-        context: context,
+      children.add(IconTheme.merge(
         data: new IconThemeData(color: _iconColor(theme, tileTheme)),
         child: new Container(
           margin: const EdgeInsets.only(right: 16.0),
