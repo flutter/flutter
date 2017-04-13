@@ -103,10 +103,10 @@ source_set("runtime") {
     deps += [ "//lib/tonic/debugger" ]
   }
 
-  # On iOS (device), precompiled snapshots contain the instruction buffer.
+  # In AOT mode, precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no generic snapshot.
-  if (!is_ios || use_ios_simulator) {
+  if (!flutter_aot) {
     deps += [ "//flutter/lib/snapshot" ]
   }
 }
