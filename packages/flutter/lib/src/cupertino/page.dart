@@ -25,6 +25,20 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   end: FractionalOffset.topLeft,
 );
 
+// BoxDecoration from no shadow to page shadow mimicking iOS page transitions.
+final DecorationTween _kShadowTween = new DecorationTween(
+  begin: null, // No shadow initially.
+  end: const BoxDecoration(
+    boxShadow: const <BoxShadow>[
+      const BoxShadow(
+        blurRadius: 10.0,
+        spreadRadius: 4.0,
+        color: const Color(0x38000000),
+      ),
+    ],
+  ),
+);
+
 /// Provides the native iOS page transition animation.
 ///
 /// The page slides in from the right and exits in reverse. It also shifts to the left in
@@ -57,15 +71,15 @@ class CupertinoPageTransition extends StatelessWidget {
           reverseCurve: Curves.easeIn,
         )
       ),
+      _primaryShadowAnimation = _kShadowTween.animate(primaryRouteAnimation),
       super(key: key);
 
   // When this page is coming in to cover another page.
   final Animation<FractionalOffset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
   final Animation<FractionalOffset> _secondaryPositionAnimation;
-  final Animation<double> _primaryRouteAnimation;
+  final Animation<Decoration> _primaryShadowAnimation;
   final Widget child;
-
 
   @override
   Widget build(BuildContext context) {
@@ -75,19 +89,10 @@ class CupertinoPageTransition extends StatelessWidget {
       position: _secondaryPositionAnimation,
       child: new SlideTransition(
         position: _primaryPositionAnimation,
-        child: new DecoratedBox(
-          decoration: new BoxDecoration(
-            boxShadow: <BoxShadow>[
-              new BoxShadow(
-                // Calculate directly from the route's 0.0 to 1.0 animation.
-                blurRadius: _primaryRouteAnimation.value * 10.0, // Linearly from 0.0 to 10.0.
-                spreadRadius: _primaryRouteAnimation.value * 4.0, // Linearly from 0.0 to 4.0
-                color: const Color(0x38000000),
-              ),
-            ],
-          ),
+        child: new DecoratedBoxTransition(
+          decoration: _primaryShadowAnimation,
           child: child,
-        )
+        ),
       ),
     );
   }
