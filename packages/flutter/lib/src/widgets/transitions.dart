@@ -401,7 +401,11 @@ class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecorationBox] whose [Decoration] animation updates
   /// the widget. 
   /// 
-  /// The [decoration] and [position] cannot be null.  
+  /// The [decoration] and [position] cannot be null. 
+  /// 
+  /// See also:
+  /// 
+  /// * [new DecoratedBox].
   DecoratedBoxTransition({
     Key key,
     @required this.decoration,
