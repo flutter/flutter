@@ -162,23 +162,25 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 }
 
 - (void)setTextInputState:(NSDictionary*)state {
+  [self.inputDelegate selectionWillChange:self];
+  [self.inputDelegate textWillChange:self];
+
+  [self.text setString:state[@"text"]];
+
   NSInteger selectionBase = [state[@"selectionBase"] intValue];
   NSInteger selectionExtent = [state[@"selectionExtent"] intValue];
-
-  [self.inputDelegate textWillChange:self];
-  [self.text setString:state[@"text"]];
-  [self.inputDelegate textDidChange:self];
-
-  [self.inputDelegate selectionWillChange:self];
   NSUInteger start = MAX(0, MIN(selectionBase, selectionExtent));
   NSUInteger end = MAX(0, MAX(selectionBase, selectionExtent));
   NSRange selectedRange = NSMakeRange(start, end - start);
   [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
           updateEditingState:NO];
+
   _selectionAffinity = _kTextAffinityDownstream;
   if ([state[@"selectionAffinity"] isEqualToString:@(_kTextAffinityUpstream)])
     _selectionAffinity = _kTextAffinityUpstream;
+
   [self.inputDelegate selectionDidChange:self];
+  [self.inputDelegate textDidChange:self];
 }
 
 #pragma mark - UIResponder Overrides
@@ -235,15 +237,9 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
     selectedRange.length -= intersectionRange.length;
   }
 
-  [self.inputDelegate textWillChange:self];
-  [self.inputDelegate selectionWillChange:self];
-
   [self.text replaceCharactersInRange:replaceRange withString:text];
   [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
           updateEditingState:NO];
-
-  [self.inputDelegate textDidChange:self];
-  [self.inputDelegate selectionDidChange:self];
 
   [self updateEditingState];
 }
@@ -268,12 +264,10 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   self.markedTextRange =
       markedTextRange.length > 0 ? [FlutterTextRange rangeWithNSRange:markedTextRange] : nil;
 
-  [self.inputDelegate selectionWillChange:self];
   NSUInteger selectionLocation = markedSelectedRange.location + markedTextRange.location;
   selectedRange = NSMakeRange(selectionLocation, markedSelectedRange.length);
   [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
           updateEditingState:YES];
-  [self.inputDelegate selectionDidChange:self];
 }
 
 - (void)unmarkText {
@@ -288,12 +282,19 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
 }
 
+/** Returns the range of the character sequence at the specified index in the text. */
+- (NSRange)rangeForCharacterAtIndex:(NSUInteger)index {
+  if (index < self.text.length)
+    [self.text rangeOfComposedCharacterSequenceAtIndex:index];
+  return NSMakeRange(index, 0);
+}
+
 - (NSUInteger)decrementOffsetPosition:(NSUInteger)position {
-  return [self.text rangeOfComposedCharacterSequenceAtIndex:MAX(0, position - 1)].location;
+  return [self rangeForCharacterAtIndex:MAX(0, position - 1)].location;
 }
 
 - (NSUInteger)incrementOffsetPosition:(NSUInteger)position {
-  NSRange charRange = [self.text rangeOfComposedCharacterSequenceAtIndex:position];
+  NSRange charRange = [self rangeForCharacterAtIndex:position];
   return MIN(position + charRange.length, self.text.length);
 }
 
@@ -428,10 +429,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 - (UITextRange*)characterRangeAtPoint:(CGPoint)point {
   // TODO(cbracken) Implement.
   NSUInteger currentIndex = ((FlutterTextPosition*)_selectedTextRange.start).index;
-  if (currentIndex < self.text.length)
-    return [FlutterTextRange
-        rangeWithNSRange:[self.text rangeOfComposedCharacterSequenceAtIndex:currentIndex]];
-  return [FlutterTextRange rangeWithNSRange:NSMakeRange(currentIndex, 0)];
+  return [FlutterTextRange rangeWithNSRange:[self rangeForCharacterAtIndex:currentIndex]];
 }
 
 #pragma mark - UIKeyInput Overrides
