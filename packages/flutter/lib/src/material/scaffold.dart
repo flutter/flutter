@@ -795,21 +795,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? padding.top : 0.0;
-      Widget appBar = widget.appBar;
-      //final double extent = widget.appBar.minExtent + topPadding;
       final double extent = widget.appBar.preferredSize.height + topPadding;
-      // TBD: make sure the extent isn't infinite, is >= 0
-      //if (widget.appBar.flexibleSpace != null) {
-        appBar = FlexibleSpaceBar.createSettings(
-          currentExtent: extent,
-          child: appBar,
-        );
-      //}
+      assert(extent >= 0.0 && extent.isFinite);
       _addIfNonNull(
         children,
         new ConstrainedBox(
           constraints: new BoxConstraints(maxHeight: extent),
-          child: appBar,
+          child: FlexibleSpaceBar.createSettings(
+            currentExtent: extent,
+            child: widget.appBar,
+          ),
         ),
         _ScaffoldSlot.appBar,
       );
