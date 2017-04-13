@@ -637,4 +637,79 @@ void main() {
     expect(appBarTop(tester), lessThanOrEqualTo(0.0));
     expect(appBarBottom(tester), kTextTabBarHeight);
   });
+
+  testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: false,
+          appBar: new AppBar(),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: true,
+          appBar: new AppBar(title: const Text('title'))
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(tester.getTopLeft(find.text('title')).dy, greaterThan(100.0));
+    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: false,
+          appBar: new AppBar(
+            bottom: new PreferredSize(
+              preferredSize: const Size.fromHeight(200.0),
+              child: new Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 200.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: true,
+          appBar: new AppBar(
+            bottom: new PreferredSize(
+              preferredSize: const Size.fromHeight(200.0),
+              child: new Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new AppBar(
+          primary: false,
+          title: const Text('title'),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
+  });
 }

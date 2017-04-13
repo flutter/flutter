@@ -24,16 +24,6 @@ import 'tabs.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-/// An interface for widgets that can appear at the bottom of an [AppBar] or
-/// [SliverAppBar].
-///
-/// This interface exposes the height of the widget, so that the [Scaffold] and
-/// [SliverAppBar] widgets can correctly size an [AppBar].
-abstract class AppBarBottomWidget extends Widget {
-  /// Defines the height of the app bar's optional bottom widget.
-  double get bottomHeight;
-}
-
 enum _ToolbarSlot {
   leading,
   title,
@@ -156,7 +146,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///  * [FlexibleSpaceBar], which is used with [flexibleSpace] when the app bar
 ///    can expand and collapse.
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
-class AppBar extends StatefulWidget {
+class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design app bar.
   ///
   /// Typically used in the [Scaffold.appBar] property.
@@ -176,7 +166,7 @@ class AppBar extends StatefulWidget {
     this.centerTitle,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
-  }) : _bottomHeight = bottom?.bottomHeight ?? 0.0,
+  }) : preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
        super(key: key) {
     assert(elevation != null);
     assert(primary != null);
@@ -229,8 +219,7 @@ class AppBar extends StatefulWidget {
   ///
   /// A flexible space isn't actually flexible unless the [AppBar]'s container
   /// changes the [AppBar]'s size. A [SliverAppBar] in a [CustomScrollView]
-  /// changes the [AppBar]'s height when scrolled. A [Scaffold] always sets the
-  /// [AppBar] to the [minExtent].
+  /// changes the [AppBar]'s height when scrolled.
   ///
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
@@ -239,7 +228,7 @@ class AppBar extends StatefulWidget {
   ///
   /// Typically a [TabBar]. Only widgets that implement [AppBarBottomWidget] can
   /// be used at the bottom of an app bar.
-  final AppBarBottomWidget bottom;
+  final PreferredSizeWidget bottom;
 
   /// The z-coordinate at which to place this app bar.
   ///
@@ -274,8 +263,9 @@ class AppBar extends StatefulWidget {
 
   /// Whether this app bar is being displayed at the top of the screen.
   ///
-  /// If this is true, the top padding specified by the [MediaQuery] will be
-  /// added to the top of the toolbar. See also [minExtent].
+  /// If true, the appbar's toolbar elements and [bottom] widget will be
+  /// padded on top by the height of the system status bar. The layout
+  /// of the [flexibleSpace] is not affected by the [primary] property.
   final bool primary;
 
   /// Whether the title should be centered.
@@ -301,17 +291,10 @@ class AppBar extends StatefulWidget {
   /// bar is scrolled.
   final double bottomOpacity;
 
-  final double _bottomHeight;
-
-  /// The height of the toolbar and the [bottom] widget.
-  ///
-  /// The parent widget should constrain the [AppBar] to a height between this
-  /// and whatever maximum size it wants the [AppBar] to have.
-  ///
-  /// If [primary] is true, the parent should increase this height by the height
-  /// of the top padding specified by the [MediaQuery] in scope for the
-  /// [AppBar].
-  double get minExtent => kToolbarHeight + _bottomHeight;
+  /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
+  /// preferred height.
+  @override
+  final Size preferredSize;
 
   bool _getEffectiveCenterTitle(ThemeData themeData) {
     if (centerTitle != null)
@@ -566,7 +549,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
-  }) : _bottomHeight = bottom?.bottomHeight ?? 0.0 {
+  }) : _bottomHeight = bottom?.preferredSize?.height ?? 0.0 {
     assert(primary || topPadding == 0.0);
   }
 
@@ -574,7 +557,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget title;
   final List<Widget> actions;
   final Widget flexibleSpace;
-  final AppBarBottomWidget bottom;
+  final PreferredSizeWidget bottom;
   final int elevation;
   final Color backgroundColor;
   final Brightness brightness;
@@ -771,7 +754,7 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// Typically a [TabBar]. This widget must be a widget that implements the
   /// [AppBarBottomWidget] interface.
-  final AppBarBottomWidget bottom;
+  final PreferredSizeWidget bottom;
 
   /// The z-coordinate at which to place this app bar.
   ///
@@ -901,7 +884,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
   Widget build(BuildContext context) {
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
-      ? widget.bottom.bottomHeight + topPadding : null;
+      ? widget.bottom.preferredSize.height + topPadding : null;
 
     return new SliverPersistentHeader(
       floating: widget.floating,
