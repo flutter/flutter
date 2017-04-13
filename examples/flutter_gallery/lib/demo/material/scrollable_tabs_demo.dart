@@ -59,22 +59,22 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
     final Color iconColor = Theme.of(context).accentColor;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Scrollable tabs'),
+        title: const Text('Scrollable tabs'),
         actions: <Widget>[
           new PopupMenuButton<TabsDemoStyle>(
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
               new PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
-                child: new Text('Icons and text')
+                child: const Text('Icons and text')
               ),
               new PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsOnly,
-                child: new Text('Icons only')
+                child: const Text('Icons only')
               ),
               new PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.textOnly,
-                child: new Text('Text only')
+                child: const Text('Text only')
               ),
             ],
           ),

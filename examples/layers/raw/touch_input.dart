@@ -26,7 +26,7 @@ ui.Picture paint(ui.Rect paintBounds) {
   // The commands draw a circle in the center of the screen.
   final ui.Size size = paintBounds.size;
   canvas.drawCircle(
-    size.center(ui.Point.origin),
+    size.center(ui.Offset.zero),
     size.shortestSide * 0.45,
     new ui.Paint()..color = color
   );
@@ -67,7 +67,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   // First, record a picture with our painting commands.
   final ui.Picture picture = paint(paintBounds);
   // Second, include that picture in a scene graph.

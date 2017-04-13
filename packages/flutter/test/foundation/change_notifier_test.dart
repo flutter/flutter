@@ -206,4 +206,33 @@ void main() {
     notifier.value = 3.0;
     expect(log, isEmpty);
   });
+
+  test('Listenable.merge toString', () {
+    final TestNotifier source1 = new TestNotifier();
+    final TestNotifier source2 = new TestNotifier();
+
+    ChangeNotifier listenableUnderTest = new Listenable.merge(<Listenable>[]);
+    expect(listenableUnderTest.toString(), 'Listenable.merge([])');
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[null]);
+    expect(listenableUnderTest.toString(), 'Listenable.merge([null])');
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[source1]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([Instance of 'TestNotifier'])",
+    );
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[source1, source2]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([Instance of 'TestNotifier', Instance of 'TestNotifier'])",
+    );
+
+    listenableUnderTest = new Listenable.merge(<Listenable>[null, source2]);
+    expect(
+      listenableUnderTest.toString(), 
+      "Listenable.merge([null, Instance of 'TestNotifier'])",
+    );
+  });
 }

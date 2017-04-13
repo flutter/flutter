@@ -108,9 +108,9 @@ void createFooter(String footerPath) {
 
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
-    '$kDocRoot/api/dart-io/File-class.html',
-    '$kDocRoot/api/dart-ui/Canvas-class.html',
-    '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kDocRoot/api/dart.io/File-class.html',
+    '$kDocRoot/api/dart_ui/Canvas-class.html',
+    '$kDocRoot/api/dart_ui/Canvas/drawRect.html',
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',

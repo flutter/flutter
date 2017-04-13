@@ -9,7 +9,7 @@ import 'package:flutter_gallery/main.dart' as flutter_gallery_main;
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
-    binding.allowAllFrames = true;
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('Flutter Gallery app simple smoke test', (WidgetTester tester) async {
     flutter_gallery_main.main(); // builds the app and schedules a frame but doesn't trigger one

@@ -18,7 +18,7 @@ class TestIconState extends State<TestIcon> {
   @override
   Widget build(BuildContext context) {
     iconTheme = IconTheme.of(context);
-    return new Icon(Icons.add);
+    return const Icon(Icons.add);
   }
 }
 
@@ -37,7 +37,7 @@ class TestTextState extends State<TestText> {
   @override
   Widget build(BuildContext context) {
     textStyle = DefaultTextStyle.of(context).style;
-    return new Text(config.text);
+    return new Text(widget.text);
   }
 }
 
@@ -53,10 +53,10 @@ void main() {
         home: new Material(
           child: new Center(
             child: new ListTile(
-              leading: new Text('leading'),
-              title: new Text('title'),
-              subtitle: hasSubtitle ? new Text('subtitle') : null,
-              trailing: new Text('trailing'),
+              leading: const Text('leading'),
+              title: const Text('title'),
+              subtitle: hasSubtitle ? const Text('subtitle') : null,
+              trailing: const Text('trailing'),
               dense: dense,
               isThreeLine: isThreeLine,
             ),
@@ -73,10 +73,10 @@ void main() {
       expect(find.text('trailing'), findsOneWidget);
     }
 
-    double left(String text) => tester.getTopLeft(find.text(text)).x;
-    double right(String text) => tester.getTopRight(find.text(text)).x;
-    double top(String text) => tester.getTopLeft(find.text(text)).y;
-    double bottom(String text) => tester.getBottomLeft(find.text(text)).y;
+    double left(String text) => tester.getTopLeft(find.text(text)).dx;
+    double right(String text) => tester.getTopRight(find.text(text)).dx;
+    double top(String text) => tester.getTopLeft(find.text(text)).dy;
+    double bottom(String text) => tester.getBottomLeft(find.text(text)).dy;
 
     // 16.0 padding to the left and right of the leading and trailing widgets
     void testHorizontalGeometry() {

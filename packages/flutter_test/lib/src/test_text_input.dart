@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -48,7 +49,7 @@ class TestTextInput {
           <dynamic>[_client, value.toJSON()],
         ),
       ),
-      (_) {},
+      (ByteData data) { /* response from framework is discarded */ },
     );
   }
 

@@ -106,7 +106,7 @@ class _TabsFabDemoState extends State<TabsFabDemo> with SingleTickerProviderStat
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('FAB per tab'),
+        title: const Text('FAB per tab'),
         bottom: new TabBar(
           controller: _controller,
           tabs: _allPages.map((_Page page) => new Tab(text: page.label.toUpperCase())).toList(),

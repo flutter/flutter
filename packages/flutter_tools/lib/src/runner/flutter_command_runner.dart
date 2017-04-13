@@ -286,8 +286,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         engineSourcePath = null;
       }
 
-      if (engineSourcePath == null)
-        engineSourcePath = _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
+      engineSourcePath ??= _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
 
       if (engineSourcePath == null) {
         printError('Unable to detect local Flutter engine build directory.\n'
@@ -327,8 +326,7 @@ class FlutterCommandRunner extends CommandRunner<Null> {
   }
 
   static void initFlutterRoot() {
-    if (Cache.flutterRoot == null)
-      Cache.flutterRoot = _defaultFlutterRoot;
+    Cache.flutterRoot ??= _defaultFlutterRoot;
   }
 
   /// Get all pub packages in the Flutter repo.

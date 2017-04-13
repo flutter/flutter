@@ -4,8 +4,10 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -251,17 +253,87 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   double childMainAxisPosition(RenderBox child) => 0.0;
 }
 
+/// Specifies how a floating header is to be "snapped" (animated) into or out
+/// of view.
+///
+/// See also:
+///
+///  * [RenderSliverFloatingPersistentHeader.maybeStartSnapAnimation] and
+///    [RenderSliverFloatingPersistentHeader.maybeStopSnapAnimation], which
+///    start or stop the floating header's animation.
+///  * [SliverAppBar], which creates a header that can be pinned, floating,
+///    and snapped into view via the corresponding parameters.
+class FloatingHeaderSnapConfiguration {
+  /// Creates an object that specifies how a floating header is to be "snapped"
+  /// (animated) into or out of view.
+  FloatingHeaderSnapConfiguration({
+    @required this.vsync,
+    this.curve: Curves.ease,
+    this.duration: const Duration(milliseconds: 300),
+  }) {
+    assert(vsync != null);
+    assert(curve != null);
+    assert(duration != null);
+  }
+
+  /// The [TickerProvider] for the [AnimationController] that causes a
+  /// floating header to snap in or out of view.
+  final TickerProvider vsync;
+
+  /// The snap animation curve.
+  final Curve curve;
+
+  /// The snap animation's duration.
+  final Duration duration;
+}
+
 abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
-  }) : super(child: child);
+    FloatingHeaderSnapConfiguration snapConfiguration,
+  }) : _snapConfiguration = snapConfiguration, super(child: child);
 
+  AnimationController _controller;
+  Animation<double> _animation;
   double _lastActualScrollOffset;
   double _effectiveScrollOffset;
 
   // Distance from our leading edge to the child's leading edge, in the axis
   // direction. Negative if we're scrolled off the top.
   double _childPosition;
+
+  @override
+  void detach() {
+    _controller?.dispose();
+    _controller = null; // lazily recreated if we're reattached.
+    super.detach();
+  }
+
+  /// Defines the parameters used to snap (animate) the floating header in and
+  /// out of view.
+  ///
+  /// If [snapConfiguration] is null then the floating header does not snap.
+  ///
+  /// See also:
+  ///
+  ///  * [RenderSliverFloatingPersistentHeader.maybeStartSnapAnimation] and
+  ///    [RenderSliverFloatingPersistentHeader.maybeStopSnapAnimation], which
+  ///    start or stop the floating header's animation.
+  ///  * [SliverAppBar], which creates a header that can be pinned, floating,
+  ///    and snapped into view via the corresponding parameters.
+  FloatingHeaderSnapConfiguration get snapConfiguration => _snapConfiguration;
+  FloatingHeaderSnapConfiguration _snapConfiguration;
+  set snapConfiguration(FloatingHeaderSnapConfiguration value) {
+    if (value == _snapConfiguration)
+      return;
+    if (value == null) {
+      _controller?.dispose();
+    } else {
+      if (_snapConfiguration != null && value.vsync != _snapConfiguration.vsync)
+        _controller?.resync(value.vsync);
+    }
+    _snapConfiguration = value;
+  }
 
   // Update [geometry] and return the new value for [childMainAxisPosition].
   @protected
@@ -280,6 +352,42 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     return math.min(0.0, paintExtent - childExtent);
   }
 
+  /// If the header isn't already fully exposed, then scroll it into view.
+  void maybeStartSnapAnimation(ScrollDirection direction) {
+    if (snapConfiguration == null)
+      return;
+    if (direction == ScrollDirection.forward && _effectiveScrollOffset <= 0.0)
+      return;
+    if (direction == ScrollDirection.reverse && _effectiveScrollOffset >= maxExtent)
+      return;
+
+    final TickerProvider vsync = snapConfiguration.vsync;
+    final Duration duration = snapConfiguration.duration;
+    _controller ??= new AnimationController(vsync: vsync, duration: duration)
+      ..addListener(() {
+        if (_effectiveScrollOffset == _animation.value)
+          return;
+        _effectiveScrollOffset = _animation.value;
+        markNeedsLayout();
+      });
+
+    // Recreating the animation rather than updating a cached value, only
+    // to avoid the extra complexity of managing the animation's lifetime.
+    _animation = new Tween<double>(
+      begin: _effectiveScrollOffset,
+      end: direction == ScrollDirection.forward ? 0.0 : maxExtent,
+    ).animate(new CurvedAnimation(
+      parent: _controller,
+      curve: snapConfiguration.curve,
+    ));
+
+    _controller.forward(from: 0.0);
+  }
+
+  /// If a header snap animation is underway then stop it.
+  void maybeStopSnapAnimation(ScrollDirection direction) {
+    _controller?.stop();
+  }
 
   @override
   void performLayout() {
@@ -321,7 +429,8 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
 abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPersistentHeader {
   RenderSliverFloatingPinnedPersistentHeader({
     RenderBox child,
-  }) : super(child: child);
+    FloatingHeaderSnapConfiguration snapConfiguration,
+  }) : super(child: child, snapConfiguration: snapConfiguration);
 
   @override
   double updateGeometry() {

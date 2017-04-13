@@ -10,7 +10,7 @@ void main() {
   testWidgets('Scaffold control test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Scaffold(
-      appBar: new AppBar(title: new Text('Title')),
+      appBar: new AppBar(title: const Text('Title')),
       body: new Container(key: bodyKey)
     ));
 
@@ -20,7 +20,7 @@ void main() {
     await tester.pumpWidget(new MediaQuery(
       data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
-        appBar: new AppBar(title: new Text('Title')),
+        appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey)
       )
     ));
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpWidget(new MediaQuery(
       data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
       child: new Scaffold(
-        appBar: new AppBar(title: new Text('Title')),
+        appBar: new AppBar(title: const Text('Title')),
         body: new Container(key: bodyKey),
         resizeToAvoidBottomPadding: false
       )
@@ -72,7 +72,7 @@ void main() {
       ),
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Title'),
+          title: const Text('Title'),
         ),
         body: new Container(key: bodyKey),
       ),
@@ -83,20 +83,20 @@ void main() {
 
   testWidgets('Floating action animation', (WidgetTester tester) async {
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: new Text("1")
+        child: const Text("1")
       )
     ));
 
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('two'),
         onPressed: null,
-        child: new Text("2")
+        child: const Text("2")
       )
     ));
 
@@ -107,10 +107,10 @@ void main() {
     expect(tester.binding.transientCallbackCount, 0);
 
     await tester.pumpWidget(new Scaffold(
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
-        child: new Text("1")
+        child: const Text("1")
       )
     ));
 
@@ -140,8 +140,8 @@ void main() {
               new SliverAppBar(
                 pinned: true,
                 expandedHeight: appBarHeight,
-                title: new Text('Title'),
-                flexibleSpace: new FlexibleSpaceBar(title: new Text('Title')),
+                title: const Text('Title'),
+                flexibleSpace: new FlexibleSpaceBar(title: const Text('Title')),
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),
@@ -185,7 +185,7 @@ void main() {
             primary: true,
             slivers: <Widget>[
               new SliverAppBar(
-                title: new Text('Title')
+                title: const Text('Title')
               ),
               new SliverList(
                 delegate: new SliverChildListDelegate(new List<Widget>.generate(
@@ -204,7 +204,7 @@ void main() {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
-    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pumpAndSettle();
     expect(scrollable.position.pixels, equals(0.0));
   });
@@ -214,7 +214,7 @@ void main() {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     scrollable.position.jumpTo(500.0);
     expect(scrollable.position.pixels, equals(500.0));
-    await tester.tapAt(const Point(100.0, 10.0));
+    await tester.tapAt(const Offset(100.0, 10.0));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(scrollable.position.pixels, equals(500.0));
@@ -228,7 +228,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('Title'),
+            title: const Text('Title'),
           ),
           body: new Builder(
             builder: (BuildContext context) {
@@ -241,7 +241,7 @@ void main() {
                     );
                   });
                 },
-                child: new Text('X'),
+                child: const Text('X'),
               );
             },
           ),
@@ -256,8 +256,8 @@ void main() {
     final RenderBox appBarBox = tester.renderObject(find.byType(AppBar));
     final RenderBox sheetBox = tester.renderObject(find.byKey(sheetKey));
 
-    final Point appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Point.origin));
-    final Point sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Point.origin));
+    final Offset appBarBottomRight = appBarBox.localToGlobal(appBarBox.size.bottomRight(Offset.zero));
+    final Offset sheetTopRight = sheetBox.localToGlobal(sheetBox.size.topRight(Offset.zero));
 
     expect(appBarBottomRight, equals(sheetTopRight));
   });
@@ -273,7 +273,7 @@ void main() {
                 backgroundColor: Colors.amber[500],
               ),
               height: 5000.0,
-              child: new Text('body'),
+              child: const Text('body'),
             ),
           ),
           persistentFooterButtons: <Widget>[
@@ -281,7 +281,7 @@ void main() {
               onPressed: () {
                 didPressButton = true;
               },
-              child: new Text('X'),
+              child: const Text('X'),
             )
           ],
         ),
@@ -298,10 +298,10 @@ void main() {
     Future<Null> expectBackIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
       final GlobalKey rootKey = new GlobalKey();
       final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-        '/': (_) => new Container(key: rootKey, child: new Text('Home')),
+        '/': (_) => new Container(key: rootKey, child: const Text('Home')),
         '/scaffold': (_) => new Scaffold(
             appBar: new AppBar(),
-            body: new Text('Scaffold'),
+            body: const Text('Scaffold'),
         )
       };
       await tester.pumpWidget(
@@ -329,6 +329,42 @@ void main() {
     });
   });
 
+  group('close button', () {
+    Future<Null> expectCloseIcon(WidgetTester tester, TargetPlatform platform, IconData expectedIcon) async {
+      await tester.pumpWidget(
+        new MaterialApp(
+          theme: new ThemeData(platform: platform),
+          home: new Scaffold(appBar: new AppBar(), body: const Text('Page 1')),
+        )
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(new MaterialPageRoute<Null>(
+        builder: (BuildContext context) {
+          return new Scaffold(appBar: new AppBar(), body: const Text('Page 2'));
+        },
+        fullscreenDialog: true,
+      ));
+
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      final Icon icon = tester.widget(find.byType(Icon));
+      expect(icon.icon, expectedIcon);
+    }
+
+    testWidgets('Close button shows correctly on Android', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.android, Icons.close);
+    });
+
+    testWidgets('Close button shows correctly on Fuchsia', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.fuchsia, Icons.close);
+    });
+
+    testWidgets('Close button shows correctly on iOS', (WidgetTester tester) async {
+      await expectCloseIcon(tester, TargetPlatform.iOS, Icons.close);
+    });
+  });
+
   group('body size', () {
     testWidgets('body size with container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
@@ -336,7 +372,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with sized container', (WidgetTester tester) async {
@@ -345,7 +381,7 @@ void main() {
         new Scaffold(body: new Container(key: testKey, height: 100.0))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with centered container', (WidgetTester tester) async {
@@ -354,16 +390,16 @@ void main() {
         new Scaffold(body: new Center(child: new Container(key: testKey)))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
 
     testWidgets('body size with button', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: new Text('')))
+        new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: const Text('')))
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
-      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Point.origin), const Point(0.0, 0.0));
+      expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     });
   });
 }

@@ -158,8 +158,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   void didChangeDependencies() {
     final ThemeData theme = Theme.of(context);
     _valueColor = new ColorTween(
-      begin: (config.color ?? theme.accentColor).withOpacity(0.0),
-      end: (config.color ?? theme.accentColor).withOpacity(1.0)
+      begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
+      end: (widget.color ?? theme.accentColor).withOpacity(1.0)
     ).animate(new CurvedAnimation(
       parent: _positionController,
       curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
@@ -311,13 +311,13 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
       .whenComplete(() {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
-          assert(config.onRefresh != null);
+          assert(widget.onRefresh != null);
           setState(() {
             // Show the indeterminate progress indicator.
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          config.onRefresh().whenComplete(() {
+          widget.onRefresh().whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
               completer.complete();
               _dismiss(_RefreshIndicatorMode.done);
@@ -362,7 +362,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
       onNotification: _handleScrollNotification,
       child: new NotificationListener<OverscrollIndicatorNotification>(
         onNotification: _handleGlowNotification,
-        child: config.child,
+        child: widget.child,
       ),
     );
     if (_mode == null) {
@@ -389,8 +389,8 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             sizeFactor: _positionFactor, // this is what brings it down
             child: new Container(
               padding: _isIndicatorAtTop
-                ? new EdgeInsets.only(top: config.displacement)
-                : new EdgeInsets.only(bottom: config.displacement),
+                ? new EdgeInsets.only(top: widget.displacement)
+                : new EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
                 ? FractionalOffset.topCenter
                 : FractionalOffset.bottomCenter,
@@ -402,7 +402,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                     return new RefreshProgressIndicator(
                       value: showIndeterminateIndicator ? null : _value.value,
                       valueColor: _valueColor,
-                      backgroundColor: config.backgroundColor,
+                      backgroundColor: widget.backgroundColor,
                     );
                   },
                 ),

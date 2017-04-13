@@ -36,7 +36,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }
 
 void main() {

@@ -110,7 +110,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
     setState(() {
       _haveTriggeredAction = true;
     });
-    config.onPressed();
+    widget.onPressed();
     Scaffold.of(context).hideCurrentSnackBar(reason: SnackBarClosedReason.action);
   }
 
@@ -118,7 +118,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
   Widget build(BuildContext context) {
     return new FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
-      child: new Text(config.label)
+      child: new Text(widget.label)
     );
   }
 }

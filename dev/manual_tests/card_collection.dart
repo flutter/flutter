@@ -88,7 +88,7 @@ class CardCollectionState extends State<CardCollection> {
         data: const IconThemeData(color: Colors.black),
         child: new ListView(
           children: <Widget>[
-            new DrawerHeader(child: new Center(child: new Text('Options'))),
+            const DrawerHeader(child: const Center(child: const Text('Options'))),
             buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
             buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
             buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
@@ -108,9 +108,9 @@ class CardCollectionState extends State<CardCollection> {
             buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             new Divider(),
             new ListTile(
-              leading: new Icon(Icons.dvr),
+              leading: const Icon(Icons.dvr),
               onTap: () { debugDumpApp(); debugDumpRenderTree(); },
-              title: new Text('Dump App to Console'),
+              title: const Text('Dump App to Console'),
             ),
           ],
         ),
@@ -281,12 +281,12 @@ class CardCollectionState extends State<CardCollection> {
     }
 
     // TODO(abarth): This icon is wrong in RTL.
-    Widget leftArrowIcon =  new Icon(Icons.arrow_back, size: 36.0);
+    Widget leftArrowIcon =  const Icon(Icons.arrow_back, size: 36.0);
     if (_dismissDirection == DismissDirection.startToEnd)
       leftArrowIcon = new Opacity(opacity: 0.1, child: leftArrowIcon);
 
       // TODO(abarth): This icon is wrong in RTL.
-    Widget rightArrowIcon =  new Icon(Icons.arrow_forward, size: 36.0);
+    Widget rightArrowIcon =  const Icon(Icons.arrow_forward, size: 36.0);
     if (_dismissDirection == DismissDirection.endToStart)
       rightArrowIcon = new Opacity(opacity: 0.1, child: rightArrowIcon);
 

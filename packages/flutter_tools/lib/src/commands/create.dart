@@ -15,6 +15,7 @@ import '../doctor.dart';
 import '../flx.dart' as flx;
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
+import '../plugins.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
@@ -141,8 +142,10 @@ class CreateCommand extends FlutterCommand {
 
     updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
 
-    if (argResults['pub'])
+    if (argResults['pub']) {
       await pubGet(directory: appPath);
+      injectPlugins(directory: appPath);
+    }
 
     printStatus('');
 

@@ -18,7 +18,7 @@ void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
 
 void verifyActualBoxPosition(WidgetTester tester, Finder finder, int index, Rect ideal) {
   final RenderBox box = tester.renderObjectList<RenderBox>(finder).elementAt(index);
-  final Rect rect = new Rect.fromPoints(box.localToGlobal(Point.origin), box.localToGlobal(box.size.bottomRight(Point.origin)));
+  final Rect rect = new Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
   expect(rect, equals(ideal));
 }
 
@@ -191,9 +191,9 @@ void main() {
           new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
           new SliverList(
             delegate: new SliverChildListDelegate(<Widget>[
-              new SizedBox(
+              const SizedBox(
                 height: 300.0,
-                child: new Text('X'),
+                child: const Text('X'),
               ),
             ]),
           ),
@@ -201,15 +201,15 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.byType(Container)), Point.origin);
-    expect(tester.getTopLeft(find.text('X')), const Point(0.0, 200.0));
+    expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
+    expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 200.0));
 
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(-50.0);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.byType(Container)), Point.origin);
-    expect(tester.getTopLeft(find.text('X')), const Point(0.0, 250.0));
+    expect(tester.getTopLeft(find.byType(Container)), Offset.zero);
+    expect(tester.getTopLeft(find.text('X')), const Offset(0.0, 250.0));
   });
 }
 

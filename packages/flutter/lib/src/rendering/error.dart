@@ -73,7 +73,7 @@ class RenderErrorBox extends RenderBox {
   bool get sizedByParent => true;
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void performResize() {

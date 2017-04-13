@@ -77,8 +77,8 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   await tester.pump(const Duration(milliseconds: 400));
 
   // Scroll the demo around a bit.
-  await tester.flingFrom(const Point(400.0, 300.0), const Offset(-100.0, 0.0), 500.0);
-  await tester.flingFrom(const Point(400.0, 300.0), const Offset(0.0, -100.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-100.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, -100.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
@@ -90,15 +90,15 @@ Future<Null> smokeDemo(WidgetTester tester, String routeName) async {
   verifyToStringOutput('debugDumpLayerTree', routeName, RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
 
   // Scroll the demo around a bit more.
-  await tester.flingFrom(const Point(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(-200.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 50));
   await tester.pump(const Duration(milliseconds: 200));
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(const Point(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(100.0, 0.0), 500.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
-  await tester.flingFrom(const Point(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
+  await tester.flingFrom(const Offset(400.0, 300.0), const Offset(0.0, 400.0), 1000.0);
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 400));
 

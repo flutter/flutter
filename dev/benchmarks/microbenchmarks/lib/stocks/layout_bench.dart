@@ -21,7 +21,7 @@ Future<Null> main() async {
   // This allows us to call onBeginFrame even when the engine didn't request it,
   // and have it actually do something:
   final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  binding.allowAllFrames = true;
+  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   final Stopwatch watch = new Stopwatch();
   int iterations = 0;
@@ -30,7 +30,7 @@ Future<Null> main() async {
     stocks.main();
     await tester.pump(); // Start startup animation
     await tester.pump(const Duration(seconds: 1)); // Complete startup animation
-    await tester.tapAt(const Point(20.0, 40.0)); // Open drawer
+    await tester.tapAt(const Offset(20.0, 40.0)); // Open drawer
     await tester.pump(); // Start drawer animation
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 

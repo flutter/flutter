@@ -26,14 +26,14 @@ class _PageSelector extends StatelessWidget {
           child: new Row(
             children: <Widget>[
               new IconButton(
-                icon: new Icon(Icons.chevron_left),
+                icon: const Icon(Icons.chevron_left),
                 color: color,
                 onPressed: () { _handleArrowButtonPress(context, -1); },
                 tooltip: 'Page back'
               ),
               new TabPageSelector(controller: controller),
               new IconButton(
-                icon: new Icon(Icons.chevron_right),
+                icon: const Icon(Icons.chevron_right),
                 color: color,
                 onPressed: () { _handleArrowButtonPress(context, 1); },
                 tooltip: 'Page forward'
@@ -76,7 +76,7 @@ class PageSelectorDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Page selector')),
+      appBar: new AppBar(title: const Text('Page selector')),
       body: new DefaultTabController(
         length: icons.length,
         child: new _PageSelector(icons: icons),

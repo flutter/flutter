@@ -90,7 +90,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
   void _handleOnScaleStart(ScaleStartDetails details) {
     setState(() {
       _previousScale = _scale;
-      _normalizedOffset = (details.focalPoint.toOffset() - _offset) / _scale;
+      _normalizedOffset = (details.focalPoint - _offset) / _scale;
       // The fling animation stops if an input gesture starts.
       _controller.stop();
     });
@@ -100,7 +100,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     setState(() {
       _scale = (_previousScale * details.scale).clamp(1.0, 4.0);
       // Ensure that image location under the focal point stays in the same place despite scaling.
-      _offset = _clampOffset(details.focalPoint.toOffset() - _normalizedOffset * _scale);
+      _offset = _clampOffset(details.focalPoint - _normalizedOffset * _scale);
     });
   }
 
@@ -109,7 +109,7 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
     if (magnitude < _kMinFlingVelocity)
       return;
     final Offset direction = details.velocity.pixelsPerSecond / magnitude;
-    final double distance = (Point.origin & context.size).shortestSide;
+    final double distance = (Offset.zero & context.size).shortestSide;
     _flingAnimation = new Tween<Offset>(
       begin: _offset,
       end: _clampOffset(_offset + direction * distance)
@@ -121,22 +121,18 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return new LayoutBuilder(
-      builder: (BuildContext context, BoxConstraints constraints) {
-        return new GestureDetector(
-          onScaleStart: _handleOnScaleStart,
-          onScaleUpdate: _handleOnScaleUpdate,
-          onScaleEnd: _handleOnScaleEnd,
-          child: new Transform(
-            transform: new Matrix4.identity()
-              ..translate(_offset.dx, _offset.dy)
-              ..scale(_scale),
-            child: new ClipRect(
-              child: new Image.asset(config.photo.assetName, fit: BoxFit.cover),
-            ),
-          ),
-        );
-      }
+    return new GestureDetector(
+      onScaleStart: _handleOnScaleStart,
+      onScaleUpdate: _handleOnScaleUpdate,
+      onScaleEnd: _handleOnScaleEnd,
+      child: new ClipRect(
+        child: new Transform(
+          transform: new Matrix4.identity()
+            ..translate(_offset.dx, _offset.dy)
+            ..scale(_scale),
+          child: new Image.asset(widget.photo.assetName, fit: BoxFit.cover),
+        ),
+      ),
     );
   }
 }
@@ -316,22 +312,22 @@ class GridListDemoState extends State<GridListDemo> {
     final Orientation orientation = MediaQuery.of(context).orientation;
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Grid list'),
+        title: const Text('Grid list'),
         actions: <Widget>[
           new PopupMenuButton<GridDemoTileStyle>(
             onSelected: changeTileStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<GridDemoTileStyle>>[
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.imageOnly,
-                child: new Text('Image only'),
+                child: const Text('Image only'),
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.oneLine,
-                child: new Text('One line'),
+                child: const Text('One line'),
               ),
               new PopupMenuItem<GridDemoTileStyle>(
                 value: GridDemoTileStyle.twoLine,
-                child: new Text('Two line'),
+                child: const Text('Two line'),
               ),
             ],
           ),

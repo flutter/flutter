@@ -97,8 +97,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   void startPolling() {
     if (_timer == null) {
-      if (_items == null)
-        _items = new ItemListNotifier<Device>();
+      _items ??= new ItemListNotifier<Device>();
       _timer = new Timer.periodic(_pollingDuration, (Timer timer) {
         _items.updateWithNewList(pollingGetDevices());
       });
@@ -112,20 +111,17 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
   @override
   List<Device> get devices {
-    if (_items == null)
-      _items = new ItemListNotifier<Device>.from(pollingGetDevices());
+    _items ??= new ItemListNotifier<Device>.from(pollingGetDevices());
     return _items.items;
   }
 
   Stream<Device> get onAdded {
-    if (_items == null)
-      _items = new ItemListNotifier<Device>();
+    _items ??= new ItemListNotifier<Device>();
     return _items.onAdded;
   }
 
   Stream<Device> get onRemoved {
-    if (_items == null)
-      _items = new ItemListNotifier<Device>();
+    _items ??= new ItemListNotifier<Device>();
     return _items.onRemoved;
   }
 
@@ -283,12 +279,14 @@ abstract class Device {
 class DebuggingOptions {
   DebuggingOptions.enabled(this.buildMode, {
     this.startPaused: false,
+    this.useTestFonts: false,
     this.observatoryPort,
     this.diagnosticPort
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildMode) :
     debuggingEnabled = false,
+    useTestFonts = false,
     startPaused = false,
     observatoryPort = null,
     diagnosticPort = null;
@@ -297,6 +295,7 @@ class DebuggingOptions {
 
   final BuildMode buildMode;
   final bool startPaused;
+  final bool useTestFonts;
   final int observatoryPort;
   final int diagnosticPort;
 
@@ -378,6 +377,9 @@ abstract class DeviceLogReader {
 
   @override
   String toString() => name;
+
+  /// Process ID of the app on the deivce.
+  int appPid;
 }
 
 /// Describes an app running on the device.

@@ -174,7 +174,7 @@ class FlutterLogoDecoration extends Decoration {
 
   @override
   // TODO(ianh): better hit testing
-  bool hitTest(Size size, Point position) => true;
+  bool hitTest(Size size, Offset position) => true;
 
   @override
   BoxPainter createBoxPainter([VoidCallback onChanged]) {
@@ -275,10 +275,8 @@ class _FlutterLogoPainter extends BoxPainter {
       ..color = _config.darkColor;
 
     final ui.Gradient triangleGradient = new ui.Gradient.linear(
-      const <Point>[
-        const Point(87.2623 + 37.9092, 28.8384 + 123.4389),
-        const Point(42.9205 + 37.9092, 35.0952 + 123.4389),
-      ],
+      const Offset(87.2623 + 37.9092, 28.8384 + 123.4389),
+      const Offset(42.9205 + 37.9092, 35.0952 + 123.4389),
       <Color>[
         const Color(0xBFFFFFFF),
         const Color(0xBFFCFCFC),
@@ -290,17 +288,15 @@ class _FlutterLogoPainter extends BoxPainter {
         const Color(0xBF6E6E6E),
         const Color(0xBF616161),
       ],
-      <double>[ 0.2690, 0.4093, 0.4972, 0.5708, 0.6364, 0.6968, 0.7533, 0.8058, 0.8219 ]
+      <double>[ 0.2690, 0.4093, 0.4972, 0.5708, 0.6364, 0.6968, 0.7533, 0.8058, 0.8219 ],
     );
     final Paint trianglePaint = new Paint()
       ..shader = triangleGradient
       ..blendMode = BlendMode.multiply;
 
     final ui.Gradient rectangleGradient = new ui.Gradient.linear(
-      const <Point>[
-        const Point(62.3643 + 37.9092, 40.135 + 123.4389),
-        const Point(54.0376 + 37.9092, 31.8083 + 123.4389),
-      ],
+      const Offset(62.3643 + 37.9092, 40.135 + 123.4389),
+      const Offset(54.0376 + 37.9092, 31.8083 + 123.4389),
       <Color>[
         const Color(0x80FFFFFF),
         const Color(0x80FCFCFC),
@@ -440,11 +436,11 @@ class _FlutterLogoPainter extends BoxPainter {
         );
         canvas.save();
         if (_config._position < 1.0) {
-          final Point center = logoSquare.center;
+          final Offset center = logoSquare.center;
           final Path path = new Path()
-            ..moveTo(center.x, center.y)
-            ..lineTo(center.x + rect.width, center.y - rect.width)
-            ..lineTo(center.x + rect.width, center.y + rect.width)
+            ..moveTo(center.dx, center.dy)
+            ..lineTo(center.dx + rect.width, center.dy - rect.width)
+            ..lineTo(center.dx + rect.width, center.dy + rect.width)
             ..close();
           canvas.clipPath(path);
         }
@@ -462,7 +458,7 @@ class _FlutterLogoPainter extends BoxPainter {
           canvas.save();
         }
         canvas.translate(
-          logoTargetSquare.center.x - (_textBoundingRect.width * scale / 2.0),
+          logoTargetSquare.center.dx - (_textBoundingRect.width * scale / 2.0),
           logoTargetSquare.bottom
         );
         canvas.scale(scale, scale);
@@ -471,7 +467,8 @@ class _FlutterLogoPainter extends BoxPainter {
           canvas.drawRect(_textBoundingRect.inflate(_textBoundingRect.width * 0.5), new Paint()
             ..blendMode = BlendMode.modulate
             ..shader = new ui.Gradient.linear(
-              <Point>[new Point(_textBoundingRect.width * -0.5, 0.0), new Point(_textBoundingRect.width * 1.5, 0.0)],
+              new Offset(_textBoundingRect.width * -0.5, 0.0),
+              new Offset(_textBoundingRect.width * 1.5, 0.0),
               <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF), const Color(0x00FFFFFF), const Color(0x00FFFFFF)],
               <double>[ 0.0, math.max(0.0, _config._position.abs() - 0.1), math.min(_config._position.abs() + 0.1, 1.0), 1.0 ],
             )

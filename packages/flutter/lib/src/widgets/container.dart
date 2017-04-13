@@ -16,20 +16,23 @@ import 'image.dart';
 /// not.
 ///
 /// Commonly used with [BoxDecoration].
+/// 
+/// See also:
+///
+/// * [DecoratedBoxTransition], the version of this class that animates on the [decoration] property.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
-  DecoratedBox({
+  const DecoratedBox({
     Key key,
     @required this.decoration,
     this.position: DecorationPosition.background,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(decoration != null);
-    assert(position != null);
-  }
+  }) : assert(decoration != null),
+       assert(position != null),
+       super(key: key, child: child);
 
   /// What decoration to paint.
   ///

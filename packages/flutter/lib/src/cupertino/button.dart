@@ -115,7 +115,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   void _setTween() {
     _opacityTween = new Tween<double>(
       begin: 1.0,
-      end: config.pressedOpacity,
+      end: widget.pressedOpacity,
     );
   }
 
@@ -138,8 +138,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
   }
 
   @override
-  void didUpdateConfig(CupertinoButton old) {
-    super.didUpdateConfig(old);
+  void didUpdateWidget(CupertinoButton old) {
+    super.didUpdateWidget(old);
     _setTween();
   }
 
@@ -157,19 +157,19 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    final bool enabled = config.enabled;
-    final Color backgroundColor = config.color;
+    final bool enabled = widget.enabled;
+    final Color backgroundColor = widget.color;
 
     return new Listener(
       onPointerDown: enabled ? _handleTapDown : null,
       onPointerUp: enabled ? _handleTapUp : null,
       onPointerCancel: enabled ? _handleTapCancel : null,
       child: new GestureDetector(
-        onTap: config.onPressed,
+        onTap: widget.onPressed,
         child: new ConstrainedBox(
           constraints: new BoxConstraints(
-            minWidth: config.minSize,
-            minHeight: config.minSize,
+            minWidth: widget.minSize,
+            minHeight: widget.minSize,
           ),
           child: new FadeTransition(
             opacity: _opacityTween.animate(new CurvedAnimation(
@@ -184,8 +184,8 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                     : backgroundColor,
               ),
               child: new Padding(
-                padding: config.padding != null
-                    ? config.padding
+                padding: widget.padding != null
+                    ? widget.padding
                     : backgroundColor != null
                         ? _kBackgroundButtonPadding
                         : _kButtonPadding,
@@ -198,7 +198,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                         : enabled
                             ? _kButtonTextStyle
                             : _kDisabledButtonTextStyle,
-                    child: config.child,
+                    child: widget.child,
                   ),
                 ),
               ),

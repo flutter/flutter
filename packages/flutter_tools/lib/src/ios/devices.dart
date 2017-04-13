@@ -228,6 +228,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.startPaused)
       launchArguments.add("--start-paused");
 
+    if (debuggingOptions.useTestFonts)
+      launchArguments.add("--use-test-fonts");
+
     if (debuggingOptions.debuggingEnabled) {
       launchArguments.add("--enable-checked-mode");
 
@@ -357,12 +360,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _IOSDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _IOSDevicePortForwarder(this);
 
   @override
   void clearLogs() {

@@ -266,11 +266,9 @@ abstract class ServiceObject {
         serviceObject = new Isolate._empty(owner.vm);
       break;
     }
-    if (serviceObject == null) {
-      // If we don't have a model object for this service object type, as a
-      // fallback return a ServiceMap object.
-      serviceObject = new ServiceMap._empty(owner);
-    }
+    // If we don't have a model object for this service object type, as a
+    // fallback return a ServiceMap object.
+    serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an emtpy service object, call update to
     // populate it.
     serviceObject.update(map);
@@ -509,6 +507,7 @@ class VM extends ServiceObjectOwner {
     _loaded = true;
 
     // TODO(johnmccutchan): Extract any properties we care about here.
+    _pid = map['pid'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -522,6 +521,11 @@ class VM extends ServiceObjectOwner {
 
   /// The set of live views.
   final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
+
+  /// The pid of the VM's process.
+  int _pid;
+
+  int get pid => _pid;
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -971,14 +975,14 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
-  Future<Null> flutterPlatformOverride([String platform]) async {
+  Future<String> flutterPlatformOverride([String platform]) async {
     final Map<String, String> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
       timeout: const Duration(seconds: 5),
       timeoutFatal: false,
     );
-    if (result != null && result.containsKey('value') && result['value'] is String)
+    if (result != null && result['value'] is String)
       return result['value'];
     return 'unknown';
   }

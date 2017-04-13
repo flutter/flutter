@@ -19,48 +19,48 @@ class StockSettings extends StatefulWidget {
 class StockSettingsState extends State<StockSettings> {
   void _handleOptimismChanged(bool value) {
     value ??= false;
-    sendUpdates(config.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
+    sendUpdates(widget.configuration.copyWith(stockMode: value ? StockMode.optimistic : StockMode.pessimistic));
   }
 
   void _handleBackupChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
+    sendUpdates(widget.configuration.copyWith(backupMode: value ? BackupMode.enabled : BackupMode.disabled));
   }
 
   void _handleShowGridChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowGrid: value));
+    sendUpdates(widget.configuration.copyWith(debugShowGrid: value));
   }
 
   void _handleShowSizesChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowSizes: value));
+    sendUpdates(widget.configuration.copyWith(debugShowSizes: value));
   }
 
   void _handleShowBaselinesChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowBaselines: value));
+    sendUpdates(widget.configuration.copyWith(debugShowBaselines: value));
   }
 
   void _handleShowLayersChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowLayers: value));
+    sendUpdates(widget.configuration.copyWith(debugShowLayers: value));
   }
 
   void _handleShowPointersChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowPointers: value));
+    sendUpdates(widget.configuration.copyWith(debugShowPointers: value));
   }
 
   void _handleShowRainbowChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(debugShowRainbow: value));
+    sendUpdates(widget.configuration.copyWith(debugShowRainbow: value));
   }
 
 
   void _handleShowPerformanceOverlayChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(showPerformanceOverlay: value));
+    sendUpdates(widget.configuration.copyWith(showPerformanceOverlay: value));
   }
 
   void _handleShowSemanticsDebuggerChanged(bool value) {
-    sendUpdates(config.configuration.copyWith(showSemanticsDebugger: value));
+    sendUpdates(widget.configuration.copyWith(showSemanticsDebugger: value));
   }
 
   void _confirmOptimismChange() {
-    switch (config.configuration.stockMode) {
+    switch (widget.configuration.stockMode) {
       case StockMode.optimistic:
         _handleOptimismChanged(false);
         break;
@@ -68,17 +68,17 @@ class StockSettingsState extends State<StockSettings> {
         showDialog<bool>(
           context: context,
           child: new AlertDialog(
-            title: new Text("Change mode?"),
-            content: new Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
+            title: const Text("Change mode?"),
+            content: const Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
             actions: <Widget>[
               new FlatButton(
-                child: new Text('NO THANKS'),
+                child: const Text('NO THANKS'),
                 onPressed: () {
                   Navigator.pop(context, false);
                 }
               ),
               new FlatButton(
-                child: new Text('AGREE'),
+                child: const Text('AGREE'),
                 onPressed: () {
                   Navigator.pop(context, true);
                 }
@@ -91,51 +91,51 @@ class StockSettingsState extends State<StockSettings> {
   }
 
   void sendUpdates(StockConfiguration value) {
-    if (config.updater != null)
-      config.updater(value);
+    if (widget.updater != null)
+      widget.updater(value);
   }
 
   Widget buildAppBar(BuildContext context) {
     return new AppBar(
-      title: new Text('Settings')
+      title: const Text('Settings')
     );
   }
 
   Widget buildSettingsPane(BuildContext context) {
     final List<Widget> rows = <Widget>[
       new ListTile(
-        leading: new Icon(Icons.thumb_up),
-        title: new Text('Everything is awesome'),
+        leading: const Icon(Icons.thumb_up),
+        title: const Text('Everything is awesome'),
         onTap: _confirmOptimismChange,
         trailing: new Checkbox(
-          value: config.configuration.stockMode == StockMode.optimistic,
+          value: widget.configuration.stockMode == StockMode.optimistic,
           onChanged: (bool value) => _confirmOptimismChange(),
         ),
       ),
       new ListTile(
-        leading: new Icon(Icons.backup),
-        title: new Text('Back up stock list to the cloud'),
-        onTap: () { _handleBackupChanged(!(config.configuration.backupMode == BackupMode.enabled)); },
+        leading: const Icon(Icons.backup),
+        title: const Text('Back up stock list to the cloud'),
+        onTap: () { _handleBackupChanged(!(widget.configuration.backupMode == BackupMode.enabled)); },
         trailing: new Switch(
-          value: config.configuration.backupMode == BackupMode.enabled,
+          value: widget.configuration.backupMode == BackupMode.enabled,
           onChanged: _handleBackupChanged,
         ),
       ),
       new ListTile(
-        leading: new Icon(Icons.picture_in_picture),
-        title: new Text('Show rendering performance overlay'),
-        onTap: () { _handleShowPerformanceOverlayChanged(!config.configuration.showPerformanceOverlay); },
+        leading: const Icon(Icons.picture_in_picture),
+        title: const Text('Show rendering performance overlay'),
+        onTap: () { _handleShowPerformanceOverlayChanged(!widget.configuration.showPerformanceOverlay); },
         trailing: new Switch(
-          value: config.configuration.showPerformanceOverlay,
+          value: widget.configuration.showPerformanceOverlay,
           onChanged: _handleShowPerformanceOverlayChanged,
         ),
       ),
       new ListTile(
-        leading: new Icon(Icons.accessibility),
-        title: new Text('Show semantics overlay'),
-        onTap: () { _handleShowSemanticsDebuggerChanged(!config.configuration.showSemanticsDebugger); },
+        leading: const Icon(Icons.accessibility),
+        title: const Text('Show semantics overlay'),
+        onTap: () { _handleShowSemanticsDebuggerChanged(!widget.configuration.showSemanticsDebugger); },
         trailing: new Switch(
-          value: config.configuration.showSemanticsDebugger,
+          value: widget.configuration.showSemanticsDebugger,
           onChanged: _handleShowSemanticsDebuggerChanged,
         ),
       ),
@@ -144,56 +144,56 @@ class StockSettingsState extends State<StockSettings> {
       // material grid and size construction lines are only available in checked mode
       rows.addAll(<Widget>[
         new ListTile(
-          leading: new Icon(Icons.border_clear),
-          title: new Text('Show material grid (for debugging)'),
-          onTap: () { _handleShowGridChanged(!config.configuration.debugShowGrid); },
+          leading: const Icon(Icons.border_clear),
+          title: const Text('Show material grid (for debugging)'),
+          onTap: () { _handleShowGridChanged(!widget.configuration.debugShowGrid); },
           trailing: new Switch(
-            value: config.configuration.debugShowGrid,
+            value: widget.configuration.debugShowGrid,
             onChanged: _handleShowGridChanged,
           ),
         ),
         new ListTile(
-          leading: new Icon(Icons.border_all),
-          title: new Text('Show construction lines (for debugging)'),
-          onTap: () { _handleShowSizesChanged(!config.configuration.debugShowSizes); },
+          leading: const Icon(Icons.border_all),
+          title: const Text('Show construction lines (for debugging)'),
+          onTap: () { _handleShowSizesChanged(!widget.configuration.debugShowSizes); },
           trailing: new Switch(
-            value: config.configuration.debugShowSizes,
+            value: widget.configuration.debugShowSizes,
             onChanged: _handleShowSizesChanged,
           ),
         ),
         new ListTile(
-          leading: new Icon(Icons.format_color_text),
-          title: new Text('Show baselines (for debugging)'),
-          onTap: () { _handleShowBaselinesChanged(!config.configuration.debugShowBaselines); },
+          leading: const Icon(Icons.format_color_text),
+          title: const Text('Show baselines (for debugging)'),
+          onTap: () { _handleShowBaselinesChanged(!widget.configuration.debugShowBaselines); },
           trailing: new Switch(
-            value: config.configuration.debugShowBaselines,
+            value: widget.configuration.debugShowBaselines,
             onChanged: _handleShowBaselinesChanged,
           ),
         ),
         new ListTile(
-          leading: new Icon(Icons.filter_none),
-          title: new Text('Show layer boundaries (for debugging)'),
-          onTap: () { _handleShowLayersChanged(!config.configuration.debugShowLayers); },
+          leading: const Icon(Icons.filter_none),
+          title: const Text('Show layer boundaries (for debugging)'),
+          onTap: () { _handleShowLayersChanged(!widget.configuration.debugShowLayers); },
           trailing: new Switch(
-            value: config.configuration.debugShowLayers,
+            value: widget.configuration.debugShowLayers,
             onChanged: _handleShowLayersChanged,
           ),
         ),
         new ListTile(
-          leading: new Icon(Icons.mouse),
-          title: new Text('Show pointer hit-testing (for debugging)'),
-          onTap: () { _handleShowPointersChanged(!config.configuration.debugShowPointers); },
+          leading: const Icon(Icons.mouse),
+          title: const Text('Show pointer hit-testing (for debugging)'),
+          onTap: () { _handleShowPointersChanged(!widget.configuration.debugShowPointers); },
           trailing: new Switch(
-            value: config.configuration.debugShowPointers,
+            value: widget.configuration.debugShowPointers,
             onChanged: _handleShowPointersChanged,
           ),
         ),
         new ListTile(
-          leading: new Icon(Icons.gradient),
-          title: new Text('Show repaint rainbow (for debugging)'),
-          onTap: () { _handleShowRainbowChanged(!config.configuration.debugShowRainbow); },
+          leading: const Icon(Icons.gradient),
+          title: const Text('Show repaint rainbow (for debugging)'),
+          onTap: () { _handleShowRainbowChanged(!widget.configuration.debugShowRainbow); },
           trailing: new Switch(
-            value: config.configuration.debugShowRainbow,
+            value: widget.configuration.debugShowRainbow,
             onChanged: _handleShowRainbowChanged,
           ),
         ),

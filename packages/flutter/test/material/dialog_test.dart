@@ -16,7 +16,7 @@ void main() {
             builder: (BuildContext context) {
               return new Center(
                 child: new RaisedButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
@@ -33,7 +33,7 @@ void main() {
                             onPressed: () {
                               didPressOk = true;
                             },
-                            child: new Text('OK')
+                            child: const Text('OK')
                           )
                         ]
                       )
@@ -66,13 +66,13 @@ void main() {
             builder: (BuildContext context) {
               return new Center(
                 child: new RaisedButton(
-                  child: new Text('X'),
+                  child: const Text('X'),
                   onPressed: () {
                     showDialog<Null>(
                       context: context,
                       child: new AlertDialog(
-                        title: new Text('Title'),
-                        content: new Text('Y'),
+                        title: const Text('Title'),
+                        content: const Text('Y'),
                         actions: <Widget>[ ],
                       ),
                     );
@@ -90,11 +90,11 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     final StatefulElement widget = tester.element(find.byType(Material).last);
-    final Material materialconfig = widget.state.config;
+    final Material materialWidget = widget.state.widget;
     //first and second expect check that the material is the dialog's one
-    expect(materialconfig.type, MaterialType.card);
-    expect(materialconfig.elevation, 24);
-    expect(materialconfig.color, Colors.grey[800]);
+    expect(materialWidget.type, MaterialType.card);
+    expect(materialWidget.elevation, 24);
+    expect(materialWidget.color, Colors.grey[800]);
   });
 
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
@@ -104,7 +104,7 @@ void main() {
           child: new Center(
             child: new RaisedButton(
               onPressed: null,
-              child: new Text('Go'),
+              child: const Text('Go'),
             ),
           ),
         ),
@@ -116,16 +116,16 @@ void main() {
     final Future<int> result = showDialog(
       context: context,
       child: new SimpleDialog(
-        title: new Text('Title'),
+        title: const Text('Title'),
         children: <Widget>[
           new SimpleDialogOption(
             onPressed: () {
               Navigator.pop(context, 42);
             },
-            child: new Text('First option'),
+            child: const Text('First option'),
           ),
           new SimpleDialogOption(
-            child: new Text('Second option'),
+            child: const Text('Second option'),
           ),
         ],
       ),
@@ -145,7 +145,7 @@ void main() {
           child: new Center(
             child: new RaisedButton(
               onPressed: null,
-              child: new Text('Go'),
+              child: const Text('Go'),
             ),
           ),
         ),
@@ -160,7 +160,7 @@ void main() {
         width: 100.0,
         height: 100.0,
         alignment: FractionalOffset.center,
-        child: new Text('Dialog1'),
+        child: const Text('Dialog1'),
       ),
     );
 
@@ -168,7 +168,7 @@ void main() {
     expect(find.text('Dialog1'), findsOneWidget);
 
     // Tap on the barrier.
-    await tester.tapAt(const Point(10.0, 10.0));
+    await tester.tapAt(const Offset(10.0, 10.0));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog1'), findsNothing);
@@ -180,7 +180,7 @@ void main() {
         width: 100.0,
         height: 100.0,
         alignment: FractionalOffset.center,
-        child: new Text('Dialog2'),
+        child: const Text('Dialog2'),
       ),
     );
 
@@ -188,7 +188,7 @@ void main() {
     expect(find.text('Dialog2'), findsOneWidget);
 
     // Tap on the barrier, which shouldn't do anything this time.
-    await tester.tapAt(const Point(10.0, 10.0));
+    await tester.tapAt(const Offset(10.0, 10.0));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.text('Dialog2'), findsOneWidget);

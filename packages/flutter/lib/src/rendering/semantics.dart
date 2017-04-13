@@ -716,7 +716,7 @@ class SemanticsOwner extends ChangeNotifier {
     handler?.performAction(action);
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Point position, SemanticsAction action) {
+  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
@@ -750,7 +750,7 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
-  void performActionAt(Point position, SemanticsAction action) {
+  void performActionAt(Offset position, SemanticsAction action) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)

@@ -243,8 +243,8 @@ class _ImageState extends State<Image> {
   }
 
   @override
-  void didUpdateConfig(Image oldConfig) {
-    if (config.image != oldConfig.image)
+  void didUpdateWidget(Image oldWidget) {
+    if (widget.image != oldWidget.image)
       _resolveImage();
   }
 
@@ -256,14 +256,14 @@ class _ImageState extends State<Image> {
 
   void _resolveImage() {
     final ImageStream oldImageStream = _imageStream;
-    _imageStream = config.image.resolve(createLocalImageConfiguration(
+    _imageStream = widget.image.resolve(createLocalImageConfiguration(
       context,
-      size: config.width != null && config.height != null ? new Size(config.width, config.height) : null
+      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
     ));
     assert(_imageStream != null);
     if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_handleImageChanged);
-      if (!config.gaplessPlayback)
+      if (!widget.gaplessPlayback)
         setState(() { _imageInfo = null; });
       _imageStream.addListener(_handleImageChanged);
     }
@@ -286,14 +286,14 @@ class _ImageState extends State<Image> {
   Widget build(BuildContext context) {
     return new RawImage(
       image: _imageInfo?.image,
-      width: config.width,
-      height: config.height,
+      width: widget.width,
+      height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,
-      color: config.color,
-      fit: config.fit,
-      alignment: config.alignment,
-      repeat: config.repeat,
-      centerSlice: config.centerSlice
+      color: widget.color,
+      fit: widget.fit,
+      alignment: widget.alignment,
+      repeat: widget.repeat,
+      centerSlice: widget.centerSlice
     );
   }
 

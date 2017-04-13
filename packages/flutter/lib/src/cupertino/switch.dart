@@ -79,9 +79,9 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSwitchRenderObjectWidget(
-      value: config.value,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged,
+      value: widget.value,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }
@@ -321,7 +321,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {

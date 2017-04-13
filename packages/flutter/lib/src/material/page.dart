@@ -3,43 +3,44 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';  
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Fractional offset from 1/4 screen below the top to fully on screen. 
+final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+  begin: const FractionalOffset(0.0, 0.25),
+  end: FractionalOffset.topLeft
+);
+
 // Used for Android and Fuchsia.
-class _MountainViewPageTransition extends AnimatedWidget {
+class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
     Key key,
-    this.routeAnimation,
-    this.child,
-  }) : super(
-    key: key,
-    listenable: _kTween.animate(new CurvedAnimation(
-      parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
-      curve: Curves.fastOutSlowIn
-    )
-  ));
+    @required Animation<double> routeAnimation,
+    @required this.child,
+  }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
+         parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
+         curve: Curves.fastOutSlowIn,
+       )),
+       _opacityAnimation = new CurvedAnimation(
+         parent: routeAnimation,
+         curve: Curves.easeIn, // Eyeballed from other Material apps.
+       ),
+       super(key: key);
 
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: const FractionalOffset(0.0, 0.25),
-    end: FractionalOffset.topLeft
-  );
-
+  final Animation<FractionalOffset> _positionAnimation;
+  final Animation<double> _opacityAnimation;
   final Widget child;
-  final Animation<double> routeAnimation;
 
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
-      position: listenable,
+      position: _positionAnimation,
       child: new FadeTransition(
-        opacity: new CurvedAnimation(
-          parent: routeAnimation,
-          curve: Curves.easeIn, // Eyeballed from other Material apps.
-        ),
+        opacity: _opacityAnimation,
         child: child,
       ),
     );

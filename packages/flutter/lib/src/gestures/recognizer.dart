@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' show Point, Offset;
+import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 
@@ -232,7 +232,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   int primaryPointer;
 
   /// The global location at which the primary pointer contacted the screen.
-  Point initialPosition;
+  Offset initialPosition;
 
   Timer _timer;
 

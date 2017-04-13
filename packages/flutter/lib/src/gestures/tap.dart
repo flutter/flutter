@@ -12,12 +12,12 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition: Point.origin }) {
+  TapDownDetails({ this.globalPosition: Offset.zero }) {
     assert(globalPosition != null);
   }
 
   /// The global position at which the pointer contacted the screen.
-  final Point globalPosition;
+  final Offset globalPosition;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -32,12 +32,12 @@ class TapUpDetails {
   /// Creates details for a [GestureTapUpCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapUpDetails({ this.globalPosition: Point.origin }) {
+  TapUpDetails({ this.globalPosition: Offset.zero }) {
     assert(globalPosition != null);
   }
 
   /// The global position at which the pointer contacted the screen.
-  final Point globalPosition;
+  final Offset globalPosition;
 }
 
 /// Signature for when a pointer that will trigger a tap has stopped contacting
@@ -85,7 +85,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   bool _sentTapDown = false;
   bool _wonArenaForPrimaryPointer = false;
-  Point _finalPosition;
+  Offset _finalPosition;
 
   @override
   void handlePrimaryPointer(PointerEvent event) {

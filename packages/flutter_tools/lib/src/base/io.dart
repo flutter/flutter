@@ -138,7 +138,7 @@ class _PosixProcessSignal extends ProcessSignal {
   @override
   Stream<ProcessSignal> watch() {
     if (platform.isWindows)
-      return new Stream<ProcessSignal>.empty();
+      return const Stream<ProcessSignal>.empty();
     return super.watch();
   }
 }

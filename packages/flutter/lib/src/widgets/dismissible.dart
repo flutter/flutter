@@ -193,9 +193,9 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   bool get _directionIsXAxis {
-    return config.direction == DismissDirection.horizontal
-        || config.direction == DismissDirection.endToStart
-        || config.direction == DismissDirection.startToEnd;
+    return widget.direction == DismissDirection.horizontal
+        || widget.direction == DismissDirection.endToStart
+        || widget.direction == DismissDirection.startToEnd;
   }
 
   DismissDirection get _dismissDirection {
@@ -205,7 +205,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   double get _dismissThreshold {
-    return config.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
+    return widget.dismissThresholds[_dismissDirection] ?? _kDismissThreshold;
   }
 
   bool get _isActive {
@@ -237,7 +237,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     final double delta = details.primaryDelta;
     final double oldDragExtent = _dragExtent;
-    switch (config.direction) {
+    switch (widget.direction) {
       case DismissDirection.horizontal:
       case DismissDirection.vertical:
         _dragExtent += delta;
@@ -283,7 +283,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (_directionIsXAxis) {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(config.direction) {
+      switch(widget.direction) {
         case DismissDirection.horizontal:
           return vx.abs() > _kMinFlingVelocity;
         case DismissDirection.endToStart:
@@ -294,7 +294,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     } else {
       if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(config.direction) {
+      switch(widget.direction) {
         case DismissDirection.vertical:
           return vy.abs() > _kMinFlingVelocity;
         case DismissDirection.up:
@@ -332,11 +332,11 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     assert(_moveController.isCompleted);
     assert(_resizeController == null);
     assert(_sizePriorToCollapse == null);
-    if (config.resizeDuration == null) {
-      if (config.onDismissed != null)
-        config.onDismissed(_dismissDirection);
+    if (widget.resizeDuration == null) {
+      if (widget.onDismissed != null)
+        widget.onDismissed(_dismissDirection);
     } else {
-      _resizeController = new AnimationController(duration: config.resizeDuration, vsync: this)
+      _resizeController = new AnimationController(duration: widget.resizeDuration, vsync: this)
         ..addListener(_handleResizeProgressChanged);
       _resizeController.forward();
       setState(() {
@@ -354,21 +354,21 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
   void _handleResizeProgressChanged() {
     if (_resizeController.isCompleted) {
-      if (config.onDismissed != null)
-        config.onDismissed(_dismissDirection);
+      if (widget.onDismissed != null)
+        widget.onDismissed(_dismissDirection);
     } else {
-      if (config.onResize != null)
-        config.onResize();
+      if (widget.onResize != null)
+        widget.onResize();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget background = config.background;
-    if (config.secondaryBackground != null) {
+    Widget background = widget.background;
+    if (widget.secondaryBackground != null) {
       final DismissDirection direction = _dismissDirection;
       if (direction == DismissDirection.endToStart || direction == DismissDirection.up)
-        background = config.secondaryBackground;
+        background = widget.secondaryBackground;
     }
 
     if (_resizeAnimation != null) {
@@ -398,7 +398,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
 
     Widget content = new SlideTransition(
       position: _moveAnimation,
-      child: config.child
+      child: widget.child
     );
 
     if (background != null) {
@@ -420,7 +420,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
       content = new Stack(children: children);
     }
 
-    // We are not resizing but we may be being dragging in config.direction.
+    // We are not resizing but we may be being dragging in widget.direction.
     return new GestureDetector(
       onHorizontalDragStart: _directionIsXAxis ? _handleDragStart : null,
       onHorizontalDragUpdate: _directionIsXAxis ? _handleDragUpdate : null,

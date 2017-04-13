@@ -34,8 +34,7 @@ Future<Null> pubGet({
   bool offline: false,
   bool checkLastModified: true
 }) async {
-  if (directory == null)
-    directory = fs.currentDirectory.path;
+  directory ??= fs.currentDirectory.path;
 
   final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));

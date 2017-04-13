@@ -43,14 +43,14 @@ class _CupertinoActivityIndicatorState extends State<CupertinoActivityIndicator>
       vsync: this,
     );
 
-    if (config.animating)
+    if (widget.animating)
       _controller.repeat();
   }
 
   @override
-  void didUpdateConfig(CupertinoActivityIndicator oldConfig) {
-    if (config.animating != oldConfig.animating) {
-      if (config.animating)
+  void didUpdateWidget(CupertinoActivityIndicator oldWidget) {
+    if (widget.animating != oldWidget.animating) {
+      if (widget.animating)
         _controller.repeat();
       else
         _controller.stop();

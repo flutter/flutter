@@ -108,12 +108,12 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final ThemeData themeData = Theme.of(context);
     final bool isDark = themeData.brightness == Brightness.dark;
 
-    final Color activeThumbColor = config.activeColor ?? themeData.accentColor;
+    final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
     final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
-    if (config.onChanged != null) {
+    if (widget.onChanged != null) {
       inactiveThumbColor = isDark ? Colors.grey.shade400 : Colors.grey.shade50;
       inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
     } else {
@@ -122,15 +122,15 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     }
 
     return new _SwitchRenderObjectWidget(
-      value: config.value,
+      value: widget.value,
       activeColor: activeThumbColor,
       inactiveColor: inactiveThumbColor,
-      activeThumbImage: config.activeThumbImage,
-      inactiveThumbImage: config.inactiveThumbImage,
+      activeThumbImage: widget.activeThumbImage,
+      inactiveThumbImage: widget.inactiveThumbImage,
       activeTrackColor: activeTrackColor,
       inactiveTrackColor: inactiveTrackColor,
       configuration: createLocalImageConfiguration(context),
-      onChanged: config.onChanged,
+      onChanged: widget.onChanged,
       vsync: this,
     );
   }
@@ -365,7 +365,7 @@ class _RenderSwitch extends RenderToggleable {
     final RRect trackRRect = new RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
     canvas.drawRRect(trackRRect, paint);
 
-    final Point thumbPosition = new Point(
+    final Offset thumbPosition = new Offset(
       kRadialReactionRadius + currentPosition * _trackInnerLength,
       size.height / 2.0
     );
@@ -389,7 +389,7 @@ class _RenderSwitch extends RenderToggleable {
       final double radius = _kThumbRadius - inset;
       thumbPainter.paint(
         canvas,
-        thumbPosition.toOffset() + offset - new Offset(radius, radius),
+        thumbPosition + offset - new Offset(radius, radius),
         configuration.copyWith(size: new Size.fromRadius(radius))
       );
     } finally {

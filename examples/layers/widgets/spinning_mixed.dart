@@ -52,7 +52,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     child: new Row(
                       children: <Widget>[
                         new Image.network('https://flutter.io/images/favicon.png'),
-                        new Text('PRESS ME'),
+                        const Text('PRESS ME'),
                       ]
                     ),
                     onPressed: () {
@@ -78,8 +78,7 @@ Duration timeBase;
 RenderTransform transformBox;
 
 void rotate(Duration timeStamp) {
-  if (timeBase == null)
-    timeBase = timeStamp;
+  timeBase ??= timeStamp;
   final double delta = (timeStamp - timeBase).inMicroseconds.toDouble() / Duration.MICROSECONDS_PER_SECOND; // radians
 
   transformBox.setIdentity();

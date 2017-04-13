@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('Empty GridView', (WidgetTester tester) async {
     final List<Widget> children = <Widget>[
-      new DecoratedBox(decoration: const BoxDecoration()),
-      new DecoratedBox(decoration: const BoxDecoration()),
-      new DecoratedBox(decoration: const BoxDecoration()),
-      new DecoratedBox(decoration: const BoxDecoration())
+      const DecoratedBox(decoration: const BoxDecoration()),
+      const DecoratedBox(decoration: const BoxDecoration()),
+      const DecoratedBox(decoration: const BoxDecoration()),
+      const DecoratedBox(decoration: const BoxDecoration()),
     ];
 
     await tester.pumpWidget(new Center(
@@ -25,11 +25,12 @@ void main() {
       ),
     ));
 
-    children.forEach((Widget child) {
-      final RenderBox box = tester.renderObject(find.byConfig(child));
+    expect(tester.renderObjectList<RenderBox>(find.byType(DecoratedBox)), hasLength(4));
+
+    for (RenderBox box in tester.renderObjectList<RenderBox>(find.byType(DecoratedBox))) {
       expect(box.size.width, equals(100.0), reason: "child width");
       expect(box.size.height, equals(100.0), reason: "child height");
-    });
+    }
 
     final RenderBox grid = tester.renderObject(find.byType(GridView));
     expect(grid.size.width, equals(200.0), reason: "grid width");
@@ -48,11 +49,10 @@ void main() {
       ),
     ));
 
-    children.forEach((Widget child) {
-      final RenderBox box = tester.renderObject(find.byConfig(child));
+    for (RenderBox box in tester.renderObjectList<RenderBox>(find.byType(DecoratedBox))) {
       expect(box.size.width, equals(50.0), reason: "child width");
       expect(box.size.height, equals(50.0), reason: "child height");
-    });
+    }
 
     expect(grid.size.width, equals(200.0), reason: "grid width");
     expect(grid.size.height, equals(50.0), reason: "grid height");

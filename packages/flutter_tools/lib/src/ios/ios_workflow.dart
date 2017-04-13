@@ -136,9 +136,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         messages.add(new ValidationMessage.error(
           'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
           'To install, run:\n'
-          'brew update\n'
-          'brew install --HEAD libimobiledevice\n'
-          'brew install ideviceinstaller'
+          '  brew update\n'
+          '  brew install --HEAD libimobiledevice\n'
+          '  brew install ideviceinstaller'
         ));
       }
 
@@ -151,14 +151,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         if (hasIosDeploy) {
           messages.add(new ValidationMessage.error(
             'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
-            'brew update\n'
-            'brew upgrade ios-deploy'
+            '  brew update\n'
+            '  brew upgrade ios-deploy'
           ));
         } else {
           messages.add(new ValidationMessage.error(
             'ios-deploy not installed. To install:\n'
-            'brew update\n'
-            'brew install ios-deploy'
+            '  brew update\n'
+            '  brew install ios-deploy'
           ));
         }
       } else {
@@ -169,9 +169,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-            'brew update\n'
-            'brew uninstall --ignore-dependencies libimobiledevice\n'
-            'brew install --HEAD libimobiledevice'
+            '  brew update\n'
+            '  brew uninstall --ignore-dependencies libimobiledevice\n'
+            '  brew install --HEAD libimobiledevice'
           ));
         }
       }
@@ -182,16 +182,16 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         if (!hasCocoaPods) {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed. To install:\n'
-            'brew update\n'
-            'brew install cocoapods\n'
-            'pod setup'
+            '  brew update\n'
+            '  brew install cocoapods\n'
+            '  pod setup'
           ));
         } else {
           messages.add(new ValidationMessage.error(
             'CocoaPods out of date ($cocoaPodsMinimumVersion is required). To upgrade:\n'
-            'brew update\n'
-            'brew upgrade cocoapods\n'
-            'pod setup'
+            '  brew update\n'
+            '  brew upgrade cocoapods\n'
+            '  pod setup'
           ));
         }
       }

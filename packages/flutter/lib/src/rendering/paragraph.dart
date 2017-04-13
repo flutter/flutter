@@ -172,7 +172,7 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  bool hitTestSelf(Point position) => true;
+  bool hitTestSelf(Offset position) => true;
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
@@ -180,7 +180,7 @@ class RenderParagraph extends RenderBox {
     if (event is! PointerDownEvent)
       return;
     _layoutTextWithConstraints(constraints);
-    final Offset offset = entry.localPosition.toOffset();
+    final Offset offset = entry.localPosition;
     final TextPosition position = _textPainter.getPositionForOffset(offset);
     final TextSpan span = _textPainter.text.getSpanForPosition(position);
     span?.recognizer?.addPointer(event);
@@ -222,15 +222,17 @@ class RenderParagraph extends RenderBox {
             final double fadeStart = fadeEnd - fadeSizePainter.width;
             // TODO(abarth): This shader has an LTR bias.
             _overflowShader = new ui.Gradient.linear(
-              <Point>[new Point(fadeStart, 0.0), new Point(fadeEnd, 0.0)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(fadeStart, 0.0),
+              new Offset(fadeEnd, 0.0),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           } else {
             final double fadeEnd = size.height;
             final double fadeStart = fadeEnd - fadeSizePainter.height / 2.0;
             _overflowShader = new ui.Gradient.linear(
-              <Point>[new Point(0.0, fadeStart), new Point(0.0, fadeEnd)],
-              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)]
+              new Offset(0.0, fadeStart),
+              new Offset(0.0, fadeEnd),
+              <Color>[const Color(0xFFFFFFFF), const Color(0x00FFFFFF)],
             );
           }
           break;
@@ -279,7 +281,7 @@ class RenderParagraph extends RenderBox {
         final Paint paint = new Paint()
           ..blendMode = BlendMode.modulate
           ..shader = _overflowShader;
-        canvas.drawRect(Point.origin & size, paint);
+        canvas.drawRect(Offset.zero & size, paint);
       }
       canvas.restore();
     }

@@ -16,7 +16,7 @@ void beginFrame(Duration timeStamp) {
   final ui.Paragraph paragraph = paragraphBuilder.build()
     ..layout(new ui.ParagraphConstraints(width: logicalSize.width));
 
-  final ui.Rect physicalBounds = ui.Point.origin & (logicalSize * devicePixelRatio);
+  final ui.Rect physicalBounds = ui.Offset.zero & (logicalSize * devicePixelRatio);
   final ui.PictureRecorder recorder = new ui.PictureRecorder();
   final ui.Canvas canvas = new ui.Canvas(recorder, physicalBounds);
   canvas.scale(devicePixelRatio, devicePixelRatio);

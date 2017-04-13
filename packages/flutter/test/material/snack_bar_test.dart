@@ -266,7 +266,7 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('I am a snack bar.'),
+                  content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
@@ -276,7 +276,7 @@ void main() {
                   )
                 ));
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           }
         )
@@ -304,12 +304,12 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('I am a snack bar.'),
+                  content: const Text('I am a snack bar.'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(label: 'ACTION', onPressed: () {})
                 ));
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           }
         )
@@ -323,16 +323,16 @@ void main() {
     final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
     final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
 
-    final Point textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Point.origin));
-    final Point textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Point.origin));
-    final Point actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Point.origin));
-    final Point actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Point.origin));
-    final Point snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Point.origin));
-    final Point snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Point.origin));
+    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
+    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
+    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
+    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
+    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
+    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
 
-    expect(textBottomLeft.x - snackBarBottomLeft.x, 24.0);
-    expect(actionTextBottomLeft.x - textBottomRight.x, 24.0);
-    expect(snackBarBottomRight.x - actionTextBottomRight.x, 24.0);
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0);
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0);
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
@@ -348,7 +348,7 @@ void main() {
             return new GestureDetector(
               onTap: () {
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text('snack'),
+                  content: const Text('snack'),
                   duration: const Duration(seconds: 2),
                   action: new SnackBarAction(
                     label: 'ACTION',
@@ -360,7 +360,7 @@ void main() {
                   closedReason = reason;
                 });
               },
-              child: new Text('X')
+              child: const Text('X')
             );
           },
         )

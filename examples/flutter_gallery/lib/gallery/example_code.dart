@@ -16,7 +16,7 @@ class ButtonsDemo {
 // START buttons_raised
 // Create a raised button.
 new RaisedButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
   }
@@ -26,7 +26,7 @@ new RaisedButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 new RaisedButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: null
 );
 // END
@@ -35,7 +35,7 @@ new RaisedButton(
 // START buttons_flat
 // Create a flat button.
 new FlatButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: () {
     // Perform some action
   }
@@ -45,7 +45,7 @@ new FlatButton(
 // Buttons are disabled when onPressed isn't
 // specified or is null.
 new FlatButton(
-  child: new Text('BUTTON TITLE'),
+  child: const Text('BUTTON TITLE'),
   onPressed: null
 );
 // END
@@ -83,7 +83,7 @@ bool value;
 
 // Toggleable icon button.
 new IconButton(
-  icon: new Icon(Icons.thumb_up),
+  icon: const Icon(Icons.thumb_up),
   onPressed: () {
     setState(() => value = !value);
   },
@@ -96,10 +96,10 @@ new IconButton(
 // Floating action button in Scaffold.
 new Scaffold(
   appBar: new AppBar(
-    title: new Text('Demo')
+    title: const Text('Demo')
   ),
-  floatingActionButton: new FloatingActionButton(
-    child: new Icon(Icons.add),
+  floatingActionButton: const FloatingActionButton(
+    child: const Icon(Icons.add),
     onPressed: null
   )
 );

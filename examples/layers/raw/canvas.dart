@@ -26,24 +26,24 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.drawPaint(new ui.Paint()..color = const ui.Color(0xFFFFFFFF));
 
   final ui.Size size = paintBounds.size;
-  final ui.Point mid = size.center(ui.Point.origin);
+  final ui.Offset mid = size.center(ui.Offset.zero);
   final double radius = size.shortestSide / 2.0;
 
   final double devicePixelRatio = ui.window.devicePixelRatio;
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
   canvas.save();
-  canvas.translate(-mid.x/2.0, logicalSize.height*2.0);
-  canvas.clipRect(
-      new ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
+  canvas.translate(-mid.dx / 2.0, logicalSize.height * 2.0);
+  canvas.clipRect(new ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
 
-  canvas.translate(mid.x, mid.y);
+  canvas.translate(mid.dx, mid.dy);
   paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
   canvas.rotate(math.PI/4.0);
 
   final ui.Gradient yellowBlue = new ui.Gradient.linear(
-    <ui.Point>[new ui.Point(-radius, -radius), const ui.Point(0.0, 0.0)],
-    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)]
+    new ui.Offset(-radius, -radius),
+    const ui.Offset(0.0, 0.0),
+    <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
   );
   canvas.drawRect(new ui.Rect.fromLTRB(-radius, -radius, radius, radius),
                   new ui.Paint()..shader = yellowBlue);
@@ -57,11 +57,11 @@ ui.Picture paint(ui.Rect paintBounds) {
   ]);
   canvas.transform(scaleMatrix);
   paint.color = const ui.Color.fromARGB(128, 0, 255, 0);
-  canvas.drawCircle(ui.Point.origin, radius, paint);
+  canvas.drawCircle(ui.Offset.zero, radius, paint);
   canvas.restore();
 
   paint.color = const ui.Color.fromARGB(128, 255, 0, 0);
-  canvas.drawCircle(const ui.Point(150.0, 300.0), radius, paint);
+  canvas.drawCircle(const ui.Offset(150.0, 300.0), radius, paint);
 
   // When we're done issuing painting commands, we end the recording an receive
   // a Picture, which is an immutable record of the commands we've issued. You
@@ -85,7 +85,7 @@ ui.Scene composite(ui.Picture picture, ui.Rect paintBounds) {
 }
 
 void beginFrame(Duration timeStamp) {
-  final ui.Rect paintBounds = ui.Point.origin & (ui.window.physicalSize / ui.window.devicePixelRatio);
+  final ui.Rect paintBounds = ui.Offset.zero & (ui.window.physicalSize / ui.window.devicePixelRatio);
   final ui.Picture picture = paint(paintBounds);
   final ui.Scene scene = composite(picture, paintBounds);
   ui.window.render(scene);

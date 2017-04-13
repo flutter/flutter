@@ -266,7 +266,7 @@ class AboutDialog extends StatelessWidget {
     body.add(new Expanded(
       child: new Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0),
-        child: new BlockBody(
+        child: new ListBody(
           children: <Widget>[
             new Text(name, style: Theme.of(context).textTheme.headline),
             new Text(version, style: Theme.of(context).textTheme.body1),
@@ -286,11 +286,11 @@ class AboutDialog extends StatelessWidget {
       body.addAll(children);
     return new AlertDialog(
       content: new SingleChildScrollView(
-        child: new BlockBody(children: body),
+        child: new ListBody(children: body),
       ),
       actions: <Widget>[
         new FlatButton(
-          child: new Text('VIEW LICENSES'),
+          child: const Text('VIEW LICENSES'),
           onPressed: () {
             showLicensePage(
               context: context,
@@ -302,7 +302,7 @@ class AboutDialog extends StatelessWidget {
           }
         ),
         new FlatButton(
-          child: new Text('CLOSE'),
+          child: const Text('CLOSE'),
           onPressed: () {
             Navigator.pop(context);
           }
@@ -377,9 +377,9 @@ class _LicensePageState extends State<LicensePage> {
       if (!mounted)
         return;
       setState(() {
-        _licenses.add(new Padding(
+        _licenses.add(const Padding(
           padding: const EdgeInsets.symmetric(vertical: 18.0),
-          child: new Text(
+          child: const Text(
             '🍀‬', // That's U+1F340. Could also use U+2766 (❦) if U+1F340 doesn't work everywhere.
             textAlign: TextAlign.center
           )
@@ -421,13 +421,13 @@ class _LicensePageState extends State<LicensePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String name = config.applicationName ?? _defaultApplicationName(context);
-    final String version = config.applicationVersion ?? _defaultApplicationVersion(context);
+    final String name = widget.applicationName ?? _defaultApplicationName(context);
+    final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
     final List<Widget> contents = <Widget>[
       new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
       new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 18.0),
-      new Text(config.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
+      new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
       new Container(height: 18.0),
       new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 24.0),
@@ -443,7 +443,7 @@ class _LicensePageState extends State<LicensePage> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Licenses')
+        title: const Text('Licenses')
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,

@@ -116,7 +116,7 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
   @override
   Widget build(BuildContext context) {
     Color iconColor = Colors.white;
-    Color materialColor = config.backgroundColor;
+    Color materialColor = widget.backgroundColor;
     if (materialColor == null) {
       final ThemeData themeData = Theme.of(context);
       materialColor = themeData.accentColor;
@@ -127,28 +127,28 @@ class _FloatingActionButtonState extends State<FloatingActionButton> {
       child: new IconTheme.merge(
         context: context,
         data: new IconThemeData(color: iconColor),
-        child: config.child
+        child: widget.child
       )
     );
 
-    if (config.tooltip != null) {
+    if (widget.tooltip != null) {
       result = new Tooltip(
-        message: config.tooltip,
+        message: widget.tooltip,
         child: result
       );
     }
 
     return new Hero(
-      tag: config.heroTag ?? _kDefaultHeroTag,
+      tag: widget.heroTag ?? _kDefaultHeroTag,
       child: new Material(
         color: materialColor,
         type: MaterialType.circle,
-        elevation: _highlight ? config.highlightElevation : config.elevation,
+        elevation: _highlight ? widget.highlightElevation : widget.elevation,
         child: new Container(
-          width: config.mini ? _kSizeMini : _kSize,
-          height: config.mini ? _kSizeMini : _kSize,
+          width: widget.mini ? _kSizeMini : _kSize,
+          height: widget.mini ? _kSizeMini : _kSize,
           child: new InkWell(
-            onTap: config.onPressed,
+            onTap: widget.onPressed,
             onHighlightChanged: _handleHighlightChanged,
             child: result
           )

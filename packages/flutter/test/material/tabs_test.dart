@@ -22,8 +22,8 @@ class StateMarkerState extends State<StateMarker> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.child != null)
-      return config.child;
+    if (widget.child != null)
+      return widget.child;
     return new Container();
   }
 }
@@ -70,8 +70,8 @@ class TabControllerFrameState extends State<TabControllerFrame> with SingleTicke
     super.initState();
     _controller = new TabController(
       vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
     );
   }
 
@@ -83,7 +83,7 @@ class TabControllerFrameState extends State<TabControllerFrame> with SingleTicke
 
   @override
   Widget build(BuildContext context) {
-    return config.builder(context, _controller);
+    return widget.builder(context, _controller);
   }
 }
 
@@ -95,15 +95,15 @@ Widget buildLeftRightApp({ List<String> tabs, String value }) {
       length: tabs.length,
       child: new Scaffold(
         appBar: new AppBar(
-          title: new Text('tabs'),
+          title: const Text('tabs'),
           bottom: new TabBar(
             tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
           ),
         ),
         body: new TabBarView(
           children: <Widget>[
-            new Center(child: new Text('LEFT CHILD')),
-            new Center(child: new Text('RIGHT CHILD'))
+            const Center(child: const Text('LEFT CHILD')),
+            const Center(child: const Text('RIGHT CHILD'))
           ]
         )
       )
@@ -195,13 +195,13 @@ void main() {
 
     expect(tester.getSize(find.byKey(tabBarKey)).width, equals(800.0));
     // The center of the FFFFFF item is to the right of the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).x, greaterThan(401.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, greaterThan(401.0));
 
     await tester.tap(find.text('FFFFFF'));
     await tester.pumpAndSettle();
     expect(controller.index, 5);
     // The center of the FFFFFF item is now at the TabBar's center
-    expect(tester.getCenter(find.text('FFFFFF')).x, closeTo(400.0, 1.0));
+    expect(tester.getCenter(find.text('FFFFFF')).dx, closeTo(400.0, 1.0));
   });
 
 
@@ -214,11 +214,11 @@ void main() {
     expect(controller.index, 0);
 
     // Fling-scroll the TabBar to the left
-    expect(tester.getCenter(find.text('HHHH')).x, lessThan(700.0));
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(700.0));
     await tester.fling(find.byKey(tabBarKey), const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
-    expect(tester.getCenter(find.text('HHHH')).x, lessThan(500.0));
+    expect(tester.getCenter(find.text('HHHH')).dx, lessThan(500.0));
 
     // Scrolling the TabBar doesn't change the selection
     expect(controller.index, 0);
@@ -310,7 +310,7 @@ void main() {
     expect(controller.index, 0);
 
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
-    Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pumpAndSettle();
     expect(controller.index, 1);
@@ -338,7 +338,7 @@ void main() {
     final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
-    final Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
@@ -359,7 +359,7 @@ void main() {
     final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
-    final Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     // this is similar to a test above, but that one does many more pumps
@@ -382,7 +382,7 @@ void main() {
     final TabController controller = DefaultTabController.of(tester.element(find.text('LEFT')));
     expect(controller.index, 0);
 
-    final Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
     final TestGesture gesture = await tester.startGesture(flingStart);
     for (int index = 0; index > 50; index += 1) {
       await gesture.moveBy(const Offset(-10.0, 0.0));
@@ -419,7 +419,7 @@ void main() {
               length: tabs.length,
               child: new Scaffold(
                 appBar: new AppBar(
-                  title: new Text('tabs'),
+                  title: const Text('tabs'),
                   bottom: new TabBar(
                     isScrollable: true,
                     tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -440,7 +440,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
     final RenderBox box = tester.renderObject(find.text('BBBBBB'));
-    expect(box.localToGlobal(Point.origin).x, greaterThan(0.0));
+    expect(box.localToGlobal(Offset.zero).dx, greaterThan(0.0));
   });
 
   testWidgets('TabController change notification', (WidgetTester tester) async {
@@ -465,12 +465,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, 'LEFT');
 
-    final Point leftFlingStart = tester.getCenter(find.text('LEFT CHILD'));
+    final Offset leftFlingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(leftFlingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pumpAndSettle();
     expect(value, 'RIGHT');
 
-    final Point rightFlingStart = tester.getCenter(find.text('RIGHT CHILD'));
+    final Offset rightFlingStart = tester.getCenter(find.text('RIGHT CHILD'));
     await tester.flingFrom(rightFlingStart, const Offset(200.0, 0.0), 10000.0);
     await tester.pumpAndSettle();
     expect(value, 'LEFT');
@@ -486,7 +486,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('tabs'),
+            title: const Text('tabs'),
             bottom: new TabBar(
               controller: controller,
               tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -495,8 +495,8 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: <Widget>[
-              new Center(child: new Text('LEFT CHILD')),
-              new Center(child: new Text('RIGHT CHILD'))
+              const Center(child: const Text('LEFT CHILD')),
+              const Center(child: const Text('RIGHT CHILD'))
             ]
           ),
         ),
@@ -545,7 +545,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('tabs'),
+            title: const Text('tabs'),
             bottom: new TabBar(
               controller: controller,
               tabs: tabs.map((String tab) => new Tab(text: tab)).toList(),
@@ -554,9 +554,9 @@ void main() {
           body: new TabBarView(
             controller: controller,
             children: <Widget>[
-              new Center(child: new Text('CHILD A')),
-              new Center(child: new Text('CHILD B')),
-              new Center(child: new Text('CHILD C')),
+              const Center(child: const Text('CHILD A')),
+              const Center(child: const Text('CHILD B')),
+              const Center(child: const Text('CHILD C')),
             ]
           ),
         ),
@@ -593,7 +593,7 @@ void main() {
     await tester.pumpWidget(buildLeftRightApp(tabs: tabs, value: 'LEFT'));
 
     // Fling to the left, switch from the 'LEFT' tab to the 'RIGHT'
-    final Point flingStart = tester.getCenter(find.text('LEFT CHILD'));
+    final Offset flingStart = tester.getCenter(find.text('LEFT CHILD'));
     await tester.flingFrom(flingStart, const Offset(-200.0, 0.0), 10000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
@@ -618,13 +618,13 @@ void main() {
             new Builder(
               builder: (BuildContext context) {
                 firstColor = IconTheme.of(context).color;
-                return new Text('First');
+                return const Text('First');
               }
             ),
             new Builder(
               builder: (BuildContext context) {
                 secondColor = IconTheme.of(context).color;
-                return new Text('Second');
+                return const Text('Second');
               }
             ),
           ],
@@ -646,14 +646,14 @@ void main() {
       new Material(
         child: new TabBarView(
           controller: controller,
-          children: <Widget>[ new Text('First'), new Text('Second') ],
+          children: <Widget>[ const Text('First'), const Text('Second') ],
         ),
       ),
     );
 
     expect(controller.index, equals(0));
 
-    TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     expect(controller.index, equals(0));
 
     // Drag to the left and right, by less than the TabBarView's width.
@@ -674,7 +674,7 @@ void main() {
     expect(find.text('First'), findsNothing);
     expect(find.text('Second'), findsOneWidget);
 
-    gesture = await tester.startGesture(const Point(100.0, 100.0));
+    gesture = await tester.startGesture(const Offset(100.0, 100.0));
     expect(controller.index, equals(1));
 
     // Drag to the left and right, by less than the TabBarView's width.
@@ -745,7 +745,7 @@ void main() {
         child: new TabBar(
           key: new UniqueKey(),
           controller: controller,
-          tabs: <Widget>[ new Text('A'), new Text('B') ],
+          tabs: <Widget>[ const Text('A'), const Text('B') ],
         ),
       );
     }

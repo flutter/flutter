@@ -100,9 +100,8 @@ class ColdRunner extends ResidentRunner {
     startTime.stop();
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
+    if (debuggingOptions.debuggingEnabled)
       await connectToServiceProtocol(_result.observatoryUri);
-    }
 
     if (_result.hasObservatory) {
       connectionInfoCompleter?.complete(new DebugConnectionInfo(
@@ -114,6 +113,7 @@ class ColdRunner extends ResidentRunner {
     printTrace('Application running.');
 
     if (vmService != null) {
+      device.getLogReader(app: package).appPid = vmService.vm.pid;
       await vmService.vm.refreshViews();
       printTrace('Connected to ${vmService.vm.firstView}\.');
     }

@@ -104,13 +104,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       background: new Container(
         color: theme.primaryColor,
         child: new ListTile(
-          leading: new Icon(Icons.delete, color: Colors.white, size: 36.0)
+          leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         color: theme.primaryColor,
         child: new ListTile(
-          trailing: new Icon(Icons.archive, color: Colors.white, size: 36.0)
+          trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
         )
       ),
       child: new Container(
@@ -132,30 +132,30 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     return new Scaffold(
       key: _scaffoldKey,
       appBar: new AppBar(
-        title: new Text('Swipe to dismiss'),
+        title: const Text('Swipe to dismiss'),
         actions: <Widget>[
           new PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               new PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: new Text('Reset the list')
+                child: const Text('Reset the list')
               ),
               new PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
-                child: new Text('Hoizontal swipe')
+                child: const Text('Hoizontal swipe')
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
                 checked: _dismissDirection == DismissDirection.endToStart,
-                child: new Text('Only swipe left')
+                child: const Text('Only swipe left')
               ),
               new CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
                 checked: _dismissDirection == DismissDirection.startToEnd,
-                child: new Text('Only swipe right')
+                child: const Text('Only swipe right')
               )
             ]
           )

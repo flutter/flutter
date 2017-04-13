@@ -169,23 +169,23 @@ class _TextFieldState extends State<TextField> {
   final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
-  TextEditingController get _effectiveController => config.controller ?? _controller;
+  TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   FocusNode _focusNode;
-  FocusNode get _effectiveFocusNode => config.focusNode ?? (_focusNode ??= new FocusNode());
+  FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
 
   @override
   void initState() {
     super.initState();
-    if (config.controller == null)
+    if (widget.controller == null)
       _controller = new TextEditingController();
   }
 
   @override
-  void didUpdateConfig(TextField oldConfig) {
-    if (config.controller == null && oldConfig.controller != null)
-      _controller == new TextEditingController.fromValue(oldConfig.controller.value);
-    else if (config.controller != null && oldConfig.controller == null)
+  void didUpdateWidget(TextField oldWidget) {
+    if (widget.controller == null && oldWidget.controller != null)
+      _controller == new TextEditingController.fromValue(oldWidget.controller.value);
+    else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
   }
 
@@ -202,7 +202,7 @@ class _TextFieldState extends State<TextField> {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final TextStyle style = config.style ?? themeData.textTheme.subhead;
+    final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
 
@@ -211,28 +211,28 @@ class _TextFieldState extends State<TextField> {
         key: _editableTextKey,
         controller: controller,
         focusNode: focusNode,
-        keyboardType: config.keyboardType,
+        keyboardType: widget.keyboardType,
         style: style,
-        textAlign: config.textAlign,
-        autofocus: config.autofocus,
-        obscureText: config.obscureText,
-        maxLines: config.maxLines,
+        textAlign: widget.textAlign,
+        autofocus: widget.autofocus,
+        obscureText: widget.obscureText,
+        maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
         selectionControls: materialTextSelectionControls,
-        onChanged: config.onChanged,
-        onSubmitted: config.onSubmitted,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
       ),
     );
 
-    if (config.decoration != null) {
+    if (widget.decoration != null) {
       child = new AnimatedBuilder(
         animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
-            decoration: config.decoration,
-            baseStyle: config.style,
-            textAlign: config.textAlign,
+            decoration: widget.decoration,
+            baseStyle: widget.style,
+            textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             child: child,

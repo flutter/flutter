@@ -153,16 +153,16 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     Widget home = new Scaffold(
       key: _scaffoldKey,
       drawer: new GalleryDrawer(
-        useLightTheme: config.useLightTheme,
-        onThemeChanged: config.onThemeChanged,
-        timeDilation: config.timeDilation,
-        onTimeDilationChanged: config.onTimeDilationChanged,
-        showPerformanceOverlay: config.showPerformanceOverlay,
-        onShowPerformanceOverlayChanged: config.onShowPerformanceOverlayChanged,
-        checkerboardRasterCacheImages: config.checkerboardRasterCacheImages,
-        onCheckerboardRasterCacheImagesChanged: config.onCheckerboardRasterCacheImagesChanged,
-        onPlatformChanged: config.onPlatformChanged,
-        onSendFeedback: config.onSendFeedback,
+        useLightTheme: widget.useLightTheme,
+        onThemeChanged: widget.onThemeChanged,
+        timeDilation: widget.timeDilation,
+        onTimeDilationChanged: widget.onTimeDilationChanged,
+        showPerformanceOverlay: widget.showPerformanceOverlay,
+        onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
+        checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
+        onCheckerboardRasterCacheImagesChanged: widget.onCheckerboardRasterCacheImagesChanged,
+        onPlatformChanged: widget.onPlatformChanged,
+        onSendFeedback: widget.onSendFeedback,
       ),
       body: new CustomScrollView(
         slivers: <Widget>[
@@ -170,7 +170,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
             pinned: true,
             expandedHeight: _kFlexibleSpaceMaxHeight,
             flexibleSpace: new FlexibleSpaceBar(
-              title: new Text('Flutter Gallery'),
+              title: const Text('Flutter Gallery'),
               // TODO(abarth): Wire up to the parallax in a way that doesn't pop during hero transition.
               background: new _AppBarBackground(animation: kAlwaysDismissedAnimation),
             ),
@@ -194,7 +194,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           home,
           new FadeTransition(
             opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-            child: new Banner(
+            child: const Banner(
               message: 'PREVIEW',
               location: BannerLocation.topRight,
             )

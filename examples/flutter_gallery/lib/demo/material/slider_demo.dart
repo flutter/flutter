@@ -18,7 +18,7 @@ class _SliderDemoState extends State<SliderDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Sliders')),
+      appBar: new AppBar(title: const Text('Sliders')),
       body: new Center(
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -37,14 +37,14 @@ class _SliderDemoState extends State<SliderDemo> {
                     });
                   }
                 ),
-                new Text('Continuous'),
+                const Text('Continuous'),
               ]
             ),
             new Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget> [
                 new Slider(value: 0.25, thumbOpenAtMin: true, onChanged: null),
-                new Text('Disabled'),
+                const Text('Disabled'),
               ]
             ),
             new Column(
@@ -63,7 +63,7 @@ class _SliderDemoState extends State<SliderDemo> {
                     });
                   }
                 ),
-                new Text('Discrete'),
+                const Text('Discrete'),
               ],
             ),
           ],

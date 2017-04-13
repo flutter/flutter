@@ -15,7 +15,7 @@ const ImageProvider _kImage = const TestImageProvider(21, 42);
 void main() {
   testWidgets('ImageIcon sizing - no theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
+      const Center(
         child: const ImageIcon(_kImage)
       )
     );
@@ -42,7 +42,7 @@ void main() {
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
+      const Center(
         child: const ImageIcon(
           null,
           size: 96.0

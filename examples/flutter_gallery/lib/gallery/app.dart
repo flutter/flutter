@@ -13,6 +13,9 @@ import 'item.dart';
 import 'updates.dart';
 
 final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
+  // For a different example of how to set up an application routing table,
+  // consider the Stocks example:
+  // https://github.com/flutter/flutter/blob/master/examples/stocks/lib/main.dart
   kAllGalleryItems,
   key: (GalleryItem item) => item.routeName,
   value: (GalleryItem item) => item.buildRoute,
@@ -81,13 +84,13 @@ class GalleryAppState extends State<GalleryApp> {
         });
       },
       showPerformanceOverlay: _showPerformanceOverlay,
-      onShowPerformanceOverlayChanged: config.enablePerformanceOverlay ? (bool value) {
+      onShowPerformanceOverlayChanged: widget.enablePerformanceOverlay ? (bool value) {
         setState(() {
           _showPerformanceOverlay = value;
         });
       } : null,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-      onCheckerboardRasterCacheImagesChanged: config.checkerboardRasterCacheImages ? (bool value) {
+      onCheckerboardRasterCacheImagesChanged: widget.checkerboardRasterCacheImages ? (bool value) {
         setState(() {
           _checkerboardRasterCacheImages = value;
         });
@@ -115,12 +118,12 @@ class GalleryAppState extends State<GalleryApp> {
           }
         });
       },
-      onSendFeedback: config.onSendFeedback,
+      onSendFeedback: widget.onSendFeedback,
     );
 
-    if (config.updateUrlFetcher != null) {
+    if (widget.updateUrlFetcher != null) {
       home = new Updater(
-        updateUrlFetcher: config.updateUrlFetcher,
+        updateUrlFetcher: widget.updateUrlFetcher,
         child: home,
       );
     }

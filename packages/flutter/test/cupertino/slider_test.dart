@@ -66,7 +66,7 @@ void main() {
     );
 
     expect(value, equals(0.0));
-    final Point topLeft = tester.getTopLeft(find.byKey(sliderKey));
+    final Offset topLeft = tester.getTopLeft(find.byKey(sliderKey));
     const double unit = CupertinoThumbPainter.radius;
     const double delta = 3.0 * unit;
     await tester.dragFrom(topLeft + const Offset(unit, unit), const Offset(delta, 0.0));

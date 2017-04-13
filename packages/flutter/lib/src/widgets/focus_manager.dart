@@ -132,8 +132,7 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
     if (_firstChild != null)
       _firstChild._previousSibling = child;
     _firstChild = child;
-    if (_lastChild == null)
-      _lastChild = child;
+    _lastChild ??= child;
     child._updateManager(_manager);
   }
 

@@ -123,17 +123,17 @@ class CupertinoSlider extends StatefulWidget {
 
 class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderStateMixin {
   void _handleChanged(double value) {
-    assert(config.onChanged != null);
-    config.onChanged(value * (config.max - config.min) + config.min);
+    assert(widget.onChanged != null);
+    widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
 
   @override
   Widget build(BuildContext context) {
     return new _CupertinoSliderRenderObjectWidget(
-      value: (config.value - config.min) / (config.max - config.min),
-      divisions: config.divisions,
-      activeColor: config.activeColor,
-      onChanged: config.onChanged != null ? _handleChanged : null,
+      value: (widget.value - widget.min) / (widget.max - widget.min),
+      divisions: widget.divisions,
+      activeColor: widget.activeColor,
+      onChanged: widget.onChanged != null ? _handleChanged : null,
       vsync: this,
     );
   }
@@ -281,8 +281,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool hitTestSelf(Point position) {
-    return (position.x - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
+  bool hitTestSelf(Offset position) {
+    return (position.dx - _thumbCenter).abs() < CupertinoThumbPainter.radius + _kPadding;
   }
 
   @override
@@ -319,7 +319,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
       canvas.drawRRect(new RRect.fromLTRBXY(trackActive, trackTop, trackRight, trackBottom, 1.0, 1.0), paint);
     }
 
-    final Point thumbCenter = new Point(trackActive, trackCenter);
+    final Offset thumbCenter = new Offset(trackActive, trackCenter);
     _thumbPainter.paint(canvas, new Rect.fromCircle(center: thumbCenter, radius: CupertinoThumbPainter.radius));
   }
 

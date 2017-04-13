@@ -88,6 +88,14 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
+    argParser.addFlag('use-test-fonts',
+        negatable: true,
+        defaultsTo: false,
+        help: 'Enable (and default to) the "Ahem" font. This is a special font\n'
+              'used in tests to remove any dependencies on the font metrics. It\n'
+              'is enabled when you use "flutter test". Set this flag when running\n'
+              'a test using "flutter run" for debugging purposes. This flag is\n'
+              'only available when running in debug mode.');
     argParser.addFlag('build',
         defaultsTo: true,
         help: 'If necessary, build the app before running.');
@@ -126,18 +134,19 @@ class RunCommand extends RunCommandBase {
         hide: !verboseHelp,
         help: 'Stay resident after launching the application.');
 
-    // Hidden option to enable a benchmarking mode. This will run the given
-    // application, measure the startup time and the app restart time, write the
-    // results out to 'refresh_benchmark.json', and exit. This flag is intended
-    // for use in generating automated flutter benchmarks.
-    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp);
+    argParser.addFlag('benchmark',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Enable a benchmarking mode. This will run the given application,\n'
+            'measure the startup time and the app restart time, write the\n'
+            'results out to "refresh_benchmark.json", and exit. This flag is\n'
+            'intended for use in generating automated flutter benchmarks.');
 
     commandValidator = () {
-      if (!runningWithPrebuiltApplication)
-        commonCommandValidator();
-
       // When running with a prebuilt application, no command validation is
       // necessary.
+      if (!runningWithPrebuiltApplication)
+        commonCommandValidator();
     };
   }
 
@@ -196,6 +205,20 @@ class RunCommand extends RunCommandBase {
     return super.verifyThenRunCommand();
   }
 
+  DebuggingOptions _createDebuggingOptions() {
+    if (getBuildMode() == BuildMode.release) {
+      return new DebuggingOptions.disabled(getBuildMode());
+    } else {
+      return new DebuggingOptions.enabled(
+        getBuildMode(),
+        startPaused: argResults['start-paused'],
+        useTestFonts: argResults['use-test-fonts'],
+        observatoryPort: observatoryPort,
+        diagnosticPort: diagnosticPort,
+      );
+    }
+  }
+
   @override
   Future<Null> runCommand() async {
 
@@ -212,7 +235,7 @@ class RunCommand extends RunCommandBase {
       try {
         app = await daemon.appDomain.startApp(
           device, fs.currentDirectory.path, targetFile, route,
-          getBuildMode(), argResults['start-paused'], hotMode,
+          _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: argResults['packages'],
@@ -228,19 +251,6 @@ class RunCommand extends RunCommandBase {
 
     if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
       throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
-
-    DebuggingOptions options;
-
-    if (getBuildMode() == BuildMode.release) {
-      options = new DebuggingOptions.disabled(getBuildMode());
-    } else {
-      options = new DebuggingOptions.enabled(
-        getBuildMode(),
-        startPaused: argResults['start-paused'],
-        observatoryPort: observatoryPort,
-        diagnosticPort: diagnosticPort,
-      );
-    }
 
     if (hotMode) {
       if (!device.supportsHotMode)
@@ -258,7 +268,7 @@ class RunCommand extends RunCommandBase {
       runner = new HotRunner(
         device,
         target: targetFile,
-        debuggingOptions: options,
+        debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
         kernelFilePath: argResults['kernel'],
@@ -271,7 +281,7 @@ class RunCommand extends RunCommandBase {
       runner = new ColdRunner(
         device,
         target: targetFile,
-        debuggingOptions: options,
+        debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         stayResident: stayResident,

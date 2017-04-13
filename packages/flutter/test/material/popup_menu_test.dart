@@ -11,7 +11,7 @@ void main() {
       new MaterialApp(
         routes: <String, WidgetBuilder> {
           '/next': (BuildContext context) {
-            return new Text('Next');
+            return const Text('Next');
           }
         },
         home: new Material(
@@ -26,7 +26,7 @@ void main() {
                     return <PopupMenuItem<int>>[
                       new PopupMenuItem<int>(
                         value: 1,
-                        child: new Text('One')
+                        child: const Text('One')
                       )
                     ];
                   }

@@ -29,6 +29,8 @@ import 'theme.dart';
 ///    [AppBar.leading] slot when appropriate.
 ///  * [IconButton], which is a more general widget for creating buttons with
 ///    icons.
+///  * [CloseButton], an alternative which may be more appropriate for leaf
+///    node pages in the navigation tree.
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
@@ -52,6 +54,36 @@ class BackButton extends StatelessWidget {
     return new IconButton(
       icon: new Icon(getIconData(Theme.of(context).platform)),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
+      onPressed: () {
+        Navigator.of(context).maybePop();
+      },
+    );
+  }
+}
+
+/// A material design close button.
+///
+/// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
+/// close button calls [Navigator.maybePop] to return to the previous route.
+///
+/// Use a [CloseButton] instead of a [BackButton] on fullscreen dialogs or
+/// pages that may solicit additional actions to close.
+///
+/// See also:
+///
+///  * [AppBar], which automatically uses a [CloseButton] in its
+///    [AppBar.leading] slot when appropriate.
+///  * [BackButton], which is more appropriate for middle nodes in the 
+///    navigation tree or where pages can be popped instantaneously with
+///    no user data consequence.
+class CloseButton extends StatelessWidget {
+  const CloseButton({ Key key }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return new IconButton(
+      icon: const Icon(Icons.close),
+      tooltip: 'Close',
       onPressed: () {
         Navigator.of(context).maybePop();
       },

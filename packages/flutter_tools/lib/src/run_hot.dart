@@ -101,6 +101,8 @@ class HotRunner extends ResidentRunner {
       return 2;
     }
 
+    device.getLogReader(app: package).appPid = vmService.vm.pid;
+
     try {
       final Uri baseUri = await _initDevFS();
       if (connectionInfoCompleter != null) {
@@ -359,24 +361,28 @@ class HotRunner extends ResidentRunner {
     if (fullRestart) {
       final Status status = logger.startProgress('Performing full restart...', progressId: 'hot.restart');
       try {
+        final Stopwatch timer = new Stopwatch()..start();
         await _restartFromSources();
-        status.stop();
-        printStatus('Restart complete.');
+        timer.stop();
+        status.cancel();
+        printStatus('Restarted app in ${getElapsedAsSeconds(timer.elapsed)}.');
         return OperationResult.ok;
       } catch (error) {
-        status.stop();
+        status.cancel();
         rethrow;
       }
     } else {
       final Status status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
       try {
+        final Stopwatch timer = new Stopwatch()..start();
         final OperationResult result = await _reloadSources(pause: pauseAfterRestart);
-        status.stop();
+        timer.stop();
+        status.cancel();
         if (result.isOk)
-          printStatus("${result.message}.");
+          printStatus("Reloaded ${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.");
         return result;
       } catch (error) {
-        status.stop();
+        status.cancel();
         rethrow;
       }
     }
@@ -432,7 +438,8 @@ class HotRunner extends ResidentRunner {
         flutterUsage.sendEvent('hot', 'reload');
         final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
         final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-        reloadMessage = 'Reload done: $loadedLibraryCount of $finalLibraryCount libraries needed reloading';
+        printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
+        reloadMessage = '$loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
       final int errorCode = error['code'];
