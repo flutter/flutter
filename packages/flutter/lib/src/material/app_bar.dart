@@ -226,8 +226,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// This widget appears across the bottom of the app bar.
   ///
-  /// Typically a [TabBar]. Only widgets that implement [AppBarBottomWidget] can
+  /// Typically a [TabBar]. Only widgets that implement [PreferredSizeWidget] can
   /// be used at the bottom of an app bar.
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
   /// The z-coordinate at which to place this app bar.
@@ -293,6 +297,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// A size whose height is the sum of [kToolbarHeight] and the [bottom] widget's
   /// preferred height.
+  ///
+  /// [Scaffold] uses this this size to set its app bar's height.
   @override
   final Size preferredSize;
 
@@ -752,8 +758,12 @@ class SliverAppBar extends StatefulWidget {
 
   /// This widget appears across the bottom of the appbar.
   ///
-  /// Typically a [TabBar]. This widget must be a widget that implements the
-  /// [AppBarBottomWidget] interface.
+  /// Typically a [TabBar]. Only widgets that implement [PreferredSizeWidget] can
+  /// be used at the bottom of an app bar.
+  ///
+  /// See also:
+  ///
+  ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
   /// The z-coordinate at which to place this app bar.

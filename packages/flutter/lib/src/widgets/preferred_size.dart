@@ -8,7 +8,8 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 
-/// Return the size this widget would prefer if it were otherwise unconstrained.
+/// An interface for widgets that can return the size this widget would prefer
+/// if it were otherwise unconstrained.
 ///
 /// There are a few cases, notably [AppBar] and [TabBar], where it would be
 /// undesirable for the widget to constrain its own size but where the widget
@@ -17,7 +18,14 @@ import 'framework.dart';
 /// plus the height of the system status bar.
 ///
 /// Use [PreferredSize] to give a preferred size to an arbitrary widget.
-abstract class PreferredSizeWidget extends Widget {
+abstract class PreferredSizeWidget implements Widget {
+
+  /// The size this widget would prefer if it were otherwise unconstrained.
+  ///
+  /// In many cases it's only necessary to define one preferred dimension.
+  /// For example the [Scaffold] only depends on its app bar's preferred
+  /// height. In that case implementations of this method can just return
+  /// `new Size.fromHeight(myAppBarHeight)`;
   Size get preferredSize;
 }
 
@@ -30,6 +38,9 @@ abstract class PreferredSizeWidget extends Widget {
 /// See also:
 ///
 ///  * [AppBar.bottom] and [Scaffold.appBar], which require preferred size widgets.
+///  * [PreferredSizeWidget], the interface which this widget implements to expose
+///    its preferred size.
+///  * [AppBar] and [TabBar], which implement PreferredSizeWidget.
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
   const PreferredSize({
     Key key,

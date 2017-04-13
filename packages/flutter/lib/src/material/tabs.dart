@@ -420,6 +420,9 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
+  /// A size whose height depends on if the tabs have both icons and text.
+  ///
+  /// [AppBar] uses this this size to compute its own preferred size.
   @override
   Size get preferredSize {
     for (Widget item in tabs) {

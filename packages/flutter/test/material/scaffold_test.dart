@@ -82,7 +82,7 @@ void main() {
   });
 
   testWidgets('Floating action animation', (WidgetTester tester) async {
-    await tester.pumpWidget(new Scaffold(
+    await tester.pumpWidget(const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
@@ -92,7 +92,7 @@ void main() {
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(new Scaffold(
+    await tester.pumpWidget(const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('two'),
         onPressed: null,
@@ -103,10 +103,10 @@ void main() {
     expect(tester.binding.transientCallbackCount, greaterThan(0));
     await tester.pumpWidget(new Container());
     expect(tester.binding.transientCallbackCount, 0);
-    await tester.pumpWidget(new Scaffold());
+    await tester.pumpWidget(const Scaffold());
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(new Scaffold(
+    await tester.pumpWidget(const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,

@@ -283,7 +283,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
-  Scaffold({
+  const Scaffold({
     Key key,
     this.appBar,
     this.body,
@@ -294,9 +294,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding: true,
     this.primary: true,
-  }) : super(key: key) {
-    assert(primary != null);
-  }
+  }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;

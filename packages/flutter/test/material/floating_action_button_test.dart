@@ -28,7 +28,7 @@ void main() {
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Scaffold(
+        home: const Scaffold(
           floatingActionButton: const FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
