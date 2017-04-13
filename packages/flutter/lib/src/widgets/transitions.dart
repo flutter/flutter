@@ -391,13 +391,17 @@ class RelativePositionedTransition extends AnimatedWidget {
 
 /// Animated version of a [DecoratedBox] that animates the different properties
 /// of its [Decoration].
+/// 
+/// See also:
+///
+/// * [DecoratedBox], which also draws a [Decoration] but is not animated.
+/// * [AnimatedContainer], a more full-featured container that also animates on 
+///   decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecorationBox] whose [Decoration] animation updates
   /// the widget. 
   /// 
-  /// `decoration` and `position` cannot be null.
-  /// 
-  /// Also see [DecoratedBox].
+  /// The [decoration] and [position] cannot be null.  
   DecoratedBoxTransition({
     Key key,
     @required this.decoration,
@@ -407,7 +411,8 @@ class DecoratedBoxTransition extends AnimatedWidget {
 
   /// Animation of the decoration to paint.
   ///
-  /// Can be created using a [DecorationTween].
+  /// Can be created using a [DecorationTween] interpolating typically between
+  /// two [BoxDecoration].
   final Animation<Decoration> decoration;
 
   /// Whether to paint the box decoration behind or in front of the child.
