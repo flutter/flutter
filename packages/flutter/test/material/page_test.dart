@@ -73,7 +73,7 @@ void main() {
           '/next': (BuildContext context) {
             return new Material(
               key: page2Key,
-              child: const Text('Page 2')
+              child: const Text('Page 2'),
             );
           },
         },
