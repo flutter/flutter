@@ -349,7 +349,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 ///
 ///  * [TabBarView], which displays the contents that the tab bar is selecting
 ///    between.
-class TabBar extends StatefulWidget implements AppBarBottomWidget {
+class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
   /// The [tabs] argument must not be null and must have more than one widget.
@@ -420,16 +420,19 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
+  /// A size whose height depends on if the tabs have both icons and text.
+  ///
+  /// [AppBar] uses this this size to compute its own preferred size.
   @override
-  double get bottomHeight {
+  Size get preferredSize {
     for (Widget item in tabs) {
       if (item is Tab) {
         final Tab tab = item;
         if (tab.text != null && tab.icon != null)
-          return _kTextAndIconTabHeight + _kTabIndicatorHeight;
+          return const Size.fromHeight(_kTextAndIconTabHeight + _kTabIndicatorHeight);
       }
     }
-    return _kTabHeight + _kTabIndicatorHeight;
+    return const Size.fromHeight(_kTabHeight + _kTabIndicatorHeight);
   }
 
   @override

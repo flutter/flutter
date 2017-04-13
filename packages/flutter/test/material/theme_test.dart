@@ -206,7 +206,7 @@ void main() {
                   onTap: () {
                     showDialog<Null>(
                       context: context,
-                      child: new Scaffold(
+                      child: const Scaffold(
                         body: const SizedBox(
                           width: 200.0,
                           height: 200.0,

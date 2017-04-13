@@ -283,7 +283,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
-  Scaffold({
+  const Scaffold({
     Key key,
     this.appBar,
     this.body,
@@ -292,11 +292,12 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.bottomNavigationBar,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding: true
-  }) : super(key: key);
+    this.resizeToAvoidBottomPadding: true,
+    this.primary: true,
+  }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
-  final AppBar appBar;
+  final PreferredSizeWidget appBar;
 
   /// The primary content of the scaffold.
   ///
@@ -362,6 +363,15 @@ class Scaffold extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool resizeToAvoidBottomPadding;
+
+  /// Whether this scaffold is being displayed at the top of the screen.
+  ///
+  /// If true then the height of the [appBar] will be extended by the height
+  /// of the screen's status bar, i.e. the top padding for [MediaQuery].
+  ///
+  /// The default value of this property, like the default value of
+  /// [AppBar.primary], is true.
+  final bool primary;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -782,21 +792,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _addIfNonNull(children, widget.body, _ScaffoldSlot.body);
 
     if (widget.appBar != null) {
-      assert(widget.appBar.primary || padding.top == 0.0, 'A non-primary AppBar was passed to a Scaffold but the MediaQuery in scope has top padding.');
-      final double topPadding = widget.appBar.primary ? padding.top : 0.0;
-      Widget appBar = widget.appBar;
-      final double extent = widget.appBar.minExtent + topPadding;
-      if (widget.appBar.flexibleSpace != null) {
-        appBar = FlexibleSpaceBar.createSettings(
-          currentExtent: extent,
-          child: appBar,
-        );
-      }
+      final double topPadding = widget.primary ? padding.top : 0.0;
+      final double extent = widget.appBar.preferredSize.height + topPadding;
+      assert(extent >= 0.0 && extent.isFinite);
       _addIfNonNull(
         children,
         new ConstrainedBox(
           constraints: new BoxConstraints(maxHeight: extent),
-          child: appBar,
+          child: FlexibleSpaceBar.createSettings(
+            currentExtent: extent,
+            child: widget.appBar,
+          ),
         ),
         _ScaffoldSlot.appBar,
       );
