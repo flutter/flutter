@@ -16,6 +16,10 @@ import 'image.dart';
 /// not.
 ///
 /// Commonly used with [BoxDecoration].
+/// 
+/// See also:
+///
+/// * [DecoratedBoxTransition], the version of this class that animates on the [decoration] property.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///
