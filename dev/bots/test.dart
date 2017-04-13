@@ -1,13 +1,22 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as path;
 
-String flutterRoot = p.dirname(p.dirname(p.dirname(p.fromUri(Platform.script))));
-String flutter = p.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
-String dart = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
-String pub = p.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
-String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
+final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
+final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
+final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
+final bool hasColor = stdout.supportsAnsiEscapes;
+
+final String bold = hasColor ? '\x1B[1m' : '';
+final String red = hasColor ? '\x1B[31m' : '';
+final String green = hasColor ? '\x1B[32m' : '';
+final String yellow = hasColor ? '\x1B[33m' : '';
+final String cyan = hasColor ? '\x1B[36m' : '';
+final String reset = hasColor ? '\x1B[0m' : '';
 
 /// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
 /// arguments to flutter test. For example, you might want to call this
@@ -21,7 +30,7 @@ String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 /// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 Future<Null> main() async {
   if (Platform.environment['SHARD'] == 'docs') {
-    print('\x1B[32mDONE: test.dart does nothing in the docs shard.\x1B[0m');
+    print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
   } else if (Platform.environment['SHARD'] == 'analyze') {
     // Analyze all the Dart code in the repo.
     await _runFlutterAnalyze(flutterRoot,
@@ -35,48 +44,48 @@ Future<Null> main() async {
     );
 
     // Try an analysis against a big version of the gallery.
-    await _runCmd(dart, <String>[p.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
+    await _runCommand(dart, <String>[path.join(flutterRoot, 'dev', 'tools', 'mega_gallery.dart')],
       workingDirectory: flutterRoot,
     );
-    await _runFlutterAnalyze(p.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
+    await _runFlutterAnalyze(path.join(flutterRoot, 'dev', 'benchmarks', 'mega_gallery'),
       options: <String>['--watch', '--benchmark'],
     );
 
-    print('\x1B[32mDONE: Analysis successful.\x1B[0m');
+    print('${bold}DONE: Analysis successful.$reset');
   } else {
     // Verify that the tests actually return failure on failure and success on success.
-    final String automatedTests = p.join(flutterRoot, 'dev', 'automated_tests');
+    final String automatedTests = path.join(flutterRoot, 'dev', 'automated_tests');
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'fail_test.dart'),
+      script: path.join('test_smoke_test', 'fail_test.dart'),
       expectFailure: true,
       printOutput: false,
     );
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'pass_test.dart'),
+      script: path.join('test_smoke_test', 'pass_test.dart'),
       printOutput: false,
     );
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'crash1_test.dart'),
+      script: path.join('test_smoke_test', 'crash1_test.dart'),
       expectFailure: true,
       printOutput: false,
     );
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'crash2_test.dart'),
+      script: path.join('test_smoke_test', 'crash2_test.dart'),
       expectFailure: true,
       printOutput: false,
     );
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'syntax_error_test.broken_dart'),
+      script: path.join('test_smoke_test', 'syntax_error_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
     );
     await _runFlutterTest(automatedTests,
-      script: p.join('test_smoke_test', 'missing_import_test.broken_dart'),
+      script: path.join('test_smoke_test', 'missing_import_test.broken_dart'),
       expectFailure: true,
       printOutput: false,
     );
-    await _runCmd(flutter, <String>['drive', '--use-existing-app', '-t', p.join('test_driver', 'failure.dart')],
-      workingDirectory: p.join(flutterRoot, 'packages', 'flutter_driver'),
+    await _runCommand(flutter, <String>['drive', '--use-existing-app', '-t', path.join('test_driver', 'failure.dart')],
+      workingDirectory: path.join(flutterRoot, 'packages', 'flutter_driver'),
       expectFailure: true,
       printOutput: false,
     );
@@ -86,22 +95,22 @@ Future<Null> main() async {
       coverageFlags.add('--coverage');
 
     // Run tests.
-    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter'),
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'),
       options: coverageFlags,
     );
-    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_driver'));
-    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_test'));
-    await _runFlutterTest(p.join(flutterRoot, 'packages', 'flutter_markdown'));
-    await _pubRunTest(p.join(flutterRoot, 'packages', 'flutter_tools'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_markdown'));
+    await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
 
-    await _runAllDartTests(p.join(flutterRoot, 'dev', 'devicelab'));
-    await _runFlutterTest(p.join(flutterRoot, 'dev', 'manual_tests'));
-    await _runFlutterTest(p.join(flutterRoot, 'examples', 'hello_world'));
-    await _runFlutterTest(p.join(flutterRoot, 'examples', 'layers'));
-    await _runFlutterTest(p.join(flutterRoot, 'examples', 'stocks'));
-    await _runFlutterTest(p.join(flutterRoot, 'examples', 'flutter_gallery'));
+    await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'));
 
-    print('\x1B[32mDONE: All tests successful.\x1B[0m');
+    print('${bold}DONE: All tests successful.$reset');
   }
 }
 
@@ -112,40 +121,48 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test'];
   if (testPath != null)
     args.add(testPath);
-  return _runCmd(pub, args, workingDirectory: workingDirectory);
+  return _runCommand(pub, args, workingDirectory: workingDirectory);
 }
 
-Future<Null> _runCmd(String executable, List<String> arguments, {
+Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
   bool expectFailure: false,
   bool printOutput: true,
   bool skip: false,
 }) async {
-  final String cmd = '${p.relative(executable)} ${arguments.join(' ')}';
-  final String relativeWorkingDir = p.relative(workingDirectory);
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory);
   if (skip) {
-    _printProgress('SKIPPING', relativeWorkingDir, cmd);
+    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
     return null;
   }
-  _printProgress('RUNNING', relativeWorkingDir, cmd);
+  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
 
   final Process process = await Process.start(executable, arguments,
     workingDirectory: workingDirectory,
     environment: environment,
   );
 
+  Future<List<List<int>>> savedStdout, savedStderr;
   if (printOutput) {
     stdout.addStream(process.stdout);
     stderr.addStream(process.stderr);
+  } else {
+    savedStdout = process.stdout.toList();
+    savedStderr = process.stderr.toList();
   }
 
   final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectFailure) {
+    if (!printOutput) {
+      print(UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()));
+      print(UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()));
+    }
     print(
-      '\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m\n'
-      '\x1B[1mERROR:\x1B[31m Last command exited with $exitCode (expected: ${expectFailure ? 'non-zero' : 'zero'}).\x1B[0m\n'
-      '\x1B[31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\x1B[0m'
+      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '${bold}ERROR:$red Last command exited with $exitCode (expected: ${expectFailure ? 'non-zero' : 'zero'}).$reset\n'
+      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
     );
     exit(1);
   }
@@ -159,11 +176,11 @@ Future<Null> _runFlutterTest(String workingDirectory, {
     bool skip: false,
 }) {
   final List<String> args = <String>['test']..addAll(options);
-  if (flutterTestArgs != null)
+  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.add(flutterTestArgs);
   if (script != null)
     args.add(script);
-  return _runCmd(flutter, args,
+  return _runCommand(flutter, args,
     workingDirectory: workingDirectory,
     expectFailure: expectFailure,
     printOutput: printOutput,
@@ -174,8 +191,8 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 Future<Null> _runAllDartTests(String workingDirectory, {
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>['--checked', p.join('test', 'all.dart')];
-  return _runCmd(dart, args,
+  final List<String> args = <String>['--checked', path.join('test', 'all.dart')];
+  return _runCommand(dart, args,
     workingDirectory: workingDirectory,
     environment: environment,
   );
@@ -184,11 +201,12 @@ Future<Null> _runAllDartTests(String workingDirectory, {
 Future<Null> _runFlutterAnalyze(String workingDirectory, {
   List<String> options: const <String>[]
 }) {
-  return _runCmd(flutter, <String>['analyze']..addAll(options),
+  return _runCommand(flutter, <String>['analyze']..addAll(options),
     workingDirectory: workingDirectory,
   );
 }
 
-void _printProgress(String action, String workingDir, String cmd) {
-  print('>>> $action in \x1B[36m$workingDir\x1B[0m: \x1B[33m$cmd\x1B[0m');
+void _printProgress(String action, String workingDir, String command) {
+  const String arrow = '⏩';
+  print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
 }
