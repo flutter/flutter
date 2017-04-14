@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../android/android.dart' as android;
+import '../android/android_sdk.dart' as android_sdk;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -103,7 +104,7 @@ class CreateCommand extends FlutterCommand {
 
     final Map<String, dynamic> templateContext = _templateContext(
         projectName, argResults['description'], dirPath,
-        flutterPackagesDirectory, renderDriverTest: argResults['with-driver-test'],
+        flutterRoot, renderDriverTest: argResults['with-driver-test'],
         withPluginHook: generatePlugin,
     );
 
@@ -188,10 +189,10 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
   }
 
   Map<String, dynamic> _templateContext(String projectName,
-      String projectDescription, String dirPath, String flutterPackagesDirectory,
+      String projectDescription, String dirPath, String flutterRoot,
       { bool renderDriverTest: false, bool withPluginHook: false }) {
-    flutterPackagesDirectory = fs.path.normalize(flutterPackagesDirectory);
-    flutterPackagesDirectory = _relativePath(from: dirPath, to: flutterPackagesDirectory);
+    flutterRoot = fs.path.normalize(flutterRoot);
+    flutterRoot = _relativePath(from: dirPath, to: flutterRoot);
 
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -203,8 +204,11 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'androidIdentifier': _createAndroidIdentifier(projectName),
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': projectDescription,
-      'flutterPackagesDirectory': flutterPackagesDirectory,
+      'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
+      'flutterPackagesDirectory': fs.path.join(flutterRoot, 'packages'),
       'androidMinApiLevel': android.minApiLevel,
+      'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
+      'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
