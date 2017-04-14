@@ -184,6 +184,30 @@ void main() {
         contains('Actual: ?:<zero widgets with text "bar" that has ancestor(s) with type Column with text "foo"')
       );
     });
+
+    testWidgets('Root not matched by default', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.byType(Row),
+      ), findsNothing);
+    });
+
+    testWidgets('Match the root', (WidgetTester tester) async {
+      await tester.pumpWidget(new Row(children: <Widget>[
+        new Column(children: <Text>[const Text('foo'), const Text('bar')])
+      ]));
+
+      expect(find.descendant(
+        of: find.widgetWithText(Row, 'foo'),
+        matching: find.byType(Row),
+        matchRoot: true,
+      ), findsOneWidget);
+    });
+
   });
 
   testWidgets('hasRunningAnimations control test', (WidgetTester tester) async {

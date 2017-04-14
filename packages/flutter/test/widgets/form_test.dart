@@ -28,7 +28,7 @@ void main() {
     expect(fieldValue, isNull);
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText), testValue);
+      await tester.enterText(find.byType(TextFormField), testValue);
       formKey.currentState.save();
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
@@ -58,7 +58,7 @@ void main() {
     expect(fieldValue, isNull);
 
     Future<Null> checkText(String testValue) async {
-      await tester.enterText(find.byType(EditableText), testValue);
+      await tester.enterText(find.byType(TextField), testValue);
       // pump'ing is unnecessary because callback happens regardless of frames
       expect(fieldValue, equals(testValue));
     }
@@ -90,7 +90,7 @@ void main() {
 
     Future<Null> checkErrorText(String testValue) async {
       formKey.currentState.reset();
-      await tester.enterText(find.byType(EditableText), testValue);
+      await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pumpWidget(builder(false));
 
       // We have to manually validate if we're not autovalidating.
@@ -101,7 +101,7 @@ void main() {
 
       // Try again with autovalidation. Should validate immediately.
       formKey.currentState.reset();
-      await tester.enterText(find.byType(EditableText), testValue);
+      await tester.enterText(find.byType(TextFormField), testValue);
       await tester.pumpWidget(builder(true));
 
       expect(find.text(errorText(testValue)), findsOneWidget);
@@ -141,7 +141,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     Future<Null> checkErrorText(String testValue) async {
-      await tester.enterText(find.byType(EditableText).first, testValue);
+      await tester.enterText(find.byType(TextFormField).first, testValue);
       await tester.pump();
 
       // Check for a new Text widget with our error text.
@@ -172,7 +172,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(TextFormField));
 
     // initial value should be loaded into keyboard editing state
     expect(tester.testTextInput.editingState, isNotNull);
@@ -184,7 +184,7 @@ void main() {
 
     // sanity check, make sure we can still edit the text and everything updates
     expect(inputKey.currentState.value, equals(initialValue));
-    await tester.enterText(find.byType(EditableText), 'world');
+    await tester.enterText(find.byType(TextFormField), 'world');
     await tester.pump();
     expect(inputKey.currentState.value, equals('world'));
     expect(editableText.widget.controller.text, equals('world'));
@@ -214,7 +214,7 @@ void main() {
     expect(fieldValue, isNull);
     expect(formKey.currentState.validate(), isTrue);
 
-    await tester.enterText(find.byType(EditableText), 'Test');
+    await tester.enterText(find.byType(TextFormField), 'Test');
     await tester.pumpWidget(builder(false));
 
     // Form wasn't saved yet.

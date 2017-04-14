@@ -189,10 +189,13 @@ class CommonFinders {
   ///       of: find.widgetWithText(Row, 'label_1'), matching: find.text('value_1')
   ///     ), findsOneWidget);
   ///
+  /// If the [matchRoot] argument is true then the widget(s) specified by [of]
+  /// will be matched along with the descendants.
+  ///
   /// If the [skipOffstage] argument is true (the default), then nodes that are
   /// [Offstage] or that are from inactive [Route]s are skipped.
-  Finder descendant({ Finder of, Finder matching, bool skipOffstage: true }) {
-    return new _DescendantFinder(of, matching, skipOffstage: skipOffstage);
+  Finder descendant({ Finder of, Finder matching, bool matchRoot: false, bool skipOffstage: true }) {
+    return new _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 }
 
@@ -488,13 +491,21 @@ class _ElementPredicateFinder extends MatchFinder {
 }
 
 class _DescendantFinder extends Finder {
-  _DescendantFinder(this.ancestor, this.descendant, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+  _DescendantFinder(this.ancestor, this.descendant, {
+    this.matchRoot: false,
+    bool skipOffstage: true,
+  }) : super(skipOffstage: skipOffstage);
 
   final Finder ancestor;
   final Finder descendant;
+  final bool matchRoot;
 
   @override
-  String get description => '${descendant.description} that has ancestor(s) with ${ancestor.description} ';
+  String get description {
+    if (matchRoot)
+      return '${descendant.description} in the subtree(s) beginning with ${ancestor.description}';
+    return '${descendant.description} that has ancestor(s) with ${ancestor.description}';
+  }
 
   @override
   Iterable<Element> apply(Iterable<Element> candidates) {
@@ -503,8 +514,12 @@ class _DescendantFinder extends Finder {
 
   @override
   Iterable<Element> get allCandidates {
-    return ancestor.evaluate().expand(
+    final Iterable<Element> ancestorElements = ancestor.evaluate();
+    final List<Element> candidates = ancestorElements.expand(
       (Element element) => collectAllElementsFrom(element, skipOffstage: skipOffstage)
     ).toSet().toList();
+    if (matchRoot)
+      candidates.insertAll(0, ancestorElements);
+    return candidates;
   }
 }
