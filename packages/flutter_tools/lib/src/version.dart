@@ -107,7 +107,7 @@ class FlutterVersion {
   ///
   /// Throws [ToolExit] if a git command fails, for example, when the remote git
   /// repository is not reachable due to a network issue.
-  static Future<String> fetchRemoteFrameworkCommitDate() async {
+  static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
     await _removeVersionCheckRemoteIfExists();
     try {
       await _run(<String>[
@@ -117,8 +117,8 @@ class FlutterVersion {
         _kVersionCheckRemote,
         'https://github.com/flutter/flutter.git',
       ]);
-      await _run(<String>['git', 'fetch', _kVersionCheckRemote, 'master']);
-      return _latestGitCommitDate('$_kVersionCheckRemote/master');
+      await _run(<String>['git', 'fetch', _kVersionCheckRemote, branch]);
+      return _latestGitCommitDate('$_kVersionCheckRemote/$branch');
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -243,7 +243,8 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate());
+      final String branch = _channel == 'alpha' ? 'alpha' : 'master';
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(branch));
       versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
