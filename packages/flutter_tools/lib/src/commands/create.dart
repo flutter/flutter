@@ -205,7 +205,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'flutterPackagesDirectory': '$flutterRoot/packages',
+      'flutterPackagesDirectory': fs.path.join(flutterRoot, 'packages'),
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
