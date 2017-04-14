@@ -44,6 +44,8 @@ class TestSemantics {
   final String label;
 
   /// The bounding box for this node in its coordinate system.
+  ///
+  /// Defaults to filling the screen.
   final Rect rect;
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
@@ -62,7 +64,7 @@ class TestSemantics {
       actions: actions,
       label: label,
       rect: rect,
-      transform: transform
+      transform: transform,
     );
   }
 

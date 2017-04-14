@@ -1638,6 +1638,9 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// `super.markNeedsLayout()`, in the normal case, or call
   /// [markParentNeedsLayout], in the case where the parent neds to be laid out
   /// as well as the child.
+  ///
+  /// If [sizedByParent] has changed, called
+  /// [markNeedsLayoutForSizedByParentChange] instead of [markNeedsLayout].
   void markNeedsLayout() {
     assert(_debugCanPerformMutations);
     if (_needsLayout) {
@@ -1664,9 +1667,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Mark this render object's layout information as dirty, and then defer to
   /// the parent.
   ///
-  /// This function should only be called from [markNeedsLayout] implementations
-  /// of subclasses that introduce more reasons for deferring the handling of
-  /// dirty layout to the parent. See [markNeedsLayout] for details.
+  /// This function should only be called from [markNeedsLayout] or
+  /// [markNeedsLayoutForSizedByParentChange] implementations of subclasses that
+  /// introduce more reasons for deferring the handling of dirty layout to the
+  /// parent. See [markNeedsLayout] for details.
   ///
   /// Only call this if [parent] is not null.
   @protected
@@ -1679,6 +1683,18 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       assert(parent._debugDoingThisLayout);
     }
     assert(parent == this.parent);
+  }
+
+  /// Mark this render object's layout information as dirty (like
+  /// [markNeedsLayout]), and additionally also handle any necessary work to
+  /// handle the case where [sizedByParent] has changed value.
+  ///
+  /// This should be called whenever [sizedByParent] might have changed.
+  ///
+  /// Only call this if [parent] is not null.
+  void markNeedsLayoutForSizedByParentChange() {
+    markNeedsLayout();
+    markParentNeedsLayout();
   }
 
   void _cleanRelayoutBoundary() {
@@ -1878,6 +1894,10 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returning false is always correct, but returning true can be more
   /// efficient when computing the size of this render object because we don't
   /// need to recompute the size if the constraints don't change.
+  ///
+  /// Typically, subclasses will always return the same value. If the value can
+  /// change, then, when it does change, the subclass should make sure to call
+  /// [markNeedsLayoutForSizedByParentChange].
   @protected
   bool get sizedByParent => false;
 
@@ -2224,21 +2244,18 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
           'disallowed.'
         );
       }
-      if (_needsLayout) {
-        throw new FlutterError(
-          'Tried to paint a RenderObject before it was laid out.\n'
-          'The following RenderObject was marked as dirty for layout at the '
-          'time that it was painted:\n'
-          '  ${toStringShallow("\n    ")}\n'
-          'A RenderObject that is still dirty for layout cannot be painted '
-          'because it does not know its own geometry yet.\n'
-          'Maybe one of the ancestors of this RenderObject was skipped '
-          'during the layout phase, but not skipped during the paint phase. '
-          'If the ancestor in question is below the nearest relayout boundary, '
-          'but is not below the nearest repaint boundary, that could cause '
-          'this error.'
-        );
-      }
+      return true;
+    });
+    // If we still need layout, then that means that we were skipped in the
+    // layout phase and therefore don't need painting. We might not know that
+    // yet (that is, our layer might not have been detached yet), because the
+    // same node that skipped us in layout is above us in the tree (obviously)
+    // and therefore may not have had a chance to paint yet (since the tree
+    // paints in reverse order). In particular this will happen if they are have
+    // a different layer, because there's a repaint boundary between us.
+    if (_needsLayout)
+      return;
+    assert(() {
       if (_needsCompositingBitsUpdate) {
         throw new FlutterError(
           'Tried to paint a RenderObject before its compositing bits were '
@@ -2651,7 +2668,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   void debugFillDescription(List<String> description) {
     if (debugCreator != null)
       description.add('creator: $debugCreator');
-    description.add('parentData: $parentData');
+    description.add('parentData: $parentData${ _debugCanParentUseSize ? " (can use size)" : ""}');
     description.add('constraints: $constraints');
     if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
       description.add('layer: $_layer');

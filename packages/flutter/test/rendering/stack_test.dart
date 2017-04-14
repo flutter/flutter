@@ -45,4 +45,6 @@ void main() {
     expect(green.size.width, equals(100.0));
     expect(green.size.height, equals(100.0));
   });
+
+  // More tests in ../widgets/stack_test.dart
 }

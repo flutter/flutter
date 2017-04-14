@@ -22,25 +22,27 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           const Semantics(
-            label: 'L1'
+            label: 'L1',
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              sizing: StackFit.expand,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
                 const Semantics(
-                  checked: false
-                )
-              ]
-            )
-          )
-        ]
-      )
+                  checked: false,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -76,23 +78,25 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           const Semantics(
-            label: 'L1'
+            label: 'L1',
           ),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              sizing: StackFit.expand,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
-                const Semantics()
-              ]
-            )
-          )
-        ]
-      )
+                const Semantics(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(
@@ -118,21 +122,23 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           const Semantics(),
           new Semantics(
             label: 'L2',
             child: new Stack(
+              sizing: StackFit.expand,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
-                const Semantics()
-              ]
-            )
-          )
-        ]
-      )
+                const Semantics(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
 
     expect(semantics, hasSemantics(

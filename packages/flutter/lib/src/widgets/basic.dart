@@ -43,6 +43,7 @@ export 'package:flutter/rendering.dart' show
   RelativeRect,
   ShaderCallback,
   SingleChildLayoutDelegate,
+  StackFit,
   TextOverflow,
   ValueChanged,
   ValueGetter,
@@ -1647,6 +1648,7 @@ class Stack extends MultiChildRenderObjectWidget {
   Stack({
     Key key,
     this.alignment: FractionalOffset.topLeft,
+    this.sizing: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
@@ -1659,6 +1661,13 @@ class Stack extends MultiChildRenderObjectWidget {
   /// each non-positioned child will be located at the same global coordinate.
   final FractionalOffset alignment;
 
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// The constraints passed into the [Stack] from its parent are either
+  /// loosened ([StackFit.loose]) or tightened to their biggest size
+  /// ([StackFit.expand]).
+  final StackFit sizing;
+
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
@@ -1669,7 +1678,8 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
-      overflow: overflow
+      sizing: sizing,
+      overflow: overflow,
     );
   }
 
@@ -1677,6 +1687,7 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
+      ..sizing = sizing
       ..overflow = overflow;
   }
 }
@@ -1696,9 +1707,10 @@ class IndexedStack extends Stack {
   IndexedStack({
     Key key,
     FractionalOffset alignment: FractionalOffset.topLeft,
+    StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, children: children);
+  }) : super(key: key, alignment: alignment, sizing: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
