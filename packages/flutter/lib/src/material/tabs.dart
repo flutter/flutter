@@ -440,7 +440,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  ScrollController _scrollController = new ScrollController();
+  final ScrollController _scrollController = new ScrollController();
   bool _completedInitialScroll = false;
 
   TabController _controller;
