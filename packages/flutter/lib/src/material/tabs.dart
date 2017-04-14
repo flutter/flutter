@@ -440,7 +440,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  final ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController = new ScrollController();
+  bool _completedInitialScroll = false;
 
   TabController _controller;
   _IndicatorPainter _indicatorPainter;
@@ -557,8 +558,18 @@ class _TabBarState extends State<TabBar> {
     });
   }
 
+  // Called each time layout completes.
   void _saveTabOffsets(List<double> tabOffsets) {
     _indicatorPainter?.tabOffsets = tabOffsets;
+
+    if (!_completedInitialScroll) {
+      _completedInitialScroll = true;
+      if (widget.isScrollable && _currentIndex != 0) {
+        scheduleMicrotask(() {
+          _scrollController.jumpTo(_tabCenteredScrollOffset(_currentIndex));
+        });
+      }
+    }
   }
 
   void _handleTap(int index) {
