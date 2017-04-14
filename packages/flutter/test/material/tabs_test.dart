@@ -759,4 +759,53 @@ void main() {
     controller.index = 1;
     await tester.pump(const Duration(milliseconds: 300));
   });
+
+  testWidgets('TabBarView scrolls end very VERY close to a new page', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/9375
+
+    final TabController tabController = new TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: 3,
+    );
+
+    await tester.pumpWidget(
+      new SizedBox.expand(
+        child: new Center(
+          child: new SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: new TabBarView(
+              controller: tabController,
+              children: <Widget>[
+                const Center(child: const Text('0')),
+                const Center(child: const Text('1')),
+                const Center(child: const Text('2')),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tabController.index, 1);
+
+    final PageView pageView = tester.widget(find.byType(PageView));
+    final PageController pageController = pageView.controller;
+    final ScrollPosition position = pageController.position;
+
+    // The TabBarView's page width is 400, so page 0 is at scroll offset 0.0,
+    // page 1 is at 400.0, page 2 is at 800.0.
+
+    expect(position.pixels, 400.0);
+
+    // Not close enough to switch to page 2
+    pageController.jumpTo(800.0 - 1.25 * position.physics.tolerance.distance);
+    expect(tabController.index, 1);
+
+    // Close enough to switch to page 2
+    pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
+    expect(tabController.index, 2);
+
+  });
 }
