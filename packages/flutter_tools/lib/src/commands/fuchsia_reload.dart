@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../flx.dart' as flx;
@@ -150,9 +151,30 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   Future<Null> _listViews(List<int> ports) async {
+    const String bold = '\u001B[0;1m';
+    const String reset = '\u001B[0m';
     for (FlutterView v in await _getViews(ports)) {
       final Uri addr = v.owner.vmService.httpAddress;
-      printStatus('At $addr, found view: ${v.uiIsolate.name}');
+      final Isolate i = v.uiIsolate;
+      final String name = i.name;
+      final String shortName = name.substring(0, name.indexOf('\$'));
+      final String main = '\$main-';
+      final String number = name.substring(name.indexOf(main) + main.length);
+      final String newUsed = getSizeAsMB(i.newSpace.used);
+      final String newCap = getSizeAsMB(i.newSpace.capacity);
+      final String newFreq = '${i.newSpace.avgCollectionTime.inMilliseconds}ms';
+      final String newPer = '${i.newSpace.avgCollectionPeriod.inSeconds}s';
+      final String oldUsed = getSizeAsMB(i.oldSpace.used);
+      final String oldCap = getSizeAsMB(i.oldSpace.capacity);
+      final String oldFreq = '${i.oldSpace.avgCollectionTime.inMilliseconds}ms';
+      final String oldPer = '${i.oldSpace.avgCollectionPeriod.inSeconds}s';
+      printStatus(
+        '$bold$shortName$reset\n'
+        '\tIsolate number: $number\n'
+        '\tObservatory: $addr\n'
+        '\tNew gen: $newUsed used of $newCap, GC: $newFreq every $newPer\n'
+        '\tOld gen: $oldUsed used of $oldCap, GC: $oldFreq every $oldPer\n'
+      );
     }
   }
 
