@@ -81,6 +81,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   platform_channel_test:
     description: >
