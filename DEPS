@@ -32,7 +32,7 @@ vars = {
   'dart_observatory_packages_revision': '26aad88f1c1915d39bbcbff3cad589e2402fdcf1',
   'dart_root_certificates_revision': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
 
-  'buildtools_revision': '5655267acc2b1c672aec43bfbd28c645908fcd74',
+  'buildtools_revision': 'cdf612890f1eb65b06d5cc1df229dd44c13ee507',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.
@@ -156,7 +156,13 @@ hooks = [
   {
     'name': 'buildtools',
     'pattern': '.',
-    'action': ['python', 'src/tools/buildtools/update.py'],
+    'action': [
+      'python',
+      'src/tools/buildtools/update.py',
+      '--ninja',
+      '--gn',
+      '--toolchain'
+    ],
   },
   {
     # Pull dart sdk if needed
