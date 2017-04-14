@@ -21,6 +21,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///    to describe the child's placement.
 ///  * [RenderSliverGrid], which uses this class during its
 ///    [RenderSliverGrid.performLayout] method.
+@immutable
 class SliverGridGeometry {
   /// Creates an object that describes the placement of a child in a [RenderSliverGrid].
   const SliverGridGeometry({
@@ -99,6 +100,7 @@ class SliverGridGeometry {
 ///    delegates's layout.
 ///  * [RenderSliverGrid], which uses this class during its
 ///    [RenderSliverGrid.performLayout] method.
+@immutable
 abstract class SliverGridLayout {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

@@ -24,6 +24,7 @@ export 'edge_insets.dart' show EdgeInsets;
 /// method to obtain a [BoxPainter]. [Decoration] objects can be
 /// shared between boxes; [BoxPainter] objects can cache resources to
 /// make painting on a particular surface faster.
+@immutable
 abstract class Decoration {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

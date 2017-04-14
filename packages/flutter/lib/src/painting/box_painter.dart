@@ -33,6 +33,7 @@ enum BoxShape {
 /// An immutable set of radii for each corner of a rectangle.
 ///
 /// Used by [BoxDecoration] when the shape is a [BoxShape.rectangle].
+@immutable
 class BorderRadius {
   /// Creates a border radius where all radii are [radius].
   const BorderRadius.all(Radius radius) : this.only(
@@ -151,6 +152,7 @@ enum BorderStyle {
 }
 
 /// A side of a border of a box.
+@immutable
 class BorderSide {
   /// Creates the side of a border.
   ///
@@ -250,6 +252,7 @@ class BorderSide {
 }
 
 /// A border of a box, comprised of four sides.
+@immutable
 class Border {
   /// Creates a border.
   ///
@@ -502,6 +505,7 @@ class Border {
 /// (e.g., has a border radius or a circular shape).
 ///
 /// This class is similar to CSS box-shadow.
+@immutable
 class BoxShadow {
   /// Creates a box shadow.
   ///
@@ -611,6 +615,7 @@ class BoxShadow {
 }
 
 /// A 2D gradient.
+@immutable
 abstract class Gradient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -963,6 +968,7 @@ void paintImage({
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
+@immutable
 class BackgroundImage {
   /// Creates a background image.
   ///
