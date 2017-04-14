@@ -436,19 +436,25 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Returns the TestTextInput singleton.
   ///
   /// Typical app tests will not need to use this value. To add text to widgets
-  /// like [Input] or [TextField], call [enterText].
+  /// like [TextField] or [FormTextField], call [enterText].
   TestTextInput get testTextInput => binding.testTextInput;
 
-  /// Give the EditableText widget specified by [finder] the focus, as if the
+  /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
   ///
-  /// Tests that just need to add text to widgets like [Input] or [TextField]
-  /// only need to call [enterText].
+  /// The widget specified by [finder] must be an [EditableText] or have
+  /// an [EditableText] descendant. For example `find.byType(TextField)`
+  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
+  ///
+  /// Tests that just need to add text to widgets like [TextField]
+  /// or [FormTextField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
     return TestAsyncUtils.guard(() async {
-      // TODO(hansmuller): Once find.descendant (#7789) lands replace the following
-      // RHS with state(find.descendant(finder), find.byType(EditableText)).
-      final EditableTextState editable = state(finder);
+      final EditableTextState editable = state(find.descendant(
+        of: finder,
+        matching: find.byType(EditableText),
+        matchRoot: true,
+      ));
       if (editable != binding.focusedEditable) {
         binding.focusedEditable = editable;
         await pump();
@@ -456,8 +462,15 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
-  /// Give the EditableText widget specified by [finder] the focus and
+  /// Give the text input widget specified by [finder] the focus and
   /// enter [text] as if it been provided by the onscreen keyboard.
+  ///
+  /// The widget specified by [finder] must be an [EditableText] or have
+  /// an [EditableText] descendant. For example `find.byType(TextField)`
+  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
+  ///
+  /// To just give [finder] the focus without entering any text,
+  /// see [showKeyboard].
   Future<Null> enterText(Finder finder, String text) async {
     return TestAsyncUtils.guard(() async {
       await showKeyboard(finder);

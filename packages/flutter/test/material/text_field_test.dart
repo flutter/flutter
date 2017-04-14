@@ -103,7 +103,7 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
-        await tester.enterText(find.byType(EditableText), testValue);
+        await tester.enterText(find.byType(TextField), testValue);
 
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
@@ -137,7 +137,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(TextField));
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
 
@@ -157,7 +157,7 @@ void main() {
     }
 
     await checkCursorToggle();
-    await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(TextField));
 
     // Try the test again with a nonempty EditableText.
     tester.testTextInput.updateEditingValue(const TextEditingValue(
@@ -182,7 +182,7 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
-    await tester.showKeyboard(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(TextField));
 
     const String testValue = 'ABC';
     tester.testTextInput.updateEditingValue(const TextEditingValue(
@@ -211,7 +211,7 @@ void main() {
     expect(controller.selection.extentOffset, -1);
 
     final String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
 
@@ -249,7 +249,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     final String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
     expect(controller.value.text, testValue);
 
     await tester.pumpWidget(builder());
@@ -284,7 +284,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     final String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
 
@@ -346,7 +346,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     final String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -398,7 +398,7 @@ void main() {
     await tester.pumpWidget(builder());
 
     final String testValue = 'abc def ghi';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
     await tester.pumpWidget(builder());
 
     // Tap the selection handle to bring up the "paste / select all" menu.
@@ -449,12 +449,12 @@ void main() {
     final RenderBox inputBox = findInputBox();
     final Size emptyInputSize = inputBox.size;
 
-    await tester.enterText(find.byType(EditableText), 'No wrapping here.');
+    await tester.enterText(find.byType(TextField), 'No wrapping here.');
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, equals(emptyInputSize));
 
-    await tester.enterText(find.byType(EditableText), kThreeLines);
+    await tester.enterText(find.byType(TextField), kThreeLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(emptyInputSize));
@@ -462,13 +462,13 @@ void main() {
     final Size threeLineInputSize = inputBox.size;
 
     // An extra line won't increase the size because we max at 3.
-    await tester.enterText(find.byType(EditableText), kFourLines);
+    await tester.enterText(find.byType(TextField), kFourLines);
     await tester.pumpWidget(builder(3));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, threeLineInputSize);
 
     // But now it will.
-    await tester.enterText(find.byType(EditableText), kFourLines);
+    await tester.enterText(find.byType(TextField), kFourLines);
     await tester.pumpWidget(builder(4));
     expect(findInputBox(), equals(inputBox));
     expect(inputBox.size, greaterThan(threeLineInputSize));
@@ -493,7 +493,7 @@ void main() {
 
     final String testValue = kThreeLines;
     final String cutValue = 'First line of stuff ';
-    await tester.enterText(find.byType(EditableText), testValue);
+    await tester.enterText(find.byType(TextField), testValue);
 
     await tester.pumpWidget(builder());
 
@@ -572,7 +572,7 @@ void main() {
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
 
-    await tester.enterText(find.byType(EditableText), kFourLines);
+    await tester.enterText(find.byType(TextField), kFourLines);
 
     await tester.pumpWidget(builder());
     await tester.pump(const Duration(seconds: 1));
@@ -660,7 +660,7 @@ void main() {
 
     Future<Null> checkText(String testValue) {
       return TestAsyncUtils.guard(() async {
-        await tester.enterText(find.byType(EditableText), testValue);
+        await tester.enterText(find.byType(TextField), testValue);
 
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
@@ -694,7 +694,7 @@ void main() {
 
     Future<Null> checkText(String testValue) async {
       return TestAsyncUtils.guard(() async {
-        await tester.enterText(find.byType(EditableText), testValue);
+        await tester.enterText(find.byType(TextField), testValue);
 
         // Check that the onChanged event handler fired.
         expect(textFieldValue, equals(testValue));
@@ -866,7 +866,7 @@ void main() {
 
     expect(topLeft.dx, equals(399.0));
 
-    await tester.enterText(find.byType(EditableText), 'abcd');
+    await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
 
     topLeft = editable.localToGlobal(
@@ -900,7 +900,7 @@ void main() {
 
     expect(topLeft.dx, equals(399.0));
 
-    await tester.enterText(find.byType(EditableText), 'abcd');
+    await tester.enterText(find.byType(TextField), 'abcd');
     await tester.pump();
 
     topLeft = editable.localToGlobal(
