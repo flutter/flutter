@@ -40,15 +40,24 @@ class FuchsiaReloadCommand extends FlutterCommand {
       help: 'Path to Fuchsia source tree.');
     argParser.addOption('gn-target',
       abbr: 'g',
-      help: 'GN target of the application, e.g //path/to/app:app');
+      help: 'GN target of the application, e.g //path/to/app:app.');
+    argParser.addFlag('list',
+      abbr: 'l',
+      defaultsTo: false,
+      help: 'Lists the running modules. '
+            'Requires the flags --address(-a) and --fuchsia-root(-f).');
     argParser.addOption('name-override',
       abbr: 'n',
       help: 'On-device name of the application binary.');
+    argParser.addOption('isolate-number',
+      abbr: 'i',
+      help: 'To reload only one instance, speficy the isolate number, e.g. '
+            'the number in foo\$main-###### given by --list.');
     argParser.addOption('target',
       abbr: 't',
       defaultsTo: flx.defaultMainPath,
       help: 'Target app path / main entry-point file. '
-            'Relative to --gn-target path, e.g. lib/main.dart');
+            'Relative to --gn-target path, e.g. lib/main.dart.');
   }
 
   @override
@@ -61,10 +70,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
   String _projectRoot;
   String _projectName;
   String _binaryName;
+  String _isolateNumber;
   String _fuchsiaProjectPath;
   String _target;
   String _address;
   String _dotPackagesPath;
+
+  bool _list;
 
   @override
   Future<Null> runCommand() async {
@@ -79,9 +91,14 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in servicePorts)
       printTrace('Fuchsia service port: $port');
 
+    if (_list) {
+      await _listViews(servicePorts);
+      return;
+    }
+
     // Check that there are running VM services on the returned
     // ports, and find the Isolates that are running the target app.
-    final String isolateName = '$_binaryName\$main';
+    final String isolateName = '$_binaryName\$main$_isolateNumber';
     final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
     if (targetPorts.isEmpty)
       throwToolExit('No VMs found running $_binaryName.');
@@ -90,41 +107,53 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
     // Set up a device and hot runner and attach the hot runner to the first
     // vm service we found.
-    final int firstPort = targetPorts[0];
-    final String fullAddress = '$_address:$firstPort';
-    final FuchsiaDevice device = new FuchsiaDevice(fullAddress);
+    final List<String> fullAddresses = targetPorts.map(
+      (int p) => '$_address:$p'
+    ).toList();
+    final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0]);
     final HotRunner hotRunner = new HotRunner(
       device,
       debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
       target: _target,
       projectRootPath: _fuchsiaProjectPath,
-      packagesFilePath: _dotPackagesPath,
+      packagesFilePath: _dotPackagesPath
     );
-    final Uri observatoryUri = Uri.parse('http://$fullAddress');
-    printStatus('Connecting to $_binaryName at $observatoryUri');
-    await hotRunner.attach(observatoryUri, isolateFilter: isolateName);
+    final List<Uri> observatoryUris =
+      fullAddresses.map((String a) => Uri.parse('http://$a')).toList();
+    printStatus('Connecting to $_binaryName');
+    await hotRunner.attach(observatoryUris, isolateFilter: isolateName);
   }
 
-  // Find ports where there is a view isolate with the given name
-  Future<List<int>> _filterPorts(List<int> ports, String isolateFilter) async {
-    final List<int> result = <int>[];
+  Future<List<FlutterView>> _getViews(List<int> ports) async {
+    final List<FlutterView> views = <FlutterView>[];
     for (int port in ports) {
       final String addr = 'http://$_address:$port';
       final Uri uri = Uri.parse(addr);
       final VMService vmService = VMService.connect(uri);
       await vmService.getVM();
       await vmService.waitForViews();
-      if (vmService.vm.firstView == null) {
-        printTrace('Found no views at $addr');
-        continue;
-      }
-      for (FlutterView v in vmService.vm.views) {
-        printTrace('At $addr, found view: ${v.uiIsolate.name}');
-        if (v.uiIsolate.name.indexOf(isolateFilter) == 0)
-          result.add(port);
-      }
+      views.addAll(vmService.vm.views);
+    }
+    return views;
+  }
+
+  // Find ports where there is a view isolate with the given name
+  Future<List<int>> _filterPorts(List<int> ports, String isolateFilter) async {
+    final List<int> result = <int>[];
+    for (FlutterView v in await _getViews(ports)) {
+      final Uri addr = v.owner.vmService.httpAddress;
+      printTrace('At $addr, found view: ${v.uiIsolate.name}');
+      if (v.uiIsolate.name.indexOf(isolateFilter) == 0)
+        result.add(addr.port);
     }
     return result;
+  }
+
+  Future<Null> _listViews(List<int> ports) async {
+    for (FlutterView v in await _getViews(ports)) {
+      final Uri addr = v.owner.vmService.httpAddress;
+      printStatus('At $addr, found view: ${v.uiIsolate.name}');
+    }
   }
 
   void _validateArguments() {
@@ -137,6 +166,12 @@ class FuchsiaReloadCommand extends FlutterCommand {
     _address = argResults['address'];
     if (_address == null)
       throwToolExit('Give the address of the device running Fuchsia with --address.');
+
+    _list = argResults['list'];
+    if (_list) {
+      // For --list, we only need the device address and the Fuchsia tree root.
+      return;
+    }
 
     final List<String> gnTarget = _extractPathAndName(argResults['gn-target']);
     _projectRoot = gnTarget[0];
@@ -165,6 +200,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
       _binaryName = _projectName;
     } else {
       _binaryName = nameOverride;
+    }
+
+    final String isolateNumber = argResults['isolate-number'];
+    if (isolateNumber == null) {
+      _isolateNumber = '';
+    } else {
+      _isolateNumber = '-$isolateNumber';
     }
   }
 
