@@ -68,6 +68,7 @@ public:
 private:
     void initFromRanges(const uint32_t* ranges, size_t nRanges);
 
+    static const uint32_t kMaximumCapacity = 0xFFFFFF;
     static const int kLogValuesPerPage = 8;
     static const int kPageMask = (1 << kLogValuesPerPage) - 1;
     static const int kLogBytesPerEl = 2;
@@ -77,16 +78,16 @@ private:
     typedef uint32_t element;
     static const element kElAllOnes = ~((element)0);
     static const element kElFirst = ((element)1) << kElMask;
-    static const uint32_t noZeroPage = ~0u;
+    static const uint16_t noZeroPage = 0xFFFF;
 
     static uint32_t calcNumPages(const uint32_t* ranges, size_t nRanges);
     static int CountLeadingZeros(element x);
 
     uint32_t mMaxVal;
 
-    std::unique_ptr<uint32_t[]> mIndices;
+    std::unique_ptr<uint16_t[]> mIndices;
     std::unique_ptr<element[]> mBitmaps;
-    uint32_t mZeroPageIndex;
+    uint16_t mZeroPageIndex;
 
     // Forbid copy and assign.
     SparseBitSet(const SparseBitSet&) = delete;
