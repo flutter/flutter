@@ -38,6 +38,8 @@ void assertMinikinLocked();
 
 hb_blob_t* getFontTable(const MinikinFont* minikinFont, uint32_t tag);
 
+constexpr uint32_t MAX_UNICODE_CODE_POINT = 0x10FFFF;
+
 // An RAII wrapper for hb_blob_t
 class HbBlob {
 public:

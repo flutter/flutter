@@ -25,6 +25,7 @@ using std::vector;
 
 #include <minikin/SparseBitSet.h>
 #include <minikin/CmapCoverage.h>
+#include "MinikinInternal.h"
 
 namespace minikin {
 
@@ -126,6 +127,16 @@ static bool getCoverageFormat12(vector<uint32_t>& coverage, const uint8_t* data,
             // invalid group range: size must be positive
             android_errorWriteLog(0x534e4554, "26413177");
             return false;
+        }
+
+        // No need to read outside of Unicode code point range.
+        if (start > MAX_UNICODE_CODE_POINT) {
+            return true;
+        }
+        if (end > MAX_UNICODE_CODE_POINT) {
+            // file is inclusive, vector is exclusive
+            addRange(coverage, start, MAX_UNICODE_CODE_POINT + 1);
+            return true;
         }
         addRange(coverage, start, end + 1);  // file is inclusive, vector is exclusive
     }
