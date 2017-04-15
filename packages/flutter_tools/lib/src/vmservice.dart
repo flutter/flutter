@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show BASE64;
+import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
@@ -773,6 +774,44 @@ class VM extends ServiceObjectOwner {
   }
 }
 
+class HeapSpace extends ServiceObject {
+  HeapSpace._empty(ServiceObjectOwner owner) : super._empty(owner);
+
+  int _used = 0;
+  int _capacity = 0;
+  int _external = 0;
+  int _collections = 0;
+  double _totalCollectionTimeInSeconds = 0.0;
+  double _averageCollectionPeriodInMillis = 0.0;
+
+  int get used => _used;
+  int get capacity => _capacity;
+  int get external => _external;
+
+  Duration get avgCollectionTime {
+    final double mcs = _totalCollectionTimeInSeconds *
+      Duration.MICROSECONDS_PER_SECOND /
+      math.max(_collections, 1);
+    return new Duration(microseconds: mcs.ceil());
+  }
+
+  Duration get avgCollectionPeriod {
+    final double mcs = _averageCollectionPeriodInMillis *
+                       Duration.MICROSECONDS_PER_MILLISECOND;
+    return new Duration(microseconds: mcs.ceil());
+  }
+
+  @override
+  void _update(Map<String, dynamic> map, bool mapIsRef) {
+    _used = map['used'];
+    _capacity = map['capacity'];
+    _external = map['external'];
+    _collections = map['collections'];
+    _totalCollectionTimeInSeconds = map['time'];
+    _averageCollectionPeriodInMillis = map['avgCollectionPeriodMillis'];
+  }
+}
+
 /// An isolate running inside the VM. Instances of the Isolate class are always
 /// canonicalized.
 class Isolate extends ServiceObjectOwner {
@@ -792,11 +831,16 @@ class Isolate extends ServiceObjectOwner {
 
   final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
 
+  HeapSpace _newSpace;
+  HeapSpace _oldSpace;
+
+  HeapSpace get newSpace => _newSpace;
+  HeapSpace get oldSpace => _oldSpace;
+
   @override
   ServiceObject getFromMap(Map<String, dynamic> map) {
-    if (map == null) {
+    if (map == null)
       return null;
-    }
     final String mapType = _stripRef(map['type']);
     if (mapType == 'Isolate') {
       // There are sometimes isolate refs in ServiceEvents.
@@ -811,9 +855,8 @@ class Isolate extends ServiceObjectOwner {
     }
     // Build the object from the map directly.
     serviceObject = new ServiceObject._fromMap(this, map);
-    if ((serviceObject != null) && serviceObject.canCache) {
+    if ((serviceObject != null) && serviceObject.canCache)
       _cache[mapId] = serviceObject;
-    }
     return serviceObject;
   }
 
@@ -844,6 +887,15 @@ class Isolate extends ServiceObjectOwner {
     return getFromMap(await invokeRpcRaw(method, params: params));
   }
 
+  void _updateHeaps(Map<String, dynamic> map, bool mapIsRef) {
+    if (_newSpace == null)
+      _newSpace = new HeapSpace._empty(this);
+    _newSpace._update(map['new'], mapIsRef);
+    if (_oldSpace == null)
+      _oldSpace = new HeapSpace._empty(this);
+    _oldSpace._update(map['old'], mapIsRef);
+  }
+
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {
     if (mapIsRef)
@@ -856,6 +908,8 @@ class Isolate extends ServiceObjectOwner {
     _upgradeCollection(map, this);
 
     pauseEvent = map['pauseEvent'];
+
+    _updateHeaps(map['_heaps'], mapIsRef);
   }
 
   static final int kIsolateReloadBarred = 1005;
