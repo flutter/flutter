@@ -309,7 +309,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _mode = _RefreshIndicatorMode.snap;
     _positionController
       .animateTo(1.0 / _kDragSizeFactorLimit, duration: _kIndicatorSnapDuration)
-      .whenComplete(() {
+      .then((Null value) {
         if (mounted && _mode == _RefreshIndicatorMode.snap) {
           assert(widget.onRefresh != null);
           setState(() {

@@ -13,6 +13,8 @@ import 'animation.dart';
 import 'curves.dart';
 import 'listener_helpers.dart';
 
+export 'package:flutter/scheduler.dart' show TickerFuture, TickerCanceled;
+
 /// The direction in which an animation is running.
 enum _AnimationDirection {
   /// The animation is running from beginning to end.
@@ -53,6 +55,35 @@ const Tolerance _kFlingTolerance = const Tolerance(
 /// in the context of tests. In other contexts, you will have to either pass a [TickerProvider] from
 /// a higher level (e.g. indirectly from a [State] that mixes in [TickerProviderStateMixin]), or
 /// create a custom [TickerProvider] subclass.
+///
+/// The methods that start animations return a [TickerFuture] object which
+/// completes when the animation completes successfully, and never throws an
+/// error; if the animation is canceled, the future never completes. This object
+/// also has a [TickerFuture.orCancel] property which returns a future that
+/// completes when the animation completes successfully, and completes with an
+/// error when the animation is aborted.
+///
+/// This can be used to write code such as:
+///
+/// ```dart
+/// Future<Null> fadeOutAndUpdateState() async {
+///   try {
+///     await fadeAnimationController.forward().orCancel;
+///     await sizeAnimationController.forward().orCancel;
+///     setState(() {
+///       dismissed = true;
+///     });
+///   } on TickerCanceled {
+///     // the animation got canceled, probably because we were disposed
+///   }
+/// }
+/// ```
+///
+/// ...which asynchnorously runs one animation, then runs another, then changes
+/// the state of the widget, without having to verify [State.mounted] is still
+/// true at each step, and without having to chain futures together explicitly.
+/// (This assumes that the controllers are created in [State.initState] and
+/// disposed in [State.dispose].)
 class AnimationController extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
 
@@ -171,6 +202,10 @@ class AnimationController extends Animation<double>
   ///
   /// Value listeners are notified even if this does not change the value.
   /// Status listeners are notified if the animation was previously playing.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
   set value(double newValue) {
     assert(newValue != null);
     stop();
@@ -202,7 +237,8 @@ class AnimationController extends Animation<double>
     }
   }
 
-  /// The amount of time that has passed between the time the animation started and the most recent tick of the animation.
+  /// The amount of time that has passed between the time the animation started
+  /// and the most recent tick of the animation.
   ///
   /// If the controller is not animating, the last elapsed duration is null.
   Duration get lastElapsedDuration => _lastElapsedDuration;
@@ -224,8 +260,12 @@ class AnimationController extends Animation<double>
 
   /// Starts running this animation forwards (towards the end).
   ///
-  /// Returns a [Future] that completes when the animation is complete.
-  Future<Null> forward({ double from }) {
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture forward({ double from }) {
     assert(() {
       if (duration == null) {
         throw new FlutterError(
@@ -244,8 +284,12 @@ class AnimationController extends Animation<double>
 
   /// Starts running this animation in reverse (towards the beginning).
   ///
-  /// Returns a [Future] that completes when the animation is complete.
-  Future<Null> reverse({ double from }) {
+  /// Returns a [TickerFuture] that completes when the animation is dismissed.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture reverse({ double from }) {
     assert(() {
       if (duration == null) {
         throw new FlutterError(
@@ -264,8 +308,12 @@ class AnimationController extends Animation<double>
 
   /// Drives the animation from its current value to target.
   ///
-  /// Returns a [Future] that completes when the animation is complete.
-  Future<Null> animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture animateTo(double target, { Duration duration, Curve curve: Curves.linear }) {
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
@@ -290,7 +338,7 @@ class AnimationController extends Animation<double>
         AnimationStatus.completed :
         AnimationStatus.dismissed;
       _checkStatusChanged();
-      return new Future<Null>.value();
+      return new TickerFuture.complete();
     }
     assert(simulationDuration > Duration.ZERO);
     assert(!isAnimating);
@@ -301,7 +349,14 @@ class AnimationController extends Animation<double>
   /// restarts the animation when it completes.
   ///
   /// Defaults to repeating between the lower and upper bounds.
-  Future<Null> repeat({ double min, double max, Duration period }) {
+  ///
+  /// Returns a [TickerFuture] that never completes. The [TickerFuture.onCancel] future
+  /// completes with an error when the animation is stopped (e.g. with [stop]).
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture repeat({ double min, double max, Duration period }) {
     min ??= lowerBound;
     max ??= upperBound;
     period ??= duration;
@@ -319,10 +374,18 @@ class AnimationController extends Animation<double>
     return animateWith(new _RepeatingSimulation(min, max, period));
   }
 
-  /// Drives the animation with a critically damped spring (within [lowerBound] and [upperBound]) and initial velocity.
+  /// Drives the animation with a critically damped spring (within [lowerBound]
+  /// and [upperBound]) and initial velocity.
   ///
-  /// If velocity is positive, the animation will complete, otherwise it will dismiss.
-  Future<Null> fling({ double velocity: 1.0 }) {
+  /// If velocity is positive, the animation will complete, otherwise it will
+  /// dismiss.
+  ///
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture fling({ double velocity: 1.0 }) {
     _direction = velocity < 0.0 ? _AnimationDirection.reverse : _AnimationDirection.forward;
     final double target = velocity < 0.0 ? lowerBound - _kFlingTolerance.distance
                                          : upperBound + _kFlingTolerance.distance;
@@ -332,12 +395,18 @@ class AnimationController extends Animation<double>
   }
 
   /// Drives the animation according to the given simulation.
-  Future<Null> animateWith(Simulation simulation) {
+  ///
+  /// Returns a [TickerFuture] that completes when the animation is complete.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
+  TickerFuture animateWith(Simulation simulation) {
     stop();
     return _startSimulation(simulation);
   }
 
-  Future<Null> _startSimulation(Simulation simulation) {
+  TickerFuture _startSimulation(Simulation simulation) {
     assert(simulation != null);
     assert(!isAnimating);
     _simulation = simulation;
@@ -355,21 +424,33 @@ class AnimationController extends Animation<double>
   ///
   /// This does not trigger any notifications. The animation stops in its
   /// current state.
-  void stop() {
+  ///
+  /// By default, the most recently returned [TickerFuture] is marked as having
+  /// been canceled, meaning the future never completes and its
+  /// [TickerFuture.orCancel] derivative future completes with a [TickerCanceled]
+  /// error. By passing the `completed` argument with the value false, this is
+  /// reversed, and the futures complete successfully.
+  void stop({ bool canceled: true }) {
     _simulation = null;
     _lastElapsedDuration = null;
-    _ticker.stop();
+    _ticker.stop(canceled: canceled);
   }
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
+  ///
+  /// The most recently returned [TickerFuture], if any, is marked as having been
+  /// canceled, meaning the future never completes and its [TickerFuture.orCancel]
+  /// derivative future completes with a [TickerCanceled] error.
   @override
   void dispose() {
     assert(() {
       if (_ticker == null) {
         throw new FlutterError(
           'AnimationController.dispose() called more than once.\n'
-          'A given AnimationController cannot be disposed more than once.'
+          'A given $runtimeType cannot be disposed more than once.\n'
+          'The following $runtimeType object was disposed multiple times:\n'
+          '  $this'
         );
       }
       return true;
@@ -397,7 +478,7 @@ class AnimationController extends Animation<double>
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
         AnimationStatus.dismissed;
-      stop();
+      stop(canceled: false);
     }
     notifyListeners();
     _checkStatusChanged();
