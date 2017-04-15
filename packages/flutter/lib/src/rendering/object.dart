@@ -2167,9 +2167,47 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   }
 
   void _paintWithContext(PaintingContext context, Offset offset) {
-    assert(!_debugDoingThisPaint);
-    assert(!_needsLayout);
-    assert(!_needsCompositingBitsUpdate);
+    assert(() {
+      if (_debugDoingThisPaint) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject reentrantly.\n'
+          'The following RenderObject was already being painted when it was '
+          'painted again:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'Since this typically indicates an infinite recursion, it is '
+          'disallowed.'
+        );
+      }
+      if (_needsLayout) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject before it was laid out.\n'
+          'The following RenderObject was marked as dirty for layout at the '
+          'time that it was painted:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'A RenderObject that is still dirty for layout cannot be painted '
+          'because it does not know its own geometry yet.\n'
+          'Maybe one of the ancestors of this RenderObject was skipped '
+          'during the layout phase, but not skipped during the paint phase. '
+          'If the ancestor in question is below the nearest relayout boundary, '
+          'but is not below the nearest repaint boundary, that could cause '
+          'this error.'
+        );
+      }
+      if (_needsCompositingBitsUpdate) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject before its compositing bits were '
+          'updated.\n'
+          'The following RenderObject was marked as having dirty compositing '
+          'bits at the time that it was painted:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'A RenderObject that still has dirty compositing bits cannot be '
+          'painted because this indicates that the tree has not yet been '
+          'properly configured for creating the layer tree.\n'
+          'This usually indicates an error in the Flutter framework itself.'
+        );
+      }
+      return true;
+    });
     RenderObject debugLastActivePaint;
     assert(() {
       _debugDoingThisPaint = true;
