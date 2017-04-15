@@ -271,6 +271,34 @@ TEST(CmapCoverageTest, SingleFormat12) {
     }
 }
 
+TEST(CmapCoverageTest, Format12_beyondTheUnicodeLimit) {
+    bool has_cmap_format_14_subtable = false;
+    {
+        SCOPED_TRACE("Starting range is out of Unicode code point. Should be ignored.");
+        std::vector<uint8_t> cmap = CmapBuilder::buildSingleFormat12Cmap(
+                0, 0, std::vector<uint32_t>({'a', 'a', 0x110000, 0x110000}));
+
+        SparseBitSet coverage = CmapCoverage::getCoverage(
+                cmap.data(), cmap.size(), &has_cmap_format_14_subtable);
+        EXPECT_TRUE(coverage.get('a'));
+        EXPECT_FALSE(coverage.get(0x110000));
+        EXPECT_FALSE(has_cmap_format_14_subtable);
+    }
+    {
+        SCOPED_TRACE("Ending range is out of Unicode code point. Should be ignored.");
+        std::vector<uint8_t> cmap = CmapBuilder::buildSingleFormat12Cmap(
+                0, 0, std::vector<uint32_t>({'a', 'a', 0x10FF00, 0x110000}));
+
+        SparseBitSet coverage = CmapCoverage::getCoverage(
+                cmap.data(), cmap.size(), &has_cmap_format_14_subtable);
+        EXPECT_TRUE(coverage.get('a'));
+        EXPECT_TRUE(coverage.get(0x10FF00));
+        EXPECT_TRUE(coverage.get(0x10FFFF));
+        EXPECT_FALSE(coverage.get(0x110000));
+        EXPECT_FALSE(has_cmap_format_14_subtable);
+    }
+}
+
 TEST(CmapCoverageTest, notSupportedEncodings) {
     bool has_cmap_format_14_subtable = false;
 
@@ -397,6 +425,16 @@ TEST(CmapCoverageTest, brokenFormat12Table) {
         CmapBuilder builder(1);
         builder.appendTable(0, 0, table);
         std::vector<uint8_t> cmap = builder.build();
+
+        SparseBitSet coverage = CmapCoverage::getCoverage(
+                cmap.data(), cmap.size(), &has_cmap_format_14_subtable);
+        EXPECT_EQ(0U, coverage.length());
+        EXPECT_FALSE(has_cmap_format_14_subtable);
+    }
+    {
+        SCOPED_TRACE("Too large code point");
+        std::vector<uint8_t> cmap = CmapBuilder::buildSingleFormat12Cmap(
+                0, 0, std::vector<uint32_t>({0x110000, 0x110000}));
 
         SparseBitSet coverage = CmapCoverage::getCoverage(
                 cmap.data(), cmap.size(), &has_cmap_format_14_subtable);
