@@ -55,8 +55,12 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
     if (nRanges == 0) {
         return;
     }
-    mMaxVal = ranges[nRanges * 2 - 1];
-    mIndices.reset(new uint32_t[(mMaxVal + kPageMask) >> kLogValuesPerPage]);
+    const uint32_t maxVal = ranges[nRanges * 2 - 1];
+    if (maxVal >= kMaximumCapacity) {
+        return;
+    }
+    mMaxVal = maxVal;
+    mIndices.reset(new uint16_t[(mMaxVal + kPageMask) >> kLogValuesPerPage]);
     uint32_t nPages = calcNumPages(ranges, nRanges);
     mBitmaps.reset(new element[nPages << (kLogValuesPerPage - kLogBitsPerEl)]());
     mZeroPageIndex = noZeroPage;
@@ -124,7 +128,7 @@ uint32_t SparseBitSet::nextSetBit(uint32_t fromIndex) const {
     }
     uint32_t maxPage = (mMaxVal + kPageMask) >> kLogValuesPerPage;
     for (uint32_t page = fromPage + 1; page < maxPage; page++) {
-        uint32_t index = mIndices[page];
+        uint16_t index = mIndices[page];
         if (index == mZeroPageIndex) {
             continue;
         }
