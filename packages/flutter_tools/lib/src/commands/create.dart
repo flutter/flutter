@@ -192,7 +192,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       String projectDescription, String dirPath, String flutterRoot,
       { bool renderDriverTest: false, bool withPluginHook: false }) {
     flutterRoot = fs.path.normalize(flutterRoot);
-    flutterRoot = _relativePath(from: dirPath, to: flutterRoot);
+    final String relativeFlutterRoot = _relativePath(from: dirPath, to: flutterRoot);
 
     final String pluginDartClass = _createPluginClassName(projectName);
     final String pluginClass = pluginDartClass.endsWith('Plugin')
@@ -205,7 +205,7 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
       'iosIdentifier': _createUTIIdentifier(projectName),
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
-      'flutterPackagesDirectory': fs.path.join(flutterRoot, 'packages'),
+      'flutterPackagesDirectory': fs.path.join(relativeFlutterRoot, 'packages'),
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
