@@ -220,6 +220,13 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   }
 }
 
+class DevFSException implements Exception {
+  DevFSException(this.message, [this.error, this.stackTrace]);
+  final String message;
+  final dynamic error;
+  final StackTrace stackTrace;
+}
+
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
       : httpAddress = serviceProtocol.httpAddress;
@@ -274,11 +281,16 @@ class _DevFSHttpWriter {
       request.headers.removeAll(HttpHeaders.ACCEPT_ENCODING);
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
-                          BASE64.encode(UTF8.encode(deviceUri.toString())));
+          BASE64.encode(UTF8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
       await response.drain<Null>();
+    } on SocketException catch (socketException, stackTrace) {
+      // We have one completer and can get up to kMaxInFlight errors.
+      if (!_completer.isCompleted)
+        _completer.completeError(socketException, stackTrace);
+      return;
     } catch (e) {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
@@ -422,8 +434,12 @@ class DevFS {
         try {
           await _httpWriter.write(dirtyEntries,
                                   progressReporter: progressReporter);
-        } catch (e) {
-          printError("Could not update files on device: $e");
+        } on SocketException catch (socketException, stackTrace) {
+          printTrace("DevFS sync failed. Lost connection to device: $socketException");
+          throw new DevFSException('Lost connection to device.', socketException, stackTrace);
+        } catch (exception, stackTrace) {
+          printError("Could not update files on device: $exception");
+          throw new DevFSException('Sync failed', exception, stackTrace);
         }
       } else {
         // Make service protocol requests for each.

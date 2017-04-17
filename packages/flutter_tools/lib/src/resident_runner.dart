@@ -49,6 +49,7 @@ abstract class ResidentRunner {
   final bool usesTerminalUI;
   final bool stayResident;
   final Completer<int> _finished = new Completer<int>();
+  bool _stopped = false;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
   String _projectRootPath;
@@ -101,6 +102,7 @@ abstract class ResidentRunner {
   }
 
   Future<Null> stop() async {
+    _stopped = true;
     await stopEchoingDeviceLog();
     await preStop();
     return stopApp();
@@ -259,7 +261,7 @@ abstract class ResidentRunner {
       service.done.then<Null>(
         _serviceProtocolDone,
         onError: _serviceProtocolError
-      ).whenComplete(appFinished);
+      ).whenComplete(_serviceDisconnected);
     }
   }
 
@@ -334,6 +336,18 @@ abstract class ResidentRunner {
     } finally {
       _processingUserRequest = false;
     }
+  }
+
+  void _serviceDisconnected() {
+    if (_stopped) {
+      // User requested the application exit.
+      return;
+    }
+    if (_finished.isCompleted)
+      return;
+    printStatus('Lost connection to device.');
+    _resetTerminal();
+    _finished.complete(0);
   }
 
   void appFinished() {
