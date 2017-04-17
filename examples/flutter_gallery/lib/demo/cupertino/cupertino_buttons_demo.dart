@@ -34,7 +34,9 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
             child: new Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget> [
-                new Text(_pressedCount > 0 ? "Button pressed $_pressedCount times" : " "),
+                new Text(_pressedCount > 0
+                    ? 'Button pressed $_pressedCount time${_pressedCount == 1 ? '' : 's'}'
+                    : ' '),
                 const Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
                   alignment: const FractionalOffset(0.5, 0.4),
