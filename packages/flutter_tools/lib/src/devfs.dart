@@ -479,11 +479,33 @@ class DevFS {
     return false;
   }
 
-  Future<bool> _scanDirectory(Directory directory,
-                              {Uri directoryUriOnDevice,
-                               bool recursive: false,
-                               bool ignoreDotFiles: true,
-                               Set<String> fileFilter}) async {
+  bool _shouldSkip(FileSystemEntity file,
+                   String relativePath,
+                   Uri directoryUriOnDevice, {
+                   bool ignoreDotFiles: true,
+                   Set<String> fileFilter
+                   }) {
+    if (file is Directory) {
+      // Skip non-files.
+      return true;
+    }
+    assert((file is Link) || (file is File));
+    if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
+      // Skip dot files.
+      return true;
+    }
+    if (fileFilter != null) {
+      final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
+      if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
+        // Skip files that are not included in the filter.
+        return true;
+      }
+    }
+    return false;
+  }
+
+  Uri _directoryUriOnDevice(Uri directoryUriOnDevice,
+                            Directory directory) {
     if (directoryUriOnDevice == null) {
       final String relativeRootPath = fs.path.relative(directory.path, from: rootDirectory.path);
       if (relativeRootPath == '.') {
@@ -491,6 +513,58 @@ class DevFS {
       } else {
         directoryUriOnDevice = fs.path.toUri(relativeRootPath);
       }
+    }
+    return directoryUriOnDevice;
+  }
+
+  /// Scan all files from the [fileFilter] that are contained in [directory] and
+  /// pass various filters (e.g. ignoreDotFiles).
+  Future<bool> _scanFilteredDirectory(Set<String> fileFilter,
+                                      Directory directory,
+                                      {Uri directoryUriOnDevice,
+                                       bool ignoreDotFiles: true}) async {
+    directoryUriOnDevice =
+        _directoryUriOnDevice(directoryUriOnDevice, directory);
+    try {
+      final String absoluteDirectoryPath =
+          fs.path.canonicalize(fs.path.absolute(directory.path));
+      // For each file in the file filter.
+      for (String filePath in fileFilter) {
+        if (!filePath.startsWith(absoluteDirectoryPath)) {
+          // File is not in this directory. Skip.
+          continue;
+        }
+        final String relativePath =
+          fs.path.relative(filePath, from: directory.path);
+        final FileSystemEntity file = fs.file(filePath);
+        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles)) {
+          continue;
+        }
+        final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
+        if (!_shouldIgnore(deviceUri))
+          _scanFile(deviceUri, file);
+      }
+    } on FileSystemException catch (e) {
+      _printScanDirectoryError(directory.path, e);
+      return false;
+    }
+    return true;
+  }
+
+  /// Scan all files in [directory] that pass various filters (e.g. ignoreDotFiles).
+  Future<bool> _scanDirectory(Directory directory,
+                              {Uri directoryUriOnDevice,
+                               bool recursive: false,
+                               bool ignoreDotFiles: true,
+                               Set<String> fileFilter}) async {
+    directoryUriOnDevice = _directoryUriOnDevice(directoryUriOnDevice, directory);
+    if ((fileFilter != null) && fileFilter.isNotEmpty) {
+      // When the fileFilter isn't empty, we can skip crawling the directory
+      // tree and instead use the fileFilter as the source of potential files.
+      return _scanFilteredDirectory(fileFilter,
+                                    directory,
+                                    directoryUriOnDevice: directoryUriOnDevice,
+                                    ignoreDotFiles: ignoreDotFiles);
     }
     try {
       final Stream<FileSystemEntity> files =
@@ -508,27 +582,12 @@ class DevFS {
             continue;
           }
         }
-        if (file is Directory) {
-          // Skip non-files.
-          continue;
-        }
-        assert((file is Link) || (file is File));
-        if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
-          // Skip dot files.
-          continue;
-        }
         final String relativePath =
-            fs.path.relative(file.path, from: directory.path);
+          fs.path.relative(file.path, from: directory.path);
+        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles, fileFilter: fileFilter)) {
+          continue;
+        }
         final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));
-        final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
-        if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
-          // Skip files that are not included in the filter.
-          continue;
-        }
-        if (ignoreDotFiles && deviceUri.path.startsWith('.')) {
-          // Skip directories that start with a dot.
-          continue;
-        }
         if (!_shouldIgnore(deviceUri))
           _scanFile(deviceUri, file);
       }
