@@ -184,7 +184,6 @@ void main() {
             .map((FileSystemEntity file) => fs.path.canonicalize(file.path))
             .toList());
       }
-
       final int bytes = await devFS.update(fileFilter: fileFilter);
       devFSOperations.expectMessages(<String>[
         'writeFile test .packages',
