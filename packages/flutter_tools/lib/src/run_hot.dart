@@ -373,7 +373,9 @@ class HotRunner extends ResidentRunner {
         rethrow;
       }
     } else {
-      final Status status = logger.startProgress('Performing hot reload...', progressId: 'hot.reload');
+      final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
+      final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
+      final Status status =  logger.startProgress('$progressPrefix hot reload...', progressId: 'hot.reload');
       try {
         final Stopwatch timer = new Stopwatch()..start();
         final OperationResult result = await _reloadSources(pause: pauseAfterRestart);
