@@ -480,6 +480,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
 
  @override
   void didUpdateWidget(DropdownButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     _updateSelectedIndex();
   }
 

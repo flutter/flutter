@@ -291,6 +291,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void didUpdateWidget(BottomNavigationBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.currentIndex != oldWidget.currentIndex) {
       if (widget.type == BottomNavigationBarType.shifting)
         _pushCircle(widget.currentIndex);

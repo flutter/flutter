@@ -368,6 +368,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
     _syncAll(widget.gestures);
   }
 

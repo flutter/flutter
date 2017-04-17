@@ -122,6 +122,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
 
   @override
   void didUpdateWidget(GlowingOverscrollIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.color != widget.color || oldWidget.axis != widget.axis) {
       _leadingController.color = widget.color;
       _leadingController.axis = widget.axis;

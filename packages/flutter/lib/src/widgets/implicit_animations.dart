@@ -148,6 +148,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 
   @override
   void didUpdateWidget(T oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.curve != oldWidget.curve)
       _updateCurve();
     _controller.duration = widget.duration;
@@ -229,11 +230,11 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// The [AnimatedContainer] will automatically animate between the old and
 /// new values of properties when they change using the provided curve and
 /// duration. Properties that are null are not animated.
-/// 
+///
 /// This class is useful for generating simple implicit transitions between
 /// different parameters to [Container] with its internal
 /// [AnimationController]. For more complex animations, you'll likely want to
-/// use a subclass of [Transition] such as the [DecoratedBoxTransition] or use 
+/// use a subclass of [Transition] such as the [DecoratedBoxTransition] or use
 /// your own [AnimationController].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.

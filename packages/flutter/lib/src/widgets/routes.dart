@@ -442,6 +442,7 @@ class _ModalScopeState extends State<_ModalScope> {
 
   @override
   void didUpdateWidget(_ModalScope oldWidget) {
+    super.didUpdateWidget(oldWidget);
     assert(widget.route == oldWidget.route);
   }
 

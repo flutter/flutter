@@ -831,7 +831,7 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// If you override this, make sure your method starts with a call to
   /// super.didUpdateWidget(oldWidget).
-  // TODO(abarth): Add @mustCallSuper.
+  @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 

@@ -183,6 +183,7 @@ class _TextFieldState extends State<TextField> {
 
   @override
   void didUpdateWidget(TextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
       _controller == new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)

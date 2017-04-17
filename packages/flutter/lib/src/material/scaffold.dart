@@ -196,6 +196,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
   @override
   void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
     final bool oldChildIsNull = oldWidget.child == null;
     final bool newChildIsNull = widget.child == null;
     if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key)
