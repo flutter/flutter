@@ -10,43 +10,65 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
+import 'node.dart';
 
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that
 /// are uploaded into the engine and displayed by the compositor. This class is
 /// the base class for all composited layers.
-abstract class Layer extends Object with TreeDiagnosticsMixin {
-  /// This layer's parent in the layer tree
-  ContainerLayer get parent => _parent;
-  ContainerLayer _parent;
+///
+/// Most layers can have their properties mutated, and layers can be moved to
+/// different parents. The scene must be explicitly recomposited after such
+/// changes are made; the layer tree does not maintain its own dirty state.
+///
+/// To composite the tree, create a [ui.SceneBuilder] object, pass it to the
+/// root [Layer] object's [addToScene] method, and then call
+/// [ui.SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
+/// using [ui.window.render].
+///
+/// See also:
+///
+///  * [RenderView.compositeFrame], which implements this recomposition protocol
+///    for painting [RenderObject] trees on the the display.
+abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
+  /// This layer's parent in the layer tree.
+  ///
+  /// The [parent] of the root node in the layer tree is null.
+  ///
+  /// Only subclasses of [ContainerLayer] can have children in the layer tree.
+  /// All other layer classes are used for leaves in the layer tree.
+  @override
+  ContainerLayer get parent => super.parent;
 
-  /// This layer's next sibling in the parent layer's child list
+  /// This layer's next sibling in the parent layer's child list.
   Layer get nextSibling => _nextSibling;
   Layer _nextSibling;
 
-  /// This layer's previous sibling in the parent layer's child list
+  /// This layer's previous sibling in the parent layer's child list.
   Layer get previousSibling => _previousSibling;
   Layer _previousSibling;
 
-  /// Removes this layer from its parent layer's child list
+  /// Removes this layer from its parent layer's child list.
   @mustCallSuper
-  void detach() {
-    _parent?._remove(this);
+  void remove() {
+    parent?._removeChild(this);
   }
 
-  /// Replaces this layer with the given layer in the parent layer's child list
+  /// Replaces this layer with the given layer in the parent layer's child list.
   void replaceWith(Layer newLayer) {
-    assert(_parent != null);
-    assert(newLayer._parent == null);
+    assert(parent != null);
+    assert(attached == parent.attached);
+    assert(newLayer.parent == null);
     assert(newLayer._nextSibling == null);
     assert(newLayer._previousSibling == null);
-    newLayer._nextSibling = _nextSibling;
+    assert(!newLayer.attached);
+    newLayer._nextSibling = nextSibling;
     if (_nextSibling != null)
-      newLayer._nextSibling._previousSibling = newLayer;
-    newLayer._previousSibling = _previousSibling;
+      _nextSibling._previousSibling = newLayer;
+    newLayer._previousSibling = previousSibling;
     if (_previousSibling != null)
-      newLayer._previousSibling._nextSibling = newLayer;
+      _previousSibling._nextSibling = newLayer;
     assert(() {
       Layer node = this;
       while (node.parent != null)
@@ -54,17 +76,19 @@ abstract class Layer extends Object with TreeDiagnosticsMixin {
       assert(node != newLayer); // indicates we are about to create a cycle
       return true;
     });
-    newLayer._parent = _parent;
-    if (_parent._firstChild == this)
-      _parent._firstChild = newLayer;
-    if (_parent._lastChild == this)
-      _parent._lastChild = newLayer;
+    parent.adoptChild(newLayer);
+    assert(newLayer.attached == parent.attached);
+    if (parent.firstChild == this)
+      parent._firstChild = newLayer;
+    if (parent.lastChild == this)
+      parent._lastChild = newLayer;
     _nextSibling = null;
     _previousSibling = null;
-    _parent = null;
+    parent.dropChild(this);
+    assert(!attached);
   }
 
-  /// Override this method to upload this layer to the engine
+  /// Override this method to upload this layer to the engine.
   ///
   /// The layerOffset is the accumulated offset of this layer's parent from the
   /// origin of the builder's coordinate system.
@@ -79,16 +103,22 @@ abstract class Layer extends Object with TreeDiagnosticsMixin {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
+    description.add('${ owner != null ? "owner: $owner" : "DETACHED" }');
     if (debugCreator != null)
       description.add('creator: $debugCreator');
   }
 }
 
-/// A composited layer containing a [Picture]
+/// A composited layer containing a [Picture].
+///
+/// Picture layers are always leaves in the layer tree.
 class PictureLayer extends Layer {
-  /// The picture recorded for this layer
+  /// The picture recorded for this layer.
   ///
-  /// The picture's coodinate system matches this layer's coodinate system
+  /// The picture's coodinate system matches this layer's coodinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   ui.Picture picture;
 
   /// Hints that the painting in this layer is complex and would benefit from
@@ -96,6 +126,9 @@ class PictureLayer extends Layer {
   ///
   /// If this hint is not set, the compositor will apply its own heuristics to
   /// decide whether the this layer is complex enough to benefit from caching.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   bool isComplexHint = false;
 
   /// Hints that the painting in this layer is likely to change next frame.
@@ -104,6 +137,9 @@ class PictureLayer extends Layer {
   /// will not be used in the future. If this hint is not set, the compositor
   /// will apply its own heuristics to decide whether this layer is likely to be
   /// reused in the future.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   bool willChangeHint = false;
 
   @override
@@ -114,6 +150,8 @@ class PictureLayer extends Layer {
 
 /// A layer that indicates to the compositor that it should display
 /// certain performance statistics within it.
+///
+/// Performance overlay layers are always leaves in the layer tree.
 class PerformanceOverlayLayer extends Layer {
   /// Creates a layer that displays a performance overlay.
   PerformanceOverlayLayer({
@@ -124,6 +162,9 @@ class PerformanceOverlayLayer extends Layer {
   });
 
   /// The rectangle in this layer's coordinate system that the overlay should occupy.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Rect overlayRect;
 
   /// The mask is created by shifting 1 by the index of the specific
@@ -157,40 +198,69 @@ class PerformanceOverlayLayer extends Layer {
   }
 }
 
-/// A composited layer that has a list of children
+/// A composited layer that has a list of children.
+///
+/// A [ContainerLayer] instance merely takes a list of children and inserts them
+/// into the composited rendering in order. There are subclasses of
+/// [ContainerLayer] which apply more elaborate effects in the process.
 class ContainerLayer extends Layer {
-  /// The first composited layer in this layer's child list
+  /// The first composited layer in this layer's child list.
   Layer get firstChild => _firstChild;
   Layer _firstChild;
 
-  /// The last composited layer in this layer's child list
+  /// The last composited layer in this layer's child list.
   Layer get lastChild => _lastChild;
   Layer _lastChild;
 
   bool _debugUltimatePreviousSiblingOf(Layer child, { Layer equals }) {
-    while (child._previousSibling != null) {
-      assert(child._previousSibling != child);
-      child = child._previousSibling;
+    assert(child.attached == attached);
+    while (child.previousSibling != null) {
+      assert(child.previousSibling != child);
+      child = child.previousSibling;
+      assert(child.attached == attached);
     }
     return child == equals;
   }
 
   bool _debugUltimateNextSiblingOf(Layer child, { Layer equals }) {
+    assert(child.attached == attached);
     while (child._nextSibling != null) {
       assert(child._nextSibling != child);
       child = child._nextSibling;
+      assert(child.attached == attached);
     }
     return child == equals;
   }
 
-  /// Adds the given layer to the end of this layer's child list
+  @override
+  void attach(Object owner) {
+    super.attach(owner);
+    Layer child = firstChild;
+    while (child != null) {
+      child.attach(owner);
+      child = child.nextSibling;
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    Layer child = firstChild;
+    while (child != null) {
+      child.detach();
+      child = child.nextSibling;
+    }
+  }
+
+  /// Adds the given layer to the end of this layer's child list.
   void append(Layer child) {
     assert(child != this);
-    assert(child != _firstChild);
-    assert(child != _lastChild);
-    assert(child._parent == null);
-    assert(child._nextSibling == null);
-    assert(child._previousSibling == null);
+    assert(child != firstChild);
+    assert(child != lastChild);
+    assert(child.parent == null);
+    assert(!child.attached);
+    assert(child.nextSibling == null);
+    assert(child.previousSibling == null);
     assert(() {
       Layer node = this;
       while (node.parent != null)
@@ -198,43 +268,53 @@ class ContainerLayer extends Layer {
       assert(node != child); // indicates we are about to create a cycle
       return true;
     });
-    child._parent = this;
-    child._previousSibling = _lastChild;
-    if (_lastChild != null)
-      _lastChild._nextSibling = child;
+    adoptChild(child);
+    child._previousSibling = lastChild;
+    if (lastChild != null)
+      lastChild._nextSibling = child;
     _lastChild = child;
     _firstChild ??= child;
+    assert(child.attached == attached);
   }
 
-  void _remove(Layer child) {
-    assert(child._parent == this);
-    assert(_debugUltimatePreviousSiblingOf(child, equals: _firstChild));
-    assert(_debugUltimateNextSiblingOf(child, equals: _lastChild));
+  // Implementation of [Layer.remove].
+  void _removeChild(Layer child) {
+    assert(child.parent == this);
+    assert(child.attached == attached);
+    assert(_debugUltimatePreviousSiblingOf(child, equals: firstChild));
+    assert(_debugUltimateNextSiblingOf(child, equals: lastChild));
     if (child._previousSibling == null) {
       assert(_firstChild == child);
       _firstChild = child._nextSibling;
     } else {
-      child._previousSibling._nextSibling = child._nextSibling;
+      child._previousSibling._nextSibling = child.nextSibling;
     }
     if (child._nextSibling == null) {
-      assert(_lastChild == child);
-      _lastChild = child._previousSibling;
+      assert(lastChild == child);
+      _lastChild = child.previousSibling;
     } else {
-      child._nextSibling._previousSibling = child._previousSibling;
+      child.nextSibling._previousSibling = child.previousSibling;
     }
+    assert((firstChild == null) == (lastChild == null));
+    assert(firstChild == null || firstChild.attached == attached);
+    assert(lastChild == null || lastChild.attached == attached);
+    assert(firstChild == null || _debugUltimateNextSiblingOf(firstChild, equals: lastChild));
+    assert(lastChild == null || _debugUltimatePreviousSiblingOf(lastChild, equals: firstChild));
     child._previousSibling = null;
     child._nextSibling = null;
-    child._parent = null;
+    dropChild(child);
+    assert(!child.attached);
   }
 
-  /// Removes all of this layer's children from its child list
+  /// Removes all of this layer's children from its child list.
   void removeAllChildren() {
-    Layer child = _firstChild;
+    Layer child = firstChild;
     while (child != null) {
       final Layer next = child.nextSibling;
       child._previousSibling = null;
       child._nextSibling = null;
-      child._parent = null;
+      assert(child.attached == attached);
+      dropChild(child);
       child = next;
     }
     _firstChild = null;
@@ -246,9 +326,15 @@ class ContainerLayer extends Layer {
     addChildrenToScene(builder, layerOffset);
   }
 
-  /// Uploads all of this layer's children to the engine
+  /// Uploads all of this layer's children to the engine.
+  ///
+  /// This method is typically used by [addToScene] to insert the children into
+  /// the scene. Subclasses of [ContainerLayer] typically override [addToScene]
+  /// to apply effects to the scene using the [ui.SceneBuilder] API, then insert
+  /// their children using [addChildrenToScene], then reverse the aforementioned
+  /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder, Offset childOffset) {
-    Layer child = _firstChild;
+    Layer child = firstChild;
     while (child != null) {
       child.addToScene(builder, childOffset);
       child = child.nextSibling;
@@ -257,19 +343,19 @@ class ContainerLayer extends Layer {
 
   @override
   String debugDescribeChildren(String prefix) {
+    if (firstChild == null)
+      return '';
     String result = '$prefix \u2502\n';
-    if (_firstChild != null) {
-      Layer child = _firstChild;
-      int count = 1;
-      while (child != _lastChild) {
-        result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
-        count += 1;
-        child = child._nextSibling;
-      }
-      if (child != null) {
-        assert(child == _lastChild);
-        result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
-      }
+    Layer child = firstChild;
+    int count = 1;
+    while (child != lastChild) {
+      result += '${child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502")}';
+      count += 1;
+      child = child.nextSibling;
+    }
+    if (child != null) {
+      assert(child == lastChild);
+      result += '${child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  ")}';
     }
     return result;
   }
@@ -291,6 +377,9 @@ class OffsetLayer extends ContainerLayer {
   OffsetLayer({ this.offset: Offset.zero });
 
   /// Offset from parent in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Offset offset;
 
   @override
@@ -306,7 +395,7 @@ class OffsetLayer extends ContainerLayer {
 }
 
 
-/// A composite layer that clips its children using a rectangle
+/// A composite layer that clips its children using a rectangle.
 class ClipRectLayer extends ContainerLayer {
   /// Creates a layer with a rectangular clip.
   ///
@@ -314,7 +403,10 @@ class ClipRectLayer extends ContainerLayer {
   /// the pipeline.
   ClipRectLayer({ this.clipRect });
 
-  /// The rectangle to clip in the parent's coordinate system
+  /// The rectangle to clip in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Rect clipRect;
 
   @override
@@ -331,7 +423,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 }
 
-/// A composite layer that clips its children using a rounded rectangle
+/// A composite layer that clips its children using a rounded rectangle.
 class ClipRRectLayer extends ContainerLayer {
   /// Creates a layer with a rounded-rectangular clip.
   ///
@@ -339,7 +431,10 @@ class ClipRRectLayer extends ContainerLayer {
   /// the pipeline.
   ClipRRectLayer({ this.clipRRect });
 
-  /// The rounded-rect to clip in the parent's coordinate system
+  /// The rounded-rect to clip in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   RRect clipRRect;
 
   @override
@@ -356,7 +451,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 }
 
-/// A composite layer that clips its children using a path
+/// A composite layer that clips its children using a path.
 class ClipPathLayer extends ContainerLayer {
   /// Creates a layer with a path-based clip.
   ///
@@ -364,7 +459,10 @@ class ClipPathLayer extends ContainerLayer {
   /// the pipeline.
   ClipPathLayer({ this.clipPath });
 
-  /// The path to clip in the parent's coordinate system
+  /// The path to clip in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Path clipPath;
 
   @override
@@ -381,7 +479,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 }
 
-/// A composited layer that applies a transformation matrix to its children
+/// A composited layer that applies a transformation matrix to its children.
 class TransformLayer extends OffsetLayer {
   /// Creates a transform layer.
   ///
@@ -391,7 +489,10 @@ class TransformLayer extends OffsetLayer {
     this.transform
   });
 
-  /// The matrix to apply
+  /// The matrix to apply.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Matrix4 transform;
 
   @override
@@ -415,7 +516,7 @@ class TransformLayer extends OffsetLayer {
   }
 }
 
-/// A composited layer that makes its children partially transparent
+/// A composited layer that makes its children partially transparent.
 class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
@@ -423,10 +524,13 @@ class OpacityLayer extends ContainerLayer {
   /// the pipeline.
   OpacityLayer({ this.alpha });
 
-  /// The amount to multiply into the alpha channel
+  /// The amount to multiply into the alpha channel.
   ///
   /// The opacity is expressed as an integer from 0 to 255, where 0 is fully
   /// transparent and 255 is fully opaque.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   int alpha;
 
   @override
@@ -452,12 +556,21 @@ class ShaderMaskLayer extends ContainerLayer {
   ShaderMaskLayer({ this.shader, this.maskRect, this.blendMode });
 
   /// The shader to apply to the children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Shader shader;
 
   /// The size of the shader.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Rect maskRect;
 
   /// The blend mode to apply when blending the shader with the children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   BlendMode blendMode;
 
   @override
@@ -485,6 +598,9 @@ class BackdropFilterLayer extends ContainerLayer {
   BackdropFilterLayer({ this.filter });
 
   /// The filter to apply to the existing contents of the scene.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   ui.ImageFilter filter;
 
   @override
@@ -515,13 +631,22 @@ class PhysicalModelLayer extends ContainerLayer {
     assert(color != null);
   }
 
-  /// The rounded-rect to clip in the parent's coordinate system
+  /// The rounded-rect to clip in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   RRect clipRRect;
 
   /// The z-coordinate at which to place this physical object.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   int elevation;
 
   /// The background color.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
   Color color;
 
   @override

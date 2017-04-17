@@ -809,6 +809,7 @@ class RenderTable extends RenderBox {
 
   @override
   void detach() {
+    super.detach();
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
@@ -816,7 +817,6 @@ class RenderTable extends RenderBox {
     }
     for (RenderBox child in _children)
       child?.detach();
-    super.detach();
   }
 
   @override

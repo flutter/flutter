@@ -126,7 +126,7 @@ class PaintingContext {
       assert(child._layer != null);
       assert(() {
         child.debugRegisterRepaintBoundaryPaint(includedParent: true, includedChild: false);
-        child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
+        child._layer.debugCreator = child.debugCreator ?? child;
         return true;
       });
     }
@@ -136,7 +136,7 @@ class PaintingContext {
 
   void _appendLayer(Layer layer) {
     assert(!_isRecording);
-    layer.detach();
+    layer.remove();
     _containerLayer.append(layer);
   }
 
@@ -1998,7 +1998,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// To access the layer in debug code, even when it might be inappropriate to
   /// access it (e.g. because it is dirty), consider [debugLayer].
   OffsetLayer get layer {
-    assert(isRepaintBoundary);
+    assert(isRepaintBoundary, 'You can only access RenderObject.layer for render objects that are repaint boundaries.');
     assert(!_needsPaint);
     return _layer;
   }
@@ -2141,6 +2141,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [RenderView] for an example of how this function is used.
   void scheduleInitialPaint(ContainerLayer rootLayer) {
+    assert(rootLayer.attached);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingPaint);
@@ -2157,11 +2158,13 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
   void replaceRootLayer(OffsetLayer rootLayer) {
+    assert(rootLayer.attached);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layer != null); // use scheduleInitialPaint the first time
+    _layer.detach();
     _layer = rootLayer;
     markNeedsPaint();
   }
