@@ -93,7 +93,20 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
-  testWidgets('dispose() method does not uncondtionally throw an error', (WidgetTester tester) async {
+  testWidgets('visitAncestorElements() called from dispose() throws error', (WidgetTester tester) async {
+    bool disposeCalled = false;
+    await tester.pumpWidget(
+      new TestWidget((BuildContext context) {
+        disposeCalled = true;
+        context.visitAncestorElements((Element element){ });
+      }),
+    );
+    await tester.pumpWidget(new Container());
+    expect(disposeCalled, isTrue);
+    expect(tester.takeException(), isFlutterError);
+  });
+
+  testWidgets('dispose() method does not unconditionally throw an error', (WidgetTester tester) async {
     bool disposeCalled = false;
     await tester.pumpWidget(
       new TestWidget((BuildContext context) {
