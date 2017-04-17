@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "flutter/fml/platform/darwin/cf_utils.h"
+#include "flutter/fml/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/utils/mac/SkCGUtils.h"
 
@@ -51,6 +52,7 @@ std::unique_ptr<Surface> IOSSurfaceSoftware::CreateGPUSurface() {
 }
 
 sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
+  TRACE_EVENT0("flutter", "IOSSurfaceSoftware::AcquireBackingStore");
   if (!IsValid()) {
     return nullptr;
   }
@@ -67,6 +69,7 @@ sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
 }
 
 bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
+  TRACE_EVENT0("flutter", "IOSSurfaceSoftware::PresentBackingStore");
   if (!IsValid() || backing_store == nullptr) {
     return false;
   }
@@ -76,6 +79,7 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
     return false;
   }
 
+  // Some basic sanity checking.
   uint64_t expected_pixmap_data_size = pixmap.width() * pixmap.height() * 4;
 
   if (expected_pixmap_data_size != pixmap.getSize64()) {
@@ -84,27 +88,38 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 
   fml::CFRef<CGColorSpaceRef> colorspace(CGColorSpaceCreateDeviceRGB());
 
-  fml::CFRef<CGContextRef> bitmap(CGBitmapContextCreate(
-      const_cast<uint32_t*>(pixmap.addr32()),  // data managed pixmap
-      pixmap.width(),                          // width
-      pixmap.height(),                         // height
-      8,                                       // bits per component
-      4 * pixmap.width(),                      // bytes per row
-      colorspace,                              // colorspace
-      kCGImageAlphaPremultipliedLast           // bitmap info
+  // Setup the data provider that gives CG a view into the pixmap.
+  fml::CFRef<CGDataProviderRef> pixmap_data_provider(CGDataProviderCreateWithData(
+      nullptr,             // info
+      pixmap.addr32(),     // data
+      pixmap.getSize64(),  // size
+      nullptr              // release callback
       ));
 
-  if (!bitmap) {
+  if (!pixmap_data_provider) {
     return false;
   }
 
-  fml::CFRef<CGImageRef> image(CGBitmapContextCreateImage(bitmap));
+  // Create the CGImageRef representation on the pixmap.
+  fml::CFRef<CGImageRef> pixmap_image(CGImageCreate(pixmap.width(),      // width
+                                                    pixmap.height(),     // height
+                                                    8,                   // bits per component
+                                                    32,                  // bits per pixel
+                                                    4 * pixmap.width(),  // bytes per row
+                                                    colorspace,          // colorspace
+                                                    kCGImageAlphaPremultipliedLast,  // bitmap info
+                                                    pixmap_data_provider,      // data provider
+                                                    nullptr,                   // decode array
+                                                    false,                     // should interpolate
+                                                    kCGRenderingIntentDefault  // rendering intent
+                                                    ));
 
-  if (!image) {
+  if (!pixmap_image) {
     return false;
   }
 
-  [GetLayer() setContents:reinterpret_cast<id>(static_cast<CGImageRef>(image))];
+  CALayer* layer = GetLayer();
+  layer.contents = reinterpret_cast<id>(static_cast<CGImageRef>(pixmap_image));
 
   return true;
 }
