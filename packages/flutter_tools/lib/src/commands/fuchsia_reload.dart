@@ -195,9 +195,12 @@ class FuchsiaReloadCommand extends FlutterCommand {
       return;
     }
 
-    final List<String> gnTarget = _extractPathAndName(argResults['gn-target']);
-    _projectRoot = gnTarget[0];
-    _projectName = gnTarget[1];
+    final String gnTarget = argResults['gn-target'];
+    if (gnTarget == null)
+      throwToolExit('Give the GN target with --gn-target(-g).');
+    final List<String> targetInfo = _extractPathAndName(gnTarget);
+    _projectRoot = targetInfo[0];
+    _projectName = targetInfo[1];
     _fuchsiaProjectPath = '$_fuchsiaRoot/$_projectRoot';
     if (!_directoryExists(_fuchsiaProjectPath))
       throwToolExit('Target does not exist in the Fuchsia tree: $_fuchsiaProjectPath.');
