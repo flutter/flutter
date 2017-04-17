@@ -42,6 +42,8 @@ class SurfaceFrame {
 
 class Surface {
  public:
+  Surface();
+
   virtual ~Surface();
 
   virtual bool Setup() = 0;
@@ -51,6 +53,15 @@ class Surface {
   virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) = 0;
 
   virtual GrContext* GetContext() = 0;
+
+  virtual bool SupportsScaling() const;
+
+  double GetScale() const;
+
+  void SetScale(double scale);
+
+ private:
+  double scale_;
 };
 
 }  // namespace shell

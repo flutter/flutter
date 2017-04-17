@@ -32,6 +32,8 @@ class GPUSurfaceSoftware : public Surface {
 
   GrContext* GetContext() override;
 
+  bool SupportsScaling() const override;
+
  private:
   GPUSurfaceSoftwareDelegate* delegate_;
 

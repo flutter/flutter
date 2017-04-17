@@ -22,13 +22,22 @@ bool GPUSurfaceSoftware::IsValid() {
   return delegate_ != nullptr;
 }
 
+bool GPUSurfaceSoftware::SupportsScaling() const {
+  return true;
+}
+
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
-    const SkISize& size) {
+    const SkISize& logical_size) {
   if (!IsValid()) {
     return nullptr;
   }
 
-  auto backing_store = delegate_->AcquireBackingStore(size);
+  // Check if we need to support surface scaling.
+  const auto scale = SupportsScaling() ? GetScale() : 1.0;
+  const auto size = SkISize::Make(logical_size.width() * scale,
+                                  logical_size.height() * scale);
+
+  sk_sp<SkSurface> backing_store = delegate_->AcquireBackingStore(size);
 
   if (backing_store == nullptr) {
     return nullptr;
@@ -37,6 +46,13 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
   if (size != SkISize::Make(backing_store->width(), backing_store->height())) {
     return nullptr;
   }
+
+  // If the surface has been scaled, we need to apply the inverse scaling to the
+  // underlying canvas so that coordinates are mapped to the same spot
+  // irrespective of surface scaling.
+  SkCanvas* canvas = backing_store->getCanvas();
+  canvas->resetMatrix();
+  canvas->scale(scale, scale);
 
   SurfaceFrame::SubmitCallback
       on_submit = [self = weak_factory_.GetWeakPtr()](
