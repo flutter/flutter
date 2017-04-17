@@ -4,8 +4,10 @@
 
 assert(is_fuchsia)
 
+import("//build/vulkan/config.gni")
+
 declare_args() {
-  flutter_enable_vulkan = false
+  flutter_enable_vulkan = fuchsia_use_vulkan
   flutter_use_vulkan_native_surface = false
 }
 
