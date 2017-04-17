@@ -108,7 +108,13 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+  bool updateShouldNotify(DefaultTextStyle old) {
+    return style != old.style ||
+        textAlign != old.textAlign ||
+        softWrap != old.softWrap ||
+        overflow != old.overflow ||
+        maxLines != old.maxLines;
+  }
 
   @override
   void debugFillDescription(List<String> description) {
