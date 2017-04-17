@@ -808,7 +808,7 @@ void main() {
     expect(tabController.index, 2);
   });
 
-  testWidgets('Scrollabel TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
+  testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/9374
 
     final List<Tab> tabs = new List<Tab>.generate(20, (int index) {
