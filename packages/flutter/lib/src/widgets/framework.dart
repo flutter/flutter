@@ -1585,6 +1585,11 @@ abstract class BuildContext {
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
   ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// in [State.didChangeDependencies].
+  ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
   /// going to be cached and reused later.
@@ -1609,6 +1614,11 @@ abstract class BuildContext {
   /// widgets to obtain their corresponding [InheritedElement] object so that they
   /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
   /// notify the widgets that _did_ register such a relationship.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1623,6 +1633,11 @@ abstract class BuildContext {
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -1631,7 +1646,7 @@ abstract class BuildContext {
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
   /// In general, [inheritFromWidgetOfExactType] is more appropriate for such
-  /// cases. This method is useful to change the state of an ancestor widget in
+  /// cases. This method is useful for changing the state of an ancestor widget in
   /// a one-off manner, for example, to cause an ancestor scrolling list to
   /// scroll this build context's widget into view, or to move the focus in
   /// response to user interaction.
@@ -1644,6 +1659,11 @@ abstract class BuildContext {
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   ///
   /// Example:
   ///
@@ -1663,6 +1683,11 @@ abstract class BuildContext {
   /// it is used by [Material] so that [InkWell] widgets can trigger the ink
   /// splash on the [Material]'s actual render object.
   ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
@@ -1677,6 +1702,11 @@ abstract class BuildContext {
   /// This is useful for inspecting the widget tree.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the tree).
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   void visitAncestorElements(bool visitor(Element element));
 
   /// Walks the children of this widget.
@@ -2739,7 +2769,7 @@ abstract class Element implements BuildContext {
           'The size of this render object has not yet been determined because '
           'this render object has not yet been through layout, which typically '
           'means that the size getter was called too early in the pipeline '
-          '(e.g., during the build pahse) before the framework has determined '
+          '(e.g., during the build phase) before the framework has determined '
           'the size and position of the render objects during layout.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
@@ -2756,8 +2786,25 @@ abstract class Element implements BuildContext {
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
+  bool _debugCheckStateIsActiveForAncestorLoopkup() {
+    assert(() {
+      if (_debugLifecycleState != _ElementLifecycle.active) {
+        throw new FlutterError(
+          'Looking up a deactivated widget\'s ancestor is unsafe.\n'
+          'At this point the state of the widget\'s element tree is no longer '
+          'stable. To safely refer to a widget\'s ancestor in its dispose() method, '
+          'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
+          'in the widget\'s didChangeDependencies() method.\n'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
@@ -2772,6 +2819,7 @@ abstract class Element implements BuildContext {
 
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     return ancestor;
   }
@@ -2783,6 +2831,7 @@ abstract class Element implements BuildContext {
 
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
@@ -2791,6 +2840,7 @@ abstract class Element implements BuildContext {
 
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is StatefulElement && matcher.check(ancestor.state))
@@ -2803,6 +2853,7 @@ abstract class Element implements BuildContext {
 
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
@@ -2815,6 +2866,7 @@ abstract class Element implements BuildContext {
 
   @override
   void visitAncestorElements(bool visitor(Element element)) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
       ancestor = ancestor._parent;
