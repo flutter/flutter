@@ -51,6 +51,27 @@ bool SurfaceFrame::PerformSubmit() {
   return false;
 }
 
+Surface::Surface() : scale_(1.0) {}
+
 Surface::~Surface() = default;
+
+bool Surface::SupportsScaling() const {
+  return false;
+}
+
+double Surface::GetScale() const {
+  return scale_;
+}
+
+void Surface::SetScale(double scale) {
+  static constexpr double kMaxScale = 1.0;
+  static constexpr double kMinScale = 0.25;
+  if (scale > kMaxScale) {
+    scale = kMaxScale;
+  } else if (scale < kMinScale) {
+    scale = kMinScale;
+  }
+  scale_ = scale;
+}
 
 }  // namespace shell
