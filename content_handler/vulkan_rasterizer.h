@@ -97,6 +97,10 @@ class VulkanRasterizer : public Rasterizer {
     }
 
     ftl::RefPtr<vulkan::VulkanProcTable> vk_;
+    std::unique_ptr<vulkan::VulkanApplication> application_;
+    std::unique_ptr<vulkan::VulkanDevice> logical_device_;
+    sk_sp<GrVkBackendContext> backend_context_;
+    sk_sp<GrContext> context_;
 
     // These three containers hold surfaces in various stages of recycling
 
@@ -121,11 +125,6 @@ class VulkanRasterizer : public Rasterizer {
     // Surfaces exist in pendind surfaces until they are released by the buffer
     // consumer
     std::unordered_map<mx_handle_t, PendingSurfaceInfo> pending_surfaces_;
-
-    sk_sp<GrContext> context_;
-    sk_sp<GrVkBackendContext> backend_context_;
-    std::unique_ptr<vulkan::VulkanApplication> application_;
-    std::unique_ptr<vulkan::VulkanDevice> logical_device_;
     bool valid_;
 
     bool Initialize();
