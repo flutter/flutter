@@ -4,8 +4,9 @@ description: Flutter end-to-end test.
 dependencies:
   flutter:
     sdk: flutter
-dev_dependencies:
   flutter_driver:
     sdk: flutter
+dev_dependencies:
+  test: 0.12.20
 flutter:
   uses-material-design: true
