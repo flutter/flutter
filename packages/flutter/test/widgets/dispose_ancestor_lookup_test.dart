@@ -93,4 +93,17 @@ void main() {
     expect(tester.takeException(), isFlutterError);
   });
 
+  testWidgets('dispose() method does not uncondtionally throw an error', (WidgetTester tester) async {
+    bool disposeCalled = false;
+    await tester.pumpWidget(
+      new TestWidget((BuildContext context) {
+        disposeCalled = true;
+      }),
+    );
+    await tester.pumpWidget(new Container());
+    expect(disposeCalled, isTrue);
+  });
+
+
+
 }
