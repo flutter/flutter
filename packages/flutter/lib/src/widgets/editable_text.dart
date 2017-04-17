@@ -236,6 +236,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   @override
   void didUpdateWidget(EditableText oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
       oldWidget.controller.removeListener(_didChangeTextEditingValue);
       widget.controller.addListener(_didChangeTextEditingValue);

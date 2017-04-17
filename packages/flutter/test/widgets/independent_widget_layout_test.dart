@@ -78,6 +78,7 @@ class TriggerableState extends State<TriggerableWidget> {
 
   @override
   void didUpdateWidget(TriggerableWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     widget.trigger.callback = fire;
   }
 

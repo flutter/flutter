@@ -107,6 +107,7 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
 
   @override
   void didUpdateWidget(StreamBuilderBase<T, S> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.stream != widget.stream) {
       if (_subscription != null) {
         _unsubscribe();
@@ -419,6 +420,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
 
   @override
   void didUpdateWidget(FutureBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.future != widget.future) {
       if (_activeCallbackIdentity != null) {
         _unsubscribe();

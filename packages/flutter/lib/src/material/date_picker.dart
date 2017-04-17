@@ -372,6 +372,7 @@ class _MonthPickerState extends State<MonthPicker> {
 
   @override
   void didUpdateWidget(MonthPicker oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.selectedDate != oldWidget.selectedDate) {
       _dayPickerController = new PageController(initialPage: _monthDelta(widget.firstDate, widget.selectedDate));
       _currentDisplayedMonthDate =

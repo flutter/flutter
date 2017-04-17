@@ -30,6 +30,7 @@ class TestWidgetState extends State<TestWidget> {
 
   @override
   void didUpdateWidget(TestWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     syncedState = widget.syncedState;
     // we explicitly do NOT sync the persistentState from the new instance
     // because we're using that to track whether we got recreated

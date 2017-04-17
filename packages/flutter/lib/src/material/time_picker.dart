@@ -479,6 +479,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   @override
   void didUpdateWidget(_Dial oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.mode != oldWidget.mode && !_dragging)
       _animateTo(_getThetaForTime(widget.selectedTime));
   }

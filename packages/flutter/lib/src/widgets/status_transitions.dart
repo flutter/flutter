@@ -39,6 +39,7 @@ class _StatusTransitionState extends State<StatusTransitionWidget> {
 
   @override
   void didUpdateWidget(StatusTransitionWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.animation != oldWidget.animation) {
       oldWidget.animation.removeStatusListener(_animationStatusChanged);
       widget.animation.addStatusListener(_animationStatusChanged);

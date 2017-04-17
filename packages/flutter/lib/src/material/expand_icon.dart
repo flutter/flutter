@@ -84,6 +84,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
 
   @override
   void didUpdateWidget(ExpandIcon oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.isExpanded != oldWidget.isExpanded) {
       if (widget.isExpanded) {
         _controller.forward();

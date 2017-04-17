@@ -74,6 +74,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 
   @override
   void didUpdateWidget(AnimatedWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.listenable != oldWidget.listenable) {
       oldWidget.listenable.removeListener(_handleChange);
       widget.listenable.addListener(_handleChange);
@@ -391,20 +392,20 @@ class RelativePositionedTransition extends AnimatedWidget {
 
 /// Animated version of a [DecoratedBox] that animates the different properties
 /// of its [Decoration].
-/// 
+///
 /// See also:
 ///
 /// * [DecoratedBox], which also draws a [Decoration] but is not animated.
-/// * [AnimatedContainer], a more full-featured container that also animates on 
+/// * [AnimatedContainer], a more full-featured container that also animates on
 ///   decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecorationBox] whose [Decoration] animation updates
-  /// the widget. 
-  /// 
-  /// The [decoration] and [position] cannot be null. 
-  /// 
+  /// the widget.
+  ///
+  /// The [decoration] and [position] cannot be null.
+  ///
   /// See also:
-  /// 
+  ///
   /// * [new DecoratedBox].
   DecoratedBoxTransition({
     Key key,

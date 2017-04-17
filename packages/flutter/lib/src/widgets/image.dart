@@ -244,6 +244,7 @@ class _ImageState extends State<Image> {
 
   @override
   void didUpdateWidget(Image oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (widget.image != oldWidget.image)
       _resolveImage();
   }

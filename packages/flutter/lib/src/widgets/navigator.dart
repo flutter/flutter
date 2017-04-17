@@ -716,6 +716,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   @override
   void didUpdateWidget(Navigator oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.observers != widget.observers) {
       for (NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;

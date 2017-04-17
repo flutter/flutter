@@ -23,6 +23,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
 
   @override
   void didUpdateWidget(ProbeWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
     setState(() {});
   }
 
