@@ -35,11 +35,27 @@ void main() {
 
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
-      return _createAndAnalyzeProject(temp, <String>[]);
+      return _createAndAnalyzeProject(
+        temp,
+        <String>[],
+        fs.path.join(temp.path, 'lib', 'main.dart'),
+      );
     });
 
     testUsingContext('project with-driver-test', () async {
-      return _createAndAnalyzeProject(temp, <String>['--with-driver-test']);
+      return _createAndAnalyzeProject(
+        temp,
+        <String>['--with-driver-test'],
+        fs.path.join(temp.path, 'lib', 'main.dart'),
+      );
+    });
+
+    testUsingContext('plugin project', () async {
+      return _createAndAnalyzeProject(
+        temp,
+        <String>['--plugin'],
+        fs.path.join(temp.path, 'example', 'lib', 'main.dart'),
+      );
     });
 
     // Verify content and formatting
@@ -54,27 +70,30 @@ void main() {
       void expectExists(String relPath) {
         expect(fs.isFileSync('${temp.path}/$relPath'), true);
       }
+
       expectExists('lib/main.dart');
       for (FileSystemEntity file in temp.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
-          final String original= file.readAsStringSync();
+          final String original = file.readAsStringSync();
 
           final Process process = await Process.start(
-              sdkBinaryName('dartfmt'),
-              <String>[file.path],
-              workingDirectory: temp.path,
+            sdkBinaryName('dartfmt'),
+            <String>[file.path],
+            workingDirectory: temp.path,
           );
           final String formatted =
-            await process.stdout.transform(UTF8.decoder).join();
+              await process.stdout.transform(UTF8.decoder).join();
 
           expect(original, formatted, reason: file.path);
         }
       }
 
       // Generated Xcode settings
-      final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+      final String xcodeConfigPath =
+          fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
       expectExists(xcodeConfigPath);
-      final File xcodeConfigFile = fs.file(fs.path.join(temp.path, xcodeConfigPath));
+      final File xcodeConfigFile =
+          fs.file(fs.path.join(temp.path, xcodeConfigPath));
       final String xcodeConfig = xcodeConfigFile.readAsStringSync();
       expect(xcodeConfig, contains('FLUTTER_ROOT='));
       expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
@@ -127,7 +146,11 @@ void main() {
   });
 }
 
-Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) async {
+Future<Null> _createAndAnalyzeProject(
+  Directory dir,
+  List<String> createArgs,
+  String mainPath,
+) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -136,12 +159,15 @@ Future<Null> _createAndAnalyzeProject(Directory dir, List<String> createArgs) as
   args.add(dir.path);
   await runner.run(args);
 
-  final String mainPath = fs.path.join(dir.path, 'lib', 'main.dart');
   expect(fs.file(mainPath).existsSync(), true);
-  final String flutterToolsPath = fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
   final ProcessResult exec = Process.runSync(
-    '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
-    workingDirectory: dir.path
+    '$dartSdkPath/bin/dart',
+    <String>[flutterToolsPath, 'analyze'],
+    workingDirectory: dir.path,
   );
   if (exec.exitCode != 0) {
     print(exec.stdout);
