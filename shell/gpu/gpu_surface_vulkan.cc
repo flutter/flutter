@@ -32,18 +32,21 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceVulkan::AcquireFrame(
     return nullptr;
   }
 
-  return std::make_unique<SurfaceFrame>(
-      std::move(surface),
-      [weak_this = weak_factory_.GetWeakPtr()](SkCanvas * canvas)->bool {
-        // Frames are only ever acquired on the GPU thread. This is also the
-        // thread on which the weak pointer factory is collected (as this
-        // instance is owned by the rasterizer). So this use of weak pointers is
-        // safe.
-        if (canvas == nullptr || !weak_this) {
-          return false;
-        }
-        return weak_this->window_.SwapBuffers();
-      });
+  SurfaceFrame::SubmitCallback callback = [weak_this =
+                                               weak_factory_.GetWeakPtr()](
+                                              const SurfaceFrame&,
+                                              SkCanvas* canvas)
+                                              ->bool {
+    // Frames are only ever acquired on the GPU thread. This is also the thread
+    // on which the weak pointer factory is collected (as this instance is owned
+    // by the rasterizer). So this use of weak pointers is safe.
+    if (canvas == nullptr || !weak_this) {
+      return false;
+    }
+    return weak_this->window_.SwapBuffers();
+  };
+  return std::make_unique<SurfaceFrame>(std::move(surface),
+                                        std::move(callback));
 }
 
 GrContext* GPUSurfaceVulkan::GetContext() {
