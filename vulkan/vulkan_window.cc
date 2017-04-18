@@ -129,6 +129,11 @@ sk_sp<GrVkBackendContext> VulkanWindow::CreateSkiaBackendContext() {
     return nullptr;
   }
 
+  // The Skia backend context takes ownership of the device and the instance.
+  // Make sure we release our ownership now.
+  logical_device_->ReleaseDeviceOwnership();
+  application_->ReleaseInstanceOwnership();
+
   auto context = sk_make_sp<GrVkBackendContext>();
   context->fInstance = application_->GetInstance();
   context->fPhysicalDevice = logical_device_->GetPhysicalDeviceHandle();

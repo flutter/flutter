@@ -148,6 +148,10 @@ const VulkanHandle<VkDevice>& VulkanDevice::GetHandle() const {
   return device_;
 }
 
+void VulkanDevice::ReleaseDeviceOwnership() {
+  device_.ReleaseOwnership();
+}
+
 const VulkanHandle<VkPhysicalDevice>& VulkanDevice::GetPhysicalDeviceHandle()
     const {
   return physical_device_;

@@ -33,7 +33,9 @@ class VulkanApplication {
 
   uint32_t GetAPIVersion() const;
 
-  const VulkanHandle<VkInstance>& GetInstance();
+  const VulkanHandle<VkInstance>& GetInstance() const;
+
+  void ReleaseInstanceOwnership();
 
   std::unique_ptr<VulkanDevice> AcquireFirstCompatibleLogicalDevice() const;
 

@@ -115,8 +115,12 @@ uint32_t VulkanApplication::GetAPIVersion() const {
   return api_version_;
 }
 
-const VulkanHandle<VkInstance>& VulkanApplication::GetInstance() {
+const VulkanHandle<VkInstance>& VulkanApplication::GetInstance() const {
   return instance_;
+}
+
+void VulkanApplication::ReleaseInstanceOwnership() {
+  instance_.ReleaseOwnership();
 }
 
 std::vector<VkPhysicalDevice> VulkanApplication::GetPhysicalDevices() const {
