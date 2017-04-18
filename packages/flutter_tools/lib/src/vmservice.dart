@@ -941,6 +941,12 @@ class Isolate extends ServiceObjectOwner {
     }
   }
 
+  /// Resumes the isolate.
+  Future<Map<String, dynamic>> resume() {
+    return invokeRpcRaw('resume');
+  }
+
+
   // Flutter extension methods.
 
   // Invoke a flutter extension method, if the flutter extension is not
