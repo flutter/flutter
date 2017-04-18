@@ -904,11 +904,10 @@ class TabPageSelector extends StatelessWidget {
   ) {
     Color background;
     if (tabController.indexIsChanging) {
-      final double t = 1.0 - _indexChangeProgress(tabController);
       // The selection's animation is animating from previousValue to value.
-      if (tabController.index == tabIndex) {
+      final double t = 1.0 - _indexChangeProgress(tabController);
+      if (tabController.index == tabIndex)
         background = selectedColor.lerp(t);
-      }
       else if (tabController.previousIndex == tabIndex)
         background = previousColor.lerp(t);
       else
