@@ -335,6 +335,54 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   }
 }
 
+// This class, and TabBarScrollController, only exist to handle the the case
+// where a scrollable TabBar has a non-zero initialIndex. In that case we can
+// only compute the scroll position's initial scroll offset (the "correct"
+// pixels value) after the TabBar viewport width and scroll limits are known.
+class _TabBarScrollPosition extends ScrollPosition {
+  _TabBarScrollPosition({
+    ScrollPhysics physics,
+    AbstractScrollState state,
+    ScrollPosition oldPosition,
+    this.tabBar,
+  }) : super(
+    physics: physics,
+    state: state,
+    initialPixels: null,
+    oldPosition: oldPosition,
+  );
+
+  final _TabBarState tabBar;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    bool result = true;
+    if (pixels == null) {
+      correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
+      result = false;
+    }
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent) && result;
+  }
+}
+
+// This class, and TabBarScrollPosition, only exist to handle the the case
+// where a scrollable TabBar has a non-zero initialIndex.
+class _TabBarScrollController extends ScrollController {
+  _TabBarScrollController(this.tabBar);
+
+  final _TabBarState tabBar;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new _TabBarScrollPosition(
+      physics: physics,
+      state: state,
+      oldPosition: oldPosition,
+      tabBar: tabBar,
+    );
+  }
+}
+
 /// A material design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as part of an [AppBar] and in conjuction with a
@@ -440,7 +488,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  final ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController;
 
   TabController _controller;
   _IndicatorPainter _indicatorPainter;
@@ -504,14 +552,22 @@ class _TabBarState extends State<TabBar> {
   // tabOffsets[tabOffsets.length] is the right edge of the last tab.
   int get maxTabIndex => _indicatorPainter.tabOffsets.length - 2;
 
-  double _tabCenteredScrollOffset(int tabIndex) {
+  double _tabScrollOffset(int index, double viewportWidth, double minExtent, double maxExtent) {
+    if (!widget.isScrollable)
+      return 0.0;
     final List<double> tabOffsets = _indicatorPainter.tabOffsets;
-    assert(tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
+    assert(tabOffsets != null && index >= 0 && index <= maxTabIndex);
+    final double tabCenter = (tabOffsets[index] + tabOffsets[index + 1]) / 2.0;
+    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
+  }
 
+  double _tabCenteredScrollOffset(int index) {
     final ScrollPosition position = _scrollController.position;
-    final double tabCenter = (tabOffsets[tabIndex] + tabOffsets[tabIndex + 1]) / 2.0;
-    return (tabCenter - position.viewportDimension / 2.0)
-      .clamp(position.minScrollExtent, position.maxScrollExtent);
+    return _tabScrollOffset(index, position.viewportDimension, position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  double _initialScrollOffset(double viewportWidth, double minExtent, double maxExtent) {
+    return _tabScrollOffset(_currentIndex, viewportWidth, minExtent, maxExtent);
   }
 
   void _scrollToCurrentIndex() {
@@ -557,6 +613,7 @@ class _TabBarState extends State<TabBar> {
     });
   }
 
+  // Called each time layout completes.
   void _saveTabOffsets(List<double> tabOffsets) {
     _indicatorPainter?.tabOffsets = tabOffsets;
   }
@@ -662,6 +719,7 @@ class _TabBarState extends State<TabBar> {
     );
 
     if (widget.isScrollable) {
+      _scrollController ??= new _TabBarScrollController(this);
       tabBar = new SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,

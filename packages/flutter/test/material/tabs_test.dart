@@ -806,6 +806,33 @@ void main() {
     // Close enough to switch to page 2
     pageController.jumpTo(800.0 - 0.75 * position.physics.tolerance.distance);
     expect(tabController.index, 2);
+  });
 
+  testWidgets('Scrollable TabBar with a non-zero TabController initialIndex', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/9374
+
+    final List<Tab> tabs = new List<Tab>.generate(20, (int index) {
+      return new Tab(text: 'TAB #$index');
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: tabs.length - 1,
+    );
+
+    await tester.pumpWidget(
+      new Material(
+        child: new TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: tabs,
+        ),
+      ),
+    );
+
+    // The initialIndex tab should be visible and right justified
+    expect(find.text('TAB #19'), findsOneWidget);
+    expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, 800.0);
   });
 }
