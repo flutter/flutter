@@ -719,7 +719,7 @@ class _TabBarState extends State<TabBar> {
     );
 
     if (widget.isScrollable) {
-      _scrollController = new _TabBarScrollController(this);
+      _scrollController ??= new _TabBarScrollController(this);
       tabBar = new SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
