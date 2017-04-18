@@ -55,7 +55,7 @@
                          eventReceiver:(FlutterEventReceiver)eventReceiver {
   _eventReceiver = eventReceiver;
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
-  [self updateBatteryState];
+  [self sendBatteryStateEvent];
   [[NSNotificationCenter defaultCenter]
    addObserver:self
       selector:@selector(onBatteryStateDidChange:)
@@ -65,10 +65,10 @@
 }
 
 - (void)onBatteryStateDidChange:(NSNotification*)notification {
-  [self updateBatteryState];
+  [self sendBatteryStateEvent];
 }
 
-- (void)updateBatteryState {
+- (void)sendBatteryStateEvent {
   if (!_eventReceiver) return;
   UIDeviceBatteryState state = [[UIDevice currentDevice] batteryState];
   switch (state) {

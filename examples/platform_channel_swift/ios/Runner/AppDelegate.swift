@@ -47,7 +47,7 @@ import Flutter
                        eventReceiver: @escaping FlutterEventReceiver) -> FlutterError? {
     self.eventReceiver = eventReceiver;
     UIDevice.current.isBatteryMonitoringEnabled = true;
-    self.updateBatteryState();
+    self.sendBatteryStateEvent();
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(onBatteryStateDidChange),
@@ -57,10 +57,10 @@ import Flutter
   }
 
   @objc private func onBatteryStateDidChange(notification: NSNotification) {
-    self.updateBatteryState();
+    self.sendBatteryStateEvent();
   }
 
-  private func updateBatteryState() {
+  private func sendBatteryStateEvent() {
     if (eventReceiver == nil) {
       return;
     }
