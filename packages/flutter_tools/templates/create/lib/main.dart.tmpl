@@ -100,26 +100,26 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(widget.title),
       ),
       body: new Center(
-{{#withPluginHook}}
+        // Widgets can be grouped in Rows and Columns.
         child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+{{#withPluginHook}}
             new Text('Running on: $_platformVersion\n'),
-            new Text(
-                'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.'),
+{{/withPluginHook}}
+            // Padding is handled by wrapping a widget with a Padding widget.
+            new Padding(
+              padding: new EdgeInsets.all(16.0),
+              child: new Text(
+                'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
+              ),
+            ),
+            new RaisedButton(
+              onPressed: _incrementCounter,
+              child: new Text('Increment'),
+            )
           ],
         ),
-{{/withPluginHook}}
-{{^withPluginHook}}
-        child: new Text(
-          'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-        ),
-{{/withPluginHook}}
-      ),
-      floatingActionButton: new FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: new Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
