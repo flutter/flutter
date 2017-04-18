@@ -47,11 +47,13 @@ class VulkanWindow {
  private:
   bool valid_;
   ftl::RefPtr<VulkanProcTable> vk;
+  // Note: The order of objects here is important because the
+  // GrVkBackendContext assumes ownership of the device and instance handles.
+  sk_sp<GrVkBackendContext> skia_vk_backend_context_;
   std::unique_ptr<VulkanApplication> application_;
   std::unique_ptr<VulkanDevice> logical_device_;
   std::unique_ptr<VulkanSurface> surface_;
   std::unique_ptr<VulkanSwapchain> swapchain_;
-  sk_sp<GrVkBackendContext> skia_vk_backend_context_;
   sk_sp<GrContext> skia_gr_context_;
 
   bool CreateSkiaGrContext();
