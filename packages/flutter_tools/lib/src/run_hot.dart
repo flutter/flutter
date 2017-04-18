@@ -324,6 +324,8 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _restartFromSources() async {
+    printTrace('Refreshing active FlutterViews before restarting.');
+    await refreshViews();
     final Stopwatch restartTimer = new Stopwatch();
     restartTimer.start();
     final bool updatedDevFS = await _updateDevFS();
@@ -409,6 +411,8 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _reloadSources({ bool pause: false }) async {
+    printTrace('Refreshing active FlutterViews before reloading.');
+    await refreshViews();
     if (currentView.uiIsolate == null)
       throw 'Application isolate not found';
     // The initial launch is from a script snapshot. When we reload from source
