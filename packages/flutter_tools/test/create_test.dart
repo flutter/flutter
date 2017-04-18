@@ -134,7 +134,8 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       final File existingFile = fs.file("${temp.path.toString()}/bad");
-      if (!existingFile.existsSync()) existingFile.createSync();
+      if (!existingFile.existsSync())
+        existingFile.createSync();
       try {
         await runner.run(<String>['create', existingFile.path]);
         fail('expected ToolExit exception');
@@ -146,7 +147,10 @@ void main() {
 }
 
 Future<Null> _createAndAnalyzeProject(
-    Directory dir, List<String> createArgs, String mainPath) async {
+  Directory dir,
+  List<String> createArgs,
+  String mainPath,
+) async {
   Cache.flutterRoot = '../..';
   final CreateCommand command = new CreateCommand();
   final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -156,11 +160,15 @@ Future<Null> _createAndAnalyzeProject(
   await runner.run(args);
 
   expect(fs.file(mainPath).existsSync(), true);
-  final String flutterToolsPath =
-      fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart'));
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
   final ProcessResult exec = Process.runSync(
-      '$dartSdkPath/bin/dart', <String>[flutterToolsPath, 'analyze'],
-      workingDirectory: dir.path);
+    '$dartSdkPath/bin/dart',
+    <String>[flutterToolsPath, 'analyze'],
+    workingDirectory: dir.path,
+  );
   if (exec.exitCode != 0) {
     print(exec.stdout);
     print(exec.stderr);
