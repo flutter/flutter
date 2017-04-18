@@ -84,14 +84,14 @@ void main() {
       );
       await libMain.writeAsString(source);
 
-      /// Analyze in the current directory - no arguments
+      // Analyze in the current directory - no arguments
       await runCommand(
         command: new AnalyzeCommand(workingDirectory: tempDir),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'child\' is required',
-          '1 warning found.',
+          '1 issue found.',
         ],
         toolExit: true,
       );
@@ -105,7 +105,7 @@ void main() {
         statusTextContains: <String>[
           'Analyzing',
           'warning $analyzerSeparator The parameter \'child\' is required',
-          '1 warning found.',
+          '1 issue found.',
         ],
         toolExit: true,
       );
@@ -124,7 +124,7 @@ void main() {
       - only_throw_errors
   ''');
 
-      /// Analyze in the current directory - no arguments
+      // Analyze in the current directory - no arguments
       await runCommand(
         command: new AnalyzeCommand(workingDirectory: tempDir),
         arguments: <String>['analyze'],
@@ -132,10 +132,44 @@ void main() {
           'Analyzing',
           'warning $analyzerSeparator The parameter \'child\' is required',
           'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '1 warning and 1 lint found.',
+          '2 issues found.',
         ],
         toolExit: true,
       );
+    });
+
+    testUsingContext('flutter analyze no duplicate issues', () async {
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
+
+      try {
+        final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
+        foo.writeAsStringSync('''
+import 'bar.dart';
+
+foo() => bar();
+''');
+
+        final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
+        bar.writeAsStringSync('''
+import 'dart:async'; // unused
+
+void bar() {
+}
+''');
+
+        // Analyze in the current directory - no arguments
+        await runCommand(
+          command: new AnalyzeCommand(workingDirectory: tempDir),
+          arguments: <String>['analyze'],
+          statusTextContains: <String>[
+            'Analyzing',
+            '1 issue found.',
+          ],
+          toolExit: true,
+        );
+      } finally {
+        tempDir.deleteSync(recursive: true);
+      }
     });
 
     // Analyze a specific file outside the current directory
@@ -147,7 +181,7 @@ void main() {
           'Analyzing',
           'warning $analyzerSeparator The parameter \'child\' is required',
           'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '1 warning and 1 lint found.',
+          '2 issues found.',
         ],
         toolExit: true,
       );
