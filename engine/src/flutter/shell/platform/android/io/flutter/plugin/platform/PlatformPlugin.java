@@ -17,12 +17,11 @@ import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
 
-import io.flutter.plugin.common.FlutterMethodChannel;
 import io.flutter.util.PathUtils;
 
 import io.flutter.plugin.common.ActivityLifecycleListener;
-import io.flutter.plugin.common.FlutterMethodChannel.MethodCallHandler;
-import io.flutter.plugin.common.FlutterMethodChannel.Response;
+import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
+import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.MethodCall;
 
 import org.json.JSONArray;
@@ -44,48 +43,48 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
     }
 
     @Override
-    public void onMethodCall(MethodCall call, Response response) {
+    public void onMethodCall(MethodCall call, Result result) {
         String method = call.method;
         Object arguments = call.arguments;
         try {
             if (method.equals("SystemSound.play")) {
                 playSystemSound((String) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("HapticFeedback.vibrate")) {
                 vibrateHapticFeedback();
-                response.success(null);
+                result.success(null);
             } else if (method.equals("UrlLauncher.launch")) {
                 launchURL((String) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("SystemChrome.setPreferredOrientations")) {
                 setSystemChromePreferredOrientations((JSONArray) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("SystemChrome.setApplicationSwitcherDescription")) {
                 setSystemChromeApplicationSwitcherDescription((JSONObject) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("SystemChrome.setEnabledSystemUIOverlays")) {
                 setSystemChromeEnabledSystemUIOverlays((JSONArray) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("SystemChrome.setSystemUIOverlayStyle")) {
                 setSystemChromeSystemUIOverlayStyle((String) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("SystemNavigator.pop")) {
                 popSystemNavigator();
-                response.success(null);
+                result.success(null);
             } else if (method.equals("Clipboard.getData")) {
-                response.success(getClipboardData((String) arguments));
+                result.success(getClipboardData((String) arguments));
             } else if (method.equals("Clipboard.setData")) {
                 setClipboardData((JSONObject) arguments);
-                response.success(null);
+                result.success(null);
             } else if (method.equals("PathProvider.getTemporaryDirectory")) {
-                response.success(getPathProviderTemporaryDirectory());
+                result.success(getPathProviderTemporaryDirectory());
             } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
-                response.success(getPathProviderApplicationDocumentsDirectory());
+                result.success(getPathProviderApplicationDocumentsDirectory());
             } else {
-                response.notImplemented();
+                result.notImplemented();
             }
         } catch (JSONException e) {
-            response.error("error", "JSON error: " + e.getMessage(), null);
+            result.error("error", "JSON error: " + e.getMessage(), null);
         }
     }
 

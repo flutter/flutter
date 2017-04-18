@@ -20,8 +20,7 @@ typedef void (^ValidationResult)(BOOL result, NSString* message);
                         packages:(NSURL*)packages
                       flxArchive:(NSURL*)flxArchive NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)flxArchive
-    NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)flxArchive NS_DESIGNATED_INITIALIZER;
 
 - (void)validate:(ValidationResult)result;
 

@@ -11,25 +11,35 @@
 
 NS_ASSUME_NONNULL_BEGIN
 /**
- A strategy for handling a binary message reply.
+ A message reply callback.
+
+ Used for submitting a binary reply back to a Flutter message sender. Also used
+ in the dual capacity for handling a binary message reply received from Flutter.
+
+ - Parameters:
+   - reply: The reply.
  */
-typedef void (^FlutterBinaryReplyHandler)(NSData* _Nullable reply);
+typedef void (^FlutterBinaryReply)(NSData* _Nullable reply);
 
 /**
- A strategy for handling incoming binary messages and to send asynchronous
- replies.
+ A strategy for handling incoming binary messages from Flutter and to send
+ asynchronous replies back to Flutter.
+
+ - Parameters:
+   - message: The message.
+   - reply: A callback for submitting a reply to the sender.
  */
-typedef void (^FlutterBinaryMessageHandler)(
-    NSData* _Nullable message,
-    FlutterBinaryReplyHandler replyHandler);
+typedef void (^FlutterBinaryMessageHandler)(NSData* _Nullable message, FlutterBinaryReply reply);
 
 /**
  A facility for communicating with the Flutter side using asynchronous message
  passing with binary messages.
 
  - SeeAlso:
-   - `FlutterMessageChannel`, which supports communication using structured messages.
-   - `FlutterMethodChannel`, which supports communication using asynchronous method calls.
+   - `FlutterBasicMessageChannel`, which supports communication using structured
+ messages.
+   - `FlutterMethodChannel`, which supports communication using asynchronous
+ method calls.
    - `FlutterEventChannel`, which supports commuication using event streams.
  */
 FLUTTER_EXPORT
@@ -39,24 +49,23 @@ FLUTTER_EXPORT
  no reply.
 
  - Parameters:
+   - channel: The channel name.
    - message: The message.
-   - channelName: The channel name.
  */
-- (void)sendBinaryMessage:(NSData* _Nullable)message
-              channelName:(NSString*)channelName;
+- (void)sendOnChannel:(NSString*)channel message:(NSData* _Nullable)message;
 
 /**
  Sends a binary message to the Flutter side on the specified channel, expecting
  an asynchronous reply.
 
  - Parameters:
+   - channel: The channel name.
    - message: The message.
-   - channelName: The channel name.
-   - handler: A reply handler.
+   - callback: A callback for receiving a reply.
  */
-- (void)sendBinaryMessage:(NSData* _Nullable)message
-              channelName:(NSString*)channelName
-       binaryReplyHandler:(FlutterBinaryReplyHandler _Nullable)handler;
+- (void)sendOnChannel:(NSString*)channel
+              message:(NSData* _Nullable)message
+          binaryReply:(FlutterBinaryReply _Nullable)callback;
 
 /**
  Registers a message handler for incoming binary messages from the Flutter side
@@ -66,11 +75,11 @@ FLUTTER_EXPORT
  existing handler.
 
  - Parameters:
-   - channelName: The channel name.
+   - channel: The channel name.
    - handler: The message handler.
  */
-- (void)setBinaryMessageHandlerOnChannel:(NSString*)channelName
-                    binaryMessageHandler:(FlutterBinaryMessageHandler _Nullable)handler;
+- (void)setMessageHandlerOnChannel:(NSString*)channel
+              binaryMessageHandler:(FlutterBinaryMessageHandler _Nullable)handler;
 @end
 NS_ASSUME_NONNULL_END
 #endif  // FLUTTER_FLUTTERBINARYMESSENGER_H_

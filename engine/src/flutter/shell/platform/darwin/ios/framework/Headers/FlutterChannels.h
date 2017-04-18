@@ -10,30 +10,34 @@
 
 NS_ASSUME_NONNULL_BEGIN
 /**
- A strategy for handling a message reply.
+ A message reply callback.
+
+ Used for submitting a reply back to a Flutter message sender. Also used in
+ the dual capacity for handling a message reply received from Flutter.
 
  - Parameter reply: The reply.
  */
-typedef void (^FlutterReplyHandler)(id _Nullable reply);
+typedef void (^FlutterReply)(id _Nullable reply);
 
 /**
- A strategy for handling a message.
+ A strategy for handling incoming messages from Flutter and to send
+ asynchronous replies back to Flutter.
 
  - Parameters:
-   - message: The incoming message.
-   - replyHandler: A call-back to asynchronously supply a reply to the message.
+   - message: The message.
+   - reply: A callback for submitting a reply to the sender.
  */
-typedef void (^FlutterMessageHandler)(id _Nullable message,
-                                      FlutterReplyHandler replyHandler);
+typedef void (^FlutterMessageHandler)(id _Nullable message, FlutterReply callback);
 
 /**
- A channel for communicating with the Flutter side using asynchronous message
- passing.
+ A channel for communicating with the Flutter side using basic, asynchronous
+ message passing.
  */
 FLUTTER_EXPORT
-@interface FlutterMessageChannel : NSObject
+@interface FlutterBasicMessageChannel : NSObject
 /**
- Creates a `FlutterMessageChannel` with the specified name and binary messenger.
+ Creates a `FlutterBasicMessageChannel` with the specified name and binary
+ messenger.
 
  The channel name logically identifies the channel; identically named channels
  interfere with each other's communication.
@@ -51,7 +55,8 @@ FLUTTER_EXPORT
                        binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger;
 
 /**
- Creates a `FlutterMessageChannel` with the specified name, binary messenger,
+ Creates a `FlutterBasicMessageChannel` with the specified name, binary
+ messenger,
  and message codec.
 
  The channel name logically identifies the channel; identically named channels
@@ -70,8 +75,8 @@ FLUTTER_EXPORT
                                  codec:(NSObject<FlutterMessageCodec>*)codec;
 
 /**
- Initializes a `FlutterMessageChannel` with the specified nane, binary messenger,
- and message codec.
+ Initializes a `FlutterBasicMessageChannel` with the specified name, binary
+ messenger, and message codec.
 
  The channel name logically identifies the channel; identically named channels
  interfere with each other's communication.
@@ -91,18 +96,20 @@ FLUTTER_EXPORT
 /**
  Sends the specified message to the Flutter side, ignoring any reply.
 
- - Parameter message: The message. Must be supported by the codec of this channel.
+ - Parameter message: The message. Must be supported by the codec of this
+ channel.
  */
 - (void)sendMessage:(id _Nullable)message;
 
 /**
- Sends the specified message to the Flutter side, expecting an asynchronous reply.
+ Sends the specified message to the Flutter side, expecting an asynchronous
+ reply.
 
  - Parameters:
    - message: The message. Must be supported by the codec of this channel.
-   - handler: The reply handler.
+   - callback: A callback to be invoked with the message reply from Flutter.
  */
-- (void)sendMessage:(id _Nullable)message replyHandler:(FlutterReplyHandler _Nullable)handler;
+- (void)sendMessage:(id _Nullable)message reply:(FlutterReply _Nullable)callback;
 
 /**
  Registers a message handler with this channel.
@@ -116,29 +123,27 @@ FLUTTER_EXPORT
 @end
 
 /**
- A receiver of the result of a method call.
+ A method call result callback.
 
- - Parameter result: The result. Will be a `FlutterError` instance, if the method
-   call resulted in an error on the Flutter side. Will be
-   `FlutterMethodNotImplemented`, if the method called was not implemented on
-   the Flutter side. All other values, including `nil` should be interpreted
-   as successful results.
+ Used for submitting a method call result back to a Flutter caller. Also used in
+ the dual capacity for handling a method call result received from Flutter.
+
+ - Parameter result: The result.
  */
-typedef void (^FlutterResultReceiver)(id _Nullable result);
+typedef void (^FlutterResult)(id _Nullable result);
 
 /**
  A strategy for handling method calls.
 
  - Parameters:
    - call: The incoming method call.
-   - resultReceiver: A call-back to asynchronously supply the result of the call.
-     Invoke the call-back with a `FlutterError` to indicate that the call failed.
-     Invoke the call-back with `FlutterMethodNotImplemented` to indicate that the
-     method was unknown. Any other values, including `nil` are interpreted as
+   - result: A callback to asynchronously submit the result of the call.
+     Invoke the callback with a `FlutterError` to indicate that the call failed.
+     Invoke the callback with `FlutterMethodNotImplemented` to indicate that the
+     method was unknown. Any other values, including `nil`, are interpreted as
      successful results.
  */
-typedef void (^FlutterMethodCallHandler)(FlutterMethodCall* call,
-                                         FlutterResultReceiver resultReceiver);
+typedef void (^FlutterMethodCallHandler)(FlutterMethodCall* call, FlutterResult result);
 
 /**
  A constant used with `FlutterMethodCallHandler` to respond to the call of an
@@ -146,7 +151,6 @@ typedef void (^FlutterMethodCallHandler)(FlutterMethodCall* call,
  */
 FLUTTER_EXPORT
 extern NSObject const* FlutterMethodNotImplemented;
-
 
 /**
  A channel for communicating with the Flutter side using invocation of
@@ -190,7 +194,7 @@ FLUTTER_EXPORT
  */
 + (instancetype)methodChannelWithName:(NSString*)name
                       binaryMessenger:(NSObject<FlutterBinaryMessenger>*)messenger
-                             codec:(NSObject<FlutterMethodCodec>*)codec;
+                                codec:(NSObject<FlutterMethodCodec>*)codec;
 
 /**
  Initializes a `FlutterMethodChannel` with the specified name, binary messenger,
@@ -230,15 +234,15 @@ FLUTTER_EXPORT
    - method: The name of the method to invoke.
    - arguments: The arguments. Must be a value supported by the codec of this
      channel.
-   - resultReceiver: A call-back for receipt of an asynchronous result.
+   - result: A callback that will be invoked with the asynchronous result.
      The result will be a `FlutterError` instance, if the method call resulted
      in an error on the Flutter side. Will be `FlutterMethodNotImplemented`, if
      the method called was not implemented on the Flutter side. Any other value,
-     including `nil` should be interpreted as successful results.
+     including `nil`, should be interpreted as successful results.
  */
 - (void)invokeMethod:(NSString*)method
            arguments:(id _Nullable)arguments
-      resultReceiver:(FlutterResultReceiver _Nullable)resultReceiver;
+              result:(FlutterResult _Nullable)callback;
 
 /**
  Registers a handler for method calls from the Flutter side.
@@ -252,14 +256,11 @@ FLUTTER_EXPORT
 @end
 
 /**
- A strategy for consuming events.
+ An event sink callback.
 
- - Parameter event: The event. Will be a `FlutterError` instance, if the
-   event represents an error. Will be `FlutterEndOfEventStream`, if no more
-   events will be emitted. All other values, including `nil` should be
-   interpreted as success events.
+ - Parameter event: The event.
  */
-typedef void (^FlutterEventReceiver)(id _Nullable event);
+typedef void (^FlutterEventSink)(id _Nullable event);
 
 /**
  A strategy for exposing an event stream to the Flutter side.
@@ -274,15 +275,15 @@ FLUTTER_EXPORT
 
  - Parameters:
    - arguments: Arguments for the stream.
-   - eventReceiver: A call-back to asynchronously emit events. Invoke the
-     call-back with a `FlutterError` to emit an error event. Invoke the
-     call-back with `FlutterEndOfEventStream` to indicate that no more
+   - events: A callback to asynchronously emit events. Invoke the
+     callback with a `FlutterError` to emit an error event. Invoke the
+     callback with `FlutterEndOfEventStream` to indicate that no more
      events will be emitted. Any other value, including `nil` are emitted as
      successful events.
  - Returns: A FlutterError instance, if setup fails.
  */
 - (FlutterError* _Nullable)onListenWithArguments:(id _Nullable)arguments
-                                   eventReceiver:(FlutterEventReceiver)eventReceiver;
+                                       eventSink:(FlutterEventSink)events;
 
 /**
  Tears down an event stream.
@@ -372,7 +373,7 @@ FLUTTER_EXPORT
 
  - Parameter handler: The stream handler.
  */
-- (void)setStreamHandler:(NSObject<FlutterStreamHandler>* _Nullable)streamHandler;
+- (void)setStreamHandler:(NSObject<FlutterStreamHandler>* _Nullable)handler;
 @end
 NS_ASSUME_NONNULL_END
 

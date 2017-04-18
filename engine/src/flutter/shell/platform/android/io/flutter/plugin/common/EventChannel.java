@@ -5,9 +5,8 @@
 package io.flutter.plugin.common;
 
 import android.util.Log;
-import io.flutter.view.FlutterView;
-import io.flutter.view.FlutterView.BinaryMessageResponse;
-import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
+import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
+import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,37 +26,37 @@ import java.util.concurrent.atomic.AtomicReference;
  * The identity of the channel is given by its name, so other uses of that name
  * with may interfere with this channel's communication.
  */
-public final class FlutterEventChannel {
-    private static final String TAG = "FlutterEventChannel#";
+public final class EventChannel {
+    private static final String TAG = "EventChannel#";
 
-    private final FlutterView view;
+    private final BinaryMessenger messenger;
     private final String name;
     private final MethodCodec codec;
 
     /**
-     * Creates a new channel associated with the specified {@link FlutterView} and with the
-     * specified name and the standard {@link MethodCodec}.
+     * Creates a new channel associated with the specified {@link BinaryMessenger}
+     * and with the specified name and the standard {@link MethodCodec}.
      *
-     * @param view a {@link FlutterView}.
+     * @param messenger a {@link BinaryMessenger}.
      * @param name a channel name String.
      */
-    public FlutterEventChannel(FlutterView view, String name) {
-        this(view, name, StandardMethodCodec.INSTANCE);
+    public EventChannel(BinaryMessenger messenger, String name) {
+        this(messenger, name, StandardMethodCodec.INSTANCE);
     }
 
     /**
-     * Creates a new channel associated with the specified {@link FlutterView} and with the
-     * specified name and {@link MethodCodec}.
+     * Creates a new channel associated with the specified {@link BinaryMessenger}
+     * and with the specified name and {@link MethodCodec}.
      *
-     * @param view a {@link FlutterView}.
+     * @param messenger a {@link BinaryMessenger}.
      * @param name a channel name String.
      * @param codec a {@link MessageCodec}.
      */
-    public FlutterEventChannel(FlutterView view, String name, MethodCodec codec) {
-        assert view != null;
+    public EventChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
+        assert messenger != null;
         assert name != null;
         assert codec != null;
-        this.view = view;
+        this.messenger = messenger;
         this.name = name;
         this.codec = codec;
     }
@@ -70,15 +69,13 @@ public final class FlutterEventChannel {
      * @param handler a {@link StreamHandler}, or null to deregister.
      */
     public void setStreamHandler(final StreamHandler handler) {
-        view.addOnBinaryMessageListenerAsync(name,
-            handler == null ? null : new StreamListener(handler));
+        messenger.setMessageHandler(name, handler == null ? null : new IncomingStreamRequestHandler(handler));
     }
 
     /**
-     * Strategy for handling event streams. Supports dual use:
-     * Producers of events to be sent to Flutter act as clients of this interface
-     * for sending events. Consumers of events sent from Flutter implement
-     * this interface for handling received events.
+     * Event callback. Supports dual use: Producers of events to be sent to Flutter
+     * act as clients of this interface for sending events. Consumers of events sent
+     * from Flutter implement this interface for handling received events.
      */
     public interface EventSink {
         /**
@@ -106,16 +103,16 @@ public final class FlutterEventChannel {
     }
 
     /**
-     * A call-back interface for handling stream setup and tear-down requests.
+     * Handler of stream setup and tear-down requests.
      */
     public interface StreamHandler {
         /**
          * Handles a request to set up an event stream.
          *
          * @param arguments Stream configuration arguments, possibly null.
-         * @param eventSink An {@link EventSink} for sending events to the Flutter receiver.
+         * @param events An {@link EventSink} for emitting events to the Flutter receiver.
          */
-        void onListen(Object arguments, EventSink eventSink);
+        void onListen(Object arguments, EventSink events);
 
         /**
          * Handles a request to tear down an event stream.
@@ -125,55 +122,54 @@ public final class FlutterEventChannel {
         void onCancel(Object arguments);
     }
 
-    private final class StreamListener implements OnBinaryMessageListenerAsync {
+    private final class IncomingStreamRequestHandler implements BinaryMessageHandler {
         private final StreamHandler handler;
         private final AtomicReference<EventSink> activeSink = new AtomicReference<>(null);
 
-        StreamListener(StreamHandler handler) {
+        IncomingStreamRequestHandler(StreamHandler handler) {
             this.handler = handler;
         }
 
         @Override
-        public void onMessage(FlutterView view, ByteBuffer message,
-            final BinaryMessageResponse response) {
+        public void onMessage(ByteBuffer message, final BinaryReply reply) {
             final MethodCall call = codec.decodeMethodCall(message);
             if (call.method.equals("listen")) {
-                onListen(call.arguments, response);
+                onListen(call.arguments, reply);
             } else if (call.method.equals("cancel")) {
-                onCancel(call.arguments, response);
+                onCancel(call.arguments, reply);
             } else {
-                response.send(null);
+                reply.reply(null);
             }
         }
 
-        private void onListen(Object arguments, BinaryMessageResponse response) {
+        private void onListen(Object arguments, BinaryReply callback) {
             final EventSink eventSink = new EventSinkImplementation();
             if (activeSink.compareAndSet(null, eventSink)) {
                 try {
                     handler.onListen(arguments, eventSink);
-                    response.send(codec.encodeSuccessEnvelope(null));
+                    callback.reply(codec.encodeSuccessEnvelope(null));
                 } catch (Exception e) {
                     activeSink.set(null);
                     Log.e(TAG + name, "Failed to open event stream", e);
-                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             } else {
-                response.send(codec.encodeErrorEnvelope("error", "Stream already active", null));
+                callback.reply(codec.encodeErrorEnvelope("error", "Stream already active", null));
             }
         }
 
-        private void onCancel(Object arguments, BinaryMessageResponse response) {
+        private void onCancel(Object arguments, BinaryReply callback) {
             final EventSink oldSink = activeSink.getAndSet(null);
             if (oldSink != null) {
                 try {
                     handler.onCancel(arguments);
-                    response.send(codec.encodeSuccessEnvelope(null));
+                    callback.reply(codec.encodeSuccessEnvelope(null));
                 } catch (Exception e) {
                     Log.e(TAG + name, "Failed to close event stream", e);
-                    response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             } else {
-                response.send(codec.encodeErrorEnvelope("error", "No active stream to cancel", null));
+                callback.reply(codec.encodeErrorEnvelope("error", "No active stream to cancel", null));
             }
         }
 
@@ -183,10 +179,9 @@ public final class FlutterEventChannel {
                  if (activeSink.get() != this) {
                      return;
                  }
-                 FlutterEventChannel.this.view.sendBinaryMessage(
+                 EventChannel.this.messenger.send(
                      name,
-                     codec.encodeSuccessEnvelope(event),
-                     null);
+                     codec.encodeSuccessEnvelope(event));
              }
 
              @Override
@@ -195,10 +190,9 @@ public final class FlutterEventChannel {
                  if (activeSink.get() != this) {
                      return;
                  }
-                 FlutterEventChannel.this.view.sendBinaryMessage(
+                 EventChannel.this.messenger.send(
                      name,
-                     codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails),
-                     null);
+                     codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
              }
 
              @Override
@@ -206,7 +200,7 @@ public final class FlutterEventChannel {
                  if (activeSink.get() != this) {
                      return;
                  }
-                 FlutterEventChannel.this.view.sendBinaryMessage(name, null, null);
+                 EventChannel.this.messenger.send(name, null);
              }
          }
     }

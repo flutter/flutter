@@ -17,7 +17,7 @@
 
 #ifndef NS_ASSUME_NONNULL_BEGIN
 #define NS_ASSUME_NONNULL_BEGIN _Pragma("clang assume_nonnull begin")
-#define NS_ASSUME_NONNULL_END   _Pragma("clang assume_nonnull end")
-#endif // defined(NS_ASSUME_NONNULL_BEGIN)
+#define NS_ASSUME_NONNULL_END _Pragma("clang assume_nonnull end")
+#endif  // defined(NS_ASSUME_NONNULL_BEGIN)
 
 #endif  // FLUTTER_FLUTTERMACROS_H_

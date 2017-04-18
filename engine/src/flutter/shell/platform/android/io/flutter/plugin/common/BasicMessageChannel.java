@@ -5,11 +5,9 @@
 package io.flutter.plugin.common;
 
 import android.util.Log;
-import io.flutter.view.FlutterView;
-import io.flutter.view.FlutterView.BinaryMessageReplyCallback;
-import io.flutter.view.FlutterView.BinaryMessageResponse;
-import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
 import java.nio.ByteBuffer;
+import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
+import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 
 /**
  * A named channel for communicating with the Flutter application using semi-structured messages.
@@ -20,31 +18,30 @@ import java.nio.ByteBuffer;
  * counterpart of this channel on the Dart side. The static Java type of messages sent and received
  * is Object, but only values supported by the specified {@link MessageCodec} can be used.
  *
- * The channel supports basic message send/receive operations, handling incoming method
- * invocations, and emitting event streams. All communication is asynchronous.
+ * The channel supports basic message send/receive operations. All communication is asynchronous.
  *
  * Identically named channels may interfere with each other's communication.
  */
-public final class FlutterMessageChannel<T> {
+public final class BasicMessageChannel<T> {
     private static final String TAG = "FlutterMessageChannel#";
 
-    private final FlutterView view;
+    private final BinaryMessenger messenger;
     private final String name;
     private final MessageCodec<T> codec;
 
     /**
-     * Creates a new channel associated with the specified {@link FlutterView} and with the
-     * specified name and {@link MessageCodec}.
+     * Creates a new channel associated with the specified {@link BinaryMessenger}
+     * and with the specified name and {@link MessageCodec}.
      *
-     * @param view a {@link FlutterView}.
+     * @param messenger a {@link BinaryMessenger}.
      * @param name a channel name String.
      * @param codec a {@link MessageCodec}.
      */
-    public FlutterMessageChannel(FlutterView view, String name, MessageCodec<T> codec) {
-        assert view != null;
+    public BasicMessageChannel(BinaryMessenger messenger, String name, MessageCodec<T> codec) {
+        assert messenger != null;
         assert name != null;
         assert codec != null;
-        this.view = view;
+        this.messenger = messenger;
         this.name = name;
         this.codec = codec;
     }
@@ -62,11 +59,11 @@ public final class FlutterMessageChannel<T> {
      * Sends the specified message to the Flutter application, optionally expecting a reply.
      *
      * @param message the message, possibly null.
-     * @param handler a {@link ReplyHandler} call-back, possibly null.
+     * @param callback a {@link Reply} callback, possibly null.
      */
-    public void send(T message, final ReplyHandler<T> handler) {
-        view.sendBinaryMessage(name, codec.encodeMessage(message),
-            handler == null ? null : new ReplyCallback(handler));
+    public void send(T message, final Reply<T> callback) {
+        messenger.send(name, codec.encodeMessage(message),
+            callback == null ? null : new IncomingReplyHandler(callback));
     }
 
     /**
@@ -77,87 +74,80 @@ public final class FlutterMessageChannel<T> {
      * @param handler a {@link MessageHandler}, or null to deregister.
      */
     public void setMessageHandler(final MessageHandler<T> handler) {
-        view.addOnBinaryMessageListenerAsync(name,
-            handler == null ? null : new MessageListener(handler));
+        messenger.setMessageHandler(name,
+            handler == null ? null : new IncomingMessageHandler(handler));
     }
 
     /**
-     * A call-back interface for handling replies to outgoing messages.
-     */
-    public interface ReplyHandler<T> {
-        /**
-         * Handle the specified reply.
-         *
-         * @param reply the reply, possibly null.
-         */
-        void onReply(T reply);
-    }
-
-    /**
-     * A call-back interface for handling incoming messages.
+     * A handler of incoming messages.
      */
     public interface MessageHandler<T> {
 
         /**
          * Handles the specified message.
          *
-         * @param message The message, possibly null.
-         * @param reply A {@link Reply} for providing a single message reply.
+         * @param message the message, possibly null.
+         * @param reply a {@link Reply} for providing a single message reply.
          */
         void onMessage(T message, Reply<T> reply);
     }
 
     /**
-     * Response interface for sending results back to Flutter.
+     * Message reply callback. Used to submit a reply to an incoming
+     * message from Flutter. Also used in the dual capacity to handle a reply
+     * received from Flutter after sending a message.
      */
     public interface Reply<T> {
         /**
-         * Submits a reply.
+         * Handles the specified message reply.
          *
-         * @param reply The result, possibly null.
+         * @param reply the reply, possibly null.
          */
-        void send(T reply);
+        void reply(T reply);
     }
 
-    private final class ReplyCallback implements BinaryMessageReplyCallback {
-        private final ReplyHandler<T> handler;
+    private final class IncomingReplyHandler implements BinaryReply {
+        private final Reply<T> callback;
 
-        private ReplyCallback(ReplyHandler<T> handler) {
-            this.handler = handler;
+        private IncomingReplyHandler(Reply<T> callback) {
+            this.callback = callback;
         }
 
         @Override
-        public void onReply(ByteBuffer reply) {
-            handler.onReply(codec.decodeMessage(reply));
+        public void reply(ByteBuffer reply) {
+            try {
+                callback.reply(codec.decodeMessage(reply));
+            } catch (Exception e) {
+                Log.e(TAG + name, "Failed to handle message reply", e);
+            }
         }
     }
 
-    private final class MessageListener implements OnBinaryMessageListenerAsync {
+    private final class IncomingMessageHandler implements BinaryMessageHandler {
         private final MessageHandler<T> handler;
 
-        private MessageListener(MessageHandler<T> handler) {
+        private IncomingMessageHandler(MessageHandler<T> handler) {
             this.handler = handler;
         }
 
         @Override
-        public void onMessage(FlutterView view, ByteBuffer message,
-            final BinaryMessageResponse response) {
+        public void onMessage(ByteBuffer message, final BinaryReply callback) {
             try {
                 handler.onMessage(codec.decodeMessage(message), new Reply<T>() {
                     private boolean done = false;
 
                     @Override
-                    public void send(T reply) {
+                    public void reply(T reply) {
                         if (done) {
                             throw new IllegalStateException("Call result already provided");
                         }
-                        response.send(codec.encodeMessage(reply));
+                        callback.reply(codec.encodeMessage(reply));
                         done = true;
                     }
                 });
             } catch (Exception e) {
                 Log.e(TAG + name, "Failed to handle message", e);
-                response.send(null);
+                callback.reply(null);
             }
         }
     }

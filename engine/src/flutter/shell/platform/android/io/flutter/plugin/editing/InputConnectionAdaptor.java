@@ -9,7 +9,7 @@ import android.text.Selection;
 import android.view.inputmethod.BaseInputConnection;
 import android.view.KeyEvent;
 
-import io.flutter.plugin.common.FlutterMethodChannel;
+import io.flutter.plugin.common.MethodChannel;
 import io.flutter.view.FlutterView;
 
 import java.util.Arrays;
@@ -19,11 +19,11 @@ import java.util.Map;
 class InputConnectionAdaptor extends BaseInputConnection {
     private final int mClient;
     private final TextInputPlugin mPlugin;
-    private final FlutterMethodChannel mFlutterChannel;
+    private final MethodChannel mFlutterChannel;
     private final Map<String, Object> mOutgoingState;
 
     public InputConnectionAdaptor(FlutterView view, int client,
-        TextInputPlugin plugin, FlutterMethodChannel flutterChannel) {
+        TextInputPlugin plugin, MethodChannel flutterChannel) {
         super(view, true);
         mClient = client;
         mPlugin = plugin;
