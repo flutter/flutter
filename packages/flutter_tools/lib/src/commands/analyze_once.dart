@@ -11,6 +11,7 @@ import 'package:yaml/yaml.dart' as yaml;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
 import '../globals.dart';
@@ -83,19 +84,34 @@ class AnalyzeOnce extends AnalyzeBase {
       final String dartanalyzer = fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', 'dartanalyzer');
       arguments.insert(0, dartanalyzer);
       bool noErrors = false;
+      final Set<String> issues = new Set<String>();
       int exitCode = await runCommandAndStreamOutput(
           arguments,
           workingDirectory: workingDirectory?.path,
           mapFunction: (String line) {
+            // De-duplicate the dartanalyzer command output (https://github.com/dart-lang/sdk/issues/25697).
+            if (line.startsWith('  ')) {
+              if (!issues.add(line.trim()))
+                return null;
+            }
+
             // Workaround for the fact that dartanalyzer does not exit with a non-zero exit code
             // when errors are found.
             // TODO(danrubel): Fix dartanalyzer to return non-zero exit code
             if (line == 'No issues found!')
               noErrors = true;
+
+            // Remove text about the issue count ('2 hints found.'); with the duplicates
+            // above, the printed count would be incorrect.
+            if (line.endsWith(' found.'))
+              return null;
+
             return line;
           },
       );
       stopwatch.stop();
+      if (issues.isNotEmpty)
+        printStatus('${issues.length} ${pluralize('issue', issues.length)} found.');
       final String elapsed = (stopwatch.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
       // Workaround for the fact that dartanalyzer does not exit with a non-zero exit code
       // when errors are found.
