@@ -31,7 +31,7 @@ def main():
 
   args = parser.parse_args()
 
-  result = subprocess.call([
+  cmd = [
     args.snapshotter_path,
     '--snapshot_kind=script',
     '--vm_snapshot_data=%s' % args.vm_snapshot_data,
@@ -40,7 +40,11 @@ def main():
     '--script_snapshot=%s' % args.snapshot,
     '--dependencies=%s' % args.depfile,
     args.main_dart,
-  ], cwd=args.root_build_dir)
+  ]
+
+  result = subprocess.call(cmd, cwd=args.root_build_dir)
+  if result != 0:
+    print("Command failed: '%s'" % (" ".join(cmd)))
 
   return result
 

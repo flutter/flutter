@@ -51,6 +51,8 @@ def main():
   cmd.append(args.main_dart)
 
   result = subprocess.call(cmd, cwd=args.root_build_dir)
+  if result != 0:
+    print("Command failed: '%s'" % (" ".join(cmd)))
 
   return result
 
