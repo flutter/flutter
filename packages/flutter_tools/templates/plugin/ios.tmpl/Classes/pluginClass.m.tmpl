@@ -8,12 +8,14 @@
   if (self) {
     FlutterMethodChannel *channel = [FlutterMethodChannel
         methodChannelWithName:@"{{projectName}}"
-           binaryMessenger:controller];
+              binaryMessenger:controller];
     [channel setMethodCallHandler:^(FlutterMethodCall *call,
-                                    FlutterResultReceiver result) {
+                                    FlutterResult result) {
       if ([@"getPlatformVersion" isEqualToString:call.method]) {
         result([@"iOS " stringByAppendingString:[[UIDevice currentDevice]
                                                     systemVersion]]);
+      } else {
+        result(FlutterMethodNotImplemented);
       }
     }];
   }
