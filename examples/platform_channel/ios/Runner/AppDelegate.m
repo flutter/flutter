@@ -69,7 +69,7 @@
 }
 
 - (void)sendBatteryStateEvent {
-  if (!_eventReceiver) return;
+  if (!_eventSink) return;
   UIDeviceBatteryState state = [[UIDevice currentDevice] batteryState];
   switch (state) {
     case UIDeviceBatteryStateFull:
