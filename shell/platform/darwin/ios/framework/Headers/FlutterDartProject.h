@@ -12,16 +12,13 @@
 FLUTTER_EXPORT
 @interface FlutterDartProject : NSObject
 
-- (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle
-    NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithPrecompiledDartBundle:(NSBundle*)bundle NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)initWithFLXArchive:(NSURL*)archiveURL
                           dartMain:(NSURL*)dartMainURL
-                          packages:(NSURL*)dartPackages
-    NS_DESIGNATED_INITIALIZER;
+                          packages:(NSURL*)dartPackages NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL
-    NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL NS_DESIGNATED_INITIALIZER;
 
 - (instancetype)initFromDefaultSourceForConfiguration;
 

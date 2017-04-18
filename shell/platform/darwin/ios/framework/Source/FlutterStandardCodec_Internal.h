@@ -25,12 +25,10 @@ typedef NS_ENUM(NSInteger, FlutterStandardField) {
 };
 
 namespace shell {
-FlutterStandardField FlutterStandardFieldForDataType(
-    FlutterStandardDataType type) {
+FlutterStandardField FlutterStandardFieldForDataType(FlutterStandardDataType type) {
   return (FlutterStandardField)(type + FlutterStandardFieldUInt8Data);
 }
-FlutterStandardDataType FlutterStandardDataTypeForField(
-    FlutterStandardField field) {
+FlutterStandardDataType FlutterStandardDataTypeForField(FlutterStandardField field) {
   return (FlutterStandardDataType)(field - FlutterStandardFieldUInt8Data);
 }
 UInt8 elementSizeForFlutterStandardDataType(FlutterStandardDataType type) {

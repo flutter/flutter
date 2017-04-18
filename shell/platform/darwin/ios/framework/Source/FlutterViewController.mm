@@ -69,8 +69,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterMethodChannel*> _navigationChannel;
   fml::scoped_nsprotocol<FlutterMethodChannel*> _platformChannel;
   fml::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
-  fml::scoped_nsprotocol<FlutterMessageChannel*> _lifecycleChannel;
-  fml::scoped_nsprotocol<FlutterMessageChannel*> _systemChannel;
+  fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _lifecycleChannel;
+  fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _systemChannel;
   BOOL _initialized;
 }
 
@@ -141,28 +141,26 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
       binaryMessenger:self
                 codec:[FlutterJSONMethodCodec sharedInstance]]);
 
-  _lifecycleChannel.reset([[FlutterMessageChannel alloc]
+  _lifecycleChannel.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/lifecycle"
       binaryMessenger:self
                 codec:[FlutterStringCodec sharedInstance]]);
 
-  _systemChannel.reset([[FlutterMessageChannel alloc]
+  _systemChannel.reset([[FlutterBasicMessageChannel alloc]
          initWithName:@"flutter/system"
       binaryMessenger:self
                 codec:[FlutterJSONMessageCodec sharedInstance]]);
 
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
-  [_platformChannel.get()
-      setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
-        [_platformPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
-      }];
+  [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [_platformPlugin.get() handleMethodCall:call result:result];
+  }];
 
   _textInputPlugin.reset([[FlutterTextInputPlugin alloc] init]);
   _textInputPlugin.get().textInputDelegate = self;
-  [_textInputChannel.get()
-      setMethodCallHandler:^(FlutterMethodCall* call, FlutterResultReceiver resultReceiver) {
-        [_textInputPlugin.get() handleMethodCall:call resultReceiver:resultReceiver];
-      }];
+  [_textInputChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [_textInputPlugin.get() handleMethodCall:call result:result];
+  }];
 
   [self setupNotificationCenterObservers];
 
@@ -561,15 +559,15 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
   });
 }
 
-#pragma mark - Application Messages
+#pragma mark - FlutterBinaryMessenger
 
-- (void)sendBinaryMessage:(NSData*)message channelName:(NSString*)channel {
-  [self sendBinaryMessage:message channelName:channel binaryReplyHandler:nil];
+- (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
+  [self sendOnChannel:channel message:message binaryReply:nil];
 }
 
-- (void)sendBinaryMessage:(NSData*)message
-              channelName:(NSString*)channel
-       binaryReplyHandler:(FlutterBinaryReplyHandler)callback {
+- (void)sendOnChannel:(NSString*)channel
+              message:(NSData*)message
+          binaryReply:(FlutterBinaryReply)callback {
   NSAssert(channel, @"The channel must not be null");
   ftl::RefPtr<PlatformMessageResponseDarwin> response =
       (callback == nil) ? nullptr
@@ -583,9 +581,9 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
   _platformView->DispatchPlatformMessage(platformMessage);
 }
 
-- (void)setBinaryMessageHandlerOnChannel:(NSString*)channel
-                    binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
-  NSAssert(channel, @"The channel name must not be null");
+- (void)setMessageHandlerOnChannel:(NSString*)channel
+              binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
+  NSAssert(channel, @"The channel must not be null");
   _platformView->platform_message_router().SetMessageHandler(channel.UTF8String, handler);
 }
 @end

@@ -8,7 +8,7 @@ import java.util.Map;
 import org.json.JSONObject;
 
 /**
- * Command object representing a method call on a {@link FlutterMethodChannel}.
+ * Command object representing a method call on a {@link MethodChannel}.
  */
 public final class MethodCall {
     /**

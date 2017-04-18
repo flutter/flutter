@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_IOS_FRAMEWORK_SOURCE_VSYNC_WAITER_IOS_H_
 
-#include "lib/ftl/macros.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "lib/ftl/macros.h"
 
 #if __OBJC__
 @class VSyncClient;

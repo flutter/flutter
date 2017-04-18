@@ -20,12 +20,10 @@ class PlatformMessageRouter {
 
   void HandlePlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
 
-  void SetMessageHandler(const std::string& channel,
-                         FlutterBinaryMessageHandler handler);
+  void SetMessageHandler(const std::string& channel, FlutterBinaryMessageHandler handler);
 
  private:
-  std::unordered_map<std::string, FlutterBinaryMessageHandler>
-      message_handlers_;
+  std::unordered_map<std::string, FlutterBinaryMessageHandler> message_handlers_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(PlatformMessageRouter);
 };

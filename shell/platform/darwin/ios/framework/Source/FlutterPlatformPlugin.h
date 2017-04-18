@@ -9,7 +9,7 @@
 
 @interface FlutterPlatformPlugin : NSObject
 
--(void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver;
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 @end
 

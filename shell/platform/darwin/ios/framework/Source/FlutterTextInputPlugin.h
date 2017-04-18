@@ -11,7 +11,7 @@
 @interface FlutterTextInputPlugin : NSObject
 
 @property(nonatomic, assign) id<FlutterTextInputDelegate> textInputDelegate;
--(void)handleMethodCall:(FlutterMethodCall*)call resultReceiver:(FlutterResultReceiver)resultReceiver;
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
 
 @end
 

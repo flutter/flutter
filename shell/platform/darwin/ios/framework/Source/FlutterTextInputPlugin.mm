@@ -282,7 +282,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   return [FlutterTextRange rangeWithNSRange:NSMakeRange(fromIndex, toIndex - fromIndex)];
 }
 
-/** Returns the range of the character sequence at the specified index in the text. */
+/** Returns the range of the character sequence at the specified index in the
+ * text. */
 - (NSRange)rangeForCharacterAtIndex:(NSUInteger)index {
   if (index < self.text.length)
     [self.text rangeOfComposedCharacterSequenceAtIndex:index];
@@ -397,8 +398,10 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 
 #pragma mark - UITextInput cursor, selection rect handling
 
-// The following methods are required to support force-touch cursor positioning and to position the
-// candidates view for multi-stage input methods (e.g., Japanese) when using a physical keyboard.
+// The following methods are required to support force-touch cursor positioning
+// and to position the
+// candidates view for multi-stage input methods (e.g., Japanese) when using a
+// physical keyboard.
 
 - (CGRect)firstRectForRange:(UITextRange*)range {
   // TODO(cbracken) Implement.
@@ -496,27 +499,26 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   [super dealloc];
 }
 
-- (void)handleMethodCall:(FlutterMethodCall*)call
-          resultReceiver:(FlutterResultReceiver)resultReceiver {
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   NSString* method = call.method;
   id args = call.arguments;
   if ([method isEqualToString:@"TextInput.show"]) {
     [self showTextInput];
-    resultReceiver(nil);
+    result(nil);
   } else if ([method isEqualToString:@"TextInput.hide"]) {
     [self hideTextInput];
-    resultReceiver(nil);
+    result(nil);
   } else if ([method isEqualToString:@"TextInput.setClient"]) {
     [self setTextInputClient:[args[0] intValue] withConfiguration:args[1]];
-    resultReceiver(nil);
+    result(nil);
   } else if ([method isEqualToString:@"TextInput.setEditingState"]) {
     [self setTextInputEditingState:args];
-    resultReceiver(nil);
+    result(nil);
   } else if ([method isEqualToString:@"TextInput.clearClient"]) {
     [self clearTextInputClient];
-    resultReceiver(nil);
+    result(nil);
   } else {
-    resultReceiver(FlutterMethodNotImplemented);
+    result(FlutterMethodNotImplemented);
   }
 }
 

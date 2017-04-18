@@ -95,8 +95,7 @@ FLUTTER_EXPORT
    - method: the name of the method to call.
    - arguments: the arguments value.
  */
-+ (instancetype)methodCallWithMethodName:(NSString*)method
-                               arguments:(id _Nullable)arguments;
++ (instancetype)methodCallWithMethodName:(NSString*)method arguments:(id _Nullable)arguments;
 
 /**
  The method name.

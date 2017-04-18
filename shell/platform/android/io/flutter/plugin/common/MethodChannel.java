@@ -5,10 +5,8 @@
 package io.flutter.plugin.common;
 
 import android.util.Log;
-import io.flutter.view.FlutterView;
-import io.flutter.view.FlutterView.BinaryMessageReplyCallback;
-import io.flutter.view.FlutterView.BinaryMessageResponse;
-import io.flutter.view.FlutterView.OnBinaryMessageListenerAsync;
+import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
+import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 import java.nio.ByteBuffer;
 
 /**
@@ -25,37 +23,37 @@ import java.nio.ByteBuffer;
  * The identity of the channel is given by its name, so other uses of that name
  * with may interfere with this channel's communication.
  */
-public final class FlutterMethodChannel {
-    private static final String TAG = "FlutterMethodChannel#";
+public final class MethodChannel {
+    private static final String TAG = "MethodChannel#";
 
-    private final FlutterView view;
+    private final BinaryMessenger messenger;
     private final String name;
     private final MethodCodec codec;
 
     /**
-     * Creates a new channel associated with the specified {@link FlutterView} and with the
-     * specified name and the standard {@link MethodCodec}.
+     * Creates a new channel associated with the specified {@link BinaryMessenger}
+     * and with the specified name and the standard {@link MethodCodec}.
      *
-     * @param view a {@link FlutterView}.
+     * @param messenger a {@link BinaryMessenger}.
      * @param name a channel name String.
      */
-    public FlutterMethodChannel(FlutterView view, String name) {
-        this(view, name, StandardMethodCodec.INSTANCE);
+    public MethodChannel(BinaryMessenger messenger, String name) {
+        this(messenger, name, StandardMethodCodec.INSTANCE);
     }
 
     /**
-     * Creates a new channel associated with the specified {@link FlutterView} and with the
+     * Creates a new channel associated with the specified {@link BinaryMessenger} and with the
      * specified name and {@link MethodCodec}.
      *
-     * @param view a {@link FlutterView}.
+     * @param messenger a {@link BinaryMessenger}.
      * @param name a channel name String.
      * @param codec a {@link MessageCodec}.
      */
-    public FlutterMethodChannel(FlutterView view, String name, MethodCodec codec) {
-        assert view != null;
+    public MethodChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
+        assert messenger != null;
         assert name != null;
         assert codec != null;
-        this.view = view;
+        this.messenger = messenger;
         this.name = name;
         this.codec = codec;
     }
@@ -75,11 +73,11 @@ public final class FlutterMethodChannel {
      *
      * @param method the name String of the method.
      * @param arguments the arguments for the invocation, possibly null.
-     * @param handler a {@link Response} handler for the invocation result.
+     * @param callback a {@link Result} callback for the invocation result.
      */
-    public void invokeMethod(String method, Object arguments, Response handler) {
-        view.sendBinaryMessage(name, codec.encodeMethodCall(new MethodCall(method, arguments)),
-            handler == null ? null : new MethodCallResultCallback(handler));
+    public void invokeMethod(String method, Object arguments, Result callback) {
+        messenger.send(name, codec.encodeMethodCall(new MethodCall(method, arguments)),
+            callback == null ? null : new IncomingResultHandler(callback));
     }
 
     /**
@@ -90,17 +88,17 @@ public final class FlutterMethodChannel {
      * @param handler a {@link MethodCallHandler}, or null to deregister.
      */
     public void setMethodCallHandler(final MethodCallHandler handler) {
-        view.addOnBinaryMessageListenerAsync(name,
-            handler == null ? null : new MethodCallListener(handler));
+        messenger.setMessageHandler(name,
+            handler == null ? null : new IncomingMethodCallHandler(handler));
     }
 
     /**
-     * Strategy for handling the result of a method call. Supports dual use:
-     * Implementations of methods to be invoked by Flutter act as clients of this interface
-     * for sending results back to Flutter. Invokers of Flutter methods provide
-     * implementations of this interface for handling results received from Flutter.
+     * Method call result callback. Supports dual use: Implementations of methods
+     * to be invoked by Flutter act as clients of this interface for sending results
+     * back to Flutter. Invokers of Flutter methods provide implementations of this
+     * interface for handling results received from Flutter.
      */
-    public interface Response {
+    public interface Result {
         /**
          * Handles a successful result.
          *
@@ -124,66 +122,65 @@ public final class FlutterMethodChannel {
     }
 
     /**
-     * A call-back interface for handling incoming method calls.
+     * A handler of incoming method calls.
      */
     public interface MethodCallHandler {
         /**
          * Handles the specified method call.
          *
          * @param call A {@link MethodCall}.
-         * @param response A {@link Response} for providing a single method call result.
+         * @param result A {@link Result} used for submitting the result of the call.
          */
-        void onMethodCall(MethodCall call, Response response);
+        void onMethodCall(MethodCall call, Result result);
     }
 
-    private final class MethodCallResultCallback implements BinaryMessageReplyCallback {
-        private final Response handler;
+    private final class IncomingResultHandler implements BinaryReply {
+        private final Result callback;
 
-        MethodCallResultCallback(Response handler) {
-            this.handler = handler;
+        IncomingResultHandler(Result callback) {
+            this.callback = callback;
         }
 
         @Override
-        public void onReply(ByteBuffer reply) {
+        public void reply(ByteBuffer reply) {
             if (reply == null) {
-                handler.notImplemented();
+                callback.notImplemented();
             } else {
                 try {
                     final Object result = codec.decodeEnvelope(reply);
-                    handler.success(result);
+                    callback.success(result);
                 } catch (FlutterException e) {
-                    handler.error(e.code, e.getMessage(), e.details);
+                    callback.error(e.code, e.getMessage(), e.details);
                 }
             }
         }
     }
 
-    private final class MethodCallListener implements OnBinaryMessageListenerAsync {
+    private final class IncomingMethodCallHandler implements BinaryMessageHandler {
         private final MethodCallHandler handler;
 
-        MethodCallListener(MethodCallHandler handler) {
+        IncomingMethodCallHandler(MethodCallHandler handler) {
             this.handler = handler;
         }
 
         @Override
-        public void onMessage(FlutterView view, ByteBuffer message,
-            final BinaryMessageResponse response) {
+        public void onMessage(ByteBuffer message, final BinaryReply reply) {
             final MethodCall call = codec.decodeMethodCall(message);
             try {
-                handler.onMethodCall(call, new Response() {
+                handler.onMethodCall(call, new Result() {
                     private boolean done = false;
 
                     @Override
                     public void success(Object result) {
                         checkDone();
-                        response.send(codec.encodeSuccessEnvelope(result));
+                        reply.reply(codec.encodeSuccessEnvelope(result));
                         done = true;
                     }
 
                     @Override
                     public void error(String errorCode, String errorMessage, Object errorDetails) {
                         checkDone();
-                        response.send(codec.encodeErrorEnvelope(
+                        reply.reply(codec.encodeErrorEnvelope(
                             errorCode, errorMessage, errorDetails));
                         done = true;
                     }
@@ -191,7 +188,7 @@ public final class FlutterMethodChannel {
                     @Override
                     public void notImplemented() {
                         checkDone();
-                        response.send(null);
+                        reply.reply(null);
                         done = true;
                     }
 
@@ -203,7 +200,7 @@ public final class FlutterMethodChannel {
                 });
             } catch (Exception e) {
                 Log.e(TAG + name, "Failed to handle method call", e);
-                response.send(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                reply.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
             }
         }
     }

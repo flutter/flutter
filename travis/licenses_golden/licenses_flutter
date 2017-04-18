@@ -1072,6 +1072,7 @@ FILE: ../../../flutter/lib/ui/natives.dart
 FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/runtime/platform_impl.h
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.java
 FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
@@ -1422,14 +1423,14 @@ FILE: ../../../flutter/lib/ui/painting/vertices.cc
 FILE: ../../../flutter/lib/ui/painting/vertices.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterEventChannel.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/EventChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterException.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMessageChannel.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterMethodChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCall.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMethodCodec.java
