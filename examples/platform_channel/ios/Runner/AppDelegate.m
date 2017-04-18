@@ -55,6 +55,7 @@
                          eventReceiver:(FlutterEventReceiver)eventReceiver {
   _eventReceiver = eventReceiver;
   [[UIDevice currentDevice] setBatteryMonitoringEnabled:YES];
+  [self sendBatteryStateEvent];
   [[NSNotificationCenter defaultCenter]
    addObserver:self
       selector:@selector(onBatteryStateDidChange:)
@@ -64,6 +65,10 @@
 }
 
 - (void)onBatteryStateDidChange:(NSNotification*)notification {
+  [self sendBatteryStateEvent];
+}
+
+- (void)sendBatteryStateEvent {
   if (!_eventReceiver) return;
   UIDeviceBatteryState state = [[UIDevice currentDevice] batteryState];
   switch (state) {
@@ -76,8 +81,8 @@
       break;
     default:
       _eventReceiver([FlutterError errorWithCode:@"UNAVAILABLE"
-                                          message:@"Charging status unavailable"
-                                          details:nil]);
+                                         message:@"Charging status unavailable"
+                                         details:nil]);
       break;
   }
 }
