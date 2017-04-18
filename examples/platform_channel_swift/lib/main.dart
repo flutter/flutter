@@ -14,9 +14,9 @@ class PlatformChannel extends StatefulWidget {
 
 class _PlatformChannelState extends State<PlatformChannel> {
   static const PlatformMethodChannel methodChannel =
-    const PlatformMethodChannel('samples.flutter.io/battery');
+      const PlatformMethodChannel('samples.flutter.io/battery');
   static const PlatformEventChannel eventChannel =
-    const PlatformEventChannel('samples.flutter.io/charging');
+      const PlatformEventChannel('samples.flutter.io/charging');
 
   String _batteryLevel = 'Battery level: unknown.';
   String _chargingStatus = 'Battery status: unknown.';
@@ -43,7 +43,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
   void _onEvent(String event) {
     setState(() {
       _chargingStatus =
-      "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
+          "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
     });
   }
 
@@ -56,25 +56,25 @@ class _PlatformChannelState extends State<PlatformChannel> {
   @override
   Widget build(BuildContext context) {
     return new Material(
-        child: new Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      child: new Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          new Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    new Text(_batteryLevel, key: const Key('Battery level label')),
-                    new Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: new RaisedButton(
-                            child: const Text('Refresh'),
-                            onPressed: _getBatteryLevel,
-                        ),
-                    ),
-                  ],
+              new Text(_batteryLevel, key: const Key('Battery level label')),
+              new Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: new RaisedButton(
+                  child: const Text('Refresh'),
+                  onPressed: _getBatteryLevel,
+                ),
               ),
-              new Text(_chargingStatus),
             ],
-        ),
+          ),
+          new Text(_chargingStatus),
+        ],
+      ),
     );
   }
 }
