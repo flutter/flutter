@@ -174,8 +174,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
       else
         return new CupertinoPageTransition(
-          incomingRouteAnimation: animation,
-          outgoingRouteAnimation: secondaryAnimation,
+          primaryRouteAnimation: animation,
+          secondaryRouteAnimation: secondaryAnimation,
           child: child,
           // In the middle of a back gesture drag, let the transition be linear to match finger
           // motions.

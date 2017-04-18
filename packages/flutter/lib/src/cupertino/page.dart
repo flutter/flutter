@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 const double _kMinFlingVelocity = 1.0;  // screen width per second.
-const Color _kBackgroundColor = const Color(0xFFEFEFF4); // iOS 10 background color.
 
 // Fractional offset from offscreen to the right to fully on screen.
 final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
@@ -26,6 +25,20 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   end: FractionalOffset.topLeft,
 );
 
+// BoxDecoration from no shadow to page shadow mimicking iOS page transitions.
+final DecorationTween _kShadowTween = new DecorationTween(
+  begin: BoxDecoration.none, // No shadow initially.
+  end: const BoxDecoration(
+    boxShadow: const <BoxShadow>[
+      const BoxShadow(
+        blurRadius: 10.0,
+        spreadRadius: 4.0,
+        color: const Color(0x38000000),
+      ),
+    ],
+  ),
+);
+
 /// Provides the native iOS page transition animation.
 ///
 /// The page slides in from the right and exits in reverse. It also shifts to the left in
@@ -34,51 +47,50 @@ class CupertinoPageTransition extends StatelessWidget {
   CupertinoPageTransition({
     Key key,
     // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
-    @required Animation<double> incomingRouteAnimation,
+    @required Animation<double> primaryRouteAnimation,
     // Linear route animation from 0.0 to 1.0 when another screen is being pushed on top of this
     // one.
-    @required Animation<double> outgoingRouteAnimation,
+    @required Animation<double> secondaryRouteAnimation,
     @required this.child,
-    // Perform incoming transition linearly. Use to precisely track back gesture drags.
+    // Perform primary transition linearly. Use to precisely track back gesture drags.
     bool linearTransition,
   }) :
-      _incomingPositionAnimation = linearTransition
-        ? _kRightMiddleTween.animate(incomingRouteAnimation)
+      _primaryPositionAnimation = linearTransition
+        ? _kRightMiddleTween.animate(primaryRouteAnimation)
         : _kRightMiddleTween.animate(
             new CurvedAnimation(
-              parent: incomingRouteAnimation,
+              parent: primaryRouteAnimation,
               curve: Curves.easeOut,
               reverseCurve: Curves.easeIn,
             )
           ),
-      _outgoingPositionAnimation = _kMiddleLeftTween.animate(
+      _secondaryPositionAnimation = _kMiddleLeftTween.animate(
         new CurvedAnimation(
-          parent: outgoingRouteAnimation,
+          parent: secondaryRouteAnimation,
           curve: Curves.easeOut,
           reverseCurve: Curves.easeIn,
         )
       ),
+      _primaryShadowAnimation = _kShadowTween.animate(primaryRouteAnimation),
       super(key: key);
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> _incomingPositionAnimation;
+  final Animation<FractionalOffset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> _outgoingPositionAnimation;
+  final Animation<FractionalOffset> _secondaryPositionAnimation;
+  final Animation<Decoration> _primaryShadowAnimation;
   final Widget child;
-
 
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
-      position: _outgoingPositionAnimation,
+      position: _secondaryPositionAnimation,
       child: new SlideTransition(
-        position: _incomingPositionAnimation,
-        child: new PhysicalModel(
-          shape: BoxShape.rectangle,
-          color: _kBackgroundColor,
-          elevation: 32,
+        position: _primaryPositionAnimation,
+        child: new DecoratedBoxTransition(
+          decoration: _primaryShadowAnimation,
           child: child,
         ),
       ),

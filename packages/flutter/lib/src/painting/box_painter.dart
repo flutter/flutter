@@ -1078,6 +1078,9 @@ class BoxDecoration extends Decoration {
     this.shape: BoxShape.rectangle
   });
 
+  /// A [BoxDecoration] with no decorating properties.
+  static const BoxDecoration none = const BoxDecoration();
+
   @override
   bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||

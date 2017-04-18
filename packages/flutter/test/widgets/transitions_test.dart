@@ -15,7 +15,7 @@ void main() {
     expect(widget.toString, isNot(throwsException));
   });
 
-  group('ContainerTransition test', () {
+  group('DecoratedBoxTransition test', () {
     final DecorationTween decorationTween = new DecorationTween(
       begin: new BoxDecoration(
         backgroundColor: const Color(0xFFFFFFFF),
