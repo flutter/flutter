@@ -41,7 +41,7 @@ class TestTextInput {
 
   void updateEditingValue(TextEditingValue value) {
     expect(_client, isNonZero);
-    PlatformMessages.handlePlatformMessage(
+    BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         new MethodCall(

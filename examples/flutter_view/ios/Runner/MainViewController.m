@@ -12,7 +12,7 @@
 
 @property (nonatomic) NativeViewController* nativeViewController;
 @property (nonatomic) FlutterViewController* flutterViewController;
-@property (nonatomic) FlutterMessageChannel* messageChannel;
+@property (nonatomic) FlutterBasicMessageChannel* messageChannel;
 @end
 
 static NSString* const emptyString = @"";
@@ -35,20 +35,20 @@ static NSString* const channel = @"increment";
   if ([segue.identifier isEqualToString:@"FlutterViewControllerSegue"]) {
     self.flutterViewController = segue.destinationViewController;
 
-    self.messageChannel = [FlutterMessageChannel messageChannelWithName:channel
-                                                        binaryMessenger:self.flutterViewController
-                                                                  codec:[FlutterStringCodec sharedInstance]];
+    self.messageChannel = [FlutterBasicMessageChannel messageChannelWithName:channel
+                                                             binaryMessenger:self.flutterViewController
+                                                                       codec:[FlutterStringCodec sharedInstance]];
 
     MainViewController*  __weak weakSelf = self;
-    [self.messageChannel setMessageHandler:^(id message, FlutterReplyHandler replyHandler) {
+    [self.messageChannel setMessageHandler:^(id message, FlutterReply reply) {
       [weakSelf.nativeViewController didReceiveIncrement];
-      replyHandler(emptyString);
+      reply(emptyString);
     }];
   }
 }
 
 - (void)didTapIncrementButton {
-  [self.messageChannel sendMessage:ping replyHandler:nil];
+  [self.messageChannel sendMessage:ping];
 }
 
 @end

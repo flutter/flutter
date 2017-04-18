@@ -216,7 +216,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = UTF8.encoder.convert(key);
     final ByteData asset =
-        await PlatformMessages.sendBinary('flutter/assets', encoded.buffer.asByteData());
+        await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
     if (asset == null)
       throw new FlutterError('Unable to load asset: $key');
     return asset;

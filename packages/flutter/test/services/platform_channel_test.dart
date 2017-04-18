@@ -11,9 +11,9 @@ import 'package:test/test.dart';
 void main() {
   group('PlatformMessageChannel', () {
     const MessageCodec<String> string = const StringCodec();
-    const PlatformMessageChannel<String> channel = const PlatformMessageChannel<String>('ch', string);
+    const BasicMessageChannel<String> channel = const BasicMessageChannel<String>('ch', string);
     test('can send string message and get reply', () async {
-      PlatformMessages.setMockBinaryMessageHandler(
+      BinaryMessages.setMockMessageHandler(
         'ch',
         (ByteData message) async => string.encodeMessage(string.decodeMessage(message) + ' world'),
       );
@@ -23,7 +23,7 @@ void main() {
     test('can receive string message and send reply', () async {
       channel.setMessageHandler((String message) async => message + ' world');
       String reply;
-      await PlatformMessages.handlePlatformMessage(
+      await BinaryMessages.handlePlatformMessage(
         'ch',
         const StringCodec().encodeMessage('hello'),
         (ByteData replyBinary) {
@@ -37,9 +37,9 @@ void main() {
   group('PlatformMethodChannel', () {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
-    const PlatformMethodChannel channel = const PlatformMethodChannel('ch7', jsonMethod);
+    const MethodChannel channel = const MethodChannel('ch7', jsonMethod);
     test('can invoke method and get result', () async {
-      PlatformMessages.setMockBinaryMessageHandler(
+      BinaryMessages.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
@@ -53,7 +53,7 @@ void main() {
       expect(result, equals('hello world'));
     });
     test('can invoke method and get error', () async {
-      PlatformMessages.setMockBinaryMessageHandler(
+      BinaryMessages.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
           return jsonMessage.encodeMessage(<dynamic>[
@@ -75,7 +75,7 @@ void main() {
       }
     });
     test('can invoke unimplemented method', () async {
-      PlatformMessages.setMockBinaryMessageHandler(
+      BinaryMessages.setMockMessageHandler(
         'ch7',
         (ByteData message) async => null,
       );
@@ -93,17 +93,17 @@ void main() {
   group('PlatformEventChannel', () {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
-    const PlatformEventChannel channel = const PlatformEventChannel('ch', jsonMethod);
+    const EventChannel channel = const EventChannel('ch', jsonMethod);
     test('can receive event stream', () async {
       void emitEvent(dynamic event) {
-        PlatformMessages.handlePlatformMessage(
+        BinaryMessages.handlePlatformMessage(
           'ch',
           event,
           (ByteData reply) {},
         );
       }
       bool cancelled = false;
-      PlatformMessages.setMockBinaryMessageHandler(
+      BinaryMessages.setMockMessageHandler(
         'ch',
         (ByteData message) async {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
