@@ -756,6 +756,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Null> refreshViews() async {
+    _viewCache.clear();
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
