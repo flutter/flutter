@@ -73,7 +73,6 @@ void SnapshotRasterizer(ftl::WeakPtr<shell::Rasterizer> rasterizer,
 
   // Create a canvas from the backing store and a single use compositor context
   // to draw into the canvas.
-  SkAutoLockPixels pixel_lock(bitmap, true);
 
   SkCanvas canvas(bitmap);
 
