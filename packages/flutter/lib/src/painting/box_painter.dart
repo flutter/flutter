@@ -1073,7 +1073,7 @@ class BoxDecoration extends Decoration {
   });
 
   /// A [BoxDecoration] with no decorating properties.
-  static const BoxDecoration noDecoration = const BoxDecoration();
+  static const BoxDecoration none = const BoxDecoration();
 
   @override
   bool debugAssertIsValid() {

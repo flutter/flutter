@@ -27,7 +27,7 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
 
 // BoxDecoration from no shadow to page shadow mimicking iOS page transitions.
 final DecorationTween _kShadowTween = new DecorationTween(
-  begin: BoxDecoration.noDecoration, // No shadow initially.
+  begin: BoxDecoration.none, // No shadow initially.
   end: const BoxDecoration(
     boxShadow: const <BoxShadow>[
       const BoxShadow(
