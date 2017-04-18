@@ -329,6 +329,18 @@ class HotRunner extends ResidentRunner {
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS Synchronization Failed');
+    // Check if the isolate is paused and resume it.
+    if (currentView?.uiIsolate != null) {
+      // Reload the isolate.
+      await currentView.uiIsolate.reload();
+      final ServiceEvent pauseEvent = currentView.uiIsolate.pauseEvent;
+      if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
+        // Resume the isolate so that it can be killed by the embedder.
+        await currentView.uiIsolate.resume();
+      }
+    }
+    // We are now running from source.
+    _runningFromSnapshot = false;
     await _launchFromDevFS(package, mainPath);
     restartTimer.stop();
     printTrace('Restart performed in '
