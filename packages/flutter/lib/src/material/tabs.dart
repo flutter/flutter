@@ -912,6 +912,33 @@ class _TabBarViewState extends State<TabBarView> {
   }
 }
 
+/// Displays a single 12x12 circle with the specified border and background colors.
+///
+/// Used by [TabPageSelector] to indicate the selected page.
+class TabPageSelectorIndicator extends StatelessWidget {
+  const TabPageSelectorIndicator({ Key key, this.backgroundColor, this.borderColor }) : super(key: key);
+
+  /// The indicator circle's background color.
+  final Color backgroundColor;
+
+  /// The indicator circle's border color.
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      width: 12.0,
+      height: 12.0,
+      margin: const EdgeInsets.all(4.0),
+      decoration: new BoxDecoration(
+        backgroundColor: backgroundColor,
+        border: new Border.all(color: borderColor),
+        shape: BoxShape.circle
+      ),
+    );
+  }
+}
+
 /// Displays a row of small circular indicators, one per tab. The selected
 /// tab's indicator is highlighted. Often used in conjuction with a [TabBarView].
 ///
@@ -936,24 +963,30 @@ class TabPageSelector extends StatelessWidget {
     Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
+      final double t = 1.0 - _indexChangeProgress(tabController);
       if (tabController.index == tabIndex)
-        background = selectedColor.lerp(_indexChangeProgress(tabController));
+        background = selectedColor.lerp(t);
       else if (tabController.previousIndex == tabIndex)
-        background = previousColor.lerp(_indexChangeProgress(tabController));
+        background = previousColor.lerp(t);
       else
         background = selectedColor.begin;
     } else {
-      background = tabController.index == tabIndex ? selectedColor.end : selectedColor.begin;
+      // The selection's offset reflects how far the TabBarView has
+      /// been dragged to the left (-1.0 to 0.0) or the right (0.0 to 1.0).
+      final double offset = tabController.offset;
+      if (tabController.index == tabIndex) {
+        background = selectedColor.lerp(1.0 - offset.abs());
+      } else if (tabController.index == tabIndex - 1 && offset > 0.0) {
+        background = selectedColor.lerp(offset);
+      } else if (tabController.index == tabIndex + 1 && offset < 0.0) {
+        background = selectedColor.lerp(-offset);
+      } else {
+        background = selectedColor.begin;
+      }
     }
-    return new Container(
-      width: 12.0,
-      height: 12.0,
-      margin: const EdgeInsets.all(4.0),
-      decoration: new BoxDecoration(
-        backgroundColor: background,
-        border: new Border.all(color: selectedColor.end),
-        shape: BoxShape.circle
-      )
+    return new TabPageSelectorIndicator(
+      backgroundColor: background,
+      borderColor: selectedColor.end,
     );
   }
 
