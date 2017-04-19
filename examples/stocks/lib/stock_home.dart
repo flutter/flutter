@@ -209,15 +209,15 @@ class StockHomeState extends State<StockHome> {
               checked: _autorefresh,
               child: const Text('Autorefresh'),
             ),
-            new PopupMenuItem<_StockMenuItem>(
+            const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.refresh,
               child: const Text('Refresh'),
             ),
-            new PopupMenuItem<_StockMenuItem>(
+            const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedUp,
               child: const Text('Increase animation speed'),
             ),
-            new PopupMenuItem<_StockMenuItem>(
+            const PopupMenuItem<_StockMenuItem>(
               value: _StockMenuItem.speedDown,
               child: const Text('Decrease animation speed'),
             ),

@@ -192,11 +192,11 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
               });
             },
             itemBuilder: (BuildContext context) => <PopupMenuItem<BottomNavigationBarType>>[
-              new PopupMenuItem<BottomNavigationBarType>(
+              const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.fixed,
                 child: const Text('Fixed'),
               ),
-              new PopupMenuItem<BottomNavigationBarType>(
+              const PopupMenuItem<BottomNavigationBarType>(
                 value: BottomNavigationBarType.shifting,
                 child: const Text('Shifting'),
               )

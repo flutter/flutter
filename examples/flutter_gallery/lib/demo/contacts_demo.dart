@@ -128,15 +128,15 @@ class ContactsDemoState extends State<ContactsDemo> {
                     });
                   },
                   itemBuilder: (BuildContext context) => <PopupMenuItem<AppBarBehavior>>[
-                    new PopupMenuItem<AppBarBehavior>(
+                    const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.normal,
                       child: const Text('App bar scrolls away')
                     ),
-                    new PopupMenuItem<AppBarBehavior>(
+                    const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.pinned,
                       child: const Text('App bar stays put')
                     ),
-                    new PopupMenuItem<AppBarBehavior>(
+                    const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
                       child: const Text('App bar floats')
                     ),

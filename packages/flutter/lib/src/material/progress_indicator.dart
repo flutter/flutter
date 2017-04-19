@@ -30,7 +30,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  ProgressIndicator({
+  const ProgressIndicator({
     Key key,
     this.value,
     this.backgroundColor,
@@ -137,7 +137,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  LinearProgressIndicator({
+  const LinearProgressIndicator({
     Key key,
     double value
   }) : super(key: key, value: value);
@@ -278,7 +278,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  CircularProgressIndicator({
+  const CircularProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
@@ -438,7 +438,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
-  RefreshProgressIndicator({
+  const RefreshProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,

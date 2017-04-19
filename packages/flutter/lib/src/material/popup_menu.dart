@@ -76,7 +76,7 @@ class PopupMenuDivider extends PopupMenuEntry<dynamic> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16.0 logical pixels.
-  PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
+  const PopupMenuDivider({ Key key, this.height: 16.0 }) : super(key: key);
 
   @override
   final double height;
@@ -111,7 +111,7 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   /// Creates an item for a popup menu.
   ///
   /// By default, the item is enabled.
-  PopupMenuItem({
+  const PopupMenuItem({
     Key key,
     this.value,
     this.enabled: true,
@@ -195,7 +195,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   /// Creates a popup menu item with a checkmark.
   ///
   /// By default, the menu item is enabled but unchecked.
-  CheckedPopupMenuItem({
+  const CheckedPopupMenuItem({
     Key key,
     T value,
     this.checked: false,
@@ -252,7 +252,7 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
 }
 
 class _PopupMenu<T> extends StatelessWidget {
-  _PopupMenu({
+  const _PopupMenu({
     Key key,
     this.route
   }) : super(key: key);
