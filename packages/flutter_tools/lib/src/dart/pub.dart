@@ -49,7 +49,7 @@ Future<Null> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
-    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'];
+    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-precompile'];
     if (offline)
       args.add('--offline');
     final int code = await runCommandAndStreamOutput(args,
