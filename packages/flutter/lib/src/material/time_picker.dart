@@ -34,6 +34,7 @@ enum DayPeriod {
 }
 
 /// A value representing a time during the day
+@immutable
 class TimeOfDay {
   /// Creates a time of day.
   ///

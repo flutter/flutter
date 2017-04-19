@@ -5,6 +5,8 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -32,6 +34,7 @@ class TableCellParentData extends BoxParentData {
 /// distributes the space equally among the flexible columns,
 /// [FractionColumnWidth], which sizes a column based on the size of the
 /// table's container.
+@immutable
 abstract class TableColumnWidth {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

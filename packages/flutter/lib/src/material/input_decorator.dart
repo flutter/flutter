@@ -23,6 +23,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///    [InputDecoration].
 ///  * [InputDecorator], which is a widget that draws an [InputDecoration]
 ///    around an arbitrary child widget.
+@immutable
 class InputDecoration {
   /// Creates a bundle of text and styles used to label an input field.
   ///

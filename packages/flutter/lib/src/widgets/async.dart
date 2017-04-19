@@ -8,6 +8,7 @@
 
 import 'dart:async' show Future, Stream, StreamSubscription;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show required;
 
@@ -179,9 +180,10 @@ enum ConnectionState {
 /// See also:
 ///
 /// * [StreamBuilder], which builds itself based on a snapshot from interacting
-/// with a [Stream].
+///   with a [Stream].
 /// * [FutureBuilder], which builds itself based on a snapshot from interacting
-/// with a [Future].
+///   with a [Future].
+@immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).

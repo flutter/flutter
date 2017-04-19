@@ -28,6 +28,7 @@ export 'package:flutter/rendering.dart' show
 ///
 /// The alignment of individual cells in a row can be controlled using a
 /// [TableCell].
+@immutable
 class TableRow {
   /// Creates a row in a [Table].
   const TableRow({ this.key, this.decoration, this.children });

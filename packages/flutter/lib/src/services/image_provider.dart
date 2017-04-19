@@ -19,6 +19,7 @@ import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
+@immutable
 class ImageConfiguration {
   /// Creates an object holding the configuration information for an [ImageProvider].
   ///
@@ -212,6 +213,7 @@ abstract class ImageProvider<T> {
 /// Key for the image obtained by an [AssetImage] or [ExactAssetImage].
 ///
 /// This is used to identify the precise resource in the [imageCache].
+@immutable
 class AssetBundleImageKey {
   /// Creates the key for an [AssetImage] or [AssetBundleImageProvider].
   ///

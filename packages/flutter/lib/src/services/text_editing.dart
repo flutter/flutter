@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 export 'dart:ui' show TextAffinity, TextPosition;
 
 /// A range of characters in a string of text.
+@immutable
 class TextRange {
   /// Creates a text range.
   ///
@@ -89,6 +90,7 @@ class TextRange {
 }
 
 /// A range of text that represents a selection.
+@immutable
 class TextSelection extends TextRange {
   /// Creates a text selection.
   ///

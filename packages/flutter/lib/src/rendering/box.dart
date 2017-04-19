@@ -529,6 +529,8 @@ class BoxParentData extends ParentData {
 abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
+
+@immutable
 class _IntrinsicDimensionsCacheEntry {
   _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
 

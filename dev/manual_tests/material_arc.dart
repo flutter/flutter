@@ -52,7 +52,7 @@ class _PointDemoPainter extends CustomPainter {
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialPointArcTween arc;
-  Animation<double> _repaint;
+  final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset point, Color color) {
     final Paint paint = new Paint()
@@ -227,7 +227,7 @@ class _RectangleDemoPainter extends CustomPainter {
   }) : _repaint = repaint, super(repaint: repaint);
 
   final MaterialRectArcTween arc;
-  Animation<double> _repaint;
+  final Animation<double> _repaint;
 
   void drawPoint(Canvas canvas, Offset p, Color color) {
     final Paint paint = new Paint()
