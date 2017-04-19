@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_ui;
+part of dart.ui;
 
 /// Whether to slant the glyphs in the font
 enum FontStyle {

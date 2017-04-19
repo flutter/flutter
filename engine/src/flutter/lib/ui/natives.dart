@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_ui;
+part of dart.ui;
 
 // Corelib 'print' implementation.
 void _print(arg) {

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_ui;
+part of dart.ui;
 
 String _decodeUTF8(ByteData message) {
   return message != null ? UTF8.decoder.convert(message.buffer.asUint8List()) : null;
