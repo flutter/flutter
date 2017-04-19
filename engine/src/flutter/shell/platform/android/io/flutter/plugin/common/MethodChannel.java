@@ -13,15 +13,16 @@ import java.nio.ByteBuffer;
  * A named channel for communicating with the Flutter application using asynchronous
  * method calls.
  *
- * Incoming method calls are decoded from binary on receipt, and Java results are encoded
+ * <p>Incoming method calls are decoded from binary on receipt, and Java results are encoded
  * into binary before being transmitted back to Flutter. The {@link MethodCodec} used must be
  * compatible with the one used by the Flutter application. This can be achieved
- * by creating a PlatformMethodChannel counterpart of this channel on the
- * Flutter side. The Java type of method call arguments and results is Object,
- * but only values supported by the specified {@link MethodCodec} can be used.
+ * by creating a
+ * <a href="https://docs.flutter.io/flutter/services/MethodChannel-class.html">MethodChannel</a>
+ * counterpart of this channel on the Dart side. The Java type of method call arguments and results is
+ * {@code Object}, but only values supported by the specified {@link MethodCodec} can be used.</p>
  *
- * The identity of the channel is given by its name, so other uses of that name
- * with may interfere with this channel's communication.
+ * <p>The logical identity of the channel is given by its name. Identically named channels will interfere
+ * with each other's communication.</p>
  */
 public final class MethodChannel {
     private static final String TAG = "MethodChannel#";
@@ -69,11 +70,13 @@ public final class MethodChannel {
     }
 
     /**
-     * Invokes a method on this channel.
+     * Invokes a method on this channel, optionally expecting a result.
+     *
+     * <p>Any uncaught exception thrown by the result callback will be caught and logged.</p>
      *
      * @param method the name String of the method.
      * @param arguments the arguments for the invocation, possibly null.
-     * @param callback a {@link Result} callback for the invocation result.
+     * @param callback a {@link Result} callback for the invocation result, or null.
      */
     public void invokeMethod(String method, Object arguments, Result callback) {
         messenger.send(name, codec.encodeMethodCall(new MethodCall(method, arguments)),
@@ -83,13 +86,44 @@ public final class MethodChannel {
     /**
      * Registers a method call handler on this channel.
      *
-     * Overrides any existing handler registration.
+     * <p>Overrides any existing handler registration for (the name of) this channel.</p>
+     *
+     * <p>If no handler has been registered, any incoming method call on this channel will be handled
+     * silently by sending a null reply. This results in a
+     * <a href="https://docs.flutter.io/flutter/services/MissingPluginException-class.html">MissingPluginException</a>
+     * on the Dart side, unless an
+     * <a href="https://docs.flutter.io/flutter/services/OptionalMethodChannel-class.html">OptionalMethodChannel</a>
+     * is used.</p>
      *
      * @param handler a {@link MethodCallHandler}, or null to deregister.
      */
     public void setMethodCallHandler(final MethodCallHandler handler) {
         messenger.setMessageHandler(name,
             handler == null ? null : new IncomingMethodCallHandler(handler));
+    }
+
+    /**
+     * A handler of incoming method calls.
+     */
+    public interface MethodCallHandler {
+        /**
+         * Handles the specified method call received from Flutter.
+         *
+         * <p>Handler implementations must submit a result for all incoming calls, by making a single call
+         * on the given {@link Result} callback. Failure to do so will result in lingering Flutter result
+         * handlers. The result may be submitted asynchronously. Calls to unknown or unimplemented methods
+         * should be handled using {@link Result#notImplemented()}.</p>
+         *
+         * <p>Any uncaught exception thrown by this method, or the preceding method call decoding, will be
+         * caught by the channel implementation and logged, and an error result will be sent back to Flutter.</p>
+         *
+         * <p>Any uncaught exception thrown during encoding a result submitted to the {@link Result}
+         * is treated similarly: the exception is logged, and an error result is sent to Flutter.</p>
+         *
+         * @param call A {@link MethodCall}.
+         * @param result A {@link Result} used for submitting the result of the call.
+         */
+        void onMethodCall(MethodCall call, Result result);
     }
 
     /**
@@ -121,19 +155,6 @@ public final class MethodChannel {
         void notImplemented();
     }
 
-    /**
-     * A handler of incoming method calls.
-     */
-    public interface MethodCallHandler {
-        /**
-         * Handles the specified method call.
-         *
-         * @param call A {@link MethodCall}.
-         * @param result A {@link Result} used for submitting the result of the call.
-         */
-        void onMethodCall(MethodCall call, Result result);
-    }
-
     private final class IncomingResultHandler implements BinaryReply {
         private final Result callback;
 
@@ -143,15 +164,19 @@ public final class MethodChannel {
 
         @Override
         public void reply(ByteBuffer reply) {
-            if (reply == null) {
-                callback.notImplemented();
-            } else {
-                try {
-                    final Object result = codec.decodeEnvelope(reply);
-                    callback.success(result);
-                } catch (FlutterException e) {
-                    callback.error(e.code, e.getMessage(), e.details);
+            try {
+                if (reply == null) {
+                    callback.notImplemented();
+                } else {
+                    try {
+                        final Object result = codec.decodeEnvelope(reply);
+                        callback.success(result);
+                    } catch (FlutterException e) {
+                        callback.error(e.code, e.getMessage(), e.details);
+                    }
                 }
+            } catch (RuntimeException e) {
+                Log.e(TAG + name, "Failed to handle method call result", e);
             }
         }
     }
@@ -165,42 +190,45 @@ public final class MethodChannel {
 
         @Override
         public void onMessage(ByteBuffer message, final BinaryReply reply) {
-            final MethodCall call = codec.decodeMethodCall(message);
+            MethodCall call;
+            try {
+                call = codec.decodeMethodCall(message);
+            } catch (RuntimeException e) {
+                Log.e(TAG + name, "Failed to decode method call", e);
+                reply.reply(codec.encodeErrorEnvelope("decode", e.getMessage(), null));
+                return;
+            }
             try {
                 handler.onMethodCall(call, new Result() {
-                    private boolean done = false;
-
                     @Override
                     public void success(Object result) {
-                        checkDone();
-                        reply.reply(codec.encodeSuccessEnvelope(result));
-                        done = true;
+                        try {
+                            reply.reply(codec.encodeSuccessEnvelope(result));
+                        } catch (RuntimeException e) {
+                            Log.e(TAG + name, "Failed to encode success result", e);
+                            reply.reply(codec.encodeErrorEnvelope("encode", e.getMessage(), null));
+                        }
                     }
 
                     @Override
                     public void error(String errorCode, String errorMessage, Object errorDetails) {
-                        checkDone();
-                        reply.reply(codec.encodeErrorEnvelope(
-                            errorCode, errorMessage, errorDetails));
-                        done = true;
+                        try {
+                            reply.reply(codec.encodeErrorEnvelope(
+                                    errorCode, errorMessage, errorDetails));
+                        } catch (RuntimeException e) {
+                            Log.e(TAG + name, "Failed to encode error result", e);
+                            reply.reply(codec.encodeErrorEnvelope("encode", e.getMessage(), null));
+                        }
                     }
 
                     @Override
                     public void notImplemented() {
-                        checkDone();
                         reply.reply(null);
-                        done = true;
-                    }
-
-                    private void checkDone() {
-                        if (done) {
-                            throw new IllegalStateException("Call result already provided");
-                        }
                     }
                 });
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 Log.e(TAG + name, "Failed to handle method call", e);
-                reply.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                reply.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
             }
         }
     }
