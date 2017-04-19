@@ -98,7 +98,7 @@ class RenderParagraph extends RenderBox {
       return;
     _overflow = value;
     _textPainter.ellipsis = value == TextOverflow.ellipsis ? _kEllipsis : null;
-    markNeedsPaint();
+    markNeedsLayout();
   }
 
   /// The number of font pixels for each logical pixel.
