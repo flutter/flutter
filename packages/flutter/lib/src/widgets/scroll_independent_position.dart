@@ -35,7 +35,7 @@ import 'scroll_position.dart';
 ///  * [ScrollController], which can manipulate one or more [ScrollPosition]s,
 ///    and which uses [ScrollIndependentPosition] as its default class for scroll
 ///    positions.
-class ScrollIndependentPosition extends ScrollPosition implements ScrollPositionWriteAndDragInterface {
+class ScrollIndependentPosition extends ScrollPosition {
   /// Create a [ScrollPosition] object that manages its behavior using
   /// [ScrollActivity] objects.
   ///
@@ -57,11 +57,14 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
     if (pixels == null)
       correctPixels(initialPixels);
     if (activity == null)
-      beginIdleActivity();
+      goIdle();
     assert(activity != null);
   }
 
-  final ScrollWidgetInterface state;
+  final ScrollContext state;
+
+  @override
+  AxisDirection get axisDirection => state.axisDirection;
 
   @override
   double setPixels(double newPixels) {
@@ -98,7 +101,7 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
     assert(otherPosition != null);
     if (otherPosition is! ScrollIndependentPosition) {
       super.absorb(otherPosition);
-      beginIdleActivity();
+      goIdle();
       return;
     }
     final ScrollIndependentPosition other = otherPosition;
@@ -192,7 +195,7 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
   /// End the current [ScrollActivity], replacing it with an
   /// [IdleScrollActivity].
   @override
-  void beginIdleActivity() {
+  void goIdle() {
     beginActivity(new IdleScrollActivity(this));
   }
 
@@ -206,13 +209,13 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
   ///
   /// The velocity should be in logical pixels per second.
   @override
-  void beginBallisticActivity(double velocity) {
+  void goBallistic(double velocity) {
     assert(pixels != null);
     final Simulation simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(new BallisticScrollActivity(this, simulation, state.vsync));
     } else {
-      beginIdleActivity();
+      goIdle();
     }
   }
 
@@ -305,7 +308,7 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
   /// then this method automatically overrides the [ScrollPosition] version.
   @override
   void jumpTo(double value) {
-    beginIdleActivity();
+    goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
       forcePixels(value);
@@ -314,14 +317,14 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
       reportScroll(pixels - oldPixels);
       reportScrollEnd();
     }
-    beginBallisticActivity(0.0);
+    goBallistic(0.0);
   }
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   @Deprecated('This will lead to bugs.')
   @override
   void jumpToWithoutSettling(double value) {
-    beginIdleActivity();
+    goIdle();
     if (pixels != value) {
       final double oldPixels = pixels;
       forcePixels(value);
@@ -371,19 +374,19 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
   /// Called by [beginActivity] to report when an activity has started.
   @override
   void reportScrollStart() {
-    state.dispatchNotification(activity.createScrollStartNotification(state));
+    activity.dispatchScrollStartNotification(cloneMetrics(), state.notificationContext);
   }
 
   /// Called by [setPixels] to report a change to the [pixels] position.
   @override
   void reportScroll(double delta) {
-    state.dispatchNotification(activity.createScrollUpdateNotification(state, delta));
+    activity.dispatchScrollUpdateNotification(cloneMetrics(), state.notificationContext, delta);
   }
 
   /// Called by [beginActivity] to report when an activity has ended.
   @override
   void reportScrollEnd() {
-    state.dispatchNotification(activity.createScrollEndNotification(state));
+    activity.dispatchScrollEndNotification(cloneMetrics(), state.notificationContext);
   }
 
   /// Called by [setPixels] to report overscroll when an attempt is made to
@@ -392,14 +395,14 @@ class ScrollIndependentPosition extends ScrollPosition implements ScrollPosition
   @override
   void reportOverscroll(double value) {
     assert(activity.isScrolling);
-    state.dispatchNotification(activity.createOverscrollNotification(state, value));
+    activity.dispatchOverscrollNotification(cloneMetrics(), state.notificationContext, value);
   }
 
   /// Called by [updateUserScrollDirection] to report that the
   /// [userScrollDirection] has changed.
   @override
   void reportScrollDirection(ScrollDirection direction) {
-    state.dispatchNotification(new UserScrollNotification(scrollable: state, direction: direction));
+    new UserScrollNotification(metrics: cloneMetrics(), context: state.notificationContext, direction: direction).dispatch(state.notificationContext);
   }
 
   @override

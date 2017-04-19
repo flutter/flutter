@@ -16,8 +16,6 @@ import 'notification_listener.dart';
 import 'scroll_configuration.dart';
 import 'scroll_controller.dart';
 import 'scroll_interfaces.dart';
-import 'scroll_metrics.dart';
-import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'ticker_provider.dart';
@@ -134,7 +132,7 @@ class _ScrollableScope extends InheritedWidget {
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
 class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
-    implements ScrollWidgetInterface {
+    implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
   ///
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
@@ -145,9 +143,6 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
-
-  @override
-  ScrollMetrics getMetrics() => position.getMetrics();
 
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
@@ -235,6 +230,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
                 ..minFlingDistance = _physics?.minFlingDistance
                 ..minFlingVelocity = _physics?.minFlingVelocity
                 ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -249,6 +245,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
                 ..minFlingDistance = _physics?.minFlingDistance
                 ..minFlingVelocity = _physics?.minFlingVelocity
                 ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -279,28 +276,11 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  @protected
-  void dispatchNotification(Notification notification) {
-    assert(mounted);
-    notification.dispatch(_gestureDetectorKey.currentContext);
-  }
+  BuildContext get notificationContext => _gestureDetectorKey.currentContext;
 
   // TOUCH HANDLERS
 
-  ScrollDragInterface _drag;
-
-  bool get _reverseDirection {
-    assert(widget.axisDirection != null);
-    switch (widget.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        return true;
-      case AxisDirection.down:
-      case AxisDirection.right:
-        return false;
-    }
-    return null;
-  }
+  Drag _drag;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
@@ -309,22 +289,28 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
-    _drag = position.beginDrag(details, _handleDragCanceled);
+    _drag = position.beginDrag(details, _disposeDrag);
     assert(_drag != null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    // _drag might be null if the drag activity ended and called _handleDragCanceled.
-    _drag?.update(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.update(details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    // _drag might be null if the drag activity ended and called _handleDragCanceled.
-    _drag?.end(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.end(details);
     assert(_drag == null);
   }
 
-  void _handleDragCanceled() {
+  void _handleDragCancel() {
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.cancel();
+    assert(_drag == null);
+  }
+
+  void _disposeDrag() {
     _drag = null;
   }
 

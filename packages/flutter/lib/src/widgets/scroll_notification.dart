@@ -6,10 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
-import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
-import 'scroll_interfaces.dart';
 import 'scroll_metrics.dart';
 
 /// Mixin for [Notification]s that track how many [RenderAbstractViewport] they
@@ -44,19 +42,13 @@ abstract class ViewportNotificationMixin extends Notification {
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Creates a notification about scrolling.
   ScrollNotification({
-    @required ScrollWidgetInterface scrollable,
-  }) : axisDirection = scrollable.axisDirection,
-       metrics = scrollable.getMetrics(),
-       context = scrollable.context;
-
-  /// The direction that positive scroll offsets indicate.
-  final AxisDirection axisDirection;
-
-  Axis get axis => axisDirectionToAxis(axisDirection);
+    @required this.metrics,
+    @required this.context,
+  });
 
   final ScrollMetrics metrics;
 
-  /// The build context of the [Scrollable] that fired this notification.
+  /// The build context of the widget that fired this notification.
   ///
   /// This can be used to find the scrollable's render objects to determine the
   /// size of the viewport, for instance.
@@ -65,16 +57,16 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('$axisDirection');
-    description.add('metrics: $metrics');
+    description.add('$metrics');
   }
 }
 
 class ScrollStartNotification extends ScrollNotification {
   ScrollStartNotification({
-    @required ScrollWidgetInterface scrollable,
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
     this.dragDetails,
-  }) : super(scrollable: scrollable);
+  }) : super(metrics: metrics, context: context);
 
   final DragStartDetails dragDetails;
 
@@ -88,10 +80,11 @@ class ScrollStartNotification extends ScrollNotification {
 
 class ScrollUpdateNotification extends ScrollNotification {
   ScrollUpdateNotification({
-    @required ScrollWidgetInterface scrollable,
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
     this.dragDetails,
     this.scrollDelta,
-  }) : super(scrollable: scrollable);
+  }) : super(metrics: metrics, context: context);
 
   final DragUpdateDetails dragDetails;
 
@@ -109,11 +102,12 @@ class ScrollUpdateNotification extends ScrollNotification {
 
 class OverscrollNotification extends ScrollNotification {
   OverscrollNotification({
-    @required ScrollWidgetInterface scrollable,
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
-  }) : super(scrollable: scrollable) {
+  }) : super(metrics: metrics, context: context) {
     assert(overscroll != null);
     assert(overscroll.isFinite);
     assert(overscroll != 0.0);
@@ -148,9 +142,10 @@ class OverscrollNotification extends ScrollNotification {
 
 class ScrollEndNotification extends ScrollNotification {
   ScrollEndNotification({
-    @required ScrollWidgetInterface scrollable,
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
     this.dragDetails,
-  }) : super(scrollable: scrollable);
+  }) : super(metrics: metrics, context: context);
 
   final DragEndDetails dragDetails;
 
@@ -164,9 +159,10 @@ class ScrollEndNotification extends ScrollNotification {
 
 class UserScrollNotification extends ScrollNotification {
   UserScrollNotification({
-    @required ScrollWidgetInterface scrollable,
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
     this.direction,
-  }) : super(scrollable: scrollable);
+  }) : super(metrics: metrics, context: context);
 
   final ScrollDirection direction;
 

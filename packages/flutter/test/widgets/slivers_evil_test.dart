@@ -56,7 +56,7 @@ class TestScrollPhysics extends ClampingScrollPhysics {
 class TestViewportScrollPosition extends ScrollIndependentPosition {
   TestViewportScrollPosition({
     ScrollPhysics physics,
-    ScrollWidgetInterface state,
+    ScrollContext state,
     ScrollPosition oldPosition,
   }) : super(physics: physics, state: state, oldPosition: oldPosition);
 

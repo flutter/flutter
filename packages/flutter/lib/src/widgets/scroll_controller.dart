@@ -134,7 +134,7 @@ class ScrollController extends ChangeNotifier {
     super.dispose();
   }
 
-  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
+  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, ScrollContext state, ScrollPosition oldPosition) {
     return new ScrollIndependentPosition(
       physics: physics,
       state: state,
@@ -144,7 +144,7 @@ class ScrollController extends ChangeNotifier {
 
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,
-    ScrollWidgetInterface state,
+    ScrollContext state,
     ScrollPosition oldPosition,
   ) {
     return new ScrollIndependentPosition(

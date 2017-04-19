@@ -10,7 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/physics.dart';
 
 import 'overscroll_indicator.dart';
-import 'scroll_interfaces.dart';
+import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
@@ -36,7 +36,7 @@ abstract class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  double applyPhysicsToUserOffset(ScrollPositionReadInterface position, double offset) {
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     if (parent == null)
       return offset;
     return parent.applyPhysicsToUserOffset(position, offset);
@@ -51,7 +51,7 @@ abstract class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  bool shouldAcceptUserOffset(ScrollPositionReadInterface position) {
+  bool shouldAcceptUserOffset(ScrollMetrics position) {
     if (parent == null)
       return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     return parent.shouldAcceptUserOffset(position);
@@ -81,7 +81,7 @@ abstract class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  double applyBoundaryConditions(ScrollPositionReadInterface position, double value) {
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
     if (parent == null)
       return 0.0;
     return parent.applyBoundaryConditions(position, value);
@@ -91,7 +91,7 @@ abstract class ScrollPhysics {
   /// position with the given velocity.
   ///
   /// This is used by [ScrollIndependentPosition] in the
-  /// [ScrollIndependentPosition.beginBallisticActivity] method. If the result
+  /// [ScrollIndependentPosition.goBallistic] method. If the result
   /// is non-null, [ScrollIndependentPosition] will begin a
   /// [BallisticScrollActivity] with the returned value. Otherwise, it will
   /// begin an idle activity instead.
@@ -99,7 +99,7 @@ abstract class ScrollPhysics {
   /// The given `position` is only valid during this method call. Do not keep a
   /// reference to it to use later, as the values may update, may not update, or
   /// may update to reflect an entirely unrelated scrollable.
-  Simulation createBallisticSimulation(ScrollPositionReadInterface position, double velocity) {
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     if (parent == null)
       return null;
     return parent.createBallisticSimulation(position, velocity);
@@ -185,7 +185,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   double get frictionFactor => 0.5;
 
   @override
-  double applyPhysicsToUserOffset(ScrollPositionReadInterface position, double offset) {
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
     if (offset > 0.0)
@@ -209,10 +209,10 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  double applyBoundaryConditions(ScrollPositionReadInterface position, double value) => 0.0;
+  double applyBoundaryConditions(ScrollMetrics position, double value) => 0.0;
 
   @override
-  Simulation createBallisticSimulation(ScrollPositionReadInterface position, double velocity) {
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (velocity.abs() >= tolerance.velocity || position.outOfRange) {
       return new BouncingScrollSimulation(
@@ -257,7 +257,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
   ClampingScrollPhysics applyTo(ScrollPhysics parent) => new ClampingScrollPhysics(parent: parent);
 
   @override
-  double applyBoundaryConditions(ScrollPositionReadInterface position, double value) {
+  double applyBoundaryConditions(ScrollMetrics position, double value) {
     assert(() {
       if (value == position.pixels) {
         throw new FlutterError(
@@ -286,7 +286,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollPositionReadInterface position, double velocity) {
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     final Tolerance tolerance = this.tolerance;
     if (position.outOfRange) {
       double end;
@@ -337,5 +337,5 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics parent) => new AlwaysScrollableScrollPhysics(parent: parent);
 
   @override
-  bool shouldAcceptUserOffset(ScrollPositionReadInterface position) => true;
+  bool shouldAcceptUserOffset(ScrollMetrics position) => true;
 }

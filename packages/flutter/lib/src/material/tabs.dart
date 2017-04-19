@@ -342,7 +342,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 class _TabBarScrollPosition extends ScrollIndependentPosition {
   _TabBarScrollPosition({
     ScrollPhysics physics,
-    ScrollWidgetInterface state,
+    ScrollContext state,
     ScrollPosition oldPosition,
     this.tabBar,
   }) : super(
@@ -373,7 +373,7 @@ class _TabBarScrollController extends ScrollController {
   final _TabBarState tabBar;
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext state, ScrollPosition oldPosition) {
     return new _TabBarScrollPosition(
       physics: physics,
       state: state,

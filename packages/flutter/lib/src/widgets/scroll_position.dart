@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,12 +12,10 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'scroll_interfaces.dart';
 import 'scroll_metrics.dart';
 import 'scroll_physics.dart';
-import 'scrollable.dart';
 
-abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWriteInterface {
+abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPosition({
     @required this.physics,
     ScrollPosition oldPosition,
@@ -30,14 +27,6 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
   final ScrollPhysics physics;
 
   @override
-  double get pixels => _pixels;
-  double _pixels;
-
-  @override
-  double get viewportDimension => _viewportDimension;
-  double _viewportDimension;
-
-  @override
   double get minScrollExtent => _minScrollExtent;
   double _minScrollExtent;
 
@@ -46,10 +35,12 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
   double _maxScrollExtent;
 
   @override
-  bool get outOfRange => pixels < minScrollExtent || pixels > maxScrollExtent;
+  double get pixels => _pixels;
+  double _pixels;
 
   @override
-  bool get atEdge => pixels == minScrollExtent || pixels == maxScrollExtent;
+  double get viewportDimension => _viewportDimension;
+  double _viewportDimension;
 
   /// Whether [viewportDimension], [minScrollExtent], [maxScrollExtent],
   /// [outOfRange], and [atEdge] are available yet.
@@ -72,10 +63,10 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
   void absorb(ScrollPosition other) {
     assert(other != null);
     assert(_pixels == null);
-    _pixels = other._pixels;
-    _viewportDimension = other.viewportDimension;
     _minScrollExtent = other.minScrollExtent;
     _maxScrollExtent = other.maxScrollExtent;
+    _pixels = other._pixels;
+    _viewportDimension = other.viewportDimension;
   }
 
   /// Update the scroll position ([pixels]) to a given pixel value.
@@ -94,7 +85,6 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
   ///
   /// The amount of the change that is applied is reported using [reportScroll].
   /// If there is any overscroll, it is reported using [reportOverscroll].
-  @override
   double setPixels(double newPixels) {
     assert(_pixels != null);
     assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
@@ -168,7 +158,7 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
   /// conventions of the class. For example, [ScrollIndependentPosition]
   /// introduces [ScrollActivity] objects and uses [forcePixels] in conjunction
   /// with adjusting the activity, e.g. by calling
-  /// [ScrollIndependentPosition.beginIdleActivity], so that the activity does
+  /// [ScrollIndependentPosition.goIdle], so that the activity does
   /// not immediately set the value back. (Consider, for instance, a case where
   /// one is using a [DrivenScrollActivity]. That object will ignore any calls
   /// to [forcePixels], which would result in the rendering stuttering: changing
@@ -187,7 +177,6 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
     notifyListeners();
   }
 
-  @protected
   double applyPhysicsToUserOffset(double delta) {
     return physics.applyPhysicsToUserOffset(this, delta);
   }
@@ -269,24 +258,6 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
     return animateTo(target, duration: duration, curve: curve);
   }
 
-  /// Returns a description of the [Scrollable].
-  ///
-  /// Accurately describing the metrics typicaly requires using information
-  /// provided by the viewport to the [applyViewportDimension] and
-  /// [applyContentDimensions] methods.
-  ///
-  /// The metrics do not need to be in absolute (pixel) units, but they must be
-  /// in consistent units (so that they can be compared over time or used to
-  /// drive diagrammatic user interfaces such as scrollbars).
-  ScrollMetrics getMetrics() {
-    return new ScrollMetrics(
-      extentBefore: math.max(pixels - minScrollExtent, 0.0),
-      extentInside: math.min(pixels, maxScrollExtent) - math.max(pixels, minScrollExtent) + math.min(viewportDimension, maxScrollExtent - minScrollExtent),
-      extentAfter: math.max(maxScrollExtent - pixels, 0.0),
-      viewportDimension: viewportDimension,
-    );
-  }
-
   /// This notifier's value is true if a scroll is underway and false if the scroll
   /// position is idle.
   ///
@@ -307,7 +278,13 @@ abstract class ScrollPosition extends ViewportOffset implements ScrollPositionWr
 
   void touched();
 
-  ScrollDragInterface beginDrag(DragStartDetails details, VoidCallback dragCancelCallback);
+  Drag beginDrag(DragStartDetails details, VoidCallback dragCancelCallback);
+
+  void updateUserScrollDirection(ScrollDirection value);
+
+  void goIdle();
+
+  void goBallistic(double velocity);
 
   @protected
   void reportScrollStart();

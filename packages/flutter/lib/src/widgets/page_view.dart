@@ -112,7 +112,7 @@ class PageController extends ScrollController {
   }
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext state, ScrollPosition oldPosition) {
     return new _PagePosition(
       physics: physics,
       state: state,
@@ -134,7 +134,7 @@ class PageController extends ScrollController {
 ///
 /// The metrics are available on [ScrollNotification]s generated from
 /// [PageView]s.
-class PageMetrics extends ScrollMetrics {
+class PageMetrics extends FixedScrollMetrics {
   /// Creates page metrics that add the given information to the `parent`
   /// metrics.
   PageMetrics({
@@ -149,7 +149,7 @@ class PageMetrics extends ScrollMetrics {
 class _PagePosition extends ScrollIndependentPosition {
   _PagePosition({
     ScrollPhysics physics,
-    ScrollWidgetInterface state,
+    ScrollContext state,
     this.initialPage: 0,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
@@ -202,9 +202,9 @@ class _PagePosition extends ScrollIndependentPosition {
   }
 
   @override
-  PageMetrics getMetrics() {
+  PageMetrics cloneMetrics() {
     return new PageMetrics(
-      parent: super.getMetrics(),
+      parent: this,
       page: page,
     );
   }
@@ -242,7 +242,7 @@ class PageScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  Simulation createBallisticSimulation(ScrollPositionReadInterface position, double velocity) {
+  Simulation createBallisticSimulation(ScrollMetrics position, double velocity) {
     // If we're out of range and not headed back in range, defer to the parent
     // ballistics, which should put us back in range at a page boundary.
     if ((velocity <= 0.0 && position.pixels <= position.minScrollExtent) ||

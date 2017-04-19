@@ -62,7 +62,7 @@ class LinkedScrollController extends ScrollController {
   }
 
   @override
-  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollWidgetInterface state, ScrollPosition oldPosition) {
+  LinkedScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext state, ScrollPosition oldPosition) {
     return new LinkedScrollPosition(
       this,
       physics: physics,
@@ -112,7 +112,7 @@ class LinkedScrollPosition extends ScrollIndependentPosition {
   LinkedScrollPosition(
     this.owner, {
     ScrollPhysics physics,
-    ScrollWidgetInterface state,
+    ScrollContext state,
     double initialPixels,
     ScrollPosition oldPosition,
   }) : super(
@@ -230,7 +230,7 @@ class LinkedScrollActivity extends ScrollActivity {
   void unlink(LinkedScrollPosition driver) {
     drivers.remove(driver);
     if (drivers.isEmpty)
-      position?.beginIdleActivity();
+      position?.goIdle();
   }
 
   @override

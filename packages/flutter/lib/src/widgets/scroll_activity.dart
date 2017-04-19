@@ -13,9 +13,9 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'notification_listener.dart';
-import 'scroll_interfaces.dart';
+import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
+import 'scroll_position.dart';
 import 'ticker_provider.dart';
 
 /// Base class for scrolling activities like dragging and flinging.
@@ -27,42 +27,42 @@ import 'ticker_provider.dart';
 abstract class ScrollActivity {
   ScrollActivity(this._position);
 
-  ScrollPositionWriteInterface get position => _position;
-  ScrollPositionWriteInterface _position;
+  ScrollPosition get position => _position;
+  ScrollPosition _position;
 
-  /// Updates the activity's link to the [ScrollPositionWriteInterface].
+  /// Updates the activity's link to the [ScrollPosition].
   ///
   /// This should only be called when an activity is being moved from a defunct
-  /// (or about-to-be defunct) [ScrollPositionWriteInterface] object to a new one.
-  void updatePosition(ScrollPositionWriteInterface value) {
+  /// (or about-to-be defunct) [ScrollPosition] object to a new one.
+  void updatePosition(ScrollPosition value) {
     assert(_position != value);
     _position = value;
   }
 
-  /// Called by the [ScrollPositionWriteInterface] when it has changed type (for
+  /// Called by the [ScrollPosition] when it has changed type (for
   /// example, when changing from an Android-style scroll position to an
   /// iOS-style scroll position). If this activity can differ between the two
   /// modes, then it should tell the position to restart that activity
   /// appropriately.
   ///
   /// For example, [BallisticScrollActivity]'s implementation calls
-  /// [ScrollPositionWriteInterface.beginBallisticActivity].
+  /// [ScrollPosition.goBallistic].
   void resetActivity() { }
 
-  Notification createScrollStartNotification(ScrollWidgetInterface scrollable) {
-    return new ScrollStartNotification(scrollable: scrollable);
+  void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
+    new ScrollStartNotification(metrics: metrics, context: context).dispatch(context);
   }
 
-  Notification createScrollUpdateNotification(ScrollWidgetInterface scrollable, double scrollDelta) {
-    return new ScrollUpdateNotification(scrollable: scrollable, scrollDelta: scrollDelta);
+  void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
+    new ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta).dispatch(context);
   }
 
-  Notification createOverscrollNotification(ScrollWidgetInterface scrollable, double overscroll) {
-    return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll).dispatch(context);
   }
 
-  Notification createScrollEndNotification(ScrollWidgetInterface scrollable) {
-    return new ScrollEndNotification(scrollable: scrollable);
+  void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
+    new ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
   void touched() { }
@@ -83,11 +83,11 @@ abstract class ScrollActivity {
 }
 
 class IdleScrollActivity extends ScrollActivity {
-  IdleScrollActivity(ScrollPositionWriteInterface position) : super(position);
+  IdleScrollActivity(ScrollPosition position) : super(position);
 
   @override
   void applyNewDimensions() {
-    position.beginBallisticActivity(0.0);
+    position.goBallistic(0.0);
   }
 
   @override
@@ -97,9 +97,9 @@ class IdleScrollActivity extends ScrollActivity {
   bool get isScrolling => false;
 }
 
-class DragScrollActivity extends ScrollActivity implements ScrollDragInterface {
+class DragScrollActivity extends ScrollActivity implements Drag {
   DragScrollActivity(
-    ScrollPositionWriteAndDragInterface position,
+    ScrollPosition position,
     DragStartDetails details,
     this.onDragCanceled,
   ) : _lastDetails = details, super(position);
@@ -107,21 +107,31 @@ class DragScrollActivity extends ScrollActivity implements ScrollDragInterface {
   final VoidCallback onDragCanceled;
 
   @override
-  ScrollPositionWriteAndDragInterface get position => super.position;
-
-  @override
   void touched() {
     assert(false);
   }
 
+  bool get _reversed {
+    assert(position?.axisDirection != null);
+    switch (position.axisDirection) {
+      case AxisDirection.up:
+      case AxisDirection.left:
+        return true;
+      case AxisDirection.down:
+      case AxisDirection.right:
+        return false;
+    }
+    return null;
+  }
+
   @override
-  void update(DragUpdateDetails details, { bool reverse }) {
+  void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
     _lastDetails = details;
     double offset = details.primaryDelta;
     if (offset == 0.0)
       return;
-    if (reverse) // e.g. an AxisDirection.up scrollable
+    if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
     position.updateUserScrollDirection(offset > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
     applyDragTo(position.pixels - position.applyPhysicsToUserOffset(offset));
@@ -134,16 +144,21 @@ class DragScrollActivity extends ScrollActivity implements ScrollDragInterface {
   }
 
   @override
-  void end(DragEndDetails details, { bool reverse }) {
+  void end(DragEndDetails details) {
     assert(details.primaryVelocity != null);
     double velocity = details.primaryVelocity;
-    if (reverse) // e.g. an AxisDirection.up scrollable
+    if (_reversed) // e.g. an AxisDirection.up scrollable
       velocity = -velocity;
     _lastDetails = details;
     // We negate the velocity here because if the touch is moving downwards,
     // the scroll has to move upwards. It's the same reason that update()
     // above negates the delta before applying it to the scroll offset.
-    position.beginBallisticActivity(-velocity);
+    position.goBallistic(-velocity);
+  }
+
+  @override
+  void cancel() {
+    position.goBallistic(0.0);
   }
 
   @override
@@ -157,30 +172,31 @@ class DragScrollActivity extends ScrollActivity implements ScrollDragInterface {
   dynamic _lastDetails;
 
   @override
-  Notification createScrollStartNotification(ScrollWidgetInterface scrollable) {
+  void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
     assert(_lastDetails is DragStartDetails);
-    return new ScrollStartNotification(scrollable: scrollable, dragDetails: _lastDetails);
+    new ScrollStartNotification(metrics: metrics, context: context, dragDetails: _lastDetails).dispatch(context);
   }
 
   @override
-  Notification createScrollUpdateNotification(ScrollWidgetInterface scrollable, double scrollDelta) {
+  void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
     assert(_lastDetails is DragUpdateDetails);
-    return new ScrollUpdateNotification(scrollable: scrollable, scrollDelta: scrollDelta, dragDetails: _lastDetails);
+    new ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: _lastDetails).dispatch(context);
   }
 
   @override
-  Notification createOverscrollNotification(ScrollWidgetInterface scrollable, double overscroll) {
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
     assert(_lastDetails is DragUpdateDetails);
-    return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, dragDetails: _lastDetails);
+    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: _lastDetails).dispatch(context);
   }
 
   @override
-  Notification createScrollEndNotification(ScrollWidgetInterface scrollable) {
+  void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
     // We might not have DragEndDetails yet if we're being called from beginActivity.
-    return new ScrollEndNotification(
-      scrollable: scrollable,
+    new ScrollEndNotification(
+      metrics: metrics,
+      context: context,
       dragDetails: _lastDetails is DragEndDetails ? _lastDetails : null
-    );
+    ).dispatch(context);
   }
 
   @override
@@ -194,7 +210,7 @@ class BallisticScrollActivity extends ScrollActivity {
   // ///
   // /// The velocity should be in logical pixels per second.
   BallisticScrollActivity(
-    ScrollPositionWriteInterface position,
+    ScrollPosition position,
     Simulation simulation,
     TickerProvider vsync,
   ) : super(position) {
@@ -213,22 +229,22 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   void resetActivity() {
-    position.beginBallisticActivity(velocity);
+    position.goBallistic(velocity);
   }
 
   @override
   void touched() {
-    position.beginIdleActivity();
+    position.goIdle();
   }
 
   @override
   void applyNewDimensions() {
-    position.beginBallisticActivity(velocity);
+    position.goBallistic(velocity);
   }
 
   void _tick() {
     if (!applyMoveTo(_controller.value))
-      position.beginIdleActivity();
+      position.goIdle();
   }
 
   /// Move the position to the given location.
@@ -236,7 +252,7 @@ class BallisticScrollActivity extends ScrollActivity {
   /// If the new position was fully applied, return true.
   /// If there was any overflow, return false.
   ///
-  /// The default implementation calls [ScrollPositionWriteInterface.setPixels]
+  /// The default implementation calls [ScrollPosition.setPixels]
   /// and returns true if the overflow was zero.
   @protected
   bool applyMoveTo(double value) {
@@ -244,12 +260,12 @@ class BallisticScrollActivity extends ScrollActivity {
   }
 
   void _end() {
-    position?.beginBallisticActivity(0.0);
+    position?.goBallistic(0.0);
   }
 
   @override
-  Notification createOverscrollNotification(ScrollWidgetInterface scrollable, double overscroll) {
-    return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, velocity: velocity);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
   }
 
   @override
@@ -272,7 +288,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
 class DrivenScrollActivity extends ScrollActivity {
   DrivenScrollActivity(
-    ScrollPositionWriteInterface position, {
+    ScrollPosition position, {
     @required double from,
     @required double to,
     @required Duration duration,
@@ -304,21 +320,21 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   void touched() {
-    position.beginIdleActivity();
+    position.goIdle();
   }
 
   void _tick() {
     if (position.setPixels(_controller.value) != 0.0)
-      position.beginIdleActivity();
+      position.goIdle();
   }
 
   void _end() {
-    position?.beginBallisticActivity(velocity);
+    position?.goBallistic(velocity);
   }
 
   @override
-  Notification createOverscrollNotification(ScrollWidgetInterface scrollable, double overscroll) {
-    return new OverscrollNotification(scrollable: scrollable, overscroll: overscroll, velocity: velocity);
+  void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
+    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, velocity: velocity).dispatch(context);
   }
 
   @override
