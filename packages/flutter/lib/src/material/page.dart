@@ -10,7 +10,7 @@ import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen. 
 final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-  begin: const FractionalOffset(0.0, 0.25),
+  begin: FractionalOffset.bottomLeft,
   end: FractionalOffset.topLeft
 );
 
@@ -24,14 +24,9 @@ class _MountainViewPageTransition extends StatelessWidget {
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn,
        )),
-       _opacityAnimation = new CurvedAnimation(
-         parent: routeAnimation,
-         curve: Curves.easeIn, // Eyeballed from other Material apps.
-       ),
        super(key: key);
 
   final Animation<FractionalOffset> _positionAnimation;
-  final Animation<double> _opacityAnimation;
   final Widget child;
 
   @override
@@ -39,10 +34,7 @@ class _MountainViewPageTransition extends StatelessWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
       position: _positionAnimation,
-      child: new FadeTransition(
-        opacity: _opacityAnimation,
-        child: child,
-      ),
+      child: child,
     );
   }
 }
