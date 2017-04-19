@@ -39,7 +39,7 @@ class AbstractNode {
   /// The depth of this node in the tree.
   ///
   /// The depth of nodes in a tree monotonically increases as you traverse down
-  /// the trees.
+  /// the tree.
   int get depth => _depth;
   int _depth = 0;
 
@@ -80,8 +80,9 @@ class AbstractNode {
   /// Typically called only from the [parent]'s [attach] method, and by the
   /// [owner] to mark the root of a tree as attached.
   ///
-  /// Subclasses with children should [attach] all their children to the same
-  /// [owner] whenever this method is called.
+  /// Subclasses with children should override this method to first call their
+  /// inherited [attach] method, and then [attach] all their children to the
+  /// same [owner].
   @mustCallSuper
   void attach(covariant Object owner) {
     assert(owner != null);
@@ -94,12 +95,13 @@ class AbstractNode {
   /// Typically called only from the [parent]'s [detach], and by the [owner] to
   /// mark the root of a tree as detached.
   ///
-  /// Subclasses with children should [detach] all their children whenever this
-  /// method is called.
+  /// Subclasses with children should override this method to first call their
+  /// inherited [detach] method, and then [detach] all their children.
   @mustCallSuper
   void detach() {
     assert(_owner != null);
     _owner = null;
+    assert(parent == null || attached == parent.attached);
   }
 
   /// The parent of this node in the tree.

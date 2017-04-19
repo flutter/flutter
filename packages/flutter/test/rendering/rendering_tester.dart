@@ -8,19 +8,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
-enum EnginePhase {
-  layout,
-  compositingBits,
-  paint,
-  composite,
-  flushSemantics
-}
+import 'package:flutter_test/flutter_test.dart' show EnginePhase;
+export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
 class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, RendererBinding, GestureBinding {
   EnginePhase phase = EnginePhase.composite;
 
   @override
   void beginFrame() {
+    assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
     pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
       return;
@@ -34,7 +30,9 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     if (phase == EnginePhase.composite)
       return;
     pipelineOwner.flushSemantics();
-    assert(phase == EnginePhase.flushSemantics);
+    if (phase == EnginePhase.flushSemantics)
+      return;
+    assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsTree);
   }
 }
 
@@ -53,10 +51,13 @@ TestRenderingFlutterBinding get renderer {
 /// be put in a different place in the tree or passed to [layout] again, because
 /// [layout] places the given object into another [RenderBox] which you would
 /// need to unparent it from (but that box isn't itself made available).
+///
+/// The EnginePhase must not be [EnginePhase.build], since the rendering layer
+/// has no build phase.
 void layout(RenderBox box, {
   BoxConstraints constraints,
   FractionalOffset alignment: FractionalOffset.center,
-  EnginePhase phase: EnginePhase.layout
+  EnginePhase phase: EnginePhase.layout,
 }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().
   assert(box.parent == null); // We stick the box in another, so you can't reuse it easily, sorry.
