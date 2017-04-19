@@ -578,7 +578,7 @@ class HotRunner extends ResidentRunner {
       ansiAlternative: '$red$fire$bold  To hot reload your app on the fly, '
                        'press "r". To restart the app entirely, press "R".$reset'
     );
-    printStatus('The Observatory debugger and profiler is available at: $_observatoryUri.');
+    printStatus('The Observatory debugger and profiler is available at: $_observatoryUri');
     if (details) {
       printHelpDetails();
       printStatus('To repeat this help message, press "h". To quit, press "q".');

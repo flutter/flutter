@@ -242,8 +242,9 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await runCheckedAsync(adbCommandForDevice(
-      <String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
+    await runCheckedAsync(adbCommandForDevice(<String>[
+      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)
+    ]));
     return true;
   }
 

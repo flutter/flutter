@@ -71,8 +71,7 @@ String getGradleAppOut() {
 }
 
 String getGradleAppOutDirV2() {
-  if (_cachedGradleAppOutDirV2 == null)
-    _cachedGradleAppOutDirV2 = _calculateGradleAppOutDirV2();
+  _cachedGradleAppOutDirV2 ??= _calculateGradleAppOutDirV2();
   return _cachedGradleAppOutDirV2;
 }
 

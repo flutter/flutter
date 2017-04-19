@@ -158,7 +158,7 @@ class ColdRunner extends ResidentRunner {
   void printHelp({ @required bool details }) {
     bool haveDetails = false;
     if (_result.hasObservatory)
-      printStatus('The Observatory debugger and profiler is available at: ${_result.observatoryUri}.');
+      printStatus('The Observatory debugger and profiler is available at: ${_result.observatoryUri}');
     if (supportsServiceProtocol) {
       haveDetails = true;
       if (details)
