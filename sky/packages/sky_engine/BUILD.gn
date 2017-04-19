@@ -73,7 +73,7 @@ copy("copy_dart_ui") {
   sources = dart_ui_files
 
   outputs = [
-    "$root_gen_dir/dart-pkg/sky_engine/lib/dart_ui/{{source_file_part}}",
+    "$root_gen_dir/dart-pkg/sky_engine/lib/ui/{{source_file_part}}",
   ]
 }
 

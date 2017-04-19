@@ -8,7 +8,7 @@ embedded_libs:
   "dart:isolate": "isolate/isolate.dart"
   "dart:math": "math/math.dart"
   "dart:typed_data": "typed_data/typed_data.dart"
-  "dart:ui": "dart_ui/ui.dart"
+  "dart:ui": "ui/ui.dart"
   # The internal library is needed as some implementations bleed into the public
   # API, e.g. List being Iterable by virtue of implementing
   # EfficientLengthIterable.
