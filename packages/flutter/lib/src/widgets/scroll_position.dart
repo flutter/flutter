@@ -32,6 +32,7 @@ abstract class AbstractScrollState {
   void dispatchNotification(Notification notification);
 }
 
+@immutable
 abstract class ScrollPhysics {
   const ScrollPhysics(this.parent);
 

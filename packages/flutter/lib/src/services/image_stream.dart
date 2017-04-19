@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// ImageInfo objects are used by [ImageStream] objects to represent the
 /// actual data of the image once it has been obtained.
+@immutable
 class ImageInfo {
   /// Creates an [ImageInfo] object for the given image and scale.
   ///

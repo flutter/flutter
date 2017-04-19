@@ -47,6 +47,7 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 /// Use this class to configure a [Theme] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
+@immutable
 class ThemeData {
   /// Create a ThemeData given a set of preferred values.
   ///

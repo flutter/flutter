@@ -27,6 +27,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
+@immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///

@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 /// The base type for [MaterialSlice] and [MaterialGap].
 ///
 /// All [MergeableMaterialItem] objects need a [LocalKey].
+@immutable
 abstract class MergeableMaterialItem {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -15,6 +16,7 @@ import 'layer.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
+@immutable
 class ViewConfiguration {
   /// Creates a view configuration.
   ///

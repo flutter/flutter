@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// How a box should be inscribed into another box.
@@ -40,6 +42,7 @@ enum BoxFit {
 }
 
 /// The pair of sizes returned by [applyBoxFit].
+@immutable
 class FittedSizes {
   /// Creates an object to store a pair of sizes,
   /// as would be returned by [applyBoxFit].

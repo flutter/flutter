@@ -26,6 +26,7 @@ import 'colors.dart';
 ///  * [Theme]
 ///  * [ThemeData]
 ///  * <http://material.google.com/style/typography.html>
+@immutable
 class TextTheme {
   /// Create a text theme that uses the given values.
   ///

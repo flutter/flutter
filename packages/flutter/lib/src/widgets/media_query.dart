@@ -26,6 +26,7 @@ enum Orientation {
 /// To obtain the current [MediaQueryData] for a given [BuildContext], use the
 /// [MediaQuery.of] function. For example, to obtain the size of the current
 /// window, use `MediaQuery.of(context).size`.
+@immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///

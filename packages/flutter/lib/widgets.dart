@@ -26,7 +26,7 @@ export 'src/widgets/focus_scope.dart';
 export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
-export 'src/widgets/gridpaper.dart';
+export 'src/widgets/grid_paper.dart';
 export 'src/widgets/heroes.dart';
 export 'src/widgets/image.dart';
 export 'src/widgets/implicit_animations.dart';

@@ -18,6 +18,7 @@ import 'scrollable.dart' show Scrollable, ScrollableState;
 /// not defined, but must be consistent. For example, they could be in pixels,
 /// or in percentages, or in units of the [extentInside] (in the latter case,
 /// [extentInside] would always be 1.0).
+@immutable
 class ScrollMetrics {
   /// Create a description of the metrics of a [Scrollable]'s contents.
   ///

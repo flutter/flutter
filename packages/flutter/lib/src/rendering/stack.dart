@@ -19,6 +19,7 @@ import 'object.dart';
 ///
 /// If you create the RelativeRect with null values, the methods on
 /// RelativeRect will not work usefully (or at all).
+@immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
@@ -204,6 +205,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
 enum Overflow {
   /// Overflowing children will be visible.
   visible,
+
   /// Overflowing children will be clipped to the bounds of their parent.
   clip,
 }
