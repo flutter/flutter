@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of dart_ui;
+part of dart.ui;
 
 /// Signature of callbacks that have no arguments and return no data.
 typedef void VoidCallback();
