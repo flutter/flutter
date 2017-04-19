@@ -6,6 +6,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'box.dart';
 import 'debug.dart';
@@ -189,17 +190,21 @@ class RenderParagraph extends RenderBox {
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
 
+  @visibleForTesting
+  bool get debugHasOverflowShader => _overflowShader != null;
+
   @override
   void performLayout() {
     _layoutTextWithConstraints(constraints);
     // We grab _textPainter.size here because assigning to `size` will trigger
     // us to validate our intrinsic sizes, which will change _textPainter's
     // layout because the intrinsic size calculations are destructive.
+    // Other _textPainter state like didExceedMaxLines will also be affected.
     final Size textSize = _textPainter.size;
+    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     size = constraints.constrain(textSize);
 
     final bool didOverflowWidth = size.width < textSize.width;
-    final bool didOverflowHeight = _textPainter.didExceedMaxLines;
     // TODO(abarth): We're only measuring the sizes of the line boxes here. If
     // the glyphs draw outside the line boxes, we might think that there isn't
     // visual overflow when there actually is visual overflow. This can become
