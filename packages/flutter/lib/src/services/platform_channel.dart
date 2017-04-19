@@ -17,14 +17,12 @@ import 'platform_messages.dart';
 /// Messages are encoded into binary before being sent, and binary messages
 /// received are decoded into Dart values. The [MessageCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a FlutterMessageChannel counterpart of this channel on the
+/// by creating a `BasicMessageChannel` counterpart of this channel on the
 /// platform side. The Dart type of messages sent and received is [T],
 /// but only the values supported by the specified [MessageCodec] can be used.
 ///
-/// The identity of the channel is given by its name, so other uses of that name
-/// with may interfere with this channel's communication. Specifically, at most
-/// one message handler can be registered with the channel name at any given
-/// time.
+/// The logical identity of the channel is given by its name. Identically named
+/// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.io/platform-channels/>
 class BasicMessageChannel<T> {
@@ -42,11 +40,9 @@ class BasicMessageChannel<T> {
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received and decoded response,
-  /// or to a [FormatException], if encoding or decoding fails.
+  /// or to an exception, if encoding or decoding fails in Dart code.
   Future<T> send(T message) async {
-    return codec.decodeMessage(
-      await BinaryMessages.send(name, codec.encodeMessage(message))
-    );
+    return codec.decodeMessage(await BinaryMessages.send(name, codec.encodeMessage(message)));
   }
 
   /// Sets a callback for receiving messages from the platform plugins on this
@@ -56,8 +52,8 @@ class BasicMessageChannel<T> {
   /// channel, if any. To remove the handler, pass `null` as the `handler`
   /// argument.
   ///
-  /// The handler's return value, if non-null, is sent back to the platform
-  /// plugins as a response.
+  /// The handler's return value is sent back to the platform plugins as a
+  /// message reply.
   void setMessageHandler(Future<T> handler(T message)) {
     if (handler == null) {
       BinaryMessages.setMessageHandler(name, null);
@@ -74,7 +70,7 @@ class BasicMessageChannel<T> {
   /// this channel, if any. To remove the mock handler, pass `null` as the
   /// `handler` argument.
   ///
-  /// The handler's return value, if non-null, is used as a response.
+  /// The handler's return value is used as a message reply.
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
@@ -95,12 +91,12 @@ class BasicMessageChannel<T> {
 /// Method calls are encoded into binary before being sent, and binary results
 /// received are decoded into Dart values. The [MethodCodec] used must be
 /// compatible with the one used by the platform plugin. This can be achieved
-/// by creating a FlutterMethodChannel counterpart of this channel on the
+/// by creating a `MethodChannel` counterpart of this channel on the
 /// platform side. The Dart type of messages sent and received is `dynamic`,
 /// but only values supported by the specified [MethodCodec] can be used.
 ///
-/// The identity of the channel is given by its name, so other uses of that name
-/// with may interfere with this channel's communication.
+/// The logical identity of the channel is given by its name. Identically named
+/// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.io/platform-channels/>
 class MethodChannel {
@@ -124,8 +120,8 @@ class MethodChannel {
   ///
   /// * a result (possibly `null`), on successful invocation;
   /// * a [PlatformException], if the invocation failed in the platform plugin;
-  /// * a [FormatException], if encoding or decoding failed.
   /// * a [MissingPluginException], if the method has not been implemented.
+  /// * an exception, if encoding or decoding fails in Dart code.
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
     final dynamic result = await BinaryMessages.send(
@@ -150,26 +146,13 @@ class MethodChannel {
   /// populate an error envelope which is sent back instead. If the future
   /// completes with a [MissingPluginException], an empty reply is sent
   /// similarly to what happens if no method call handler has been set.
+  /// Any other exception, including those thrown on encoding or
+  /// decoding errors, results in an error envelope being sent.
   void setMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    if (handler == null) {
-      BinaryMessages.setMessageHandler(name, null);
-    } else {
-      BinaryMessages.setMessageHandler(
-        name,
-        (ByteData message) async {
-          final MethodCall call = codec.decodeMethodCall(message);
-          try {
-            final dynamic result = await handler(call);
-            return codec.encodeSuccessEnvelope(result);
-          } on PlatformException catch (e) {
-            return codec.encodeErrorEnvelope(
-              code: e.code, message: e.message, details: e.details);
-          } on MissingPluginException {
-            return null;
-          }
-        },
-      );
-    }
+    BinaryMessages.setMessageHandler(
+      name,
+      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+    );
   }
 
   /// Sets a mock callback for intercepting method invocations on this channel.
@@ -186,24 +169,44 @@ class MethodChannel {
   /// This is intended for testing. Method calls intercepted in this manner are
   /// not sent to platform plugins.
   void setMockMethodCallHandler(Future<dynamic> handler(MethodCall call)) {
-    if (handler == null) {
-      BinaryMessages.setMockMessageHandler(name, null);
-    } else {
-      BinaryMessages.setMockMessageHandler(
-        name,
-        (ByteData message) async {
-          final MethodCall call = codec.decodeMethodCall(message);
-          try {
-            final dynamic result = await handler(call);
-            return codec.encodeSuccessEnvelope(result);
-          } on PlatformException catch (e) {
-            return codec.encodeErrorEnvelope(
-              code: e.code, message: e.message, details: e.details);
-          } on MissingPluginException {
-            return null;
-          }
-        },
-      );
+    BinaryMessages.setMockMessageHandler(
+      name,
+      handler == null ? null : (ByteData message) => _handleAsMethodCall(message, handler),
+    );
+  }
+  
+  Future<ByteData> _handleAsMethodCall(ByteData message, Future<dynamic> handler(MethodCall call)) async {
+    try {
+      MethodCall call;
+      try {
+        call = codec.decodeMethodCall(message);
+      } catch (e) {
+        return codec.encodeErrorEnvelope(code: 'decode', message: e.toString(), details: null);
+      }
+      dynamic result;
+      PlatformException platformException;
+      try {
+        result = await handler(call);
+      } on PlatformException catch (e) {
+        platformException = e;
+      } on MissingPluginException {
+        return null;
+      }
+      try {
+        if (platformException == null) {
+          return codec.encodeSuccessEnvelope(result);
+        } else {
+          return codec.encodeErrorEnvelope(
+            code: platformException.code,
+            message: platformException.message,
+            details: platformException.details,
+          );
+        }
+      } catch (e) {
+        return codec.encodeErrorEnvelope(code: 'encode', message: e.toString(), details: null);
+      }
+    } catch (e) {
+      return codec.encodeErrorEnvelope(code: 'uncaught', message: e.toString(), details: null);
     }
   }
 }
@@ -214,8 +217,9 @@ class MethodChannel {
 /// instead of throwing an exception.
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
-    : super(name, codec);
+  const OptionalMethodChannel(String name,
+      [MethodCodec codec = const StandardMethodCodec()])
+      : super(name, codec);
 
   @override
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
@@ -230,18 +234,19 @@ class OptionalMethodChannel extends MethodChannel {
 /// A named channel for communicating with platform plugins using event streams.
 ///
 /// Stream setup requests are encoded into binary before being sent,
-/// and binary events received are decoded into Dart values. The [MethodCodec]
-/// used must be compatible with the one used by the platform plugin. This can
-/// be achieved by creating a FlutterEventChannel counterpart of this channel on
-/// the platform side. The Dart type of events sent and received is `dynamic`,
-/// but only values supported by the specified [MethodCodec] can be used.
+/// and binary events and errors received are decoded into Dart values.
+/// The [MethodCodec] used must be compatible with the one used by the platform
+/// plugin. This can be achieved by creating an `EventChannel` counterpart of
+/// this channel on the platform side. The Dart type of events sent and received
+/// is `dynamic`, but only values supported by the specified [MethodCodec] can
+/// be used.
 ///
-/// The identity of the channel is given by its name, so other uses of that name
-/// with may interfere with this channel's communication.
+/// The logical identity of the channel is given by its name. Identically named
+/// channels will interfere with each other's communication.
 ///
 /// See: <https://flutter.io/platform-channels/>
 class EventChannel {
-  /// Creates a [EventChannel] with the specified [name].
+  /// Creates an [EventChannel] with the specified [name].
   ///
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
@@ -263,61 +268,51 @@ class EventChannel {
   /// received from the platform plugin;
   /// * an error event containing a [PlatformException] for each error event
   /// received from the platform plugin;
-  /// * an error event containing a [FormatException] for each event received
-  /// where decoding fails;
-  /// * an error event containing a [PlatformException],
-  /// [MissingPluginException], or [FormatException] whenever stream setup fails
-  /// (stream setup is done only when listener count changes from 0 to 1).
+  /// * an error event containing an exception for each event received
+  /// where decoding fails in Dart code;
   ///
-  /// Notes for platform plugin implementers:
-  ///
-  /// Plugins must expose methods named `listen` and `cancel` suitable for
-  /// invocations by [MethodChannel.invokeMethod]. Both methods are
-  /// invoked with the specified [arguments].
-  ///
-  /// Following the semantics of broadcast streams, `listen` will be called as
-  /// the first listener registers with the returned stream, and `cancel` when
-  /// the last listener cancels its registration. This pattern may repeat
-  /// indefinitely. Platform plugins should consume no stream-related resources
-  /// while listener count is zero.
+  /// Errors occurring during stream activation or deactivation are reported
+  /// through the [FlutterError] facility. Stream activation happens only when
+  /// stream listener count changes from 0 to 1. Stream deactivation happens
+  /// only when stream listener count changes from 1 to 0.
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
     final MethodChannel methodChannel = new MethodChannel(name, codec);
     StreamController<dynamic> controller;
-    controller = new StreamController<dynamic>.broadcast(
-      onListen: () async {
-        BinaryMessages.setMessageHandler(
-          name, (ByteData reply) async {
-            if (reply == null) {
-              controller.close();
-            } else {
-              try {
-                controller.add(codec.decodeEnvelope(reply));
-              } catch (e) {
-                controller.addError(e);
-              }
-            }
+    controller = new StreamController<dynamic>.broadcast(onListen: () async {
+      BinaryMessages.setMessageHandler(name, (ByteData reply) async {
+        if (reply == null) {
+          controller.close();
+        } else {
+          try {
+            controller.add(codec.decodeEnvelope(reply));
+          } catch (e) {
+            controller.addError(e);
           }
-        );
-        try {
-          await methodChannel.invokeMethod('listen', arguments);
-        } catch (e) {
-          BinaryMessages.setMessageHandler(name, null);
-          controller.addError(e);
         }
-      }, onCancel: () async {
-        BinaryMessages.setMessageHandler(name, null);
-        try {
-          await methodChannel.invokeMethod('cancel', arguments);
-        } catch (exception, stack) {
-          FlutterError.reportError(new FlutterErrorDetails(
-            exception: exception,
-            stack: stack,
-            library: 'services library',
-            context: 'while de-activating platform stream on channel $name',
-          ));
-        }
+      });
+      try {
+        await methodChannel.invokeMethod('listen', arguments);
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: 'while activating platform stream on channel $name',
+        ));
       }
-    );
+    }, onCancel: () async {
+      BinaryMessages.setMessageHandler(name, null);
+      try {
+        await methodChannel.invokeMethod('cancel', arguments);
+      } catch (exception, stack) {
+        FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: 'while de-activating platform stream on channel $name',
+        ));
+      }
+    });
     return controller.stream;
   }
 }
