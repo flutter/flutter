@@ -9,22 +9,24 @@ import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * A named channel for communicating with the Flutter application using asynchronous
  * event streams.
  *
- * Incoming requests for event stream setup are decoded from binary on receipt, and
+ * <p>Incoming requests for event stream setup are decoded from binary on receipt, and
  * Java responses and events are encoded into binary before being transmitted back
  * to Flutter. The {@link MethodCodec} used must be compatible with the one used by
- * the Flutter application. This can be achieved by creating a PlatformEventChannel
- * counterpart of this channel on the Flutter side. The Java type of responses and
- * events is Object, but only values supported by the specified {@link MethodCodec}
- * can be used.
+ * the Flutter application. This can be achieved by creating an
+ * <a href="https://docs.flutter.io/flutter/services/EventChannel-class.html">EventChannel</a>
+ * counterpart of this channel on the Dart side. The Java type of stream configuration arguments,
+ * events, and error details is {@code Object}, but only values supported by the specified
+ * {@link MethodCodec} can be used.</p>
  *
- * The identity of the channel is given by its name, so other uses of that name
- * with may interfere with this channel's communication.
+ * <p>The logical identity of the channel is given by its name. Identically named channels will interfere
+ * with each other's communication.</p>
  */
 public final class EventChannel {
     private static final String TAG = "EventChannel#";
@@ -64,7 +66,10 @@ public final class EventChannel {
     /**
      * Registers a stream handler on this channel.
      *
-     * Overrides any existing handler registration.
+     * <p>Overrides any existing handler registration for (the name of) this channel.</p>
+     *
+     * <p>If no handler has been registered, any incoming stream setup requests will be handled
+     * silently by providing an empty stream.</p>
      *
      * @param handler a {@link StreamHandler}, or null to deregister.
      */
@@ -73,53 +78,72 @@ public final class EventChannel {
     }
 
     /**
-     * Event callback. Supports dual use: Producers of events to be sent to Flutter
-     * act as clients of this interface for sending events. Consumers of events sent
-     * from Flutter implement this interface for handling received events.
-     */
-    public interface EventSink {
-        /**
-         * Consumes a successful event.
-         *
-         * @param event The event, possibly null.
-         */
-        void success(Object event);
-
-        /**
-         * Consumes an error event.
-         *
-         * @param errorCode An error code String.
-         * @param errorMessage A human-readable error message String, possibly null.
-         * @param errorDetails Error details, possibly null
-         */
-        void error(String errorCode, String errorMessage, Object errorDetails);
-
-        /**
-         * Consumes end of stream. No calls to {@link #success(Object)} or
-         * {@link #error(String, String, Object)} will be made following a call
-         * to this method.
-         */
-        void endOfStream();
-    }
-
-    /**
      * Handler of stream setup and tear-down requests.
+     *
+     * <p>Implementations must be prepared to accept sequences of alternating calls to
+     * {@link #onListen(Object, EventSink)} and {@link #onCancel(Object)}. Implementations
+     * should ideally consume no resources when the last such call is not {@code onListen}.
+     * In typical situations, this means that the implementation should register itself
+     * with platform-specific event sources {@code onListen} and deregister again
+     * {@code onCancel}.</p>
      */
     public interface StreamHandler {
         /**
          * Handles a request to set up an event stream.
          *
-         * @param arguments Stream configuration arguments, possibly null.
-         * @param events An {@link EventSink} for emitting events to the Flutter receiver.
+         * <p>Any uncaught exception thrown by this method, or the preceding arguments
+         * decoding, will be caught by the channel implementation and logged. An error result
+         * message will be sent back to Flutter.</p>
+         *
+         * <p>Any uncaught exception thrown during encoding an event or error submitted to the
+         * {@link EventSink} is treated similarly: the exception is logged, and an error event
+         * is sent to Flutter.</p>
+         *
+         * @param arguments stream configuration arguments, possibly null.
+         * @param events an {@link EventSink} for emitting events to the Flutter receiver.
          */
         void onListen(Object arguments, EventSink events);
 
         /**
          * Handles a request to tear down an event stream.
          *
-         * @param arguments Stream configuration arguments, possibly null.
+         * <p>Any uncaught exception thrown by this method, or the preceding arguments
+         * decoding, will be caught by the channel implementation and logged. An error result
+         * result message will be sent back to Flutter.</p>
+         *
+         * @param arguments stream configuration arguments, possibly null.
          */
         void onCancel(Object arguments);
+    }
+
+    /**
+     * Event callback. Supports dual use: Producers of events to be sent to Flutter
+     * act as clients of this interface for sending events. Consumers of events sent
+     * from Flutter implement this interface for handling received events (the latter
+     * facility has not been implemented yet).
+     */
+    public interface EventSink {
+        /**
+         * Consumes a successful event.
+         *
+         * @param event the event, possibly null.
+         */
+        void success(Object event);
+
+        /**
+         * Consumes an error event.
+         *
+         * @param errorCode an error code String.
+         * @param errorMessage a human-readable error message String, possibly null.
+         * @param errorDetails error details, possibly null
+         */
+        void error(String errorCode, String errorMessage, Object errorDetails);
+
+        /**
+         * Consumes end of stream. Ensuing calls to {@link #success(Object)} or
+         * {@link #error(String, String, Object)}, if any, are ignored.
+         */
+        void endOfStream();
     }
 
     private final class IncomingStreamRequestHandler implements BinaryMessageHandler {
@@ -132,13 +156,18 @@ public final class EventChannel {
 
         @Override
         public void onMessage(ByteBuffer message, final BinaryReply reply) {
-            final MethodCall call = codec.decodeMethodCall(message);
-            if (call.method.equals("listen")) {
-                onListen(call.arguments, reply);
-            } else if (call.method.equals("cancel")) {
-                onCancel(call.arguments, reply);
-            } else {
-                reply.reply(null);
+            try {
+                final MethodCall call = codec.decodeMethodCall(message);
+                if (call.method.equals("listen")) {
+                    onListen(call.arguments, reply);
+                } else if (call.method.equals("cancel")) {
+                    onCancel(call.arguments, reply);
+                } else {
+                    reply.reply(null);
+                }
+            } catch (RuntimeException e) {
+                Log.e(TAG + name, "Failed to decode event stream lifecycle call", e);
+                reply.reply(codec.encodeErrorEnvelope("decode", e.getMessage(), null));
             }
         }
 
@@ -148,10 +177,10 @@ public final class EventChannel {
                 try {
                     handler.onListen(arguments, eventSink);
                     callback.reply(codec.encodeSuccessEnvelope(null));
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     activeSink.set(null);
                     Log.e(TAG + name, "Failed to open event stream", e);
-                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
                 }
             } else {
                 callback.reply(codec.encodeErrorEnvelope("error", "Stream already active", null));
@@ -164,9 +193,9 @@ public final class EventChannel {
                 try {
                     handler.onCancel(arguments);
                     callback.reply(codec.encodeSuccessEnvelope(null));
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     Log.e(TAG + name, "Failed to close event stream", e);
-                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
                 }
             } else {
                 callback.reply(codec.encodeErrorEnvelope("error", "No active stream to cancel", null));
@@ -174,30 +203,39 @@ public final class EventChannel {
         }
 
         private final class EventSinkImplementation implements EventSink {
+             final AtomicBoolean hasEnded = new AtomicBoolean(false);
+
              @Override
              public void success(Object event) {
-                 if (activeSink.get() != this) {
+                 if (hasEnded.get() || activeSink.get() != this) {
                      return;
                  }
-                 EventChannel.this.messenger.send(
-                     name,
-                     codec.encodeSuccessEnvelope(event));
+                 try {
+                     EventChannel.this.messenger.send(name, codec.encodeSuccessEnvelope(event));
+                 } catch (RuntimeException e) {
+                     Log.e(TAG + name, "Failed to encode event", e);
+                     EventChannel.this.messenger.send(name, codec.encodeErrorEnvelope("encode", e.getMessage(), null));
+                 }
              }
 
              @Override
-             public void error(String errorCode, String errorMessage,
-                 Object errorDetails) {
-                 if (activeSink.get() != this) {
+             public void error(String errorCode, String errorMessage, Object errorDetails) {
+                 if (hasEnded.get() || activeSink.get() != this) {
                      return;
                  }
-                 EventChannel.this.messenger.send(
-                     name,
-                     codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
+                 try {
+                   EventChannel.this.messenger.send(
+                       name,
+                       codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
+                 } catch (RuntimeException e) {
+                     Log.e(TAG + name, "Failed to encode error", e);
+                     EventChannel.this.messenger.send(name, codec.encodeErrorEnvelope("encode", e.getMessage(), null));
+                 }
              }
 
              @Override
              public void endOfStream() {
-                 if (activeSink.get() != this) {
+                 if (hasEnded.getAndSet(true) || activeSink.get() != this) {
                      return;
                  }
                  EventChannel.this.messenger.send(name, null);

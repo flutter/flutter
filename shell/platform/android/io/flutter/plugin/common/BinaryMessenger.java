@@ -4,7 +4,9 @@ import java.nio.ByteBuffer;
 
 /**
  * Facility for communicating with Flutter using asynchronous message passing with binary messages.
- * The Flutter Dart code can use {@code BinaryMessages} to participate.
+ * The Flutter Dart code should use
+ * <a href="https://docs.flutter.io/flutter/services/BinaryMessages-class.html">BinaryMessages</a>
+ * to participate.
  *
  * @see BasicMessageChannel , which supports message passing with Strings and semi-structured messages.
  * @see MethodChannel , which supports communication using asynchronous method invocation.
@@ -12,19 +14,20 @@ import java.nio.ByteBuffer;
  */
 public interface BinaryMessenger {
     /**
-     * Sends a binary message to the Flutter application. The Flutter Dart code can register a
-     * platform message handler with {@code BinaryMessages} that will receive these messages.
+     * Sends a binary message to the Flutter application.
      *
-     * @param channel the name {@link String} of the channel that will receive this message.
+     * @param channel the name {@link String} of the logical channel used for the message.
      * @param message the message payload, a {@link ByteBuffer} with the message bytes between position
      * zero and current position, or null.
      */
     void send(String channel, ByteBuffer message);
 
     /**
-     * Sends a binary message to the Flutter application,
+     * Sends a binary message to the Flutter application, optionally expecting a reply.
      *
-     * @param channel the name {@link String} of the channel that will receive this message.
+     * <p>Any uncaught exception thrown by the reply callback will be caught and logged.</p>
+     *
+     * @param channel the name {@link String} of the logical channel used for the message.
      * @param message the message payload, a {@link ByteBuffer} with the message bytes between position
      * zero and current position, or null.
      * @param callback a {@link BinaryReply} callback invoked when the Flutter application responds to the
@@ -36,11 +39,14 @@ public interface BinaryMessenger {
      * Registers a handler to be invoked when the Flutter application sends a message
      * to its host platform.
      *
-     * Registration overwrites any previous registration for the same channel name.
-     * Use a {@code null} handler to unregister.
+     * <p>Registration overwrites any previous registration for the same channel name.
+     * Use a null handler to deregister.</p>
+     *
+     * <p>If no handler has been registered for a particular channel, any incoming message on
+     * that channel will be handled silently by sending a null reply.</p>
      *
      * @param channel the name {@link String} of the channel.
-     * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages.
+     * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
      */
     void setMessageHandler(String channel, BinaryMessageHandler handler);
 
@@ -51,7 +57,14 @@ public interface BinaryMessenger {
         /**
          * Handles the specified message.
          *
-         * @param message the message {@link ByteBuffer} payload.
+         * <p>Handler implementations must reply to all incoming messages, by submitting a single reply
+         * message to the given {@link BinaryReply}. Failure to do so will result in lingering Flutter reply
+         * handlers. The reply may be submitted asynchronously.</p>
+         *
+         * <p>Any uncaught exception thrown by this method will be caught by the messenger implementation and
+         * logged, and a null reply message will be sent back to Flutter.</p>
+         *
+         * @param message the message {@link ByteBuffer} payload, possibly null.
          * @param reply A {@link BinaryReply} used for submitting a reply back to Flutter.
          */
         void onMessage(ByteBuffer message, BinaryReply reply);

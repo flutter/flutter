@@ -11,6 +11,7 @@ import org.json.JSONObject;
  * {@link JSONMessageCodec}.
  */
 public final class JSONMethodCodec implements MethodCodec {
+    // This codec must match the Dart codec of the same name in package flutter/services.
     public static final JSONMethodCodec INSTANCE = new JSONMethodCodec();
 
     private JSONMethodCodec() {

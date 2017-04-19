@@ -45,6 +45,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An Android view containing a Flutter app.
@@ -607,8 +608,12 @@ public class FlutterView extends SurfaceView
                 final ByteBuffer buffer = (message == null ? null : ByteBuffer.wrap(message));
                 handler.onMessage(buffer,
                     new BinaryReply() {
+                        private final AtomicBoolean done = new AtomicBoolean(false);
                         @Override
                         public void reply(ByteBuffer reply) {
+                            if (done.getAndSet(true)) {
+                                throw new IllegalStateException("Reply already submitted");
+                            }
                             if (reply == null) {
                                 nativeInvokePlatformMessageEmptyResponseCallback(mNativePlatformView,
                                     replyId);
@@ -637,7 +642,7 @@ public class FlutterView extends SurfaceView
             try {
                 callback.reply(reply == null ? null : ByteBuffer.wrap(reply));
             } catch (Exception ex) {
-                Log.e(TAG, "Uncaught exception in binary message handler reply", ex);
+                Log.e(TAG, "Uncaught exception in binary message reply handler", ex);
             }
         }
     }
