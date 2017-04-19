@@ -64,6 +64,11 @@ dependencies:
 
   createFooter('dev/docs/lib/footer.html');
 
+  // Verify which version of dartdoc we're using.
+  final ProcessResult result = Process.runSync('pub',
+    <String>['global', 'run', 'dartdoc', '--version']);
+  print('\n${result.stdout}');
+
   // Generate the documentation.
   final List<String> args = <String>[
     'global', 'run', 'dartdoc',
