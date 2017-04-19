@@ -72,6 +72,7 @@ void main() {
       }
 
       expectExists('lib/main.dart');
+      expectExists('.analysis_options');
       for (FileSystemEntity file in temp.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           final String original = file.readAsStringSync();
