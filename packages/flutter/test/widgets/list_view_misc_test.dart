@@ -164,21 +164,21 @@ void main() {
             // The overall height of the ListView's contents is 500
             child: new ListView(
               children: <Widget>[
-                new SizedBox(
+                const SizedBox(
                   height: 150.0,
-                  child: new Center(
+                  child: const Center(
                     child: const Text('top')
                   ),
                 ),
-                new SizedBox(
+                const SizedBox(
                   height: 200.0,
-                  child: new Center(
+                  child: const Center(
                     child: const Text('middle')
                   ),
                 ),
-                new SizedBox(
+                const SizedBox(
                   height: 150.0,
-                  child: new Center(
+                  child: const Center(
                     child: const Text('bottom')
                   ),
                 ),
@@ -188,7 +188,7 @@ void main() {
           // If this widget's height is > 100 the ListView can scroll.
           new SizeTransition(
             sizeFactor: controller.view,
-            child: new SizedBox(
+            child: const SizedBox(
               height: 300.0,
               child: const Text('keyboard'),
             ),
