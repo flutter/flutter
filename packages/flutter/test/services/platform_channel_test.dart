@@ -98,7 +98,7 @@ void main() {
         await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
       } catch(e) {
-        expect(e, new isInstanceOf<FormatException>());
+        expect(e, const isInstanceOf<FormatException>());
       }
     });
     test('can handle method call with call decoding error', () async {

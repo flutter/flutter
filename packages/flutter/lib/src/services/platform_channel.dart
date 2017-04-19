@@ -217,9 +217,8 @@ class MethodChannel {
 /// instead of throwing an exception.
 class OptionalMethodChannel extends MethodChannel {
   /// Creates a [MethodChannel] that ignores missing platform plugins.
-  const OptionalMethodChannel(String name,
-      [MethodCodec codec = const StandardMethodCodec()])
-      : super(name, codec);
+  const OptionalMethodChannel(String name, [MethodCodec codec = const StandardMethodCodec()])
+    : super(name, codec);
 
   @override
   Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {

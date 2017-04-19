@@ -11,7 +11,7 @@ import 'platform_channel.dart';
 
 /// A message encoding/decoding mechanism.
 ///
-/// Both operations may throw an exception, if conversion fails.
+/// Both operations throw an exception, if conversion fails.
 ///
 /// See also:
 ///
