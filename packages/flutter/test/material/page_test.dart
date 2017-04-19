@@ -26,7 +26,6 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    Opacity widget2Opacity = tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -34,10 +33,8 @@ void main() {
     expect(widget1TopLeft.dx == widget2TopLeft.dx, true);
     // Page 1 is above page 2 mid-transition.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Animation begins 3/4 of the way up the page.
-    expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
-    // Animation starts with page 2 being near transparent.
-    expect(widget2Opacity.opacity < 0.01, true);
+    // Animation begins from the top of the page.
+    expect(widget2TopLeft.dy < widget2Size.height, true);
 
     await tester.pumpAndSettle();
 
@@ -49,13 +46,10 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    widget2Opacity = tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
-    // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity < 1.0, true);
 
     await tester.pumpAndSettle();
 
