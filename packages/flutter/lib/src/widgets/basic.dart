@@ -2662,7 +2662,7 @@ class RawImage extends LeafRenderObjectWidget {
       description.add('scale: $scale');
     if (color != null)
       description.add('color: $color');
-    if (color != null)
+    if (colorBlendMode != null)
       description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
