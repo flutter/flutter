@@ -67,18 +67,28 @@ class PaintingContext {
 
   /// Repaint the given render object.
   ///
-  /// The render object must have a composited layer and must be in need of
-  /// painting. The render object's layer is re-used, along with any layers in
-  /// the subtree that don't need to be repainted.
+  /// The render object must be attached to a [PipelineOwner], must have a
+  /// composited layer, and must be in need of painting. The render object's
+  /// layer, if any, is re-used, along with any layers in the subtree that don't
+  /// need to be repainted.
   static void repaintCompositedChild(RenderObject child, { bool debugAlsoPaintedParent: false }) {
     assert(child.isRepaintBoundary);
     assert(child._needsPaint);
     assert(() {
-      child.debugRegisterRepaintBoundaryPaint(includedParent: debugAlsoPaintedParent, includedChild: true);
+      // register the call for RepaintBoundary metrics
+      child.debugRegisterRepaintBoundaryPaint(
+        includedParent: debugAlsoPaintedParent,
+        includedChild: true,
+      );
       return true;
     });
-    child._layer ??= new OffsetLayer();
-    child._layer.removeAllChildren();
+    if (child._layer == null) {
+      assert(debugAlsoPaintedParent);
+      child._layer = new OffsetLayer();
+    } else {
+      assert(debugAlsoPaintedParent || child._layer.attached);
+      child._layer.removeAllChildren();
+    }
     assert(() {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
@@ -125,7 +135,11 @@ class PaintingContext {
     } else {
       assert(child._layer != null);
       assert(() {
-        child.debugRegisterRepaintBoundaryPaint(includedParent: true, includedChild: false);
+        // register the call for RepaintBoundary metrics
+        child.debugRegisterRepaintBoundaryPaint(
+          includedParent: true,
+          includedChild: false,
+        );
         child._layer.debugCreator = child.debugCreator ?? child;
         return true;
       });
@@ -1096,8 +1110,14 @@ class PipelineOwner {
       _nodesNeedingPaint = <RenderObject>[];
       // Sort the dirty nodes in reverse order (deepest first).
       for (RenderObject node in dirtyNodes..sort((RenderObject a, RenderObject b) => b.depth - a.depth)) {
-        if (node._needsPaint && node.owner == this)
-          PaintingContext.repaintCompositedChild(node);
+        assert(node._layer != null);
+        if (node._needsPaint && node.owner == this) {
+          if (node._layer.attached) {
+            PaintingContext.repaintCompositedChild(node);
+          } else {
+            node._skippedPaintingOnLayer();
+          }
+        }
       }
       assert(_nodesNeedingPaint.isEmpty);
     } finally {
@@ -2132,6 +2152,31 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
   }
 
+  // Called when flushPaint() tries to make us paint but our layer is detached.
+  // To make sure that our subtree is repainted when it's finally reattached,
+  // even in the case where some ancestor layer is itself never marked dirty, we
+  // have to mark our entire detached subtree as dirty and needing to be
+  // repainted. That way, we'll eventually be repainted.
+  void _skippedPaintingOnLayer() {
+    assert(attached);
+    assert(isRepaintBoundary);
+    assert(_needsPaint);
+    assert(_layer != null);
+    assert(!_layer.attached);
+    AbstractNode ancestor = parent;
+    while (ancestor is RenderObject) {
+      final RenderObject node = ancestor;
+      if (node.isRepaintBoundary) {
+        if (node._layer == null)
+          break; // looks like the subtree here has never been painted. let it handle itself.
+        if (node._layer.attached)
+          break; // it's the one that detached us, so it's the one that will decide to repaint us.
+        node._needsPaint = true;
+      }
+      ancestor = node.parent;
+    }
+  }
+
   /// Bootstrap the rendering pipeline by scheduling the very first paint.
   ///
   /// Requires that this render object is attached, is the root of the render
@@ -2549,6 +2594,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     }
     if (_needsLayout)
       header += ' NEEDS-LAYOUT';
+    if (_needsPaint)
+      header += ' NEEDS-PAINT';
     if (!attached)
       header += ' DETACHED';
     return header;
@@ -2606,6 +2653,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       description.add('creator: $debugCreator');
     description.add('parentData: $parentData');
     description.add('constraints: $constraints');
+    if (_layer != null) // don't access it via the "layer" getter since that's only valid when we don't need paint
+      description.add('layer: $_layer');
   }
 
   /// Returns a string describing the current node's descendants. Each line of
