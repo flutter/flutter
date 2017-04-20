@@ -15,6 +15,8 @@
  * This class provides the following behaviors:
  *   * Status bar touches are forwarded to the key window's root view
  *     FlutterViewController, in order to trigger scroll to top.
+ *   * Keeps the Flutter connection open in debug mode when the phone screen
+ *     locks.
  *
  * App delegates for Flutter applications are *not* required to inherit from
  * this class. Developers of custom app delegate classes should copy and paste
