@@ -316,7 +316,7 @@ void main() {
 
 class MockDevice extends Mock implements Device {
   MockDevice() {
-    when(this.isSupported()).thenReturn(true);
+    when(isSupported()).thenReturn(true);
   }
 }
 

@@ -1769,7 +1769,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           '$runtimeType does not implement applyPaintTransform.\n'
           'The following $runtimeType object:\n'
-          '  ${this.toStringShallow()}\n'
+          '  ${toStringShallow()}\n'
           '...did not use a BoxParentData class for the parentData field of the following child:\n'
           '  ${child.toStringShallow()}\n'
           'The $runtimeType class inherits from RenderBox. '

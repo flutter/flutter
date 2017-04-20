@@ -40,13 +40,13 @@ abstract class AnalyzerTask {
 
 class AnalyzerCliTask extends AnalyzerTask {
   AnalyzerCliTask(String sdk, String commit, DateTime timestamp) {
-    this.benchmark = new FlutterAnalyzeBenchmark(sdk, commit, timestamp);
+    benchmark = new FlutterAnalyzeBenchmark(sdk, commit, timestamp);
   }
 }
 
 class AnalyzerServerTask extends AnalyzerTask {
   AnalyzerServerTask(String sdk, String commit, DateTime timestamp) {
-    this.benchmark = new FlutterAnalyzeAppBenchmark(sdk, commit, timestamp);
+    benchmark = new FlutterAnalyzeAppBenchmark(sdk, commit, timestamp);
   }
 }
 

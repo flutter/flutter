@@ -600,8 +600,8 @@ abstract class CompoundAnimation<T> extends Animation<T>
 
   T _lastValue;
   void _maybeNotifyListeners() {
-    if (this.value != _lastValue) {
-      _lastValue = this.value;
+    if (value != _lastValue) {
+      _lastValue = value;
       notifyListeners();
     }
   }

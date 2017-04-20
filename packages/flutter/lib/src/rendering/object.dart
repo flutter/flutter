@@ -1781,7 +1781,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       final RenderObject parent = this.parent;
       relayoutBoundary = parent._relayoutBoundary;
     }
-    assert(parent == this.parent);
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
@@ -1842,7 +1841,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _needsLayout = false;
     markNeedsPaint();
-    assert(parent == this.parent);
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,

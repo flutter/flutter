@@ -165,7 +165,7 @@ class MockDoctor extends Doctor {
 
 class MockSimControl extends Mock implements SimControl {
   MockSimControl() {
-    when(this.getConnectedDevices()).thenReturn(<SimDevice>[]);
+    when(getConnectedDevices()).thenReturn(<SimDevice>[]);
   }
 }
 
