@@ -136,7 +136,7 @@ void sanityCheckDocs() {
     }
   }
   if (oldMissing)
-    canaries.addAll(oldSdkCanaries);
+    canaries.addAll(newSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
       throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
