@@ -114,8 +114,8 @@ void sanityCheckDocs() {
   // TODO(jcollins-g): remove old_sdk_canaries for dartdoc >= 0.10.0
   final List<String> old_sdk_canaries = <String>[
     '$kDocRoot/api/dart.io/File-class.html',
-    '$kDocRoot/api/dart_ui/Canvas-class.html',
-    '$kDocRoot/api/dart_ui/Canvas/drawRect.html',
+    '$kDocRoot/api/dart.ui/Canvas-class.html',
+    '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
   ];
   final List<String> new_sdk_canaries = <String>[
     '$kDocRoot/api/dart-io/File-class.html',
