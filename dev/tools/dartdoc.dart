@@ -112,12 +112,12 @@ void createFooter(String footerPath) {
 
 void sanityCheckDocs() {
   // TODO(jcollins-g): remove old_sdk_canaries for dartdoc >= 0.10.0
-  final List<String> old_sdk_canaries = <String>[
+  final List<String> oldSdkCanaries = <String>[
     '$kDocRoot/api/dart.io/File-class.html',
     '$kDocRoot/api/dart.ui/Canvas-class.html',
     '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
   ];
-  final List<String> new_sdk_canaries = <String>[
+  final List<String> newSdkCanaries = <String>[
     '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
@@ -128,15 +128,15 @@ void sanityCheckDocs() {
     '$kDocRoot/api/material/Tooltip-class.html',
     '$kDocRoot/api/widgets/Widget-class.html',
   ];
-  bool old_missing = false;
-  for (String canary in old_sdk_canaries) {
+  bool oldMissing = false;
+  for (String canary in oldSdkCanaries) {
     if (!new File(canary).existsSync()) {
-      old_missing = true;
+      oldMissing = true;
       break;
     }
   }
-  if (old_missing)
-    canaries.addAll(new_sdk_canaries);
+  if (oldMissing)
+    canaries.addAll(oldSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
       throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
