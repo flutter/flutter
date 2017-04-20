@@ -97,7 +97,7 @@ linter:
     - prefer_const_constructors
     - prefer_contains
     # - prefer_expression_function_bodies # not yet tested
-    - prefer_final_fields
+    # - prefer_final_fields # https://github.com/dart-lang/linter/issues/506
     - prefer_final_locals
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
