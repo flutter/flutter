@@ -140,6 +140,10 @@ void main() {
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isTrue);
 
+    // Change back to ellipsis and check that the fade shader is cleared.
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.debugHasOverflowShader, isFalse);
+
     relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
     expect(paragraph.debugHasOverflowShader, isFalse);
   });
