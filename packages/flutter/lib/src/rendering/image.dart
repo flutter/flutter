@@ -97,7 +97,6 @@ class RenderImage extends RenderBox {
 
   ColorFilter _colorFilter;
 
-  // Should we make the blend mode configurable?
   void _updateColorFilter() {
     if (_color == null)
       _colorFilter = null;
@@ -120,6 +119,10 @@ class RenderImage extends RenderBox {
   ///
   /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
   /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
   BlendMode get colorBlendMode => _colorBlendMode;
   BlendMode _colorBlendMode;
   set colorBlendMode(BlendMode value) {

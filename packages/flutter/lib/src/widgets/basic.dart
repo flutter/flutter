@@ -2594,6 +2594,10 @@ class RawImage extends LeafRenderObjectWidget {
   ///
   /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
   /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
   final BlendMode colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
