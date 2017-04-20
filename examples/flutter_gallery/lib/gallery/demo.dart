@@ -128,8 +128,8 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
     Widget body;
     if (_exampleCode == null) {
-      body = new Center(
-        child: new CircularProgressIndicator()
+      body = const Center(
+        child: const CircularProgressIndicator()
       );
     } else {
       body = new SingleChildScrollView(

@@ -434,10 +434,10 @@ class _LicensePageState extends State<LicensePage> {
     ];
     contents.addAll(_licenses);
     if (!_loaded) {
-      contents.add(new Padding(
+      contents.add(const Padding(
         padding: const EdgeInsets.symmetric(vertical: 24.0),
-        child: new Center(
-          child: new CircularProgressIndicator()
+        child: const Center(
+          child: const CircularProgressIndicator()
         )
       ));
     }

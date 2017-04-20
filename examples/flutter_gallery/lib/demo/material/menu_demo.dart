@@ -67,15 +67,15 @@ class MenuDemoState extends State<MenuDemo> {
           new PopupMenuButton<String>(
             onSelected: showMenuSelection,
             itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-              new PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'Toolbar menu',
                 child: const Text('Toolbar menu')
               ),
-              new PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'Right here',
                 child: const Text('Right here')
               ),
-              new PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'Hooray!',
                 child: const Text('Hooray!')
               ),
@@ -99,7 +99,7 @@ class MenuDemoState extends State<MenuDemo> {
                   value: _simpleValue1,
                   child: const Text('Context menu item one')
                 ),
-                new PopupMenuItem<String>(
+                const PopupMenuItem<String>(
                   enabled: false,
                   child: const Text('A disabled menu item')
                 ),
@@ -140,7 +140,7 @@ class MenuDemoState extends State<MenuDemo> {
                     title: const Text('Get link')
                   )
                 ),
-                new PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
+                const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
                 new PopupMenuItem<String>(
                   value: 'Remove',
                   child: new ListTile(

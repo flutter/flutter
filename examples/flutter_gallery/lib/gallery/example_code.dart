@@ -192,7 +192,7 @@ new Switch(
 // Create a disabled switch.
 // Switches are disabled when onChanged isn't
 // specified or null.
-new Switch(value: false, onChanged: null);
+const Switch(value: false, onChanged: null);
 // END
   }
 }

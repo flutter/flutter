@@ -484,7 +484,7 @@ class _AppBarState extends State<AppBar> {
 }
 
 class _FloatingAppBar extends StatefulWidget {
-  _FloatingAppBar({ Key key, this.child }) : super(key: key);
+  const _FloatingAppBar({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 

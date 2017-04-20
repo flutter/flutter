@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'debug.dart';
 
 class _AccountPictures extends StatelessWidget {
-  _AccountPictures({
+  const _AccountPictures({
     Key key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
@@ -49,7 +49,7 @@ class _AccountPictures extends StatelessWidget {
 }
 
 class _AccountDetails extends StatelessWidget {
-  _AccountDetails({
+  const _AccountDetails({
     Key key,
     @required this.accountName,
     @required this.accountEmail,
@@ -132,7 +132,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  UserAccountsDrawerHeader({
+  const UserAccountsDrawerHeader({
     Key key,
     this.decoration,
     this.margin: const EdgeInsets.only(bottom: 8.0),
