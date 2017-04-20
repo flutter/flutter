@@ -150,7 +150,7 @@ abstract class Device {
   bool isLatestBuildInstalled(ApplicationPackage app);
 
   /// Install an app package on the current device
-  bool installApp(ApplicationPackage app);
+  Future<bool> installApp(ApplicationPackage app);
 
   /// Uninstall an app package from the current device
   bool uninstallApp(ApplicationPackage app);

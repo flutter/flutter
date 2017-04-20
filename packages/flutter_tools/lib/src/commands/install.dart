@@ -37,12 +37,12 @@ class InstallCommand extends FlutterCommand {
 
     printStatus('Installing $package to $device...');
 
-    if (!installApp(device, package))
+    if (!await installApp(device, package))
       throwToolExit('Install failed');
   }
 }
 
-bool installApp(Device device, ApplicationPackage package, { bool uninstall: true }) {
+Future<bool> installApp(Device device, ApplicationPackage package, { bool uninstall: true }) async {
   if (package == null)
     return false;
 

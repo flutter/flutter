@@ -23,6 +23,8 @@ const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
 
+String _cachedGradleAppOutDirV2;
+
 enum FlutterPluginVersion {
   none,
   v1,
@@ -54,7 +56,7 @@ FlutterPluginVersion get flutterPluginVersion {
   return FlutterPluginVersion.none;
 }
 
-String get gradleAppOut {
+String getGradleAppOut() {
   switch (flutterPluginVersion) {
     case FlutterPluginVersion.none:
       // Fall through. Pretend we're v1, and just go with it.
@@ -63,12 +65,18 @@ String get gradleAppOut {
     case FlutterPluginVersion.managed:
       // Fall through. The managed plugin matches plugin v2 for now.
     case FlutterPluginVersion.v2:
-      return '$gradleAppOutDirV2/app.apk';
+      return '${getGradleAppOutDirV2()}/app.apk';
   }
   return null;
 }
 
-String get gradleAppOutDirV2 {
+String getGradleAppOutDirV2() {
+  _cachedGradleAppOutDirV2 ??= _calculateGradleAppOutDirV2();
+  return _cachedGradleAppOutDirV2;
+}
+
+// Note: this call takes about a second to complete.
+String _calculateGradleAppOutDirV2() {
   final String gradle = ensureGradle();
   ensureLocalProperties();
   try {
@@ -224,7 +232,7 @@ Future<Null> buildGradleProjectV2(String gradle, String buildModeName, String ta
   if (exitcode != 0)
     throwToolExit('Gradle build failed: $exitcode', exitCode: exitcode);
 
-  final String buildDirectory = gradleAppOutDirV2;
+  final String buildDirectory = getGradleAppOutDirV2();
   final String apkFilename = 'app-$buildModeName.apk';
   final File apkFile = fs.file('$buildDirectory/$apkFilename');
   // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.

@@ -53,6 +53,14 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
+    final String modeName = getModeName(debuggingOptions.buildMode);
+    if (mainPath == null) {
+      assert(prebuiltMode);
+      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
+    } else {
+      printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
+    }
+
     package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
@@ -71,14 +79,6 @@ class ColdRunner extends ResidentRunner {
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
     await startEchoingDeviceLog(package);
-
-    final String modeName = getModeName(debuggingOptions.buildMode);
-    if (mainPath == null) {
-      assert(prebuiltMode);
-      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
-    } else {
-      printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
-    }
 
     _result = await device.startApp(
       package,

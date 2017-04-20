@@ -155,7 +155,7 @@ class IOSDevice extends Device {
   bool isLatestBuildInstalled(ApplicationPackage app) => false;
 
   @override
-  bool installApp(ApplicationPackage app) {
+  Future<bool> installApp(ApplicationPackage app) async {
     final IOSApp iosApp = app;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
@@ -197,8 +197,7 @@ class IOSDevice extends Device {
     bool applicationNeedsRebuild: false,
   }) async {
     if (!prebuiltApplication) {
-      // TODO(chinmaygarde): Use checked, mainPath, route.
-      // TODO(devoncarew): Handle startPaused, debugPort.
+      // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${app.name} for $id');
 
       // Step 1: Build the precompiled/DBC application if necessary.
@@ -210,7 +209,7 @@ class IOSDevice extends Device {
         return new LaunchResult.failed();
       }
     } else {
-      if (!installApp(app))
+      if (!await installApp(app))
         return new LaunchResult.failed();
     }
 
