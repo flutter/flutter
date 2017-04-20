@@ -117,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await Testplugin.platformVersion;
+      platformVersion = await {{pluginDartClass}}.platformVersion;
     } on PlatformException {
       platformVersion = "Failed to get platform version";
     }
