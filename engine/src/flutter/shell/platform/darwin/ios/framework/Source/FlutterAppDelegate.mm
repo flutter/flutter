@@ -4,8 +4,11 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#include "lib/ftl/logging.h"
 
-@implementation FlutterAppDelegate
+@implementation FlutterAppDelegate {
+  UIBackgroundTaskIdentifier _debugBackgroundTask;
+}
 
 // Returns the key window's rootViewController, if it's a FlutterViewController.
 // Otherwise, returns nil.
@@ -25,5 +28,26 @@
     [self.rootFlutterViewController handleStatusBarTouches:event];
   }
 }
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
+- (void)applicationDidEnterBackground:(UIApplication *)application {
+  // The following keeps the Flutter session alive when the device screen locks
+  // in debug mode. It allows continued use of features like hot reload and 
+  // taking screenshots once the device unlocks again.
+  //
+  // Note the name is not an identifier and multiple instances can exist. 
+  _debugBackgroundTask = [application beginBackgroundTaskWithName:@"Flutter debug task"
+                                                expirationHandler:^{
+      FTL_LOG(WARNING) << "\nThe OS has terminated the Flutter debug connection for being "
+                          "inactive in the background for too long.\n\n"
+                          "There are no errors with your Flutter application.\n\n"
+                          "To reconnect, launch your application again via 'flutter run";
+      }];
+}
+
+- (void)applicationWillEnterForeground:(UIApplication *)application {
+  [application endBackgroundTask: _debugBackgroundTask];
+}
+#endif  // FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_DEBUG
 
 @end
