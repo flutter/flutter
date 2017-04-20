@@ -29,8 +29,6 @@ analyzer:
     missing_required_param: warning
     # treat missing returns as a warning (not a hint)
     missing_return: warning
-    # allow overriding fields (if they use super, ideally...)
-    strong_mode_invalid_field_override: ignore
     # allow having TODOs in the code
     todo: ignore
   exclude:
