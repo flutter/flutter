@@ -74,9 +74,9 @@ template("flutter_app") {
       "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
 
   flutter_root = "//lib/flutter"
-  flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
+  flutter_tools_label = "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
   flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
-  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/flutter_tools"
+  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$target_gen_dir/$bundle_name"
