@@ -1124,7 +1124,8 @@ class FlutterView extends ServiceObject {
       // launch errors.
       if (event.kind == ServiceEvent.kIsolateRunnable) {
         printTrace('Isolate is runnable.');
-        completer.complete(null);
+        if (!completer.isCompleted)
+          completer.complete(null);
       }
     });
     await owner.vm.runInView(viewId,
