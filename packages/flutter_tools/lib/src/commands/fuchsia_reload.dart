@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 import 'dart:math';
 
 import '../base/common.dart';
@@ -93,7 +94,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       printTrace('Fuchsia service port: $port');
 
     if (_list) {
-      await _listViews(servicePorts);
+      await _listVMs(servicePorts);
       return;
     }
 
@@ -125,12 +126,23 @@ class FuchsiaReloadCommand extends FlutterCommand {
     await hotRunner.attach(observatoryUris, isolateFilter: isolateName);
   }
 
-  Future<List<FlutterView>> _getViews(List<int> ports) async {
-    final List<FlutterView> views = <FlutterView>[];
-    for (int port in ports) {
+  // A cache of VMService connections.
+  HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
+
+  VMService _getVMService(int port) {
+    if (!_vmServiceCache.containsKey(port)) {
       final String addr = 'http://$_address:$port';
       final Uri uri = Uri.parse(addr);
       final VMService vmService = VMService.connect(uri);
+      _vmServiceCache[port] = vmService;
+    }
+    return _vmServiceCache[port];
+  }
+
+  Future<List<FlutterView>> _getViews(List<int> ports) async {
+    final List<FlutterView> views = <FlutterView>[];
+    for (int port in ports) {
+      final VMService vmService = _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       views.addAll(vmService.vm.views);
@@ -150,31 +162,89 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return result;
   }
 
-  Future<Null> _listViews(List<int> ports) async {
-    const String bold = '\u001B[0;1m';
-    const String reset = '\u001B[0m';
-    for (FlutterView v in await _getViews(ports)) {
-      final Uri addr = v.owner.vmService.httpAddress;
-      final Isolate i = v.uiIsolate;
-      final String name = i.name;
-      final String shortName = name.substring(0, name.indexOf('\$'));
-      final String main = '\$main-';
-      final String number = name.substring(name.indexOf(main) + main.length);
-      final String newUsed = getSizeAsMB(i.newSpace.used);
-      final String newCap = getSizeAsMB(i.newSpace.capacity);
-      final String newFreq = '${i.newSpace.avgCollectionTime.inMilliseconds}ms';
-      final String newPer = '${i.newSpace.avgCollectionPeriod.inSeconds}s';
-      final String oldUsed = getSizeAsMB(i.oldSpace.used);
-      final String oldCap = getSizeAsMB(i.oldSpace.capacity);
-      final String oldFreq = '${i.oldSpace.avgCollectionTime.inMilliseconds}ms';
-      final String oldPer = '${i.oldSpace.avgCollectionPeriod.inSeconds}s';
-      printStatus(
-        '$bold$shortName$reset\n'
-        '\tIsolate number: $number\n'
-        '\tObservatory: $addr\n'
-        '\tNew gen: $newUsed used of $newCap, GC: $newFreq every $newPer\n'
-        '\tOld gen: $oldUsed used of $oldCap, GC: $oldFreq every $oldPer\n'
-      );
+  static const String _bold = '\u001B[0;1m';
+  static const String _reset = '\u001B[0m';
+
+  String _vmServiceToString(VMService vmService, {int tabDepth: 0}) {
+    final Uri addr = vmService.httpAddress;
+    final int numIsolates = vmService.vm.isolates.length;
+    final String maxRSS = getSizeAsMB(vmService.vm.maxRSS);
+    final String heapSize = getSizeAsMB(vmService.vm.heapAllocatedMemoryUsage);
+    int totalNewUsed = 0;
+    int totalNewCap = 0;
+    int totalOldUsed = 0;
+    int totalOldCap = 0;
+    int totalExternal = 0;
+    for (Isolate i in vmService.vm.isolates) {
+      totalNewUsed += i.newSpace.used;
+      totalNewCap += i.newSpace.capacity;
+      totalOldUsed += i.oldSpace.used;
+      totalOldCap += i.oldSpace.capacity;
+      totalExternal += i.newSpace.external;
+      totalExternal += i.oldSpace.external;
+    }
+    final String newUsed = getSizeAsMB(totalNewUsed);
+    final String newCap = getSizeAsMB(totalNewCap);
+    final String oldUsed = getSizeAsMB(totalOldUsed);
+    final String oldCap = getSizeAsMB(totalOldCap);
+    final String external = getSizeAsMB(totalExternal);
+    final String tabs = '\t' * tabDepth;
+    final String extraTabs = '\t' * (tabDepth + 1);
+    final StringBuffer stringBuffer = new StringBuffer(
+      '$tabs${_bold}VM at $addr$_reset\n'
+      '${extraTabs}RSS: $maxRSS\n'
+      '${extraTabs}Native allocations: $heapSize\n'
+      '${extraTabs}New Spaces: $newUsed of $newCap\n'
+      '${extraTabs}Old Spaces: $oldUsed of $oldCap\n'
+      '${extraTabs}External: $external\n'
+      '${extraTabs}Isolates: $numIsolates\n'
+    );
+    for (Isolate isolate in vmService.vm.isolates) {
+      stringBuffer.write(_isolateToString(isolate, tabDepth: tabDepth + 1));
+    }
+    return stringBuffer.toString();
+  }
+
+  String _isolateToString(Isolate isolate, {int tabDepth: 0}) {
+    final Uri vmServiceAddr = isolate.owner.vmService.httpAddress;
+    final String name = isolate.name;
+    final String shortName = name.substring(0, name.indexOf('\$'));
+    final String main = '\$main-';
+    final String number = name.substring(name.indexOf(main) + main.length);
+
+    // The Observatory requires somewhat non-standard URIs that the Uri class
+    // can't build for us, so instead we build them by hand.
+    final String isolateIdQuery = "?isolateId=isolates%2F$number";
+    final String isolateAddr = "$vmServiceAddr/#/inspect$isolateIdQuery";
+    final String debuggerAddr = "$vmServiceAddr/#/debugger$isolateIdQuery";
+
+    final String newUsed = getSizeAsMB(isolate.newSpace.used);
+    final String newCap = getSizeAsMB(isolate.newSpace.capacity);
+    final String newFreq = '${isolate.newSpace.avgCollectionTime.inMilliseconds}ms';
+    final String newPer = '${isolate.newSpace.avgCollectionPeriod.inSeconds}s';
+    final String oldUsed = getSizeAsMB(isolate.oldSpace.used);
+    final String oldCap = getSizeAsMB(isolate.oldSpace.capacity);
+    final String oldFreq = '${isolate.oldSpace.avgCollectionTime.inMilliseconds}ms';
+    final String oldPer = '${isolate.oldSpace.avgCollectionPeriod.inSeconds}s';
+    final String external = getSizeAsMB(isolate.newSpace.external + isolate.oldSpace.external);
+    final String tabs = '\t' * tabDepth;
+    final String extraTabs = '\t' * (tabDepth + 1);
+    return
+      '$tabs$_bold$shortName$_reset\n'
+      '${extraTabs}Isolate number: $number\n'
+      '${extraTabs}Observatory: $isolateAddr\n'
+      '${extraTabs}Debugger: $debuggerAddr\n'
+      '${extraTabs}New gen: $newUsed used of $newCap, GC: $newFreq every $newPer\n'
+      '${extraTabs}Old gen: $oldUsed used of $oldCap, GC: $oldFreq every $oldPer\n'
+      '${extraTabs}External: $external\n';
+  }
+
+  Future<Null> _listVMs(List<int> ports) async {
+    for (int port in ports) {
+      final VMService vmService = _getVMService(port);
+      await vmService.getVM();
+      await vmService.waitForViews();
+      printStatus(_vmServiceToString(vmService));
     }
   }
 
