@@ -607,7 +607,7 @@ class DataTable extends StatelessWidget {
 /// [Table], and put the other contents of the cell inside it.)
 class TableRowInkWell extends InkResponse {
   /// Creates an ink well for a table row.
-  TableRowInkWell({
+  const TableRowInkWell({
     Key key,
     Widget child,
     GestureTapCallback onTap,
@@ -661,7 +661,7 @@ class TableRowInkWell extends InkResponse {
 }
 
 class _SortArrow extends StatefulWidget {
-  _SortArrow({
+  const _SortArrow({
     Key key,
     this.visible,
     this.down,

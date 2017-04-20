@@ -31,7 +31,7 @@ class InkResponse extends StatefulWidget {
   /// Creates an area of a [Material] that responds to touch.
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
-  InkResponse({
+  const InkResponse({
     Key key,
     this.child,
     this.onTap,
