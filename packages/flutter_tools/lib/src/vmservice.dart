@@ -512,6 +512,10 @@ class VM extends ServiceObjectOwner {
 
     // TODO(johnmccutchan): Extract any properties we care about here.
     _pid = map['pid'];
+    if (map['_heapAllocatedMemoryUsage'] != null) {
+      _heapAllocatedMemoryUsage = map['_heapAllocatedMemoryUsage'];
+    }
+    _maxRSS = map['_maxRSS'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -528,8 +532,17 @@ class VM extends ServiceObjectOwner {
 
   /// The pid of the VM's process.
   int _pid;
-
   int get pid => _pid;
+
+  /// The number of bytes allocated (e.g. by malloc) in the native heap.
+  int _heapAllocatedMemoryUsage;
+  int get heapAllocatedMemoryUsage {
+    return _heapAllocatedMemoryUsage == null ? 0 : _heapAllocatedMemoryUsage;
+  }
+
+  /// The peak resident set size for the process.
+  int _maxRSS;
+  int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
