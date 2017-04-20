@@ -69,6 +69,7 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
 
 /// Base class for touch, stylus, or mouse events.
+@immutable
 abstract class PointerEvent {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

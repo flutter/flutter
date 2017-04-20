@@ -78,7 +78,7 @@ class BuildAotCommand extends BuildSubCommand {
   }
 }
 
-String _getSdkExtensionPath(PackageMap packageMap, String package) {
+String _getPackagePath(PackageMap packageMap, String package) {
   return fs.path.dirname(packageMap.map[package].toFilePath());
 }
 
@@ -145,8 +145,8 @@ Future<String> _buildAotSnapshot(
     return null;
   }
 
-  final String skyEnginePkg = _getSdkExtensionPath(packageMap, 'sky_engine');
-  final String uiPath = fs.path.join(skyEnginePkg, 'dart_ui', 'ui.dart');
+  final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
+  final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
   final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
   final List<String> filePaths = <String>[

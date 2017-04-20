@@ -64,15 +64,15 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           new PopupMenuButton<TabsDemoStyle>(
             onSelected: changeDemoStyle,
             itemBuilder: (BuildContext context) => <PopupMenuItem<TabsDemoStyle>>[
-              new PopupMenuItem<TabsDemoStyle>(
+              const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsAndText,
                 child: const Text('Icons and text')
               ),
-              new PopupMenuItem<TabsDemoStyle>(
+              const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.iconsOnly,
                 child: const Text('Icons only')
               ),
-              new PopupMenuItem<TabsDemoStyle>(
+              const PopupMenuItem<TabsDemoStyle>(
                 value: TabsDemoStyle.textOnly,
                 child: const Text('Text only')
               ),

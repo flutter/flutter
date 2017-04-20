@@ -30,12 +30,16 @@ import 'typography.dart';
 enum StepState {
   /// A step that displays its index in its circle.
   indexed,
+
   /// A step that displays a pencil icon in its circle.
   editing,
+
   /// A step that displays a tick icon in its circle.
   complete,
+
   /// A step that is disabled and does not to react to taps.
   disabled,
+
   /// A step that is currently having an error. e.g. the use has submitted wrong
   /// input.
   error,
@@ -45,6 +49,7 @@ enum StepState {
 enum StepperType {
   /// A vertical layout of the steps with their content in-between the titles.
   vertical,
+
   /// A horizontal layout of the steps with their content below the titles.
   horizontal,
 }
@@ -70,6 +75,7 @@ const double _kTriangleHeight = _kStepSize * 0.866025; // Traingle height. sqrt(
 ///
 ///  * [Stepper]
 ///  * <https://material.google.com/components/steppers.html>
+@immutable
 class Step {
   /// Creates a step for a [Stepper].
   ///

@@ -15,6 +15,7 @@ const Color _kDefaultGlowColor = const Color(0xFFFFFFFF);
 ///
 /// Used by [ScrollConfiguration] to configure the [Scrollable] widgets in a
 /// subtree.
+@immutable
 class ScrollBehavior {
   /// Creates a description of how [Scrollable] widgets should behave.
   const ScrollBehavior();

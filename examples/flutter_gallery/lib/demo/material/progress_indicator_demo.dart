@@ -63,17 +63,17 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
   Widget _buildIndicators(BuildContext context, Widget child) {
     final List<Widget> indicators = <Widget>[
-      new SizedBox(
+      const SizedBox(
         width: 200.0,
-        child: new LinearProgressIndicator()
+        child: const LinearProgressIndicator()
       ),
-      new LinearProgressIndicator(),
-      new LinearProgressIndicator(),
+      const LinearProgressIndicator(),
+      const LinearProgressIndicator(),
       new LinearProgressIndicator(value: _animation.value),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          new CircularProgressIndicator(),
+          const CircularProgressIndicator(),
           new SizedBox(
               width: 20.0,
               height: 20.0,

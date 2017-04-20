@@ -282,12 +282,12 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   @override
   void performLayout() {
-    assert(this.parentData is SectorParentData);
+    assert(parentData is SectorParentData);
     deltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
     assert(deltaRadius < double.INFINITY);
     final double innerDeltaRadius = deltaRadius - padding * 2.0;
-    final double childRadius = this.parentData.radius + padding;
-    final double paddingTheta = math.atan(padding / (this.parentData.radius + deltaRadius));
+    final double childRadius = parentData.radius + padding;
+    final double paddingTheta = math.atan(padding / (parentData.radius + deltaRadius));
     double innerTheta = paddingTheta; // increments with each child
     double remainingDeltaTheta = constraints.maxDeltaTheta - (innerTheta + paddingTheta);
     RenderSector child = firstChild;
@@ -367,11 +367,11 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   @override
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
-    assert(this.parentData is SectorParentData);
-    final double paddingTheta = math.atan(padding / this.parentData.radius);
+    assert(parentData is SectorParentData);
+    final double paddingTheta = math.atan(padding / parentData.radius);
     final double outerDeltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     final double innerDeltaTheta = outerDeltaTheta - paddingTheta * 2.0;
-    double childRadius = this.parentData.radius + padding;
+    double childRadius = parentData.radius + padding;
     double remainingDeltaRadius = constraints.maxDeltaRadius - (padding * 2.0);
     RenderSector child = firstChild;
     while (child != null) {
@@ -388,19 +388,19 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       remainingDeltaRadius -= padding;
     }
     return new SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: childRadius - this.parentData.radius,
+                                                deltaRadius: childRadius - parentData.radius,
                                                 deltaTheta: outerDeltaTheta);
   }
 
   @override
   void performLayout() {
-    assert(this.parentData is SectorParentData);
+    assert(parentData is SectorParentData);
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     assert(deltaTheta <= kTwoPi);
-    final double paddingTheta = math.atan(padding / this.parentData.radius);
-    final double innerTheta = this.parentData.theta + paddingTheta;
+    final double paddingTheta = math.atan(padding / parentData.radius);
+    final double innerTheta = parentData.theta + paddingTheta;
     final double innerDeltaTheta = deltaTheta - paddingTheta * 2.0;
-    double childRadius = this.parentData.radius + padding;
+    double childRadius = parentData.radius + padding;
     double remainingDeltaRadius = constraints.maxDeltaRadius - (padding * 2.0);
     RenderSector child = firstChild;
     while (child != null) {
@@ -418,7 +418,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       childRadius += padding;
       remainingDeltaRadius -= padding;
     }
-    deltaRadius = childRadius - this.parentData.radius;
+    deltaRadius = childRadius - parentData.radius;
   }
 
   // offset must point to the center of our circle

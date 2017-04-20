@@ -19,7 +19,7 @@ class TestTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = this.listenable;
+    final Animation<double> animation = listenable;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;

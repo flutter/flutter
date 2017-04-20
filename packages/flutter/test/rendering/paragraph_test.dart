@@ -135,5 +135,17 @@ void main() {
 
     relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
+
+    // Test presence of the fade effect.
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.fade);
+    expect(paragraph.debugHasOverflowShader, isTrue);
+
+    // Change back to ellipsis and check that the fade shader is cleared.
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.debugHasOverflowShader, isFalse);
+
+    relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
+    expect(paragraph.debugHasOverflowShader, isFalse);
   });
 }
+

@@ -4,11 +4,14 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 /// A mapping of the unit interval to the unit interval.
 ///
 /// A curve must map t=0.0 to 0.0 and t=1.0 to 1.0.
 ///
 /// See [Curves] for a collection of common animation curves.
+@immutable
 abstract class Curve {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.

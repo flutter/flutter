@@ -39,6 +39,7 @@ enum TextInputAction {
 /// See also:
 ///
 ///  * [TextInput.attach]
+@immutable
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
@@ -74,6 +75,7 @@ TextAffinity _toTextAffinity(String affinity) {
 }
 
 /// The current text, selection, and composing state for editing a run of text.
+@immutable
 class TextEditingValue {
   /// Creates information for editing a run of text.
   ///

@@ -30,7 +30,6 @@ import 'test_text_input.dart';
 ///
 /// See [WidgetsBinding.beginFrame] for a more detailed description of some of
 /// these phases.
-// TODO(ianh): Merge with near-identical code in the rendering test code.
 enum EnginePhase {
   /// The build phase in the widgets library. See [BuildOwner.buildScope].
   build,

@@ -30,6 +30,7 @@ typedef void DataColumnSortCallback(int columnIndex, bool ascending);
 /// One column configuration must be provided for each column to
 /// display in the table. The list of [DataColumn] objects is passed
 /// as the `columns` argument to the [new DataTable] constructor.
+@immutable
 class DataColumn {
   /// Creates the configuration for a column of a [DataTable].
   ///
@@ -81,6 +82,7 @@ class DataColumn {
 ///
 /// The data for this row of the table is provided in the [cells]
 /// property of the [DataRow] object.
+@immutable
 class DataRow {
   /// Creates the configuration for a row of a [DataTable].
   ///
@@ -150,6 +152,7 @@ class DataRow {
 /// One list of [DataCell] objects must be provided for each [DataRow]
 /// in the [DataTable], in the [new DataRow] constructor's `cells`
 /// argument.
+@immutable
 class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///

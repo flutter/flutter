@@ -9,7 +9,7 @@ void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
     final Widget widget = new TickerMode(
       enabled: false,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     );
     expect(widget.toString, isNot(throwsException));
 
@@ -19,14 +19,14 @@ void main() {
 
     await tester.pumpWidget(new TickerMode(
       enabled: true,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 1);
 
     await tester.pumpWidget(new TickerMode(
       enabled: false,
-      child: new LinearProgressIndicator()
+      child: const LinearProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 0);
@@ -34,7 +34,7 @@ void main() {
 
   testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
-      home: new LinearProgressIndicator(),
+      home: const LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
         '/test': (BuildContext context) => const Text('hello'),
       },

@@ -25,7 +25,7 @@ void main() {
                 key: popupMenuButtonKey,
                 itemBuilder: (BuildContext context) {
                   return <PopupMenuItem<String>>[
-                    new PopupMenuItem<String>(child: const Text('menuItem'))
+                    const PopupMenuItem<String>(child: const Text('menuItem'))
                   ];
                 }
               ),
@@ -71,7 +71,7 @@ void main() {
                   key: popupMenuButtonKey,
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<String>>[
-                      new PopupMenuItem<String>(child: const Text('menuItem'))
+                      const PopupMenuItem<String>(child: const Text('menuItem'))
                     ];
                   }
                 ),

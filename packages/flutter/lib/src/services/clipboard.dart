@@ -4,12 +4,15 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'system_channels.dart';
 
 /// Data stored on the system clipboard.
 ///
 /// The system clipboard can contain data of various media types. This data
 /// structure currently supports only plain text data, in the [text] property.
+@immutable
 class ClipboardData {
   /// Creates data for the system clipboard.
   const ClipboardData({ this.text });

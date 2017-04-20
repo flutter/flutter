@@ -26,6 +26,7 @@ class RenderImage extends RenderBox {
     double height,
     double scale: 1.0,
     Color color,
+    BlendMode colorBlendMode,
     BoxFit fit,
     FractionalOffset alignment,
     ImageRepeat repeat: ImageRepeat.noRepeat,
@@ -35,6 +36,7 @@ class RenderImage extends RenderBox {
       _height = height,
       _scale = scale,
       _color = color,
+      _colorBlendMode = colorBlendMode,
       _fit = fit,
       _alignment = alignment,
       _repeat = repeat,
@@ -95,21 +97,38 @@ class RenderImage extends RenderBox {
 
   ColorFilter _colorFilter;
 
-  // Should we make the blend mode configurable?
   void _updateColorFilter() {
     if (_color == null)
       _colorFilter = null;
     else
-      _colorFilter = new ColorFilter.mode(_color, BlendMode.srcIn);
+      _colorFilter = new ColorFilter.mode(_color, _colorBlendMode ?? BlendMode.srcIn);
   }
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   Color get color => _color;
   Color _color;
   set color(Color value) {
     if (value == _color)
       return;
     _color = value;
+    _updateColorFilter();
+    markNeedsPaint();
+  }
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  BlendMode get colorBlendMode => _colorBlendMode;
+  BlendMode _colorBlendMode;
+  set colorBlendMode(BlendMode value) {
+    if (value == _colorBlendMode)
+      return;
+    _colorBlendMode;
     _updateColorFilter();
     markNeedsPaint();
   }
@@ -251,6 +270,8 @@ class RenderImage extends RenderBox {
       description.add('scale: $scale');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)

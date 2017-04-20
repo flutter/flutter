@@ -26,7 +26,7 @@ void main() {
         )
       ),
       null,
-      EnginePhase.layout
+      EnginePhase.layout,
     );
     RenderImage renderImage = key.currentContext.findRenderObject();
     expect(renderImage.image, isNull);
@@ -304,6 +304,19 @@ void main() {
 
   testWidgets('Image.memory control test', (WidgetTester tester) async {
     await tester.pumpWidget(new Image.memory(new Uint8List.fromList(kTransparentImage)));
+  });
+
+  testWidgets('Image color and colorBlend parameters', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Image(
+        image: new TestImageProvider(),
+        color: const Color(0xFF00FF00),
+        colorBlendMode: BlendMode.clear
+      )
+    );
+    final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.color, const Color(0xFF00FF00));
+    expect(renderer.colorBlendMode, BlendMode.clear);
   });
 }
 

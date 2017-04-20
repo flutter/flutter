@@ -69,6 +69,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -87,6 +88,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -107,6 +109,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -135,6 +138,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -153,6 +157,7 @@ class Image extends StatefulWidget {
     this.width,
     this.height,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -176,8 +181,18 @@ class Image extends StatefulWidget {
   /// aspect ratio.
   final double height;
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
   ///
@@ -221,6 +236,8 @@ class Image extends StatefulWidget {
       description.add('height: $height');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)
@@ -291,6 +308,7 @@ class _ImageState extends State<Image> {
       height: widget.height,
       scale: _imageInfo?.scale ?? 1.0,
       color: widget.color,
+      colorBlendMode: widget.colorBlendMode,
       fit: widget.fit,
       alignment: widget.alignment,
       repeat: widget.repeat,

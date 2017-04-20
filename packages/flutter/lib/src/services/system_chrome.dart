@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+
 import 'system_channels.dart';
 
 /// Specifies a particular device orientation.
@@ -47,6 +49,7 @@ enum DeviceOrientation {
 /// interface.
 ///
 /// Used by [SystemChrome.setApplicationSwitcherDescription].
+@immutable
 class ApplicationSwitcherDescription {
   /// Creates an ApplicationSwitcherDescription.
   const ApplicationSwitcherDescription({ this.label, this.primaryColor });

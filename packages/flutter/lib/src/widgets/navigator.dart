@@ -192,6 +192,7 @@ abstract class Route<T> {
 }
 
 /// Data that might be useful in constructing a [Route].
+@immutable
 class RouteSettings {
   /// Creates data used to construct routes.
   const RouteSettings({
@@ -377,6 +378,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```
 ///
 /// To show a route by name:
+///
 /// ```dart
 /// Navigator.of(context).pushNamed('/b');
 /// ```
@@ -462,6 +464,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///   }
 /// ));
 /// ```
+///
 /// The page route is built in two parts, the "page" and the
 /// "transitions". The page becomes a descendant of the child passed to
 /// the `buildTransitions` method. Typically the page is only built once,

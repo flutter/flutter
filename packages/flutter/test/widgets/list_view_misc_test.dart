@@ -148,4 +148,79 @@ void main() {
     );
     expect(maxScrollOffset, equals(26.0));
   });
+
+  testWidgets('Resizing a ListView child restores scroll offset', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/9221
+    final AnimationController controller = new AnimationController(
+      vsync: const TestVSync(),
+      duration: const Duration(milliseconds: 200),
+    );
+
+    // The overall height of the frame is (as ever) 600
+    Widget buildFrame() {
+      return new Column(
+        children: <Widget>[
+          new Flexible(
+            // The overall height of the ListView's contents is 500
+            child: new ListView(
+              children: <Widget>[
+                const SizedBox(
+                  height: 150.0,
+                  child: const Center(
+                    child: const Text('top')
+                  ),
+                ),
+                const SizedBox(
+                  height: 200.0,
+                  child: const Center(
+                    child: const Text('middle')
+                  ),
+                ),
+                const SizedBox(
+                  height: 150.0,
+                  child: const Center(
+                    child: const Text('bottom')
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // If this widget's height is > 100 the ListView can scroll.
+          new SizeTransition(
+            sizeFactor: controller.view,
+            child: const SizedBox(
+              height: 300.0,
+              child: const Text('keyboard'),
+            ),
+          ),
+        ],
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    expect(find.text('top'), findsOneWidget);
+
+    final ScrollPosition position = Scrollable.of(tester.element(find.text('middle'))).position;
+    expect(position.viewportDimension, 600.0);
+    expect(position.pixels, 0.0);
+
+    // Animate the 'keyboard' height from 0 to 300
+    controller.forward();
+    await tester.pumpAndSettle();
+    expect(position.viewportDimension, 300.0);
+
+    // Scroll the ListView upwards
+    position.jumpTo(200.0);
+    await tester.pumpAndSettle();
+    expect(position.pixels, 200.0);
+    expect(find.text('top'), findsNothing);
+
+    // Animate the 'keyboard' height back to 0. This causes the scroll
+    // offset to return to 0.0
+    controller.reverse();
+    await tester.pumpAndSettle();
+    expect(position.viewportDimension, 600.0);
+    expect(position.pixels, 0.0);
+    expect(find.text('top'), findsOneWidget);
+  });
 }

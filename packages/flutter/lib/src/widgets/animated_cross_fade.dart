@@ -18,6 +18,7 @@ enum CrossFadeState {
   /// Show the first child ([AnimatedCrossFade.firstChild]) and hide the second
   /// ([AnimatedCrossFade.secondChild]]).
   showFirst,
+
   /// Show the second child ([AnimatedCrossFade.secondChild]) and hide the first
   /// ([AnimatedCrossFade.firstChild]).
   showSecond,

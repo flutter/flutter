@@ -107,6 +107,7 @@ tasks:
       Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   hot_mode_dev_cycle__benchmark:
     description: >
@@ -212,9 +213,11 @@ tasks:
       Gallery on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true
 
   hot_mode_dev_cycle_win__benchmark:
     description: >
       Measures the performance of Dart VM hot patching feature on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true

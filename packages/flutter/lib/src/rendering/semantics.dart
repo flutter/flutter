@@ -55,6 +55,7 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 /// for the node.
 ///
 /// Typically obtained from [SemanticsNode.getSemanticsData].
+@immutable
 class SemanticsData {
   /// Creates a semantics data object.
   ///

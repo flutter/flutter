@@ -27,6 +27,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
+@immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///
@@ -312,7 +313,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
-    if (this.runtimeType == LabeledGlobalKey)
+    if (runtimeType == LabeledGlobalKey)
       return '[GlobalKey$tag]';
     return '[$runtimeType$tag]';
   }
@@ -739,12 +740,6 @@ abstract class State<T extends StatefulWidget> {
   T get widget => _widget;
   T _widget;
 
-  /// Deprecated getter for [widget]. Use the [widget] getter instead. This
-  /// getter will be removed on 2017/04/20.
-  @Deprecated('The "config" property is now called "widget". Please migrate '
-      'now, as we will remove this feature soon.')
-  T get config => _widget;
-
   /// The current stage in the lifecycle for this state object.
   ///
   /// This field is used by the framework when asserts are enabled to verify
@@ -834,13 +829,6 @@ abstract class State<T extends StatefulWidget> {
   @mustCallSuper
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
-
-  /// Deprecated callback when the widget configuration changes.
-  ///
-  /// Use [didUpdateWidget] instead. This method will be removed on 2017/04/20.
-  @Deprecated('The "didUpdateConfig" method is now called "didUpdateWidget". '
-      'Please migrate now, as we will remove this feature soon.')
-  void didUpdateConfig(covariant T oldConfig) { }
 
   /// Called whenever the application is reassembled during debugging.
   ///
@@ -3287,8 +3275,6 @@ class StatefulElement extends ComponentElement {
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
       _state.didUpdateWidget(oldWidget);
-      // ignore: deprecated_member_use
-      _state.didUpdateConfig(oldWidget);
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }

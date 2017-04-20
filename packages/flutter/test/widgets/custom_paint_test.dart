@@ -8,8 +8,8 @@ import 'package:flutter/widgets.dart';
 class TestCustomPainter extends CustomPainter {
   TestCustomPainter({ this.log, this.name });
 
-  List<String> log;
-  String name;
+  final List<String> log;
+  final String name;
 
   @override
   void paint(Canvas canvas, Size size) {

@@ -27,6 +27,7 @@ typedef void SelectionChangedHandler(TextSelection selection, RenderEditable ren
 
 /// Represents a global screen coordinate of the point in a selection, and the
 /// text direction at that point.
+@immutable
 class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
   ///

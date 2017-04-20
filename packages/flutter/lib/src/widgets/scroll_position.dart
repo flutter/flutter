@@ -32,6 +32,7 @@ abstract class AbstractScrollState {
   void dispatchNotification(Notification notification);
 }
 
+@immutable
 abstract class ScrollPhysics {
   const ScrollPhysics(this.parent);
 
@@ -58,7 +59,7 @@ abstract class ScrollPhysics {
   /// there is actually content outside the viewport to reveal.
   bool shouldAcceptUserOffset(ScrollPosition position) {
     if (parent == null)
-      return position.minScrollExtent != position.maxScrollExtent;
+      return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     return parent.shouldAcceptUserOffset(position);
   }
 

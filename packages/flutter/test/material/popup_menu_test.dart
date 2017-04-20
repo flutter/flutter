@@ -26,7 +26,7 @@ void main() {
                   },
                   itemBuilder: (BuildContext context) {
                     return <PopupMenuItem<int>>[
-                      new PopupMenuItem<int>(
+                      const PopupMenuItem<int>(
                         value: 1,
                         child: const Text('One')
                       )
