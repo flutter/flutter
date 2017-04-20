@@ -1,3 +1,7 @@
+{{#withPluginHook}}
+import 'dart:async';
+
+{{/withPluginHook}}
 import 'package:flutter/material.dart';
 {{#withDriverTest}}
 import 'package:flutter_driver/driver_extension.dart';
@@ -59,16 +63,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 {{#withPluginHook}}
-  String _platformVersion = 'Unknown';
+  Future<String> _platformVersion;
 
   @override
   void initState() {
     super.initState();
-    {{pluginDartClass}}.platformVersion.then((String platformVersion) {
-      setState(() {
-        _platformVersion = platformVersion;
-      });
-    });
+    _platformVersion = {{pluginDartClass}}.platformVersion;
   }
 {{/withPluginHook}}
 
@@ -104,7 +104,12 @@ class _MyHomePageState extends State<MyHomePage> {
         child: new Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            new Text('Running on: $_platformVersion\n'),
+            new FutureBuilder(
+              future: _platformVersion,
+              builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+                return new Text('Running on: ${snapshot.data ?? 'Unknown'}\n');
+              },
+            ),
             new Text(
                 'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.'),
           ],
