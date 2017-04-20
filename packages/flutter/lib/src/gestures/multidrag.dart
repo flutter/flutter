@@ -11,30 +11,13 @@ import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'drag.dart';
+import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
 import 'velocity_tracker.dart';
 
 /// Signature for when [MultiDragGestureRecognizer] recognizes the start of a drag gesture.
 typedef Drag GestureMultiDragStartCallback(Offset position);
-
-/// Interface for receiving updates about drags from a [MultiDragGestureRecognizer].
-abstract class Drag {
-  /// The pointer has moved.
-  void update(DragUpdateDetails details) { }
-
-  /// The pointer is no longer in contact with the screen.
-  ///
-  /// The velocity at which the pointer was moving when it stopped contacting
-  /// the screen is available in the `details`.
-  void end(DragEndDetails details) { }
-
-  /// The input from the pointer is no longer directed towards this receiver.
-  ///
-  /// For example, the user might have been interrupted by a system-modal dialog
-  /// in the middle of the drag.
-  void cancel() { }
-}
 
 /// Per-pointer state for a [MultiDragGestureRecognizer].
 ///
