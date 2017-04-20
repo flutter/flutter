@@ -2558,6 +2558,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale: 1.0,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -2586,8 +2587,18 @@ class RawImage extends LeafRenderObjectWidget {
   /// Used when determining the best display size for the image.
   final double scale;
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
   ///
@@ -2621,6 +2632,7 @@ class RawImage extends LeafRenderObjectWidget {
     height: height,
     scale: scale,
     color: color,
+    colorBlendMode: colorBlendMode,
     fit: fit,
     alignment: alignment,
     repeat: repeat,
@@ -2635,6 +2647,7 @@ class RawImage extends LeafRenderObjectWidget {
       ..height = height
       ..scale = scale
       ..color = color
+      ..colorBlendMode = colorBlendMode
       ..alignment = alignment
       ..fit = fit
       ..repeat = repeat
@@ -2653,6 +2666,8 @@ class RawImage extends LeafRenderObjectWidget {
       description.add('scale: $scale');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)

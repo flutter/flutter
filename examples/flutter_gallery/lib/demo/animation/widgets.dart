@@ -33,12 +33,11 @@ class SectionCard extends StatelessWidget {
             ],
           ),
         ),
-        child: new Opacity(
-          opacity: 0.075,
-          child: new Image.asset(
-            section.backgroundAsset,
-            fit: BoxFit.cover,
-          ),
+        child: new Image.asset(
+          section.backgroundAsset,
+          color: const Color.fromRGBO(255, 255, 255, 0.075),
+          colorBlendMode: BlendMode.modulate,
+          fit: BoxFit.cover,
         ),
       ),
     );
