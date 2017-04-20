@@ -113,7 +113,7 @@ void sanityCheckDocs() {
     '$kDocRoot/api/dart_ui/Canvas/drawRect.html',
   ];
   final List<String> new_sdk_canaries = <String>[
-    '$kdocRoot/api/dart-io/File-class.html',
+    '$kDocRoot/api/dart-io/File-class.html',
     '$kDocRoot/api/dart-ui/Canvas-class.html',
     '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
   ];
