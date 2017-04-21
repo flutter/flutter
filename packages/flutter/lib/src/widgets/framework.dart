@@ -395,7 +395,7 @@ class TypeMatcher<T> {
 @immutable
 abstract class Widget {
   /// Initializes [key] for subclasses.
-  const Widget({ this.key });
+  const Widget({ this.key, this.debugTraceData });
 
   /// Controls how one widget replaces another widget in the tree.
   ///
@@ -413,6 +413,13 @@ abstract class Widget {
   /// the tree in the previous frame, then that widget's element is moved to the
   /// new location.
   final Key key;
+
+  /// Holds extra information about the widgets for use by debugging tools.
+  ///
+  /// This property will only be populated in debug mode, it may be null
+  /// for widgets created by the infrastructure rather than in a developer's
+  /// code.
+  final DebugTraceData debugTraceData;
 
   /// Inflates this configuration to a concrete instance.
   ///
