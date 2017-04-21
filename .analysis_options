@@ -90,7 +90,7 @@ linter:
     - package_api_docs
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
-    # - prefer_adjacent_string_concatenation # not yet tested
+    - prefer_adjacent_string_concatenation
     - prefer_collection_literals
     - prefer_const_constructors
     - prefer_contains
