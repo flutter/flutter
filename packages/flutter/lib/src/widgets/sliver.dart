@@ -614,10 +614,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  void didFinishLayout(bool didUnderflow) {
+  void didFinishLayout() {
     assert(debugAssertChildListLocked());
-    if (didUnderflow)
-      setDidUnderflow(didUnderflow);
     final int firstIndex = _childElements.firstKey() ?? 0;
     final int lastIndex = _childElements.lastKey() ?? 0;
     widget.delegate.didFinishLayout(firstIndex, lastIndex);

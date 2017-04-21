@@ -124,9 +124,6 @@ void main() {
     expect(find.text('300'), findsOneWidget);
     expect(find.text('400'), findsOneWidget);
     expect(find.text('100'), findsNothing);
-
-    final RenderSliverList list = tester.renderObject(find.byType(SliverList));
-    expect(list.geometry.scrollExtent, equals(700.0));
   });
 
   testWidgets('Overflowing ListView should become scrollable', (WidgetTester tester) async {
