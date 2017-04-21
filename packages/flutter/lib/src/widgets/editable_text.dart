@@ -144,8 +144,7 @@ class EditableText extends StatefulWidget {
        assert(autofocus != null),
        inputFormatters = maxLines == 1 
            ? ((inputFormatters ?? <TextInputFormatter>[])
-                 ..add(BlacklistingTextInputFormatter
-                           .singleLineBlacklistingTextInputFormatter)
+                 ..add(BlacklistingTextInputFormatter.singleLineFormatter)
              )
            : inputFormatters,
        super(key: key);

@@ -93,7 +93,6 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
   }
 
   /// A [BlacklistingTextInputFormatter] that forces input to be a single line.
-  static final BlacklistingTextInputFormatter 
-      singleLineBlacklistingTextInputFormatter
-      = new BlacklistingTextInputFormatter(new RegExp(r'/\r?\n|\r/'));
+  static final BlacklistingTextInputFormatter singleLineFormatter
+      = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
 }
