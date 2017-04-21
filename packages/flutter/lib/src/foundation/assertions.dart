@@ -105,7 +105,7 @@ class FlutterErrorDetails {
 
   /// Converts the [exception] to a string.
   ///
-  /// This applies some additional logic to 
+  /// This applies some additional logic to
   String exceptionAsString() {
     String longMessage;
     if (exception is AssertionError) {
@@ -151,7 +151,7 @@ class FlutterError extends AssertionError {
   /// Include as much detail as possible in the full error message,
   /// including specifics about the state of the app that might be
   /// relevant to debugging the error.
-  FlutterError(this.message);
+  FlutterError(String message) : super(message);
 
   /// The message associated with this error.
   ///
@@ -169,7 +169,7 @@ class FlutterError extends AssertionError {
   /// All sentences in the error should be correctly punctuated (i.e.,
   /// do end the error message with a period).
   @override
-  final String message;
+  String get message => super.message;
 
   @override
   String toString() => message;
