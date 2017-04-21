@@ -589,6 +589,10 @@ class RenderSliverGrid extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: true,
     );
 
+    // We may have started the layout while scrolled to the end, which
+    // would not expose a new child.
+    if (estimatedTotalExtent == trailingScrollOffset)
+      childManager.setDidUnderflow(true);
     childManager.didFinishLayout();
   }
 }

@@ -209,6 +209,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         || constraints.scrollOffset > 0.0,
     );
 
+    // We may have started the layout while scrolled to the end, which would not
+    // expose a new child.
+    if (estimatedMaxScrollOffset == trailingScrollOffset)
+      childManager.setDidUnderflow(true);
     childManager.didFinishLayout();
   }
 }

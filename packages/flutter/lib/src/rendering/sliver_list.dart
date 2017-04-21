@@ -243,6 +243,10 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
+    // We may have started the layout while scrolled to the end, which would not
+    // expose a new child.
+    if (estimatedMaxScrollOffset == endScrollOffset)
+      childManager.setDidUnderflow(true);
     childManager.didFinishLayout();
   }
 }

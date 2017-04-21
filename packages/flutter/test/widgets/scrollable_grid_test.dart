@@ -68,4 +68,31 @@ void main() {
     expect(find.text('3'), findsNothing);
     expect(find.text('4'), findsNothing);
   });
+
+  testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/9506
+    Widget buildFrame(int itemCount) {
+      return new GridView.count(
+        crossAxisCount: itemCount,
+        children: new List<Widget>.generate(itemCount, (int index) {
+          return new SizedBox(
+            height: 200.0,
+            child: new Text('item $index'),
+          );
+        }),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(3));
+    expect(find.text('item 0'), findsOneWidget);
+    expect(find.text('item 1'), findsOneWidget);
+    expect(find.text('item 2'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(4));
+    final TestGesture gesture = await tester.startGesture(const Offset(0.0, 300.0));
+    await gesture.moveBy(const Offset(0.0, -200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('item 3'), findsOneWidget);
+  });
+
 }
