@@ -111,15 +111,32 @@ void createFooter(String footerPath) {
 }
 
 void sanityCheckDocs() {
-  final List<String> canaries = <String>[
+  // TODO(jcollins-g): remove old_sdk_canaries for dartdoc >= 0.10.0
+  final List<String> oldSdkCanaries = <String>[
     '$kDocRoot/api/dart.io/File-class.html',
     '$kDocRoot/api/dart.ui/Canvas-class.html',
     '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
+  ];
+  final List<String> newSdkCanaries = <String>[
+    '$kDocRoot/api/dart-io/File-class.html',
+    '$kDocRoot/api/dart-ui/Canvas-class.html',
+    '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+  ];
+  final List<String> canaries = <String>[
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',
     '$kDocRoot/api/widgets/Widget-class.html',
   ];
+  bool oldMissing = false;
+  for (String canary in oldSdkCanaries) {
+    if (!new File(canary).existsSync()) {
+      oldMissing = true;
+      break;
+    }
+  }
+  if (oldMissing)
+    canaries.addAll(newSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
       throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
