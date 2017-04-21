@@ -78,7 +78,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       if (!addInitialChild()) {
         // There are no children.
         geometry = SliverGeometry.zero;
-        childManager.didFinishLayout();
+        childManager.didFinishLayout(false);
         return;
       }
     }
@@ -243,6 +243,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       hasVisualOverflow: endScrollOffset > targetEndScrollOffset || constraints.scrollOffset > 0.0,
     );
 
-    childManager.didFinishLayout();
+    final bool didUnderflow = estimatedMaxScrollOffset >= endScrollOffset;
+    childManager.didFinishLayout(didUnderflow);
   }
 }
