@@ -313,7 +313,7 @@ class PageView extends StatefulWidget {
     PageController controller,
     this.physics,
     this.onPageChanged,
-    IndexedWidgetBuilder itemBuilder,
+    @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),

@@ -386,7 +386,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
-    IndexedWidgetBuilder itemBuilder,
+    @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
   }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
     key: key,
@@ -473,8 +473,11 @@ class ListView extends BoxScrollView {
 /// overlapping.
 ///
 /// To create a grid with a large (or infinite) number of children, use the
-/// [GridView.custom] constructor with either a [SliverChildBuilderDelegate] or
-/// a custom [SliverChildDelegate].
+/// [GridView.builder] constructor with either a
+/// [SliverGridDelegateWithFixedCrossAxisCount] or a
+/// [SliverGridDelegateWithMaxCrossAxisExtent] for the [gridDelegate].
+///
+/// To use a custom [SliverChildDelegate], use [GridView.custom].
 ///
 /// To create a linear array of children, use a [ListView].
 ///
@@ -520,11 +523,49 @@ class GridView extends BoxScrollView {
     assert(gridDelegate != null);
   }
 
+  /// Creates a scrollable, 2D array of widgets that are created on demand.
+  ///
+  /// This constructor is appropriate for grid views with a large (or infinite)
+  /// number of children because the builder is called only for those children
+  /// that are actually visible.
+  ///
+  /// Providing a non-null [itemCount] improves the ability of the [GridView] to
+  /// estimate the maximum scroll extent.
+  ///
+  /// [itemBuilder] will be called only with indices greater than or equal to
+  /// zero and less than [itemCount].
+  ///
+  /// The [gridDelegate] argument must not be null.
+  GridView.builder({
+    Key key,
+    Axis scrollDirection: Axis.vertical,
+    bool reverse: false,
+    ScrollController controller,
+    bool primary,
+    ScrollPhysics physics,
+    bool shrinkWrap: false,
+    EdgeInsets padding,
+    @required this.gridDelegate,
+    @required IndexedWidgetBuilder itemBuilder,
+    int itemCount,
+  }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
+    key: key,
+    scrollDirection: scrollDirection,
+    reverse: reverse,
+    controller: controller,
+    primary: primary,
+    physics: physics,
+    shrinkWrap: shrinkWrap,
+    padding: padding,
+  ) {
+    assert(gridDelegate != null);
+  }
+
   /// Creates a scrollable, 2D array of widgets with both a custom
   /// [SliverGridDelegate] and a custom [SliverChildDelegate].
   ///
-  /// To use an [IndexedWidgetBuilder] callback to build children, use the
-  /// [SliverChildBuilderDelegate].
+  /// To use an [IndexedWidgetBuilder] callback to build children, either use
+  /// a [SliverChildBuilderDelegate] or use the [GridView.builder] constructor.
   ///
   /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
   GridView.custom({
