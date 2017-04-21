@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'animation/home.dart';
 
 class AnimationDemo extends StatelessWidget {
-  AnimationDemo({Key key}) : super(key: key);
+  const AnimationDemo({Key key}) : super(key: key);
 
   static const String routeName = '/animation';
 
   @override
-  Widget build(BuildContext context) => new AnimationDemoHome();
+  Widget build(BuildContext context) => const AnimationDemoHome();
 }

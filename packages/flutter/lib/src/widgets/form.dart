@@ -132,7 +132,7 @@ class FormState extends State<Form> {
 }
 
 class _FormScope extends InheritedWidget {
-  _FormScope({
+  const _FormScope({
     Key key,
     Widget child,
     FormState formState,

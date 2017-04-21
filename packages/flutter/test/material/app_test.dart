@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 class StateMarker extends StatefulWidget {
-  StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -68,7 +68,7 @@ void main() {
   testWidgets('Can show grid without losing sync', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new StateMarker(),
+        home: const StateMarker(),
       ),
     );
 
@@ -78,7 +78,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         debugShowMaterialGrid: true,
-        home: new StateMarker(),
+        home: const StateMarker(),
       ),
     );
 

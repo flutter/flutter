@@ -74,7 +74,7 @@ class DotState extends State<Dot> {
 }
 
 class ExampleDragSource extends StatelessWidget {
-  ExampleDragSource({
+  const ExampleDragSource({
     Key key,
     this.color,
     this.heavy: false,
@@ -174,7 +174,7 @@ class DashOutlineCirclePainter extends CustomPainter {
 }
 
 class MovableBall extends StatelessWidget {
-  MovableBall(this.position, this.ballPosition, this.callback);
+  const MovableBall(this.position, this.ballPosition, this.callback);
 
   final int position;
   final int ballPosition;

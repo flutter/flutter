@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestUniqueWidget extends UniqueWidget<TestUniqueWidgetState> {
-  TestUniqueWidget({ GlobalKey key }) : super(key: key);
+  const TestUniqueWidget({ GlobalKey key }) : super(key: key);
 
   @override
   TestUniqueWidgetState createState() => new TestUniqueWidgetState();

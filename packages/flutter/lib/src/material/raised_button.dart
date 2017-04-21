@@ -36,7 +36,7 @@ class RaisedButton extends StatelessWidget {
   ///
   /// The [child] argument is required and is typically a [Text] widget in all
   /// caps.
-  RaisedButton({
+  const RaisedButton({
     Key key,
     @required this.onPressed,
     this.color,

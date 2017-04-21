@@ -41,7 +41,7 @@ class Checkbox extends StatefulWidget {
   ///
   /// * [value] determines whether the checkbox is checked.
   /// * [onChanged] is called when the value of the checkbox should change.
-  Checkbox({
+  const Checkbox({
     Key key,
     @required this.value,
     @required this.onChanged,

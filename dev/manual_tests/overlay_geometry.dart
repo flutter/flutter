@@ -57,7 +57,7 @@ class _MarkerPainter extends CustomPainter {
 }
 
 class Marker extends StatelessWidget {
-  Marker({
+  const Marker({
     Key key,
     this.type: MarkerType.touch,
     this.position,

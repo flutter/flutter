@@ -50,7 +50,7 @@ class FlutterLogoDecoration extends Decoration {
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 
-  FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this._position, this._opacity, this.margin);
+  const FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this._position, this._opacity, this.margin);
 
   /// The lighter of the two colors used to paint the logo.
   ///

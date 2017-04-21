@@ -126,7 +126,7 @@ class MaterialButton extends StatefulWidget {
   ///
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton].
-  MaterialButton({
+  const MaterialButton({
     Key key,
     this.colorBrightness,
     this.textTheme,

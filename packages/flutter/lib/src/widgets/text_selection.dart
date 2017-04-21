@@ -296,7 +296,7 @@ class TextSelectionOverlay implements TextSelectionDelegate {
 
 /// This widget represents a single draggable text selection handle.
 class _TextSelectionHandleOverlay extends StatefulWidget {
-  _TextSelectionHandleOverlay({
+  const _TextSelectionHandleOverlay({
     Key key,
     this.selection,
     this.position,

@@ -487,7 +487,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 }
 
 class _Editable extends LeafRenderObjectWidget {
-  _Editable({
+  const _Editable({
     Key key,
     this.value,
     this.style,

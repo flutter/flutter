@@ -112,7 +112,7 @@ Future<Null> dismissItem(WidgetTester tester, int item, { DismissDirection gestu
 }
 
 class Test1215DismissibleWidget extends StatelessWidget {
-  Test1215DismissibleWidget(this.text);
+  const Test1215DismissibleWidget(this.text);
 
   final String text;
 
@@ -290,8 +290,8 @@ void main() {
         height: 1000.0,
         child: new Column(
           children: <Widget>[
-            new Test1215DismissibleWidget('1'),
-            new Test1215DismissibleWidget('2'),
+            const Test1215DismissibleWidget('1'),
+            const Test1215DismissibleWidget('2'),
           ],
         ),
       ),

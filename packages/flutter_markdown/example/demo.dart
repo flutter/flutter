@@ -31,7 +31,7 @@ void main() {
     title: "Markdown Demo",
     home: new Scaffold(
       appBar: new AppBar(title: const Text('Markdown Demo')),
-      body: new Markdown(data: _kMarkdownData)
+      body: const Markdown(data: _kMarkdownData)
     )
   ));
 }

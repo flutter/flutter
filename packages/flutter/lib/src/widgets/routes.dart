@@ -416,7 +416,7 @@ enum RoutePopDisposition {
 typedef Future<bool> WillPopCallback();
 
 class _ModalScope extends StatefulWidget {
-  _ModalScope({
+  const _ModalScope({
     Key key,
     this.route,
     @required this.page,

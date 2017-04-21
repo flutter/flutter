@@ -7,7 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
-  _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
+  const _TimePickerLauncher({ Key key, this.onChanged }) : super(key: key);
 
   final ValueChanged<TimeOfDay> onChanged;
 

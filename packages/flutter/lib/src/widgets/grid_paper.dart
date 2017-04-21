@@ -52,7 +52,7 @@ class _GridPaperPainter extends CustomPainter {
 /// Useful with a [Stack] for visualizing your layout along a grid.
 class GridPaper extends StatelessWidget {
   /// Creates a widget that draws a rectilinear grid of 1px wide lines.
-  GridPaper({
+  const GridPaper({
     Key key,
     this.color: const Color(0x7FC3E8F3),
     this.interval: 100.0,

@@ -235,7 +235,7 @@ class InputDecoration {
 class InputDecorator extends StatelessWidget {
   /// Creates a widget that displayes labels and other visual elements similar
   /// to a [TextField].
-  InputDecorator({
+  const InputDecorator({
     Key key,
     @required this.decoration,
     this.baseStyle,

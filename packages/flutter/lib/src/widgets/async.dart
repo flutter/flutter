@@ -43,7 +43,7 @@ import 'package:meta/meta.dart' show required;
 ///  recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  StreamBuilderBase({ Key key, this.stream }) : super(key: key);
+  const StreamBuilderBase({ Key key, this.stream }) : super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using

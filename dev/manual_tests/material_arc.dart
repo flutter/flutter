@@ -103,7 +103,7 @@ class _PointDemoPainter extends CustomPainter {
 }
 
 class _PointDemo extends StatefulWidget {
-  _PointDemo({ Key key, this.controller }) : super(key: key);
+  const _PointDemo({ Key key, this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -268,7 +268,7 @@ class _RectangleDemoPainter extends CustomPainter {
 }
 
 class _RectangleDemo extends StatefulWidget {
-  _RectangleDemo({ Key key, this.controller }) : super(key: key);
+  const _RectangleDemo({ Key key, this.controller }) : super(key: key);
 
   final AnimationController controller;
 
@@ -404,7 +404,7 @@ class _ArcDemo {
 }
 
 class AnimationDemo extends StatefulWidget {
-  AnimationDemo({ Key key }) : super(key: key);
+  const AnimationDemo({ Key key }) : super(key: key);
 
   @override
   _AnimationDemoState createState() => new _AnimationDemoState();
@@ -469,6 +469,6 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
 void main() {
   runApp(new MaterialApp(
-    home: new AnimationDemo()
+    home: const AnimationDemo()
   ));
 }

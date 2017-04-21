@@ -17,7 +17,7 @@ void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex
 
 // Solid colour, Widget version
 class Rectangle extends StatelessWidget {
-  Rectangle(this.color, { Key key }) : super(key: key);
+  const Rectangle(this.color, { Key key }) : super(key: key);
 
   final Color color;
 
@@ -41,7 +41,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
       height: 300.0,
       child: new Column(
         children: <Widget>[
-          new Rectangle(const Color(0xFF00FFFF)),
+          const Rectangle(const Color(0xFF00FFFF)),
           new Material(
             child: new Container(
               padding: const EdgeInsets.all(10.0),
@@ -66,7 +66,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
               )
             )
           ),
-          new Rectangle(const Color(0xFFFFFF00)),
+          const Rectangle(const Color(0xFFFFFF00)),
         ],
         mainAxisAlignment: MainAxisAlignment.spaceBetween
       )

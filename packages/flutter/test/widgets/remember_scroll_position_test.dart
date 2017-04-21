@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 class ThePositiveNumbers extends StatelessWidget {
-  ThePositiveNumbers({ @required this.from });
+  const ThePositiveNumbers({ @required this.from });
   final int from;
   @override
   Widget build(BuildContext context) {
@@ -34,12 +34,12 @@ void main() {
         if (settings.name == '/') {
           return new MaterialPageRoute<Null>(
             settings: settings,
-            builder: (_) => new Container(child: new ThePositiveNumbers(from: 0)),
+            builder: (_) => new Container(child: const ThePositiveNumbers(from: 0)),
           );
         } else if (settings.name == '/second') {
           return new MaterialPageRoute<Null>(
             settings: settings,
-            builder: (_) => new Container(child: new ThePositiveNumbers(from: 10000)),
+            builder: (_) => new Container(child: const ThePositiveNumbers(from: 10000)),
           );
         }
         return null;

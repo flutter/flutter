@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class InnerWidget extends StatefulWidget {
-  InnerWidget({ Key key }) : super(key: key);
+  const InnerWidget({ Key key }) : super(key: key);
 
   @override
   InnerWidgetState createState() => new InnerWidgetState();
@@ -28,7 +28,7 @@ class InnerWidgetState extends State<InnerWidget> {
 }
 
 class OuterContainer extends StatefulWidget {
-  OuterContainer({ Key key, this.child }) : super(key: key);
+  const OuterContainer({ Key key, this.child }) : super(key: key);
 
   final InnerWidget child;
 

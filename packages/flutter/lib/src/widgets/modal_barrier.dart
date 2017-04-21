@@ -12,7 +12,7 @@ import 'transitions.dart';
 /// A widget that prevents the user from interacting with widgets behind itself.
 class ModalBarrier extends StatelessWidget {
   /// Creates a widget that blocks user interaction.
-  ModalBarrier({
+  const ModalBarrier({
     Key key,
     this.color,
     this.dismissible: true
@@ -50,7 +50,7 @@ class ModalBarrier extends StatelessWidget {
 /// A widget that prevents the user from interacting with widgets behind itself.
 class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction.
-  AnimatedModalBarrier({
+  const AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
     this.dismissible: true

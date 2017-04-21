@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 import '../rendering/recording_canvas.dart';
 
 class StateMarker extends StatefulWidget {
-  StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -52,7 +52,7 @@ Widget buildFrame({
 typedef Widget TabControllerFrameBuilder(BuildContext context, TabController controller);
 
 class TabControllerFrame extends StatefulWidget {
-  TabControllerFrame({ this.length, this.initialIndex: 0, this.builder });
+  const TabControllerFrame({ this.length, this.initialIndex: 0, this.builder });
 
   final int length;
   final int initialIndex;

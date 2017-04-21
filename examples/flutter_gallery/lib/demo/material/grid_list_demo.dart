@@ -29,7 +29,7 @@ class Photo {
 }
 
 class GridPhotoViewer extends StatefulWidget {
-  GridPhotoViewer({ Key key, this.photo }) : super(key: key);
+  const GridPhotoViewer({ Key key, this.photo }) : super(key: key);
 
   final Photo photo;
 
@@ -38,7 +38,7 @@ class GridPhotoViewer extends StatefulWidget {
 }
 
 class _GridTitleText extends StatelessWidget {
-  _GridTitleText(this.text);
+  const _GridTitleText(this.text);
 
   final String text;
 
@@ -227,7 +227,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 }
 
 class GridListDemo extends StatefulWidget {
-  GridListDemo({ Key key }) : super(key: key);
+  const GridListDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/grid-list';
 

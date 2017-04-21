@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestIcon extends StatefulWidget {
-  TestIcon({ Key key }) : super(key: key);
+  const TestIcon({ Key key }) : super(key: key);
 
   @override
   TestIconState createState() => new TestIconState();
@@ -23,7 +23,7 @@ class TestIconState extends State<TestIcon> {
 }
 
 class TestText extends StatefulWidget {
-  TestText(this.text, { Key key }) : super(key: key);
+  const TestText(this.text, { Key key }) : super(key: key);
 
   final String text;
 
@@ -175,7 +175,7 @@ void main() {
                   return new ListTile(
                     enabled: enabled,
                     selected: selected,
-                    leading: new TestIcon(),
+                    leading: const TestIcon(),
                     title: new TestText('title', key: titleKey),
                     subtitle: new TestText('subtitle', key: subtitleKey),
                   );

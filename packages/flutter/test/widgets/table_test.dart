@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestStatefulWidget extends StatefulWidget {
-  TestStatefulWidget({ Key key }) : super(key: key);
+  const TestStatefulWidget({ Key key }) : super(key: key);
 
   @override
   TestStatefulWidgetState createState() => new TestStatefulWidgetState();
@@ -351,15 +351,15 @@ void main() {
           new TableRow(
             key: const ValueKey<int>(1),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(11)),
-              new TestStatefulWidget(key: const ValueKey<int>(12)),
+              const TestStatefulWidget(key: const ValueKey<int>(11)),
+              const TestStatefulWidget(key: const ValueKey<int>(12)),
             ],
           ),
           new TableRow(
             key: const ValueKey<int>(2),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(21)),
-              new TestStatefulWidget(key: const ValueKey<int>(22)),
+              const TestStatefulWidget(key: const ValueKey<int>(21)),
+              const TestStatefulWidget(key: const ValueKey<int>(22)),
             ],
           ),
         ]
@@ -382,8 +382,8 @@ void main() {
           new TableRow(
             key: const ValueKey<int>(2),
             children: <Widget>[
-              new TestStatefulWidget(key: const ValueKey<int>(21)),
-              new TestStatefulWidget(key: const ValueKey<int>(22)),
+              const TestStatefulWidget(key: const ValueKey<int>(21)),
+              const TestStatefulWidget(key: const ValueKey<int>(22)),
             ],
           ),
         ]

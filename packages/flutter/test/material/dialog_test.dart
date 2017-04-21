@@ -101,8 +101,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
-          child: new Center(
-            child: new RaisedButton(
+          child: const Center(
+            child: const RaisedButton(
               onPressed: null,
               child: const Text('Go'),
             ),
@@ -124,7 +124,7 @@ void main() {
             },
             child: const Text('First option'),
           ),
-          new SimpleDialogOption(
+          const SimpleDialogOption(
             child: const Text('Second option'),
           ),
         ],
@@ -142,8 +142,8 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
-          child: new Center(
-            child: new RaisedButton(
+          child: const Center(
+            child: const RaisedButton(
               onPressed: null,
               child: const Text('Go'),
             ),

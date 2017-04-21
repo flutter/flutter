@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class TestScrollBehavior extends ScrollBehavior {
-  TestScrollBehavior(this.flag);
+  const TestScrollBehavior(this.flag);
 
   final bool flag;
 
@@ -40,7 +40,7 @@ void main() {
 
     await tester.pumpWidget(
       new ScrollConfiguration(
-        behavior: new TestScrollBehavior(true),
+        behavior: const TestScrollBehavior(true),
         child: scrollView,
       ),
     );
@@ -55,7 +55,7 @@ void main() {
     // Same Scrollable, different ScrollConfiguration
     await tester.pumpWidget(
       new ScrollConfiguration(
-        behavior: new TestScrollBehavior(false),
+        behavior: const TestScrollBehavior(false),
         child: scrollView,
       ),
     );

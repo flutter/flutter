@@ -127,7 +127,7 @@ void main() {
     Widget builder() {
       return new Center(
         child: new Material(
-          child: new TextField(
+          child: const TextField(
             decoration: const InputDecoration(
               hintText: 'Placeholder',
             ),
@@ -171,7 +171,7 @@ void main() {
     Widget builder() {
       return new Center(
         child: new Material(
-          child: new TextField(
+          child: const TextField(
             obscureText: true,
             decoration: const InputDecoration(
               hintText: 'Placeholder',
@@ -771,7 +771,7 @@ void main() {
         child: new Material(
           child: new Column(
             children: <Widget>[
-              new TextField(
+              const TextField(
                 decoration: const InputDecoration(
                   labelText: 'First',
                 ),
@@ -813,7 +813,7 @@ void main() {
     await tester.pumpWidget(
       new Center(
         child: new Material(
-          child: new TextField(
+          child: const TextField(
             decoration: const InputDecoration(
               icon: const Icon(Icons.phone),
               labelText: 'label',
@@ -832,7 +832,7 @@ void main() {
     await tester.pumpWidget(
       overlay(new Center(
         child: new Material(
-          child: new TextField(
+          child: const TextField(
             decoration: const InputDecoration.collapsed(
               hintText: 'hint',
             ),
@@ -850,7 +850,7 @@ void main() {
         child: new Material(
           child: new Container(
             width: 300.0,
-            child: new TextField(
+            child: const TextField(
               textAlign: TextAlign.center,
               decoration: null,
             ),
@@ -882,8 +882,8 @@ void main() {
         child: new Material(
           child: new Container(
             width: 300.0,
-            child: new Center(
-              child: new TextField(
+            child: const Center(
+              child: const TextField(
                 textAlign: TextAlign.center,
                 decoration: null,
               ),

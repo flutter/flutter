@@ -28,9 +28,9 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new BigSliver(height: bigHeight),
+          const BigSliver(height: bigHeight),
           new SliverPersistentHeader(delegate: new TestDelegate(), floating: true),
-          new BigSliver(height: bigHeight),
+          const BigSliver(height: bigHeight),
         ],
       ),
     );
@@ -255,7 +255,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  BigSliver({ Key key, this.height }) : super(key: key);
+  const BigSliver({ Key key, this.height }) : super(key: key);
 
   final double height;
 

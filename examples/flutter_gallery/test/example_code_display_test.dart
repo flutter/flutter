@@ -14,7 +14,7 @@ void main() {
   testWidgets('Flutter gallery button example code displays', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/6147
 
-    await tester.pumpWidget(new GalleryApp());
+    await tester.pumpWidget(const GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
 

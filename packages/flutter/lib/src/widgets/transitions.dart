@@ -37,12 +37,11 @@ abstract class AnimatedWidget extends StatefulWidget {
   /// Creates a widget that rebuilds when the given listenable changes.
   ///
   /// The [listenable] argument is required.
-  AnimatedWidget({
+  const AnimatedWidget({
     Key key,
     @required this.listenable
-  }) : super(key: key) {
-    assert(listenable != null);
-  }
+  }) : assert(listenable != null),
+       super(key: key);
 
   /// The [Listenable] to which this widget is listening.
   ///
@@ -102,7 +101,7 @@ class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
   /// The [position] argument must not be null.
-  SlideTransition({
+  const SlideTransition({
     Key key,
     @required Animation<FractionalOffset> position,
     this.transformHitTests: true,
@@ -142,7 +141,7 @@ class ScaleTransition extends AnimatedWidget {
   ///
   /// The [scale] argument must not be null. The [alignment] argument defaults
   /// to [FractionalOffset.center].
-  ScaleTransition({
+  const ScaleTransition({
     Key key,
     @required Animation<double> scale,
     this.alignment: FractionalOffset.center,
@@ -183,7 +182,7 @@ class RotationTransition extends AnimatedWidget {
   /// Creates a rotation transition.
   ///
   /// The [turns] argument must not be null.
-  RotationTransition({
+  const RotationTransition({
     Key key,
     @required Animation<double> turns,
     this.child,
@@ -270,7 +269,7 @@ class FadeTransition extends AnimatedWidget {
   /// Creates an opacity transition.
   ///
   /// The [opacity] argument must not be null.
-  FadeTransition({
+  const FadeTransition({
     Key key,
     @required Animation<double> opacity,
     this.child,
@@ -322,7 +321,7 @@ class PositionedTransition extends AnimatedWidget {
   /// Creates a transition for [Positioned].
   ///
   /// The [rect] argument must not be null.
-  PositionedTransition({
+  const PositionedTransition({
     Key key,
     @required Animation<RelativeRect> rect,
     @required this.child,
@@ -358,7 +357,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// Each frame, the [Positioned] widget will be configured to represent the
   /// current value of the [rect] argument assuming that the stack has the given
   /// [size]. Both [rect] and [size] must not be null.
-  RelativePositionedTransition({
+  const RelativePositionedTransition({
     Key key,
     @required Animation<Rect> rect,
     @required this.size,
@@ -407,7 +406,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   /// See also:
   ///
   /// * [new DecoratedBox].
-  DecoratedBoxTransition({
+  const DecoratedBoxTransition({
     Key key,
     @required this.decoration,
     this.position: DecorationPosition.background,

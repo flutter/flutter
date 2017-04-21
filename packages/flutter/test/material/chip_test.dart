@@ -13,7 +13,7 @@ void main() {
         home: new Material(
           child: new Center(
             child: new Chip(
-              avatar: new CircleAvatar(
+              avatar: const CircleAvatar(
                 child: const Text('C')
               ),
               label: const Text('Chip'),

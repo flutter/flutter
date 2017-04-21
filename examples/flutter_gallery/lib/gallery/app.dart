@@ -32,7 +32,7 @@ final ThemeData _kGalleryDarkTheme = new ThemeData(
 );
 
 class GalleryApp extends StatefulWidget {
-  GalleryApp({
+  const GalleryApp({
     this.updateUrlFetcher,
     this.enablePerformanceOverlay: true,
     this.checkerboardRasterCacheImages: true,

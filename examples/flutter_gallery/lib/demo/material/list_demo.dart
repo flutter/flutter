@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class ListDemo extends StatefulWidget {
-  ListDemo({ Key key }) : super(key: key);
+  const ListDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/list';
 

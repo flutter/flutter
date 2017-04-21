@@ -94,7 +94,7 @@ class TestScrollController extends ScrollController {
 }
 
 class TestScrollBehavior extends ScrollBehavior {
-  TestScrollBehavior(this.extentMultiplier);
+  const TestScrollBehavior(this.extentMultiplier);
 
   final double extentMultiplier;
 
@@ -117,7 +117,7 @@ class TestScrollBehavior extends ScrollBehavior {
 void main() {
   testWidgets('Changing the scroll behavior dynamically', (WidgetTester tester) async {
     await tester.pumpWidget(new ScrollConfiguration(
-      behavior: new TestScrollBehavior(1.0),
+      behavior: const TestScrollBehavior(1.0),
       child: new CustomScrollView(
         controller: new TestScrollController(),
         slivers: <Widget>[
@@ -129,7 +129,7 @@ void main() {
 
     expect(state.position.getMetrics().extentInside, 1.0);
     await tester.pumpWidget(new ScrollConfiguration(
-      behavior: new TestScrollBehavior(2.0),
+      behavior: const TestScrollBehavior(2.0),
       child: new CustomScrollView(
         controller: new TestScrollController(),
         slivers: <Widget>[

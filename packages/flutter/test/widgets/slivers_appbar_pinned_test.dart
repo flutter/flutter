@@ -262,7 +262,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  BigSliver({ Key key, this.height }) : super(key: key);
+  const BigSliver({ Key key, this.height }) : super(key: key);
 
   final double height;
 

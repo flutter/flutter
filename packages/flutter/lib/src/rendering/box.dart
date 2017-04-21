@@ -532,7 +532,7 @@ enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
 
 @immutable
 class _IntrinsicDimensionsCacheEntry {
-  _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
+  const _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
 
   final _IntrinsicDimension dimension;
   final double argument;

@@ -15,11 +15,11 @@ void main() {
   testWidgets('Pesto appbar heroics', (WidgetTester tester) async {
     await tester.pumpWidget(
       // The bug only manifests itself when the screen's orientation is portrait
-      new Center(
-        child: new SizedBox(
+      const Center(
+        child: const SizedBox(
           width: 400.0,
           height: 800.0,
-          child: new GalleryApp()
+          child: const GalleryApp()
         )
       )
     );
@@ -43,7 +43,7 @@ void main() {
   });
 
   testWidgets('Pesto can be scrolled all the way down', (WidgetTester tester) async {
-    await tester.pumpWidget(new GalleryApp());
+    await tester.pumpWidget(const GalleryApp());
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
 
     await tester.tap(find.text('Pesto'));

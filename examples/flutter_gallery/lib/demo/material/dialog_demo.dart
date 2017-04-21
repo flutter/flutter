@@ -20,7 +20,7 @@ const String _alertWithTitleText =
   "data to Google, even when no apps are running.";
 
 class DialogDemoItem extends StatelessWidget {
-  DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
+  const DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);
 
   final IconData icon;
   final Color color;

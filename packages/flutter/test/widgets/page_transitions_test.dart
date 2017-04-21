@@ -14,7 +14,7 @@ class TestOverlayRoute extends OverlayRoute<Null> {
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
-  PersistentBottomSheetTest({ Key key }) : super(key: key);
+  const PersistentBottomSheetTest({ Key key }) : super(key: key);
 
   @override
   PersistentBottomSheetTestState createState() => new PersistentBottomSheetTestState();

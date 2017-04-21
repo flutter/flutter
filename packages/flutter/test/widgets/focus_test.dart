@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class TestFocusable extends StatefulWidget {
-  TestFocusable({
+  const TestFocusable({
     Key key,
     this.no,
     this.yes,
@@ -59,11 +59,11 @@ void main() {
     await tester.pumpWidget(
       new Column(
         children: <Widget>[
-          new TestFocusable(
+          const TestFocusable(
             no: 'a',
             yes: 'A FOCUSED',
           ),
-          new TestFocusable(
+          const TestFocusable(
             no: 'b',
             yes: 'B FOCUSED',
           ),
@@ -110,7 +110,7 @@ void main() {
 
   testWidgets('Can blur', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new TestFocusable(
+      const TestFocusable(
         no: 'a',
         yes: 'A FOCUSED',
         autofocus: false,
@@ -146,7 +146,7 @@ void main() {
         autofocus: true,
         child: new Row(
           children: <Widget>[
-            new TestFocusable(
+            const TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,
@@ -175,7 +175,7 @@ void main() {
         node: parentFocusScope,
         child: new Row(
           children: <Widget>[
-            new TestFocusable(
+            const TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,
@@ -200,7 +200,7 @@ void main() {
         node: parentFocusScope,
         child: new Row(
           children: <Widget>[
-            new TestFocusable(
+            const TestFocusable(
               no: 'a',
               yes: 'A FOCUSED',
               autofocus: false,

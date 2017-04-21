@@ -355,7 +355,7 @@ class _TableElement extends RenderObjectElement {
 /// other kinds of widgets, like [RenderObjectWidget]s).
 class TableCell extends ParentDataWidget<Table> {
   /// Creates a widget that controls how a child of a [Table] is aligned.
-  TableCell({
+  const TableCell({
     Key key,
     this.verticalAlignment,
     @required Widget child

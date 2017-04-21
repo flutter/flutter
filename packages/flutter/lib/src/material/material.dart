@@ -358,7 +358,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 }
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
-  _InkFeatures({ Key key, this.color, Widget child, @required this.vsync }) : super(key: key, child: child);
+  const _InkFeatures({ Key key, this.color, Widget child, @required this.vsync }) : super(key: key, child: child);
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
   // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.

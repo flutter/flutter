@@ -74,7 +74,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging')
@@ -218,7 +218,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new LongPressDraggable<int>(
+          const LongPressDraggable<int>(
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging')
@@ -264,7 +264,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging')
@@ -321,13 +321,13 @@ void main() {
             }
           ),
           new Container(height: 400.0),
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('H'),
             feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
-          new Draggable<int>(
+          const Draggable<int>(
             data: 2,
             child: const Text('V'),
             feedback: const Text('Dragging'),
@@ -428,13 +428,13 @@ void main() {
             }
           ),
           new Container(width: 400.0),
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('H'),
             feedback: const Text('Dragging'),
             affinity: Axis.horizontal,
           ),
-          new Draggable<int>(
+          const Draggable<int>(
             data: 2,
             child: const Text('V'),
             feedback: const Text('Dragging'),
@@ -706,12 +706,12 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('IntSource'),
             feedback: const Text('IntDragging')
           ),
-          new Draggable<double>(
+          const Draggable<double>(
             data: 1.0,
             child: const Text('DoubleSource'),
             feedback: const Text('DoubleDragging')
@@ -1059,7 +1059,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging')
@@ -1097,7 +1097,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
       home: new Column(
         children: <Widget>[
-          new Draggable<int>(
+          const Draggable<int>(
             data: 1,
             child: const Text('Source'),
             feedback: const Text('Dragging')
@@ -1117,7 +1117,7 @@ void main() {
     await tester.pumpWidget(new MaterialApp(
         home: new Column(
             children: <Widget>[
-              new Draggable<int>(
+              const Draggable<int>(
                   data: 1,
                   child: const Text('Source'),
                   feedback: const Text('Dragging')
@@ -1192,7 +1192,7 @@ void main() {
             onTap: () {
               events.add('tap');
             },
-            child: new LongPressDraggable<int>(
+            child: const LongPressDraggable<int>(
               feedback: const Text('Feedback'),
               child: const Text('X'),
             ),

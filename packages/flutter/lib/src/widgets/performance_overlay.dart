@@ -27,7 +27,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// Create a performance overlay that only displays specific statistics. The
   /// mask is created by shifting 1 by the index of the specific
   /// [StatisticOption] to enable.
-  PerformanceOverlay({
+  const PerformanceOverlay({
     Key key,
     this.optionsMask: 0,
     this.rasterizerThreshold: 0,

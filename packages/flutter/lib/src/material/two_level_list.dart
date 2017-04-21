@@ -104,7 +104,7 @@ class TwoLevelListItem extends StatelessWidget {
 ///  * [ListTile]
 class TwoLevelSublist extends StatefulWidget {
   /// Creates an item in a two-level list that can expland and collapse.
-  TwoLevelSublist({
+  const TwoLevelSublist({
     Key key,
     this.leading,
     @required this.title,

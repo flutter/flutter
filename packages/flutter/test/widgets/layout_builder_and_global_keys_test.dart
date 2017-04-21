@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 import 'package:flutter/widgets.dart';
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     this.child,
   }) : super(key: key);
@@ -18,7 +18,7 @@ class Wrapper extends StatelessWidget {
 }
 
 class StatefulWrapper extends StatefulWidget {
-  StatefulWrapper({
+  const StatefulWrapper({
     Key key,
     this.child,
   }) : super(key: key);

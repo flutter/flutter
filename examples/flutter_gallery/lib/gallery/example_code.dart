@@ -25,7 +25,7 @@ new RaisedButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-new RaisedButton(
+const RaisedButton(
   child: const Text('BUTTON TITLE'),
   onPressed: null
 );
@@ -130,7 +130,7 @@ new Checkbox(
 // Create a disabled checkbox.
 // Checkboxes are disabled when onChanged isn't
 // specified or null.
-new Checkbox(value: false, onChanged: null);
+const Checkbox(value: false, onChanged: null);
 // END
 
 
@@ -167,7 +167,7 @@ new Row(
 );
 
 // Creates a disabled radio button.
-new Radio<int>(
+const Radio<int>(
   value: 0,
   groupValue: 0,
   onChanged: null

@@ -83,7 +83,7 @@ class Draggable<T> extends StatefulWidget {
   ///
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
-  Draggable({
+  const Draggable({
     Key key,
     @required this.child,
     @required this.feedback,
@@ -95,11 +95,11 @@ class Draggable<T> extends StatefulWidget {
     this.maxSimultaneousDrags,
     this.onDragStarted,
     this.onDraggableCanceled
-  }) : super(key: key) {
-    assert(child != null);
-    assert(feedback != null);
-    assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0);
-  }
+  }) : assert(child != null),
+       assert(feedback != null),
+       assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
+       super(key: key);
+
 
   /// The data that will be dropped by this draggable.
   final T data;
@@ -207,7 +207,7 @@ class LongPressDraggable<T> extends Draggable<T> {
   ///
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
-  LongPressDraggable({
+  const LongPressDraggable({
     Key key,
     @required Widget child,
     @required Widget feedback,

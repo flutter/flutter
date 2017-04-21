@@ -366,7 +366,7 @@ class _AllSectionsView extends AnimatedWidget {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  AnimationDemoHome({ Key key }) : super(key: key);
+  const AnimationDemoHome({ Key key }) : super(key: key);
 
   static const String routeName = '/animation';
 

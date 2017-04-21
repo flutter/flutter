@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class _PageSelector extends StatelessWidget {
-  _PageSelector({ this.icons });
+  const _PageSelector({ this.icons });
 
   final List<IconData> icons;
 

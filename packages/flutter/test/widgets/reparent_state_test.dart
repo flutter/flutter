@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class StateMarker extends StatefulWidget {
-  StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Key key, this.child }) : super(key: key);
 
   final Widget child;
 
@@ -26,7 +26,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class DeactivateLogger extends StatefulWidget {
-  DeactivateLogger({ Key key, this.log }) : super(key: key);
+  const DeactivateLogger({ Key key, this.log }) : super(key: key);
 
   final List<String> log;
 
@@ -53,7 +53,7 @@ void main() {
     final GlobalKey left = new GlobalKey();
     final GlobalKey right = new GlobalKey();
 
-    final StateMarker grandchild = new StateMarker();
+    final StateMarker grandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -79,7 +79,7 @@ void main() {
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
-    final StateMarker newGrandchild = new StateMarker();
+    final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -126,7 +126,7 @@ void main() {
     final GlobalKey left = new GlobalKey();
     final GlobalKey right = new GlobalKey();
 
-    final StateMarker grandchild = new StateMarker();
+    final StateMarker grandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[
@@ -148,7 +148,7 @@ void main() {
     expect(grandchildState, isNotNull);
     grandchildState.marker = "grandchild";
 
-    final StateMarker newGrandchild = new StateMarker();
+    final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
       new Stack(
         children: <Widget>[

@@ -475,7 +475,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 }
 
 class _GestureSemantics extends SingleChildRenderObjectWidget {
-  _GestureSemantics({
+  const _GestureSemantics({
     Key key,
     Widget child,
     this.owner

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'logic.dart';
 
 class Calculator extends StatefulWidget {
-  Calculator({Key key}) : super(key: key);
+  const Calculator({Key key}) : super(key: key);
 
   @override
   _CalculatorState createState() => new _CalculatorState();
@@ -138,7 +138,7 @@ class _CalculatorState extends State<Calculator> {
 }
 
 class CalcDisplay extends StatelessWidget {
-  CalcDisplay({ this.content });
+  const CalcDisplay({ this.content });
 
   final String content;
 
@@ -154,7 +154,7 @@ class CalcDisplay extends StatelessWidget {
 }
 
 class KeyPad extends StatelessWidget {
-  KeyPad({ this.calcState });
+  const KeyPad({ this.calcState });
 
   final _CalculatorState calcState;
 
@@ -222,7 +222,7 @@ class KeyPad extends StatelessWidget {
 }
 
 class KeyRow extends StatelessWidget {
-  KeyRow(this.keys);
+  const KeyRow(this.keys);
 
   final List<Widget> keys;
 
@@ -238,7 +238,7 @@ class KeyRow extends StatelessWidget {
 }
 
 class CalcKey extends StatelessWidget {
-  CalcKey(this.text, this.onTap);
+  const CalcKey(this.text, this.onTap);
 
   final String text;
   final GestureTapCallback onTap;
