@@ -2668,6 +2668,30 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 ///
 /// Provides a child model for a render object subclass that has a unique child.
 abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
+  bool debugValidateChild(RenderObject child) {
+    assert(() {
+      if (child is! ChildType) {
+        throw new FlutterError(
+          'A $runtimeType expected a child of type $ChildType but received a '
+          'child of type ${child.runtimeType}.\n'
+          'RenderObjects expect specific types of children because they '
+          'coordinate with their children during layout and paint. For '
+          'example, a RenderSliver cannot be the child of a RenderBox because '
+          'a RenderSliver does not understand the RenderBox layout protocol.\n'
+          '\n'
+          'The $runtimeType that expected a $ChildType child was created by:\n'
+          '  $debugCreator\n'
+          '\n'
+          'The ${child.runtimeType} that did not match the expected child type '
+          'was created by:\n'
+          '  ${child.debugCreator}\n'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
   ChildType _child;
   /// The render object's unique child
   ChildType get child => _child;
@@ -2769,6 +2793,30 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   int _childCount = 0;
   /// The number of children.
   int get childCount => _childCount;
+
+  bool debugValidateChild(RenderObject child) {
+    assert(() {
+      if (child is! ChildType) {
+        throw new FlutterError(
+          'A $runtimeType expected a child of type $ChildType but received a '
+          'child of type ${child.runtimeType}.\n'
+          'RenderObjects expect specific types of children because they '
+          'coordinate with their children during layout and paint. For '
+          'example, a RenderSliver cannot be the child of a RenderBox because '
+          'a RenderSliver does not understand the RenderBox layout protocol.\n'
+          '\n'
+          'The $runtimeType that expected a $ChildType child was created by:\n'
+          '  $debugCreator\n'
+          '\n'
+          'The ${child.runtimeType} that did not match the expected child type '
+          'was created by:\n'
+          '  ${child.debugCreator}\n'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
 
   ChildType _firstChild;
   ChildType _lastChild;

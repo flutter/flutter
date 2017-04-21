@@ -599,6 +599,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
+    assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 
