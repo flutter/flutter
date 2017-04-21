@@ -75,7 +75,7 @@ void main() {
     Widget buildFrame(int itemCount) {
       return new GridView.count(
         crossAxisCount: itemCount,
-        children: new List.generate(itemCount, (int index) {
+        children: new List<Widget>.generate(itemCount, (int index) {
           return new SizedBox(
             height: 200.0,
             child: new Text('item $index'),
