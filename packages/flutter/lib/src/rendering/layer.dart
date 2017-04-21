@@ -101,9 +101,13 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
   dynamic debugCreator;
 
   @override
+  String toString() => '${super.toString()}${ owner == null ? " DETACHED" : ""}';
+
+  @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${ owner != null ? "owner: $owner" : "DETACHED" }');
+    if (parent == null && owner != null)
+      description.add('owner: $owner');
     if (debugCreator != null)
       description.add('creator: $debugCreator');
   }

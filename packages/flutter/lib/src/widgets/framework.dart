@@ -15,7 +15,7 @@ export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
-export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree;
+export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // KEYS
 
