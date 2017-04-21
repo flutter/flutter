@@ -643,6 +643,26 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// constraints by the given padding, causing the child to layout at a smaller
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
+///
+/// ## Design discussion
+///
+/// ### Why use a [Padding] widget rather than a [Container] with a [Container.padding] property?
+///
+/// There isn't really any difference between the two. If you supply a
+/// [Container.padding] argument, [Container] simply builds a [Padding] widget
+/// for you.
+///
+/// [Container] doesn't implement its properties directly. Instead, [Container]
+/// combines a number of simpler widgets together into a convenient package. For
+/// example, the [Container.padding] property causes the container to build a
+/// [Padding] widget and the [Container.decoration] property causes the
+/// container to build a [DecoratedBox] widget. If you find [Container]
+/// convenient, feel free to use it. If not, feel free to build these simpler
+/// widgets in whatever combination meets your needs.
+///
+/// In fact, the majority of widgets in Flutter are simply combinations of other
+/// simpler widgets. Composition, rather than inheritance, is the primary
+/// mechansim for building up widgets.
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
   ///
