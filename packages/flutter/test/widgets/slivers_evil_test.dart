@@ -53,10 +53,10 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
 }
 
-class TestViewportScrollPosition extends ScrollPosition {
+class TestViewportScrollPosition extends ScrollIndependentPosition {
   TestViewportScrollPosition({
     ScrollPhysics physics,
-    AbstractScrollState state,
+    ScrollContext state,
     ScrollPosition oldPosition,
   }) : super(physics: physics, state: state, oldPosition: oldPosition);
 

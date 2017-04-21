@@ -411,7 +411,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     if (notification.depth == 0 && notification is ScrollUpdateNotification) {
       selectedIndex.value = leader.page;
       if (follower.page != leader.page)
-        follower.position.jumpTo(leader.position.pixels, settle: false);
+        follower.position.jumpToWithoutSettling(leader.position.pixels); // ignore: deprecated_member_use
     }
     return false;
   }
