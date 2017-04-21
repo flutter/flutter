@@ -202,8 +202,8 @@ class TextSelection extends TextRange {
     return new TextSelection(
       baseOffset: baseOffset ?? this.baseOffset,
       extentOffset: extentOffset ?? this.extentOffset,
-      affinity: this.affinity,
-      isDirectional: this.isDirectional,
+      affinity: affinity,
+      isDirectional: isDirectional,
     );
   }
 }
