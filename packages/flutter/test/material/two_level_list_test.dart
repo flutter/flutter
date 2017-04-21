@@ -8,14 +8,14 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TwoLevelList default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new TwoLevelList()));
+    await tester.pumpWidget(const Center(child: const TwoLevelList()));
 
     await tester.pumpWidget(
       new Material(
-        child: new Center(
-          child: new TwoLevelList(
-            children: <Widget>[
-              new TwoLevelSublist(
+        child: const Center(
+          child: const TwoLevelList(
+            children: const <Widget>[
+              const TwoLevelSublist(
                 title: const Text('Title'),
               )
             ]

@@ -44,7 +44,7 @@ import 'typography.dart';
 ///  * <https://material.google.com/components/chips.html#chips-contact-chips>
 class CircleAvatar extends StatelessWidget {
   /// Creates a circle that represents a user.
-  CircleAvatar({
+  const CircleAvatar({
     Key key,
     this.child,
     this.backgroundColor,
