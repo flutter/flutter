@@ -369,6 +369,24 @@ void main() {
     expect(find.text('19'), findsOneWidget);
   });
 
+  testWidgets('GridView.builder control test', (WidgetTester tester) async {
+    await tester.pumpWidget(new GridView.builder(
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+      ),
+      shrinkWrap: true,
+      itemCount: 20,
+      itemBuilder: (BuildContext context, int index) {
+        return new Container(
+          child: new Text('$index'),
+        );
+      },
+    ));
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('11'), findsOneWidget);
+    expect(find.text('12'), findsNothing);
+  });
+
   // TODO(ianh): can you tap a grid cell that is slightly off the bottom of the screen?
   // (try it with the flutter_gallery Grid demo)
 }
