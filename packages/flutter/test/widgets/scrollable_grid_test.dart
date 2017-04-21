@@ -71,7 +71,6 @@ void main() {
 
   testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
-
     Widget buildFrame(int itemCount) {
       return new GridView.count(
         crossAxisCount: itemCount,
