@@ -281,7 +281,8 @@ bool VulkanDevice::ChooseSurfaceFormat(const VulkanSurface& surface,
   std::map<VkFormat, VkSurfaceFormatKHR> supported_formats;
 
   for (uint32_t i = 0; i < format_count; i++) {
-    if (GrVkFormatToPixelConfig(formats[i].format, nullptr /* dont care */)) {
+    GrPixelConfig pixel_config = GrVkFormatToPixelConfig(formats[i].format);
+    if (pixel_config != kUnknown_GrPixelConfig) {
       supported_formats[formats[i].format] = formats[i];
     }
   }

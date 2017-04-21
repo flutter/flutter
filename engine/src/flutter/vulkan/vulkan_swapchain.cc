@@ -189,9 +189,9 @@ sk_sp<SkSurface> VulkanSwapchain::CreateSkiaSurface(GrContext* gr_context,
     return nullptr;
   }
 
-  GrPixelConfig pixel_config = kUnknown_GrPixelConfig;
+  GrPixelConfig pixel_config = GrVkFormatToPixelConfig(surface_format_.format);
 
-  if (!GrVkFormatToPixelConfig(surface_format_.format, &pixel_config)) {
+  if (pixel_config == kUnknown_GrPixelConfig) {
     // Vulkan format unsupported by Skia.
     return nullptr;
   }
