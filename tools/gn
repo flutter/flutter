@@ -139,7 +139,6 @@ def to_gn_args(args):
       # Configure Skia for Vulkan support.
       gn_args['skia_use_vulkan'] = True
       gn_args['skia_link_with_vulkan'] = False
-      gn_args['skia_vulkan_headers_path'] = '//third_party/vulkan/src'
 
     return gn_args
 
