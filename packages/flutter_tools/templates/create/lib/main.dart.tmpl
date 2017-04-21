@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_driver/driver_extension.dart';
 {{/withDriverTest}}
 {{#withPluginHook}}
+import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
 
@@ -56,21 +57,9 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => new _MyHomePageState();
 }
 
+{{^withPluginHook}}
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-{{#withPluginHook}}
-  String _platformVersion = 'Unknown';
-
-  @override
-  void initState() {
-    super.initState();
-    {{pluginDartClass}}.platformVersion.then((String platformVersion) {
-      setState(() {
-        _platformVersion = platformVersion;
-      });
-    });
-  }
-{{/withPluginHook}}
 
   void _incrementCounter() {
     setState(() {
@@ -100,21 +89,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: new Text(widget.title),
       ),
       body: new Center(
-{{#withPluginHook}}
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            new Text('Running on: $_platformVersion\n'),
-            new Text(
-                'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.'),
-          ],
-        ),
-{{/withPluginHook}}
-{{^withPluginHook}}
         child: new Text(
           'Button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
         ),
-{{/withPluginHook}}
       ),
       floatingActionButton: new FloatingActionButton(
         onPressed: _incrementCounter,
@@ -124,3 +101,46 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+{{/withPluginHook}}
+{{#withPluginHook}}
+class _MyHomePageState extends State<MyHomePage> {
+  String _platformVersion = 'Unknown';
+
+  @override
+  initState() {
+    super.initState();
+    initPlatformState();
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  initPlatformState() async {
+    String platformVersion;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      platformVersion = await {{pluginDartClass}}.platformVersion;
+    } on PlatformException {
+      platformVersion = "Failed to get platform version";
+    }
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted)
+      return;
+
+    setState(() {
+      _platformVersion = platformVersion;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text('Plugin example app'),
+      ),
+      body: new Center(child: new Text('Running on: $_platformVersion\n')),
+    );
+  }
+}
+{{/withPluginHook}}
