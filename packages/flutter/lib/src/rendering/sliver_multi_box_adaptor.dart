@@ -92,7 +92,7 @@ abstract class RenderSliverBoxChildManager {
   void didStartLayout() { }
 
   /// Called at the end of layout to indicate that layout is now complete.
-  void didFinishLayout() { }
+  void didFinishLayout(bool didUnderflow) { }
 
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.

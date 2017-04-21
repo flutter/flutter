@@ -138,7 +138,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are no children.
         geometry = SliverGeometry.zero;
-        childManager.didFinishLayout();
+        childManager.didFinishLayout(false);
         return;
       }
     }
@@ -209,7 +209,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         || constraints.scrollOffset > 0.0,
     );
 
-    childManager.didFinishLayout();
+    final bool didUnderflow = estimatedMaxScrollOffset >= trailingScrollOffset;
+    childManager.didFinishLayout(didUnderflow);
   }
 }
 
