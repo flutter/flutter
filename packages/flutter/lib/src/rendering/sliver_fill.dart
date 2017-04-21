@@ -32,9 +32,13 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverFillViewport({
-    @required RenderSliverBoxChildManager childManager,
     double viewportFraction: 1.0,
-  }) : _viewportFraction = viewportFraction, super(childManager: childManager) {
+    double itemSpacing: 0.0,
+    @required RenderSliverBoxChildManager childManager,
+  }) : _viewportFraction = viewportFraction, super(
+    itemSpacing: itemSpacing,
+    childManager: childManager,
+  ) {
     assert(viewportFraction != null);
     assert(viewportFraction > 0.0);
   }
@@ -60,18 +64,18 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
 
   @override
-  double indexToLayoutOffset(double itemExtent, int index) {
-    return _padding + super.indexToLayoutOffset(itemExtent, index);
+  double indexToLayoutOffset(double itemStride, int index) {
+    return _padding + super.indexToLayoutOffset(itemStride, index);
   }
 
   @override
-  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
+  int getMinChildIndexForScrollOffset(double scrollOffset, double itemStride) {
+    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemStride);
   }
 
   @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
+  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemStride) {
+    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemStride);
   }
 
   @override

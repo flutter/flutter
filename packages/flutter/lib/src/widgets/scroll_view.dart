@@ -353,6 +353,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
+    this.itemSpacing: 0.0,
     List<Widget> children: const <Widget>[],
   }) : childrenDelegate = new SliverChildListDelegate(children), super(
     key: key,
@@ -386,6 +387,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
+    this.itemSpacing: 0.0,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
   }) : childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount), super(
@@ -413,6 +415,7 @@ class ListView extends BoxScrollView {
     bool shrinkWrap: false,
     EdgeInsets padding,
     this.itemExtent,
+    this.itemSpacing: 0.0,
     @required this.childrenDelegate,
   }) : super(
     key: key,
@@ -436,6 +439,13 @@ class ListView extends BoxScrollView {
   /// the scroll position changes drastically.
   final double itemExtent;
 
+  /// How much empty space to place between each child in the main axis.
+  ///
+  /// Does not add space before the first child or after the last child.
+  ///
+  /// Defaults to 0.0.
+  final double itemSpacing;
+
   /// A delegate that provides the children for the [ListView].
   ///
   /// The [ListView.custom] constructor lets you specify this delegate
@@ -450,9 +460,10 @@ class ListView extends BoxScrollView {
       return new SliverFixedExtentList(
         delegate: childrenDelegate,
         itemExtent: itemExtent,
+        itemSpacing: itemSpacing,
       );
     }
-    return new SliverList(delegate: childrenDelegate);
+    return new SliverList(delegate: childrenDelegate, itemSpacing: itemSpacing);
   }
 
   @override

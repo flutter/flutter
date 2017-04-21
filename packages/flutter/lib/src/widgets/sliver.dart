@@ -310,12 +310,25 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
   const SliverList({
     Key key,
     @required SliverChildDelegate delegate,
+    this.itemSpacing: 0.0,
   }) : super(key: key, delegate: delegate);
+
+  /// How much empty space to place between each child in the main axis.
+  ///
+  /// Does not add space before the first child or after the last child.
+  ///
+  /// Defaults to 0.0.
+  final double itemSpacing;
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverList(childManager: element);
+    return new RenderSliverList(childManager: element, itemSpacing: itemSpacing);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverList renderObject) {
+    renderObject.itemSpacing = itemSpacing;
   }
 }
 
@@ -344,20 +357,59 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
     Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
+    this.itemSpacing: 0.0,
   }) : super(key: key, delegate: delegate);
 
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;
 
+  /// How much empty space to place between each child in the main axis.
+  ///
+  /// Does not add space before the first child or after the last child.
+  ///
+  /// Defaults to 0.0.
+  final double itemSpacing;
+
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
     final SliverMultiBoxAdaptorElement element = context;
-    return new RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
+    return new RenderSliverFixedExtentList(
+      childManager: element,
+      itemExtent: itemExtent,
+      itemSpacing: itemSpacing,
+    );
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFixedExtentList renderObject) {
-    renderObject.itemExtent = itemExtent;
+    renderObject
+      ..itemExtent = itemExtent
+      ..itemSpacing = itemSpacing;
+  }
+
+  double _estimateMaxScrollOffset(int estimatedChildCount) {
+    if (estimatedChildCount == null)
+      return null;
+    if (estimatedChildCount == 0)
+      return 0.0;
+    return estimatedChildCount * itemExtent + (estimatedChildCount - 1) * itemSpacing;
+  }
+
+  @override
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
+    return super.estimateMaxScrollOffset(
+      constraints,
+      firstIndex,
+      lastIndex,
+      leadingScrollOffset,
+      trailingScrollOffset,
+    ) ?? _estimateMaxScrollOffset(delegate.estimatedChildCount);
   }
 }
 

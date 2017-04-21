@@ -39,8 +39,30 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
   ///
   /// The [childManager] argument must not be null.
   RenderSliverList({
+    double itemSpacing: 0.0,
     @required RenderSliverBoxChildManager childManager,
-  }) : super(childManager: childManager);
+  }) : _itemSpacing = itemSpacing, super(childManager: childManager) {
+    assert(itemSpacing != null);
+  }
+
+  /// How much empty space to place between each child in the main axis.
+  ///
+  /// Does not add space before the first child or after the last child.
+  ///
+  /// Defaults to 0.0.
+  double get itemSpacing => _itemSpacing;
+  double _itemSpacing;
+  set itemSpacing(double value) {
+    assert(value != null);
+    if (_itemSpacing == value)
+      return;
+    _itemSpacing = value;
+    markNeedsLayout();
+  }
+
+  double _itemStrideOf(RenderBox child) {
+    return paintExtentOf(child) + itemSpacing;
+  }
 
   @override
   void performLayout() {
@@ -109,7 +131,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         return;
       }
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
-      childParentData.layoutOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      childParentData.layoutOffset = earliestScrollOffset - _itemStrideOf(firstChild);
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
@@ -140,7 +162,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     bool inLayoutRange = true;
     RenderBox child = earliestUsefulChild;
     int index = indexOf(child);
-    double endScrollOffset = childScrollOffset(child) + paintExtentOf(child);
+    double endScrollOffset = childScrollOffset(child) + _itemStrideOf(child);
     bool advance() { // returns true if we advanced, false if we have no more children
       // This function is used in two different places below, to avoid code duplication.
       assert(child != null);
@@ -171,7 +193,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       childParentData.layoutOffset = endScrollOffset;
       assert(childParentData.index == index);
-      endScrollOffset = childScrollOffset(child) + paintExtentOf(child);
+      endScrollOffset = childScrollOffset(child) + _itemStrideOf(child);
       return true;
     }
 
@@ -184,11 +206,11 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // we want to make sure we keep the last child around so we know the end scroll offset
         collectGarbage(leadingGarbage - 1, 0);
         assert(firstChild == lastChild);
-        final double extent = childScrollOffset(lastChild) + paintExtentOf(lastChild);
+        final double maxScrollOffset = childScrollOffset(lastChild) + paintExtentOf(lastChild);
         geometry = new SliverGeometry(
-          scrollExtent: extent,
+          scrollExtent: maxScrollOffset,
           paintExtent: 0.0,
-          maxPaintExtent: extent,
+          maxPaintExtent: maxScrollOffset,
         );
         return;
       }
@@ -219,6 +241,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     double estimatedMaxScrollOffset;
     if (reachedEnd) {
+      endScrollOffset -= itemSpacing;
       estimatedMaxScrollOffset = endScrollOffset;
     } else {
       estimatedMaxScrollOffset = childManager.estimateMaxScrollOffset(
