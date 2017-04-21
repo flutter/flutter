@@ -65,23 +65,31 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
       return newValue;
     final int selectionStartIndex = newValue.selection.start;
     final int selectionEndIndex = newValue.selection.end;
-    final String beforeSelection = newValue.text
-        .substring(0, selectionStartIndex)
-        .replaceAll(blacklistedPattern, replacementString);
-    final String inSelection = newValue.text
-        .substring(selectionStartIndex, selectionEndIndex)
-        .replaceAll(blacklistedPattern, replacementString);
-    final String afterSelection = newValue.text
-        .substring(selectionEndIndex)
-        .replaceAll(blacklistedPattern, replacementString);
-    return new TextEditingValue(
-      text: beforeSelection + inSelection + afterSelection,
-      selection: newValue.selection.copyWith(
-        baseOffset: beforeSelection.length,
-        extentOffset: beforeSelection.length + inSelection.length,
-      ),
-      composing: TextRange.empty,
-    );
+    if (selectionStartIndex < 0 || selectionEndIndex < 0) {
+      return new TextEditingValue(
+        text: newValue.text.replaceAll(blacklistedPattern, replacementString),
+        selection: const TextSelection.collapsed(offset: -1), 
+        composing: TextRange.empty,
+      );
+    } else {
+      final String beforeSelection = newValue.text
+          .substring(0, selectionStartIndex)
+          .replaceAll(blacklistedPattern, replacementString);
+      final String inSelection = newValue.text
+          .substring(selectionStartIndex, selectionEndIndex)
+          .replaceAll(blacklistedPattern, replacementString);
+      final String afterSelection = newValue.text
+          .substring(selectionEndIndex)
+          .replaceAll(blacklistedPattern, replacementString);
+      return new TextEditingValue(
+        text: beforeSelection + inSelection + afterSelection,
+        selection: newValue.selection.copyWith(
+          baseOffset: beforeSelection.length,
+          extentOffset: beforeSelection.length + inSelection.length,
+        ),
+        composing: TextRange.empty,
+      );
+    }
   }
 
   /// A [BlacklistingTextInputFormatter] that forces input to be a single line.
