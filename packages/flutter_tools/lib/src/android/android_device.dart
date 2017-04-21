@@ -222,7 +222,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool installApp(ApplicationPackage app) {
+  Future<bool> installApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
     if (!fs.isFileSync(apk.apkPath)) {
       printError('"${apk.apkPath}" does not exist.');
@@ -233,16 +233,18 @@ class AndroidDevice extends Device {
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    final RunResult installResult = await runCheckedAsync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
     status.stop();
     final RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
-    final String failure = failureExp.stringMatch(installOut);
+    final String failure = failureExp.stringMatch(installResult.stdout);
     if (failure != null) {
       printError('Package install error: $failure');
       return false;
     }
 
-    runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
+    await runCheckedAsync(adbCommandForDevice(<String>[
+      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)
+    ]));
     return true;
   }
 
@@ -262,7 +264,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  bool _installLatestApp(ApplicationPackage package) {
+  Future<bool> _installLatestApp(ApplicationPackage package) async {
     final bool wasInstalled = isAppInstalled(package);
     if (wasInstalled) {
       if (isLatestBuildInstalled(package)) {
@@ -271,7 +273,7 @@ class AndroidDevice extends Device {
       }
     }
     printTrace('Installing APK.');
-    if (!installApp(package)) {
+    if (!await installApp(package)) {
       printTrace('Warning: Failed to install APK.');
       if (wasInstalled) {
         printStatus('Uninstalling old version...');
@@ -279,7 +281,7 @@ class AndroidDevice extends Device {
           printError('Error: Uninstalling old version failed.');
           return false;
         }
-        if (!installApp(package)) {
+        if (!await installApp(package)) {
           printError('Error: Failed to install APK again.');
           return false;
         }
@@ -325,7 +327,7 @@ class AndroidDevice extends Device {
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
 
-    if (!_installLatestApp(package))
+    if (!await _installLatestApp(package))
       return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;

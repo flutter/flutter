@@ -377,8 +377,8 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
         if (_resizeAnimation.status != AnimationStatus.forward) {
           assert(_resizeAnimation.status == AnimationStatus.completed);
           throw new FlutterError(
-            'A dismissed Dismissible widget is still part of the tree.\n' +
-            'Make sure to implement the onDismissed handler and to immediately remove the Dismissible\n' +
+            'A dismissed Dismissible widget is still part of the tree.\n'
+            'Make sure to implement the onDismissed handler and to immediately remove the Dismissible\n'
             'widget from the application once that handler has fired.'
           );
         }

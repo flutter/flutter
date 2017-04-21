@@ -49,7 +49,7 @@ class FuchsiaDevice extends Device {
   bool isLatestBuildInstalled(ApplicationPackage app) => false;
 
   @override
-  bool installApp(ApplicationPackage app) => false;
+  Future<bool> installApp(ApplicationPackage app) => new Future<bool>.value(false);
 
   @override
   bool uninstallApp(ApplicationPackage app) => false;

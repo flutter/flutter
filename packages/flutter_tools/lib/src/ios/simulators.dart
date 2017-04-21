@@ -343,7 +343,7 @@ class IOSSimulator extends Device {
   bool isLatestBuildInstalled(ApplicationPackage app) => false;
 
   @override
-  bool installApp(ApplicationPackage app) {
+  Future<bool> installApp(ApplicationPackage app) async {
     try {
       final IOSApp iosApp = app;
       SimControl.instance.install(id, iosApp.simulatorBundlePath);
@@ -435,7 +435,7 @@ class IOSSimulator extends Device {
         return new LaunchResult.failed();
       }
     } else {
-      if (!installApp(app))
+      if (!await installApp(app))
         return new LaunchResult.failed();
     }
 
