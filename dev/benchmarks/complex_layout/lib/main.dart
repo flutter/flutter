@@ -96,45 +96,45 @@ class TopBarMenu extends StatelessWidget {
     return new PopupMenuButton<String>(
       onSelected: (String value) { print('Selected: $value'); },
       itemBuilder: (BuildContext context) => <PopupMenuItem<String>>[
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Friends',
-          child: new MenuItemWithIcon(Icons.people, 'Friends', '5 new')
+          child: const MenuItemWithIcon(Icons.people, 'Friends', '5 new')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
           child: const MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Friends',
-          child: new MenuItemWithIcon(Icons.people, 'Friends', '5')
+          child: const MenuItemWithIcon(Icons.people, 'Friends', '5')
         ),
         const PopupMenuItem<String>(
           value: 'Events',
           child: const MenuItemWithIcon(Icons.event, 'Events', '12')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.group, 'Groups', '14')
+          child: const MenuItemWithIcon(Icons.group, 'Groups', '14')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.image, 'Pictures', '12')
+          child: const MenuItemWithIcon(Icons.image, 'Pictures', '12')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
+          child: const MenuItemWithIcon(Icons.near_me, 'Nearby', '33')
         )
       ]
     );
@@ -234,7 +234,7 @@ class IconBar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           const IconWithText(Icons.thumb_up, 'Like'),
-          new IconWithText(Icons.comment, 'Comment'),
+          const IconWithText(Icons.comment, 'Comment'),
           const IconWithText(Icons.share, 'Share'),
         ]
       )
@@ -530,13 +530,13 @@ class BottomBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new BottomBarButton(Icons.new_releases, 'News'),
-          new BottomBarButton(Icons.people, 'Requests'),
-          new BottomBarButton(Icons.chat, 'Messenger'),
-          new BottomBarButton(Icons.bookmark, 'Bookmark'),
-          new BottomBarButton(Icons.alarm, 'Alarm')
-        ]
-      )
+          const BottomBarButton(Icons.new_releases, 'News'),
+          const BottomBarButton(Icons.people, 'Requests'),
+          const BottomBarButton(Icons.chat, 'Messenger'),
+          const BottomBarButton(Icons.bookmark, 'Bookmark'),
+          const BottomBarButton(Icons.alarm, 'Alarm'),
+        ],
+      ),
     );
   }
 }
