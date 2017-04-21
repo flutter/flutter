@@ -12,15 +12,15 @@ RESULTS=`dartanalyzer                                                          \
   --lints                                                                      \
   out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart                        \
   2>&1                                                                         \
-  | grep -v "\[error\] Native functions can only be declared in the SDK and code that is loaded through native extensions" \
-  | grep -Ev "\[(hint|error)\] The function '.+' (is not|isn't) used"          \
-  | grep -Ev "\[(warning|error)\] Undefined name 'main'"                       \
-  | grep -Ev "\[(warning|error)\] Undefined name 'VMLibraryHooks"              \
-  | grep -v "\[error\] The library ''dart:_internal'' is internal"             \
-  | grep -Ev "Unused import\. .+ui\.dart"                                      \
-  | grep -v "\[info\] TODO"                                                    \
+  | grep -v "Native functions can only be declared in the SDK and code that is loaded through native extensions" \
+  | grep -Ev "The function '.+' (is not|isn't) used"                           \
+  | grep -Ev "Undefined name 'main'"                                           \
+  | grep -Ev "Undefined name 'VMLibraryHooks"                                  \
+  | grep -v "The library ''dart:_internal'' is internal"                       \
+  | grep -Ev "Unused import .+ui\.dart"                                        \
+  | grep -v "TODO"                                                             \
   | grep -Ev "[0-9]+ errors.*found\."                                          \
-  | grep -v "Analyzing \[out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart\]\.\.\."`
+  | grep -v "Analyzing out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart\.\.\."`
 
 echo "$RESULTS"
 if [ -n "$RESULTS" ]; then
