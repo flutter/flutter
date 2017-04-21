@@ -640,7 +640,7 @@ void main() {
     expect(inputBox.hitTest(new HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
-  testWidgets('InputField smoke test', (WidgetTester tester) async {
+  testWidgets('TextField smoke test', (WidgetTester tester) async {
     String textFieldValue;
 
     Widget builder() {
@@ -672,7 +672,7 @@ void main() {
     await checkText('Hello World');
   });
 
-  testWidgets('InputField with global key', (WidgetTester tester) async {
+  testWidgets('TextField with global key', (WidgetTester tester) async {
     final GlobalKey textFieldKey = new GlobalKey(debugLabel: 'textFieldKey');
     String textFieldValue;
 
