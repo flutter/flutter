@@ -195,4 +195,15 @@ class TextSelection extends TextRange {
     affinity.hashCode,
     isDirectional.hashCode
   );
+
+  /// Creates a new [TextSelection] based on the current selection, with the
+  /// provided parameters overridden.
+  TextSelection copyWith({int baseOffset, int extentOffset}) {
+    return new TextSelection(
+      baseOffset: baseOffset ?? this.baseOffset,
+      extentOffset: extentOffset ?? this.extentOffset,
+      affinity: this.affinity,
+      isDirectional: this.isDirectional,
+    );
+  }
 }

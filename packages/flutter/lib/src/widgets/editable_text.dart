@@ -17,6 +17,7 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
+import 'text_formatter.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
@@ -133,6 +134,7 @@ class EditableText extends StatefulWidget {
     this.keyboardType,
     this.onChanged,
     this.onSubmitted,
+    List<TextInputFormatter> inputFormatters,
   }) : assert(controller != null),
        assert(focusNode != null),
        assert(obscureText != null),
@@ -140,6 +142,12 @@ class EditableText extends StatefulWidget {
        assert(cursorColor != null),
        assert(maxLines != null),
        assert(autofocus != null),
+       inputFormatters = maxLines == 1 
+           ? ((inputFormatters ?? new List<TextInputFormatter>())
+                 ..add(BlacklistingTextInputFormatter
+                           .singleLineBlacklistingTextInputFormatter)
+             )
+           : inputFormatters,
        super(key: key);
 
   /// Controls the text being edited.
@@ -196,6 +204,10 @@ class EditableText extends StatefulWidget {
 
   /// Called when the user indicates that they are done editing the text in the field.
   final ValueChanged<String> onSubmitted;
+
+  /// Optional input validation and formatting overrides. Formatters are run 
+  /// in the provided order when the text input changes.
+  final List<TextInputFormatter> inputFormatters;
 
   @override
   EditableTextState createState() => new EditableTextState();
@@ -266,7 +278,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (value.text != _value.text)
       _hideSelectionOverlayIfNeeded();
     _lastKnownRemoteTextEditingValue = value;
-    _value = value;
+    _formatAndSetValue(value);
     if (widget.onChanged != null)
       widget.onChanged(value.text);
   }
@@ -396,8 +408,19 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
 
   void _handleSelectionOverlayChanged(TextEditingValue value, Rect caretRect) {
     assert(!value.composing.isValid);  // composing range must be empty while selecting.
-    _value = value;
+    _formatAndSetValue(value);
     _scrollController.jumpTo(_getScrollOffsetForCaret(caretRect));
+  }
+
+  void _formatAndSetValue(TextEditingValue value) {
+    if (widget.inputFormatters != null && widget.inputFormatters.isNotEmpty) {
+      for (TextInputFormatter formatter in widget.inputFormatters)
+        value = formatter.formatEditUpdate(_value, value);
+      _value = value;
+      _updateRemoteEditingValueIfNeeded();
+    } else {
+      _value = value;
+    }
   }
 
   /// Whether the blinking cursor is actually visible at this precise moment
