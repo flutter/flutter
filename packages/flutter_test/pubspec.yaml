@@ -9,3 +9,8 @@ dependencies:
 
   flutter:
     sdk: flutter
+
+  # We import stack_trace because the test packages uses it and we
+  # need to be able to unmangle the stack traces that it passed to
+  # stack_trace. See https://github.com/dart-lang/test/issues/590
+  stack_trace: any # use version expected by test package

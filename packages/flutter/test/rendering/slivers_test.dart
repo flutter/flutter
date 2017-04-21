@@ -34,44 +34,44 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
-    expect(a.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 400.0));
-    expect(b.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 800.0));
-    expect(c.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
-    expect(d.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
-    expect(e.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
+    expect(a.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 400.0));
+    expect(b.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 800.0));
+    expect(c.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
+    expect(d.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
+    expect(e.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -600.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -600.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -900.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -500.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -900.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(130.0, 150.0));
+    root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -93,38 +93,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 800.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 800.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 1100.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 700.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 1100.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(150.0, 350.0));
+    root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -146,38 +146,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(400.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-600.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-600.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-900.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(-500.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-100.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(300.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(700.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-900.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(-500.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-100.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(300.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(150.0, 450.0));
+    root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -199,38 +199,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(400.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(1000.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(1000.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(1300.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(900.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(500.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(100.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-300.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(1300.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(900.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(550.0, 150.0));
+    root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -264,44 +264,44 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
-    expect(a.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 400.0));
-    expect(b.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 800.0));
-    expect(c.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
-    expect(d.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
-    expect(e.localToGlobal(const Point(800.0, 400.0)), const Point(800.0, 1000.0));
+    expect(a.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 400.0));
+    expect(b.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 800.0));
+    expect(c.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
+    expect(d.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
+    expect(e.localToGlobal(const Offset(800.0, 400.0)), const Offset(800.0, 1000.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -600.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -600.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -900.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -500.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 600.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -900.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 600.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(130.0, 150.0));
+    root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -323,38 +323,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 200.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -200.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 200.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -200.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 800.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 400.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 800.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 400.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 1100.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 700.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 300.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -100.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, -400.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 1100.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -400.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(150.0, 350.0));
+    root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -376,38 +376,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(400.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-600.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(800.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-600.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(800.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(-900.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(-500.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-100.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(300.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(700.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(-900.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(-500.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-100.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(300.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(150.0, 450.0));
+    root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
 
@@ -429,38 +429,38 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(400.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(0.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(200.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(600.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(1000.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(600.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(200.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(-200.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-400.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(1000.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(200.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(-200.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-400.0, 0.0));
 
     root.offset = new ViewportOffset.fixed(900.0);
     pumpFrame();
-    expect(a.localToGlobal(const Point(0.0, 0.0)), const Point(1300.0, 0.0));
-    expect(b.localToGlobal(const Point(0.0, 0.0)), const Point(900.0, 0.0));
-    expect(c.localToGlobal(const Point(0.0, 0.0)), const Point(500.0, 0.0));
-    expect(d.localToGlobal(const Point(0.0, 0.0)), const Point(100.0, 0.0));
-    expect(e.localToGlobal(const Point(0.0, 0.0)), const Point(-300.0, 0.0));
+    expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(1300.0, 0.0));
+    expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(900.0, 0.0));
+    expect(c.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 0.0));
+    expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
+    expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
     final HitTestResult result = new HitTestResult();
-    root.hitTest(result, position: const Point(550.0, 150.0));
+    root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
 

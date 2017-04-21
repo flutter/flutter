@@ -43,19 +43,12 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
 
   @override
   Stream<String> get stream {
-    if (_streamRecorder == null) {
-      _streamRecorder = new _RecordingStream(super.stream, _messages);
-    }
+    _streamRecorder ??= new _RecordingStream(super.stream, _messages);
     return _streamRecorder.stream;
   }
 
   @override
-  StreamSink<String> get sink {
-    if (_sinkRecorder == null) {
-      _sinkRecorder = new _RecordingSink(super.sink, _messages);
-    }
-    return _sinkRecorder;
-  }
+  StreamSink<String> get sink => _sinkRecorder ??= new _RecordingSink(super.sink, _messages);
 }
 
 /// Base class for request and response JSON-rpc messages.
@@ -250,11 +243,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   @override
-  StreamSink<String> get sink {
-    if (_replaySink == null)
-      _replaySink = new _ReplaySink(this);
-    return _replaySink;
-  }
+  StreamSink<String> get sink => _replaySink ??= new _ReplaySink(this);
 
   @override
   Stream<String> get stream => _controller.stream;

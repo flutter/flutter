@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'debug.dart';
 
 class _AccountPictures extends StatelessWidget {
-  _AccountPictures({
+  const _AccountPictures({
     Key key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
@@ -49,7 +49,7 @@ class _AccountPictures extends StatelessWidget {
 }
 
 class _AccountDetails extends StatelessWidget {
-  _AccountDetails({
+  const _AccountDetails({
     Key key,
     @required this.accountName,
     @required this.accountEmail,
@@ -132,7 +132,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  UserAccountsDrawerHeader({
+  const UserAccountsDrawerHeader({
     Key key,
     this.decoration,
     this.margin: const EdgeInsets.only(bottom: 8.0),
@@ -182,28 +182,28 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     return new DrawerHeader(
-      decoration: config.decoration ?? new BoxDecoration(
+      decoration: widget.decoration ?? new BoxDecoration(
         backgroundColor: Theme.of(context).primaryColor,
       ),
-      margin: config.margin,
+      margin: widget.margin,
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           new Expanded(
             child: new _AccountPictures(
-              currentAccountPicture: config.currentAccountPicture,
-              otherAccountsPictures: config.otherAccountsPictures,
+              currentAccountPicture: widget.currentAccountPicture,
+              otherAccountsPictures: widget.otherAccountsPictures,
             )
           ),
           new _AccountDetails(
-            accountName: config.accountName,
-            accountEmail: config.accountEmail,
+            accountName: widget.accountName,
+            accountEmail: widget.accountEmail,
             isOpen: _isOpen,
-            onTap: config.onDetailsPressed == null ? null : () {
+            onTap: widget.onDetailsPressed == null ? null : () {
               setState(() {
                 _isOpen = !_isOpen;
               });
-              config.onDetailsPressed();
+              widget.onDetailsPressed();
             },
           ),
         ],

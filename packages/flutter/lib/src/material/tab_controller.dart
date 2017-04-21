@@ -101,16 +101,20 @@ class TabController extends ChangeNotifier {
       _indexIsChangingCount += 1;
       notifyListeners(); // Because the value of indexIsChanging may have changed.
       _animationController
-        ..animateTo(_index.toDouble(), duration: duration, curve: curve).whenComplete(() {
-          _indexIsChangingCount -= 1;
-          notifyListeners();
-        });
+        .animateTo(_index.toDouble(), duration: duration, curve: curve)
+        .orCancel.then<Null>(_indexChanged, onError: _indexChanged);
     } else {
       _indexIsChangingCount += 1;
       _animationController.value = _index.toDouble();
       _indexIsChangingCount -= 1;
       notifyListeners();
     }
+  }
+
+  Null _indexChanged(dynamic value) {
+    _indexIsChangingCount -= 1;
+    notifyListeners();
+    return null;
   }
 
   /// The index of the currently selected tab. Changing the index also updates
@@ -265,8 +269,8 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     super.initState();
     _controller = new TabController(
       vsync: this,
-      length: config.length,
-      initialIndex: config.initialIndex,
+      length: widget.length,
+      initialIndex: widget.initialIndex,
     );
   }
 
@@ -281,7 +285,7 @@ class _DefaultTabControllerState extends State<DefaultTabController> with Single
     return new _TabControllerScope(
       controller: _controller,
       enabled: TickerMode.of(context),
-      child: config.child,
+      child: widget.child,
     );
   }
 }

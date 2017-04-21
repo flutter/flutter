@@ -34,8 +34,7 @@ Future<Null> pubGet({
   bool offline: false,
   bool checkLastModified: true
 }) async {
-  if (directory == null)
-    directory = fs.currentDirectory.path;
+  directory ??= fs.currentDirectory.path;
 
   final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
@@ -50,7 +49,7 @@ Future<Null> pubGet({
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress("Running 'flutter packages $command' in ${fs.path.basename(directory)}...",
         expectSlowOperation: true);
-    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-packages-dir', '--no-precompile'];
+    final List<String> args = <String>[sdkBinaryName('pub'), '--verbosity=warning', command, '--no-precompile'];
     if (offline)
       args.add('--offline');
     final int code = await runCommandAndStreamOutput(args,

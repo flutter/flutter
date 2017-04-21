@@ -53,6 +53,14 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
+    final String modeName = getModeName(debuggingOptions.buildMode);
+    if (mainPath == null) {
+      assert(prebuiltMode);
+      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
+    } else {
+      printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
+    }
+
     package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
@@ -71,14 +79,6 @@ class ColdRunner extends ResidentRunner {
       platformArgs = <String, dynamic>{ 'trace-startup': traceStartup };
 
     await startEchoingDeviceLog(package);
-
-    final String modeName = getModeName(debuggingOptions.buildMode);
-    if (mainPath == null) {
-      assert(prebuiltMode);
-      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
-    } else {
-      printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
-    }
 
     _result = await device.startApp(
       package,
@@ -100,28 +100,28 @@ class ColdRunner extends ResidentRunner {
     startTime.stop();
 
     // Connect to observatory.
-    if (debuggingOptions.debuggingEnabled) {
-      await connectToServiceProtocol(_result.observatoryUri);
-    }
+    if (debuggingOptions.debuggingEnabled)
+      await connectToServiceProtocol(<Uri>[_result.observatoryUri]);
 
     if (_result.hasObservatory) {
       connectionInfoCompleter?.complete(new DebugConnectionInfo(
         httpUri: _result.observatoryUri,
-        wsUri: vmService.wsAddress,
+        wsUri: vmServices[0].wsAddress,
       ));
     }
 
     printTrace('Application running.');
 
-    if (vmService != null) {
-      await vmService.vm.refreshViews();
-      printTrace('Connected to ${vmService.vm.firstView}\.');
+    if (vmServices != null && vmServices.isNotEmpty) {
+      device.getLogReader(app: package).appPid = vmServices[0].vm.pid;
+      await refreshViews();
+      printTrace('Connected to $currentView.');
     }
 
-    if (vmService != null && traceStartup) {
+    if (vmServices != null && vmServices.isNotEmpty && traceStartup) {
       printStatus('Downloading startup trace info...');
       try {
-        await downloadStartupTrace(vmService);
+        await downloadStartupTrace(vmServices[0]);
       } catch(error) {
         printError(error);
         return 2;
@@ -174,7 +174,7 @@ class ColdRunner extends ResidentRunner {
   @override
   Future<Null> preStop() async {
     // If we're running in release mode, stop the app using the device logic.
-    if (vmService == null)
+    if (vmServices == null || vmServices.isEmpty)
       await device.stopApp(package);
   }
 }

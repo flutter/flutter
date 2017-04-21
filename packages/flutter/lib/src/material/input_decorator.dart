@@ -23,6 +23,7 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 ///    [InputDecoration].
 ///  * [InputDecorator], which is a widget that draws an [InputDecoration]
 ///    around an arbitrary child widget.
+@immutable
 class InputDecoration {
   /// Creates a bundle of text and styles used to label an input field.
   ///
@@ -305,7 +306,7 @@ class InputDecorator extends StatelessWidget {
 
     if (decoration.hideDivider) {
       return new Container(
-        margin: margin + new EdgeInsets.only(bottom: bottomBorder),
+        margin: margin + const EdgeInsets.only(bottom: bottomBorder),
         padding: padding,
         child: child,
       );
@@ -439,8 +440,7 @@ class InputDecorator extends StatelessWidget {
           new Container(
             margin: new EdgeInsets.only(top: iconTop),
             width: isDense ? 40.0 : 48.0,
-            child: new IconTheme.merge(
-              context: context,
+            child: IconTheme.merge(
               data: new IconThemeData(
                 color: isFocused ? activeColor : Colors.black45,
                 size: isDense ? 18.0 : 24.0,
@@ -491,25 +491,25 @@ class _AnimatedLabelState extends AnimatedWidgetBaseState<_AnimatedLabel> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _style = visitor(_style, config.style, (dynamic value) => new TextStyleTween(begin: value));
+    _style = visitor(_style, widget.style, (dynamic value) => new TextStyleTween(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     TextStyle style = _style.evaluate(animation);
     double scale = 1.0;
-    if (style.fontSize != config.style.fontSize) {
+    if (style.fontSize != widget.style.fontSize) {
       // While the fontSize is transitioning, use a scaled Transform as a
       // fraction of the original fontSize. That way we get a smooth scaling
       // effect with no snapping between discrete font sizes.
-      scale = style.fontSize / config.style.fontSize;
-      style = style.copyWith(fontSize: config.style.fontSize);
+      scale = style.fontSize / widget.style.fontSize;
+      style = style.copyWith(fontSize: widget.style.fontSize);
     }
 
     return new Transform(
       transform: new Matrix4.identity()..scale(scale),
       child: new Text(
-        config.text,
+        widget.text,
         style: style,
       ),
     );

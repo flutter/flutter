@@ -64,6 +64,11 @@ dependencies:
 
   createFooter('dev/docs/lib/footer.html');
 
+  // Verify which version of dartdoc we're using.
+  final ProcessResult result = Process.runSync('pub',
+    <String>['global', 'run', 'dartdoc', '--version']);
+  print('\n${result.stdout}');
+
   // Generate the documentation.
   final List<String> args = <String>[
     'global', 'run', 'dartdoc',
@@ -74,7 +79,6 @@ dependencies:
     '--favicon=favicon.ico',
     '--use-categories'
   ];
-
 
   for (String libraryRef in libraryRefs(diskPath: true)) {
     args.add('--include-external');
@@ -108,9 +112,9 @@ void createFooter(String footerPath) {
 
 void sanityCheckDocs() {
   final List<String> canaries = <String>[
-    '$kDocRoot/api/dart-io/File-class.html',
-    '$kDocRoot/api/dart-ui/Canvas-class.html',
-    '$kDocRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kDocRoot/api/dart.io/File-class.html',
+    '$kDocRoot/api/dart.ui/Canvas-class.html',
+    '$kDocRoot/api/dart.ui/Canvas/drawRect.html',
     '$kDocRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kDocRoot/api/material/Material-class.html',
     '$kDocRoot/api/material/Tooltip-class.html',

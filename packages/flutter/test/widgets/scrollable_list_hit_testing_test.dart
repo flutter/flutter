@@ -102,17 +102,17 @@ void main() {
         }).toList(),
       ),
     );
-    await tester.tapAt(const Point(200.0, 19.0));
+    await tester.tapAt(const Offset(200.0, 19.0));
     expect(tapped, equals(<int>[]));
-    await tester.tapAt(const Point(200.0, 21.0));
+    await tester.tapAt(const Offset(200.0, 21.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(const Point(4.0, 400.0));
+    await tester.tapAt(const Offset(4.0, 400.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(const Point(6.0, 400.0));
+    await tester.tapAt(const Offset(6.0, 400.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(const Point(800.0 - 14.0, 400.0));
+    await tester.tapAt(const Offset(800.0 - 14.0, 400.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(const Point(800.0 - 16.0, 400.0));
+    await tester.tapAt(const Offset(800.0 - 16.0, 400.0));
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
@@ -134,17 +134,17 @@ void main() {
         }).toList(),
       ),
     );
-    await tester.tapAt(const Point(200.0, 600.0 - 9.0));
+    await tester.tapAt(const Offset(200.0, 600.0 - 9.0));
     expect(tapped, equals(<int>[]));
-    await tester.tapAt(const Point(200.0, 600.0 - 11.0));
+    await tester.tapAt(const Offset(200.0, 600.0 - 11.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(const Point(4.0, 200.0));
+    await tester.tapAt(const Offset(4.0, 200.0));
     expect(tapped, equals(<int>[0]));
-    await tester.tapAt(const Point(6.0, 200.0));
+    await tester.tapAt(const Offset(6.0, 200.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(const Point(800.0 - 14.0, 200.0));
+    await tester.tapAt(const Offset(800.0 - 14.0, 200.0));
     expect(tapped, equals(<int>[0, 1]));
-    await tester.tapAt(const Point(800.0 - 16.0, 200.0));
+    await tester.tapAt(const Offset(800.0 - 16.0, 200.0));
     expect(tapped, equals(<int>[0, 1, 1]));
   });
 
@@ -170,7 +170,7 @@ void main() {
     final ScrollableState scrollable = tester.state(find.byType(Scrollable));
     expect(scrollable.position.pixels, equals(0.0));
 
-    await tester.tapAt(const Point(200.0, 100.0));
+    await tester.tapAt(const Offset(200.0, 100.0));
     expect(tapped, equals(<int>[0]));
   });
 }

@@ -9,7 +9,7 @@ import 'package:flutter/gestures.dart';
 
 import 'test_async_utils.dart';
 
-export 'dart:ui' show Point;
+export 'dart:ui' show Offset;
 
 /// A class for generating coherent artificial pointer events.
 ///
@@ -40,15 +40,15 @@ class TestPointer {
   /// The position of the last event sent by this object.
   ///
   /// If no event has ever been sent by this object, returns null.
-  Point get location => _location;
-  Point _location;
+  Offset get location => _location;
+  Offset _location;
 
   /// Create a [PointerDownEvent] at the given location.
   ///
   /// By default, the time stamp on the event is [Duration.ZERO]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerDownEvent down(Point newLocation, { Duration timeStamp: Duration.ZERO }) {
+  PointerDownEvent down(Offset newLocation, { Duration timeStamp: Duration.ZERO }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
@@ -64,7 +64,7 @@ class TestPointer {
   /// By default, the time stamp on the event is [Duration.ZERO]. You
   /// can give a specific time stamp by passing the `timeStamp`
   /// argument.
-  PointerMoveEvent move(Point newLocation, { Duration timeStamp: Duration.ZERO }) {
+  PointerMoveEvent move(Offset newLocation, { Duration timeStamp: Duration.ZERO }) {
     assert(isDown);
     final Offset delta = newLocation - location;
     _location = newLocation;
@@ -116,7 +116,7 @@ class TestPointer {
 typedef Future<Null> EventDispatcher(PointerEvent event, HitTestResult result);
 
 /// Signature for callbacks that perform hit-testing at a given location.
-typedef HitTestResult HitTester(Point location);
+typedef HitTestResult HitTester(Offset location);
 
 /// A class for performing gestures in tests.
 ///
@@ -134,7 +134,7 @@ class TestGesture {
   /// A function to use for hit testing should be provided via the `hitTester`
   /// argument, and a function to use for dispatching events should be provided
   /// via the `dispatcher` argument.
-  static Future<TestGesture> down(Point downLocation, {
+  static Future<TestGesture> down(Offset downLocation, {
     int pointer: 1,
     @required HitTester hitTester,
     @required EventDispatcher dispatcher,
@@ -169,7 +169,7 @@ class TestGesture {
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Point location) {
+  Future<Null> moveTo(Offset location) {
     return TestAsyncUtils.guard(() {
       assert(_pointer._isDown);
       return _dispatcher(_pointer.move(location), _result);

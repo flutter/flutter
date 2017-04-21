@@ -32,6 +32,7 @@ abstract class AbstractScrollState {
   void dispatchNotification(Notification notification);
 }
 
+@immutable
 abstract class ScrollPhysics {
   const ScrollPhysics(this.parent);
 
@@ -58,7 +59,7 @@ abstract class ScrollPhysics {
   /// there is actually content outside the viewport to reveal.
   bool shouldAcceptUserOffset(ScrollPosition position) {
     if (parent == null)
-      return position.minScrollExtent != position.maxScrollExtent;
+      return position.pixels != 0.0 || position.minScrollExtent != position.maxScrollExtent;
     return parent.shouldAcceptUserOffset(position);
   }
 
@@ -466,6 +467,13 @@ class ScrollPosition extends ViewportOffset {
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 
+  /// This notifier's value is true if a scroll is underway and false if the scroll
+  /// position is idle.
+  ///
+  /// Listeners added by stateful widgets should be in the widget's
+  /// [State.dispose] method.
+  final ValueNotifier<bool> isScrollingNotifier = new ValueNotifier<bool>(false);
+
   /// Change the current [activity], disposing of the old one and
   /// sending scroll notifications as necessary.
   ///
@@ -490,6 +498,7 @@ class ScrollPosition extends ViewportOffset {
     _activity = newActivity;
     if (oldIgnorePointer != shouldIgnorePointer)
       state.setIgnorePointer(shouldIgnorePointer);
+    isScrollingNotifier.value = _activity?.isScrolling ?? false;
     if (!activity.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
     if (!wasScrolling && activity.isScrolling)
@@ -686,7 +695,7 @@ class BallisticScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateWith(simulation)
-       .whenComplete(_end);
+       .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override
@@ -765,7 +774,7 @@ class DrivenScrollActivity extends ScrollActivity {
     )
       ..addListener(_tick)
       ..animateTo(to, duration: duration, curve: curve)
-       .whenComplete(_end);
+       .whenComplete(_end); // won't trigger if we dispose _controller first
   }
 
   @override

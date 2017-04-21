@@ -126,7 +126,7 @@ class PaintingContext {
       assert(child._layer != null);
       assert(() {
         child.debugRegisterRepaintBoundaryPaint(includedParent: true, includedChild: false);
-        child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
+        child._layer.debugCreator = child.debugCreator ?? child;
         return true;
       });
     }
@@ -136,7 +136,7 @@ class PaintingContext {
 
   void _appendLayer(Layer layer) {
     assert(!_isRecording);
-    layer.detach();
+    layer.remove();
     _containerLayer.append(layer);
   }
 
@@ -520,6 +520,7 @@ class PaintingContext {
 ///
 /// * The [toString] method, which should describe the constraints so that they
 ///   appear in a usefully readable form in the output of [debugDumpRenderTree].
+@immutable
 abstract class Constraints {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1249,7 +1250,7 @@ class PipelineOwner {
 ///
 /// The general behaviour of your hit-testing method should be similar to the
 /// behavior described for [RenderBox]. The main difference is that the input
-/// need not be a [Point]. You are also allowed to use a different subclass of
+/// need not be an [Offset]. You are also allowed to use a different subclass of
 /// [HitTestEntry] when adding entries to the [HitTestResult]. When the
 /// [handleEvent] method is called, the same object that was added to the
 /// [HitTestResult] will be passed in, so it can be used to track information
@@ -1780,7 +1781,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
       final RenderObject parent = this.parent;
       relayoutBoundary = parent._relayoutBoundary;
     }
-    assert(parent == this.parent);
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
@@ -1841,7 +1841,6 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     });
     _needsLayout = false;
     markNeedsPaint();
-    assert(parent == this.parent);
   }
 
   /// If a subclass has a "size" (the state controlled by `parentUsesSize`,
@@ -1997,7 +1996,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// To access the layer in debug code, even when it might be inappropriate to
   /// access it (e.g. because it is dirty), consider [debugLayer].
   OffsetLayer get layer {
-    assert(isRepaintBoundary);
+    assert(isRepaintBoundary, 'You can only access RenderObject.layer for render objects that are repaint boundaries.');
     assert(!_needsPaint);
     return _layer;
   }
@@ -2140,6 +2139,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// See [RenderView] for an example of how this function is used.
   void scheduleInitialPaint(ContainerLayer rootLayer) {
+    assert(rootLayer.attached);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingPaint);
@@ -2156,19 +2156,59 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// This might be called if, e.g., the device pixel ratio changed.
   void replaceRootLayer(OffsetLayer rootLayer) {
+    assert(rootLayer.attached);
     assert(attached);
     assert(parent is! RenderObject);
     assert(!owner._debugDoingPaint);
     assert(isRepaintBoundary);
     assert(_layer != null); // use scheduleInitialPaint the first time
+    _layer.detach();
     _layer = rootLayer;
     markNeedsPaint();
   }
 
   void _paintWithContext(PaintingContext context, Offset offset) {
-    assert(!_debugDoingThisPaint);
-    assert(!_needsLayout);
-    assert(!_needsCompositingBitsUpdate);
+    assert(() {
+      if (_debugDoingThisPaint) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject reentrantly.\n'
+          'The following RenderObject was already being painted when it was '
+          'painted again:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'Since this typically indicates an infinite recursion, it is '
+          'disallowed.'
+        );
+      }
+      if (_needsLayout) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject before it was laid out.\n'
+          'The following RenderObject was marked as dirty for layout at the '
+          'time that it was painted:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'A RenderObject that is still dirty for layout cannot be painted '
+          'because it does not know its own geometry yet.\n'
+          'Maybe one of the ancestors of this RenderObject was skipped '
+          'during the layout phase, but not skipped during the paint phase. '
+          'If the ancestor in question is below the nearest relayout boundary, '
+          'but is not below the nearest repaint boundary, that could cause '
+          'this error.'
+        );
+      }
+      if (_needsCompositingBitsUpdate) {
+        throw new FlutterError(
+          'Tried to paint a RenderObject before its compositing bits were '
+          'updated.\n'
+          'The following RenderObject was marked as having dirty compositing '
+          'bits at the time that it was painted:\n'
+          '  ${toStringShallow("\n    ")}\n'
+          'A RenderObject that still has dirty compositing bits cannot be '
+          'painted because this indicates that the tree has not yet been '
+          'properly configured for creating the layer tree.\n'
+          'This usually indicates an error in the Flutter framework itself.'
+        );
+      }
+      return true;
+    });
     RenderObject debugLastActivePaint;
     assert(() {
       _debugDoingThisPaint = true;
@@ -2480,7 +2520,7 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   // (with the signature being whatever passes for coordinates for this
   // particular class):
   //
-  // bool hitTest(HitTestResult result, { Point position }) {
+  // bool hitTest(HitTestResult result, { Offset position }) {
   //   // If the given position is not inside this node, then return false.
   //   // Otherwise:
   //   // For each child that intersects the position, in z-order starting from
@@ -2697,8 +2737,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
         _firstChildParentData.previousSibling = child;
       }
       _firstChild = child;
-      if (_lastChild == null)
-        _lastChild = child;
+      _lastChild ??= child;
     } else {
       assert(_firstChild != null);
       assert(_lastChild != null);

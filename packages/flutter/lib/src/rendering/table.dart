@@ -5,6 +5,8 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'box.dart';
 import 'object.dart';
 
@@ -32,6 +34,7 @@ class TableCellParentData extends BoxParentData {
 /// distributes the space equally among the flexible columns,
 /// [FractionColumnWidth], which sizes a column based on the size of the
 /// table's container.
+@immutable
 abstract class TableColumnWidth {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -809,6 +812,7 @@ class RenderTable extends RenderBox {
 
   @override
   void detach() {
+    super.detach();
     if (_rowDecorationPainters != null) {
       for (BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
@@ -816,7 +820,6 @@ class RenderTable extends RenderBox {
     }
     for (RenderBox child in _children)
       child?.detach();
-    super.detach();
   }
 
   @override
@@ -1196,15 +1199,13 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        final Point transformed = new Point(position.x - childParentData.offset.dx,
-                                      position.y - childParentData.offset.dy);
-        if (child.hitTest(result, position: transformed))
+        if (child.hitTest(result, position: position - childParentData.offset))
           return true;
       }
     }

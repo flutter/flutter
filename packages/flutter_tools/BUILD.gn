@@ -2,14 +2,13 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/dart/dart_package.gni")
 import("//build/dart/dart_tool.gni")
 
-dart_tool("flutter_tools") {
+dart_package("flutter_tools") {
   package_name = "flutter_tools"
 
   source_dir = "lib"
-
-  main_dart = "bin/fuchsia_builder.dart"
 
   deps = [
     "//dart/pkg/analyzer",
@@ -37,5 +36,25 @@ dart_tool("flutter_tools") {
     "//third_party/dart-pkg/pub/web_socket_channel",
     "//third_party/dart-pkg/pub/xml",
     "//third_party/dart-pkg/pub/yaml",
+  ]
+}
+
+dart_tool("fuchsia_builder") {
+  main_dart = "bin/fuchsia_builder.dart"
+
+  deps = [
+    ":flutter_tools",
+  ]
+}
+
+dart_tool("fuchsia_tester") {
+  main_dart = "bin/fuchsia_tester.dart"
+
+  deps = [
+    ":flutter_tools",
+  ]
+
+  non_dart_deps = [
+    "//flutter/shell",
   ]
 }

@@ -12,7 +12,7 @@ import '../rendering/mock_canvas.dart';
 
 final Matcher doesNotOverscroll = isNot(paints..circle());
 
-Future<Null> slowDrag(WidgetTester tester, Point start, Offset offset) async {
+Future<Null> slowDrag(WidgetTester tester, Offset start, Offset offset) async {
   final TestGesture gesture = await tester.startGesture(start);
   for (int index = 0; index < 10; index += 1) {
     await gesture.moveBy(offset);
@@ -26,7 +26,7 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
@@ -42,13 +42,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
 
-    final TestGesture gesture = await tester.startGesture(const Point(200.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0));
     await tester.pump(const Duration(milliseconds: 100)); // animate
     expect(painter, doesNotOverscroll);
     await gesture.up();
     expect(painter, doesNotOverscroll);
 
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
     expect(painter, paints..circle(color: const Color(0x0DFFFFFF)));
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -59,29 +59,29 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
 
-    await slowDrag(tester, const Point(400.0, 200.0), const Offset(0.0, 10.0));
+    await slowDrag(tester, const Offset(400.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..circle(x: 400.0));
-    await slowDrag(tester, const Point(100.0, 200.0), const Offset(0.0, 10.0));
+    await slowDrag(tester, const Offset(100.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle)
         return false;
-      final Point center = arguments[0];
-      if (center.x < 400.0)
+      final Offset center = arguments[0];
+      if (center.dx < 400.0)
         return true;
       throw 'Dragging on left hand side did not overscroll on left hand side.';
     }));
-    await slowDrag(tester, const Point(700.0, 200.0), const Offset(0.0, 10.0));
+    await slowDrag(tester, const Offset(700.0, 200.0), const Offset(0.0, 10.0));
     expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
       if (method != #drawCircle)
         return false;
-      final Point center = arguments[0];
-      if (center.x > 400.0)
+      final Offset center = arguments[0];
+      if (center.dx > 400.0)
         return true;
       throw 'Dragging on right hand side did not overscroll on right hand side.';
     }));
@@ -94,12 +94,12 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
         ],
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    final TestGesture gesture = await tester.startGesture(const Point(300.0, 200.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(300.0, 200.0));
     await gesture.moveBy(const Offset(0.0, 10.0));
     await tester.pump(const Duration(milliseconds: 20));
     double oldX = 0.0;
@@ -109,10 +109,10 @@ void main() {
       expect(painter, paints..something((Symbol method, List<dynamic> arguments) {
         if (method != #drawCircle)
           return false;
-        final Point center = arguments[0];
-        if (center.x <= oldX)
+        final Offset center = arguments[0];
+        if (center.dx <= oldX)
           throw 'Sliding to the right did not make the center of the radius slide to the right.';
-        oldX = center.x;
+        oldX = center.dx;
         return true;
       }));
     }
@@ -128,12 +128,12 @@ void main() {
         new CustomScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-      await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..circle()..restore()..save()..scale(y: -1.0)..restore()..restore());
 
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -146,12 +146,12 @@ void main() {
           reverse: true,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       );
       final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-      await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
+      await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
       expect(painter, paints..save()..scale(y: -1.0)..restore()..save()..circle()..restore()..restore());
 
       await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -164,15 +164,15 @@ void main() {
       new CustomScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, 5.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
     expect(painter, paints..circle());
     expect(painter, isNot(paints..circle()..circle()));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(0.0, -5.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, -5.0));
     expect(painter, paints..circle()..circle());
 
     await tester.pumpAndSettle(const Duration(seconds: 1));
@@ -185,15 +185,15 @@ void main() {
         scrollDirection: Axis.horizontal,
         physics: const AlwaysScrollableScrollPhysics(),
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
         ],
       ),
     );
     final RenderObject painter = tester.renderObject(find.byType(CustomPaint));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(-5.0, 0.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(-5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle()
                           ..rotate(angle: math.PI / 2.0)..circle());
 
@@ -220,7 +220,7 @@ void main() {
       ),
     );
 
-    await tester.dragFrom(const Point(100.0, 100.0), const Offset(0.0, 2000.0));
+    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 2000.0));
     await tester.pumpAndSettle();
   });
 
@@ -235,13 +235,13 @@ void main() {
           physics: const AlwaysScrollableScrollPhysics(),
           reverse: true,
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A00FF00)));
     expect(painter, isNot(paints..circle()..circle()));
 
@@ -253,13 +253,13 @@ void main() {
           scrollDirection: Axis.horizontal,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: <Widget>[
-            new SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
+            const SliverToBoxAdapter(child: const SizedBox(height: 20.0)),
           ],
         ),
       ),
     );
     painter = tester.renderObject(find.byType(CustomPaint));
-    await slowDrag(tester, const Point(200.0, 200.0), const Offset(5.0, 0.0));
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(5.0, 0.0));
     expect(painter, paints..rotate(angle: math.PI / 2.0)..circle(color: const Color(0x0A0000FF))..saveRestore());
     expect(painter, isNot(paints..circle()..circle()));
   });

@@ -37,7 +37,7 @@ void main() {
       new CustomScrollView(
         controller: controller,
         slivers: <Widget>[
-          new SliverToBoxAdapter(child: new SizedBox(height: 100.0)),
+          const SliverToBoxAdapter(child: const SizedBox(height: 100.0)),
           new SliverFillRemaining(child: new Container()),
         ],
       ),

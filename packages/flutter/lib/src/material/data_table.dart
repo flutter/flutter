@@ -30,6 +30,7 @@ typedef void DataColumnSortCallback(int columnIndex, bool ascending);
 /// One column configuration must be provided for each column to
 /// display in the table. The list of [DataColumn] objects is passed
 /// as the `columns` argument to the [new DataTable] constructor.
+@immutable
 class DataColumn {
   /// Creates the configuration for a column of a [DataTable].
   ///
@@ -81,6 +82,7 @@ class DataColumn {
 ///
 /// The data for this row of the table is provided in the [cells]
 /// property of the [DataRow] object.
+@immutable
 class DataRow {
   /// Creates the configuration for a row of a [DataTable].
   ///
@@ -150,6 +152,7 @@ class DataRow {
 /// One list of [DataCell] objects must be provided for each [DataRow]
 /// in the [DataTable], in the [new DataRow] constructor's `cells`
 /// argument.
+@immutable
 class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///
@@ -160,7 +163,7 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and then the [placeholder]
   /// argument should be set to true.
-  const DataCell(this.widget, {
+  const DataCell(this.child, {
     this.placeholder: false,
     this.showEditIcon: false,
     this.onTap
@@ -176,9 +179,9 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
-  final Widget widget;
+  final Widget child;
 
-  /// Whether the [widget] is actually a placeholder.
+  /// Whether the [child] is actually a placeholder.
   ///
   /// If this is true, the default text style for the cell is changed
   /// to be appropriate for placeholder text.
@@ -450,7 +453,7 @@ class DataTable extends StatelessWidget {
   }) {
     final bool isLightTheme = Theme.of(context).brightness == Brightness.light;
     if (showEditIcon) {
-      final Widget icon = new Icon(Icons.edit, size: 18.0);
+      final Widget icon = const Icon(Icons.edit, size: 18.0);
       label = new Expanded(child: label);
       label = new Row(children: numeric ? <Widget>[ icon, label ] : <Widget>[ label, icon ]);
     }
@@ -466,8 +469,7 @@ class DataTable extends StatelessWidget {
             ? (placeholder ? Colors.black38 : Colors.black87)
             : (placeholder ? Colors.white30 : Colors.white70)
         ),
-        child: new IconTheme.merge(
-          context: context,
+        child: IconTheme.merge(
           data: new IconThemeData(
             color: isLightTheme ? Colors.black54 : Colors.white70
           ),
@@ -523,7 +525,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = new FixedColumnWidth(_kTablePadding + Checkbox.width + _kTablePadding / 2.0);
+      tableColumns[0] = const FixedColumnWidth(_kTablePadding + Checkbox.width + _kTablePadding / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -571,7 +573,7 @@ class DataTable extends StatelessWidget {
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,
           padding: padding,
-          label: cell.widget,
+          label: cell.child,
           numeric: column.numeric,
           placeholder: cell.placeholder,
           showEditIcon: cell.showEditIcon,
@@ -692,27 +694,27 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
     super.initState();
     _opacityAnimation = new CurvedAnimation(
       parent: _opacityController = new AnimationController(
-        duration: config.duration,
+        duration: widget.duration,
         vsync: this,
       ),
       curve: Curves.fastOutSlowIn
     )
     ..addListener(_rebuild);
-    _opacityController.value = config.visible ? 1.0 : 0.0;
+    _opacityController.value = widget.visible ? 1.0 : 0.0;
     _orientationAnimation = new Tween<double>(
       begin: 0.0,
       end: math.PI
     ).animate(new CurvedAnimation(
       parent: _orientationController = new AnimationController(
-        duration: config.duration,
+        duration: widget.duration,
         vsync: this,
       ),
       curve: Curves.easeIn
     ))
     ..addListener(_rebuild)
     ..addStatusListener(_resetOrientationAnimation);
-    if (config.visible)
-      _orientationOffset = config.down ? 0.0 : math.PI;
+    if (widget.visible)
+      _orientationOffset = widget.down ? 0.0 : math.PI;
   }
 
   void _rebuild() {
@@ -730,18 +732,18 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   }
 
   @override
-  void didUpdateConfig(_SortArrow oldConfig) {
-    super.didUpdateConfig(oldConfig);
+  void didUpdateWidget(_SortArrow oldWidget) {
+    super.didUpdateWidget(oldWidget);
     bool skipArrow = false;
-    final bool newDown = config.down != null ? config.down : _down;
-    if (oldConfig.visible != config.visible) {
-      if (config.visible && (_opacityController.status == AnimationStatus.dismissed)) {
+    final bool newDown = widget.down != null ? widget.down : _down;
+    if (oldWidget.visible != widget.visible) {
+      if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
         _orientationController.value = 0.0;
         _orientationOffset = newDown ? 0.0 : math.PI;
         skipArrow = true;
       }
-      if (config.visible) {
+      if (widget.visible) {
         _opacityController.forward();
       } else {
         _opacityController.reverse();

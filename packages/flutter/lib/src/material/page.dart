@@ -3,45 +3,38 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';  
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
+// Fractional offset from 1/4 screen below the top to fully on screen. 
+final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
+  begin: FractionalOffset.bottomLeft,
+  end: FractionalOffset.topLeft
+);
+
 // Used for Android and Fuchsia.
-class _MountainViewPageTransition extends AnimatedWidget {
+class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
     Key key,
-    this.routeAnimation,
-    this.child,
-  }) : super(
-    key: key,
-    listenable: _kTween.animate(new CurvedAnimation(
-      parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
-      curve: Curves.fastOutSlowIn
-    )
-  ));
+    @required Animation<double> routeAnimation,
+    @required this.child,
+  }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
+         parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
+         curve: Curves.fastOutSlowIn,
+       )),
+       super(key: key);
 
-  static final FractionalOffsetTween _kTween = new FractionalOffsetTween(
-    begin: const FractionalOffset(0.0, 0.25),
-    end: FractionalOffset.topLeft
-  );
-
+  final Animation<FractionalOffset> _positionAnimation;
   final Widget child;
-  final Animation<double> routeAnimation;
 
   @override
   Widget build(BuildContext context) {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
-      position: listenable,
-      child: new FadeTransition(
-        opacity: new CurvedAnimation(
-          parent: routeAnimation,
-          curve: Curves.easeIn, // Eyeballed from other Material apps.
-        ),
-        child: child,
-      ),
+      position: _positionAnimation,
+      child: child,
     );
   }
 }
@@ -173,8 +166,8 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
       else
         return new CupertinoPageTransition(
-          incomingRouteAnimation: animation,
-          outgoingRouteAnimation: secondaryAnimation,
+          primaryRouteAnimation: animation,
+          secondaryRouteAnimation: secondaryAnimation,
           child: child,
           // In the middle of a back gesture drag, let the transition be linear to match finger
           // motions.

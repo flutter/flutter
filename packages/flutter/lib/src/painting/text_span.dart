@@ -45,6 +45,7 @@ bool _deepEquals(List<Object> a, List<Object> b) {
 ///  * [Text]
 ///  * [RichText]
 ///  * [TextPainter]
+@immutable
 class TextSpan {
   /// Creates a [TextSpan] with the given values.
   ///

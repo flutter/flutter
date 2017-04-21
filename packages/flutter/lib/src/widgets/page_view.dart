@@ -388,16 +388,16 @@ class _PageViewState extends State<PageView> {
   @override
   void initState() {
     super.initState();
-    _lastReportedPage = config.controller.initialPage;
+    _lastReportedPage = widget.controller.initialPage;
   }
 
   AxisDirection _getDirection(BuildContext context) {
     // TODO(abarth): Consider reading direction.
-    switch (config.scrollDirection) {
+    switch (widget.scrollDirection) {
       case Axis.horizontal:
-        return config.reverse ? AxisDirection.left : AxisDirection.right;
+        return widget.reverse ? AxisDirection.left : AxisDirection.right;
       case Axis.vertical:
-        return config.reverse ? AxisDirection.up : AxisDirection.down;
+        return widget.reverse ? AxisDirection.up : AxisDirection.down;
     }
     return null;
   }
@@ -407,28 +407,28 @@ class _PageViewState extends State<PageView> {
     final AxisDirection axisDirection = _getDirection(context);
     return new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0 && config.onPageChanged != null && notification is ScrollUpdateNotification) {
+        if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;
-            config.onPageChanged(currentPage);
+            widget.onPageChanged(currentPage);
           }
         }
         return false;
       },
       child: new Scrollable(
         axisDirection: axisDirection,
-        controller: config.controller,
-        physics: config.physics == null ? _kPagePhysics : _kPagePhysics.applyTo(config.physics),
+        controller: widget.controller,
+        physics: widget.physics == null ? _kPagePhysics : _kPagePhysics.applyTo(widget.physics),
         viewportBuilder: (BuildContext context, ViewportOffset offset) {
           return new Viewport(
             axisDirection: axisDirection,
             offset: offset,
             slivers: <Widget>[
               new SliverFillViewport(
-                viewportFraction: config.controller.viewportFraction,
-                delegate: config.childrenDelegate
+                viewportFraction: widget.controller.viewportFraction,
+                delegate: widget.childrenDelegate
               ),
             ],
           );
@@ -440,10 +440,10 @@ class _PageViewState extends State<PageView> {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('${config.scrollDirection}');
-    if (config.reverse)
+    description.add('${widget.scrollDirection}');
+    if (widget.reverse)
       description.add('reversed');
-    description.add('${config.controller}');
-    description.add('${config.physics}');
+    description.add('${widget.controller}');
+    description.add('${widget.physics}');
   }
 }

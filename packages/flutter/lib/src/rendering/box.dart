@@ -13,7 +13,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'debug.dart';
 import 'object.dart';
 
-// This class should only be used in debug builds
+// This class should only be used in debug builds.
 class _DebugSize extends Size {
   _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);
   final RenderBox _owner;
@@ -509,7 +509,7 @@ class BoxHitTestEntry extends HitTestEntry {
   RenderBox get target => super.target;
 
   /// The position of the hit test in the local coordinates of [target].
-  final Point localPosition;
+  final Offset localPosition;
 
   @override
   String toString() => '${target.runtimeType}#${target.hashCode}@$localPosition';
@@ -529,6 +529,8 @@ class BoxParentData extends ParentData {
 abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
+
+@immutable
 class _IntrinsicDimensionsCacheEntry {
   _IntrinsicDimensionsCacheEntry(this.dimension, this.argument);
 
@@ -899,7 +901,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// [hitTestChildren]. When implementing hit testing, you can either override
 /// these latter two methods, or ignore them and just override [hitTest].
 ///
-/// The [hitTest] method itself is given a [Point], and must return true if the
+/// The [hitTest] method itself is given an [Offset], and must return true if the
 /// object or one of its children has absorbed the hit (preventing objects below
 /// this one from being hit), or false if the hit can continue to other objects
 /// below this one.
@@ -1424,7 +1426,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   @override
-  Rect get semanticBounds => Point.origin & size;
+  Rect get semanticBounds => Offset.zero & size;
 
   @override
   void debugResetSize() {
@@ -1482,8 +1484,7 @@ abstract class RenderBox extends RenderObject {
   @mustCallSuper
   double getDistanceToActualBaseline(TextBaseline baseline) {
     assert(_debugDoingBaseline);
-    if (_cachedBaselines == null)
-      _cachedBaselines = <TextBaseline, double>{};
+    _cachedBaselines ??= <TextBaseline, double>{};
     _cachedBaselines.putIfAbsent(baseline, () => computeDistanceToActualBaseline(baseline));
     return _cachedBaselines[baseline];
   }
@@ -1692,7 +1693,7 @@ abstract class RenderBox extends RenderObject {
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
   /// even through it does not [paint] its children.
-  bool hitTest(HitTestResult result, { @required Point position }) {
+  bool hitTest(HitTestResult result, { @required Offset position }) {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
@@ -1720,8 +1721,7 @@ abstract class RenderBox extends RenderObject {
       }
       return true;
     });
-    if (position.x >= 0.0 && position.x < _size.width &&
-        position.y >= 0.0 && position.y < _size.height) {
+    if (_size.contains(position)) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
         return true;
@@ -1736,7 +1736,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestSelf(Point position) => false;
+  bool hitTestSelf(Offset position) => false;
 
   /// Override this method to check whether any children are located at the
   /// given position.
@@ -1748,7 +1748,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(HitTestResult result, { Point position }) => false;
+  bool hitTestChildren(HitTestResult result, { Offset position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
@@ -1769,7 +1769,7 @@ abstract class RenderBox extends RenderObject {
         throw new FlutterError(
           '$runtimeType does not implement applyPaintTransform.\n'
           'The following $runtimeType object:\n'
-          '  ${this.toStringShallow()}\n'
+          '  ${toStringShallow()}\n'
           '...did not use a BoxParentData class for the parentData field of the following child:\n'
           '  ${child.toStringShallow()}\n'
           'The $runtimeType class inherits from RenderBox. '
@@ -1809,16 +1809,16 @@ abstract class RenderBox extends RenderObject {
   /// coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
-  /// degenerate, this function returns [Point.origin].
+  /// degenerate, this function returns [Offset.zero].
   ///
   /// If `ancestor` is non-null, this function converts the given point from the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of from the global coordinate system.
-  Point globalToLocal(Point point, { RenderObject ancestor }) {
+  Offset globalToLocal(Offset point, { RenderObject ancestor }) {
     final Matrix4 transform = getTransformTo(ancestor);
     final double det = transform.invert();
     if (det == 0.0)
-      return Point.origin;
+      return Offset.zero;
     return MatrixUtils.transformPoint(transform, point);
   }
 
@@ -1828,7 +1828,7 @@ abstract class RenderBox extends RenderObject {
   /// If `ancestor` is non-null, this function converts the given point to the
   /// coordinate system of `ancestor` (which must be an ancestor of this render
   /// object) instead of to the global coordinate system.
-  Point localToGlobal(Point point, { RenderObject ancestor }) {
+  Offset localToGlobal(Offset point, { RenderObject ancestor }) {
     return MatrixUtils.transformPoint(getTransformTo(ancestor), point);
   }
 
@@ -1846,7 +1846,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The returned paint bounds are in the local coordinate system of this box.
   @override
-  Rect get paintBounds => Point.origin & size;
+  Rect get paintBounds => Offset.zero & size;
 
   /// Override this method to handle pointer events that hit this render object.
   ///
@@ -2040,14 +2040,12 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   ///
   /// Stops walking once after the first child reports that it contains the
   /// given point. Returns whether any children contain the given point.
-  bool defaultHitTestChildren(HitTestResult result, { Point position }) {
+  bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      final Point transformed = new Point(position.x - childParentData.offset.dx,
-                                    position.y - childParentData.offset.dy);
-      if (child.hitTest(result, position: transformed))
+      if (child.hitTest(result, position: position - childParentData.offset))
         return true;
       child = childParentData.previousSibling;
     }

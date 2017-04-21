@@ -27,6 +27,7 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 /// Keys must be unique amongst the [Element]s with the same parent.
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
+@immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
   ///
@@ -312,7 +313,7 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     final String tag = _debugLabel != null ? ' $_debugLabel' : '#$hashCode';
-    if (this.runtimeType == LabeledGlobalKey)
+    if (runtimeType == LabeledGlobalKey)
       return '[GlobalKey$tag]';
     return '[$runtimeType$tag]';
   }
@@ -391,6 +392,7 @@ class TypeMatcher<T> {
 ///    be read by descendant widgets.
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
+@immutable
 abstract class Widget {
   /// Initializes [key] for subclasses.
   const Widget({ this.key });
@@ -670,7 +672,7 @@ typedef void StateSetter(VoidCallback fn);
 ///  * The framework calls [initState]. Subclasses of [State] should override
 ///    [initState] to perform one-time initialization that depends on the
 ///    [BuildContext] or the widget, which are available as the [context] and
-///    [config] properties, respectively, when the [initState] method is
+///    [widget] properties, respectively, when the [initState] method is
 ///    called.
 ///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
 ///    override [didChangeDependencies] to perform initialization involving
@@ -687,12 +689,12 @@ typedef void StateSetter(VoidCallback fn);
 ///  * During this time, a parent widget might rebuild and request that this
 ///    location in the tree update to display a new widget with the same
 ///    [runtimeType] and [key]. When this happens, the framework will update the
-///    [config] property to refer to the new widget and then call the
-///    [didUpdateConfig] method with the previous widget as an argument.
-///    [State] objects should override [didUpdateConfig] to respond to changes
+///    [widget] property to refer to the new widget and then call the
+///    [didUpdateWidget] method with the previous widget as an argument.
+///    [State] objects should override [didUpdateWidget] to respond to changes
 ///    in their associated wiget (e.g., to start implicit animations).
-///    The framework always calls [build] after calling [didUpdateConfig], which
-///    means any calls to [setState] in [didUpdateConfig] are redundant.
+///    The framework always calls [build] after calling [didUpdateWidget], which
+///    means any calls to [setState] in [didUpdateWidget] are redundant.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
 ///    or [key]), the framework calls the [deactivate] method. Subclasses
@@ -720,7 +722,7 @@ typedef void StateSetter(VoidCallback fn);
 /// See also:
 ///
 ///  * [StatefulWidget], where the current configuration of a [State] is hosted
-///    (see [config]).
+///    (see [Widget]).
 ///  * [StatelessWidget], for widgets that always build the same way given a
 ///    particular configuration and ambient state.
 ///  * [InheritedWidget], for widgets that introduce ambient state that can
@@ -734,9 +736,9 @@ abstract class State<T extends StatefulWidget> {
   /// [initState]. If the parent updates this location in the tree to a new
   /// widget with the same [runtimeType] and [key] as the current configuration,
   /// the framework will update this property to refer to the new widget and
-  /// then call [didUpdateConfig], passing the old configuration as an argument.
-  T get config => _config;
-  T _config;
+  /// then call [didUpdateWidget], passing the old configuration as an argument.
+  T get widget => _widget;
+  T _widget;
 
   /// The current stage in the lifecycle for this state object.
   ///
@@ -779,14 +781,14 @@ abstract class State<T extends StatefulWidget> {
   ///
   /// Override this method to perform initialization that depends on the
   /// location at which this object was inserted into the tree (i.e., [context])
-  /// or on the widget used to configure this object (i.e., [config]).
+  /// or on the widget used to configure this object (i.e., [widget]).
   ///
   /// If a [State]'s [build] method depends on an object that can itself change
   /// state, for example a [ChangeNotifier] or [Stream], or some other object to
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
   /// method. However, [didChangeDependencies] will be called immediately
@@ -801,32 +803,32 @@ abstract class State<T extends StatefulWidget> {
     assert(_debugLifecycleState == _StateLifecycle.created);
   }
 
-  /// Called whenever the configuration changes.
+  /// Called whenever the widget configuration changes.
   ///
   /// If the parent widget rebuilds and request that this location in the tree
   /// update to display a new widget with the same [runtimeType] and [key], the
-  /// framework will update the [config] property of this [State] object to
+  /// framework will update the [widget] property of this [State] object to
   /// refer to the new widget and then call the this method with the previous
   /// widget as an argument.
   ///
-  /// Override this method to respond to changes in the [config] widget (e.g.,
+  /// Override this method to respond to changes in the [widget] widget (e.g.,
   /// to start implicit animations).
   ///
-  /// The framework always calls [build] after calling [didUpdateConfig], which
-  /// means any calls to [setState] in [didUpdateConfig] are redundant.
+  /// The framework always calls [build] after calling [didUpdateWidget], which
+  /// means any calls to [setState] in [didUpdateWidget] are redundant.
   ///
   /// If a [State]'s [build] method depends on an object that can itself change
   /// state, for example a [ChangeNotifier] or [Stream], or some other object to
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// If you override this, make sure your method starts with a call to
-  /// super.didUpdateConfig(oldConfig).
-  // TODO(abarth): Add @mustCallSuper.
+  /// super.didUpdateWidget(oldWidget).
+  @mustCallSuper
   @protected
-  void didUpdateConfig(covariant T oldConfig) { }
+  void didUpdateWidget(covariant T oldWidget) { }
 
   /// Called whenever the application is reassembled during debugging.
   ///
@@ -976,7 +978,7 @@ abstract class State<T extends StatefulWidget> {
   /// which one can subscribe to receive notifications, then the [State] should
   /// subscribe to that object during [initState], unsubscribe from the old
   /// object and subscribe to the new object when it changes in
-  /// [didUpdateConfig], and then unsubscribe from the object in [dispose].
+  /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
@@ -994,7 +996,7 @@ abstract class State<T extends StatefulWidget> {
   /// The framework calls this method in a number of different situations:
   ///
   ///  * After calling [initState].
-  ///  * After calling [didUpdateConfig].
+  ///  * After calling [didUpdateWidget].
   ///  * After receiving a call to [setState].
   ///  * After a dependency of this [State] object changes (e.g., an
   ///    [InheritedWidget] referenced by the previous [build] changes).
@@ -1074,15 +1076,15 @@ abstract class State<T extends StatefulWidget> {
   ///   ...
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     ... () { print("color: ${config.color}"); } ...
+  ///     ... () { print("color: ${widget.color}"); } ...
   ///   }
   /// }
   /// ```
   ///
   /// Now when the parent rebuilds `MyButton` with green, the closure created by
   /// the first build still refers to [State] object, which is preserved across
-  /// rebuilds, but the framework has updated that [State] object's [config]
-  /// property to refer to the new `MyButton` instance and `${config.color}`
+  /// rebuilds, but the framework has updated that [State] object's [widget]
+  /// property to refer to the new `MyButton` instance and `${widget.color}`
   /// prints green, as expected.
   @protected
   Widget build(BuildContext context);
@@ -1129,8 +1131,8 @@ abstract class State<T extends StatefulWidget> {
         description.add('$_debugLifecycleState');
       return true;
     });
-    if (_config == null)
-      description.add('no config');
+    if (_widget == null)
+      description.add('no widget');
     if (_element == null)
       description.add('not mounted');
   }
@@ -1571,6 +1573,11 @@ abstract class BuildContext {
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
   /// from [State.didChangeDependencies].
   ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// in [State.didChangeDependencies].
+  ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
   /// going to be cached and reused later.
@@ -1595,6 +1602,11 @@ abstract class BuildContext {
   /// widgets to obtain their corresponding [InheritedElement] object so that they
   /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
   /// notify the widgets that _did_ register such a relationship.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1609,6 +1621,11 @@ abstract class BuildContext {
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -1617,7 +1634,7 @@ abstract class BuildContext {
   /// This should not be used from build methods, because the build context will
   /// not be rebuilt if the value that would be returned by this method changes.
   /// In general, [inheritFromWidgetOfExactType] is more appropriate for such
-  /// cases. This method is useful to change the state of an ancestor widget in
+  /// cases. This method is useful for changing the state of an ancestor widget in
   /// a one-off manner, for example, to cause an ancestor scrolling list to
   /// scroll this build context's widget into view, or to move the focus in
   /// response to user interaction.
@@ -1630,6 +1647,11 @@ abstract class BuildContext {
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   ///
   /// Example:
   ///
@@ -1649,6 +1671,11 @@ abstract class BuildContext {
   /// it is used by [Material] so that [InkWell] widgets can trigger the ink
   /// splash on the [Material]'s actual render object.
   ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the widget tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
   /// desired ancestor is known to be small and bounded.
@@ -1663,6 +1690,11 @@ abstract class BuildContext {
   /// This is useful for inspecting the widget tree.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the tree).
+  ///
+  /// This method should not be called from [State.deactivate] or [State.dispose]
+  /// because the element tree is no longer stable at that time. To refer to
+  /// an ancestor from one of those methods, save a reference to the ancestor
+  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
   void visitAncestorElements(bool visitor(Element element));
 
   /// Walks the children of this widget.
@@ -2664,7 +2696,7 @@ abstract class Element implements BuildContext {
           'Cannot get size during build.\n'
           'The size of this render object has not yet been determined because '
           'the framework is still in the process of building widgets, which '
-          'means the render tree for this frame has not youet been determined. '
+          'means the render tree for this frame has not yet been determined. '
           'The size getter should only be called from paint callbacks or '
           'interaction event handlers (e.g. gesture callbacks).\n'
           '\n'
@@ -2686,10 +2718,23 @@ abstract class Element implements BuildContext {
         throw new FlutterError(
           'Cannot get size without a render object.\n'
           'In order for an element to have a valid size, the element must have '
-          'an assoicated render object. This element does not have an assoicated '
+          'an assoicated render object. This element does not have an associated '
           'render object, which typically means that the size getter was called '
           'too early in the pipeline (e.g., during the build phase) before the '
           'framework has created the render tree.\n'
+          'The size getter was called for the following element:\n'
+          '  $this\n'
+        );
+      }
+      if (renderObject is RenderSliver) {
+        throw new FlutterError(
+          'Cannot get size from a RenderSliver.\n'
+          'The render object associated with this element is a '
+          '${renderObject.runtimeType}, which is a subtype of RenderSliver. '
+          'Slivers do not have a size per se. They have a more elaborate '
+          'geometry description, which can be accessed by calling '
+          'findRenderObject and then using the "geometry" getter on the '
+          'resulting object.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
         );
@@ -2712,7 +2757,7 @@ abstract class Element implements BuildContext {
           'The size of this render object has not yet been determined because '
           'this render object has not yet been through layout, which typically '
           'means that the size getter was called too early in the pipeline '
-          '(e.g., during the build pahse) before the framework has determined '
+          '(e.g., during the build phase) before the framework has determined '
           'the size and position of the render objects during layout.\n'
           'The size getter was called for the following element:\n'
           '  $this\n'
@@ -2729,8 +2774,25 @@ abstract class Element implements BuildContext {
   Set<InheritedElement> _dependencies;
   bool _hadUnsatisfiedDependencies = false;
 
+  bool _debugCheckStateIsActiveForAncestorLoopkup() {
+    assert(() {
+      if (_debugLifecycleState != _ElementLifecycle.active) {
+        throw new FlutterError(
+          'Looking up a deactivated widget\'s ancestor is unsafe.\n'
+          'At this point the state of the widget\'s element tree is no longer '
+          'stable. To safely refer to a widget\'s ancestor in its dispose() method, '
+          'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
+          'in the widget\'s didChangeDependencies() method.\n'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
   @override
   InheritedWidget inheritFromWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
       assert(ancestor is InheritedElement);
@@ -2745,6 +2807,7 @@ abstract class Element implements BuildContext {
 
   @override
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     return ancestor;
   }
@@ -2756,6 +2819,7 @@ abstract class Element implements BuildContext {
 
   @override
   Widget ancestorWidgetOfExactType(Type targetType) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null && ancestor.widget.runtimeType != targetType)
       ancestor = ancestor._parent;
@@ -2764,6 +2828,7 @@ abstract class Element implements BuildContext {
 
   @override
   State ancestorStateOfType(TypeMatcher matcher) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is StatefulElement && matcher.check(ancestor.state))
@@ -2776,6 +2841,7 @@ abstract class Element implements BuildContext {
 
   @override
   RenderObject ancestorRenderObjectOfType(TypeMatcher matcher) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null) {
       if (ancestor is RenderObjectElement && matcher.check(ancestor.renderObject))
@@ -2788,6 +2854,7 @@ abstract class Element implements BuildContext {
 
   @override
   void visitAncestorElements(bool visitor(Element element)) {
+    assert(_debugCheckStateIsActiveForAncestorLoopkup);
     Element ancestor = _parent;
     while (ancestor != null && visitor(ancestor))
       ancestor = ancestor._parent;
@@ -2885,10 +2952,10 @@ abstract class Element implements BuildContext {
   // Whether we've already built or not. Set in [rebuild].
   bool _debugBuiltOnce = false;
 
-  // We let widget authors call setState from initState, didUpdateConfig, and
+  // We let widget authors call setState from initState, didUpdateWidget, and
   // build even when state is locked because its convenient and a no-op anyway.
   // This flag ensures that this convenience is only allowed on the element
-  // currently undergoing initState, didUpdateConfig, or build.
+  // currently undergoing initState, didUpdateWidget, or build.
   bool _debugAllowIgnoredCallsToMarkNeedsBuild = false;
   bool _debugSetAllowIgnoredCallsToMarkNeedsBuild(bool value) {
     assert(_debugAllowIgnoredCallsToMarkNeedsBuild == !value);
@@ -3158,8 +3225,8 @@ class StatefulElement extends ComponentElement {
     });
     assert(_state._element == null);
     _state._element = this;
-    assert(_state._config == null);
-    _state._config = widget;
+    assert(_state._widget == null);
+    _state._widget = widget;
     assert(_state._debugLifecycleState == _StateLifecycle.created);
   }
 
@@ -3199,15 +3266,15 @@ class StatefulElement extends ComponentElement {
   void update(StatefulWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
-    final StatefulWidget oldConfig = _state._config;
-    // Notice that we mark ourselves as dirty before calling didUpdateConfig to
-    // let authors call setState from within didUpdateConfig without triggering
+    final StatefulWidget oldWidget = _state._widget;
+    // Notice that we mark ourselves as dirty before calling didUpdateWidget to
+    // let authors call setState from within didUpdateWidget without triggering
     // asserts.
     _dirty = true;
-    _state._config = widget;
+    _state._widget = widget;
     try {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(true);
-      _state.didUpdateConfig(oldConfig);
+      _state.didUpdateWidget(oldWidget);
     } finally {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }

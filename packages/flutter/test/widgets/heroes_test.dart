@@ -23,7 +23,7 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
         new Card(child: new Hero(tag: 'a', child: new Container(height: 100.0, width: 100.0, key: firstKey))),
         new Container(height: 100.0, width: 100.0),
         new FlatButton(
-          child: new Text('two'),
+          child: const Text('two'),
           onPressed: () { Navigator.pushNamed(context, '/two'); }
         ),
       ]
@@ -34,14 +34,14 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       key: routeTwoKey,
       children: <Widget>[
         new FlatButton(
-          child: new Text('pop'),
+          child: const Text('pop'),
           onPressed: () { Navigator.pop(context); }
         ),
         new Container(height: 150.0, width: 150.0),
         new Card(child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))),
         new Container(height: 150.0, width: 150.0),
         new FlatButton(
-          child: new Text('three'),
+          child: const Text('three'),
           onPressed: () { Navigator.push(context, new ThreeRoute()); },
         ),
       ]
@@ -66,7 +66,7 @@ class ThreeRoute extends MaterialPageRoute<Null> {
 
 class MutatingRoute extends MaterialPageRoute<Null> {
   MutatingRoute() : super(builder: (BuildContext context) {
-    return new Hero(tag: 'a', child: new Text('MutatingRoute'), key: new UniqueKey());
+    return new Hero(tag: 'a', child: const Text('MutatingRoute'), key: new UniqueKey());
   });
 
   void markNeedsBuild() {
@@ -85,7 +85,7 @@ class MyStatefulWidget extends StatefulWidget {
 
 class MyStatefulWidgetState extends State<MyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => new Text(config.value);
+  Widget build(BuildContext context) => new Text(widget.value);
 }
 
 void main() {
@@ -200,9 +200,9 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: new Text('foo')),
+            new Hero(tag: 'a', child: const Text('foo')),
             new Builder(builder: (BuildContext context) {
-              return new FlatButton(child: new Text('two'), onPressed: () => Navigator.push(context, route));
+              return new FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             })
           ]
         )
@@ -272,7 +272,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              child: new Text('foo')
+              child: const Text('foo')
             )
           )
         )
@@ -290,7 +290,7 @@ void main() {
                 child: new Container(
                   width: 100.0,
                   height: 150.0,
-                  child: new Text('bar')
+                  child: const Text('bar')
                 )
               )
             )
@@ -393,16 +393,16 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: new Text('a')),
-            new Hero(tag: 'a', child: new Text('a too')),
+            new Hero(tag: 'a', child: const Text('a')),
+            new Hero(tag: 'a', child: const Text('a too')),
             new Builder(
               builder: (BuildContext context) {
                 return new FlatButton(
-                  child: new Text('push'),
+                  child: const Text('push'),
                   onPressed: () {
                     Navigator.push(context, new PageRouteBuilder<Null>(
                       pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
-                        return new Text('fail');
+                        return const Text('fail');
                       },
                     ));
                   },
@@ -577,7 +577,7 @@ void main() {
                 },
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
             ],
@@ -598,7 +598,7 @@ void main() {
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],
@@ -668,17 +668,17 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 key: routeContainerKey,
                 child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
-              new SizedBox(height: 600.0),
+              const SizedBox(height: 600.0),
             ],
           )
         );
@@ -693,16 +693,16 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
-                  new SizedBox(height: 600.0),
+                  const SizedBox(height: 600.0),
                 ],
               );
             },
@@ -716,11 +716,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
@@ -729,13 +729,13 @@ void main() {
     await(tester.drag(find.byKey(routeContainerKey), const Offset(0.0, -25.0)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
-    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(75.0));
 
     await tester.pump(const Duration(milliseconds: 300));
     await tester.pump();
-    final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double finalHeroY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(finalHeroY, 75.0); // 100 less 25 for the scroll
   });
 
@@ -750,13 +750,13 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 key: routeContainerKey,
                 child: new Hero(tag: 'H', child: new Container(key: routeHeroKey, height: 200.0, width: 200.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -771,13 +771,13 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'H', child: new Container(key: homeHeroKey, height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],
@@ -793,11 +793,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 100));
-    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt100ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt100ms, lessThan(200.0));
     expect(yAt100ms, greaterThan(100.0));
 
@@ -808,7 +808,7 @@ void main() {
 
     // Flight continues (the hero will fade out) even though the destination
     // no longer exists.
-    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).y;
+    final double yAt110ms = tester.getTopLeft(find.byKey(routeHeroKey)).dy;
     expect(yAt110ms, lessThan(yAt100ms));
     expect(yAt110ms, greaterThan(100.0));
 
@@ -832,7 +832,7 @@ void main() {
               new Container(
                 child: new Hero(tag: 'BC', child: new Container(key: heroBCKey, height: 150.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -845,19 +845,19 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new SizedBox(height: 100.0),
+              const SizedBox(height: 100.0),
               // This container will appear at Y=100
               new Container(
                 child: new Hero(tag: 'AB', child: new Container(key: heroABKey, height: 200.0))
               ),
               new FlatButton(
-                child: new Text('PUSH C'),
+                child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); }
               ),
               new Container(
                 child: new Hero(tag: 'BC', child: new Container(height: 150.0))
               ),
-              new SizedBox(height: 800.0),
+              const SizedBox(height: 800.0),
             ],
           )
         );
@@ -872,13 +872,13 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new SizedBox(height: 200.0),
+                  const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   new Container(
                     child: new Hero(tag: 'AB', child: new Container(height: 100.0, width: 100.0)),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH B'),
+                    child: const Text('PUSH B'),
                     onPressed: () { Navigator.push(context, routeB); }
                   ),
                 ],
@@ -894,11 +894,11 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).y;
+    final double initialY = tester.getTopLeft(find.byKey(heroABKey)).dy;
     expect(initialY, 200.0);
 
     await tester.pump(const Duration(milliseconds: 200));
-    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).y;
+    final double yAt200ms = tester.getTopLeft(find.byKey(heroABKey)).dy;
     // Hero AB is mid flight.
     expect(yAt200ms, lessThan(200.0));
     expect(yAt200ms, greaterThan(100.0));
@@ -911,7 +911,7 @@ void main() {
     // Hero AB's aborted flight finishes where it was expected although
     // it's been faded out.
     await tester.pump(const Duration(milliseconds: 100));
-    expect(tester.getTopLeft(find.byKey(heroABKey)).y, 100.0);
+    expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
     // One Opacity widget per Hero, only one now has opacity 0.0
     final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
@@ -920,7 +920,7 @@ void main() {
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
-    expect(tester.getTopLeft(find.byKey(heroBCKey)).y, 0.0);
+    expect(tester.getTopLeft(find.byKey(heroBCKey)).dy, 0.0);
   });
 
   testWidgets('Stateful hero child state survives flight', (WidgetTester tester) async {
@@ -939,7 +939,7 @@ void main() {
                 ),
               ),
               new FlatButton(
-                child: new Text('POP'),
+                child: const Text('POP'),
                 onPressed: () { Navigator.pop(context); }
               ),
             ],
@@ -965,7 +965,7 @@ void main() {
                     ),
                   ),
                   new FlatButton(
-                    child: new Text('PUSH'),
+                    child: const Text('PUSH'),
                     onPressed: () { Navigator.push(context, route); }
                   ),
                 ],

@@ -6,6 +6,7 @@ import 'dart:developer';
 import 'dart:io' show Platform;
 import 'dart:ui' as ui show Scene, SceneBuilder, window;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
@@ -15,6 +16,7 @@ import 'layer.dart';
 import 'object.dart';
 
 /// The layout constraints for the root render object.
+@immutable
 class ViewConfiguration {
   /// Creates a view configuration.
   ///
@@ -78,7 +80,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     if (configuration == value)
       return;
     _configuration = value;
-    replaceRootLayer(new TransformLayer(transform: configuration.toMatrix()));
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
+    rootLayer.attach(this);
+    replaceRootLayer(rootLayer);
     markNeedsLayout();
   }
 
@@ -86,7 +90,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   void scheduleInitialFrame() {
     assert(owner != null);
     scheduleInitialLayout();
-    scheduleInitialPaint(new TransformLayer(transform: configuration.toMatrix()));
+    final ContainerLayer rootLayer = new TransformLayer(transform: configuration.toMatrix());
+    rootLayer.attach(this);
+    scheduleInitialPaint(rootLayer);
     owner.requestVisualUpdate();
   }
 
@@ -126,7 +132,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   /// given hit test result.
   ///
   /// The [position] argument is in the coordinate system of the render view.
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child != null)
       child.hitTest(result, position: position);
     result.add(new HitTestEntry(this));
@@ -164,10 +170,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   }
 
   @override
-  Rect get paintBounds => Point.origin & size;
+  Rect get paintBounds => Offset.zero & size;
 
   @override
-  Rect get semanticBounds => Point.origin & size;
+  Rect get semanticBounds => Offset.zero & size;
 
   @override
   void debugFillDescription(List<String> description) {

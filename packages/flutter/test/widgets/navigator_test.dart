@@ -16,7 +16,7 @@ class FirstWidget extends StatelessWidget {
         decoration: const BoxDecoration(
           backgroundColor: const Color(0xFFFFFF00)
         ),
-        child: new Text('X')
+        child: const Text('X')
       )
     );
   }
@@ -36,7 +36,7 @@ class SecondWidgetState extends State<SecondWidget> {
         decoration: const BoxDecoration(
           backgroundColor: const Color(0xFFFF00FF)
         ),
-        child: new Text('Y')
+        child: const Text('Y')
       )
     );
   }
@@ -188,11 +188,11 @@ void main() {
                 log.add('left');
                 Navigator.pushNamed(context, '/second');
               },
-              child: new Text('left')
+              child: const Text('left')
             ),
             new GestureDetector(
               onTap: () { log.add('right'); },
-              child: new Text('right')
+              child: const Text('right')
             ),
           ]
         );

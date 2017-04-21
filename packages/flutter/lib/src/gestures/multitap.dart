@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show Point, Offset;
+import 'dart:ui' show Offset;
 
 import 'arena.dart';
 import 'binding.dart';
@@ -41,7 +41,7 @@ class _TapTracker {
 
   final int pointer;
   final GestureArenaEntry entry;
-  final Point _initialPosition;
+  final Offset _initialPosition;
 
   bool _isTrackingPointer = false;
 
@@ -249,8 +249,8 @@ class _TapGesture extends _TapTracker {
   bool _wonArena = false;
   Timer _timer;
 
-  Point _lastPosition;
-  Point _finalPosition;
+  Offset _lastPosition;
+  Offset _finalPosition;
 
   void handleEvent(PointerEvent event) {
     assert(event.pointer == pointer);
@@ -374,7 +374,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<Null>('onTapCancel', () => onTapCancel(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
-  void _dispatchTap(int pointer, Point globalPosition) {
+  void _dispatchTap(int pointer, Offset globalPosition) {
     assert(_gestureMap.containsKey(pointer));
     _gestureMap.remove(pointer);
     if (onTapUp != null)
@@ -383,7 +383,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       invokeCallback<Null>('onTap', () => onTap(pointer)); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
   }
 
-  void _dispatchLongTap(int pointer, Point lastPosition) {
+  void _dispatchLongTap(int pointer, Offset lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
       invokeCallback<Null>('onLongTapDown', () => onLongTapDown(pointer, new TapDownDetails(globalPosition: lastPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504

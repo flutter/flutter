@@ -47,14 +47,15 @@ class PackagesGetCommand extends FlutterCommand {
     );
   }
 
-  // TODO: implement description
   @override
-  String get description =>
-      (upgrade ? 'Upgrade' : 'Get') + ' packages in a Flutter project.';
+  String get description {
+    return '${ upgrade ? "Upgrade" : "Get" } packages in a Flutter project.';
+  }
 
   @override
-  String get invocation =>
-      "${runner.executableName} packages $name [<target directory>]";
+  String get invocation {
+    return '${runner.executableName} packages $name [<target directory>]';
+  }
 
   @override
   Future<Null> runCommand() async {
@@ -62,22 +63,23 @@ class PackagesGetCommand extends FlutterCommand {
       throwToolExit('Too many arguments.\n$usage');
 
     final String target = findProjectRoot(
-        argResults.rest.length == 1 ? argResults.rest[0] : null);
-    if (target == null)
+      argResults.rest.length == 1 ? argResults.rest[0] : null
+    );
+    if (target == null) {
       throwToolExit(
-          'Expected to find project root starting at ' +
-          (argResults.rest.length == 1
-              ? argResults.rest[0]
-              : 'current working directory') +
-          '$usage');
+       'Expected to find project root in '
+       '${ argResults.rest.length == 1 ? argResults.rest[0] : "current working directory" }.'
+      );
+    }
 
-    // TODO: If the user is using a local build, we should use the packages from their build instead of the cache.
+    // TODO(ianh): If the user is using a local build, we should use the
+    // packages from their build instead of the cache.
 
     await pubGet(
       directory: target,
       upgrade: upgrade,
       offline: argResults['offline'],
-      checkLastModified: false
+      checkLastModified: false,
     );
   }
 }

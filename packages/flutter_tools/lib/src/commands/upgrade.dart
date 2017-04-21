@@ -36,12 +36,6 @@ class UpgradeCommand extends FlutterCommand {
     }
 
     final FlutterVersion flutterVersion = FlutterVersion.instance;
-    if (flutterVersion.channel == 'alpha') {
-      // The alpha branch is deprecated. Rather than trying to pull the alpha
-      // branch, we should switch upstream to master.
-      printStatus('Switching to from alpha to master...');
-      runSync(<String>['git', 'branch', '--set-upstream-to=origin/master']);
-    }
 
     printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
 

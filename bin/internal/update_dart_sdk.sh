@@ -49,7 +49,7 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
   mkdir -p -- "$DART_SDK_PATH"
   DART_SDK_ZIP="$FLUTTER_ROOT/bin/cache/dart-sdk.zip"
 
-  curl --progress-bar -continue-at=- --location --output "$DART_SDK_ZIP" "$DART_SDK_URL"
+  curl --progress-bar -continue-at=- --location --output "$DART_SDK_ZIP" "$DART_SDK_URL" 2>&1
   unzip -o -q "$DART_SDK_ZIP" -d "$FLUTTER_ROOT/bin/cache" || {
     echo
     echo "It appears that the downloaded file is corrupt; please try the operation again later."

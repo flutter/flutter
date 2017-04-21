@@ -4,6 +4,8 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// How a box should be inscribed into another box.
@@ -40,6 +42,7 @@ enum BoxFit {
 }
 
 /// The pair of sizes returned by [applyBoxFit].
+@immutable
 class FittedSizes {
   /// Creates an object to store a pair of sizes,
   /// as would be returned by [applyBoxFit].
@@ -89,7 +92,7 @@ class FittedSizes {
 /// ```dart
 /// final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
 /// final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
-/// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Point.origin & imageSize);
+/// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
 /// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
 /// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
 /// ```

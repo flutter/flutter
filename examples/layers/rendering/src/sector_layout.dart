@@ -282,12 +282,12 @@ class RenderSectorRing extends RenderSectorWithChildren {
 
   @override
   void performLayout() {
-    assert(this.parentData is SectorParentData);
+    assert(parentData is SectorParentData);
     deltaRadius = constraints.constrainDeltaRadius(desiredDeltaRadius);
     assert(deltaRadius < double.INFINITY);
     final double innerDeltaRadius = deltaRadius - padding * 2.0;
-    final double childRadius = this.parentData.radius + padding;
-    final double paddingTheta = math.atan(padding / (this.parentData.radius + deltaRadius));
+    final double childRadius = parentData.radius + padding;
+    final double paddingTheta = math.atan(padding / (parentData.radius + deltaRadius));
     double innerTheta = paddingTheta; // increments with each child
     double remainingDeltaTheta = constraints.maxDeltaTheta - (innerTheta + paddingTheta);
     RenderSector child = firstChild;
@@ -367,11 +367,11 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
   @override
   SectorDimensions getIntrinsicDimensions(SectorConstraints constraints, double radius) {
-    assert(this.parentData is SectorParentData);
-    final double paddingTheta = math.atan(padding / this.parentData.radius);
+    assert(parentData is SectorParentData);
+    final double paddingTheta = math.atan(padding / parentData.radius);
     final double outerDeltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     final double innerDeltaTheta = outerDeltaTheta - paddingTheta * 2.0;
-    double childRadius = this.parentData.radius + padding;
+    double childRadius = parentData.radius + padding;
     double remainingDeltaRadius = constraints.maxDeltaRadius - (padding * 2.0);
     RenderSector child = firstChild;
     while (child != null) {
@@ -388,19 +388,19 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       remainingDeltaRadius -= padding;
     }
     return new SectorDimensions.withConstraints(constraints,
-                                                deltaRadius: childRadius - this.parentData.radius,
+                                                deltaRadius: childRadius - parentData.radius,
                                                 deltaTheta: outerDeltaTheta);
   }
 
   @override
   void performLayout() {
-    assert(this.parentData is SectorParentData);
+    assert(parentData is SectorParentData);
     deltaTheta = constraints.constrainDeltaTheta(desiredDeltaTheta);
     assert(deltaTheta <= kTwoPi);
-    final double paddingTheta = math.atan(padding / this.parentData.radius);
-    final double innerTheta = this.parentData.theta + paddingTheta;
+    final double paddingTheta = math.atan(padding / parentData.radius);
+    final double innerTheta = parentData.theta + paddingTheta;
     final double innerDeltaTheta = deltaTheta - paddingTheta * 2.0;
-    double childRadius = this.parentData.radius + padding;
+    double childRadius = parentData.radius + padding;
     double remainingDeltaRadius = constraints.maxDeltaRadius - (padding * 2.0);
     RenderSector child = firstChild;
     while (child != null) {
@@ -418,7 +418,7 @@ class RenderSectorSlice extends RenderSectorWithChildren {
       childRadius += padding;
       remainingDeltaRadius -= padding;
     }
-    deltaRadius = childRadius - this.parentData.radius;
+    deltaRadius = childRadius - parentData.radius;
   }
 
   // offset must point to the center of our circle
@@ -525,22 +525,22 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
     if (child != null) {
       final Rect bounds = offset & size;
       // we move the offset to the center of the circle for the RenderSectors
-      context.paintChild(child, bounds.center.toOffset());
+      context.paintChild(child, bounds.center);
     }
   }
 
   @override
-  bool hitTest(HitTestResult result, { Point position }) {
+  bool hitTest(HitTestResult result, { Offset position }) {
     if (child == null)
       return false;
-    double x = position.x;
-    double y = position.y;
+    double x = position.dx;
+    double y = position.dy;
     // translate to our origin
-    x -= size.width/2.0;
-    y -= size.height/2.0;
+    x -= size.width / 2.0;
+    y -= size.height / 2.0;
     // convert to radius/theta
-    final double radius = math.sqrt(x*x+y*y);
-    final double theta = (math.atan2(x, -y) - math.PI/2.0) % kTwoPi;
+    final double radius = math.sqrt(x * x + y * y);
+    final double theta = (math.atan2(x, -y) - math.PI / 2.0) % kTwoPi;
     if (radius < innerRadius)
       return false;
     if (radius >= innerRadius + child.deltaRadius)

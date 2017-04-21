@@ -8,6 +8,7 @@
 
 import 'dart:async' show Future, Stream, StreamSubscription;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart' show required;
 
@@ -101,23 +102,24 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
   @override
   void initState() {
     super.initState();
-    _summary = config.initial();
+    _summary = widget.initial();
     _subscribe();
   }
 
   @override
-  void didUpdateConfig(StreamBuilderBase<T, S> oldConfig) {
-    if (oldConfig.stream != config.stream) {
+  void didUpdateWidget(StreamBuilderBase<T, S> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.stream != widget.stream) {
       if (_subscription != null) {
         _unsubscribe();
-        _summary = config.afterDisconnected(_summary);
+        _summary = widget.afterDisconnected(_summary);
       }
       _subscribe();
     }
   }
 
   @override
-  Widget build(BuildContext context) => config.build(context, _summary);
+  Widget build(BuildContext context) => widget.build(context, _summary);
 
   @override
   void dispose() {
@@ -126,21 +128,21 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
   }
 
   void _subscribe() {
-    if (config.stream != null) {
-      _subscription = config.stream.listen((T data) {
+    if (widget.stream != null) {
+      _subscription = widget.stream.listen((T data) {
         setState(() {
-          _summary = config.afterData(_summary, data);
+          _summary = widget.afterData(_summary, data);
         });
       }, onError: (Object error) {
         setState(() {
-          _summary = config.afterError(_summary, error);
+          _summary = widget.afterError(_summary, error);
         });
       }, onDone: () {
         setState(() {
-          _summary = config.afterDone(_summary);
+          _summary = widget.afterDone(_summary);
         });
       });
-      _summary = config.afterConnected(_summary);
+      _summary = widget.afterConnected(_summary);
     }
   }
 
@@ -178,9 +180,10 @@ enum ConnectionState {
 /// See also:
 ///
 /// * [StreamBuilder], which builds itself based on a snapshot from interacting
-/// with a [Stream].
+///   with a [Stream].
 /// * [FutureBuilder], which builds itself based on a snapshot from interacting
-/// with a [Future].
+///   with a [Future].
+@immutable
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
@@ -418,8 +421,9 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  void didUpdateConfig(FutureBuilder<T> oldConfig) {
-    if (oldConfig.future != config.future) {
+  void didUpdateWidget(FutureBuilder<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.future != widget.future) {
       if (_activeCallbackIdentity != null) {
         _unsubscribe();
         _snapshot = _snapshot.inState(ConnectionState.none);
@@ -429,7 +433,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   @override
-  Widget build(BuildContext context) => config.builder(context, _snapshot);
+  Widget build(BuildContext context) => widget.builder(context, _snapshot);
 
   @override
   void dispose() {
@@ -438,10 +442,10 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   }
 
   void _subscribe() {
-    if (config.future != null) {
+    if (widget.future != null) {
       final Object callbackIdentity = new Object();
       _activeCallbackIdentity = callbackIdentity;
-      config.future.then<Null>((T data) {
+      widget.future.then<Null>((T data) {
         if (_activeCallbackIdentity == callbackIdentity) {
           setState(() {
             _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.done, data);

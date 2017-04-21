@@ -10,7 +10,7 @@ void main() {
     title: 'Hardware Key Demo',
     home: new Scaffold(
       appBar: new AppBar(
-        title: new Text('Hardware Key Demo'),
+        title: const Text('Hardware Key Demo'),
       ),
       body: new Center(
         child: new RawKeyboardDemo(),

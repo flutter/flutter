@@ -18,9 +18,9 @@ void main() {
 
     final PointerRouter router = new PointerRouter();
     router.addRoute(3, callback);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
-    router.route(pointer3.down(Point.origin));
+    router.route(pointer3.down(Offset.zero));
     expect(callbackRan, isTrue);
     callbackRan = false;
     router.removeRoute(3, callback);
@@ -39,7 +39,7 @@ void main() {
     });
     router.addRoute(2, callback);
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
 
@@ -57,7 +57,7 @@ void main() {
     });
 
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(firstCallbackRan, isTrue);
     expect(secondCallbackRan, isFalse);
   });
@@ -73,7 +73,7 @@ void main() {
     });
     router.addGlobalRoute(callback);
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(callbackRan, isFalse);
   });
 
@@ -89,7 +89,7 @@ void main() {
       router.addGlobalRoute(callback);
     });
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(perPointerCallbackRan, isTrue);
     expect(callbackRan, isFalse);
   });
@@ -110,7 +110,7 @@ void main() {
       log.add('per-pointer 2');
     });
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',
       'per-pointer 2',
@@ -139,7 +139,7 @@ void main() {
     };
 
     final TestPointer pointer2 = new TestPointer(2);
-    router.route(pointer2.down(Point.origin));
+    router.route(pointer2.down(Offset.zero));
     expect(log, equals(<String>[
       'per-pointer 1',
       'per-pointer 2',

@@ -54,9 +54,9 @@ void main() {
           reverse: true,
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -79,9 +79,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -92,7 +92,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, lessThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, lessThan(300.0));
   });
 
   testWidgets('RefreshIndicator - bottom - position', (WidgetTester tester) async {
@@ -104,9 +104,9 @@ void main() {
           reverse: true,
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -117,7 +117,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pump(const Duration(seconds: 1));
-    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).y, greaterThan(300.0));
+    expect(tester.getCenter(find.byType(RefreshProgressIndicator)).dy, greaterThan(300.0));
   });
 
   testWidgets('RefreshIndicator - no movement', (WidgetTester tester) async {
@@ -128,9 +128,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -154,9 +154,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -179,9 +179,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -220,9 +220,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),
@@ -262,9 +262,9 @@ void main() {
         child: new ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: <Widget>[
-            new SizedBox(
+            const SizedBox(
               height: 200.0,
-              child: new Text('X'),
+              child: const Text('X'),
             ),
           ],
         ),

@@ -33,6 +33,7 @@ enum BoxShape {
 /// An immutable set of radii for each corner of a rectangle.
 ///
 /// Used by [BoxDecoration] when the shape is a [BoxShape.rectangle].
+@immutable
 class BorderRadius {
   /// Creates a border radius where all radii are [radius].
   const BorderRadius.all(Radius radius) : this.only(
@@ -151,6 +152,7 @@ enum BorderStyle {
 }
 
 /// A side of a border of a box.
+@immutable
 class BorderSide {
   /// Creates the side of a border.
   ///
@@ -250,6 +252,7 @@ class BorderSide {
 }
 
 /// A border of a box, comprised of four sides.
+@immutable
 class Border {
   /// Creates a border.
   ///
@@ -502,6 +505,7 @@ class Border {
 /// (e.g., has a border radius or a circular shape).
 ///
 /// This class is similar to CSS box-shadow.
+@immutable
 class BoxShadow {
   /// Creates a box shadow.
   ///
@@ -577,10 +581,8 @@ class BoxShadow {
   static List<BoxShadow> lerpList(List<BoxShadow> a, List<BoxShadow> b, double t) {
     if (a == null && b == null)
       return null;
-    if (a == null)
-      a = <BoxShadow>[];
-    if (b == null)
-      b = <BoxShadow>[];
+    a ??= <BoxShadow>[];
+    b ??= <BoxShadow>[];
     final List<BoxShadow> result = <BoxShadow>[];
     final int commonLength = math.min(a.length, b.length);
     for (int i = 0; i < commonLength; ++i)
@@ -613,6 +615,7 @@ class BoxShadow {
 }
 
 /// A 2D gradient.
+@immutable
 abstract class Gradient {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -670,8 +673,9 @@ class LinearGradient extends Gradient {
   @override
   Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
-      <Point>[begin.withinRect(rect), end.withinRect(rect)],
-      colors, stops, tileMode
+      begin.withinRect(rect),
+      end.withinRect(rect),
+      colors, stops, tileMode,
     );
   }
 
@@ -940,7 +944,7 @@ void paintImage({
   }
   final double dx = (outputSize.width - destinationSize.width) * (alignment?.dx ?? 0.5);
   final double dy = (outputSize.height - destinationSize.height) * (alignment?.dy ?? 0.5);
-  final Point destinationPosition = rect.topLeft + new Offset(dx, dy);
+  final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
   if (repeat != ImageRepeat.noRepeat) {
     canvas.save();
@@ -948,7 +952,7 @@ void paintImage({
   }
   if (centerSlice == null) {
     final Rect sourceRect = (alignment ?? FractionalOffset.center).inscribe(
-      fittedSizes.source, Point.origin & inputSize
+      fittedSizes.source, Offset.zero & inputSize
     );
     for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
       canvas.drawImageRect(image, sourceRect, tileRect, paint);
@@ -964,6 +968,7 @@ void paintImage({
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
+@immutable
 class BackgroundImage {
   /// Creates a background image.
   ///
@@ -1072,6 +1077,9 @@ class BoxDecoration extends Decoration {
     this.gradient,
     this.shape: BoxShape.rectangle
   });
+
+  /// A [BoxDecoration] with no decorating properties.
+  static const BoxDecoration none = const BoxDecoration();
 
   @override
   bool debugAssertIsValid() {
@@ -1230,19 +1238,19 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool hitTest(Size size, Point position) {
+  bool hitTest(Size size, Offset position) {
     assert(shape != null);
-    assert((Point.origin & size).contains(position));
+    assert((Offset.zero & size).contains(position));
     switch (shape) {
       case BoxShape.rectangle:
         if (borderRadius != null) {
-          final RRect bounds = borderRadius.toRRect(Point.origin & size);
+          final RRect bounds = borderRadius.toRRect(Offset.zero & size);
           return bounds.contains(position);
         }
         return true;
       case BoxShape.circle:
         // Circles are inscribed into our smallest dimension.
-        final Point center = size.center(Point.origin);
+        final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
     }
@@ -1294,7 +1302,7 @@ class _BoxDecorationPainter extends BoxPainter {
     switch (_decoration.shape) {
       case BoxShape.circle:
         assert(_decoration.borderRadius == null);
-        final Point center = rect.center;
+        final Offset center = rect.center;
         final double radius = rect.shortestSide / 2.0;
         canvas.drawCircle(center, radius, paint);
         break;

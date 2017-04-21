@@ -24,8 +24,7 @@ class TestGestureFlutterBinding extends BindingBase with GestureBinding {
 TestGestureFlutterBinding _binding = new TestGestureFlutterBinding();
 
 void ensureTestGestureBinding() {
-  if (_binding == null)
-    _binding = new TestGestureFlutterBinding();
+  _binding ??= new TestGestureFlutterBinding();
   assert(GestureBinding.instance != null);
 }
 

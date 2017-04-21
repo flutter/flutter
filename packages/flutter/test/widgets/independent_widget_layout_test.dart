@@ -73,12 +73,13 @@ class TriggerableState extends State<TriggerableWidget> {
   @override
   void initState() {
     super.initState();
-    config.trigger.callback = fire;
+    widget.trigger.callback = fire;
   }
 
   @override
-  void didUpdateConfig(TriggerableWidget oldConfig) {
-    config.trigger.callback = fire;
+  void didUpdateWidget(TriggerableWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    widget.trigger.callback = fire;
   }
 
   int _count = 0;
@@ -90,7 +91,7 @@ class TriggerableState extends State<TriggerableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    config.counter.count++;
+    widget.counter.count++;
     return new Text("Bang $_count!");
   }
 }

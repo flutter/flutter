@@ -36,13 +36,13 @@ List<BoxShadow> getShadow(WidgetTester tester) {
 class PaintRecorder extends CustomPainter {
   PaintRecorder(this.log);
 
-  List<Size> log;
+  final List<Size> log;
 
   @override
   void paint(Canvas canvas, Size size) {
     log.add(size);
     final Paint paint = new Paint()..color = const Color(0xFF0000FF);
-    canvas.drawRect(Point.origin & size, paint);
+    canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override

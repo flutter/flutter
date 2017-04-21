@@ -217,16 +217,15 @@ class FlutterDriver {
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
       final Future<dynamic> whenResumed = resumeLeniently();
-      final Future<dynamic> whenServiceExtensionReady = Future.any<dynamic>(<Future<dynamic>>[
-        waitForServiceExtension(),
+      final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
+      await whenResumed;
+
+      try {
+        _log.trace('Waiting for service extension');
         // We will never receive the extension event if the user does not
         // register it. If that happens time out.
-        new Future<String>.delayed(_kLongTimeout * 2, () => 'timeout')
-      ]);
-      await whenResumed;
-      _log.trace('Waiting for service extension');
-      final dynamic signal = await whenServiceExtensionReady;
-      if (signal == 'timeout') {
+        await whenServiceExtensionReady.timeout(_kLongTimeout * 2);
+      } on TimeoutException catch (_) {
         throw new DriverError(
           'Timed out waiting for Flutter Driver extension to become available. '
           'Ensure your test app (often: lib/main.dart) imports '

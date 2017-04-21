@@ -8,29 +8,29 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-typedef Future<ByteData> _PlatformMessageHandler(ByteData message);
+typedef Future<ByteData> _MessageHandler(ByteData message);
 
 /// Sends binary messages to and receives binary messages from platform plugins.
 ///
 /// See also:
 ///
-/// * [PlatformMessageChannel], which provides messaging services similar to
-/// PlatformMessages, but with pluggable message codecs in support of sending
+/// * [BasicMessageChannel], which provides messaging services similar to
+/// [BinaryMessages], but with pluggable message codecs in support of sending
 /// strings or semi-structured messages.
-/// * [PlatformMethodChannel], which provides higher-level platform
+/// * [MethodChannel], which provides higher-level platform
 /// communication such as method invocations and event streams.
 ///
 /// See: <https://flutter.io/platform-channels/>
-class PlatformMessages {
-  PlatformMessages._();
+class BinaryMessages {
+  BinaryMessages._();
 
   // Handlers for incoming messages from platform plugins.
-  static final Map<String, _PlatformMessageHandler> _handlers =
-      <String, _PlatformMessageHandler>{};
+  static final Map<String, _MessageHandler> _handlers =
+      <String, _MessageHandler>{};
 
   // Mock handlers that intercept and respond to outgoing messages.
-  static final Map<String, _PlatformMessageHandler> _mockHandlers =
-      <String, _PlatformMessageHandler>{};
+  static final Map<String, _MessageHandler> _mockHandlers =
+      <String, _MessageHandler>{};
 
   static Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = new Completer<ByteData>();
@@ -59,7 +59,7 @@ class PlatformMessages {
         String channel, ByteData data, ui.PlatformMessageResponseCallback callback) async {
     ByteData response;
     try {
-      final _PlatformMessageHandler handler = _handlers[channel];
+      final _MessageHandler handler = _handlers[channel];
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
@@ -78,8 +78,8 @@ class PlatformMessages {
   ///
   /// Returns a [Future] which completes to the received response, undecoded, in
   /// binary form.
-  static Future<ByteData> sendBinary(String channel, ByteData message) {
-    final _PlatformMessageHandler handler = _mockHandlers[channel];
+  static Future<ByteData> send(String channel, ByteData message) {
+    final _MessageHandler handler = _mockHandlers[channel];
     if (handler != null)
       return handler(message);
     return _sendPlatformMessage(channel, message);
@@ -93,7 +93,7 @@ class PlatformMessages {
   /// argument.
   ///
   /// The handler's return value, if non-null, is sent as a response, unencoded.
-  static void setBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
+  static void setMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
     if (handler == null)
       _handlers.remove(channel);
     else
@@ -111,7 +111,7 @@ class PlatformMessages {
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
-  static void setMockBinaryMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
+  static void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message)) {
     if (handler == null)
       _mockHandlers.remove(channel);
     else

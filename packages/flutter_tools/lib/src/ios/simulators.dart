@@ -343,7 +343,7 @@ class IOSSimulator extends Device {
   bool isLatestBuildInstalled(ApplicationPackage app) => false;
 
   @override
-  bool installApp(ApplicationPackage app) {
+  Future<bool> installApp(ApplicationPackage app) async {
     try {
       final IOSApp iosApp = app;
       SimControl.instance.install(id, iosApp.simulatorBundlePath);
@@ -435,7 +435,7 @@ class IOSSimulator extends Device {
         return new LaunchResult.failed();
       }
     } else {
-      if (!installApp(app))
+      if (!await installApp(app))
         return new LaunchResult.failed();
     }
 
@@ -455,6 +455,8 @@ class IOSSimulator extends Device {
         args.add('--enable-checked-mode');
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.useTestFonts)
+        args.add('--use-test-fonts');
 
       final int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add('--observatory-port=$observatoryPort');
@@ -565,12 +567,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _IOSSimulatorDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _IOSSimulatorDevicePortForwarder(this);
 
   @override
   void clearLogs() {

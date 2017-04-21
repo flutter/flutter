@@ -28,6 +28,7 @@ abstract class MessageCodec<T> {
 }
 
 /// An command object representing the invocation of a named method.
+@immutable
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].

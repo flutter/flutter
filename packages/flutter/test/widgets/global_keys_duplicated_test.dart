@@ -12,8 +12,8 @@ void main() {
     // This is actually a test of the regular duplicate key logic, which
     // happens before the duplicate GlobalKey logic.
     await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(key: new GlobalObjectKey(0)),
-      new Container(key: new GlobalObjectKey(0)),
+      new Container(key: const GlobalObjectKey(0)),
+      new Container(key: const GlobalObjectKey(0)),
     ]));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
@@ -24,8 +24,8 @@ void main() {
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
     await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: new GlobalObjectKey(0))),
-      new Container(child: new Container(key: new GlobalObjectKey(0))),
+      new Container(child: new Container(key: const GlobalObjectKey(0))),
+      new Container(child: new Container(key: const GlobalObjectKey(0))),
     ]));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
@@ -38,8 +38,8 @@ void main() {
 
   testWidgets('GlobalKey children of two different nodes', (WidgetTester tester) async {
     await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: new GlobalObjectKey(0))),
-      new Container(key: new Key('x'), child: new Container(key: new GlobalObjectKey(0))),
+      new Container(child: new Container(key: const GlobalObjectKey(0))),
+      new Container(key: const Key('x'), child: new Container(key: const GlobalObjectKey(0))),
     ]));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
@@ -55,12 +55,12 @@ void main() {
     StateSetter nestedSetState;
     bool flag = false;
     await tester.pumpWidget(new Row(children: <Widget>[
-      new Container(child: new Container(key: new GlobalObjectKey(0))),
+      new Container(child: new Container(key: const GlobalObjectKey(0))),
       new Container(child: new StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
           nestedSetState = setState;
           if (flag)
-            return new Container(key: new GlobalObjectKey(0));
+            return new Container(key: const GlobalObjectKey(0));
           return new Container();
         },
       )),

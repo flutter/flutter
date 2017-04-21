@@ -16,14 +16,14 @@ void main() {
       bottomLeft: Radius.zero
     );
 
-    expect(rrect.contains(const Point(1.0, 1.0)), isFalse);
-    expect(rrect.contains(const Point(1.1, 1.1)), isFalse);
-    expect(rrect.contains(const Point(1.15, 1.15)), isTrue);
-    expect(rrect.contains(const Point(2.0, 1.0)), isFalse);
-    expect(rrect.contains(const Point(1.93, 1.07)), isFalse);
-    expect(rrect.contains(const Point(1.97, 1.7)), isFalse);
-    expect(rrect.contains(const Point(1.7, 1.97)), isTrue);
-    expect(rrect.contains(const Point(1.0, 1.99)), isTrue);
+    expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
+    expect(rrect.contains(const Offset(1.1, 1.1)), isFalse);
+    expect(rrect.contains(const Offset(1.15, 1.15)), isTrue);
+    expect(rrect.contains(const Offset(2.0, 1.0)), isFalse);
+    expect(rrect.contains(const Offset(1.93, 1.07)), isFalse);
+    expect(rrect.contains(const Offset(1.97, 1.7)), isFalse);
+    expect(rrect.contains(const Offset(1.7, 1.97)), isTrue);
+    expect(rrect.contains(const Offset(1.0, 1.99)), isTrue);
   });
 
   test("RRect.contains() large radii", () {
@@ -35,13 +35,13 @@ void main() {
       bottomLeft: Radius.zero
     );
 
-    expect(rrect.contains(const Point(1.0, 1.0)), isFalse);
-    expect(rrect.contains(const Point(1.1, 1.1)), isFalse);
-    expect(rrect.contains(const Point(1.15, 1.15)), isTrue);
-    expect(rrect.contains(const Point(2.0, 1.0)), isFalse);
-    expect(rrect.contains(const Point(1.93, 1.07)), isFalse);
-    expect(rrect.contains(const Point(1.97, 1.7)), isFalse);
-    expect(rrect.contains(const Point(1.7, 1.97)), isTrue);
-    expect(rrect.contains(const Point(1.0, 1.99)), isTrue);
+    expect(rrect.contains(const Offset(1.0, 1.0)), isFalse);
+    expect(rrect.contains(const Offset(1.1, 1.1)), isFalse);
+    expect(rrect.contains(const Offset(1.15, 1.15)), isTrue);
+    expect(rrect.contains(const Offset(2.0, 1.0)), isFalse);
+    expect(rrect.contains(const Offset(1.93, 1.07)), isFalse);
+    expect(rrect.contains(const Offset(1.97, 1.7)), isFalse);
+    expect(rrect.contains(const Offset(1.7, 1.97)), isTrue);
+    expect(rrect.contains(const Offset(1.0, 1.99)), isTrue);
   });
 }

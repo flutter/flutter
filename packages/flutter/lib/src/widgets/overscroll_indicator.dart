@@ -116,17 +116,18 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   @override
   void initState() {
     super.initState();
-    _leadingController = new _GlowController(vsync: this, color: config.color, axis: config.axis);
-    _trailingController = new _GlowController(vsync: this, color: config.color, axis: config.axis);
+    _leadingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
+    _trailingController = new _GlowController(vsync: this, color: widget.color, axis: widget.axis);
   }
 
   @override
-  void didUpdateConfig(GlowingOverscrollIndicator oldConfig) {
-    if (oldConfig.color != config.color || oldConfig.axis != config.axis) {
-      _leadingController.color = config.color;
-      _leadingController.axis = config.axis;
-      _trailingController.color = config.color;
-      _trailingController.axis = config.axis;
+  void didUpdateWidget(GlowingOverscrollIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.color != widget.color || oldWidget.axis != widget.axis) {
+      _leadingController.color = widget.color;
+      _leadingController.axis = widget.axis;
+      _trailingController.color = widget.color;
+      _trailingController.axis = widget.axis;
     }
   }
 
@@ -152,7 +153,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         _accepted[isLeading] = confirmationNotification._accepted;
       }
       assert(controller != null);
-      assert(notification.axis == config.axis);
+      assert(notification.axis == widget.axis);
       if (_accepted[isLeading]) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
@@ -165,13 +166,13 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             assert(renderer != null);
             assert(renderer.hasSize);
             final Size size = renderer.size;
-            final Point position = renderer.globalToLocal(notification.dragDetails.globalPosition);
+            final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
             switch (notification.axis) {
               case Axis.horizontal:
-                controller.pull(notification.overscroll.abs(), size.width, position.y.clamp(0.0, size.height), size.height);
+                controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
                 break;
               case Axis.vertical:
-                controller.pull(notification.overscroll.abs(), size.height, position.x.clamp(0.0, size.width), size.width);
+                controller.pull(notification.overscroll.abs(), size.height, position.dx.clamp(0.0, size.width), size.width);
                 break;
             }
           }
@@ -201,12 +202,12 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
       child: new RepaintBoundary(
         child: new CustomPaint(
           foregroundPainter: new _GlowingOverscrollIndicatorPainter(
-            leadingController: config.showLeading ? _leadingController : null,
-            trailingController: config.showTrailing ? _trailingController : null,
-            axisDirection: config.axisDirection,
+            leadingController: widget.showLeading ? _leadingController : null,
+            trailingController: widget.showTrailing ? _trailingController : null,
+            axisDirection: widget.axisDirection,
           ),
           child: new RepaintBoundary(
-            child: config.child,
+            child: widget.child,
           ),
         ),
       ),
@@ -423,7 +424,7 @@ class _GlowController extends ChangeNotifier {
     final double height = math.min(size.height, size.width * _kWidthToHeightFactor);
     final double scaleY = _glowSize.value * baseGlowScale;
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, height);
-    final Point center = new Point((size.width / 2.0) * (0.5 + _displacement), height - radius);
+    final Offset center = new Offset((size.width / 2.0) * (0.5 + _displacement), height - radius);
     final Paint paint = new Paint()..color = color.withOpacity(_glowOpacity.value);
     canvas.save();
     canvas.scale(1.0, scaleY);

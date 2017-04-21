@@ -272,12 +272,12 @@ class _CupertinoButtonBarPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = _kButtonDividerColor;
 
-    canvas.drawLine(Point.origin, new Point(size.width, 0.0), paint);
+    canvas.drawLine(Offset.zero, new Offset(size.width, 0.0), paint);
     for (int i = 1; i < count; ++i) {
       // TODO(abarth): Hide the divider when one of the adjacent buttons is
       // highlighted.
       final double x = size.width * i / count;
-      canvas.drawLine(new Point(x, 0.0), new Point(x, size.height), paint);
+      canvas.drawLine(new Offset(x, 0.0), new Offset(x, size.height), paint);
     }
   }
 

@@ -222,7 +222,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  bool installApp(ApplicationPackage app) {
+  Future<bool> installApp(ApplicationPackage app) async {
     final AndroidApk apk = app;
     if (!fs.isFileSync(apk.apkPath)) {
       printError('"${apk.apkPath}" does not exist.');
@@ -233,16 +233,18 @@ class AndroidDevice extends Device {
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final String installOut = runCheckedSync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    final RunResult installResult = await runCheckedAsync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
     status.stop();
     final RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
-    final String failure = failureExp.stringMatch(installOut);
+    final String failure = failureExp.stringMatch(installResult.stdout);
     if (failure != null) {
       printError('Package install error: $failure');
       return false;
     }
 
-    runCheckedSync(adbCommandForDevice(<String>['shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)]));
+    await runCheckedAsync(adbCommandForDevice(<String>[
+      'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app)
+    ]));
     return true;
   }
 
@@ -262,7 +264,7 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  bool _installLatestApp(ApplicationPackage package) {
+  Future<bool> _installLatestApp(ApplicationPackage package) async {
     final bool wasInstalled = isAppInstalled(package);
     if (wasInstalled) {
       if (isLatestBuildInstalled(package)) {
@@ -271,7 +273,7 @@ class AndroidDevice extends Device {
       }
     }
     printTrace('Installing APK.');
-    if (!installApp(package)) {
+    if (!await installApp(package)) {
       printTrace('Warning: Failed to install APK.');
       if (wasInstalled) {
         printStatus('Uninstalling old version...');
@@ -279,7 +281,7 @@ class AndroidDevice extends Device {
           printError('Error: Uninstalling old version failed.');
           return false;
         }
-        if (!installApp(package)) {
+        if (!await installApp(package)) {
           printError('Error: Failed to install APK again.');
           return false;
         }
@@ -312,7 +314,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication) {
       printTrace('Building APK');
-      await buildApk(targetPlatform,
+      await buildApk(
           target: mainPath,
           buildMode: debuggingOptions.buildMode,
           kernelPath: kernelPath,
@@ -325,7 +327,7 @@ class AndroidDevice extends Device {
     printTrace("Stopping app '${package.name}' on $name.");
     await stopApp(package);
 
-    if (!_installLatestApp(package))
+    if (!await _installLatestApp(package))
       return new LaunchResult.failed();
 
     final bool traceStartup = platformArgs['trace-startup'] ?? false;
@@ -337,7 +339,7 @@ class AndroidDevice extends Device {
 
     if (debuggingOptions.debuggingEnabled) {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
-      // port forwarding).
+      // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = new ProtocolDiscovery.observatory(
         getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
       diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
@@ -363,6 +365,8 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+      if (debuggingOptions.useTestFonts)
+        cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
     }
     cmd.add(apk.launchActivity);
     final String result = runCheckedSync(cmd);
@@ -372,9 +376,8 @@ class AndroidDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    if (!debuggingOptions.debuggingEnabled) {
+    if (!debuggingOptions.debuggingEnabled)
       return new LaunchResult.succeeded();
-    }
 
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on...".
@@ -430,12 +433,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  DevicePortForwarder get portForwarder {
-    if (_portForwarder == null)
-      _portForwarder = new _AndroidDevicePortForwarder(this);
-
-    return _portForwarder;
-  }
+  DevicePortForwarder get portForwarder => _portForwarder ??= new _AndroidDevicePortForwarder(this);
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
@@ -616,7 +614,7 @@ class _AdbLogReader extends DeviceLogReader {
         _timeOrigin = null;
     runCommand(device.adbCommandForDevice(args)).then<Null>((Process process) {
       _process = process;
-      final Utf8Decoder decoder = new Utf8Decoder(allowMalformed: true);
+      final Utf8Decoder decoder = const Utf8Decoder(allowMalformed: true);
       _process.stdout.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.stderr.transform(decoder).transform(const LineSplitter()).listen(_onLine);
       _process.exitCode.whenComplete(() {
@@ -626,8 +624,8 @@ class _AdbLogReader extends DeviceLogReader {
     });
   }
 
-  // 'W/ActivityManager: '
-  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.{8,}:\s');
+  // 'W/ActivityManager(pid): '
+  static final RegExp _logFormat = new RegExp(r'^[VDIWEF]\/.*?\(\s*(\d+)\):\s');
 
   static final List<RegExp> _whitelistedTags = <RegExp>[
     new RegExp(r'^[VDIWEF]\/flutter[^:]*:\s+', caseSensitive: false),
@@ -662,14 +660,19 @@ class _AdbLogReader extends DeviceLogReader {
     }
     // Chop off the time.
     line = line.substring(timeMatch.end + 1);
-    if (_logFormat.hasMatch(line)) {
-      // Filter on approved names and levels.
-      for (RegExp regex in _whitelistedTags) {
-        if (regex.hasMatch(line)) {
-          _acceptedLastLine = true;
-          _linesController.add(line);
-          return;
-        }
+    final Match logMatch = _logFormat.firstMatch(line);
+    if (logMatch != null) {
+      bool acceptLine = false;
+      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+        acceptLine = true;
+      } else {
+        // Filter on approved names and levels.
+        acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
+      }
+      if (acceptLine) {
+        _acceptedLastLine = true;
+        _linesController.add(line);
+        return;
       }
       _acceptedLastLine = false;
     } else if (line == '--------- beginning of system' ||

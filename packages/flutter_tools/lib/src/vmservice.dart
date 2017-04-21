@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show BASE64;
+import 'dart:math' as math;
 
 import 'package:file/file.dart';
 import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
@@ -33,6 +34,9 @@ const Duration kDefaultRequestTimeout = const Duration(seconds: 30);
 
 /// Used for RPC requests that may take a long time.
 const Duration kLongRequestTimeout = const Duration(minutes: 1);
+
+/// Used for RPC requests that should never take a long time.
+const Duration kShortRequestTimeout = const Duration(seconds: 5);
 
 /// A connection to the Dart VM Service.
 class VMService {
@@ -266,11 +270,9 @@ abstract class ServiceObject {
         serviceObject = new Isolate._empty(owner.vm);
       break;
     }
-    if (serviceObject == null) {
-      // If we don't have a model object for this service object type, as a
-      // fallback return a ServiceMap object.
-      serviceObject = new ServiceMap._empty(owner);
-    }
+    // If we don't have a model object for this service object type, as a
+    // fallback return a ServiceMap object.
+    serviceObject ??= new ServiceMap._empty(owner);
     // We have now constructed an emtpy service object, call update to
     // populate it.
     serviceObject.update(map);
@@ -509,6 +511,11 @@ class VM extends ServiceObjectOwner {
     _loaded = true;
 
     // TODO(johnmccutchan): Extract any properties we care about here.
+    _pid = map['pid'];
+    if (map['_heapAllocatedMemoryUsage'] != null) {
+      _heapAllocatedMemoryUsage = map['_heapAllocatedMemoryUsage'];
+    }
+    _maxRSS = map['_maxRSS'];
 
     // Remove any isolates which are now dead from the isolate cache.
     _removeDeadIsolates(map['isolates']);
@@ -522,6 +529,20 @@ class VM extends ServiceObjectOwner {
 
   /// The set of live views.
   final Map<String, FlutterView> _viewCache = <String, FlutterView>{};
+
+  /// The pid of the VM's process.
+  int _pid;
+  int get pid => _pid;
+
+  /// The number of bytes allocated (e.g. by malloc) in the native heap.
+  int _heapAllocatedMemoryUsage;
+  int get heapAllocatedMemoryUsage {
+    return _heapAllocatedMemoryUsage == null ? 0 : _heapAllocatedMemoryUsage;
+  }
+
+  /// The peak resident set size for the process.
+  int _maxRSS;
+  int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
 
   int _compareIsolates(Isolate a, Isolate b) {
     final DateTime aStart = a.startTime;
@@ -751,6 +772,7 @@ class VM extends ServiceObjectOwner {
   }
 
   Future<Null> refreshViews() async {
+    _viewCache.clear();
     await vmService.vm.invokeRpc('_flutter.listViews', timeout: kLongRequestTimeout);
   }
 
@@ -760,13 +782,50 @@ class VM extends ServiceObjectOwner {
     return _viewCache.values.isEmpty ? null : _viewCache.values.first;
   }
 
-  FlutterView firstViewWithName(String isolateFilter) {
-    if (_viewCache.values.isEmpty) {
+  List<FlutterView> allViewsWithName(String isolateFilter) {
+    if (_viewCache.values.isEmpty)
       return null;
-    }
-    return _viewCache.values.firstWhere(
-        (FlutterView v) => v.uiIsolate.name.contains(isolateFilter),
-        orElse: () => null);
+    return _viewCache.values.where(
+      (FlutterView v) => v.uiIsolate.name.contains(isolateFilter)
+    ).toList();
+  }
+}
+
+class HeapSpace extends ServiceObject {
+  HeapSpace._empty(ServiceObjectOwner owner) : super._empty(owner);
+
+  int _used = 0;
+  int _capacity = 0;
+  int _external = 0;
+  int _collections = 0;
+  double _totalCollectionTimeInSeconds = 0.0;
+  double _averageCollectionPeriodInMillis = 0.0;
+
+  int get used => _used;
+  int get capacity => _capacity;
+  int get external => _external;
+
+  Duration get avgCollectionTime {
+    final double mcs = _totalCollectionTimeInSeconds *
+      Duration.MICROSECONDS_PER_SECOND /
+      math.max(_collections, 1);
+    return new Duration(microseconds: mcs.ceil());
+  }
+
+  Duration get avgCollectionPeriod {
+    final double mcs = _averageCollectionPeriodInMillis *
+                       Duration.MICROSECONDS_PER_MILLISECOND;
+    return new Duration(microseconds: mcs.ceil());
+  }
+
+  @override
+  void _update(Map<String, dynamic> map, bool mapIsRef) {
+    _used = map['used'];
+    _capacity = map['capacity'];
+    _external = map['external'];
+    _collections = map['collections'];
+    _totalCollectionTimeInSeconds = map['time'];
+    _averageCollectionPeriodInMillis = map['avgCollectionPeriodMillis'];
   }
 }
 
@@ -789,11 +848,16 @@ class Isolate extends ServiceObjectOwner {
 
   final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
 
+  HeapSpace _newSpace;
+  HeapSpace _oldSpace;
+
+  HeapSpace get newSpace => _newSpace;
+  HeapSpace get oldSpace => _oldSpace;
+
   @override
   ServiceObject getFromMap(Map<String, dynamic> map) {
-    if (map == null) {
+    if (map == null)
       return null;
-    }
     final String mapType = _stripRef(map['type']);
     if (mapType == 'Isolate') {
       // There are sometimes isolate refs in ServiceEvents.
@@ -808,9 +872,8 @@ class Isolate extends ServiceObjectOwner {
     }
     // Build the object from the map directly.
     serviceObject = new ServiceObject._fromMap(this, map);
-    if ((serviceObject != null) && serviceObject.canCache) {
+    if ((serviceObject != null) && serviceObject.canCache)
       _cache[mapId] = serviceObject;
-    }
     return serviceObject;
   }
 
@@ -841,6 +904,15 @@ class Isolate extends ServiceObjectOwner {
     return getFromMap(await invokeRpcRaw(method, params: params));
   }
 
+  void _updateHeaps(Map<String, dynamic> map, bool mapIsRef) {
+    if (_newSpace == null)
+      _newSpace = new HeapSpace._empty(this);
+    _newSpace._update(map['new'], mapIsRef);
+    if (_oldSpace == null)
+      _oldSpace = new HeapSpace._empty(this);
+    _oldSpace._update(map['old'], mapIsRef);
+  }
+
   @override
   void _update(Map<String, dynamic> map, bool mapIsRef) {
     if (mapIsRef)
@@ -853,6 +925,8 @@ class Isolate extends ServiceObjectOwner {
     _upgradeCollection(map, this);
 
     pauseEvent = map['pauseEvent'];
+
+    _updateHeaps(map['_heaps'], mapIsRef);
   }
 
   static final int kIsolateReloadBarred = 1005;
@@ -883,6 +957,12 @@ class Isolate extends ServiceObjectOwner {
       });
     }
   }
+
+  /// Resumes the isolate.
+  Future<Map<String, dynamic>> resume() {
+    return invokeRpcRaw('resume');
+  }
+
 
   // Flutter extension methods.
 
@@ -941,8 +1021,8 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> flutterReassemble() async {
     return await invokeFlutterExtensionRpcRaw(
       'ext.flutter.reassemble',
-      timeout: kLongRequestTimeout,
-      timeoutFatal: false,
+      timeout: kShortRequestTimeout,
+      timeoutFatal: true,
     );
   }
 
@@ -971,14 +1051,14 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
-  Future<Null> flutterPlatformOverride([String platform]) async {
+  Future<String> flutterPlatformOverride([String platform]) async {
     final Map<String, String> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
       params: platform != null ? <String, dynamic>{ 'value': platform } : <String, String>{},
       timeout: const Duration(seconds: 5),
       timeoutFatal: false,
     );
-    if (result != null && result.containsKey('value') && result['value'] is String)
+    if (result != null && result['value'] is String)
       return result['value'];
     return 'unknown';
   }
@@ -1057,7 +1137,8 @@ class FlutterView extends ServiceObject {
       // launch errors.
       if (event.kind == ServiceEvent.kIsolateRunnable) {
         printTrace('Isolate is runnable.');
-        completer.complete(null);
+        if (!completer.isCompleted)
+          completer.complete(null);
       }
     });
     await owner.vm.runInView(viewId,

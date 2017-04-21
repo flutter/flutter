@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 
@@ -40,7 +41,7 @@ class TestTextInput {
 
   void updateEditingValue(TextEditingValue value) {
     expect(_client, isNonZero);
-    PlatformMessages.handlePlatformMessage(
+    BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
         new MethodCall(
@@ -48,7 +49,7 @@ class TestTextInput {
           <dynamic>[_client, value.toJSON()],
         ),
       ),
-      (_) {},
+      (ByteData data) { /* response from framework is discarded */ },
     );
   }
 

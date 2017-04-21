@@ -14,7 +14,7 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from the current default text style for a given [BuildContext].
-  DefaultTextStyle({
+  const DefaultTextStyle({
     Key key,
     @required this.style,
     this.textAlign,
@@ -22,12 +22,11 @@ class DefaultTextStyle extends InheritedWidget {
     this.overflow: TextOverflow.clip,
     this.maxLines,
     @required Widget child,
-  }) : super(key: key, child: child) {
-    assert(style != null);
-    assert(softWrap != null);
-    assert(overflow != null);
-    assert(child != null);
-  }
+  }) : assert(style != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
   ///
@@ -42,15 +41,15 @@ class DefaultTextStyle extends InheritedWidget {
       maxLines = null,
       overflow = TextOverflow.clip;
 
-  /// Creates a default text style that inherits from the given [BuildContext].
+  /// Creates a default text style that overrides the text styles in scope at
+  /// this point in the widget tree.
   ///
   /// The given [style] is merged with the [style] from the default text style
-  /// for the given [BuildContext] and, if non-null, the given [textAlign]
-  /// replaces the [textAlign] from the default text style for the given
-  /// [BuildContext].
-  factory DefaultTextStyle.merge({
+  /// for the [BuildContext] where the widget is inserted, and any of the other
+  /// arguments that are not null replace the corresponding properties on that
+  /// same default text style.
+  static Widget merge({
     Key key,
-    @required BuildContext context,
     TextStyle style,
     TextAlign textAlign,
     bool softWrap,
@@ -58,17 +57,20 @@ class DefaultTextStyle extends InheritedWidget {
     int maxLines,
     @required Widget child,
   }) {
-    assert(context != null);
     assert(child != null);
-    final DefaultTextStyle parent = DefaultTextStyle.of(context);
-    return new DefaultTextStyle(
-      key: key,
-      style: parent.style.merge(style),
-      textAlign: textAlign ?? parent.textAlign,
-      softWrap: softWrap ?? parent.softWrap,
-      overflow: overflow ?? parent.overflow,
-      maxLines: maxLines ?? parent.maxLines,
-      child: child
+    return new Builder(
+      builder: (BuildContext context) {
+        final DefaultTextStyle parent = DefaultTextStyle.of(context);
+        return new DefaultTextStyle(
+          key: key,
+          style: parent.style.merge(style),
+          textAlign: textAlign ?? parent.textAlign,
+          softWrap: softWrap ?? parent.softWrap,
+          overflow: overflow ?? parent.overflow,
+          maxLines: maxLines ?? parent.maxLines,
+          child: child
+        );
+      },
     );
   }
 
@@ -106,7 +108,13 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(DefaultTextStyle old) => style != old.style;
+  bool updateShouldNotify(DefaultTextStyle old) {
+    return style != old.style ||
+        textAlign != old.textAlign ||
+        softWrap != old.softWrap ||
+        overflow != old.overflow ||
+        maxLines != old.maxLines;
+  }
 
   @override
   void debugFillDescription(List<String> description) {
@@ -140,7 +148,7 @@ class Text extends StatelessWidget {
   ///
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
-  Text(this.data, {
+  const Text(this.data, {
     Key key,
     this.style,
     this.textAlign,
@@ -148,9 +156,8 @@ class Text extends StatelessWidget {
     this.overflow,
     this.textScaleFactor,
     this.maxLines,
-  }) : super(key: key) {
-    assert(data != null);
-  }
+  }) : assert(data != null),
+       super(key: key);
 
   /// The text to display.
   final String data;

@@ -183,36 +183,37 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 
     // If we start out with a child, have the child appear fully visible instead
     // of animating in.
-    if (config.child != null)
+    if (widget.child != null)
       _currentController.value = 1.0;
   }
 
   @override
   void dispose() {
-    _previousController.stop();
-    _currentController.stop();
+    _previousController.dispose();
+    _currentController.dispose();
     super.dispose();
   }
 
   @override
-  void didUpdateConfig(_FloatingActionButtonTransition oldConfig) {
-    final bool oldChildIsNull = oldConfig.child == null;
-    final bool newChildIsNull = config.child == null;
-    if (oldChildIsNull == newChildIsNull && oldConfig.child?.key == config.child?.key)
+  void didUpdateWidget(_FloatingActionButtonTransition oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final bool oldChildIsNull = oldWidget.child == null;
+    final bool newChildIsNull = widget.child == null;
+    if (oldChildIsNull == newChildIsNull && oldWidget.child?.key == widget.child?.key)
       return;
     if (_previousController.status == AnimationStatus.dismissed) {
       final double currentValue = _currentController.value;
-      if (currentValue == 0.0 || oldConfig.child == null) {
+      if (currentValue == 0.0 || oldWidget.child == null) {
         // The current child hasn't started its entrance animation yet. We can
         // just skip directly to the new child's entrance.
         _previousChild = null;
-        if (config.child != null)
+        if (widget.child != null)
           _currentController.forward();
       } else {
         // Otherwise, we need to copy the state from the current controller to
         // the previous controller and run an exit animation for the previous
         // widget before running the entrance animation for the new child.
-        _previousChild = oldConfig.child;
+        _previousChild = oldWidget.child;
         _previousController
           ..value = currentValue
           ..reverse();
@@ -225,7 +226,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
     setState(() {
       if (status == AnimationStatus.dismissed) {
         assert(_currentController.status == AnimationStatus.dismissed);
-        if (config.child != null)
+        if (widget.child != null)
           _currentController.forward();
       }
     });
@@ -245,7 +246,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
         scale: _currentAnimation,
         child: new RotationTransition(
           turns: _kFloatingActionButtonTurnTween.animate(_currentAnimation),
-          child: config.child,
+          child: widget.child,
         )
       ));
     }
@@ -283,7 +284,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 ///  * <https://material.google.com/layout/structure.html>
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
-  Scaffold({
+  const Scaffold({
     Key key,
     this.appBar,
     this.body,
@@ -292,11 +293,12 @@ class Scaffold extends StatefulWidget {
     this.drawer,
     this.bottomNavigationBar,
     this.backgroundColor,
-    this.resizeToAvoidBottomPadding: true
-  }) : super(key: key);
+    this.resizeToAvoidBottomPadding: true,
+    this.primary: true,
+  }) : assert(primary != null), super(key: key);
 
   /// An app bar to display at the top of the scaffold.
-  final AppBar appBar;
+  final PreferredSizeWidget appBar;
 
   /// The primary content of the scaffold.
   ///
@@ -362,6 +364,15 @@ class Scaffold extends StatefulWidget {
   ///
   /// Defaults to true.
   final bool resizeToAvoidBottomPadding;
+
+  /// Whether this scaffold is being displayed at the top of the screen.
+  ///
+  /// If true then the height of the [appBar] will be extended by the height
+  /// of the screen's status bar, i.e. the top padding for [MediaQuery].
+  ///
+  /// The default value of this property, like the default value of
+  /// [AppBar.primary], is true.
+  final bool primary;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -492,7 +503,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
 
   /// Whether this scaffold has a non-null [Scaffold.drawer].
-  bool get hasDrawer => config.drawer != null;
+  bool get hasDrawer => widget.drawer != null;
 
   /// Opens the [Drawer] (if any).
   ///
@@ -667,6 +678,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       },
       onDismissed: () {
         if (_dismissedBottomSheets.contains(bottomSheet)) {
+          bottomSheet.animationController.dispose();
           setState(() {
             _dismissedBottomSheets.remove(bottomSheet);
           });
@@ -759,7 +771,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     EdgeInsets padding = MediaQuery.of(context).padding;
     final ThemeData themeData = Theme.of(context);
-    if (!config.resizeToAvoidBottomPadding)
+    if (!widget.resizeToAvoidBottomPadding)
       padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
 
     if (_snackBars.isNotEmpty) {
@@ -779,24 +791,20 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final List<LayoutId> children = <LayoutId>[];
 
-    _addIfNonNull(children, config.body, _ScaffoldSlot.body);
+    _addIfNonNull(children, widget.body, _ScaffoldSlot.body);
 
-    if (config.appBar != null) {
-      assert(config.appBar.primary || padding.top == 0.0, 'A non-primary AppBar was passed to a Scaffold but the MediaQuery in scope has top padding.');
-      final double topPadding = config.appBar.primary ? padding.top : 0.0;
-      Widget appBar = config.appBar;
-      final double extent = config.appBar.minExtent + topPadding;
-      if (config.appBar.flexibleSpace != null) {
-        appBar = FlexibleSpaceBar.createSettings(
-          currentExtent: extent,
-          child: appBar,
-        );
-      }
+    if (widget.appBar != null) {
+      final double topPadding = widget.primary ? padding.top : 0.0;
+      final double extent = widget.appBar.preferredSize.height + topPadding;
+      assert(extent >= 0.0 && extent.isFinite);
       _addIfNonNull(
         children,
         new ConstrainedBox(
           constraints: new BoxConstraints(maxHeight: extent),
-          child: appBar,
+          child: FlexibleSpaceBar.createSettings(
+            currentExtent: extent,
+            child: widget.appBar,
+          ),
         ),
         _ScaffoldSlot.appBar,
       );
@@ -805,7 +813,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (_snackBars.isNotEmpty)
       _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
 
-    if (config.persistentFooterButtons != null) {
+    if (widget.persistentFooterButtons != null) {
       children.add(new LayoutId(
         id: _ScaffoldSlot.persistentFooter,
         child: new Container(
@@ -818,17 +826,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
           child: new ButtonTheme.bar(
             child: new ButtonBar(
-              children: config.persistentFooterButtons
+              children: widget.persistentFooterButtons
             ),
           ),
         ),
       ));
     }
 
-    if (config.bottomNavigationBar != null) {
+    if (widget.bottomNavigationBar != null) {
       children.add(new LayoutId(
         id: _ScaffoldSlot.bottomNavigationBar,
-        child: config.bottomNavigationBar,
+        child: widget.bottomNavigationBar,
       ));
     }
 
@@ -848,7 +856,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     children.add(new LayoutId(
       id: _ScaffoldSlot.floatingActionButton,
       child: new _FloatingActionButtonTransition(
-        child: config.floatingActionButton,
+        child: widget.floatingActionButton,
       )
     ));
 
@@ -862,13 +870,13 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       ));
     }
 
-    if (config.drawer != null) {
+    if (widget.drawer != null) {
       assert(hasDrawer);
       children.add(new LayoutId(
         id: _ScaffoldSlot.drawer,
         child: new DrawerController(
           key: _drawerKey,
-          child: config.drawer,
+          child: widget.drawer,
         )
       ));
     } else if (_shouldHandleBackGesture()) {
@@ -897,7 +905,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       child: new PrimaryScrollController(
         controller: _primaryScrollController,
         child: new Material(
-          color: config.backgroundColor ?? themeData.scaffoldBackgroundColor,
+          color: widget.backgroundColor ?? themeData.scaffoldBackgroundColor,
           child: new CustomMultiChildLayout(
             children: children,
             delegate: new _ScaffoldLayout(
@@ -938,7 +946,7 @@ class _PersistentBottomSheet extends StatefulWidget {
     this.builder
   }) : super(key: key);
 
-  final AnimationController animationController;
+  final AnimationController animationController; // we control it, but it must be disposed by whoever created it
   final VoidCallback onClosing;
   final VoidCallback onDismissed;
   final WidgetBuilder builder;
@@ -948,55 +956,45 @@ class _PersistentBottomSheet extends StatefulWidget {
 }
 
 class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
-
-  // We take ownership of the animation controller given in the first configuration.
-  // We also share control of that animation with out BottomSheet widget.
-
   @override
   void initState() {
     super.initState();
-    assert(config.animationController.status == AnimationStatus.forward);
-    config.animationController.addStatusListener(_handleStatusChange);
+    assert(widget.animationController.status == AnimationStatus.forward);
+    widget.animationController.addStatusListener(_handleStatusChange);
   }
 
   @override
-  void didUpdateConfig(_PersistentBottomSheet oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    assert(config.animationController == oldConfig.animationController);
-  }
-
-  @override
-  void dispose() {
-    config.animationController.stop();
-    super.dispose();
+  void didUpdateWidget(_PersistentBottomSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    assert(widget.animationController == oldWidget.animationController);
   }
 
   void close() {
-    config.animationController.reverse();
+    widget.animationController.reverse();
   }
 
   void _handleStatusChange(AnimationStatus status) {
-    if (status == AnimationStatus.dismissed && config.onDismissed != null)
-      config.onDismissed();
+    if (status == AnimationStatus.dismissed && widget.onDismissed != null)
+      widget.onDismissed();
   }
 
   @override
   Widget build(BuildContext context) {
     return new AnimatedBuilder(
-      animation: config.animationController,
+      animation: widget.animationController,
       builder: (BuildContext context, Widget child) {
         return new Align(
           alignment: FractionalOffset.topLeft,
-          heightFactor: config.animationController.value,
+          heightFactor: widget.animationController.value,
           child: child
         );
       },
       child: new Semantics(
         container: true,
         child: new BottomSheet(
-          animationController: config.animationController,
-          onClosing: config.onClosing,
-          builder: config.builder
+          animationController: widget.animationController,
+          onClosing: widget.onClosing,
+          builder: widget.builder
         )
       )
     );

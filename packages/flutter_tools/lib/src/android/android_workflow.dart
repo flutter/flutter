@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import '../base/io.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
@@ -50,7 +50,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         final String javaHomeOutput = runCheckedSync(<String>['/usr/libexec/java_home'], hideStdout: true);
         if (javaHomeOutput != null) {
           final List<String> javaHomeOutputSplit = javaHomeOutput.split('\n');
-          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.length > 0)) {
+          if ((javaHomeOutputSplit != null) && (javaHomeOutputSplit.isNotEmpty)) {
             final String javaHome = javaHomeOutputSplit[0].trim();
             return fs.path.join(javaHome, 'bin', 'java');
           }
@@ -103,8 +103,11 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         ));
       } else {
         messages.add(new ValidationMessage.error(
-          'Android SDK not found. Download from https://developer.android.com/sdk/\n'
-          '(or visit https://flutter.io/setup/#android-setup for detailed instructions).'
+          'Unable to locate Android SDK.\n'
+          'Install Android Studio from https://developer.android.com/studio/index.html.\n'
+          'On first launch it will assist you in installing the Android SDK components.\n'
+          '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
+          'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.'
         ));
       }
 

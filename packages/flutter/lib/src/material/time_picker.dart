@@ -34,6 +34,7 @@ enum DayPeriod {
 }
 
 /// A value representing a time during the day
+@immutable
 class TimeOfDay {
   /// Creates a time of day.
   ///
@@ -393,7 +394,7 @@ class _DialPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double radius = size.shortestSide / 2.0;
     final Offset center = new Offset(size.width / 2.0, size.height / 2.0);
-    final Point centerPoint = center.toPoint();
+    final Offset centerPoint = center;
     canvas.drawCircle(centerPoint, radius, new Paint()..color = backgroundColor);
 
     const double labelPadding = 24.0;
@@ -418,7 +419,7 @@ class _DialPainter extends CustomPainter {
 
     final Paint selectorPaint = new Paint()
       ..color = accentColor;
-    final Point focusedPoint = getOffsetForTheta(theta).toPoint();
+    final Offset focusedPoint = getOffsetForTheta(theta);
     final double focusedRadius = labelPadding - 4.0;
     canvas.drawCircle(centerPoint, 4.0, selectorPaint);
     canvas.drawCircle(focusedPoint, focusedRadius, selectorPaint);
@@ -470,7 +471,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       duration: _kDialAnimateDuration,
       vsync: this,
     );
-    _thetaTween = new Tween<double>(begin: _getThetaForTime(config.selectedTime));
+    _thetaTween = new Tween<double>(begin: _getThetaForTime(widget.selectedTime));
     _theta = _thetaTween.animate(new CurvedAnimation(
       parent: _thetaController,
       curve: Curves.fastOutSlowIn
@@ -478,9 +479,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   @override
-  void didUpdateConfig(_Dial oldConfig) {
-    if (config.mode != oldConfig.mode && !_dragging)
-      _animateTo(_getThetaForTime(config.selectedTime));
+  void didUpdateWidget(_Dial oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.mode != oldWidget.mode && !_dragging)
+      _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
@@ -511,7 +513,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
-    final double fraction = (config.mode == _TimePickerMode.hour) ?
+    final double fraction = (widget.mode == _TimePickerMode.hour) ?
         (time.hour / _kHoursPerPeriod) % _kHoursPerPeriod :
         (time.minute / _kMinutesPerHour) % _kMinutesPerHour;
     return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
@@ -519,24 +521,24 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   TimeOfDay _getTimeForTheta(double theta) {
     final double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
-    if (config.mode == _TimePickerMode.hour) {
+    if (widget.mode == _TimePickerMode.hour) {
       final int hourOfPeriod = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
-      return config.selectedTime.replacing(
-        hour: hourOfPeriod + config.selectedTime.periodOffset
+      return widget.selectedTime.replacing(
+        hour: hourOfPeriod + widget.selectedTime.periodOffset
       );
     } else {
-      return config.selectedTime.replacing(
+      return widget.selectedTime.replacing(
         minute: (fraction * _kMinutesPerHour).round() % _kMinutesPerHour
       );
     }
   }
 
   void _notifyOnChangedIfNeeded() {
-    if (config.onChanged == null)
+    if (widget.onChanged == null)
       return;
     final TimeOfDay current = _getTimeForTheta(_theta.value);
-    if (current != config.selectedTime)
-      config.onChanged(current);
+    if (current != widget.selectedTime)
+      widget.onChanged(current);
   }
 
   void _updateThetaForPan() {
@@ -549,15 +551,15 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     });
   }
 
-  Point _position;
-  Point _center;
+  Offset _position;
+  Offset _center;
 
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
     final RenderBox box = context.findRenderObject();
     _position = box.globalToLocal(details.globalPosition);
-    _center = box.size.center(Point.origin);
+    _center = box.size.center(Offset.zero);
     _updateThetaForPan();
     _notifyOnChangedIfNeeded();
   }
@@ -573,7 +575,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _dragging = false;
     _position = null;
     _center = null;
-    _animateTo(_getThetaForTime(config.selectedTime));
+    _animateTo(_getThetaForTime(widget.selectedTime));
   }
 
   @override
@@ -593,7 +595,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     final ThemeData theme = Theme.of(context);
     List<TextPainter> primaryLabels;
     List<TextPainter> secondaryLabels;
-    switch (config.mode) {
+    switch (widget.mode) {
       case _TimePickerMode.hour:
         primaryLabels = _initHours(theme.textTheme);
         secondaryLabels = _initHours(theme.accentTextTheme);
@@ -640,7 +642,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedTime = config.initialTime;
+    _selectedTime = widget.initialTime;
   }
 
   _TimePickerMode _mode = _TimePickerMode.hour;
@@ -702,11 +704,11 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
       child: new ButtonBar(
         children: <Widget>[
           new FlatButton(
-            child: new Text('CANCEL'),
+            child: const Text('CANCEL'),
             onPressed: _handleCancel
           ),
           new FlatButton(
-            child: new Text('OK'),
+            child: const Text('OK'),
             onPressed: _handleOk
           ),
         ]

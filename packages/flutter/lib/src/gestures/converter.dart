@@ -28,7 +28,7 @@ class _PointerState {
     _down = false;
   }
 
-  Point lastPosition;
+  Offset lastPosition;
 }
 
 /// Converts from engine pointer data to framework pointer events.
@@ -36,7 +36,7 @@ class PointerEventConverter {
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
-  static _PointerState _ensureStateForPointer(ui.PointerData datum, Point position) {
+  static _PointerState _ensureStateForPointer(ui.PointerData datum, Offset position) {
     return _pointers.putIfAbsent(
       datum.device,
       () => new _PointerState(position)
@@ -46,7 +46,7 @@ class PointerEventConverter {
   /// Expand the given packet of pointer data into a sequence of framework pointer events.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
-      final Point position = new Point(datum.physicalX, datum.physicalY) / devicePixelRatio;
+      final Offset position = new Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final Duration timeStamp = datum.timeStamp;
       final PointerDeviceKind kind = datum.kind;
       assert(datum.change != null);

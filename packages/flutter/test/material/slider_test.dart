@@ -147,7 +147,7 @@ void main() {
       ),
     ));
 
-    final Point center = tester.getCenter(find.byType(Slider));
+    final Offset center = tester.getCenter(find.byType(Slider));
     final TestGesture gesture = await tester.startGesture(center);
 
     expect(value, equals(0.5));

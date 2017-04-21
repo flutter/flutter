@@ -10,7 +10,7 @@ class TestOverlayRoute extends OverlayRoute<Null> {
   Iterable<OverlayEntry> createOverlayEntries() sync* {
     yield new OverlayEntry(builder: _build);
   }
-  Widget _build(BuildContext context) => new Text('Overlay');
+  Widget _build(BuildContext context) => const Text('Overlay');
 }
 
 class PersistentBottomSheetTest extends StatefulWidget {
@@ -27,7 +27,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
 
   void showBottomSheet() {
     _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
-      return new Text('bottomSheet');
+      return const Text('bottomSheet');
     })
     .closed.whenComplete(() {
       setState(() {
@@ -40,7 +40,7 @@ class PersistentBottomSheetTestState extends State<PersistentBottomSheetTest> {
   Widget build(BuildContext context) {
     return new Scaffold(
       key: _scaffoldKey,
-      body: new Text('Sheet')
+      body: const Text('Sheet')
     );
   }
 }
@@ -50,8 +50,8 @@ void main() {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Container(key: containerKey1, child: new Text('Home')),
-      '/settings': (_) => new Container(key: containerKey2, child: new Text('Settings')),
+      '/': (_) => new Container(key: containerKey1, child: const Text('Home')),
+      '/settings': (_) => new Container(key: containerKey2, child: const Text('Settings')),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
@@ -139,7 +139,7 @@ void main() {
           decoration: const BoxDecoration(backgroundColor: const Color(0xff00ffff)),
           child: new Hero(
             tag: kHeroTag,
-            child: new Text('Home')
+            child: const Text('Home')
           )
         )
       ),
@@ -150,7 +150,7 @@ void main() {
           decoration: const BoxDecoration(backgroundColor: const Color(0xffff00ff)),
           child: new Hero(
             tag: kHeroTag,
-            child: new Text('Settings')
+            child: const Text('Settings')
           )
         )
       ),
@@ -169,11 +169,11 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Settings text is heroing to its new location
-    Point settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, greaterThan(0.0));
-    expect(settingsOffset.x, lessThan(100.0));
-    expect(settingsOffset.y, greaterThan(0.0));
-    expect(settingsOffset.y, lessThan(100.0));
+    Offset settingsOffset = tester.getTopLeft(find.text('Settings'));
+    expect(settingsOffset.dx, greaterThan(0.0));
+    expect(settingsOffset.dx, lessThan(100.0));
+    expect(settingsOffset.dy, greaterThan(0.0));
+    expect(settingsOffset.dy, lessThan(100.0));
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -181,7 +181,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(50.0, 0.0));
     await tester.pump();
 
@@ -190,22 +190,22 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Home page is sliding in from the left, no heroes.
-    final Point homeOffset = tester.getTopLeft(find.text('Home'));
-    expect(homeOffset.x, lessThan(0.0));
-    expect(homeOffset.y, 0.0);
+    final Offset homeOffset = tester.getTopLeft(find.text('Home'));
+    expect(homeOffset.dx, lessThan(0.0));
+    expect(homeOffset.dy, 0.0);
 
     // Settings page is sliding off to the right, no heroes.
     settingsOffset = tester.getTopLeft(find.text('Settings'));
-    expect(settingsOffset.x, greaterThan(100.0));
-    expect(settingsOffset.y, 100.0);
+    expect(settingsOffset.dx, greaterThan(100.0));
+    expect(settingsOffset.dy, 100.0);
   });
 
   testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
-      '/settings': (_) => new Scaffold(key: containerKey2, body: new Text('Settings')),
+      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
+      '/settings': (_) => new Scaffold(key: containerKey2, body: const Text('Settings')),
     };
 
     await tester.pumpWidget(new MaterialApp(
@@ -224,7 +224,7 @@ void main() {
 
     // Drag from left edge to invoke the gesture. (near bottom so we grab
     // the Settings page as it comes up).
-    TestGesture gesture = await tester.startGesture(const Point(5.0, 550.0));
+    TestGesture gesture = await tester.startGesture(const Offset(5.0, 550.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -236,7 +236,7 @@ void main() {
     expect(find.text('Settings'), isOnstage);
 
     // Try again now that we're settled.
-    gesture = await tester.startGesture(const Point(5.0, 550.0));
+    gesture = await tester.startGesture(const Offset(5.0, 550.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -251,7 +251,7 @@ void main() {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Scaffold(key: containerKey1, body: new Text('Home')),
+      '/': (_) => new Scaffold(key: containerKey1, body: const Text('Home')),
       '/sheet': (_) => new PersistentBottomSheetTest(key: containerKey2),
     };
 
@@ -275,7 +275,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Point(5.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
@@ -290,15 +290,15 @@ void main() {
 
   testWidgets('Test completed future', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (_) => new Center(child: new Text('home')),
-      '/next': (_) => new Center(child: new Text('next')),
+      '/': (_) => const Center(child: const Text('home')),
+      '/next': (_) => const Center(child: const Text('next')),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));
 
     final PageRoute<Null> route = new MaterialPageRoute<Null>(
       settings: const RouteSettings(name: '/page'),
-      builder: (BuildContext context) => new Center(child: new Text('page')),
+      builder: (BuildContext context) => const Center(child: const Text('page')),
     );
 
     int popCount = 0;

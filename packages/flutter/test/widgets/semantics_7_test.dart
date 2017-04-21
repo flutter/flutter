@@ -33,7 +33,7 @@ void main() {
           new MergeSemantics(
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
                 new Semantics(
@@ -83,7 +83,7 @@ void main() {
           new MergeSemantics(
             child: new Stack(
               children: <Widget>[
-                new Semantics(
+                const Semantics(
                   checked: true
                 ),
                 new Semantics(

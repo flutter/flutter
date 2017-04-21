@@ -6,9 +6,9 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
-import io.flutter.plugin.common.FlutterMessageChannel;
-import io.flutter.plugin.common.FlutterMessageChannel.MessageHandler;
-import io.flutter.plugin.common.FlutterMessageChannel.Reply;
+import io.flutter.plugin.common.BasicMessageChannel;
+import io.flutter.plugin.common.BasicMessageChannel.MessageHandler;
+import io.flutter.plugin.common.BasicMessageChannel.Reply;
 import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL = "increment";
     private static final String EMPTY_MESSAGE = "";
     private static final String PING = "ping";
-    private FlutterMessageChannel messageChannel;
+    private BasicMessageChannel messageChannel;
 
     private String[] getArgsFromIntent(Intent intent) {
         // Before adding more entries to this list, consider that arbitrary
@@ -57,15 +57,13 @@ public class MainActivity extends AppCompatActivity {
         flutterView = (FlutterView) findViewById(R.id.flutter_view);
         flutterView.runFromBundle(FlutterMain.findAppBundlePath(getApplicationContext()), null);
 
-        messageChannel =
-            new FlutterMessageChannel<String>(flutterView, CHANNEL, StringCodec.INSTANCE);
+        messageChannel = new BasicMessageChannel<>(flutterView, CHANNEL, StringCodec.INSTANCE);
         messageChannel.
             setMessageHandler(new MessageHandler<String>() {
                 @Override
                 public void onMessage(String s, Reply<String> reply) {
                     onFlutterIncrement();
-                    reply.send(EMPTY_MESSAGE);
-
+                    reply.reply(EMPTY_MESSAGE);
                 }
             });
 

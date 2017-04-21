@@ -62,7 +62,7 @@ class _DropdownMenuPainter extends CustomPainter {
 
     final Rect rect = new Rect.fromLTRB(0.0, top.evaluate(resize), size.width, bottom.evaluate(resize));
 
-    _painter.paint(canvas, rect.topLeft.toOffset(), new ImageConfiguration(size: rect.size));
+    _painter.paint(canvas, rect.topLeft, new ImageConfiguration(size: rect.size));
   }
 
   @override
@@ -113,12 +113,12 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     // the CurvedAnimation objects in build, we'd lose
     // CurvedAnimation._curveDirection.
     _fadeOpacity = new CurvedAnimation(
-      parent: config.route.animation,
+      parent: widget.route.animation,
       curve: const Interval(0.0, 0.25),
       reverseCurve: const Interval(0.75, 1.0),
     );
     _resize = new CurvedAnimation(
-      parent: config.route.animation,
+      parent: widget.route.animation,
       curve: const Interval(0.25, 0.5),
       reverseCurve: const Threshold(0.0),
     );
@@ -134,7 +134,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
     //
     // When the menu is dismissed we just fade the entire thing out
     // in the first 0.25s.
-    final _DropdownRoute<T> route = config.route;
+    final _DropdownRoute<T> route = widget.route;
     final double unit = 0.5 / (route.items.length + 1.5);
     final List<Widget> children = <Widget>[];
     for (int itemIndex = 0; itemIndex < route.items.length; ++itemIndex) {
@@ -177,7 +177,7 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
             behavior: const _DropdownScrollBehavior(),
             child: new Scrollbar(
               child: new ListView(
-                controller: config.route.scrollController,
+                controller: widget.route.scrollController,
                 padding: kMaterialListPadding,
                 itemExtent: _kMenuItemHeight,
                 shrinkWrap: true,
@@ -231,7 +231,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       top = bottom - childSize.height;
     }
     assert(() {
-      final Rect container = Point.origin & size;
+      final Rect container = Offset.zero & size;
       if (container.intersect(buttonRect) == buttonRect) {
         // If the button was entirely on-screen, then verify
         // that the menu is also on-screen.
@@ -479,39 +479,40 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   }
 
  @override
-  void didUpdateConfig(DropdownButton<T> oldConfig) {
+  void didUpdateWidget(DropdownButton<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
     _updateSelectedIndex();
   }
 
   void _updateSelectedIndex() {
-    assert(config.value == null ||
-      config.items.where((DropdownMenuItem<T> item) => item.value == config.value).length == 1);
+    assert(widget.value == null ||
+      widget.items.where((DropdownMenuItem<T> item) => item.value == widget.value).length == 1);
     _selectedIndex = null;
-    for (int itemIndex = 0; itemIndex < config.items.length; itemIndex++) {
-      if (config.items[itemIndex].value == config.value) {
+    for (int itemIndex = 0; itemIndex < widget.items.length; itemIndex++) {
+      if (widget.items[itemIndex].value == widget.value) {
         _selectedIndex = itemIndex;
         return;
       }
     }
   }
 
-  TextStyle get _textStyle => config.style ?? Theme.of(context).textTheme.subhead;
+  TextStyle get _textStyle => widget.style ?? Theme.of(context).textTheme.subhead;
 
   void _handleTap() {
     final RenderBox itemBox = context.findRenderObject();
-    final Rect itemRect = itemBox.localToGlobal(Point.origin) & itemBox.size;
+    final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     Navigator.push(context, new _DropdownRoute<T>(
-      items: config.items,
+      items: widget.items,
       buttonRect: _kMenuHorizontalPadding.inflateRect(itemRect),
       selectedIndex: _selectedIndex ?? 0,
-      elevation: config.elevation,
+      elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
     )).then<Null>((_DropdownRouteResult<T> newValue) {
       if (!mounted || newValue == null)
         return null;
-      if (config.onChanged != null)
-        config.onChanged(newValue.result);
+      if (widget.onChanged != null)
+        widget.onChanged(newValue.result);
     });
   }
 
@@ -520,7 +521,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
   // Similarly, we don't reduce the height of the button so much that its icon
   // would be clipped.
   double get _denseButtonHeight {
-    return math.max(_textStyle.fontSize, math.max(config.iconSize, _kDenseButtonHeight));
+    return math.max(_textStyle.fontSize, math.max(widget.iconSize, _kDenseButtonHeight));
   }
 
   @override
@@ -529,14 +530,14 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
 
     // The width of the button and the menu are defined by the widest
     // item and the width of the hint.
-    final List<Widget> items = new List<Widget>.from(config.items);
+    final List<Widget> items = new List<Widget>.from(widget.items);
     int hintIndex;
-    if (config.hint != null) {
+    if (widget.hint != null) {
       hintIndex = items.length;
       items.add(new DefaultTextStyle(
         style: _textStyle.copyWith(color: Theme.of(context).hintColor),
         child: new IgnorePointer(
-          child: config.hint,
+          child: widget.hint,
         ),
       ));
     }
@@ -544,7 +545,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
     Widget result = new DefaultTextStyle(
       style: _textStyle,
       child: new SizedBox(
-        height: config.isDense ? _denseButtonHeight : null,
+        height: widget.isDense ? _denseButtonHeight : null,
         child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
@@ -557,7 +558,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
               children: items,
             ),
             new Icon(Icons.arrow_drop_down,
-              size: config.iconSize,
+              size: widget.iconSize,
               // These colors are not defined in the Material Design spec.
               color: Theme.of(context).brightness == Brightness.light ? Colors.grey.shade700 : Colors.white70
             ),
@@ -567,7 +568,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> {
     );
 
     if (!DropdownButtonHideUnderline.at(context)) {
-      final double bottom = config.isDense ? 0.0 : 8.0;
+      final double bottom = widget.isDense ? 0.0 : 8.0;
       result = new Stack(
         children: <Widget>[
           result,

@@ -20,11 +20,11 @@ void main() {
                   showDialog<Null>(
                     context: context,
                     child: new CupertinoAlertDialog(
-                      title: new Text('The title'),
-                      content: new Text('The content'),
+                      title: const Text('The title'),
+                      content: const Text('The content'),
                       actions: <Widget>[
                         new CupertinoDialogAction(
-                          child: new Text('Cancel'),
+                          child: const Text('Cancel'),
                         ),
                         new CupertinoDialogAction(
                           isDestructive: true,
@@ -32,13 +32,13 @@ void main() {
                             didDelete = true;
                             Navigator.pop(context);
                           },
-                          child: new Text('Delete'),
+                          child: const Text('Delete'),
                         ),
                       ],
                     ),
                   );
                 },
-                child: new Text('Go'),
+                child: const Text('Go'),
               );
             },
           ),
@@ -66,7 +66,7 @@ void main() {
   testWidgets('Dialog action styles', (WidgetTester tester) async {
     await tester.pumpWidget(new CupertinoDialogAction(
       isDestructive: true,
-      child: new Text('Ok'),
+      child: const Text('Ok'),
     ));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));

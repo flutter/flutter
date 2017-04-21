@@ -28,7 +28,7 @@ class ChangerState extends State<Changer> {
   void test() { setState(() { _state = true; }); }
 
   @override
-  Widget build(BuildContext context) => _state ? new Wrapper(config.child) : config.child;
+  Widget build(BuildContext context) => _state ? new Wrapper(widget.child) : widget.child;
 }
 
 class Wrapper extends StatelessWidget {
@@ -47,7 +47,7 @@ class Leaf extends StatefulWidget {
 
 class LeafState extends State<Leaf> {
   @override
-  Widget build(BuildContext context) => new Text("leaf");
+  Widget build(BuildContext context) => const Text("leaf");
 }
 
 void main() {

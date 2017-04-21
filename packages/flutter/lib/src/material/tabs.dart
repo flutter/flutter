@@ -138,8 +138,7 @@ class _TabStyle extends AnimatedWidget {
 
     return new DefaultTextStyle(
       style: textStyle.copyWith(color: color),
-      child: new IconTheme.merge(
-        context: context,
+      child: IconTheme.merge(
         data: new IconThemeData(
           size: 24.0,
           color: color,
@@ -336,6 +335,54 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   }
 }
 
+// This class, and TabBarScrollController, only exist to handle the the case
+// where a scrollable TabBar has a non-zero initialIndex. In that case we can
+// only compute the scroll position's initial scroll offset (the "correct"
+// pixels value) after the TabBar viewport width and scroll limits are known.
+class _TabBarScrollPosition extends ScrollPosition {
+  _TabBarScrollPosition({
+    ScrollPhysics physics,
+    AbstractScrollState state,
+    ScrollPosition oldPosition,
+    this.tabBar,
+  }) : super(
+    physics: physics,
+    state: state,
+    initialPixels: null,
+    oldPosition: oldPosition,
+  );
+
+  final _TabBarState tabBar;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    bool result = true;
+    if (pixels == null) {
+      correctPixels(tabBar._initialScrollOffset(viewportDimension, minScrollExtent, maxScrollExtent));
+      result = false;
+    }
+    return super.applyContentDimensions(minScrollExtent, maxScrollExtent) && result;
+  }
+}
+
+// This class, and TabBarScrollPosition, only exist to handle the the case
+// where a scrollable TabBar has a non-zero initialIndex.
+class _TabBarScrollController extends ScrollController {
+  _TabBarScrollController(this.tabBar);
+
+  final _TabBarState tabBar;
+
+  @override
+  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+    return new _TabBarScrollPosition(
+      physics: physics,
+      state: state,
+      oldPosition: oldPosition,
+      tabBar: tabBar,
+    );
+  }
+}
+
 /// A material design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as part of an [AppBar] and in conjuction with a
@@ -350,7 +397,7 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 ///
 ///  * [TabBarView], which displays the contents that the tab bar is selecting
 ///    between.
-class TabBar extends StatefulWidget implements AppBarBottomWidget {
+class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Creates a material design tab bar.
   ///
   /// The [tabs] argument must not be null and must have more than one widget.
@@ -421,16 +468,19 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
   /// is null then the text style of the theme's body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
+  /// A size whose height depends on if the tabs have both icons and text.
+  ///
+  /// [AppBar] uses this this size to compute its own preferred size.
   @override
-  double get bottomHeight {
-    for (Widget widget in tabs) {
-      if (widget is Tab) {
-        final Tab tab = widget;
+  Size get preferredSize {
+    for (Widget item in tabs) {
+      if (item is Tab) {
+        final Tab tab = item;
         if (tab.text != null && tab.icon != null)
-          return _kTextAndIconTabHeight + _kTabIndicatorHeight;
+          return const Size.fromHeight(_kTextAndIconTabHeight + _kTabIndicatorHeight);
       }
     }
-    return _kTabHeight + _kTabIndicatorHeight;
+    return const Size.fromHeight(_kTabHeight + _kTabIndicatorHeight);
   }
 
   @override
@@ -438,21 +488,21 @@ class TabBar extends StatefulWidget implements AppBarBottomWidget {
 }
 
 class _TabBarState extends State<TabBar> {
-  final ScrollController _scrollController = new ScrollController();
+  ScrollController _scrollController;
 
   TabController _controller;
   _IndicatorPainter _indicatorPainter;
   int _currentIndex;
 
   void _updateTabController() {
-    final TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
       if (newController == null) {
         throw new FlutterError(
-          'No TabController for ${config.runtimeType}.\n'
-          'When creating a ${config.runtimeType}, you must either provide an explicit '
+          'No TabController for ${widget.runtimeType}.\n'
+          'When creating a ${widget.runtimeType}, you must either provide an explicit '
           'TabController using the "controller" property, or you must ensure that there '
-          'is a DefaultTabController above the ${config.runtimeType}.\n'
+          'is a DefaultTabController above the ${widget.runtimeType}.\n'
           'In this case, there was neither an explicit controller nor a default controller.'
         );
       }
@@ -482,9 +532,9 @@ class _TabBarState extends State<TabBar> {
   }
 
   @override
-  void didUpdateConfig(TabBar oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.controller != oldConfig.controller)
+  void didUpdateWidget(TabBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller)
       _updateTabController();
   }
 
@@ -502,14 +552,22 @@ class _TabBarState extends State<TabBar> {
   // tabOffsets[tabOffsets.length] is the right edge of the last tab.
   int get maxTabIndex => _indicatorPainter.tabOffsets.length - 2;
 
-  double _tabCenteredScrollOffset(int tabIndex) {
+  double _tabScrollOffset(int index, double viewportWidth, double minExtent, double maxExtent) {
+    if (!widget.isScrollable)
+      return 0.0;
     final List<double> tabOffsets = _indicatorPainter.tabOffsets;
-    assert(tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
+    assert(tabOffsets != null && index >= 0 && index <= maxTabIndex);
+    final double tabCenter = (tabOffsets[index] + tabOffsets[index + 1]) / 2.0;
+    return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
+  }
 
+  double _tabCenteredScrollOffset(int index) {
     final ScrollPosition position = _scrollController.position;
-    final double tabCenter = (tabOffsets[tabIndex] + tabOffsets[tabIndex + 1]) / 2.0;
-    return (tabCenter - position.viewportDimension / 2.0)
-      .clamp(position.minScrollExtent, position.maxScrollExtent);
+    return _tabScrollOffset(index, position.viewportDimension, position.minScrollExtent, position.maxScrollExtent);
+  }
+
+  double _initialScrollOffset(double viewportWidth, double minExtent, double maxExtent) {
+    return _tabScrollOffset(_currentIndex, viewportWidth, minExtent, maxExtent);
   }
 
   void _scrollToCurrentIndex() {
@@ -541,7 +599,7 @@ class _TabBarState extends State<TabBar> {
 
   void _handleTabControllerAnimationTick() {
     assert(mounted);
-    if (!_controller.indexIsChanging && config.isScrollable) {
+    if (!_controller.indexIsChanging && widget.isScrollable) {
       // Sync the TabBar's scroll position with the TabBarView's PageView.
       _currentIndex = _controller.index;
       _scrollToControllerValue();
@@ -555,12 +613,13 @@ class _TabBarState extends State<TabBar> {
     });
   }
 
+  // Called each time layout completes.
   void _saveTabOffsets(List<double> tabOffsets) {
     _indicatorPainter?.tabOffsets = tabOffsets;
   }
 
   void _handleTap(int index) {
-    assert(index >= 0 && index < config.tabs.length);
+    assert(index >= 0 && index < widget.tabs.length);
     _controller.animateTo(index);
   }
 
@@ -568,23 +627,23 @@ class _TabBarState extends State<TabBar> {
     return new _TabStyle(
       animation: animation,
       selected: selected,
-      labelColor: config.labelColor,
-      unselectedLabelColor: config.unselectedLabelColor,
-      labelStyle: config.labelStyle,
-      unselectedLabelStyle: config.unselectedLabelStyle,
+      labelColor: widget.labelColor,
+      unselectedLabelColor: widget.unselectedLabelColor,
+      labelStyle: widget.labelStyle,
+      unselectedLabelStyle: widget.unselectedLabelStyle,
       child: child,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> wrappedTabs = new List<Widget>.from(config.tabs, growable: false);
+    final List<Widget> wrappedTabs = new List<Widget>.from(widget.tabs, growable: false);
 
     // If the controller was provided by DefaultTabController and we're part
     // of a Hero (typically the AppBar), then we will not be able to find the
     // controller during a Hero transition. See https://github.com/flutter/flutter/issues/213.
     if (_controller != null) {
-      _indicatorPainter.color = config.indicatorColor ?? Theme.of(context).indicatorColor;
+      _indicatorPainter.color = widget.indicatorColor ?? Theme.of(context).indicatorColor;
       if (_indicatorPainter.color == Material.of(context).color) {
         // ThemeData tries to avoid this by having indicatorColor avoid being the
         // primaryColor. However, it's possible that the tab bar is on a
@@ -598,7 +657,7 @@ class _TabBarState extends State<TabBar> {
 
       if (_controller.index != _currentIndex) {
         _currentIndex = _controller.index;
-        if (config.isScrollable)
+        if (widget.isScrollable)
           _scrollToCurrentIndex();
       }
 
@@ -620,7 +679,7 @@ class _TabBarState extends State<TabBar> {
           final Animation<double> leftAnimation = new _DragAnimation(_controller, tabIndex);
           wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, leftAnimation);
         }
-        if (_currentIndex < config.tabs.length - 1) {
+        if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
           final Animation<double> rightAnimation = new _DragAnimation(_controller, tabIndex);
           wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, rightAnimation);
@@ -631,12 +690,12 @@ class _TabBarState extends State<TabBar> {
     // Add the tap handler to each tab. If the tab bar is scrollable
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
-    for (int index = 0; index < config.tabs.length; index++) {
+    for (int index = 0; index < widget.tabs.length; index++) {
       wrappedTabs[index] = new InkWell(
         onTap: () { _handleTap(index); },
         child: wrappedTabs[index],
       );
-      if (!config.isScrollable)
+      if (!widget.isScrollable)
         wrappedTabs[index] = new Expanded(child: wrappedTabs[index]);
     }
 
@@ -647,10 +706,10 @@ class _TabBarState extends State<TabBar> {
         child: new _TabStyle(
           animation: kAlwaysDismissedAnimation,
           selected: false,
-          labelColor: config.labelColor,
-          unselectedLabelColor: config.unselectedLabelColor,
-          labelStyle: config.labelStyle,
-          unselectedLabelStyle: config.unselectedLabelStyle,
+          labelColor: widget.labelColor,
+          unselectedLabelColor: widget.unselectedLabelColor,
+          labelStyle: widget.labelStyle,
+          unselectedLabelStyle: widget.unselectedLabelStyle,
           child: new _TabLabelBar(
             onPerformLayout: _saveTabOffsets,
             children:  wrappedTabs,
@@ -659,7 +718,8 @@ class _TabBarState extends State<TabBar> {
       ),
     );
 
-    if (config.isScrollable) {
+    if (widget.isScrollable) {
+      _scrollController ??= new _TabBarScrollController(this);
       tabBar = new SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         controller: _scrollController,
@@ -711,14 +771,14 @@ class _TabBarViewState extends State<TabBarView> {
   int _warpUnderwayCount = 0;
 
   void _updateTabController() {
-    final TabController newController = config.controller ?? DefaultTabController.of(context);
+    final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
       if (newController == null) {
         throw new FlutterError(
-          'No TabController for ${config.runtimeType}.\n'
-          'When creating a ${config.runtimeType}, you must either provide an explicit '
+          'No TabController for ${widget.runtimeType}.\n'
+          'When creating a ${widget.runtimeType}, you must either provide an explicit '
           'TabController using the "controller" property, or you must ensure that there '
-          'is a DefaultTabController above the ${config.runtimeType}.\n'
+          'is a DefaultTabController above the ${widget.runtimeType}.\n'
           'In this case, there was neither an explicit controller nor a default controller.'
         );
       }
@@ -737,7 +797,7 @@ class _TabBarViewState extends State<TabBarView> {
   @override
   void initState() {
     super.initState();
-    _children = config.children;
+    _children = widget.children;
   }
 
   @override
@@ -749,12 +809,12 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   @override
-  void didUpdateConfig(TabBarView oldConfig) {
-    super.didUpdateConfig(oldConfig);
-    if (config.controller != oldConfig.controller)
+  void didUpdateWidget(TabBarView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller)
       _updateTabController();
-    if (config.children != oldConfig.children && _warpUnderwayCount == 0)
-      _children = config.children;
+    if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
+      _children = widget.children;
   }
 
   @override
@@ -790,7 +850,7 @@ class _TabBarViewState extends State<TabBarView> {
     int initialPage;
     setState(() {
       _warpUnderwayCount += 1;
-      _children = new List<Widget>.from(config.children, growable: false);
+      _children = new List<Widget>.from(widget.children, growable: false);
       if (_currentIndex > previousIndex) {
         _children[_currentIndex - 1] = _children[previousIndex];
         initialPage = _currentIndex - 1;
@@ -808,7 +868,7 @@ class _TabBarViewState extends State<TabBarView> {
 
     setState(() {
       _warpUnderwayCount -= 1;
-      _children = config.children;
+      _children = widget.children;
     });
   }
 
@@ -828,7 +888,10 @@ class _TabBarViewState extends State<TabBarView> {
       }
       _controller.offset = (_pageController.page - _controller.index).clamp(-1.0, 1.0);
     } else if (notification is ScrollEndNotification) {
-      _controller.index = _pageController.page.floor();
+      final ScrollPosition position = _pageController.position;
+      final double pageTolerance = position.physics.tolerance.distance
+          / (position.viewportDimension * _pageController.viewportFraction);
+      _controller.index = (_pageController.page + pageTolerance).floor();
       _currentIndex = _controller.index;
     }
     _warpUnderwayCount -= 1;
@@ -844,6 +907,33 @@ class _TabBarViewState extends State<TabBarView> {
         controller: _pageController,
         physics: _kTabBarViewPhysics,
         children: _children,
+      ),
+    );
+  }
+}
+
+/// Displays a single 12x12 circle with the specified border and background colors.
+///
+/// Used by [TabPageSelector] to indicate the selected page.
+class TabPageSelectorIndicator extends StatelessWidget {
+  const TabPageSelectorIndicator({ Key key, this.backgroundColor, this.borderColor }) : super(key: key);
+
+  /// The indicator circle's background color.
+  final Color backgroundColor;
+
+  /// The indicator circle's border color.
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      width: 12.0,
+      height: 12.0,
+      margin: const EdgeInsets.all(4.0),
+      decoration: new BoxDecoration(
+        backgroundColor: backgroundColor,
+        border: new Border.all(color: borderColor),
+        shape: BoxShape.circle
       ),
     );
   }
@@ -873,24 +963,30 @@ class TabPageSelector extends StatelessWidget {
     Color background;
     if (tabController.indexIsChanging) {
       // The selection's animation is animating from previousValue to value.
+      final double t = 1.0 - _indexChangeProgress(tabController);
       if (tabController.index == tabIndex)
-        background = selectedColor.lerp(_indexChangeProgress(tabController));
+        background = selectedColor.lerp(t);
       else if (tabController.previousIndex == tabIndex)
-        background = previousColor.lerp(_indexChangeProgress(tabController));
+        background = previousColor.lerp(t);
       else
         background = selectedColor.begin;
     } else {
-      background = tabController.index == tabIndex ? selectedColor.end : selectedColor.begin;
+      // The selection's offset reflects how far the TabBarView has
+      /// been dragged to the left (-1.0 to 0.0) or the right (0.0 to 1.0).
+      final double offset = tabController.offset;
+      if (tabController.index == tabIndex) {
+        background = selectedColor.lerp(1.0 - offset.abs());
+      } else if (tabController.index == tabIndex - 1 && offset > 0.0) {
+        background = selectedColor.lerp(offset);
+      } else if (tabController.index == tabIndex + 1 && offset < 0.0) {
+        background = selectedColor.lerp(-offset);
+      } else {
+        background = selectedColor.begin;
+      }
     }
-    return new Container(
-      width: 12.0,
-      height: 12.0,
-      margin: const EdgeInsets.all(4.0),
-      decoration: new BoxDecoration(
-        backgroundColor: background,
-        border: new Border.all(color: selectedColor.end),
-        shape: BoxShape.circle
-      )
+    return new TabPageSelectorIndicator(
+      backgroundColor: background,
+      borderColor: selectedColor.end,
     );
   }
 

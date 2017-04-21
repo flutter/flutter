@@ -20,6 +20,7 @@ import 'system_channels.dart';
 ///  * [RawKeyEvent]
 ///  * [RawKeyDownEvent]
 ///  * [RawKeyUpEvent]
+@immutable
 abstract class RawKeyEventData {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -101,6 +102,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 ///  * [RawKeyDownEvent]
 ///  * [RawKeyUpEvent]
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
+@immutable
 abstract class RawKeyEvent {
   /// Initializes fields for subclasses.
   const RawKeyEvent({

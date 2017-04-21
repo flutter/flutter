@@ -38,7 +38,7 @@ class UpdaterState extends State<Updater> {
     }
     _lastUpdateCheck = new DateTime.now();
 
-    final String updateUrl = await config.updateUrlFetcher();
+    final String updateUrl = await widget.updateUrlFetcher();
     if (updateUrl != null) {
       final bool wantsUpdate = await showDialog(context: context, child: _buildDialog());
       if (wantsUpdate != null && wantsUpdate)
@@ -51,16 +51,16 @@ class UpdaterState extends State<Updater> {
     final TextStyle dialogTextStyle =
         theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
     return new AlertDialog(
-      title: new Text('Update Flutter Gallery?'),
+      title: const Text('Update Flutter Gallery?'),
       content: new Text('A newer version is available.', style: dialogTextStyle),
       actions: <Widget>[
         new FlatButton(
-            child: new Text('NO THANKS'),
+            child: const Text('NO THANKS'),
             onPressed: () {
               Navigator.pop(context, false);
             }),
         new FlatButton(
-            child: new Text('UPDATE'),
+            child: const Text('UPDATE'),
             onPressed: () {
               Navigator.pop(context, true);
             }),
@@ -68,5 +68,5 @@ class UpdaterState extends State<Updater> {
   }
 
   @override
-  Widget build(BuildContext context) => config.child;
+  Widget build(BuildContext context) => widget.child;
 }

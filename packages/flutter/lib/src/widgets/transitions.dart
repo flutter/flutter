@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'basic.dart';
+import 'container.dart';
 import 'framework.dart';
 
 export 'package:flutter/rendering.dart' show RelativeRect;
@@ -68,20 +69,21 @@ class _AnimatedState extends State<AnimatedWidget> {
   @override
   void initState() {
     super.initState();
-    config.listenable.addListener(_handleChange);
+    widget.listenable.addListener(_handleChange);
   }
 
   @override
-  void didUpdateConfig(AnimatedWidget oldConfig) {
-    if (config.listenable != oldConfig.listenable) {
-      oldConfig.listenable.removeListener(_handleChange);
-      config.listenable.addListener(_handleChange);
+  void didUpdateWidget(AnimatedWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.listenable != oldWidget.listenable) {
+      oldWidget.listenable.removeListener(_handleChange);
+      widget.listenable.addListener(_handleChange);
     }
   }
 
   @override
   void dispose() {
-    config.listenable.removeListener(_handleChange);
+    widget.listenable.removeListener(_handleChange);
     super.dispose();
   }
 
@@ -92,7 +94,7 @@ class _AnimatedState extends State<AnimatedWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => config.build(context);
+  Widget build(BuildContext context) => widget.build(context);
 }
 
 /// Animates the position of a widget relative to its normal position.
@@ -383,6 +385,52 @@ class RelativePositionedTransition extends AnimatedWidget {
       right: offsets.right,
       bottom: offsets.bottom,
       left: offsets.left,
+      child: child,
+    );
+  }
+}
+
+/// Animated version of a [DecoratedBox] that animates the different properties
+/// of its [Decoration].
+///
+/// See also:
+///
+/// * [DecoratedBox], which also draws a [Decoration] but is not animated.
+/// * [AnimatedContainer], a more full-featured container that also animates on
+///   decoration using an internal animation.
+class DecoratedBoxTransition extends AnimatedWidget {
+  /// Creates an animated [DecorationBox] whose [Decoration] animation updates
+  /// the widget.
+  ///
+  /// The [decoration] and [position] cannot be null.
+  ///
+  /// See also:
+  ///
+  /// * [new DecoratedBox].
+  DecoratedBoxTransition({
+    Key key,
+    @required this.decoration,
+    this.position: DecorationPosition.background,
+    @required this.child,
+  }) : super(key: key, listenable: decoration);
+
+  /// Animation of the decoration to paint.
+  ///
+  /// Can be created using a [DecorationTween] interpolating typically between
+  /// two [BoxDecoration].
+  final Animation<Decoration> decoration;
+
+  /// Whether to paint the box decoration behind or in front of the child.
+  final DecorationPosition position;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new DecoratedBox(
+      decoration: decoration.value,
+      position: position,
       child: child,
     );
   }

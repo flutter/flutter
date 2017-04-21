@@ -4,9 +4,12 @@
 
 import 'dart:ui' as ui show ParagraphStyle, TextStyle, lerpDouble;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// An immutable style in which paint text.
+@immutable
 class TextStyle {
   /// Creates a text style.
   const TextStyle({

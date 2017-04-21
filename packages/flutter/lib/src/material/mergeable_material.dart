@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 /// The base type for [MaterialSlice] and [MaterialGap].
 ///
 /// All [MergeableMaterialItem] objects need a [LocalKey].
+@immutable
 abstract class MergeableMaterialItem {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -74,7 +75,7 @@ class MaterialGap extends MergeableMaterialItem {
 /// Displays a list of [MergeableMaterialItem] children. The list contains
 /// [MaterialSlice] items whose boundaries are either "merged" with adjacent
 /// items or separated by a [MaterialGap]. The [children] are distributed along
-/// the given [mainAxis] in the same way as the children of a [BlockBody]. When
+/// the given [mainAxis] in the same way as the children of a [ListBody]. When
 /// the list of children changes, gaps are automatically animated open or closed
 /// as needed.
 ///
@@ -153,7 +154,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   @override
   void initState() {
     super.initState();
-    _children = new List<MergeableMaterialItem>.from(config.children);
+    _children = new List<MergeableMaterialItem>.from(widget.children);
 
     for (int i = 0; i < _children.length; i += 1) {
       if (_children[i] is MaterialGap) {
@@ -209,9 +210,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   bool _debugHasConsecutiveGaps(List<MergeableMaterialItem> children) {
-    for (int i = 0; i < config.children.length - 1; i += 1) {
-      if (config.children[i] is MaterialGap &&
-          config.children[i + 1] is MaterialGap)
+    for (int i = 0; i < widget.children.length - 1; i += 1) {
+      if (widget.children[i] is MaterialGap &&
+          widget.children[i + 1] is MaterialGap)
         return true;
     }
     return false;
@@ -270,19 +271,19 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
   }
 
   @override
-  void didUpdateConfig(MergeableMaterial oldConfig) {
-    super.didUpdateConfig(oldConfig);
+  void didUpdateWidget(MergeableMaterial oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    final Set<LocalKey> oldKeys = oldConfig.children.map(
+    final Set<LocalKey> oldKeys = oldWidget.children.map(
       (MergeableMaterialItem child) => child.key
     ).toSet();
-    final Set<LocalKey> newKeys = config.children.map(
+    final Set<LocalKey> newKeys = widget.children.map(
       (MergeableMaterialItem child) => child.key
     ).toSet();
     final Set<LocalKey> newOnly = newKeys.difference(oldKeys);
     final Set<LocalKey> oldOnly = oldKeys.difference(newKeys);
 
-    final List<MergeableMaterialItem> newChildren = config.children;
+    final List<MergeableMaterialItem> newChildren = widget.children;
     int i = 0;
     int j = 0;
 
@@ -473,7 +474,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       );
     }
 
-    if (config.mainAxis == Axis.vertical) {
+    if (widget.mainAxis == Axis.vertical) {
       return new BorderRadius.vertical(
         top: start ? cardRadius : startRadius,
         bottom: end ? cardRadius : endRadius
@@ -522,8 +523,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle
             ),
-            child: new BlockBody(
-              mainAxis: config.mainAxis,
+            child: new ListBody(
+              mainAxis: widget.mainAxis,
               children: slices
             )
           )
@@ -532,15 +533,15 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
         widgets.add(
           new SizedBox(
-            width: config.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
-            height: config.mainAxis == Axis.vertical ? _getGapSize(i) : null
+            width: widget.mainAxis == Axis.horizontal ? _getGapSize(i) : null,
+            height: widget.mainAxis == Axis.vertical ? _getGapSize(i) : null
           )
         );
       } else {
         final MaterialSlice slice = _children[i];
         Widget child = slice.child;
 
-        if (config.hasDividers) {
+        if (widget.hasDividers) {
           final bool hasTopDivider = _willNeedDivider(i - 1);
           final bool hasBottomDivider = _willNeedDivider(i + 1);
 
@@ -593,8 +594,8 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle
           ),
-          child: new BlockBody(
-            mainAxis: config.mainAxis,
+          child: new ListBody(
+            mainAxis: widget.mainAxis,
             children: slices
           )
         )
@@ -602,9 +603,9 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       slices = <Widget>[];
     }
 
-    return new _MergeableMaterialBlockBody(
-      mainAxis: config.mainAxis,
-      boxShadows: kElevationToShadow[config.elevation],
+    return new _MergeableMaterialListBody(
+      mainAxis: widget.mainAxis,
+      boxShadows: kElevationToShadow[widget.elevation],
       items: _children,
       children: widgets
     );
@@ -635,36 +636,36 @@ class _MergeableMaterialSliceKey extends GlobalKey {
   }
 }
 
-class _MergeableMaterialBlockBody extends BlockBody {
-  _MergeableMaterialBlockBody({
+class _MergeableMaterialListBody extends ListBody {
+  _MergeableMaterialListBody({
     List<Widget> children,
     Axis mainAxis: Axis.vertical,
     this.items,
     this.boxShadows
   }) : super(children: children, mainAxis: mainAxis);
 
-  List<MergeableMaterialItem> items;
-  List<BoxShadow> boxShadows;
+  final List<MergeableMaterialItem> items;
+  final List<BoxShadow> boxShadows;
 
   @override
-  RenderBlock createRenderObject(BuildContext context) {
-    return new _MergeableMaterialRenderBlock(
+  RenderListBody createRenderObject(BuildContext context) {
+    return new _RenderMergeableMaterialListBody(
       mainAxis: mainAxis,
       boxShadows: boxShadows
     );
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
-    final _MergeableMaterialRenderBlock materialRenderBlock = renderObject;
-    materialRenderBlock
+  void updateRenderObject(BuildContext context, RenderListBody renderObject) {
+    final _RenderMergeableMaterialListBody materialRenderListBody = renderObject;
+    materialRenderListBody
       ..mainAxis = mainAxis
       ..boxShadows = boxShadows;
   }
 }
 
-class _MergeableMaterialRenderBlock extends RenderBlock {
-  _MergeableMaterialRenderBlock({
+class _RenderMergeableMaterialListBody extends RenderListBody {
+  _RenderMergeableMaterialListBody({
     List<RenderBox> children,
     Axis mainAxis: Axis.vertical,
     this.boxShadows
@@ -692,7 +693,7 @@ class _MergeableMaterialRenderBlock extends RenderBlock {
     int i = 0;
 
     while (child != null) {
-      final BlockParentData childParentData = child.parentData;
+      final ListBodyParentData childParentData = child.parentData;
       final Rect rect = (childParentData.offset + offset) & child.size;
       if (i % 2 == 0)
         _paintShadows(context.canvas, rect);

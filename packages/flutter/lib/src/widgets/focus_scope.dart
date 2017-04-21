@@ -90,26 +90,26 @@ class _FocusScopeState extends State<FocusScope> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_didAutofocus && config.autofocus) {
-      FocusScope.of(context).setFirstFocus(config.node);
+    if (!_didAutofocus && widget.autofocus) {
+      FocusScope.of(context).setFirstFocus(widget.node);
       _didAutofocus = true;
     }
   }
 
   @override
   void dispose() {
-    config.node.detach();
+    widget.node.detach();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    FocusScope.of(context).reparentScopeIfNeeded(config.node);
+    FocusScope.of(context).reparentScopeIfNeeded(widget.node);
     return new Semantics(
       container: true,
       child: new _FocusScopeMarker(
-        node: config.node,
-        child: config.child,
+        node: widget.node,
+        child: widget.child,
       ),
     );
   }

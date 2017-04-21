@@ -38,7 +38,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
-    expect(tester.getCenter(find.text('Massachusetts')), equals(const Point(400.0, 100.0)));
+    expect(tester.getCenter(find.text('Massachusetts')), equals(const Offset(400.0, 100.0)));
 
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
@@ -109,7 +109,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Alabama'), findsNothing);
-    expect(tester.getCenter(find.text('Massachusetts')), equals(const Point(400.0, 100.0)));
+    expect(tester.getCenter(find.text('Massachusetts')), equals(const Offset(400.0, 100.0)));
 
     await tester.tap(find.text('Massachusetts'));
     expect(log, equals(<String>['Massachusetts']));
@@ -138,7 +138,7 @@ void main() {
 
     expect(log, isEmpty);
 
-    final TestGesture gesture = await tester.startGesture(const Point(100.0, 100.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
     await gesture.moveBy(const Offset(0.0, -100.0));
 
     expect(log, equals(<Type>[

@@ -56,7 +56,7 @@ class Form extends StatefulWidget {
   ///
   /// If the callback returns a Future that resolves to false, the form's route
   /// will not be popped.
-  WillPopCallback onWillPop;
+  final WillPopCallback onWillPop;
 
   @override
   FormState createState() => new FormState();
@@ -64,7 +64,7 @@ class Form extends StatefulWidget {
 
 /// State assocated with a [Form] widget.
 ///
-/// A [FormState] object can ve used to [save], [reset], and [validate] every
+/// A [FormState] object can be used to [save], [reset], and [validate] every
 /// [FormField] that is a descendant of the associated [Form].
 ///
 /// Typically obtained via [Form.of].
@@ -90,14 +90,14 @@ class FormState extends State<Form> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
     return new WillPopScope(
-      onWillPop: config.onWillPop,
+      onWillPop: widget.onWillPop,
       child: new _FormScope(
         formState: this,
         generation: _generation,
-        child: config.child,
+        child: widget.child,
       ),
     );
   }
@@ -117,7 +117,7 @@ class FormState extends State<Form> {
   }
 
   /// Validates every [FormField] that is a descendant of this [Form], and
-  /// returns true iff there are no errors.
+  /// returns true if there are no errors.
   bool validate() {
     _fieldDidChange();
     return _validate();
@@ -148,7 +148,7 @@ class _FormScope extends InheritedWidget {
   final int _generation;
 
   /// The [Form] associated with this widget.
-  Form get form => _formState.config;
+  Form get form => _formState.widget;
 
   @override
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
@@ -221,7 +221,7 @@ class FormField<T> extends StatefulWidget {
   /// An optional value to initialize the form field to, or null otherwise.
   final T initialValue;
 
-  /// If true, this form fields will validate and update its error text
+  /// If true, this form field will validate and update its error text
   /// immediately after every change. Otherwise, you must call
   /// [FormFieldState.validate] to validate. If part of a [Form] that
   /// autovalidates, this value will be ignored.
@@ -250,14 +250,14 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
-    if (config.onSaved != null)
-      config.onSaved(value);
+    if (widget.onSaved != null)
+      widget.onSaved(value);
   }
 
   /// Resets the field to its initial value.
   void reset() {
     setState(() {
-      _value = config.initialValue;
+      _value = widget.initialValue;
       _errorText = null;
     });
   }
@@ -272,8 +272,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   }
 
   bool _validate() {
-    if (config.validator != null)
-      _errorText = config.validator(_value);
+    if (widget.validator != null)
+      _errorText = widget.validator(_value);
     return !hasError;
   }
 
@@ -289,7 +289,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   @override
   void initState() {
     super.initState();
-    _value = config.initialValue;
+    _value = widget.initialValue;
   }
 
   @override
@@ -300,9 +300,9 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (config.autovalidate)
+    if (widget.autovalidate)
       _validate();
     Form.of(context)?._register(this);
-    return config.builder(this);
+    return widget.builder(this);
   }
 }

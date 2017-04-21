@@ -76,7 +76,10 @@ void main() {
 
   test('overflow test', () {
     final RenderParagraph paragraph = new RenderParagraph(
-      const TextSpan(text: 'This is\na wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.'),
+      const TextSpan(
+        text: 'This\n' // 4 characters * 10px font size = 40px width on the first line
+              'is a wrapping test. It should wrap at manual newlines, and if softWrap is true, also at spaces.',
+        style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0)),
       maxLines: 1,
       softWrap: true,
     );
@@ -90,7 +93,7 @@ void main() {
     }
 
     // Lay out in a narrow box to force wrapping.
-    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0)); // enough to fit "This" but not "This is"
     final double lineHeight = paragraph.size.height;
 
     relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.clip);
@@ -132,5 +135,17 @@ void main() {
 
     relayoutWith(maxLines: null, softWrap: false, overflow: TextOverflow.ellipsis);
     expect(paragraph.size.height, equals(2 * lineHeight));
+
+    // Test presence of the fade effect.
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.fade);
+    expect(paragraph.debugHasOverflowShader, isTrue);
+
+    // Change back to ellipsis and check that the fade shader is cleared.
+    relayoutWith(maxLines: 3, softWrap: true, overflow: TextOverflow.ellipsis);
+    expect(paragraph.debugHasOverflowShader, isFalse);
+
+    relayoutWith(maxLines: 100, softWrap: true, overflow: TextOverflow.fade);
+    expect(paragraph.debugHasOverflowShader, isFalse);
   });
 }
+

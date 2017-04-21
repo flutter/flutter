@@ -116,8 +116,7 @@ class _PosixUtils extends OperatingSystemUtils {
               .trim()} ${results[2].stdout.trim()}";
         }
       }
-      if (_name == null)
-        _name = super.name;
+      _name ??= super.name;
     }
     return _name;
   }

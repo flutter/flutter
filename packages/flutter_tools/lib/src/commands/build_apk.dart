@@ -31,11 +31,6 @@ class BuildApkCommand extends BuildSubCommand {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
-
-    argParser.addOption('target-arch',
-      defaultsTo: 'arm',
-      allowed: <String>['arm', 'x86', 'x64'],
-      help: 'Architecture of the target device.');
   }
 
   @override
@@ -47,31 +42,16 @@ class BuildApkCommand extends BuildSubCommand {
     'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are\n'
     'suitable for deploying to app stores.';
 
-  TargetPlatform _getTargetPlatform(String targetArch) {
-    switch (targetArch) {
-      case 'arm':
-        return TargetPlatform.android_arm;
-      case 'x86':
-        return TargetPlatform.android_x86;
-      case 'x64':
-        return TargetPlatform.android_x64;
-      default:
-        throw new Exception('Unrecognized target architecture: $targetArch');
-    }
-  }
-
   @override
   Future<Null> runCommand() async {
     await super.runCommand();
 
-    final TargetPlatform targetPlatform = _getTargetPlatform(argResults['target-arch']);
     final BuildMode buildMode = getBuildMode();
-    await buildApk(targetPlatform, buildMode: buildMode, target: targetFile);
+    await buildApk(buildMode: buildMode, target: targetFile);
   }
 }
 
-Future<Null> buildApk(
-  TargetPlatform platform, {
+Future<Null> buildApk({
   String target,
   BuildMode buildMode: BuildMode.debug,
   String kernelPath,
@@ -85,9 +65,6 @@ Future<Null> buildApk(
     );
   }
 
-  if (platform != TargetPlatform.android_arm && buildMode != BuildMode.debug) {
-    throwToolExit('Profile and release builds are only supported on ARM targets.');
-  }
   // Validate that we can find an android sdk.
   if (androidSdk == null)
     throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');

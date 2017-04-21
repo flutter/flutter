@@ -14,17 +14,17 @@ void main() {
         new ListView(
           shrinkWrap: true,
           children: <Widget>[
-            new Text('1'),
-            new Text('2'),
-            new Text('3'),
+            const Text('1'),
+            const Text('2'),
+            const Text('3'),
           ],
         ),
         new ListView(
           shrinkWrap: true,
           children: <Widget>[
-            new Text('4'),
-            new Text('5'),
-            new Text('6'),
+            const Text('4'),
+            const Text('5'),
+            const Text('6'),
           ],
         ),
       ],
@@ -36,14 +36,14 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
+        const SizedBox(height: 100.0, child: const Text('100')),
       ],
     ));
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
-        new SizedBox(height: 200.0, child: new Text('200')),
+        const SizedBox(height: 100.0, child: const Text('100')),
+        const SizedBox(height: 200.0, child: const Text('200')),
       ],
     ));
 
@@ -53,7 +53,7 @@ void main() {
   testWidgets('Underflowing ListView contentExtent should track additional children', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
+        const SizedBox(height: 100.0, child: const Text('100')),
       ],
     ));
 
@@ -62,8 +62,8 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
-        new SizedBox(height: 200.0, child: new Text('200')),
+        const SizedBox(height: 100.0, child: const Text('100')),
+        const SizedBox(height: 200.0, child: const Text('200')),
       ],
     ));
     expect(list.geometry.scrollExtent, equals(300.0));
@@ -77,8 +77,8 @@ void main() {
   testWidgets('Overflowing ListView should relayout for missing children', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 300.0, child: new Text('300')),
-        new SizedBox(height: 400.0, child: new Text('400')),
+        const SizedBox(height: 300.0, child: const Text('300')),
+        const SizedBox(height: 400.0, child: const Text('400')),
       ],
     ));
 
@@ -87,7 +87,7 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 300.0, child: new Text('300')),
+        const SizedBox(height: 300.0, child: const Text('300')),
       ],
     ));
 
@@ -105,8 +105,8 @@ void main() {
   testWidgets('Overflowing ListView should not relayout for additional children', (WidgetTester tester) async {
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 300.0, child: new Text('300')),
-        new SizedBox(height: 400.0, child: new Text('400')),
+        const SizedBox(height: 300.0, child: const Text('300')),
+        const SizedBox(height: 400.0, child: const Text('400')),
       ],
     ));
 
@@ -115,9 +115,9 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 300.0, child: new Text('300')),
-        new SizedBox(height: 400.0, child: new Text('400')),
-        new SizedBox(height: 100.0, child: new Text('100')),
+        const SizedBox(height: 300.0, child: const Text('300')),
+        const SizedBox(height: 400.0, child: const Text('400')),
+        const SizedBox(height: 100.0, child: const Text('100')),
       ],
     ));
 
@@ -137,7 +137,7 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
+        const SizedBox(height: 100.0, child: const Text('100')),
       ],
     ));
 
@@ -146,9 +146,9 @@ void main() {
 
     await tester.pumpWidget(new ListView(
       children: <Widget>[
-        new SizedBox(height: 100.0, child: new Text('100')),
-        new SizedBox(height: 200.0, child: new Text('200')),
-        new SizedBox(height: 400.0, child: new Text('400')),
+        const SizedBox(height: 100.0, child: const Text('100')),
+        const SizedBox(height: 200.0, child: const Text('200')),
+        const SizedBox(height: 400.0, child: const Text('400')),
       ],
     ));
 

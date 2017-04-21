@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight }) {
+Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
   return new Scaffold(
     body: new DefaultTabController(
       length: 3,
@@ -15,10 +15,11 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight 
         primary: true,
         slivers: <Widget>[
           new SliverAppBar(
-            title: new Text('AppBar Title'),
+            title: const Text('AppBar Title'),
             floating: floating,
             pinned: pinned,
             expandedHeight: expandedHeight,
+            snap: snap,
             bottom: new TabBar(
               tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
             ),
@@ -44,17 +45,11 @@ bool appBarIsVisible(WidgetTester tester) {
   return sliver.geometry.visible;
 }
 
-double appBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(AppBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar)).height;
+double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar)).dy;
+double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar)).dy;
 
-double tabBarHeight(WidgetTester tester) {
-  final Element element = tester.element(find.byType(TabBar));
-  final RenderBox box = element.findRenderObject();
-  return box.size.height;
-}
+double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar)).height;
 
 void main() {
   testWidgets('AppBar centers title on iOS', (WidgetTester tester) async {
@@ -63,16 +58,16 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
     );
 
     final Finder title = find.text('X');
-    Point center = tester.getCenter(title);
+    Offset center = tester.getCenter(title);
     Size size = tester.getSize(title);
-    expect(center.x, lessThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 - size.width / 2.0));
 
     // Clear the widget tree to avoid animating between Android and iOS.
     await tester.pumpWidget(new Container(key: new UniqueKey()));
@@ -82,7 +77,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
@@ -90,8 +85,8 @@ void main() {
 
     center = tester.getCenter(title);
     size = tester.getSize(title);
-    expect(center.x, greaterThan(400 - size.width / 2.0));
-    expect(center.x, lessThan(400 + size.width / 2.0));
+    expect(center.dx, greaterThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
   testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
@@ -101,7 +96,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: true,
-            title: new Text('X'),
+            title: const Text('X'),
           )
         )
       )
@@ -109,10 +104,10 @@ void main() {
 
 
     final Finder title = find.text('X');
-    final Point center = tester.getCenter(title);
+    final Offset center = tester.getCenter(title);
     final Size size = tester.getSize(title);
-    expect(center.x, greaterThan(400 - size.width / 2.0));
-    expect(center.x, lessThan(400 + size.width / 2.0));
+    expect(center.dx, greaterThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
   testWidgets('AppBar centerTitle:false title left edge is 16.0 ', (WidgetTester tester) async {
@@ -121,13 +116,13 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: new Text('X'),
+            title: const Text('X'),
           ),
         ),
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).x, 16.0);
+    expect(tester.getTopLeft(find.text('X')).dx, 16.0);
   });
 
   testWidgets(
@@ -138,7 +133,7 @@ void main() {
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: new Text('X'),
+            title: const Text('X'),
           ),
           // A drawer causes a leading hamburger.
           drawer: new Drawer(),
@@ -146,7 +141,7 @@ void main() {
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).x, 72.0);
+    expect(tester.getTopLeft(find.text('X')).dx, 72.0);
   });
 
   testWidgets('AppBar centerTitle:false title overflow OK ', (WidgetTester tester) async {
@@ -176,7 +171,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // The toolbar's contents are padded on the right by 4.0
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
 
@@ -186,13 +181,13 @@ void main() {
     ];
     await tester.pumpWidget(buildApp());
 
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
     expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
   });
@@ -229,7 +224,7 @@ void main() {
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
-    expect(tester.getTopLeft(title).x, 72.0);
+    expect(tester.getTopLeft(title).dx, 72.0);
     expect(tester.getSize(title).width, equals(700.0));
 
     // Centering a title with width 620 within the 800 pixel wide test widget
@@ -245,7 +240,7 @@ void main() {
       const SizedBox(width: 48.0)
     ];
     await tester.pumpWidget(buildApp());
-    expect(tester.getTopLeft(title).x, 800 - 620 - 48 - 48 - 4);
+    expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -254,9 +249,9 @@ void main() {
       new SizedBox(
         height: kToolbarHeight,
         child: new AppBar(
-          leading: new Text('L'),
-          title: new Text('No Scaffold'),
-          actions: <Widget>[new Text('A1'), new Text('A2')],
+          leading: const Text('L'),
+          title: const Text('No Scaffold'),
+          actions: <Widget>[const Text('A1'), const Text('A2')],
         ),
       ),
     );
@@ -276,7 +271,7 @@ void main() {
           width: 0.0,
           child: new Scaffold(
             appBar: new AppBar(
-              title: new Text('X'),
+              title: const Text('X'),
             ),
           ),
         ),
@@ -311,7 +306,7 @@ void main() {
     );
 
     // The vertical center of the widget with key, in global coordinates.
-    double yCenter(Key key) => tester.getCenter(find.byKey(key)).y;
+    double yCenter(Key key) => tester.getCenter(find.byKey(key)).dy;
 
     expect(yCenter(appBarKey), equals(yCenter(leadingKey)));
     expect(yCenter(appBarKey), equals(yCenter(titleKey)));
@@ -325,7 +320,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
           ),
           drawer: new Column(), // Doesn't really matter. Triggers a hamburger regardless.
         ),
@@ -333,7 +328,7 @@ void main() {
     );
 
     final Finder hamburger = find.byTooltip('Open navigation menu');
-    expect(tester.getTopLeft(hamburger), const Point(0.0, 0.0));
+    expect(tester.getTopLeft(hamburger), const Offset(0.0, 0.0));
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
@@ -343,16 +338,16 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            title: new Text('X'),
+            title: const Text('X'),
             actions: <Widget> [
-              new IconButton(
-                icon: new Icon(Icons.share),
+              const IconButton(
+                icon: const Icon(Icons.share),
                 onPressed: null,
                 tooltip: 'Share',
                 iconSize: 20.0,
               ),
-              new IconButton(
-                icon: new Icon(Icons.add),
+              const IconButton(
+                icon: const Icon(Icons.add),
                 onPressed: null,
                 tooltip: 'Add',
                 iconSize: 60.0,
@@ -365,7 +360,7 @@ void main() {
 
     final Finder addButton = find.byTooltip('Add');
     // Right padding is 4dp.
-    expect(tester.getTopRight(addButton), const Point(800.0 - 4.0, 0.0));
+    expect(tester.getTopRight(addButton), const Offset(800.0 - 4.0, 0.0));
     // It's still the size it was plus the 2 * 8dp padding from IconButton.
     expect(tester.getSize(addButton), const Size(60.0 + 2 * 8.0, 56.0));
 
@@ -459,7 +454,7 @@ void main() {
     final double initialAppBarHeight = 128.0;
     final double initialTabBarHeight = tabBarHeight(tester);
 
-    // Scroll the not-pinned appbar, collapsing the expanded height. At this
+    // Scroll the floating-pinned appbar, collapsing the expanded height. At this
     // point only the tabBar is visible.
     controller.jumpTo(600.0);
     await tester.pump();
@@ -468,11 +463,253 @@ void main() {
     expect(appBarHeight(tester), lessThan(initialAppBarHeight));
     expect(appBarHeight(tester), initialTabBarHeight);
 
-    // Scroll the not-pinned appbar back into view
+    // Scroll the floating-pinned appbar back into view
     controller.jumpTo(0.0);
     await tester.pump();
     expect(appBarIsVisible(tester), true);
     expect(appBarHeight(tester), initialAppBarHeight);
     expect(tabBarHeight(tester), initialTabBarHeight);
+  });
+
+  testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: false,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Scroll to the middle of the list. The (floating) appbar is no longer visible.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(256.00);
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), false);
+    expect(appBarTop(tester), lessThanOrEqualTo(-128.0));
+
+    // Drag the scrollable up and down. The app bar should not snap open, its
+    // height should just track the the drag offset.
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
+    await tester.pump();
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+
+    await gesture.moveBy(const Offset(0.0, -50.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 78.0); // 78 == 128 - 50
+
+    // Trigger the snap open animation: drag down and release
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating open
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    double bottom = appBarBottom(tester);
+    expect(bottom, greaterThan(88.0)); // 88 = 78 + 10
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), greaterThan(bottom));
+
+    // The animation finishes when the appbar is full height.
+    await tester.pumpAndSettle();
+    expect(appBarHeight(tester), 128.0);
+
+    // Now that the app bar is open, perform the same drag scenario
+    // in reverse: drag the appbar up and down and then trigger the
+    // snap closed animation.
+    gesture = await tester.startGesture(const Offset(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, -128.0)); // drag the appbar closed
+    await tester.pump();
+    expect(appBarBottom(tester), 0.0);
+
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 100.0);
+
+    // Trigger the snap close animation: drag upwards and release
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating closed
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    bottom = appBarBottom(tester);
+    expect(bottom, lessThan(90.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), lessThan(bottom));
+
+    // The animation finishes when the appbar is off screen.
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), lessThanOrEqualTo(0.0));
+    expect(appBarBottom(tester), lessThanOrEqualTo(0.0));
+  });
+
+  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
+    await tester.pumpWidget(buildSliverAppBarApp(
+      floating: true,
+      pinned: true,
+      snap: true,
+      expandedHeight: 128.0,
+    ));
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Scroll to the middle of the list. The only the tab bar is visible
+    // because this is a pinned appbar.
+    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    position.jumpTo(256.0);
+    await tester.pumpAndSettle();
+    expect(appBarIsVisible(tester), true);
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kTextTabBarHeight);
+
+    // Drag the scrollable up and down. The app bar should not snap open, the
+    // bottof of the appbar should just track the drag offset.
+    TestGesture gesture = await tester.startGesture(const Offset(50.0, 200.0));
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarHeight(tester), 100.0);
+
+    await gesture.moveBy(const Offset(0.0, -25.0));
+    await tester.pump();
+    expect(appBarHeight(tester), 75.0);
+
+    // Trigger the snap animation: drag down and release
+    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating open
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    final double height = appBarHeight(tester);
+    expect(height, greaterThan(85.0));
+    expect(height, lessThan(128.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarHeight(tester), greaterThan(height));
+    expect(appBarHeight(tester), lessThan(128.0));
+
+    // The animation finishes when the appbar is fully expanded
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), 128.0);
+    expect(appBarBottom(tester), 128.0);
+
+    // Now that the appbar is fully expanded, Perform the same drag
+    // scenario in reverse: drag the appbar up and down and then trigger
+    // the snap closed animation.
+    gesture = await tester.startGesture(const Offset(50.0, 256.0));
+    await gesture.moveBy(const Offset(0.0, -128.0));
+    await tester.pump();
+    expect(appBarBottom(tester), kTextTabBarHeight);
+
+    await gesture.moveBy(const Offset(0.0, 100.0));
+    await tester.pump();
+    expect(appBarBottom(tester), 100.0);
+
+    // Trigger the snap close animation: drag upwards and release
+    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.up();
+
+    // Now verify that the appbar is animating closed
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    final double bottom = appBarBottom(tester);
+    expect(bottom, lessThan(90.0));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    expect(appBarBottom(tester), lessThan(bottom));
+
+    // The animation finishes when the appbar shrinks back to its pinned height
+    await tester.pumpAndSettle();
+    expect(appBarTop(tester), lessThanOrEqualTo(0.0));
+    expect(appBarBottom(tester), kTextTabBarHeight);
+  });
+
+  testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: false,
+          appBar: new AppBar(),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: true,
+          appBar: new AppBar(title: const Text('title'))
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(tester.getTopLeft(find.text('title')).dy, greaterThan(100.0));
+    expect(appBarHeight(tester), kToolbarHeight + 100.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: false,
+          appBar: new AppBar(
+            bottom: new PreferredSize(
+              preferredSize: const Size.fromHeight(200.0),
+              child: new Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 200.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new Scaffold(
+          primary: true,
+          appBar: new AppBar(
+            bottom: new PreferredSize(
+              preferredSize: const Size.fromHeight(200.0),
+              child: new Container(),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
+
+    await tester.pumpWidget(
+      new MediaQuery(
+        data: topPadding100,
+        child: new AppBar(
+          primary: false,
+          title: const Text('title'),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 }

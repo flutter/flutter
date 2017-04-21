@@ -13,10 +13,10 @@ void main() {
 
   testWidgets('LinearProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      const Center(
+        child: const SizedBox(
           width: 200.0,
-          child: new LinearProgressIndicator(value: 0.0)
+          child: const LinearProgressIndicator(value: 0.0)
         )
       )
     );
@@ -24,10 +24,10 @@ void main() {
 
   testWidgets('LinearProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new SizedBox(
+      const Center(
+        child: const SizedBox(
           width: 200.0,
-          child: new LinearProgressIndicator(value: null)
+          child: const LinearProgressIndicator(value: null)
         )
       )
     );
@@ -35,24 +35,24 @@ void main() {
 
   testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new CircularProgressIndicator(value: 0.0)
+      const Center(
+        child: const CircularProgressIndicator(value: 0.0)
       )
     );
   });
 
   testWidgets('CircularProgressIndicator(value: null) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new CircularProgressIndicator(value: null)
+      const Center(
+        child: const CircularProgressIndicator(value: null)
       )
     );
   });
 
   testWidgets('LinearProgressIndicator causes a repaint when it changes', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(children: <Widget>[new LinearProgressIndicator(value: 0.0)]));
+    await tester.pumpWidget(new ListView(children: <Widget>[const LinearProgressIndicator(value: 0.0)]));
     final List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new ListView(children: <Widget>[new LinearProgressIndicator(value: 0.5)]));
+    await tester.pumpWidget(new ListView(children: <Widget>[const LinearProgressIndicator(value: 0.5)]));
     final List<Layer> layers2 = tester.layers;
     expect(layers1, isNot(equals(layers2)));
   });

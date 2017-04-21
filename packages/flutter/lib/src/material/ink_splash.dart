@@ -22,11 +22,11 @@ RectCallback _getClipCallback(RenderBox referenceBox, bool containedInkWell, Rec
     return rectCallback;
   }
   if (containedInkWell)
-    return () => Point.origin & referenceBox.size;
+    return () => Offset.zero & referenceBox.size;
   return null;
 }
 
-double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Point position) {
+double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallback rectCallback, Offset position) {
   if (containedInkWell) {
     final Size size = rectCallback != null ? rectCallback().size : referenceBox.size;
     return _getSplashRadiusForPoistionInSize(size, position);
@@ -34,11 +34,11 @@ double _getTargetRadius(RenderBox referenceBox, bool containedInkWell, RectCallb
   return Material.defaultSplashRadius;
 }
 
-double _getSplashRadiusForPoistionInSize(Size bounds, Point position) {
-  final double d1 = (position - bounds.topLeft(Point.origin)).distance;
-  final double d2 = (position - bounds.topRight(Point.origin)).distance;
-  final double d3 = (position - bounds.bottomLeft(Point.origin)).distance;
-  final double d4 = (position - bounds.bottomRight(Point.origin)).distance;
+double _getSplashRadiusForPoistionInSize(Size bounds, Offset position) {
+  final double d1 = (position - bounds.topLeft(Offset.zero)).distance;
+  final double d2 = (position - bounds.topRight(Offset.zero)).distance;
+  final double d3 = (position - bounds.bottomLeft(Offset.zero)).distance;
+  final double d4 = (position - bounds.bottomRight(Offset.zero)).distance;
   return math.max(math.max(d1, d2), math.max(d3, d4)).ceilToDouble();
 }
 
@@ -76,7 +76,7 @@ class InkSplash extends InkFeature {
   InkSplash({
     @required MaterialInkController controller,
     @required RenderBox referenceBox,
-    Point position,
+    Offset position,
     Color color,
     bool containedInkWell: false,
     RectCallback rectCallback,
@@ -109,7 +109,7 @@ class InkSplash extends InkFeature {
     controller.addInkFeature(this);
   }
 
-  final Point _position;
+  final Offset _position;
   final BorderRadius _borderRadius;
   final double _targetRadius;
   final RectCallback _clipCallback;
@@ -185,9 +185,9 @@ class InkSplash extends InkFeature {
   @override
   void paintFeature(Canvas canvas, Matrix4 transform) {
     final Paint paint = new Paint()..color = _color.withAlpha(_alpha.value);
-    Point center = _position;
+    Offset center = _position;
     if (_repositionToReferenceBox)
-      center = Point.lerp(center, referenceBox.size.center(Point.origin), _radiusController.value);
+      center = Offset.lerp(center, referenceBox.size.center(Offset.zero), _radiusController.value);
     final Offset originOffset = MatrixUtils.getAsTranslation(transform);
     if (originOffset == null) {
       canvas.save();

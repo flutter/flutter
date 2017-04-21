@@ -25,7 +25,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
     _animation = new CurvedAnimation(
       parent: _controller,
-      curve: new Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
+      curve: const Interval(0.0, 0.9, curve: Curves.fastOutSlowIn),
       reverseCurve: Curves.fastOutSlowIn
     )..addStatusListener((AnimationStatus status) {
       if (status == AnimationStatus.dismissed)
@@ -63,17 +63,17 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
 
   Widget _buildIndicators(BuildContext context, Widget child) {
     final List<Widget> indicators = <Widget>[
-      new SizedBox(
+      const SizedBox(
         width: 200.0,
-        child: new LinearProgressIndicator()
+        child: const LinearProgressIndicator()
       ),
-      new LinearProgressIndicator(),
-      new LinearProgressIndicator(),
+      const LinearProgressIndicator(),
+      const LinearProgressIndicator(),
       new LinearProgressIndicator(value: _animation.value),
       new Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          new CircularProgressIndicator(),
+          const CircularProgressIndicator(),
           new SizedBox(
               width: 20.0,
               height: 20.0,
@@ -99,7 +99,7 @@ class _ProgressIndicatorDemoState extends State<ProgressIndicatorDemo> with Sing
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Progress indicators')),
+      appBar: new AppBar(title: const Text('Progress indicators')),
       body: new Center(
         child: new SingleChildScrollView(
           child: new DefaultTextStyle(

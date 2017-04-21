@@ -27,17 +27,17 @@ class _TextSelectionToolbar extends StatelessWidget {
     final List<Widget> items = <Widget>[];
 
     if (!value.selection.isCollapsed) {
-      items.add(new FlatButton(child: new Text('CUT'), onPressed: _handleCut));
-      items.add(new FlatButton(child: new Text('COPY'), onPressed: _handleCopy));
+      items.add(new FlatButton(child: const Text('CUT'), onPressed: _handleCut));
+      items.add(new FlatButton(child: const Text('COPY'), onPressed: _handleCopy));
     }
     items.add(new FlatButton(
-      child: new Text('PASTE'),
+      child: const Text('PASTE'),
       // TODO(mpcomplete): This should probably be grayed-out if there is nothing to paste.
       onPressed: _handlePaste
     ));
     if (value.text.isNotEmpty) {
       if (value.selection.isCollapsed)
-        items.add(new FlatButton(child: new Text('SELECT ALL'), onPressed: _handleSelectAll));
+        items.add(new FlatButton(child: const Text('SELECT ALL'), onPressed: _handleSelectAll));
     }
 
     return new Material(
@@ -92,7 +92,7 @@ class _TextSelectionToolbar extends StatelessWidget {
 class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
   _TextSelectionToolbarLayout(this.position);
 
-  final Point position;
+  final Offset position;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -101,8 +101,8 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position.x - childSize.width/2.0;
-    double y = position.y - childSize.height;
+    double x = position.dx - childSize.width / 2.0;
+    double y = position.dy - childSize.height;
 
     if (x < _kToolbarScreenPadding)
       x = _kToolbarScreenPadding;
@@ -133,7 +133,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint paint = new Paint()..color = color;
     final double radius = size.width/2.0;
-    canvas.drawCircle(new Point(radius, radius), radius, paint);
+    canvas.drawCircle(new Offset(radius, radius), radius, paint);
     canvas.drawRect(new Rect.fromLTWH(0.0, 0.0, radius, radius), paint);
   }
 
@@ -150,7 +150,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   /// Builder for material-style copy/paste text selection toolbar.
   @override
   Widget buildToolbar(
-      BuildContext context, Point position, TextSelectionDelegate delegate) {
+      BuildContext context, Offset position, TextSelectionDelegate delegate) {
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints.loose(screenSize),

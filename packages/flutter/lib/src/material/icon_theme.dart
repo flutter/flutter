@@ -28,17 +28,20 @@ class IconTheme extends InheritedWidget {
   /// Creates an icon theme that controls the color, opacity, and size of
   /// descendant widgets, and merges in the current icon theme, if any.
   ///
-  /// The [context], [data], and [child] arguments must not be null.
-  factory IconTheme.merge({
+  /// The [data] and [child] arguments must not be null.
+  static Widget merge({
     Key key,
-    @required BuildContext context,
     @required IconThemeData data,
     @required Widget child
   }) {
-    return new IconTheme(
-      key: key,
-      data: _getInheritedIconThemData(context).merge(data),
-      child: child
+    return new Builder(
+      builder: (BuildContext context) {
+        return new IconTheme(
+          key: key,
+          data: _getInheritedIconThemeData(context).merge(data),
+          child: child,
+        );
+      },
     );
   }
 
@@ -56,11 +59,11 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    final IconThemeData iconThemeData = _getInheritedIconThemData(context);
+    final IconThemeData iconThemeData = _getInheritedIconThemeData(context);
     return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
   }
 
-  static IconThemeData _getInheritedIconThemData(BuildContext context) {
+  static IconThemeData _getInheritedIconThemeData(BuildContext context) {
     final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
     return iconTheme?.data ?? Theme.of(context).iconTheme;
   }

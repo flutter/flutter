@@ -4,6 +4,8 @@
 
 import 'dart:ui' as ui show lerpDouble, WindowPadding;
 
+import 'package:flutter/foundation.dart';
+
 import 'basic_types.dart';
 
 /// The two cardinal directions in two dimensions.
@@ -19,6 +21,7 @@ enum Axis {
 ///
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
+@immutable
 class EdgeInsets {
   /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);

@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   if (binding is LiveTestWidgetsFlutterBinding)
-    binding.allowAllFrames = true;
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   testWidgets('Flutter gallery button example code displays', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/6147
@@ -20,7 +20,7 @@ void main() {
 
 
     // Scroll the Buttons demo into view so that a tap will succeed
-    final Point allDemosOrigin = tester.getTopRight(find.text('Demos'));
+    final Offset allDemosOrigin = tester.getTopRight(find.text('Demos'));
     final Finder button = find.text('Buttons');
     while (button.evaluate().isEmpty) {
       await tester.dragFrom(allDemosOrigin, const Offset(0.0, -100.0));

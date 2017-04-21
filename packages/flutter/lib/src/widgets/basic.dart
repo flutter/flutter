@@ -1539,19 +1539,30 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
 // LAYOUT NODES
 
-/// A widget that uses the block layout algorithm for its children.
+/// A widget that arranges its children sequentially along a given axis, forcing
+/// them to the dimension of the parent in the other axis.
 ///
-/// This widget is rarely used directly. Instead, consider using [SliverList],
+/// This widget is rarely used directly. Instead, consider using [ListView],
 /// which combines a similar layout algorithm with scrolling behavior, or
 /// [Column], which gives you more flexible control over the layout of a
 /// vertical set of boxes.
 ///
-/// For details about the block layout algorithm, see [RenderBlockBase].
-class BlockBody extends MultiChildRenderObjectWidget {
-  /// Creates a block layout widget.
+/// See also:
+///
+///  * [RenderListBody], which implements this layout algorithm and the
+///    documentation for which describes some of its subtleties.
+///  * [SingleChildScrollView], which is sometimes used with [ListBody] to
+///    make the contents scrollable.
+///  * [Column] and [Row], which implement a more elaborate version of
+///    this layout algorithm (at the cost of being slightly less efficient).
+///  * [ListView], which implements an efficient scrolling version of this
+///    layout algorithm.
+class ListBody extends MultiChildRenderObjectWidget {
+  /// Creates a layout widget that arranges its children sequentially along a
+  /// given axis.
   ///
   /// By default, the [mainAxis] is [Axis.vertical].
-  BlockBody({
+  ListBody({
     Key key,
     this.mainAxis: Axis.vertical,
     List<Widget> children: const <Widget>[],
@@ -1562,10 +1573,10 @@ class BlockBody extends MultiChildRenderObjectWidget {
   final Axis mainAxis;
 
   @override
-  RenderBlock createRenderObject(BuildContext context) => new RenderBlock(mainAxis: mainAxis);
+  RenderListBody createRenderObject(BuildContext context) => new RenderListBody(mainAxis: mainAxis);
 
   @override
-  void updateRenderObject(BuildContext context, RenderBlock renderObject) {
+  void updateRenderObject(BuildContext context, RenderListBody renderObject) {
     renderObject.mainAxis = mainAxis;
   }
 }
@@ -2547,6 +2558,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.height,
     this.scale: 1.0,
     this.color,
+    this.colorBlendMode,
     this.fit,
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
@@ -2575,8 +2587,18 @@ class RawImage extends LeafRenderObjectWidget {
   /// Used when determining the best display size for the image.
   final double scale;
 
-  /// If non-null, apply this color filter to the image before painting.
+  /// If non-null, this color is blended with each image pixel using [colorBlendMode].
   final Color color;
+
+  /// Used to combine [color] with this image.
+  ///
+  /// The default is [BlendMode.srcIn]. In terms of the blend mode, [color] is
+  /// the source and this image is the destination.
+  ///
+  /// See also:
+  ///
+  ///  * [BlendMode], which includes an illustration of the effect of each blend mode.
+  final BlendMode colorBlendMode;
 
   /// How to inscribe the image into the space allocated during layout.
   ///
@@ -2610,6 +2632,7 @@ class RawImage extends LeafRenderObjectWidget {
     height: height,
     scale: scale,
     color: color,
+    colorBlendMode: colorBlendMode,
     fit: fit,
     alignment: alignment,
     repeat: repeat,
@@ -2624,6 +2647,7 @@ class RawImage extends LeafRenderObjectWidget {
       ..height = height
       ..scale = scale
       ..color = color
+      ..colorBlendMode = colorBlendMode
       ..alignment = alignment
       ..fit = fit
       ..repeat = repeat
@@ -2642,6 +2666,8 @@ class RawImage extends LeafRenderObjectWidget {
       description.add('scale: $scale');
     if (color != null)
       description.add('color: $color');
+    if (colorBlendMode != null)
+      description.add('colorBlendMode: $colorBlendMode');
     if (fit != null)
       description.add('fit: $fit');
     if (alignment != null)
@@ -3230,5 +3256,5 @@ class StatefulBuilder extends StatefulWidget {
 
 class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
-  Widget build(BuildContext context) => config.builder(context, setState);
+  Widget build(BuildContext context) => widget.builder(context, setState);
 }

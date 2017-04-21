@@ -9,13 +9,13 @@ import 'syntax_highlighter.dart';
 
 class ComponentDemoTabData {
   ComponentDemoTabData({
-    this.widget,
+    this.demoWidget,
     this.exampleCodeTag,
     this.description,
     this.tabName
   });
 
-  final Widget widget;
+  final Widget demoWidget;
   final String exampleCodeTag;
   final String description;
   final String tabName;
@@ -61,7 +61,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
             new Builder(
               builder: (BuildContext context) {
                 return new IconButton(
-                  icon: new Icon(Icons.description),
+                  icon: const Icon(Icons.description),
                   tooltip: 'Show example code',
                   onPressed: () {
                     _showExampleCode(context);
@@ -85,7 +85,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
                     style: Theme.of(context).textTheme.subhead
                   )
                 ),
-                new Expanded(child: demo.widget)
+                new Expanded(child: demo.demoWidget)
               ],
             );
           }).toList(),
@@ -110,7 +110,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
   @override
   void didChangeDependencies() {
-    getExampleCode(config.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
+    getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
           _exampleCode = code;
@@ -128,8 +128,8 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
 
     Widget body;
     if (_exampleCode == null) {
-      body = new Center(
-        child: new CircularProgressIndicator()
+      body = const Center(
+        child: const CircularProgressIndicator()
       );
     } else {
       body = new SingleChildScrollView(
@@ -150,10 +150,10 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
     return new Scaffold(
       appBar: new AppBar(
         leading: new IconButton(
-          icon: new Icon(Icons.clear),
+          icon: const Icon(Icons.clear),
           onPressed: () { Navigator.pop(context); }
         ),
-        title: new Text('Example code')
+        title: const Text('Example code')
       ),
       body: body
     );

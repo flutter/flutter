@@ -92,7 +92,7 @@ void main() {
     ));
 
     Size sizeOf(int i) => tester.getSize(find.byKey(new ValueKey<int>(i)));
-    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).x;
+    double leftOf(int i) => tester.getTopLeft(find.byKey(new ValueKey<int>(i))).dx;
 
     expect(leftOf(0), equals(0.0));
     expect(sizeOf(0), equals(const Size(800.0, 600.0)));
@@ -229,7 +229,7 @@ void main() {
     expect(log, isEmpty);
 
     final TestGesture gesture =
-        await tester.startGesture(const Point(100.0, 100.0));
+        await tester.startGesture(const Offset(100.0, 100.0));
     // The page view is 800.0 wide, so this move is just short of halfway.
     await gesture.moveBy(const Offset(-380.0, 0.0));
 
@@ -287,23 +287,23 @@ void main() {
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Alabama')), const Point(50.0, 0.0));
-    expect(tester.getTopLeft(find.text('Alaska')), const Point(750.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alabama')), const Offset(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Offset(750.0, 0.0));
 
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Georgia')), const Point(-650.0, 0.0));
-    expect(tester.getTopLeft(find.text('Hawaii')), const Point(50.0, 0.0));
-    expect(tester.getTopLeft(find.text('Idaho')), const Point(750.0, 0.0));
+    expect(tester.getTopLeft(find.text('Georgia')), const Offset(-650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Offset(750.0, 0.0));
 
     controller = new PageController(viewportFraction: 39/40);
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Georgia')), const Point(-770.0, 0.0));
-    expect(tester.getTopLeft(find.text('Hawaii')), const Point(10.0, 0.0));
-    expect(tester.getTopLeft(find.text('Idaho')), const Point(790.0, 0.0));
+    expect(tester.getTopLeft(find.text('Georgia')), const Offset(-770.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(10.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
@@ -327,24 +327,24 @@ void main() {
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Alabama')), const Point(350.0, 0.0));
-    expect(tester.getTopLeft(find.text('Alaska')), const Point(450.0, 0.0));
-    expect(tester.getTopLeft(find.text('Arizona')), const Point(550.0, 0.0));
-    expect(tester.getTopLeft(find.text('Arkansas')), const Point(650.0, 0.0));
-    expect(tester.getTopLeft(find.text('California')), const Point(750.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alabama')), const Offset(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Alaska')), const Offset(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arizona')), const Offset(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Arkansas')), const Offset(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('California')), const Offset(750.0, 0.0));
 
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Connecticut')), const Point(-50.0, 0.0));
-    expect(tester.getTopLeft(find.text('Delaware')), const Point(50.0, 0.0));
-    expect(tester.getTopLeft(find.text('Florida')), const Point(150.0, 0.0));
-    expect(tester.getTopLeft(find.text('Georgia')), const Point(250.0, 0.0));
-    expect(tester.getTopLeft(find.text('Hawaii')), const Point(350.0, 0.0));
-    expect(tester.getTopLeft(find.text('Idaho')), const Point(450.0, 0.0));
-    expect(tester.getTopLeft(find.text('Illinois')), const Point(550.0, 0.0));
-    expect(tester.getTopLeft(find.text('Indiana')), const Point(650.0, 0.0));
-    expect(tester.getTopLeft(find.text('Iowa')), const Point(750.0, 0.0));
+    expect(tester.getTopLeft(find.text('Connecticut')), const Offset(-50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Delaware')), const Offset(50.0, 0.0));
+    expect(tester.getTopLeft(find.text('Florida')), const Offset(150.0, 0.0));
+    expect(tester.getTopLeft(find.text('Georgia')), const Offset(250.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(350.0, 0.0));
+    expect(tester.getTopLeft(find.text('Idaho')), const Offset(450.0, 0.0));
+    expect(tester.getTopLeft(find.text('Illinois')), const Offset(550.0, 0.0));
+    expect(tester.getTopLeft(find.text('Indiana')), const Offset(650.0, 0.0));
+    expect(tester.getTopLeft(find.text('Iowa')), const Offset(750.0, 0.0));
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
@@ -369,13 +369,13 @@ void main() {
 
     await tester.pumpWidget(build(controller));
 
-    expect(tester.getTopLeft(find.text('Alabama')), const Point(-100.0, 0.0));
-    expect(tester.getBottomRight(find.text('Alabama')), const Point(900.0, 600.0));
+    expect(tester.getTopLeft(find.text('Alabama')), const Offset(-100.0, 0.0));
+    expect(tester.getBottomRight(find.text('Alabama')), const Offset(900.0, 600.0));
 
     controller.jumpToPage(10);
     await tester.pump();
 
-    expect(tester.getTopLeft(find.text('Hawaii')), const Point(-100.0, 0.0));
+    expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
   testWidgets('PageView does not report page changed on overscroll',

@@ -30,7 +30,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  ProgressIndicator({
+  const ProgressIndicator({
     Key key,
     this.value,
     this.backgroundColor,
@@ -89,18 +89,18 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     final Paint paint = new Paint()
       ..color = backgroundColor
       ..style = PaintingStyle.fill;
-    canvas.drawRect(Point.origin & size, paint);
+    canvas.drawRect(Offset.zero & size, paint);
 
     paint.color = valueColor;
     if (value != null) {
       final double width = value.clamp(0.0, 1.0) * size.width;
-      canvas.drawRect(Point.origin & new Size(width, size.height), paint);
+      canvas.drawRect(Offset.zero & new Size(width, size.height), paint);
     } else {
       final double startX = size.width * (1.5 * animationValue - 0.5);
       final double endX = startX + 0.5 * size.width;
       final double x = startX.clamp(0.0, size.width);
       final double width = endX.clamp(0.0, size.width) - x;
-      canvas.drawRect(new Point(x, 0.0) & new Size(width, size.height), paint);
+      canvas.drawRect(new Offset(x, 0.0) & new Size(width, size.height), paint);
     }
   }
 
@@ -137,7 +137,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  LinearProgressIndicator({
+  const LinearProgressIndicator({
     Key key,
     double value
   }) : super(key: key, value: value);
@@ -174,10 +174,10 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
       ),
       child: new CustomPaint(
         painter: new _LinearProgressIndicatorPainter(
-          backgroundColor: config._getBackgroundColor(context),
-          valueColor: config._getValueColor(context),
-          value: config.value, // may be null
-          animationValue: animationValue // ignored if config.value is not null
+          backgroundColor: widget._getBackgroundColor(context),
+          valueColor: widget._getValueColor(context),
+          value: widget.value, // may be null
+          animationValue: animationValue // ignored if widget.value is not null
         )
       )
     );
@@ -185,7 +185,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
+    if (widget.value != null)
       return _buildIndicator(context, _animation.value);
 
     return new AnimatedBuilder(
@@ -239,7 +239,7 @@ class _CircularProgressIndicatorPainter extends CustomPainter {
     if (value == null) // Indeterminate
       paint.strokeCap = StrokeCap.square;
 
-    canvas.drawArc(Point.origin & size, arcStart, arcSweep, false, paint);
+    canvas.drawArc(Offset.zero & size, arcStart, arcSweep, false, paint);
   }
 
   @override
@@ -278,7 +278,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// The [value] argument can be either null (corresponding to an indeterminate
   /// progress indcator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
-  CircularProgressIndicator({
+  const CircularProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
@@ -332,9 +332,9 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
       ),
       child: new CustomPaint(
         painter: new _CircularProgressIndicatorPainter(
-          valueColor: config._getValueColor(context),
-          value: config.value, // may be null
-          headValue: headValue, // remaining arguments are ignored if config.value is not null
+          valueColor: widget._getValueColor(context),
+          value: widget.value, // may be null
+          headValue: headValue, // remaining arguments are ignored if widget.value is not null
           tailValue: tailValue,
           stepValue: stepValue,
           rotationValue: rotationValue,
@@ -361,7 +361,7 @@ class _CircularProgressIndicatorState extends State<CircularProgressIndicator> w
 
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
+    if (widget.value != null)
       return _buildIndicator(context, 0.0, 0.0, 0, 0.0);
     return _buildAnimation();
   }
@@ -438,7 +438,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   ///
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
-  RefreshProgressIndicator({
+  const RefreshProgressIndicator({
     Key key,
     double value,
     Color backgroundColor,
@@ -463,8 +463,8 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
   // starting from wherever we left it.
   @override
   Widget build(BuildContext context) {
-    if (config.value != null)
-      _controller.value = config.value / 10.0;
+    if (widget.value != null)
+      _controller.value = widget.value / 10.0;
     else
       _controller.forward();
     return _buildAnimation();
@@ -472,20 +472,20 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
 
   @override
   Widget _buildIndicator(BuildContext context, double headValue, double tailValue, int stepValue, double rotationValue) {
-    final double arrowheadScale = config.value == null ? 0.0 : (config.value * 2.0).clamp(0.0, 1.0);
+    final double arrowheadScale = widget.value == null ? 0.0 : (widget.value * 2.0).clamp(0.0, 1.0);
     return new Container(
       width: _kIndicatorSize,
       height: _kIndicatorSize,
       margin: const EdgeInsets.all(4.0), // acommodate the shadow
       child: new Material(
         type: MaterialType.circle,
-        color: config.backgroundColor ?? Theme.of(context).canvasColor,
+        color: widget.backgroundColor ?? Theme.of(context).canvasColor,
         elevation: 2,
         child: new Padding(
           padding: const EdgeInsets.all(12.0),
           child: new CustomPaint(
             painter: new _RefreshProgressIndicatorPainter(
-              valueColor: config._getValueColor(context),
+              valueColor: widget._getValueColor(context),
               value: null, // Draw the indeterminate progress indicator.
               headValue: headValue,
               tailValue: tailValue,

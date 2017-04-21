@@ -15,7 +15,7 @@ void main() {
           onPressed: () {
             didPressButton = true;
           },
-          child: new Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       ),
     );
@@ -28,11 +28,11 @@ void main() {
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Scaffold(
-          floatingActionButton: new FloatingActionButton(
+        home: const Scaffold(
+          floatingActionButton: const FloatingActionButton(
             onPressed: null,
             tooltip: 'Add',
-            child: new Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),

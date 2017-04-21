@@ -53,15 +53,15 @@ class ShrinePageState extends State<ShrinePage> {
 
   void _showShoppingCart() {
     showModalBottomSheet<Null>(context: context, builder: (BuildContext context) {
-      if (config.shoppingCart.isEmpty) {
-        return new Padding(
+      if (widget.shoppingCart.isEmpty) {
+        return const Padding(
           padding: const EdgeInsets.all(24.0),
-          child: new Text('The shopping cart is empty')
+          child: const Text('The shopping cart is empty')
         );
       }
       return new ListView(
         padding: kMaterialListPadding,
-        children: config.shoppingCart.values.map((Order order) {
+        children: widget.shoppingCart.values.map((Order order) {
           return new ListTile(
             title: new Text(order.product.name),
             leading: new Text('${order.quantity}'),
@@ -73,23 +73,23 @@ class ShrinePageState extends State<ShrinePage> {
   }
 
   void _sortByPrice() {
-    config.products.sort((Product a, Product b) => a.price.compareTo(b.price));
+    widget.products.sort((Product a, Product b) => a.price.compareTo(b.price));
   }
 
   void _sortByProduct() {
-    config.products.sort((Product a, Product b) => a.name.compareTo(b.name));
+    widget.products.sort((Product a, Product b) => a.name.compareTo(b.name));
   }
 
   void _emptyCart() {
-    config.shoppingCart.clear();
-    config.scaffoldKey.currentState.showSnackBar(new SnackBar(content: new Text('Shopping cart is empty')));
+    widget.shoppingCart.clear();
+    widget.scaffoldKey.currentState.showSnackBar(new SnackBar(content: const Text('Shopping cart is empty')));
   }
 
   @override
   Widget build(BuildContext context) {
     final ShrineTheme theme = ShrineTheme.of(context);
     return new Scaffold(
-      key: config.scaffoldKey,
+      key: widget.scaffoldKey,
       appBar: new AppBar(
         elevation: _appBarElevation,
         backgroundColor: theme.appBarBackgroundColor,
@@ -107,23 +107,23 @@ class ShrinePageState extends State<ShrinePage> {
         ),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.shopping_cart),
+            icon: const Icon(Icons.shopping_cart),
             tooltip: 'Shopping cart',
             onPressed: _showShoppingCart
           ),
           new PopupMenuButton<ShrineAction>(
             itemBuilder: (BuildContext context) => <PopupMenuItem<ShrineAction>>[
-              new PopupMenuItem<ShrineAction>(
+              const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByPrice,
-                child: new Text('Sort by price')
+                child: const Text('Sort by price')
               ),
-              new PopupMenuItem<ShrineAction>(
+              const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.sortByProduct,
-                child: new Text('Sort by product')
+                child: const Text('Sort by product')
               ),
-              new PopupMenuItem<ShrineAction>(
+              const PopupMenuItem<ShrineAction>(
                 value: ShrineAction.emptyCart,
-                child: new Text('Empty shopping cart')
+                child: const Text('Empty shopping cart')
               )
             ],
             onSelected: (ShrineAction action) {
@@ -142,10 +142,10 @@ class ShrinePageState extends State<ShrinePage> {
           )
         ]
       ),
-      floatingActionButton: config.floatingActionButton,
+      floatingActionButton: widget.floatingActionButton,
       body: new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
-        child: config.body
+        child: widget.body
       )
     );
   }

@@ -11,7 +11,7 @@ dependencies:
   file: 2.3.2
   json_rpc_2: '^2.0.0'
   matcher: '>=0.12.0 <1.0.0'
-  meta: ^1.0.4
+  meta: ^1.0.5
   path: '^1.4.0'
   web_socket_channel: '^1.0.0'
   vm_service_client: '0.2.2+4'

@@ -23,12 +23,12 @@ import 'scrollable.dart';
 /// It is also useful if you need to shrink-wrap in both axes (the main
 /// scrolling direction as well as the cross axis), as one might see in a dialog
 /// or pop-up menu. In that case, you might pair the [SingleChildScrollView]
-/// with a [BlockBody] child.
+/// with a [ListBody] child.
 ///
 /// When you have a list of children and do not require cross-axis
 /// shrink-wrapping behavior, for example a scrolling list that is always the
 /// width of the screen, consider [ListView], which is vastly more efficient
-/// that a [SingleChildScrollView] containing a [BlockBody] or [Column] with
+/// that a [SingleChildScrollView] containing a [ListBody] or [Column] with
 /// many children.
 ///
 /// See also:
@@ -351,7 +351,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       }
 
       if (_shouldClipAtPaintOffset(paintOffset)) {
-        context.pushClipRect(needsCompositing, offset, Point.origin & size, paintContents);
+        context.pushClipRect(needsCompositing, offset, Offset.zero & size, paintContents);
       } else {
         paintContents(context, offset);
       }
@@ -367,14 +367,14 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
     if (child != null && _shouldClipAtPaintOffset(_paintOffset))
-      return Point.origin & size;
+      return Offset.zero & size;
     return null;
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Point position }) {
+  bool hitTestChildren(HitTestResult result, { Offset position }) {
     if (child != null) {
-      final Point transformed = position + -_paintOffset;
+      final Offset transformed = position + -_paintOffset;
       return child.hitTest(result, position: transformed);
     }
     return false;

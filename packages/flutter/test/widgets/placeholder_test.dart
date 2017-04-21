@@ -11,7 +11,7 @@ void main() {
 
     await tester.pumpWidget(new Placeholder(key: key));
 
-    key.currentState.child = new Text('target');
+    key.currentState.child = const Text('target');
 
     expect(find.text('target'), findsNothing);
 

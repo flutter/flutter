@@ -57,10 +57,10 @@ class ComplexLayoutState extends State<ComplexLayout> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('Advanced Layout'),
+        title: const Text('Advanced Layout'),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.create),
+            icon: const Icon(Icons.create),
             tooltip: 'Search',
             onPressed: () {
               print('Pressed search');
@@ -170,7 +170,7 @@ class FancyImageItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new BlockBody(
+    return new ListBody(
       children: <Widget>[
         new UserHeader('Ali Connors $index'),
         new ItemDescription(),
@@ -193,7 +193,7 @@ class FancyGalleryItem extends StatelessWidget {
   final int index;
   @override
   Widget build(BuildContext context) {
-    return new BlockBody(
+    return new ListBody(
       children: <Widget>[
         new UserHeader('Ali Connors'),
         new ItemGalleryBox(index),
@@ -356,9 +356,9 @@ class UserHeader extends StatelessWidget {
 class ItemDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new Padding(
+    return const Padding(
       padding: const EdgeInsets.all(8.0),
-      child: new Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
+      child: const Text('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.')
     );
   }
 }
@@ -386,11 +386,11 @@ class ItemImageBox extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
                       new IconButton(
-                        icon: new Icon(Icons.edit),
+                        icon: const Icon(Icons.edit),
                         onPressed: () { print('Pressed edit button'); }
                       ),
                       new IconButton(
-                        icon: new Icon(Icons.zoom_in),
+                        icon: const Icon(Icons.zoom_in),
                         onPressed: () { print('Pressed zoom button'); }
                       ),
                     ]
@@ -482,11 +482,11 @@ class ItemGalleryBox extends StatelessWidget {
                             new Row(
                               children: <Widget>[
                                 new IconButton(
-                                  icon: new Icon(Icons.share),
+                                  icon: const Icon(Icons.share),
                                   onPressed: () { print('Pressed share'); },
                                 ),
                                 new IconButton(
-                                  icon: new Icon(Icons.event),
+                                  icon: const Icon(Icons.event),
                                   onPressed: () { print('Pressed event'); },
                                 ),
                                 new Expanded(
@@ -578,8 +578,8 @@ class GalleryDrawer extends StatelessWidget {
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(
-            leading: new Icon(Icons.brightness_5),
-            title: new Text('Light'),
+            leading: const Icon(Icons.brightness_5),
+            title: const Text('Light'),
             onTap: () { _changeTheme(context, true); },
             selected: ComplexLayoutApp.of(context).lightTheme,
             trailing: new Radio<bool>(
@@ -589,8 +589,8 @@ class GalleryDrawer extends StatelessWidget {
             ),
           ),
           new ListTile(
-            leading: new Icon(Icons.brightness_7),
-            title: new Text('Dark'),
+            leading: const Icon(Icons.brightness_7),
+            title: const Text('Dark'),
             onTap: () { _changeTheme(context, false); },
             selected: !ComplexLayoutApp.of(context).lightTheme,
             trailing: new Radio<bool>(
@@ -601,8 +601,8 @@ class GalleryDrawer extends StatelessWidget {
           ),
           new Divider(),
           new ListTile(
-            leading: new Icon(Icons.hourglass_empty),
-            title: new Text('Animate Slowly'),
+            leading: const Icon(Icons.hourglass_empty),
+            title: const Text('Animate Slowly'),
             selected: timeDilation != 1.0,
             onTap: () { ComplexLayoutApp.of(context).toggleAnimationSpeed(); },
             trailing: new Checkbox(
@@ -620,7 +620,7 @@ class FancyDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      decoration: new BoxDecoration(
+      decoration: const BoxDecoration(
         backgroundColor: Colors.purple
       ),
       height: 200.0

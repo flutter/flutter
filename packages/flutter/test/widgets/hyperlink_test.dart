@@ -48,21 +48,21 @@ void main() {
     expect(didTapLeft, isFalse);
     expect(didTapRight, isFalse);
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset.zero) + const Offset(2.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(Point.origin) + const Offset(30.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset.zero) + const Offset(30.0, 2.0));
 
     expect(didTapLeft, isTrue);
     expect(didTapRight, isFalse);
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(new Point(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(new Offset(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isTrue);
