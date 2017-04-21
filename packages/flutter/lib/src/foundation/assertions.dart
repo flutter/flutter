@@ -105,7 +105,9 @@ class FlutterErrorDetails {
 
   /// Converts the [exception] to a string.
   ///
-  /// This applies some additional logic to
+  /// This applies some additional logic to make [AssertionError] exceptions
+  /// prettier, to handle exceptions that stringify to empty strings, to handle
+  /// objects that don't inherit from [Exception] or [Error], and so forth.
   String exceptionAsString() {
     String longMessage;
     if (exception is AssertionError) {
