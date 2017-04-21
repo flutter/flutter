@@ -62,7 +62,7 @@ class TextField extends StatefulWidget {
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
   /// null.
-  TextField({
+  const TextField({
     Key key,
     this.controller,
     this.focusNode,

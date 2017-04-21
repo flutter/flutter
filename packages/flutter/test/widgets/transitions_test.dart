@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('toString control test', (WidgetTester tester) async {
-    final Widget widget = new FadeTransition(
+    final Widget widget = const FadeTransition(
       opacity: kAlwaysCompleteAnimation,
       child: const Text('Ready'),
     );
@@ -52,16 +52,16 @@ void main() {
     });
 
     testWidgets(
-      'decoration test', 
+      'decoration test',
       (WidgetTester tester) async {
-        final DecoratedBoxTransition transitionUnderTest = 
+        final DecoratedBoxTransition transitionUnderTest =
             new DecoratedBoxTransition(
               decoration: decorationTween.animate(controller),
               child: const Text("Doesn't matter"),
             );
-        
+
         await tester.pumpWidget(transitionUnderTest);
-        RenderDecoratedBox actualBox = 
+        RenderDecoratedBox actualBox =
             tester.renderObject(find.byType(DecoratedBox));
         BoxDecoration actualDecoration = actualBox.decoration;
 
@@ -99,13 +99,13 @@ void main() {
     );
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
-      final Animation<Decoration> curvedDecorationAnimation = 
+      final Animation<Decoration> curvedDecorationAnimation =
           decorationTween.animate(new CurvedAnimation(
             parent: controller,
             curve: Curves.easeOut,
           ));
-       
-      final DecoratedBoxTransition transitionUnderTest = 
+
+      final DecoratedBoxTransition transitionUnderTest =
           new DecoratedBoxTransition(
             decoration: curvedDecorationAnimation,
             position: DecorationPosition.foreground,
@@ -113,7 +113,7 @@ void main() {
           );
 
       await tester.pumpWidget(transitionUnderTest);
-      RenderDecoratedBox actualBox = 
+      RenderDecoratedBox actualBox =
           tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration;
 
@@ -128,7 +128,7 @@ void main() {
       actualBox = tester.renderObject(find.byType(DecoratedBox));
       actualDecoration = actualBox.decoration;
 
-      // Same as the test above but the values should be much closer to the 
+      // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
       expect(actualDecoration.backgroundColor, const Color(0xFF505050));
       expect(actualDecoration.border.left.width, closeTo(1.9, 0.1));

@@ -66,7 +66,7 @@ class Drawer extends StatelessWidget {
   /// Creates a material design drawer.
   ///
   /// Typically used in the [Scaffold.drawer] property.
-  Drawer({
+  const Drawer({
     Key key,
     this.elevation: 16,
     this.child

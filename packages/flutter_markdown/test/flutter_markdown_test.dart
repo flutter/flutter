@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Simple string', (WidgetTester tester) async {
-    await tester.pumpWidget(new MarkdownBody(data: 'Hello'));
+    await tester.pumpWidget(const MarkdownBody(data: 'Hello'));
 
     final Iterable<Widget> widgets = tester.allWidgets;
     _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, RichText]);
@@ -18,7 +18,7 @@ void main() {
   });
 
   testWidgets('Header', (WidgetTester tester) async {
-    await tester.pumpWidget(new MarkdownBody(data: '# Header'));
+    await tester.pumpWidget(const MarkdownBody(data: '# Header'));
 
     final Iterable<Widget> widgets = tester.allWidgets;
     _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column, RichText]);
@@ -26,14 +26,14 @@ void main() {
   });
 
   testWidgets('Empty string', (WidgetTester tester) async {
-    await tester.pumpWidget(new MarkdownBody(data: ''));
+    await tester.pumpWidget(const MarkdownBody(data: ''));
 
     final Iterable<Widget> widgets = tester.allWidgets;
     _expectWidgetTypes(widgets, <Type>[MarkdownBody, Column]);
   });
 
   testWidgets('Ordered list', (WidgetTester tester) async {
-    await tester.pumpWidget(new MarkdownBody(data: '1. Item 1\n1. Item 2\n2. Item 3'));
+    await tester.pumpWidget(const MarkdownBody(data: '1. Item 1\n1. Item 2\n2. Item 3'));
 
     final Iterable<Widget> widgets = tester.allWidgets;
     _expectTextStrings(widgets, <String>[
@@ -47,7 +47,7 @@ void main() {
   });
 
   testWidgets('Unordered list', (WidgetTester tester) async {
-    await tester.pumpWidget(new MarkdownBody(data: '- Item 1\n- Item 2\n- Item 3'));
+    await tester.pumpWidget(const MarkdownBody(data: '- Item 1\n- Item 2\n- Item 3'));
 
     final Iterable<Widget> widgets = tester.allWidgets;
     _expectTextStrings(widgets, <String>[
@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('Scrollable wrapping', (WidgetTester tester) async {
-    await tester.pumpWidget(new Markdown(data: ''));
+    await tester.pumpWidget(const Markdown(data: ''));
 
     final List<Widget> widgets = tester.allWidgets.toList();
     _expectWidgetTypes(widgets.take(2), <Type>[
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWidgets('Links', (WidgetTester tester) async {
-    await tester.pumpWidget(new Markdown(data: '[Link Text](href)'));
+    await tester.pumpWidget(const Markdown(data: '[Link Text](href)'));
 
     final RichText textWidget = tester.allWidgets.firstWhere((Widget widget) => widget is RichText);
     final TextSpan span = textWidget.text;
@@ -106,15 +106,15 @@ void main() {
   });
 
   testWidgets('Changing config - data', (WidgetTester tester) async {
-    await tester.pumpWidget(new Markdown(data: 'Data1'));
+    await tester.pumpWidget(const Markdown(data: 'Data1'));
     _expectTextStrings(tester.allWidgets, <String>['Data1']);
 
     final String stateBefore = _dumpRenderView();
-    await tester.pumpWidget(new Markdown(data: 'Data1'));
+    await tester.pumpWidget(const Markdown(data: 'Data1'));
     final String stateAfter = _dumpRenderView();
     expect(stateBefore, equals(stateAfter));
 
-    await tester.pumpWidget(new Markdown(data: 'Data2'));
+    await tester.pumpWidget(const Markdown(data: 'Data2'));
     _expectTextStrings(tester.allWidgets, <String>['Data2']);
   });
 

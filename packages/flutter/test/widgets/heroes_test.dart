@@ -77,7 +77,7 @@ class MutatingRoute extends MaterialPageRoute<Null> {
 }
 
 class MyStatefulWidget extends StatefulWidget {
-  MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
+  const MyStatefulWidget({ Key key, this.value: '123' }) : super(key: key);
   final String value;
   @override
   MyStatefulWidgetState createState() => new MyStatefulWidgetState();
@@ -932,9 +932,9 @@ void main() {
               new Card(
                 child: new Hero(
                   tag: 'H',
-                  child: new SizedBox(
+                  child: const SizedBox(
                     height: 200.0,
-                    child: new MyStatefulWidget(value: '456'),
+                    child: const MyStatefulWidget(value: '456'),
                   ),
                 ),
               ),
@@ -958,9 +958,9 @@ void main() {
                   new Card(
                     child: new Hero(
                       tag: 'H',
-                      child: new SizedBox(
+                      child: const SizedBox(
                         height: 100.0,
-                        child: new MyStatefulWidget(value: '456'),
+                        child: const MyStatefulWidget(value: '456'),
                       ),
                     ),
                   ),

@@ -24,7 +24,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     return new MaterialApp(
       theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
       title: 'Advanced Layout',
-      home: new ComplexLayout()
+      home: const ComplexLayout()
     );
   }
 
@@ -44,7 +44,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 }
 
 class ComplexLayout extends StatefulWidget {
-  ComplexLayout({ Key key }) : super(key: key);
+  const ComplexLayout({ Key key }) : super(key: key);
 
   @override
   ComplexLayoutState createState() => new ComplexLayoutState();
@@ -85,7 +85,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
           new BottomBar(),
         ],
       ),
-      drawer: new GalleryDrawer(),
+      drawer: const GalleryDrawer(),
     );
   }
 }
@@ -100,9 +100,9 @@ class TopBarMenu extends StatelessWidget {
           value: 'Friends',
           child: new MenuItemWithIcon(Icons.people, 'Friends', '5 new')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
+          child: const MenuItemWithIcon(Icons.event, 'Events', '12 upcoming')
         ),
         new PopupMenuItem<String>(
           value: 'Events',
@@ -120,9 +120,9 @@ class TopBarMenu extends StatelessWidget {
           value: 'Friends',
           child: new MenuItemWithIcon(Icons.people, 'Friends', '5')
         ),
-        new PopupMenuItem<String>(
+        const PopupMenuItem<String>(
           value: 'Events',
-          child: new MenuItemWithIcon(Icons.event, 'Events', '12')
+          child: const MenuItemWithIcon(Icons.event, 'Events', '12')
         ),
         new PopupMenuItem<String>(
           value: 'Events',
@@ -142,7 +142,7 @@ class TopBarMenu extends StatelessWidget {
 }
 
 class MenuItemWithIcon extends StatelessWidget {
-  MenuItemWithIcon(this.icon, this.title, this.subtitle);
+  const MenuItemWithIcon(this.icon, this.title, this.subtitle);
 
   final IconData icon;
   final String title;
@@ -164,7 +164,7 @@ class MenuItemWithIcon extends StatelessWidget {
 }
 
 class FancyImageItem extends StatelessWidget {
-  FancyImageItem(this.index, {Key key}) : super(key: key);
+  const FancyImageItem(this.index, {Key key}) : super(key: key);
 
   final int index;
 
@@ -188,14 +188,14 @@ class FancyImageItem extends StatelessWidget {
 }
 
 class FancyGalleryItem extends StatelessWidget {
-  FancyGalleryItem(this.index, {Key key}) : super(key: key);
+  const FancyGalleryItem(this.index, {Key key}) : super(key: key);
 
   final int index;
   @override
   Widget build(BuildContext context) {
     return new ListBody(
       children: <Widget>[
-        new UserHeader('Ali Connors'),
+        const UserHeader('Ali Connors'),
         new ItemGalleryBox(index),
         new InfoBar(),
         new Padding(
@@ -217,7 +217,7 @@ class InfoBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new MiniIconWithText(Icons.thumb_up, '42'),
+          const MiniIconWithText(Icons.thumb_up, '42'),
           new Text('3 Comments', style: Theme.of(context).textTheme.caption)
         ]
       )
@@ -233,9 +233,9 @@ class IconBar extends StatelessWidget {
       child: new Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          new IconWithText(Icons.thumb_up, 'Like'),
+          const IconWithText(Icons.thumb_up, 'Like'),
           new IconWithText(Icons.comment, 'Comment'),
-          new IconWithText(Icons.share, 'Share'),
+          const IconWithText(Icons.share, 'Share'),
         ]
       )
     );
@@ -243,7 +243,7 @@ class IconBar extends StatelessWidget {
 }
 
 class IconWithText extends StatelessWidget {
-  IconWithText(this.icon, this.title);
+  const IconWithText(this.icon, this.title);
 
   final IconData icon;
   final String title;
@@ -264,7 +264,7 @@ class IconWithText extends StatelessWidget {
 }
 
 class MiniIconWithText extends StatelessWidget {
-  MiniIconWithText(this.icon, this.title);
+  const MiniIconWithText(this.icon, this.title);
 
   final IconData icon;
   final String title;
@@ -305,7 +305,7 @@ class FatDivider extends StatelessWidget {
 }
 
 class UserHeader extends StatelessWidget {
-  UserHeader(this.userName);
+  const UserHeader(this.userName);
 
   final String userName;
 
@@ -443,7 +443,7 @@ class ItemImageBox extends StatelessWidget {
 }
 
 class ItemGalleryBox extends StatelessWidget {
-  ItemGalleryBox(this.index);
+  const ItemGalleryBox(this.index);
 
   final int index;
 
@@ -506,7 +506,7 @@ class ItemGalleryBox extends StatelessWidget {
               )
             ),
             new Container(
-              child: new TabPageSelector()
+              child: const TabPageSelector()
             )
           ]
         )
@@ -542,7 +542,7 @@ class BottomBar extends StatelessWidget {
 }
 
 class BottomBarButton extends StatelessWidget {
-  BottomBarButton(this.icon, this.title);
+  const BottomBarButton(this.icon, this.title);
 
   final IconData icon;
   final String title;
@@ -565,7 +565,7 @@ class BottomBarButton extends StatelessWidget {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  GalleryDrawer({ Key key }) : super(key: key);
+  const GalleryDrawer({ Key key }) : super(key: key);
 
   void _changeTheme(BuildContext context, bool value) {
     ComplexLayoutApp.of(context).lightTheme = value;

@@ -21,7 +21,7 @@ void main() {
               child: const Text('A'),
             ),
             otherAccountsPictures: <Widget>[
-              new CircleAvatar(
+              const CircleAvatar(
                 child: const Text('B'),
               ),
               new CircleAvatar(
@@ -32,7 +32,7 @@ void main() {
                 key: avatarD,
                 child: const Text('D'),
               ),
-              new CircleAvatar(
+              const CircleAvatar(
                 child: const Text('E'),
               )
             ],
@@ -148,12 +148,12 @@ void main() {
     );
 
     await tester.pumpWidget(buildFrame(
-      currentAccountPicture: new CircleAvatar(child: const Text('A')),
+      currentAccountPicture: const CircleAvatar(child: const Text('A')),
     ));
     expect(find.text('A'), findsOneWidget);
 
     await tester.pumpWidget(buildFrame(
-      otherAccountsPictures: <Widget>[new CircleAvatar(child: const Text('A'))],
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
     ));
     expect(find.text('A'), findsOneWidget);
 

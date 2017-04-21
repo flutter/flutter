@@ -230,12 +230,11 @@ class SliverChildListDelegate extends SliverChildDelegate {
 /// Helps subclasses build their children lazily using a [SliverChildDelegate].
 abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
-  SliverMultiBoxAdaptorWidget({
+  const SliverMultiBoxAdaptorWidget({
     Key key,
     @required this.delegate,
-  }) : super(key: key) {
-    assert(delegate != null);
-  }
+  }) : assert(delegate != null),
+       super(key: key);
 
   /// The delegate that provides the children for this widget.
   ///
@@ -308,7 +307,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 ///  * [SliverGrid], which places its children in arbitrary positions.
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
-  SliverList({
+  const SliverList({
     Key key,
     @required SliverChildDelegate delegate,
   }) : super(key: key, delegate: delegate);
@@ -341,7 +340,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
-  SliverFixedExtentList({
+  const SliverFixedExtentList({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
@@ -376,7 +375,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
-  SliverGrid({
+  const SliverGrid({
     Key key,
     @required SliverChildDelegate delegate,
     @required this.gridDelegate,
@@ -694,7 +693,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///  * [SliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class SliverFillRemaining extends SingleChildRenderObjectWidget {
-  SliverFillRemaining({
+  const SliverFillRemaining({
     Key key,
     Widget child,
   }) : super(key: key, child: child);

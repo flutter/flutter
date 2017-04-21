@@ -57,7 +57,7 @@ const BoxDecoration _kCupertinoDialogDecoration = const BoxDecoration(
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-views/alerts/>
 class CupertinoDialog extends StatelessWidget {
   /// Creates an iOS-style dialog.
-  CupertinoDialog({
+  const CupertinoDialog({
     Key key,
     this.child,
   }) : super(key: key);
@@ -94,7 +94,7 @@ class CupertinoDialog extends StatelessWidget {
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
-  CupertinoAlertDialog({
+  const CupertinoAlertDialog({
     Key key,
     this.title,
     this.content,
@@ -233,7 +233,7 @@ const double _kButtonBarHeight = 45.0;
 const Color _kButtonDividerColor = const Color(0xFFD5D5D5);
 
 class _CupertinoButtonBar extends StatelessWidget {
-  _CupertinoButtonBar({
+  const _CupertinoButtonBar({
     Key key,
     this.children,
   }) : super(key: key);

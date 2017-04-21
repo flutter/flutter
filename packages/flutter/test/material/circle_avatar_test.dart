@@ -62,8 +62,8 @@ void main() {
     await tester.pumpWidget(
       new Theme(
         data: theme,
-        child: new Center(
-          child: new CircleAvatar(
+        child: const Center(
+          child: const CircleAvatar(
             child: const Text('Z'),
           ),
         ),

@@ -136,7 +136,7 @@ void main() {
             title: const Text('X'),
           ),
           // A drawer causes a leading hamburger.
-          drawer: new Drawer(),
+          drawer: const Drawer(),
         ),
       ),
     );

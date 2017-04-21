@@ -345,7 +345,7 @@ class _CreateCompanySheet extends StatelessWidget {
     // TODO(ianh): Fill this out.
     return new Column(
       children: <Widget>[
-        new TextField(
+        const TextField(
           autofocus: true,
           decoration: const InputDecoration(
             hintText: 'Company Name',

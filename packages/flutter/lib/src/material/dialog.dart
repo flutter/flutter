@@ -31,7 +31,7 @@ class Dialog extends StatelessWidget {
   /// Creates a dialog.
   ///
   /// Typically used in conjunction with [showDialog].
-  Dialog({
+  const Dialog({
     Key key,
     this.child,
   }) : super(key: key);
@@ -90,7 +90,7 @@ class AlertDialog extends StatelessWidget {
   /// Creates an alert dialog.
   ///
   /// Typically used in conjunction with [showDialog].
-  AlertDialog({
+  const AlertDialog({
     Key key,
     this.title,
     this.titlePadding,
@@ -194,7 +194,7 @@ class AlertDialog extends StatelessWidget {
 ///  * <https://material.google.com/components/dialogs.html#dialogs-simple-dialogs>
 class SimpleDialogOption extends StatelessWidget {
   /// Creates an option for a [SimpleDialog].
-  SimpleDialogOption({
+  const SimpleDialogOption({
     Key key,
     this.onPressed,
     this.child,
@@ -244,7 +244,7 @@ class SimpleDialog extends StatelessWidget {
   /// Creates a simple dialog.
   ///
   /// Typically used in conjunction with [showDialog].
-  SimpleDialog({
+  const SimpleDialog({
     Key key,
     this.title,
     this.titlePadding,

@@ -67,7 +67,7 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Material(child: new AboutListTile()),
+      new Material(child: const AboutListTile()),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
   });

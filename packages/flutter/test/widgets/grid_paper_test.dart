@@ -8,9 +8,9 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('GridPaper control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new GridPaper());
+    await tester.pumpWidget(const GridPaper());
     final List<Layer> layers1 = tester.layers;
-    await tester.pumpWidget(new GridPaper());
+    await tester.pumpWidget(const GridPaper());
     final List<Layer> layers2 = tester.layers;
     expect(layers1, equals(layers2));
   });

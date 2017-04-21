@@ -141,7 +141,7 @@ void main() {
                 pinned: true,
                 expandedHeight: appBarHeight,
                 title: const Text('Title'),
-                flexibleSpace: new FlexibleSpaceBar(title: const Text('Title')),
+                flexibleSpace: const FlexibleSpaceBar(title: const Text('Title')),
               ),
               new SliverPadding(
                 padding: const EdgeInsets.only(top: appBarHeight),

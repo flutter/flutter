@@ -15,7 +15,7 @@ void main() {
         child: new Center(
           child: new TwoLevelList(
             children: <Widget>[
-              new TwoLevelSublist(
+              const TwoLevelSublist(
                 title: const Text('Title'),
               )
             ]

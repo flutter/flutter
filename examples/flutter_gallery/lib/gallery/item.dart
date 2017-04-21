@@ -73,7 +73,7 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'Section organizer',
       category: 'Demos',
       routeName: AnimationDemo.routeName,
-      buildRoute: (BuildContext context) => new AnimationDemo(),
+      buildRoute: (BuildContext context) => const AnimationDemo(),
     ),
     // Material Components
     new GalleryItem(
@@ -151,7 +151,7 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'Row and column layout',
       category: 'Material Components',
       routeName: GridListDemo.routeName,
-      buildRoute: (BuildContext context) => new GridListDemo(),
+      buildRoute: (BuildContext context) => const GridListDemo(),
     ),
     new GalleryItem(
       title: 'Icons',
@@ -165,21 +165,21 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'List items with hidden actions',
       category: 'Material Components',
       routeName: LeaveBehindDemo.routeName,
-      buildRoute: (BuildContext context) => new LeaveBehindDemo(),
+      buildRoute: (BuildContext context) => const LeaveBehindDemo(),
     ),
     new GalleryItem(
       title: 'List',
       subtitle: 'Layout variations for scrollable lists',
       category: 'Material Components',
       routeName: ListDemo.routeName,
-      buildRoute: (BuildContext context) => new ListDemo(),
+      buildRoute: (BuildContext context) => const ListDemo(),
     ),
     new GalleryItem(
       title: 'Menus',
       subtitle: 'Menu buttons and simple menus',
       category: 'Material Components',
       routeName: MenuDemo.routeName,
-      buildRoute: (BuildContext context) => new MenuDemo(),
+      buildRoute: (BuildContext context) => const MenuDemo(),
     ),
     new GalleryItem(
       title: 'Modal bottom sheet',
@@ -214,7 +214,7 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'Refresh indicators',
       category: 'Material Components',
       routeName: OverscrollDemo.routeName,
-      buildRoute: (BuildContext context) => new OverscrollDemo(),
+      buildRoute: (BuildContext context) => const OverscrollDemo(),
     ),
     new GalleryItem(
       title: 'Scrollable tabs',
@@ -242,7 +242,7 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'Temporary message that appears at the bottom',
       category: 'Material Components',
       routeName: SnackBarDemo.routeName,
-      buildRoute: (BuildContext context) => new SnackBarDemo(),
+      buildRoute: (BuildContext context) => const SnackBarDemo(),
     ),
     new GalleryItem(
       title: 'Tabs',
@@ -256,7 +256,7 @@ List<GalleryItem> _buildGalleryItems() {
       subtitle: 'Single line of editable text and numbers',
       category: 'Material Components',
       routeName: TextFormFieldDemo.routeName,
-      buildRoute: (BuildContext context) => new TextFormFieldDemo(),
+      buildRoute: (BuildContext context) => const TextFormFieldDemo(),
     ),
     new GalleryItem(
       title: 'Tooltips',
@@ -327,7 +327,7 @@ List<GalleryItem> _buildGalleryItems() {
         subtitle: 'Simple recipe browser',
         category: 'Demos',
         routeName: PestoDemo.routeName,
-        buildRoute: (BuildContext context) => new PestoDemo(),
+        buildRoute: (BuildContext context) => const PestoDemo(),
       ),
     );
     return true;

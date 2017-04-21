@@ -24,7 +24,7 @@ class GridTileBar extends StatelessWidget {
   /// Creates a grid tile bar.
   ///
   /// Typically used to with [GridTile].
-  GridTileBar({
+  const GridTileBar({
     Key key,
     this.backgroundColor,
     this.leading,

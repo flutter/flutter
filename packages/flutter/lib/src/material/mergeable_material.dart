@@ -95,7 +95,7 @@ class MaterialGap extends MergeableMaterialItem {
 ///    but otherwise looks the same.
 class MergeableMaterial extends StatefulWidget {
   /// Creates a mergeable Material list of items.
-  MergeableMaterial({
+  const MergeableMaterial({
     Key key,
     this.mainAxis: Axis.vertical,
     this.elevation: 2,
@@ -615,7 +615,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 // The parent hierarchy can change and lead to the slice being
 // rebuilt. Using a global key solves the issue.
 class _MergeableMaterialSliceKey extends GlobalKey {
-  const _MergeableMaterialSliceKey(this.value) : super.constructor();
+  _MergeableMaterialSliceKey(this.value) : super.constructor();
 
   final LocalKey value;
 

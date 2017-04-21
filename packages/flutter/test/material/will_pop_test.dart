@@ -42,7 +42,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  SampleForm({ Key key, this.callback }) : super(key: key);
+  const SampleForm({ Key key, this.callback }) : super(key: key);
 
   final WillPopCallback callback;
 
@@ -56,7 +56,7 @@ class SampleForm extends StatelessWidget {
             willPopCount += 1;
             return callback();
           },
-          child: new TextField(),
+          child: const TextField(),
         ),
       ),
     );

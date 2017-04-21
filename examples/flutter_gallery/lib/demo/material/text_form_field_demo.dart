@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
-  TextFormFieldDemo({ Key key }) : super(key: key);
+  const TextFormFieldDemo({ Key key }) : super(key: key);
 
   static const String routeName = '/material/text-form-field';
 

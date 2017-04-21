@@ -440,7 +440,7 @@ void main() {
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new Container(key: key));
     expect(log, isEmpty);
-    await tester.pumpWidget(new Placeholder());
+    await tester.pumpWidget(const Placeholder());
     debugPrint = oldCallback;
     debugPrintGlobalKeyedWidgetLifecycle = false;
 

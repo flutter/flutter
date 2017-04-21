@@ -12,7 +12,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.android),
         home: new Scaffold(
           appBar: new AppBar(
-            flexibleSpace: new FlexibleSpaceBar(
+            flexibleSpace: const FlexibleSpaceBar(
               title: const Text('X')
             )
           )
@@ -33,7 +33,7 @@ void main() {
         theme: new ThemeData(platform: TargetPlatform.iOS),
         home: new Scaffold(
           appBar: new AppBar(
-            flexibleSpace: new FlexibleSpaceBar(
+            flexibleSpace: const FlexibleSpaceBar(
               title: const Text('X')
             )
           )

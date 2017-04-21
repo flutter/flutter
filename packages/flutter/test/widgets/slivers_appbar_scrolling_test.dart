@@ -53,10 +53,10 @@ void main() {
     await tester.pumpWidget(
       new CustomScrollView(
         slivers: <Widget>[
-          new BigSliver(),
+          const BigSliver(),
           new SliverPersistentHeader(key: key, delegate: delegate),
-          new BigSliver(),
-          new BigSliver(),
+          const BigSliver(),
+          const BigSliver(),
         ],
       ),
     );
@@ -130,7 +130,7 @@ class RenderBigSliver extends RenderSliver {
 }
 
 class BigSliver extends LeafRenderObjectWidget {
-  BigSliver({ Key key }) : super(key: key);
+  const BigSliver({ Key key }) : super(key: key);
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
     return new RenderBigSliver();

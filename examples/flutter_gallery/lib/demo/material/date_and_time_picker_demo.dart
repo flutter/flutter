@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class _InputDropdown extends StatelessWidget {
-  _InputDropdown({
+  const _InputDropdown({
     Key key,
     this.child,
     this.labelText,
@@ -47,7 +47,7 @@ class _InputDropdown extends StatelessWidget {
 }
 
 class _DateTimePicker extends StatelessWidget {
-  _DateTimePicker({
+  const _DateTimePicker({
     Key key,
     this.labelText,
     this.selectedDate,

@@ -223,7 +223,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       performanceOverlay = new PerformanceOverlay.allEnabled(
                   checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages);
     } else if (widget.checkerboardRasterCacheImages) {
-      performanceOverlay = new PerformanceOverlay(checkerboardRasterCacheImages: true);
+      performanceOverlay = const PerformanceOverlay(checkerboardRasterCacheImages: true);
     }
 
     if (performanceOverlay != null) {

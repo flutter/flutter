@@ -7,10 +7,10 @@ import 'package:flutter/material.dart';
 import 'calculator/home.dart';
 
 class CalculatorDemo extends StatelessWidget {
-  CalculatorDemo({Key key}) : super(key: key);
+  const CalculatorDemo({Key key}) : super(key: key);
 
   static const String routeName = '/calculator';
 
   @override
-  Widget build(BuildContext context) => new Calculator();
+  Widget build(BuildContext context) => const Calculator();
 }

@@ -15,7 +15,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// Creates a widget that animates its size to match that of its child.
   ///
   /// The [curve] and [duration] arguments must not be null.
-  AnimatedSize({
+  const AnimatedSize({
     Key key,
     Widget child,
     this.alignment: FractionalOffset.center,

@@ -573,7 +573,7 @@ class _YearPickerState extends State<YearPicker> {
 }
 
 class _DatePickerDialog extends StatefulWidget {
-  _DatePickerDialog({
+  const _DatePickerDialog({
     Key key,
     this.initialDate,
     this.firstDate,

@@ -177,7 +177,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 }
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _SliderRenderObjectWidget({
+  const _SliderRenderObjectWidget({
     Key key,
     this.value,
     this.divisions,

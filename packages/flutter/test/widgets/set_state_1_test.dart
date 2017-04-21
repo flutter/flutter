@@ -25,7 +25,7 @@ class InsideState extends State<Inside> {
 }
 
 class Middle extends StatefulWidget {
-  Middle({ this.child });
+  const Middle({ this.child });
 
   final Inside child;
 

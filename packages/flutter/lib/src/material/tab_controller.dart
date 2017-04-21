@@ -170,7 +170,7 @@ class TabController extends ChangeNotifier {
 }
 
 class _TabControllerScope extends InheritedWidget {
-  _TabControllerScope({
+  const _TabControllerScope({
     Key key,
     this.controller,
     this.enabled,
@@ -227,7 +227,7 @@ class DefaultTabController extends StatefulWidget {
   /// The [length] argument must be great than one.
   ///
   /// The [initialIndex] argument must not be null.
-  DefaultTabController({
+  const DefaultTabController({
     Key key,
     @required this.length,
     this.initialIndex: 0,

@@ -90,7 +90,7 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 }
 
 class _DropdownMenu<T> extends StatefulWidget {
-  _DropdownMenu({
+  const _DropdownMenu({
     Key key,
     this.route,
   }) : super(key: key);

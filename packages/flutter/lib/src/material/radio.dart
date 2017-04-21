@@ -46,7 +46,7 @@ class Radio<T> extends StatefulWidget {
   ///
   /// * [value] and [groupValue] together determines whether the radio button is selected.
   /// * [onChanged] is when the user selects this radio button.
-  Radio({
+  const Radio({
     Key key,
     @required this.value,
     @required this.groupValue,

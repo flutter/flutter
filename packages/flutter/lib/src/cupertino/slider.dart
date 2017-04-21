@@ -140,7 +140,7 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
 }
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
-  _CupertinoSliderRenderObjectWidget({
+  const _CupertinoSliderRenderObjectWidget({
     Key key,
     this.value,
     this.divisions,

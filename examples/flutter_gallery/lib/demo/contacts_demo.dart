@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class _ContactCategory extends StatelessWidget {
-  _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
+  const _ContactCategory({ Key key, this.icon, this.children }) : super(key: key);
 
   final IconData icon;
   final List<Widget> children;

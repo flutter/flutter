@@ -36,7 +36,7 @@ final List<_BackgroundLayer> _kBackgroundLayers = <_BackgroundLayer>[
 ];
 
 class _AppBarBackground extends StatelessWidget {
-  _AppBarBackground({ Key key, this.animation }) : super(key: key);
+  const _AppBarBackground({ Key key, this.animation }) : super(key: key);
 
   final Animation<double> animation;
 

@@ -103,7 +103,7 @@ class Tab extends StatelessWidget {
 }
 
 class _TabStyle extends AnimatedWidget {
-  _TabStyle({
+  const _TabStyle({
     Key key,
     Animation<double> animation,
     this.selected,
@@ -946,7 +946,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
 /// ancestor.
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
-  TabPageSelector({ Key key, this.controller }) : super(key: key);
+  const TabPageSelector({ Key key, this.controller }) : super(key: key);
 
   /// This widget's selection and animation state.
   ///

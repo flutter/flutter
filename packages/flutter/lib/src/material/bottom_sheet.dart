@@ -171,7 +171,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
 

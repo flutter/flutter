@@ -141,7 +141,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 }
 
 class _FloatingActionButtonTransition extends StatefulWidget {
-  _FloatingActionButtonTransition({
+  const _FloatingActionButtonTransition({
     Key key,
     this.child,
   }) : super(key: key);
@@ -938,7 +938,7 @@ class ScaffoldFeatureController<T extends Widget, U> {
 }
 
 class _PersistentBottomSheet extends StatefulWidget {
-  _PersistentBottomSheet({
+  const _PersistentBottomSheet({
     Key key,
     this.animationController,
     this.onClosing,

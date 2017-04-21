@@ -33,7 +33,7 @@ class ComponentDemoTabData {
 }
 
 class TabbedComponentDemoScaffold extends StatelessWidget {
-  TabbedComponentDemoScaffold({
+  const TabbedComponentDemoScaffold({
     this.title,
     this.demos
   });
@@ -96,7 +96,7 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
 }
 
 class FullScreenCodeDialog extends StatefulWidget {
-  FullScreenCodeDialog({ this.exampleCodeTag });
+  const FullScreenCodeDialog({ this.exampleCodeTag });
 
   final String exampleCodeTag;
 

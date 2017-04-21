@@ -14,7 +14,7 @@ typedef Widget DemoItemBodyBuilder<T>(DemoItem<T> item);
 typedef String ValueToString<T>(T value);
 
 class DualHeaderWithHint extends StatelessWidget {
-  DualHeaderWithHint({
+  const DualHeaderWithHint({
     this.name,
     this.value,
     this.hint,
@@ -76,7 +76,7 @@ class DualHeaderWithHint extends StatelessWidget {
 }
 
 class CollapsibleBody extends StatelessWidget {
-  CollapsibleBody({
+  const CollapsibleBody({
     this.margin: EdgeInsets.zero,
     this.child,
     this.onSave,

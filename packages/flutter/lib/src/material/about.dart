@@ -39,7 +39,7 @@ class AboutListTile extends StatelessWidget {
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
-  AboutListTile({
+  const AboutListTile({
     Key key,
     this.icon: const Icon(null),
     this.child,
@@ -210,7 +210,7 @@ class AboutDialog extends StatelessWidget {
   /// The arguments are all optional. The application name, if omitted, will be
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
-  AboutDialog({
+  const AboutDialog({
     Key key,
     this.applicationName,
     this.applicationVersion,

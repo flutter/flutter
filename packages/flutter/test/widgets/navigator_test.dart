@@ -45,7 +45,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef void ExceptionCallback(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  ThirdWidget({ this.targetKey, this.onException });
+  const ThirdWidget({ this.targetKey, this.onException });
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -67,7 +67,7 @@ class ThirdWidget extends StatelessWidget {
 }
 
 class OnTapPage extends StatelessWidget {
-  OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
+  const OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
 
   final String id;
   final VoidCallback onTap;
@@ -383,7 +383,7 @@ void main() {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushReplacementNamed(context, '/A'); }),
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pushReplacementNamed(context, '/B'); }),
-      '/B': (BuildContext context) => new OnTapPage(id: 'B'),
+      '/B': (BuildContext context) => const OnTapPage(id: 'B'),
     };
 
     await tester.pumpWidget(new MaterialApp(routes: routes));

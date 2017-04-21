@@ -148,9 +148,9 @@ class _VendorItem extends StatelessWidget {
 // Displays the product's price. If the product is in the shopping cart then the
 // background is highlighted.
 abstract class _PriceItem extends StatelessWidget {
-  _PriceItem({ Key key, @required this.product }) : super(key: key) {
-    assert(product != null);
-  }
+  const _PriceItem({ Key key, @required this.product })
+      : assert(product != null),
+        super(key: key);
 
   final Product product;
 
@@ -168,7 +168,7 @@ abstract class _PriceItem extends StatelessWidget {
 }
 
 class _ProductPriceItem extends _PriceItem {
-  _ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -181,7 +181,7 @@ class _ProductPriceItem extends _PriceItem {
 }
 
 class _FeaturePriceItem extends _PriceItem {
-  _FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
 
   @override
   Widget build(BuildContext context) {

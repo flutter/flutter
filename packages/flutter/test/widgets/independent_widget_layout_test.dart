@@ -62,7 +62,7 @@ class Trigger {
 }
 
 class TriggerableWidget extends StatefulWidget {
-  TriggerableWidget({ this.trigger, this.counter });
+  const TriggerableWidget({ this.trigger, this.counter });
   final Trigger trigger;
   final Counter counter;
   @override

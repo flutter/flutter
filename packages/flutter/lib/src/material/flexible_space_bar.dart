@@ -30,7 +30,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Creates a flexible space bar.
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field.
-  FlexibleSpaceBar({
+  const FlexibleSpaceBar({
     Key key,
     this.title,
     this.background,
@@ -161,7 +161,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 }
 
 class _FlexibleSpaceBarSettings extends InheritedWidget {
-  _FlexibleSpaceBarSettings({
+  const _FlexibleSpaceBarSettings({
     Key key,
     this.toolbarOpacity,
     this.minExtent,

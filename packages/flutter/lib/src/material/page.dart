@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';  
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
 
-// Fractional offset from 1/4 screen below the top to fully on screen. 
+// Fractional offset from 1/4 screen below the top to fully on screen.
 final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   begin: FractionalOffset.bottomLeft,
   end: FractionalOffset.topLeft

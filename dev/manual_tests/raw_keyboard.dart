@@ -12,15 +12,15 @@ void main() {
       appBar: new AppBar(
         title: const Text('Hardware Key Demo'),
       ),
-      body: new Center(
-        child: new RawKeyboardDemo(),
+      body: const Center(
+        child: const RawKeyboardDemo(),
       ),
     ),
   ));
 }
 
 class RawKeyboardDemo extends StatefulWidget {
-  RawKeyboardDemo({ Key key }) : super(key: key);
+  const RawKeyboardDemo({ Key key }) : super(key: key);
 
   @override
   _HardwareKeyDemoState createState() => new _HardwareKeyDemoState();

@@ -37,15 +37,14 @@ abstract class MarkdownWidget extends StatefulWidget {
   /// Creates a widget that parses and displays Markdown.
   ///
   /// The [data] argument must not be null.
-  MarkdownWidget({
+  const MarkdownWidget({
     Key key,
     @required this.data,
     this.styleSheet,
     this.syntaxHighlighter,
     this.onTapLink,
-  }) : super(key: key) {
-    assert(data != null);
-  }
+  }) : assert(data != null),
+       super(key: key);
 
   /// The Markdown to display.
   final String data;
@@ -150,7 +149,7 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
 ///  * <https://daringfireball.net/projects/markdown/>
 class MarkdownBody extends MarkdownWidget {
   /// Creates a non-scrolling widget that parses and displays Markdown.
-  MarkdownBody({
+  const MarkdownBody({
     Key key,
     String data,
     MarkdownStyleSheet styleSheet,
@@ -186,7 +185,7 @@ class MarkdownBody extends MarkdownWidget {
 ///  * <https://daringfireball.net/projects/markdown/>
 class Markdown extends MarkdownWidget {
   /// Creates a scrolling widget that parses and displays Markdown.
-  Markdown({
+  const Markdown({
     Key key,
     String data,
     MarkdownStyleSheet styleSheet,

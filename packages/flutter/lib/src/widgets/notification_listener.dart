@@ -86,7 +86,7 @@ abstract class Notification {
 /// To dispatch notifications, use the [Notification.dispatch] method.
 class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Creates a widget that listens for notifications.
-  NotificationListener({
+  const NotificationListener({
     Key key,
     @required this.child,
     this.onNotification

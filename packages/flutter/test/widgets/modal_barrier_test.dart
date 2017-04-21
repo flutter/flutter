@@ -28,7 +28,7 @@ void main() {
     final Widget subject = new Stack(
       children: <Widget>[
         tapTarget,
-        new ModalBarrier(dismissible: false),
+        const ModalBarrier(dismissible: false),
       ]
     );
 
@@ -42,7 +42,7 @@ void main() {
   testWidgets('ModalBarrier does not prevent interactions with widgets in front of it', (WidgetTester tester) async {
     final Widget subject = new Stack(
       children: <Widget>[
-        new ModalBarrier(dismissible: false),
+        const ModalBarrier(dismissible: false),
         tapTarget,
       ]
     );
@@ -97,7 +97,7 @@ class FirstWidget extends StatelessWidget {
 class SecondWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-  return new ModalBarrier(
+  return const ModalBarrier(
     key: const ValueKey<String>('barrier'),
     dismissible: true
   );

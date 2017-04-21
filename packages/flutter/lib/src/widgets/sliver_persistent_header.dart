@@ -146,12 +146,11 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 }
 
 abstract class _SliverPersistentHeaderRenderObjectWidget extends RenderObjectWidget {
-  _SliverPersistentHeaderRenderObjectWidget({
+  const _SliverPersistentHeaderRenderObjectWidget({
     Key key,
     @required this.delegate,
-  }) : super(key: key) {
-    assert(delegate != null);
-  }
+  }) : assert(delegate != null),
+       super(key: key);
 
   final SliverPersistentHeaderDelegate delegate;
 
@@ -190,7 +189,7 @@ abstract class _RenderSliverPersistentHeaderForWidgetsMixin implements RenderSli
 }
 
 class _SliverScrollingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
-  _SliverScrollingPersistentHeader({
+  const _SliverScrollingPersistentHeader({
     Key key,
     @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
@@ -208,7 +207,7 @@ class _RenderSliverScrollingPersistentHeaderForWidgets extends _RenderSliverScro
   with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
-  _SliverPinnedPersistentHeader({
+  const _SliverPinnedPersistentHeader({
     Key key,
     @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
@@ -225,7 +224,7 @@ abstract class _RenderSliverPinnedPersistentHeader extends RenderSliverPinnedPer
 class _RenderSliverPinnedPersistentHeaderForWidgets extends _RenderSliverPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverFloatingPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
-  _SliverFloatingPersistentHeader({
+  const _SliverFloatingPersistentHeader({
     Key key,
     @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);
@@ -250,7 +249,7 @@ abstract class _RenderSliverFloatingPinnedPersistentHeader extends RenderSliverF
 class _RenderSliverFloatingPinnedPersistentHeaderForWidgets extends _RenderSliverFloatingPinnedPersistentHeader with _RenderSliverPersistentHeaderForWidgetsMixin { }
 
 class _SliverFloatingPinnedPersistentHeader extends _SliverPersistentHeaderRenderObjectWidget {
-  _SliverFloatingPinnedPersistentHeader({
+  const _SliverFloatingPinnedPersistentHeader({
     Key key,
     @required SliverPersistentHeaderDelegate delegate,
   }) : super(key: key, delegate: delegate);

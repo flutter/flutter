@@ -36,7 +36,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
 }
 
 class BadWidget extends StatelessWidget {
-  BadWidget(this.parentState);
+  const BadWidget(this.parentState);
 
   final BadWidgetParentState parentState;
 
@@ -85,7 +85,7 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 }
 
 class StatefulWrapper extends StatefulWidget {
-  StatefulWrapper({
+  const StatefulWrapper({
     Key key,
     this.child,
   }) : super(key: key);
@@ -116,7 +116,7 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 }
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     this.child,
   }) : super(key: key);

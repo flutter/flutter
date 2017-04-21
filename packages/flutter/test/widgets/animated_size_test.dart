@@ -179,8 +179,8 @@ void main() {
 
   testWidgets('AnimatedSize resync', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedSize(
+      const Center(
+        child: const AnimatedSize(
           duration: const Duration(milliseconds: 200),
           vsync: const TestVSync(),
           child: const SizedBox(

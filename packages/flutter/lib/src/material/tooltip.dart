@@ -235,7 +235,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 }
 
 class _TooltipOverlay extends StatelessWidget {
-  _TooltipOverlay({
+  const _TooltipOverlay({
     Key key,
     this.message,
     this.height,

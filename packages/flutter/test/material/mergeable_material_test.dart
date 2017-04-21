@@ -66,7 +66,7 @@ void main() {
     await tester.pumpWidget(
       new Scaffold(
         body: new SingleChildScrollView(
-          child: new MergeableMaterial()
+          child: const MergeableMaterial()
         )
       )
     );

@@ -17,7 +17,7 @@ const double _kToolbarScreenPadding = 8.0; // pixels
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
-  _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
+  const _TextSelectionToolbar(this.delegate, {Key key}) : super(key: key);
 
   final TextSelectionDelegate delegate;
   TextEditingValue get value => delegate.textEditingValue;
