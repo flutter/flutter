@@ -131,6 +131,7 @@ class _LayoutBuilderElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
     assert(slot == null);
+    assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
     assert(renderObject == this.renderObject);
   }

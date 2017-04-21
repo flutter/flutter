@@ -422,6 +422,7 @@ class _TheatreElement extends RenderObjectElement {
 
   @override
   void insertChildRenderObject(RenderBox child, dynamic slot) {
+    assert(renderObject.debugValidateChild(child));
     if (slot == _onstageSlot) {
       assert(child is RenderStack);
       renderObject.child = child;

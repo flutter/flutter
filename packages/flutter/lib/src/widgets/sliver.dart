@@ -647,6 +647,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void insertChildRenderObject(covariant RenderObject child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
+    assert(renderObject.debugValidateChild(child));
     renderObject.insert(child, after: _currentBeforeChild);
     assert(() {
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;

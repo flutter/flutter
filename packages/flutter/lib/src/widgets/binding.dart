@@ -121,10 +121,10 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   final BuildOwner _buildOwner = new BuildOwner();
 
   /// The object in charge of the focus tree.
-  /// 
+  ///
   /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
   /// the [FocusScopeNode] for a given [BuildContext].
-  /// 
+  ///
   /// See [FocusManager] for more details.
   final FocusManager focusManager = new FocusManager();
 
@@ -593,6 +593,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
+    assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 

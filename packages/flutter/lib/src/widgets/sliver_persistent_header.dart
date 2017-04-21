@@ -125,6 +125,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
 
   @override
   void insertChildRenderObject(covariant RenderObject child, Null slot) {
+    assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }
 
