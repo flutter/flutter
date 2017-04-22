@@ -11,8 +11,10 @@ import 'package:flutter/services.dart';
 /// IME and not on text under composition (i.e. when 
 /// [TextEditingValue.composing] is collapsed). 
 /// 
-/// A concrete [BlacklistingTextInputFormatter] which removes blacklisted 
-/// characters upon edit commit is provided. 
+/// Concrete implementations [BlacklistingTextInputFormatter], which removes 
+/// blacklisted characters upon edit commit, and 
+/// [WhitelistingTextInputFormatter], which only allows entries of whitelisted
+/// characters, are provided. 
 /// 
 /// To create custom formatters, extend the [TextInputFormatter] class and 
 /// implement the [formatEditUpdate] method.
@@ -22,18 +24,55 @@ import 'package:flutter/services.dart';
 ///  * [EditableText] on which the formatting apply.
 ///  * [BlacklistingTextInputFormatter], a provided formatter for blacklisting
 ///    characters.
+///  * [WhitelistingTextInputFormatter], a provided formatter for whitelisting
+///    characters.
 abstract class TextInputFormatter {
   /// Called when text is being typed or cut/copy/pasted in the [EditableText].
   /// 
   /// You can override the resulting text based on the previous text value and
   /// the incoming new text value.
+  /// 
+  /// When formatters are chained, `oldValue` reflects the initial value of
+  /// [TextEditingValue] at the beginning of the chain.
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue, 
     TextEditingValue newValue
   );
+
+  /// A shorthand to creating a custom [TextInputFormatter] which formats
+  /// incoming text input changes with the given function.
+  static TextInputFormatter withFunction(
+    TextInputFormatFunction formatFunction
+  ) {
+    return new _SimpleTextInputFormatter(formatFunction);
+  }
 }
 
-/// A [TextInputFormatter] that prevents the insertion of blacklisted.
+/// Function signature expected for creating custom [TextInputFormatter] 
+/// shorthands via [TextInputFormatter.withFunction];
+typedef TextEditingValue TextInputFormatFunction(
+    TextEditingValue oldValue, 
+    TextEditingValue newValue,
+);
+
+/// Wiring for [TextInputFormatter.withFunction].
+class _SimpleTextInputFormatter extends TextInputFormatter {
+  _SimpleTextInputFormatter(this.formatFunction) : 
+    assert(formatFunction != null);
+
+  final TextInputFormatFunction formatFunction;
+  
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue, 
+    TextEditingValue newValue
+  ) {
+    return formatEditUpdate(oldValue, newValue);
+  }
+}
+
+/// A [TextInputFormatter] that prevents the insertion of blacklisted 
+/// characters.
 /// 
 /// Instances of blacklisted characters found in the new [TextEditingValue]s 
 /// will be replaced with the [replacementString] which defaults to ``.
@@ -44,6 +83,7 @@ abstract class TextInputFormatter {
 /// See also:
 ///  
 ///  * [TextInputFormatter].
+///  * [WhitelistingTextInputFormatter].
 class BlacklistingTextInputFormatter extends TextInputFormatter {
   BlacklistingTextInputFormatter(
     this.blacklistedPattern, 
@@ -57,42 +97,94 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, 
-    TextEditingValue newValue
+    TextEditingValue oldValue, // unused.
+    TextEditingValue newValue,
   ) {
     // Don't apply formatting to text still under composition.
     if (!newValue.composing.isCollapsed)
       return newValue;
-    final int selectionStartIndex = newValue.selection.start;
-    final int selectionEndIndex = newValue.selection.end;
-    if (selectionStartIndex < 0 || selectionEndIndex < 0) {
-      return new TextEditingValue(
-        text: newValue.text.replaceAll(blacklistedPattern, replacementString),
-        selection: const TextSelection.collapsed(offset: -1), 
-        composing: TextRange.empty,
-      );
-    } else {
-      final String beforeSelection = newValue.text
-          .substring(0, selectionStartIndex)
-          .replaceAll(blacklistedPattern, replacementString);
-      final String inSelection = newValue.text
-          .substring(selectionStartIndex, selectionEndIndex)
-          .replaceAll(blacklistedPattern, replacementString);
-      final String afterSelection = newValue.text
-          .substring(selectionEndIndex)
-          .replaceAll(blacklistedPattern, replacementString);
-      return new TextEditingValue(
-        text: beforeSelection + inSelection + afterSelection,
-        selection: newValue.selection.copyWith(
-          baseOffset: beforeSelection.length,
-          extentOffset: beforeSelection.length + inSelection.length,
-        ),
-        composing: TextRange.empty,
-      );
-    }
+    return _selectionAwareTextManipulation(
+      newValue, 
+      (String substring) => 
+          substring.replaceAll(blacklistedPattern, replacementString),
+    );
   }
 
   /// A [BlacklistingTextInputFormatter] that forces input to be a single line.
   static final BlacklistingTextInputFormatter singleLineFormatter
       = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
+}
+
+/// A [TextInputFormatter] that allows only the insertion of whitelisted 
+/// characters
+/// 
+/// It attempts to preserve the existing [TextEditingValue.selection] to 
+/// sensible values. 
+/// 
+/// See also:
+///  
+///  * [TextInputFormatter].
+///  * [BlacklistingTextInputFormatter].
+class WhitelistingTextInputFormatter extends TextInputFormatter {
+  WhitelistingTextInputFormatter(this.whitelistedPattern) : 
+    assert(whitelistedPattern != null);
+
+  /// A [Pattern] to extract all instances of allowed characters.
+  /// 
+  /// [RegExp] with multiple groups is not supported.
+  final Pattern whitelistedPattern;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue, // unused.
+    TextEditingValue newValue,
+  ) {
+    // Don't apply formatting to text still under composition.
+    if (!newValue.composing.isCollapsed)
+      return newValue;
+    return _selectionAwareTextManipulation(
+      newValue, 
+      (String substring) => whitelistedPattern
+          .allMatches(substring)
+          .map((Match match) => match.group(0))
+          .join(),
+    );
+  }
+
+  /// A [WhitelistingTextInputFormatter] that takes in digits `[0-9]` only.
+  static final WhitelistingTextInputFormatter digitsOnly
+      = new WhitelistingTextInputFormatter(new RegExp(r'\d+'));
+}
+
+TextEditingValue _selectionAwareTextManipulation(
+  TextEditingValue value,
+  String substringManipulation(String substring),
+) {
+  final int selectionStartIndex = value.selection.start;
+  final int selectionEndIndex = value.selection.end;
+  if (selectionStartIndex < 0 || selectionEndIndex < 0) {
+    return new TextEditingValue(
+      text: substringManipulation(value.text),
+      selection: const TextSelection.collapsed(offset: -1), 
+      composing: TextRange.empty,
+    );
+  } else {
+    final String beforeSelection = substringManipulation(
+      value.text.substring(0, selectionStartIndex)
+    );
+    final String inSelection = substringManipulation(
+      value.text.substring(selectionStartIndex, selectionEndIndex)
+    );
+    final String afterSelection = substringManipulation(
+      value.text.substring(selectionEndIndex)
+    );
+    return new TextEditingValue(
+      text: beforeSelection + inSelection + afterSelection,
+      selection: value.selection.copyWith(
+        baseOffset: beforeSelection.length,
+        extentOffset: beforeSelection.length + inSelection.length,
+      ),
+      composing: TextRange.empty,
+    );
+  }
 }
