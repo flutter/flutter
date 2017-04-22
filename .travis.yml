@@ -5,10 +5,12 @@ addons:
   apt:
     # sky_shell binary depends on /usr/lib/x86_64-linux-gnu/libstdc++.so.6 version GLIBCXX_3.4.18
     sources:
+      - heroku
       - ubuntu-toolchain-r-test # if we don't specify this, the libstdc++6 we get is the wrong version
     packages:
       - libstdc++6
       - fonts-droid
+      - heroku-toolbelt
 install:
   - ./dev/bots/travis_install.sh
 env:
@@ -18,6 +20,8 @@ env:
 before_script:
   - ./dev/bots/travis_setup.sh
 script:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - echo "TRAVIS_BRANCH=$TRAVIS_BRANCH, PR=$PR, BRANCH=$BRANCH"
   - (./bin/cache/dart-sdk/bin/dart ./dev/bots/test.dart && ./dev/bots/travis_upload.sh)
 cache:
   directories:
