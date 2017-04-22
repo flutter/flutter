@@ -68,6 +68,7 @@ fi
 
 # To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
 # FLUTTER_TOOL_ARGS="--observe=65432 --checked"
+FLUTTER_TOOL_ARGS="--causal-async-stacks=false"
 
 (
   if hash flock 2>/dev/null; then
