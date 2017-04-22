@@ -27,6 +27,9 @@ def get_out_dir(args):
     if args.android_cpu != 'arm':
         target_dir.append(args.android_cpu)
 
+    if args.enable_vulkan:
+        target_dir.append('vulkan')
+
     return os.path.join('out', '_'.join(target_dir))
 
 def to_command_line(gn_args):
