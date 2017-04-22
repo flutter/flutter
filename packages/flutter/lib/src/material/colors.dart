@@ -163,7 +163,9 @@ class Colors {
   /// * [Typography.black], which uses this color for its text styles.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Color black87 = const Color(0xDD000000);
+  ///
+  /// 0xF0 = 0xFF * LinearToSRGB(0.87)
+  static const Color black87 = const Color(0xF0000000);
 
   /// Black with 54% opacity.
   ///
@@ -174,17 +176,23 @@ class Colors {
   /// * [Typography.black], which uses this color for its text styles.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Color black54 = const Color(0x8A000000);
+  ///
+  /// 0xC2 = 0xFF * LinearToSRGB(0.54)
+  static const Color black54 = const Color(0xC2000000);
 
   /// Black with 38% opacity.
   ///
   /// Used for the placeholder text in data tables in light themes.
-  static const Color black38 = const Color(0x61000000);
+  ///
+  /// 0xA6 = 0xFF * LinearToSRGB(0.38)
+  static const Color black38 = const Color(0xA6000000);
 
   /// Black with 45% opacity.
   ///
   /// Used for modal barriers.
-  static const Color black45 = const Color(0x73000000);
+  ///
+  /// 0xB3 = 0xFF * LinearToSRGB(0.45)
+  static const Color black45 = const Color(0xB3000000);
 
   /// Black with 26% opacity.
   ///
@@ -195,12 +203,16 @@ class Colors {
   /// * [ThemeData.disabledColor], which uses this color by default in light themes.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Color black26 = const Color(0x42000000);
+  ///
+  /// 0x8B = 0xFF * LinearToSRGB(0.26)
+  static const Color black26 = const Color(0x8B000000);
 
   /// Black with 12% opacity.
   ///
   /// Used for the background of disabled raised buttons in light themes.
-  static const Color black12 = const Color(0x1F000000);
+  ///
+  /// 0x61 = 0xFF * LinearToSRGB(0.12)
+  static const Color black12 = const Color(0x61000000);
 
   /// Completely opaque white.
   ///
@@ -223,7 +235,9 @@ class Colors {
   /// * [Typography.white], which uses this color for its text styles.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Color white70 = const Color(0xB3FFFFFF);
+  ///
+  /// 0xDA = 0xFF * LinearToSRGB(0.70)
+  static const Color white70 = const Color(0xDAFFFFFF);
 
   /// White with 32% opacity.
   ///
@@ -234,15 +248,21 @@ class Colors {
   /// * [ThemeData.disabledColor], which uses this color by default in dark themes.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
-  static const Color white30 = const Color(0x4DFFFFFF);
+  ///
+  /// 0x99 = 0xFF * LinearToSRGB(0.32)
+  static const Color white30 = const Color(0x99FFFFFF);
 
   /// White with 12% opacity.
   ///
   /// Used for the background of disabled raised buttons in dark themes.
-  static const Color white12 = const Color(0x1FFFFFFF);
+  ///
+  /// 0x61 = 0xFF * LinearToSRGB(0.12)
+  static const Color white12 = const Color(0x61FFFFFF);
 
   /// White with 10% opacity.
-  static const Color white10 = const Color(0x1AFFFFFF);
+  ///
+  /// 0x59 = 0xFF * LinearToSRGB(0.10)
+  static const Color white10 = const Color(0x59FFFFFF);
 
   /// The red primary color and swatch.
   ///
