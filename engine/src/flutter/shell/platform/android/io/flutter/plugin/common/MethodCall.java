@@ -19,9 +19,9 @@ public final class MethodCall {
     /**
      * Arguments for the call.
      *
-     * Consider using {@link #arguments()} for cases where a particular run-time type is expected.
-     * Consider using {@link #argument(String)} when that run-time type is a {@link Map}
-     * or a {@link JSONObject}.
+     * <p>Consider using {@link #arguments()} for cases where a particular run-time type is expected.
+     * Consider using {@link #argument(String)} when that run-time type is {@link Map} or
+     * {@link JSONObject}.</p>
      */
     public final Object arguments;
 
@@ -68,6 +68,30 @@ public final class MethodCall {
             return (T) ((Map<?, ?>) arguments).get(key);
         } else if (arguments instanceof JSONObject) {
             return (T) ((JSONObject) arguments).opt(key);
+        } else {
+            throw new ClassCastException();
+        }
+    }
+
+    /**
+     * Returns whether this method call involves a mapping for the given argument key,
+     * assuming {@link #arguments} is a {@link Map} or a {@link JSONObject}. The value associated
+     * with the key, as returned by {@link #argument(String)}, is not considered, and may be
+     * {@code null}.
+     *
+     * @param key the String key.
+     * @return {@code true}, if {@link #arguments} is a {@link Map} containing key, or a
+     * {@link JSONObject} with a mapping for key.
+     * @throws ClassCastException if {@link #arguments} can be cast to neither {@link Map} nor
+     * {@link JSONObject}.
+     */
+    public boolean hasArgument(String key) {
+        if (arguments == null) {
+            return false;
+        } else if (arguments instanceof Map) {
+            return ((Map<?, ?>) arguments).containsKey(key);
+        } else if (arguments instanceof JSONObject) {
+            return ((JSONObject) arguments).has(key);
         } else {
             throw new ClassCastException();
         }
