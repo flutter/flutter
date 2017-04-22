@@ -32,12 +32,11 @@ class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
-  LayoutBuilder({
+  const LayoutBuilder({
     Key key,
     @required this.builder
-  }) : super(key: key) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key);
 
   /// Called at layout time to construct the widget tree. The builder must not
   /// return null.

@@ -333,13 +333,12 @@ class DropdownMenuItem<T> extends StatelessWidget {
   /// Creates an item for a dropdown menu.
   ///
   /// The [child] argument is required.
-  DropdownMenuItem({
+  const DropdownMenuItem({
     Key key,
     this.value,
     @required this.child,
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -370,12 +369,11 @@ class DropdownMenuItem<T> extends StatelessWidget {
 class DropdownButtonHideUnderline extends InheritedWidget {
   /// Creates a [DropdownButtonHideUnderline]. A non-null [child] must
   /// be given.
-  DropdownButtonHideUnderline({
+  const DropdownButtonHideUnderline({
     Key key,
     @required Widget child,
-  }) : super(key: key, child: child) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.

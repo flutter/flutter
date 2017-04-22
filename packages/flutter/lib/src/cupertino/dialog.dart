@@ -177,13 +177,11 @@ const Color _kDestructiveActionColor = const Color(0xFFFF3B30);
 ///  * [CupertinoAlertDialog]
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
-  CupertinoDialogAction({
+  const CupertinoDialogAction({
     this.onPressed,
     this.isDestructive: false,
     @required this.child,
-  }) {
-    assert(child != null);
-  }
+  }) : assert(child != null);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///

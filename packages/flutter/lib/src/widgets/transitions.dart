@@ -219,15 +219,14 @@ class SizeTransition extends AnimatedWidget {
   /// The [sizeFactor] argument must not be null. The [axis] argument defaults
   /// to [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
   /// child along the main axis during the transition.
-  SizeTransition({
+  const SizeTransition({
     Key key,
     this.axis: Axis.vertical,
     @required Animation<double> sizeFactor,
     this.axisAlignment: 0.5,
     this.child,
-  }) : super(key: key, listenable: sizeFactor) {
-    assert(axis != null);
-  }
+  }) : assert(axis != null),
+       super(key: key, listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise [Axis.vertical].
   final Axis axis;
@@ -465,14 +464,13 @@ class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///
   /// The [animation] and [builder] arguments must not be null.
-  AnimatedBuilder({
+  const AnimatedBuilder({
     Key key,
     @required Listenable animation,
     @required this.builder,
     this.child,
-  }) : super(key: key, listenable: animation) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key, listenable: animation);
 
   /// Called every time the animation changes value.
   final TransitionBuilder builder;

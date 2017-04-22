@@ -475,15 +475,14 @@ class Navigator extends StatefulWidget {
   /// Creates a widget that maintains a stack-based history of child widgets.
   ///
   /// The [onGenerateRoute] argument must not be null.
-  Navigator({
+  const Navigator({
     Key key,
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.observers: const <NavigatorObserver>[]
-  }) : super(key: key) {
-    assert(onGenerateRoute != null);
-  }
+  }) : assert(onGenerateRoute != null),
+       super(key: key);
 
   /// The name of the first route to show.
   final String initialRoute;

@@ -39,13 +39,12 @@ const EdgeInsets _kTabLabelPadding = const EdgeInsets.symmetric(horizontal: 12.0
 class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab. At least one of [text] and [icon]
   /// must be non-null.
-  Tab({
+  const Tab({
     Key key,
     this.text,
     this.icon,
-  }) : super(key: key) {
-    assert(text != null || icon != null);
-  }
+  }) : assert(text != null || icon != null),
+       super(key: key);
 
   /// The text to display as the tab's label.
   final String text;

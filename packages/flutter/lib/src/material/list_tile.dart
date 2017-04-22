@@ -158,7 +158,7 @@ class ListTile extends StatelessWidget {
   /// If [isThreeLine] is true, then [subtitle] must not be null.
   ///
   /// Requires one of its ancestors to be a [Material] widget.
-  ListTile({
+  const ListTile({
     Key key,
     this.leading,
     this.title,
@@ -170,11 +170,10 @@ class ListTile extends StatelessWidget {
     this.onTap,
     this.onLongPress,
     this.selected: false,
-  }) : super(key: key) {
-    assert(isThreeLine != null);
-    assert(enabled != null);
-    assert(selected != null);
-  }
+  }) : assert(isThreeLine != null),
+       assert(enabled != null),
+       assert(selected != null),
+       super(key: key);
 
   /// A widget to display before the title.
   ///

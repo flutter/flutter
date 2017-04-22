@@ -8,13 +8,12 @@ import 'framework.dart';
 import 'scroll_controller.dart';
 
 class PrimaryScrollController extends InheritedWidget {
-  PrimaryScrollController({
+  const PrimaryScrollController({
     Key key,
     @required this.controller,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(controller != null);
-  }
+  }) : assert(controller != null),
+       super(key: key, child: child);
 
   const PrimaryScrollController.none({
     Key key,

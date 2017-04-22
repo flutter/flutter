@@ -29,16 +29,15 @@ abstract class SliverPersistentHeaderDelegate {
 }
 
 class SliverPersistentHeader extends StatelessWidget {
-  SliverPersistentHeader({
+  const SliverPersistentHeader({
     Key key,
     @required this.delegate,
     this.pinned: false,
     this.floating: false,
-  }) : super(key: key) {
-    assert(delegate != null);
-    assert(pinned != null);
-    assert(floating != null);
-  }
+  }) : assert(delegate != null),
+       assert(pinned != null),
+       assert(floating != null),
+       super(key: key);
 
   final SliverPersistentHeaderDelegate delegate;
 

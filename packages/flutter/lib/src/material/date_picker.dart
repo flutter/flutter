@@ -44,17 +44,16 @@ const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogAction
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
-  _DatePickerHeader({
+  const _DatePickerHeader({
     Key key,
     @required this.selectedDate,
     @required this.mode,
     @required this.onModeChanged,
     @required this.orientation,
-  }) : super(key: key) {
-    assert(selectedDate != null);
-    assert(mode != null);
-    assert(orientation != null);
-  }
+  }) : assert(selectedDate != null),
+       assert(mode != null),
+       assert(orientation != null),
+       super(key: key);
 
   final DateTime selectedDate;
   final _DatePickerMode mode;

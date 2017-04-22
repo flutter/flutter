@@ -41,7 +41,7 @@ class CupertinoSlider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
-  CupertinoSlider({
+  const CupertinoSlider({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -49,13 +49,12 @@ class CupertinoSlider extends StatefulWidget {
     this.max: 1.0,
     this.divisions,
     this.activeColor: const Color(0xFF027AFF),
-  }) : super(key: key) {
-    assert(value != null);
-    assert(min != null);
-    assert(max != null);
-    assert(value >= min && value <= max);
-    assert(divisions == null || divisions > 0);
-  }
+  }) : assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///

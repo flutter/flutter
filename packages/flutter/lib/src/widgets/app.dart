@@ -38,7 +38,7 @@ typedef Future<LocaleQueryData> LocaleChangedCallback(Locale locale);
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
-  WidgetsApp({
+  const WidgetsApp({
     Key key,
     @required this.onGenerateRoute,
     this.title,
@@ -51,13 +51,12 @@ class WidgetsApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : super(key: key) {
-    assert(color != null);
-    assert(onGenerateRoute != null);
-    assert(showPerformanceOverlay != null);
-    assert(checkerboardRasterCacheImages != null);
-    assert(showSemanticsDebugger != null);
-  }
+  }) : assert(color != null),
+       assert(onGenerateRoute != null),
+       assert(showPerformanceOverlay != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(showSemanticsDebugger != null),
+       super(key: key);
 
   /// A one-line description of this app for use in the window manager.
   final String title;

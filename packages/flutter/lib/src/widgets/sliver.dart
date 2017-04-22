@@ -426,14 +426,13 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///    extent in the main axis.
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver whose box children that each fill the viewport.
-  SliverFillViewport({
+  const SliverFillViewport({
     Key key,
     @required SliverChildDelegate delegate,
     this.viewportFraction: 1.0,
-  }) : super(key: key, delegate: delegate) {
-    assert(viewportFraction != null);
-    assert(viewportFraction > 0.0);
-  }
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction > 0.0),
+       super(key: key, delegate: delegate);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///

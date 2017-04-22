@@ -354,18 +354,17 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 }
 
 class _ModalScopeStatus extends InheritedWidget {
-  _ModalScopeStatus({
+  const _ModalScopeStatus({
     Key key,
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(isCurrent != null);
-    assert(canPop != null);
-    assert(route != null);
-    assert(child != null);
-  }
+  }) : assert(isCurrent != null),
+       assert(canPop != null),
+       assert(route != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   final bool isCurrent;
   final bool canPop;

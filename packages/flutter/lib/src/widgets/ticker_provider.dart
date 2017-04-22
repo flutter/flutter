@@ -19,13 +19,12 @@ class TickerMode extends InheritedWidget {
   /// Creates a widget that enables or disables tickers.
   ///
   /// The [enabled] argument must not be null.
-  TickerMode({
+  const TickerMode({
     Key key,
     @required this.enabled,
     Widget child
-  }) : super(key: key, child: child) {
-    assert(enabled != null);
-  }
+  }) : assert(enabled != null),
+       super(key: key, child: child);
 
   /// The current ticker mode of this subtree.
   ///

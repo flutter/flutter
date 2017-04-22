@@ -117,7 +117,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [controller], [focusNode], [style], and [cursorColor] arguments must
   /// not be null.
-  EditableText({
+  const EditableText({
     Key key,
     @required this.controller,
     @required this.focusNode,
@@ -133,15 +133,14 @@ class EditableText extends StatefulWidget {
     this.keyboardType,
     this.onChanged,
     this.onSubmitted,
-  }) : super(key: key) {
-    assert(controller != null);
-    assert(focusNode != null);
-    assert(obscureText != null);
-    assert(style != null);
-    assert(cursorColor != null);
-    assert(maxLines != null);
-    assert(autofocus != null);
-  }
+  }) : assert(controller != null),
+       assert(focusNode != null),
+       assert(obscureText != null),
+       assert(style != null),
+       assert(cursorColor != null),
+       assert(maxLines != null),
+       assert(autofocus != null),
+       super(key: key);
 
   /// Controls the text being edited.
   final TextEditingController controller;

@@ -47,7 +47,7 @@ class FlatButton extends StatelessWidget {
   ///
   /// The [child] argument is required and is typically a [Text] widget in all
   /// caps.
-  FlatButton({
+  const FlatButton({
     Key key,
     @required this.onPressed,
     this.textColor,
@@ -59,9 +59,8 @@ class FlatButton extends StatelessWidget {
     this.textTheme,
     this.colorBrightness,
     @required this.child
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key);
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///

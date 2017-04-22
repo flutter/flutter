@@ -80,17 +80,15 @@ class Step {
   /// Creates a step for a [Stepper].
   ///
   /// The [title], [content], and [state] arguments must not be null.
-  Step({
+  const Step({
     @required this.title,
     this.subtitle,
     @required this.content,
     this.state: StepState.indexed,
     this.isActive: false,
-  }) {
-    assert(title != null);
-    assert(content != null);
-    assert(state != null);
-  }
+  }) : assert(title != null),
+       assert(content != null),
+       assert(state != null);
 
   /// The title of the step that typically describes it.
   final Widget title;

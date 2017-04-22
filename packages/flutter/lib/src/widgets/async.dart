@@ -187,19 +187,18 @@ enum ConnectionState {
 class AsyncSnapshot<T> {
   /// Creates an [AsyncSnapshot] with the specified [connectionState],
   /// and optionally either [data] or [error] (but not both).
-  AsyncSnapshot._(this.connectionState, this.data, this.error) {
-    assert(connectionState != null);
-    assert(data == null || error == null);
-  }
+  const AsyncSnapshot._(this.connectionState, this.data, this.error)
+      : assert(connectionState != null),
+        assert(!(data != null && error != null));
 
   /// Creates an [AsyncSnapshot] in [ConnectionState.none] with null data and error.
-  AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
+  const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
+  const AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
-  AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
+  const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
 
   /// Current state of connection to the asynchronous computation.
   final ConnectionState connectionState;
@@ -309,13 +308,12 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
   /// strategy is given by [builder].
-  StreamBuilder({
+  const StreamBuilder({
     Key key,
     Stream<T> stream,
     @required this.builder
-  }) : super(key: key, stream: stream) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key, stream: stream);
 
   /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
@@ -387,13 +385,12 @@ class FutureBuilder<T> extends StatefulWidget {
   /// interaction with a [Future].
   ///
   /// The [builder] must not be null.
-  FutureBuilder({
+  const FutureBuilder({
     Key key,
     this.future,
     @required this.builder
-  }) : super(key: key) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.

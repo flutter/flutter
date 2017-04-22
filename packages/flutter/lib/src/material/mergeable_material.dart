@@ -34,12 +34,11 @@ abstract class MergeableMaterialItem {
 class MaterialSlice extends MergeableMaterialItem {
   /// Creates a slice of [Material] that's mergeable within a
   /// [MergeableMaterial].
-  MaterialSlice({
+  const MaterialSlice({
     @required LocalKey key,
     @required this.child,
-  }) : super(key) {
-    assert(key != null);
-  }
+  }) : assert(key != null),
+       super(key);
 
   /// The contents of this slice.
   final Widget child;
@@ -55,12 +54,11 @@ class MaterialSlice extends MergeableMaterialItem {
 /// All [MaterialGap] objects need a [LocalKey].
 class MaterialGap extends MergeableMaterialItem {
   /// Creates a Material gap with a given size.
-  MaterialGap({
+  const MaterialGap({
     @required LocalKey key,
     this.size: 16.0
-  }) : super(key) {
-    assert(key != null);
-  }
+  }) : assert(key != null),
+       super(key);
 
   /// The main axis extent of this gap. For example, if the [MergableMaterial]
   /// is vertical, then this is the height of the gap.

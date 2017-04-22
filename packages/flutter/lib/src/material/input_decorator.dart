@@ -463,15 +463,14 @@ class InputDecorator extends StatelessWidget {
 // Smoothly animate the label of an InputDecorator as the label
 // transitions between inline and caption.
 class _AnimatedLabel extends ImplicitlyAnimatedWidget {
-  _AnimatedLabel({
+  const _AnimatedLabel({
     Key key,
     this.text,
     @required this.style,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(style != null);
-  }
+  }) : assert(style != null),
+       super(key: key, curve: curve, duration: duration);
 
   final String text;
   final TextStyle style;

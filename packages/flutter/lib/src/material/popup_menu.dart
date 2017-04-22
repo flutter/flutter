@@ -475,7 +475,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// Creates a button that shows a popup menu.
   ///
   /// The [itemBuilder] argument must not be null.
-  PopupMenuButton({
+  const PopupMenuButton({
     Key key,
     @required this.itemBuilder,
     this.initialValue,
@@ -484,9 +484,8 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.elevation: 8,
     this.padding: const EdgeInsets.all(8.0),
     this.child
-  }) : super(key: key) {
-    assert(itemBuilder != null);
-  }
+  }) : assert(itemBuilder != null),
+       super(key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;

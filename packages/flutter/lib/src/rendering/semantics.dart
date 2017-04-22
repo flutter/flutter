@@ -60,18 +60,16 @@ class SemanticsData {
   /// Creates a semantics data object.
   ///
   /// The [flags], [actions], [label], and [Rect] arguments must not be null.
-  SemanticsData({
+  const SemanticsData({
     @required this.flags,
     @required this.actions,
     @required this.label,
     @required this.rect,
     this.transform
-  }) {
-    assert(flags != null);
-    assert(actions != null);
-    assert(label != null);
-    assert(rect != null);
-  }
+  }) : assert(flags != null),
+       assert(actions != null),
+       assert(label != null),
+       assert(rect != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;

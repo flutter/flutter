@@ -73,15 +73,14 @@ class ExpansionPanel {
 class ExpansionPanelList extends StatelessWidget {
   /// Creates an expansion panel list widget. The [expansionCallback] is
   /// triggered when an expansion panel expand/collapse button is pushed.
-  ExpansionPanelList({
+  const ExpansionPanelList({
     Key key,
     this.children: const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration: kThemeAnimationDuration
-  }) : super(key: key) {
-    assert(children != null);
-    assert(animationDuration != null);
-  }
+  }) : assert(children != null),
+       assert(animationDuration != null),
+       super(key: key);
 
   /// The children of the expansion panel list. They are layed in a similar
   /// fashion to [ListBody].

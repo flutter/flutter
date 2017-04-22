@@ -25,16 +25,15 @@ export 'package:flutter/physics.dart' show Tolerance;
 typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 
 class Scrollable extends StatefulWidget {
-  Scrollable({
+  const Scrollable({
     Key key,
     this.axisDirection: AxisDirection.down,
     this.controller,
     this.physics,
     @required this.viewportBuilder,
-  }) : super (key: key) {
-    assert(axisDirection != null);
-    assert(viewportBuilder != null);
-  }
+  }) : assert(axisDirection != null),
+       assert(viewportBuilder != null),
+       super (key: key);
 
   final AxisDirection axisDirection;
 
@@ -100,15 +99,14 @@ class Scrollable extends StatefulWidget {
 // Enable Scrollable.of() to work as if ScrollableState was an inherited widget.
 // ScrollableState.build() always rebuilds its _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
-  _ScrollableScope({
+  const _ScrollableScope({
     Key key,
     @required this.scrollable,
     @required this.position,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(scrollable != null);
-    assert(child != null);
-  }
+  }) : assert(scrollable != null),
+       assert(child != null),
+       super(key: key, child: child);
 
   final ScrollableState scrollable;
   final ScrollPosition position;

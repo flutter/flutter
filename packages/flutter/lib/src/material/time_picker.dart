@@ -207,17 +207,15 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
 
 // TODO(ianh): Localize!
 class _TimePickerHeader extends StatelessWidget {
-  _TimePickerHeader({
+  const _TimePickerHeader({
     @required this.selectedTime,
     @required this.mode,
     @required this.orientation,
     @required this.onModeChanged,
     @required this.onChanged,
-  }) {
-    assert(selectedTime != null);
-    assert(mode != null);
-    assert(orientation != null);
-  }
+  }) : assert(selectedTime != null),
+       assert(mode != null),
+       assert(orientation != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -447,13 +445,11 @@ class _DialPainter extends CustomPainter {
 }
 
 class _Dial extends StatefulWidget {
-  _Dial({
+  const _Dial({
     @required this.selectedTime,
     @required this.mode,
     @required this.onChanged
-  }) {
-    assert(selectedTime != null);
-  }
+  }) : assert(selectedTime != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
@@ -625,12 +621,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 }
 
 class _TimePickerDialog extends StatefulWidget {
-  _TimePickerDialog({
+  const _TimePickerDialog({
     Key key,
     @required this.initialTime
-  }) : super(key: key) {
-    assert(initialTime != null);
-  }
+  }) : assert(initialTime != null),
+       super(key: key);
 
   final TimeOfDay initialTime;
 

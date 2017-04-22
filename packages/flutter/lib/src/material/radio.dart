@@ -127,19 +127,18 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 }
 
 class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
-  _RadioRenderObjectWidget({
+  const _RadioRenderObjectWidget({
     Key key,
     @required this.selected,
     @required this.activeColor,
     @required this.inactiveColor,
     this.onChanged,
     @required this.vsync,
-  }) : super(key: key) {
-    assert(selected != null);
-    assert(activeColor != null);
-    assert(inactiveColor != null);
-    assert(vsync != null);
-  }
+  }) : assert(selected != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       super(key: key);
 
   final bool selected;
   final Color inactiveColor;

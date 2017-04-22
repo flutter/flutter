@@ -21,17 +21,16 @@ import 'theme.dart';
 class ExpandIcon extends StatefulWidget {
   /// Creates an [ExpandIcon] with the given padding, and a callback that is
   /// triggered when the icon is pressed.
-  ExpandIcon({
+  const ExpandIcon({
     Key key,
     this.isExpanded: false,
     this.size: 24.0,
     @required this.onPressed,
     this.padding: const EdgeInsets.all(8.0)
-  }) : super(key: key) {
-    assert(isExpanded != null);
-    assert(size != null);
-    assert(padding != null);
-  }
+  }) : assert(isExpanded != null),
+       assert(size != null),
+       assert(padding != null),
+       super(key: key);
 
   /// Whether the icon is in an expanded state.
   ///
