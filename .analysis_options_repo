@@ -84,7 +84,7 @@ linter:
     # - omit_local_variable_types # opposite of always_specify_types
     # - one_member_abstracts # too many false positives
     # - only_throw_errors # https://github.com/flutter/flutter/issues/5792
-    # - overridden_fields # not yet tested
+    - overridden_fields
     - package_api_docs
     - package_prefixed_library_names
     # - parameter_assignments # we do this commonly
