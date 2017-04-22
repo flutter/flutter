@@ -103,13 +103,13 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       },
       background: new Container(
         color: theme.primaryColor,
-        child: new ListTile(
+        child: const ListTile(
           leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
         )
       ),
       secondaryBackground: new Container(
         color: theme.primaryColor,
-        child: new ListTile(
+        child: const ListTile(
           trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
         )
       ),

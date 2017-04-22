@@ -14,19 +14,19 @@ class TwoLevelListDemo extends StatelessWidget {
       body: new TwoLevelList(
         type: MaterialListType.oneLine,
         children: <Widget>[
-          new TwoLevelListItem(title: const Text('Top')),
+          const TwoLevelListItem(title: const Text('Top')),
           new TwoLevelSublist(
              title: const Text('Sublist'),
              backgroundColor: Theme.of(context).accentColor.withOpacity(0.025),
              children: <Widget>[
-               new TwoLevelListItem(title: const Text('One')),
-               new TwoLevelListItem(title: const Text('Two')),
+               const TwoLevelListItem(title: const Text('One')),
+               const TwoLevelListItem(title: const Text('Two')),
                // https://en.wikipedia.org/wiki/Free_Four
-               new TwoLevelListItem(title: const Text('Free')),
-               new TwoLevelListItem(title: const Text('Four'))
+               const TwoLevelListItem(title: const Text('Free')),
+               const TwoLevelListItem(title: const Text('Four'))
              ]
           ),
-           new TwoLevelListItem(title: const Text('Bottom'))
+           const TwoLevelListItem(title: const Text('Bottom'))
         ]
       )
     );

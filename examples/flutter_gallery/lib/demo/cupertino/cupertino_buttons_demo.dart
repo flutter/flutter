@@ -49,7 +49,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                           setState(() {_pressedCount++;});
                         }
                       ),
-                      new CupertinoButton(
+                      const CupertinoButton(
                         child: const Text('Disabled'),
                         onPressed: null,
                       ),
@@ -65,7 +65,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                   }
                 ),
                 const Padding(padding: const EdgeInsets.all(12.0)),
-                new CupertinoButton(
+                const CupertinoButton(
                   child: const Text('Disabled'),
                   color: _kBlue,
                   onPressed: null,

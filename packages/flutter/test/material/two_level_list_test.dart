@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TwoLevelList default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new TwoLevelList()));
+    await tester.pumpWidget(const Center(child: const TwoLevelList()));
 
     await tester.pumpWidget(
       new Material(
@@ -41,8 +41,8 @@ void main() {
                   key: sublistKey,
                   title: const Text('Sublist'),
                   children: <Widget>[
-                    new TwoLevelListItem(title: const Text('0')),
-                    new TwoLevelListItem(title: const Text('1'))
+                    const TwoLevelListItem(title: const Text('0')),
+                    const TwoLevelListItem(title: const Text('1'))
                   ]
                 ),
                 new TwoLevelListItem(title: const Text('Bottom'), key: bottomKey)
@@ -100,8 +100,8 @@ void main() {
                     didChangeOpen = opened;
                   },
                   children: <Widget>[
-                    new TwoLevelListItem(title: const Text('0')),
-                    new TwoLevelListItem(title: const Text('1'))
+                    const TwoLevelListItem(title: const Text('0')),
+                    const TwoLevelListItem(title: const Text('1'))
                   ]
                 ),
               ]

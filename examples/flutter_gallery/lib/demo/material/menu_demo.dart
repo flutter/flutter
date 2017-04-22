@@ -119,31 +119,31 @@ class MenuDemoState extends State<MenuDemo> {
               padding: EdgeInsets.zero,
               onSelected: showMenuSelection,
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                new PopupMenuItem<String>(
+                const PopupMenuItem<String>(
                   value: 'Preview',
-                  child: new ListTile(
+                  child: const ListTile(
                     leading: const Icon(Icons.visibility),
                     title: const Text('Preview')
                   )
                 ),
-                new PopupMenuItem<String>(
+                const PopupMenuItem<String>(
                   value: 'Share',
-                  child: new ListTile(
+                  child: const ListTile(
                     leading: const Icon(Icons.person_add),
                     title: const Text('Share')
                   )
                 ),
-                new PopupMenuItem<String>(
+                const PopupMenuItem<String>(
                   value: 'Get Link',
-                  child: new ListTile(
+                  child: const ListTile(
                     leading: const Icon(Icons.link),
                     title: const Text('Get link')
                   )
                 ),
                 const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-                new PopupMenuItem<String>(
+                const PopupMenuItem<String>(
                   value: 'Remove',
-                  child: new ListTile(
+                  child: const ListTile(
                     leading: const Icon(Icons.delete),
                     title: const Text('Remove')
                   )

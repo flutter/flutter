@@ -15,7 +15,7 @@ const TextStyle testStyle = const TextStyle(
 void main() {
   testWidgets('Default layout minimum size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(child: new CupertinoButton(
+      const Center(child: const CupertinoButton(
         child: const Text('X', style: testStyle),
         onPressed: null,
       ))
@@ -47,7 +47,7 @@ void main() {
 
   testWidgets('Size grows with text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(child: new CupertinoButton(
+      const Center(child: const CupertinoButton(
         child: const Text('XXXX', style: testStyle),
         onPressed: null,
       ))
@@ -61,7 +61,7 @@ void main() {
   });
 
   testWidgets('Button with background is wider', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new CupertinoButton(
+    await tester.pumpWidget(const Center(child: const CupertinoButton(
       child: const Text('X', style: testStyle),
       onPressed: null,
       color: const Color(0xFFFFFFFF),
@@ -75,7 +75,7 @@ void main() {
   });
 
   testWidgets('Custom padding', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new CupertinoButton(
+    await tester.pumpWidget(const Center(child: const CupertinoButton(
       child: const Text(' ', style: testStyle),
       onPressed: null,
       padding: const EdgeInsets.all(100.0),
@@ -116,7 +116,7 @@ void main() {
   });
 
   testWidgets('Disabled button doesn\'t animate', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(child: new CupertinoButton(
+    await tester.pumpWidget(const Center(child: const CupertinoButton(
       child: const Text('Tap me'),
       onPressed: null,
     )));

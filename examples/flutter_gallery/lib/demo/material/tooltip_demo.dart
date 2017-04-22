@@ -46,7 +46,7 @@ class TooltipDemo extends StatelessWidget {
                   color: theme.iconTheme.color,
                   tooltip: 'Place a phone call',
                   onPressed: () {
-                    Scaffold.of(context).showSnackBar(new SnackBar(
+                    Scaffold.of(context).showSnackBar(const SnackBar(
                        content: const Text('That was an ordinary tap.')
                     ));
                   }

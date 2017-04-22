@@ -35,8 +35,8 @@ void main() {
 
   testWidgets('Icon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(size: 36.0),
           child: const Icon(null),
         ),
@@ -49,8 +49,8 @@ void main() {
 
   testWidgets('Icon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(size: 36.0),
           child: const Icon(
             null,
@@ -66,8 +66,8 @@ void main() {
 
   testWidgets('Icon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(),
           child: const Icon(null),
         ),

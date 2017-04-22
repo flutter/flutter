@@ -195,7 +195,7 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
+  AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null); // not const because https://github.com/dart-lang/sdk/issues/29432
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
@@ -319,7 +319,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   final AsyncWidgetBuilder<T> builder;
 
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.nothing();
+  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.nothing();// ignore: prefer_const_constructors
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -409,7 +409,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// calling setState from stale callbacks, e.g. after disposal of this state,
   /// or after widget reconfiguration to a new Future.
   Object _activeCallbackIdentity;
-  AsyncSnapshot<T> _snapshot = new AsyncSnapshot<T>.nothing();
+  AsyncSnapshot<T> _snapshot = new AsyncSnapshot<T>.nothing();// ignore: prefer_const_constructors
 
   @override
   void initState() {

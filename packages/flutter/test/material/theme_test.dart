@@ -103,7 +103,7 @@ void main() {
                   onChanged: (String newValue) { },
                   value: 'menuItem',
                   items: <DropdownMenuItem<String>>[
-                    new DropdownMenuItem<String>(
+                    const DropdownMenuItem<String>(
                       value: 'menuItem',
                       child: const Text('menuItem'),
                     ),

@@ -82,7 +82,7 @@ class ShrinePageState extends State<ShrinePage> {
 
   void _emptyCart() {
     widget.shoppingCart.clear();
-    widget.scaffoldKey.currentState.showSnackBar(new SnackBar(content: const Text('Shopping cart is empty')));
+    widget.scaffoldKey.currentState.showSnackBar(const SnackBar(content: const Text('Shopping cart is empty')));
   }
 
   @override

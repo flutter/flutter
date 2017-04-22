@@ -125,8 +125,8 @@ void main() {
   testWidgets('Cursor blinks', (WidgetTester tester) async {
 
     Widget builder() {
-      return new Center(
-        child: new Material(
+      return const Center(
+        child: const Material(
           child: const TextField(
             decoration: const InputDecoration(
               hintText: 'Placeholder',
@@ -169,8 +169,8 @@ void main() {
 
   testWidgets('obscureText control test', (WidgetTester tester) async {
     Widget builder() {
-      return new Center(
-        child: new Material(
+      return const Center(
+        child: const Material(
           child: const TextField(
             obscureText: true,
             decoration: const InputDecoration(
@@ -811,8 +811,8 @@ void main() {
 
   testWidgets('No space between Input icon and text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new Material(
+      const Center(
+        child: const Material(
           child: const TextField(
             decoration: const InputDecoration(
               icon: const Icon(Icons.phone),
@@ -830,8 +830,8 @@ void main() {
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
-      overlay(new Center(
-        child: new Material(
+      overlay(const Center(
+        child: const Material(
           child: const TextField(
             decoration: const InputDecoration.collapsed(
               hintText: 'hint',

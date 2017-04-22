@@ -23,7 +23,7 @@ void main() {
                       title: const Text('The title'),
                       content: const Text('The content'),
                       actions: <Widget>[
-                        new CupertinoDialogAction(
+                        const CupertinoDialogAction(
                           child: const Text('Cancel'),
                         ),
                         new CupertinoDialogAction(
@@ -64,7 +64,7 @@ void main() {
   });
 
   testWidgets('Dialog action styles', (WidgetTester tester) async {
-    await tester.pumpWidget(new CupertinoDialogAction(
+    await tester.pumpWidget(const CupertinoDialogAction(
       isDestructive: true,
       child: const Text('Ok'),
     ));

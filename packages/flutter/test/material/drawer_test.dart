@@ -20,7 +20,7 @@ void main() {
                   child: const Text('header')
                 )
               ),
-              new ListTile(
+              const ListTile(
                 leading: const Icon(Icons.archive),
                 title: const Text('Archive')
               )

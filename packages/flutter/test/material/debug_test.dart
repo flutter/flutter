@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('debugCheckHasMaterial control test', (WidgetTester tester) async {
-    await tester.pumpWidget(new FlatButton(
+    await tester.pumpWidget(const FlatButton(
       onPressed: null,
       child: const Text('Go'),
     ));

@@ -14,8 +14,8 @@ class CupertinoProgressIndicatorDemo extends StatelessWidget {
       appBar: new AppBar(
         title: const Text('Cupertino Activity Indicator'),
       ),
-      body: new Center(
-        child: new CupertinoActivityIndicator(),
+      body: const Center(
+        child: const CupertinoActivityIndicator(),
       ),
     );
   }

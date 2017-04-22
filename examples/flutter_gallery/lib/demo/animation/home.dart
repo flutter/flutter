@@ -525,7 +525,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
           new Positioned(
             top: statusBarHeight,
             left: 0.0,
-            child: new IconTheme(
+            child: const IconTheme(
               data: const IconThemeData(color: Colors.white),
               child: const BackButton(),
             ),

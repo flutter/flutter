@@ -254,10 +254,10 @@ class GalleryDrawer extends StatelessWidget {
       new GalleryDrawerHeader(light: useLightTheme),
       lightThemeItem,
       darkThemeItem,
-      new Divider(),
+      const Divider(),
       mountainViewItem,
       cupertinoItem,
-      new Divider(),
+      const Divider(),
       animateSlowlyItem,
       // index 8, optional: Performance Overlay
       sendFeedbackItem,

@@ -137,7 +137,7 @@ void main() {
           ),
           body: new CustomScrollView(
             slivers: <Widget>[
-              new SliverAppBar(
+              const SliverAppBar(
                 pinned: true,
                 expandedHeight: appBarHeight,
                 title: const Text('Title'),
@@ -184,7 +184,7 @@ void main() {
           body: new CustomScrollView(
             primary: true,
             slivers: <Widget>[
-              new SliverAppBar(
+              const SliverAppBar(
                 title: const Text('Title')
               ),
               new SliverList(

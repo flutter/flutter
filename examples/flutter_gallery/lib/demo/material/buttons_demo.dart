@@ -121,7 +121,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
               // Perform some action
             },
           ),
-          new FlatButton(
+          const FlatButton(
             child: const Text('DISABLED'),
             onPressed: null,
           )

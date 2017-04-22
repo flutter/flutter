@@ -126,7 +126,7 @@ class _CalculatorState extends State<Calculator> {
             flex: 2,
             child: new CalcDisplay(content: _expression.toString())
           ),
-          new Divider(height: 1.0),
+          const Divider(height: 1.0),
           new Expanded(
             flex: 3,
             child: new KeyPad(calcState: this)
