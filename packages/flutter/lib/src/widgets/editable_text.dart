@@ -145,7 +145,7 @@ class EditableText extends StatefulWidget {
        inputFormatters = maxLines == 1 
            ? (
                <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
-                 ..addAll(inputFormatters)
+                 ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
              )
            : inputFormatters,
        super(key: key);
