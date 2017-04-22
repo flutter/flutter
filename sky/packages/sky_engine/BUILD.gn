@@ -126,5 +126,11 @@ if (is_fuchsia) {
     package_name = "sky_engine"
 
     source_dir = rebase_path("$root_gen_dir/dart-pkg/sky_engine/lib")
+
+    non_dart_deps = [
+      # This will ensure all the source files needed for this package are
+      # copied to the right location.
+      ":sky_engine",
+    ]
   }
 }
