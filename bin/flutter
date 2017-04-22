@@ -66,8 +66,10 @@ if [ ! -d "$FLUTTER_ROOT/.git" ]; then
   exit 1
 fi
 
+FLUTTER_TOOL_ARGS="--checked"
+
 # To debug the tool, you can uncomment the following line to enable checked mode and set an observatory port:
-# FLUTTER_TOOL_ARGS="--observe=65432 --checked"
+# FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 
 (
   if hash flock 2>/dev/null; then
