@@ -11,7 +11,7 @@ void main() {
   );
 }
 
-enum ScrollMode {complex, tile}
+enum ScrollMode { complex, tile }
 
 class ComplexLayoutApp extends StatefulWidget {
   @override
@@ -59,19 +59,23 @@ class TileScrollLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<Widget> children = <Widget>[];
     for (int i = 0; i < 200; i++) {
-      children.add(new Padding(padding:const EdgeInsets.all(5.0), child: new Material(
-        elevation: i % 5 + 1,
-        color: Colors.white,
-        child: new IconBar(),
-      )));
+      children.add(new Padding(
+        padding:const EdgeInsets.all(5.0),
+        child: new Material(
+          elevation: i % 5 + 1,
+          color: Colors.white,
+          child: new IconBar(),
+        ),
+      ));
     }
 
     return new Scaffold(
-      appBar: new AppBar(title: new Text('Tile Scrolling Layout')),
+      appBar: new AppBar(title: const Text('Tile Scrolling Layout')),
       body: new ListView(
-        key: new Key('tiles-scroll'),
-        children: children),
-      drawer: new GalleryDrawer(),
+        key: const Key('tiles-scroll'),
+        children: children
+      ),
+      drawer: const GalleryDrawer(),
     );
   }
 }
@@ -616,7 +620,7 @@ class GalleryDrawer extends StatelessWidget {
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(
-            key: new Key('scroll-switcher'),
+            key: const Key('scroll-switcher'),
             onTap: () { _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex); },
             trailing: new Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex')
           ),
