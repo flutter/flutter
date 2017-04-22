@@ -72,13 +72,14 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 }
 
 /// A [TextInputFormatter] that prevents the insertion of blacklisted 
-/// characters.
+/// characters patterns.
 /// 
 /// Instances of blacklisted characters found in the new [TextEditingValue]s 
 /// will be replaced with the [replacementString] which defaults to ``.
 /// 
-/// It attempts to preserve the existing [TextEditingValue.selection] to 
-/// sensible values. 
+/// Since this formatter only removes characters from the text, it attempts to
+/// preserve the existing [TextEditingValue.selection] to values it would now
+/// fall at with the removed characters.
 /// 
 /// See also:
 ///  
@@ -87,11 +88,12 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 class BlacklistingTextInputFormatter extends TextInputFormatter {
   BlacklistingTextInputFormatter(
     this.blacklistedPattern, 
-    {this.replacementString: ''}) : 
-    assert(blacklistedPattern != null);
+    {this.replacementString: ''}
+  ) : assert(blacklistedPattern != null);
 
   /// A [Pattern] to match and replace incoming [TextEditingValue]s.
   final Pattern blacklistedPattern;
+  
   /// String used to replace found patterns.
   final String replacementString;
 
@@ -116,10 +118,11 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 }
 
 /// A [TextInputFormatter] that allows only the insertion of whitelisted 
-/// characters
+/// characters patterns.
 /// 
-/// It attempts to preserve the existing [TextEditingValue.selection] to 
-/// sensible values. 
+/// Since this formatter only removes characters from the text, it attempts to
+/// preserve the existing [TextEditingValue.selection] to values it would now
+/// fall at with the removed characters.
 /// 
 /// See also:
 ///  
