@@ -17,10 +17,10 @@ RESULTS=`dartanalyzer                                                          \
   | grep -Ev "Undefined name 'main'"                                           \
   | grep -Ev "Undefined name 'VMLibraryHooks"                                  \
   | grep -v "The library ''dart:_internal'' is internal"                       \
-  | grep -Ev "Unused import .+ui\.dart"                                        \
+  | grep -Ev "Unused import.+ui\.dart"                                         \
   | grep -v "TODO"                                                             \
   | grep -Ev "[0-9]+ errors.*found\."                                          \
-  | grep -v "Analyzing out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart\.\.\."`
+  | grep -Ev "Analyzing.+out/host_debug_unopt/gen/sky/bindings/dart_ui/ui\.dart"`
 
 echo "$RESULTS"
 if [ -n "$RESULTS" ]; then
