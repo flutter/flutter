@@ -20,13 +20,13 @@ void main() {
     });
     test('requiring data fails if there is an error', () {
       expect(
-        () => new AsyncSnapshot<String>.withError(ConnectionState.done, 'error').requireData,
+        () => const AsyncSnapshot<String>.withError(ConnectionState.done, 'error').requireData,
         throwsA(equals('error')),
       );
     });
     test('requiring data fails if snapshot has neither data nor error', () {
       expect(
-        () => new AsyncSnapshot<String>.nothing().requireData,
+        () => const AsyncSnapshot<String>.nothing().requireData,
         throwsStateError,
       );
     });

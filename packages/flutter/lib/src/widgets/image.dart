@@ -63,7 +63,7 @@ class Image extends StatefulWidget {
   /// [new Image.network] and [new Image.asset] respectively.
   ///
   /// The [image] and [repeat] arguments must not be null.
-  Image({
+  const Image({
     Key key,
     @required this.image,
     this.width,
@@ -75,9 +75,8 @@ class Image extends StatefulWidget {
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.gaplessPlayback: false
-  }) : super(key: key) {
-    assert(image != null);
-  }
+  }) : assert(image != null),
+       super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///

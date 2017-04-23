@@ -9,10 +9,10 @@ void main() {
   testWidgets('BackButton control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Material(child: const Text('Home')),
+        home: const Material(child: const Text('Home')),
         routes: <String, WidgetBuilder>{
           '/next': (BuildContext context) {
-            return new Material(
+            return const Material(
               child: const Center(
                 child: const BackButton(),
               )

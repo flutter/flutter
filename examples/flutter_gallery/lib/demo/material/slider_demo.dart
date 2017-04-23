@@ -43,7 +43,7 @@ class _SliderDemoState extends State<SliderDemo> {
             new Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget> [
-                new Slider(value: 0.25, thumbOpenAtMin: true, onChanged: null),
+                const Slider(value: 0.25, thumbOpenAtMin: true, onChanged: null),
                 const Text('Disabled'),
               ]
             ),

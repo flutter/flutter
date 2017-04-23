@@ -32,9 +32,8 @@ class TextSelectionPoint {
   /// Creates a description of a point in a text selection.
   ///
   /// The [point] argument must not be null.
-  TextSelectionPoint(this.point, this.direction) {
-    assert(point != null);
-  }
+  const TextSelectionPoint(this.point, this.direction)
+      : assert(point != null);
 
   /// Screen coordinates of the lower left or lower right corner of the selection.
   final Offset point;

@@ -31,15 +31,14 @@ class Theme extends InheritedWidget {
   /// Applies the given theme [data] to [child].
   ///
   /// The [data] and [child] arguments must not be null.
-  Theme({
+  const Theme({
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(child != null);
-    assert(data != null);
-  }
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -154,17 +153,16 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   ///
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
-  AnimatedTheme({
+  const AnimatedTheme({
     Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
     Curve curve: Curves.linear,
     Duration duration: kThemeAnimationDuration,
     @required this.child,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(child != null);
-    assert(data != null);
-  }
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, curve: curve, duration: duration);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

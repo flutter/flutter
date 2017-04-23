@@ -79,14 +79,13 @@ class SnackBarAction extends StatefulWidget {
   /// Creates an action for a [SnackBar].
   ///
   /// The [label] and [onPressed] arguments must be non-null.
-  SnackBarAction({
+  const SnackBarAction({
     Key key,
     @required this.label,
     @required this.onPressed
-  }) : super(key: key) {
-    assert(label != null);
-    assert(onPressed != null);
-  }
+  }) : assert(label != null),
+       assert(onPressed != null),
+       super(key: key);
 
   /// The button label.
   final String label;
@@ -145,16 +144,15 @@ class SnackBar extends StatelessWidget {
   /// Creates a snack bar.
   ///
   /// The [content] argument must be non-null.
-  SnackBar({
+  const SnackBar({
     Key key,
     @required this.content,
     this.backgroundColor,
     this.action,
     this.duration: _kSnackBarDisplayDuration,
     this.animation,
-  }) : super(key: key) {
-    assert(content != null);
-  }
+  }) : assert(content != null),
+       super(key: key);
 
   /// The primary content of the snack bar.
   ///

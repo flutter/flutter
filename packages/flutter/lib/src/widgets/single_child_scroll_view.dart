@@ -146,14 +146,13 @@ class SingleChildScrollView extends StatelessWidget {
 }
 
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
-  _SingleChildViewport({
+  const _SingleChildViewport({
     Key key,
     this.axisDirection: AxisDirection.down,
     this.offset,
     Widget child,
-  }) : super(key: key, child: child) {
-    assert(axisDirection != null);
-  }
+  }) : assert(axisDirection != null),
+       super(key: key, child: child);
 
   final AxisDirection axisDirection;
   final ViewportOffset offset;

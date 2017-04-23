@@ -176,9 +176,9 @@ class FancyImageItem extends StatelessWidget {
         new ItemDescription(),
         new ItemImageBox(),
         new InfoBar(),
-        new Padding(
+        const Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: new Divider()
+          child: const Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -198,9 +198,9 @@ class FancyGalleryItem extends StatelessWidget {
         const UserHeader('Ali Connors'),
         new ItemGalleryBox(index),
         new InfoBar(),
-        new Padding(
+        const Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: new Divider()
+          child: const Divider()
         ),
         new IconBar(),
         new FatDivider()
@@ -599,7 +599,7 @@ class GalleryDrawer extends StatelessWidget {
               onChanged: (bool value) { _changeTheme(context, value); },
             ),
           ),
-          new Divider(),
+          const Divider(),
           new ListTile(
             leading: const Icon(Icons.hourglass_empty),
             title: const Text('Animate Slowly'),

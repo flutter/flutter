@@ -41,7 +41,7 @@ class Tooltip extends StatefulWidget {
   /// user long presses on the widget.
   ///
   /// The [message] argument cannot be null.
-  Tooltip({
+  const Tooltip({
     Key key,
     @required this.message,
     this.height: 32.0,
@@ -49,14 +49,13 @@ class Tooltip extends StatefulWidget {
     this.verticalOffset: 24.0,
     this.preferBelow: true,
     @required this.child,
-  }) : super(key: key) {
-    assert(message != null);
-    assert(height != null);
-    assert(padding != null);
-    assert(verticalOffset != null);
-    assert(preferBelow != null);
-    assert(child != null);
-  }
+  }) : assert(message != null),
+       assert(height != null),
+       assert(padding != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null),
+       assert(child != null),
+       super(key: key);
 
   /// The text to display in the tooltip.
   final String message;

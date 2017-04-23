@@ -104,13 +104,12 @@ class PageStorage extends StatelessWidget {
   /// Creates a widget that provides a storage bucket for its descendants.
   ///
   /// The [bucket] argument must not be null.
-  PageStorage({
+  const PageStorage({
     Key key,
     @required this.bucket,
     @required this.child
-  }) : super(key: key) {
-    assert(bucket != null);
-  }
+  }) : assert(bucket != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

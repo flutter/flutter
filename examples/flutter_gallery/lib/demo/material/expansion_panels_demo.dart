@@ -108,7 +108,7 @@ class CollapsibleBody extends StatelessWidget {
             )
           )
         ),
-        new Divider(height: 1.0),
+        const Divider(height: 1.0),
         new Container(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           child: new Row(

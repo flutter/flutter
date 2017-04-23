@@ -27,8 +27,8 @@ void main() {
 
   testWidgets('Icon opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(opacity: 0.5),
           child: const ImageIcon(_kImage),
         ),
@@ -56,8 +56,8 @@ void main() {
 
   testWidgets('ImageIcon sizing - sized theme', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(size: 36.0),
           child: const ImageIcon(null)
         )
@@ -70,8 +70,8 @@ void main() {
 
   testWidgets('ImageIcon sizing - sized theme, explicit size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(size: 36.0),
           child: const ImageIcon(
             null,
@@ -87,8 +87,8 @@ void main() {
 
   testWidgets('ImageIcon sizing - sizeless theme, default size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new IconTheme(
+      const Center(
+        child: const IconTheme(
           data: const IconThemeData(),
           child: const ImageIcon(null)
         )

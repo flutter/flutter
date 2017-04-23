@@ -44,7 +44,7 @@ new FlatButton(
 // Create a disabled button.
 // Buttons are disabled when onPressed isn't
 // specified or is null.
-new FlatButton(
+const FlatButton(
   child: const Text('BUTTON TITLE'),
   onPressed: null
 );

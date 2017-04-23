@@ -325,16 +325,15 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
-  RawGestureDetector({
+  const RawGestureDetector({
     Key key,
     this.child,
     this.gestures: const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics: false
-  }) : super(key: key) {
-    assert(gestures != null);
-    assert(excludeFromSemantics != null);
-  }
+  }) : assert(gestures != null),
+       assert(excludeFromSemantics != null),
+       super(key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

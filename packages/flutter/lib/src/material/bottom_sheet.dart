@@ -47,15 +47,14 @@ class BottomSheet extends StatefulWidget {
   /// Typically, bottom sheets are created implicitly by
   /// [Scaffold.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
-  BottomSheet({
+  const BottomSheet({
     Key key,
     this.animationController,
     @required this.onClosing,
     @required this.builder
-  }) : super(key: key) {
-    assert(onClosing != null);
-    assert(builder != null);
-  }
+  }) : assert(onClosing != null),
+       assert(builder != null),
+       super(key: key);
 
   /// The animation that controls the bottom sheet's position.
   ///

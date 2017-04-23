@@ -677,7 +677,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
 ///  * <https://material.google.com/layout/structure.html#structure-toolbars>
 class SliverAppBar extends StatefulWidget {
   /// Creates a material design app bar that can be placed in a [CustomScrollView].
-  SliverAppBar({
+  const SliverAppBar({
     Key key,
     this.leading,
     this.title,
@@ -695,13 +695,12 @@ class SliverAppBar extends StatefulWidget {
     this.floating: false,
     this.pinned: false,
     this.snap: false,
-  }) : super(key: key) {
-    assert(primary != null);
-    assert(floating != null);
-    assert(pinned != null);
-    assert(pinned && floating ? bottom != null : true);
-    assert(snap != null);
-  }
+  }) : assert(primary != null),
+       assert(floating != null),
+       assert(pinned != null),
+       assert(pinned && floating ? bottom != null : true),
+       assert(snap != null),
+       super(key: key);
 
   /// A widget to display before the [title].
   ///

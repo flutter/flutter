@@ -13,12 +13,11 @@ import 'package:flutter/widgets.dart';
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/progress-indicators/#activity-indicators>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator.
-  CupertinoActivityIndicator({
+  const CupertinoActivityIndicator({
     Key key,
     this.animating: true,
-  }) : super(key: key) {
-    assert(animating != null);
-  }
+  }) : assert(animating != null),
+       super(key: key);
 
   /// Whether the activity indicator is running its animation.
   ///

@@ -137,7 +137,7 @@ void main() {
         key: containerKey1,
         body: new Container(
           decoration: const BoxDecoration(backgroundColor: const Color(0xff00ffff)),
-          child: new Hero(
+          child: const Hero(
             tag: kHeroTag,
             child: const Text('Home')
           )
@@ -148,7 +148,7 @@ void main() {
         body: new Container(
           padding: const EdgeInsets.all(100.0),
           decoration: const BoxDecoration(backgroundColor: const Color(0xffff00ff)),
-          child: new Hero(
+          child: const Hero(
             tag: kHeroTag,
             child: const Text('Settings')
           )

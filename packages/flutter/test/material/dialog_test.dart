@@ -100,7 +100,7 @@ void main() {
   testWidgets('Simple dialog control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Material(
+        home: const Material(
           child: const Center(
             child: const RaisedButton(
               onPressed: null,
@@ -141,7 +141,7 @@ void main() {
   testWidgets('Barrier dismissible', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Material(
+        home: const Material(
           child: const Center(
             child: const RaisedButton(
               onPressed: null,

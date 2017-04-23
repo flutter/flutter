@@ -132,7 +132,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     for (GalleryItem galleryItem in kAllGalleryItems) {
       if (category != galleryItem.category) {
         if (category != null)
-          listItems.add(new Divider());
+          listItems.add(const Divider());
         listItems.add(
           new Container(
             height: 48.0,
@@ -166,7 +166,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
       ),
       body: new CustomScrollView(
         slivers: <Widget>[
-          new SliverAppBar(
+          const SliverAppBar(
             pinned: true,
             expandedHeight: _kFlexibleSpaceMaxHeight,
             flexibleSpace: const FlexibleSpaceBar(

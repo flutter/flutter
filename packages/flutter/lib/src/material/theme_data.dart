@@ -184,7 +184,7 @@ class ThemeData {
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes created with the
   /// [new ThemeData] constructor.
-  ThemeData.raw({
+  const ThemeData.raw({
     @required this.brightness,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
@@ -215,38 +215,36 @@ class ThemeData {
     @required this.primaryIconTheme,
     @required this.accentIconTheme,
     @required this.platform
-  }) {
-    assert(brightness != null);
-    assert(primaryColor != null);
-    assert(primaryColorBrightness != null);
-    assert(accentColor != null);
-    assert(accentColorBrightness != null);
-    assert(canvasColor != null);
-    assert(scaffoldBackgroundColor != null);
-    assert(cardColor != null);
-    assert(dividerColor != null);
-    assert(highlightColor != null);
-    assert(splashColor != null);
-    assert(selectedRowColor != null);
-    assert(unselectedWidgetColor != null);
-    assert(disabledColor != null);
-    assert(buttonColor != null);
-    assert(secondaryHeaderColor != null);
-    assert(textSelectionColor != null);
-    assert(textSelectionHandleColor != null);
-    assert(backgroundColor != null);
-    assert(dialogBackgroundColor != null);
-    assert(indicatorColor != null);
-    assert(hintColor != null);
-    assert(errorColor != null);
-    assert(textTheme != null);
-    assert(primaryTextTheme != null);
-    assert(accentTextTheme != null);
-    assert(iconTheme != null);
-    assert(primaryIconTheme != null);
-    assert(accentIconTheme != null);
-    assert(platform != null);
-  }
+  }) : assert(brightness != null),
+       assert(primaryColor != null),
+       assert(primaryColorBrightness != null),
+       assert(accentColor != null),
+       assert(accentColorBrightness != null),
+       assert(canvasColor != null),
+       assert(scaffoldBackgroundColor != null),
+       assert(cardColor != null),
+       assert(dividerColor != null),
+       assert(highlightColor != null),
+       assert(splashColor != null),
+       assert(selectedRowColor != null),
+       assert(unselectedWidgetColor != null),
+       assert(disabledColor != null),
+       assert(buttonColor != null),
+       assert(secondaryHeaderColor != null),
+       assert(textSelectionColor != null),
+       assert(textSelectionHandleColor != null),
+       assert(backgroundColor != null),
+       assert(dialogBackgroundColor != null),
+       assert(indicatorColor != null),
+       assert(hintColor != null),
+       assert(errorColor != null),
+       assert(textTheme != null),
+       assert(primaryTextTheme != null),
+       assert(accentTextTheme != null),
+       assert(iconTheme != null),
+       assert(primaryIconTheme != null),
+       assert(accentIconTheme != null),
+       assert(platform != null);
 
   /// A default light blue theme.
   factory ThemeData.light() => new ThemeData(brightness: Brightness.light);

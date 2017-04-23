@@ -103,19 +103,18 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
 }
 
 class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
-  _CheckboxRenderObjectWidget({
+  const _CheckboxRenderObjectWidget({
     Key key,
     @required this.value,
     @required this.activeColor,
     @required this.inactiveColor,
     @required this.onChanged,
     @required this.vsync,
-  }) : super(key: key) {
-    assert(value != null);
-    assert(activeColor != null);
-    assert(inactiveColor != null);
-    assert(vsync != null);
-  }
+  }) : assert(value != null),
+       assert(activeColor != null),
+       assert(inactiveColor != null),
+       assert(vsync != null),
+       super(key: key);
 
   final bool value;
   final Color activeColor;

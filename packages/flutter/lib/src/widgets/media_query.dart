@@ -121,14 +121,13 @@ class MediaQuery extends InheritedWidget {
   /// Creates a widget that provides [MediaQueryData] to its descendants.
   ///
   /// The [data] and [child] arguments must not be null.
-  MediaQuery({
+  const MediaQuery({
     Key key,
     @required this.data,
     @required Widget child,
-  }) : super(key: key, child: child) {
-    assert(child != null);
-    assert(data != null);
-  }
+  }) : assert(child != null),
+       assert(data != null),
+       super(key: key, child: child);
 
   /// Contains information about the current media.
   ///

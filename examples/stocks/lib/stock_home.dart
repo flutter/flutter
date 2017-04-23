@@ -118,12 +118,12 @@ class StockHomeState extends State<StockHome> {
       child: new ListView(
         children: <Widget>[
           const DrawerHeader(child: const Center(child: const Text('Stocks'))),
-          new ListTile(
+          const ListTile(
             leading: const Icon(Icons.assessment),
             title: const Text('Stock List'),
             selected: true,
           ),
-          new ListTile(
+          const ListTile(
             leading: const Icon(Icons.account_balance),
             title: const Text('Account Balance'),
             enabled: false,
@@ -142,7 +142,7 @@ class StockHomeState extends State<StockHome> {
               }
             },
           ),
-          new Divider(),
+          const Divider(),
           new ListTile(
             leading: const Icon(Icons.thumb_up),
             title: const Text('Optimistic'),
@@ -167,7 +167,7 @@ class StockHomeState extends State<StockHome> {
               _handleStockModeChange(StockMode.pessimistic);
             },
           ),
-          new Divider(),
+          const Divider(),
           new ListTile(
             leading: const Icon(Icons.settings),
             title: const Text('Settings'),

@@ -88,14 +88,13 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
   /// The [curve] and [duration] arguments must not be null.
-  ImplicitlyAnimatedWidget({
+  const ImplicitlyAnimatedWidget({
     Key key,
     this.curve: Curves.linear,
     @required this.duration
-  }) : super(key: key) {
-    assert(curve != null);
-    assert(duration != null);
-  }
+  }) : assert(curve != null),
+       assert(duration != null),
+       super(key: key);
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -386,7 +385,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// the three must be null.
   ///
   /// The [curve] and [duration] arguments must not be null.
-  AnimatedPositioned({
+  const AnimatedPositioned({
     Key key,
     @required this.child,
     this.left,
@@ -397,10 +396,9 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     this.height,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(left == null || right == null || width == null);
-    assert(top == null || bottom == null || height == null);
-  }
+  }) : assert(left == null || right == null || width == null),
+       assert(top == null || bottom == null || height == null),
+      super(key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
@@ -526,15 +524,14 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   ///
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
   /// inclusive. The [curve] and [duration] arguments must not be null.
-  AnimatedOpacity({
+  const AnimatedOpacity({
     Key key,
     this.child,
     @required this.opacity,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
-  }
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -583,16 +580,15 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
   /// The [child], [style], [curve], and [duration] arguments must not be null.
-  AnimatedDefaultTextStyle({
+  const AnimatedDefaultTextStyle({
     Key key,
     @required this.child,
     @required this.style,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(style != null);
-    assert(child != null);
-  }
+  }) : assert(style != null),
+       assert(child != null),
+       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;

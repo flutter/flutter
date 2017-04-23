@@ -49,7 +49,7 @@ class Slider extends StatefulWidget {
   ///
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
-  Slider({
+  const Slider({
     Key key,
     @required this.value,
     @required this.onChanged,
@@ -59,14 +59,13 @@ class Slider extends StatefulWidget {
     this.label,
     this.activeColor,
     this.thumbOpenAtMin: false,
-  }) : super(key: key) {
-    assert(value != null);
-    assert(min != null);
-    assert(max != null);
-    assert(value >= min && value <= max);
-    assert(divisions == null || divisions > 0);
-    assert(thumbOpenAtMin != null);
-  }
+  }) : assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       assert(thumbOpenAtMin != null),
+       super(key: key);
 
   /// The currently selected value for this slider.
   ///

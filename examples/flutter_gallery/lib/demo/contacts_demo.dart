@@ -116,7 +116,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                   icon: const Icon(Icons.create),
                   tooltip: 'Edit',
                   onPressed: () {
-                    _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                    _scaffoldKey.currentState.showSnackBar(const SnackBar(
                       content: const Text('This is actually just a demo. Editing isn\'t supported.')
                     ));
                   },
@@ -176,7 +176,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.message,
                       tooltip: 'Send message',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('Pretend that this opened your SMS application.')
                         ));
                       },
@@ -189,7 +189,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.message,
                       tooltip: 'Send message',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('In this demo, this button doesn\'t do anything.')
                         ));
                       },
@@ -202,7 +202,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.message,
                       tooltip: 'Send message',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('Imagine if you will, a messaging application.')
                         ));
                       },
@@ -220,7 +220,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.email,
                       tooltip: 'Send personal e-mail',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('Here, your e-mail application would open.')
                         ));
                       },
@@ -233,7 +233,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.email,
                       tooltip: 'Send work e-mail',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('This is a demo, so this button does not actually work.')
                         ));
                       },
@@ -251,7 +251,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('This would show a map of San Francisco.')
                         ));
                       },
@@ -265,7 +265,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('This would show a map of Mountain View.')
                         ));
                       },
@@ -279,7 +279,7 @@ class ContactsDemoState extends State<ContactsDemo> {
                       icon: Icons.map,
                       tooltip: 'Open map',
                       onPressed: () {
-                        _scaffoldKey.currentState.showSnackBar(new SnackBar(
+                        _scaffoldKey.currentState.showSnackBar(const SnackBar(
                           content: const Text('This would also show a map, if this was not a demo.')
                         ));
                       },

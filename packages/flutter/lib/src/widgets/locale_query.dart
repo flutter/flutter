@@ -12,13 +12,12 @@ class LocaleQueryData { } // TODO(ianh): We need a better type here. This doesn'
 /// Establishes a subtree in which locale queries resolve to the given data.
 class LocaleQuery extends InheritedWidget {
   /// Creates a widget that provides [LocaleQueryData] to its descendants.
-  LocaleQuery({
+  const LocaleQuery({
     Key key,
     @required this.data,
     @required Widget child
-  }) : super(key: key, child: child) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key, child: child);
 
   /// The locale data for this subtree.
   final LocaleQueryData data;

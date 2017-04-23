@@ -42,16 +42,14 @@ const EdgeInsets _kBackgroundButtonPadding =
 ///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
-  CupertinoButton({
+  const CupertinoButton({
     @required this.child,
     this.padding,
     this.color,
     this.minSize: 44.0,
     this.pressedOpacity: 0.1,
     @required this.onPressed,
-  }) {
-    assert(pressedOpacity >= 0.0 && pressedOpacity <= 1.0);
-  }
+  }) : assert(pressedOpacity >= 0.0 && pressedOpacity <= 1.0);
 
   /// The widget below this widget in the tree.
   ///

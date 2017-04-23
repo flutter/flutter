@@ -44,7 +44,7 @@ class AnimatedCrossFade extends StatefulWidget {
   /// The [duration] of the animation is the same for all components (fade in,
   /// fade out, and size), and you can pass [Interval]s instead of [Curve]s in
   /// order to have finer control, e.g., creating an overlap between the fades.
-  AnimatedCrossFade({
+  const AnimatedCrossFade({
     Key key,
     @required this.firstChild,
     @required this.secondChild,
@@ -53,11 +53,10 @@ class AnimatedCrossFade extends StatefulWidget {
     this.sizeCurve: Curves.linear,
     @required this.crossFadeState,
     @required this.duration
-  }) : super(key: key) {
-    assert(firstCurve != null);
-    assert(secondCurve != null);
-    assert(sizeCurve != null);
-  }
+  }) : assert(firstCurve != null),
+       assert(secondCurve != null),
+       assert(sizeCurve != null),
+       super(key: key);
 
   /// The child that is visible when [crossFadeState] is [showFirst]. It fades
   /// out when transitioning from [showFirst] to [showSecond] and vice versa.

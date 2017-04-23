@@ -21,14 +21,13 @@ class Form extends StatefulWidget {
   /// Creates a container for form fields.
   ///
   /// The [child] argument must not be null.
-  Form({
+  const Form({
     Key key,
     @required this.child,
     this.autovalidate: false,
     this.onWillPop,
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -194,16 +193,15 @@ class FormField<T> extends StatefulWidget {
   /// Creates a single form field.
   ///
   /// The [builder] argument must not be null.
-  FormField({
+  const FormField({
     Key key,
     @required this.builder,
     this.onSaved,
     this.validator,
     this.initialValue,
     this.autovalidate: false,
-  }) : super(key: key) {
-    assert(builder != null);
-  }
+  }) : assert(builder != null),
+       super(key: key);
 
   /// An optional method to call with the final value when the form is saved via
   /// Form.save().

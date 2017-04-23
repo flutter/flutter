@@ -200,7 +200,7 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: const Text('foo')),
+            const Hero(tag: 'a', child: const Text('foo')),
             new Builder(builder: (BuildContext context) {
               return new FlatButton(child: const Text('two'), onPressed: () => Navigator.push(context, route));
             })
@@ -393,8 +393,8 @@ void main() {
       home: new Material(
         child: new ListView(
           children: <Widget>[
-            new Hero(tag: 'a', child: const Text('a')),
-            new Hero(tag: 'a', child: const Text('a too')),
+            const Hero(tag: 'a', child: const Text('a')),
+            const Hero(tag: 'a', child: const Text('a too')),
             new Builder(
               builder: (BuildContext context) {
                 return new FlatButton(
@@ -929,8 +929,8 @@ void main() {
         return new Material(
           child: new ListView(
             children: <Widget>[
-              new Card(
-                child: new Hero(
+              const Card(
+                child: const Hero(
                   tag: 'H',
                   child: const SizedBox(
                     height: 200.0,
@@ -955,8 +955,8 @@ void main() {
             builder: (BuildContext context) { // Navigator.push() needs context
               return new ListView(
                 children: <Widget> [
-                  new Card(
-                    child: new Hero(
+                  const Card(
+                    child: const Hero(
                       tag: 'H',
                       child: const SizedBox(
                         height: 100.0,

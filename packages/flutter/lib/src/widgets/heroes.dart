@@ -77,14 +77,13 @@ class Hero extends StatefulWidget {
   /// Create a hero.
   ///
   /// The [tag] and [child] parameters must not be null.
-  Hero({
+  const Hero({
     Key key,
     @required this.tag,
     @required this.child,
-  }) : super(key: key) {
-    assert(tag != null);
-    assert(child != null);
-  }
+  }) : assert(tag != null),
+       assert(child != null),
+       super(key: key);
 
   /// The identifier for this particular hero. If the tag of this hero matches
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then

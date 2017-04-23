@@ -27,14 +27,13 @@ class Divider extends StatelessWidget {
   /// Creates a material design divider.
   ///
   /// The height must be at least 1.0 logical pixels.
-  Divider({
+  const Divider({
     Key key,
     this.height: 16.0,
     this.indent: 0.0,
     this.color
-  }) : super(key: key) {
-    assert(height >= 1.0);
-  }
+  }) : assert(height >= 1.0),
+       super(key: key);
 
   /// The divider's vertical extent.
   ///
