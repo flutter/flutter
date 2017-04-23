@@ -74,7 +74,7 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback: true
   }) : super(key: key) {
     assert(image != null);
   }
@@ -93,7 +93,7 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback: true
   }) : image = new NetworkImage(src, scale: scale),
        super(key: key);
 
@@ -114,7 +114,7 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback: true
   }) : image = new FileImage(file, scale: scale),
        super(key: key);
 
@@ -143,7 +143,7 @@ class Image extends StatefulWidget {
     this.alignment,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback: true
   }) : image = scale != null ? new ExactAssetImage(name, bundle: bundle, scale: scale)
                              : new AssetImage(name, bundle: bundle),
        super(key: key);
