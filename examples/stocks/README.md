@@ -1,3 +1,12 @@
+### Stocks
+
+Stocks is an older example app of using Flutter (than flutter_gallery), but is still useful for several things:
+
+1. Shows a more typical app structure than the flutter_gallery.  It uses a single Scaffold, AppBar, etc.  Shows a common drawer and search.  flutter_gallery by necessity has a somewhat quirky application design where each demo can look very different from the main screen.
+2. Shows an example of localizating (part) of your app to spanish using package:intl.
+3. Stocks is also the basis for a number of our performance benchmarks in dev/bots.
+
+
 ## Icon
 
 Icon was created using Android Asset Studio:
