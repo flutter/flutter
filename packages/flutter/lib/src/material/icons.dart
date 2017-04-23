@@ -19,6 +19,7 @@ class IconData {
 
   /// The unicode code point at which this icon is stored in the icon font.
   final int codePoint;
+  final String fontFamily;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
   final String fontFamily;
