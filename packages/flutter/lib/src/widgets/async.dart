@@ -319,7 +319,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   final AsyncWidgetBuilder<T> builder;
 
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.nothing();// ignore: prefer_const_constructors
+  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.nothing(); // ignore: prefer_const_constructors
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
@@ -409,7 +409,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// calling setState from stale callbacks, e.g. after disposal of this state,
   /// or after widget reconfiguration to a new Future.
   Object _activeCallbackIdentity;
-  AsyncSnapshot<T> _snapshot = new AsyncSnapshot<T>.nothing();// ignore: prefer_const_constructors
+  AsyncSnapshot<T> _snapshot = new AsyncSnapshot<T>.nothing(); // ignore: prefer_const_constructors
 
   @override
   void initState() {
