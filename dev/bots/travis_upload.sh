@@ -20,4 +20,9 @@ fi
 if [ "$SHARD" = "docs" ]; then
   # generate the API docs, upload them
   ./dev/bots/docs.sh
+  exit_code=$?
+  if [[ $exit_code -ne 0 ]]; then
+      >&2 echo "Error generating docs ($exit_code)"
+      exit $exit_code
+  fi
 fi
