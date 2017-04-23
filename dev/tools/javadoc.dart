@@ -37,5 +37,5 @@ Future<Null> main(List<String> args) async {
     print('Expected file ${testFile.path} not found');
     exit(1);
   }
-  print('Javadocs reay to go!');
+  print('Javadocs ready to go!');
 }
