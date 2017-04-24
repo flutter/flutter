@@ -38,7 +38,7 @@ class FlutterLogo extends StatelessWidget {
   /// 24.0.
   final double size;
 
-  /// The color swatch to use to paint the logo, Colors.blue by default.
+  /// The color swatch to use to paint the logo, [Colors.blue] by default.
   ///
   /// If for some reason the default colors are impractical, then one
   /// of [Colors.amber], [Colors.red], or [Colors.indigo] swatches can be used.
