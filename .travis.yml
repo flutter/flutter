@@ -11,7 +11,7 @@ addons:
       - fonts-droid
 language: node_js
 node_js:
-  - "7"
+  - "6"
 install:
   - ./dev/bots/travis_install.sh
 env:
