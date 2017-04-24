@@ -225,7 +225,6 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!_didAutoFocus && widget.autofocus) {
-      _didRequestKeyboard = true;
       FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;
     }
@@ -311,17 +310,16 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     return scrollOffset;
   }
 
-  bool _didRequestKeyboard = false;
   bool get _hasInputConnection => _textInputConnection != null && _textInputConnection.attached;
 
-  void _openInputConnectionIfNeeded() {
+  void _openInputConnection() {
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
       _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType))
-        ..setEditingState(localValue)
-        ..show();
+        ..setEditingState(localValue);
     }
+    _textInputConnection.show();
   }
 
   void _closeInputConnectionIfNeeded() {
@@ -333,13 +331,12 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   }
 
   void _openOrCloseInputConnectionIfNeeded() {
-    if (_hasFocus && _didRequestKeyboard) {
-      _openInputConnectionIfNeeded();
+    if (_hasFocus && widget.focusNode.consumeKeyboardToken()) {
+      _openInputConnection();
     } else if (!_hasFocus) {
       _closeInputConnectionIfNeeded();
       widget.controller.clearComposing();
     }
-    _didRequestKeyboard = false;
   }
 
   /// Express interest in interacting with the keyboard.
@@ -350,16 +347,10 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
   /// focus, the control will then attach to the keyboard and request that the
   /// keyboard become visible.
   void requestKeyboard() {
-    if (_hasInputConnection) {
-      _textInputConnection.show();
-    } else {
-      if (_hasFocus) {
-        _openInputConnectionIfNeeded();
-      } else {
-        _didRequestKeyboard = true;
-        FocusScope.of(context).requestFocus(widget.focusNode);
-      }
-    }
+    if (_hasFocus)
+      _openInputConnection();
+    else
+      FocusScope.of(context).requestFocus(widget.focusNode);
   }
 
   void _hideSelectionOverlayIfNeeded() {
