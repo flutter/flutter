@@ -67,7 +67,7 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, 
     TextEditingValue newValue
   ) {
-    return formatEditUpdate(oldValue, newValue);
+    return formatFunction(oldValue, newValue);
   }
 }
 
