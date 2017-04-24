@@ -393,7 +393,7 @@ void Engine::SetSemanticsEnabled(bool enabled) {
 }
 
 void Engine::ConfigureAssetBundle(const std::string& path) {
-  struct stat stat_result = {0};
+  struct stat stat_result = {};
 
   directory_asset_bundle_.reset();
   // TODO(abarth): We should reset asset_store_ as well, but that might break
