@@ -9,6 +9,9 @@ addons:
     packages:
       - libstdc++6
       - fonts-droid
+language: node_js
+node_js:
+  - "6"
 install:
   - ./dev/bots/travis_install.sh
 env:
