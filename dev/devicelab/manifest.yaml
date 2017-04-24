@@ -115,6 +115,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  import_test:
+    description: >
+      Tests that certain less common import styles work during hot reload.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
   complex_layout_scroll_perf__memory:
     description: >
       Measures memory usage of the scroll performance test.
@@ -218,6 +224,13 @@ tasks:
   hot_mode_dev_cycle_win__benchmark:
     description: >
       Measures the performance of Dart VM hot patching feature on Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
+    flaky: true
+
+  import_test_win:
+    description: >
+      Tests that certain less common import styles work during hot reload on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
     flaky: true
