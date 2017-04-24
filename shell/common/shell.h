@@ -6,12 +6,12 @@
 #define SHELL_COMMON_SHELL_H_
 
 #include "flutter/fml/thread.h"
-#include "flutter/fml/thread_checker.h"
 #include "flutter/shell/common/tracing_controller.h"
 #include "lib/ftl/command_line.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/ref_ptr.h"
 #include "lib/ftl/memory/weak_ptr.h"
+#include "lib/ftl/synchronization/thread_checker.h"
 #include "lib/ftl/synchronization/waitable_event.h"
 #include "lib/ftl/tasks/task_runner.h"
 
@@ -95,8 +95,8 @@ class Shell {
   std::unique_ptr<fml::Thread> ui_thread_;
   std::unique_ptr<fml::Thread> io_thread_;
 
-  std::unique_ptr<fml::ThreadChecker> gpu_thread_checker_;
-  std::unique_ptr<fml::ThreadChecker> ui_thread_checker_;
+  std::unique_ptr<ftl::ThreadChecker> gpu_thread_checker_;
+  std::unique_ptr<ftl::ThreadChecker> ui_thread_checker_;
 
   TracingController tracing_controller_;
 

@@ -1411,9 +1411,6 @@ FILE: ../../../flutter/fml/task_runner.cc
 FILE: ../../../flutter/fml/task_runner.h
 FILE: ../../../flutter/fml/thread.cc
 FILE: ../../../flutter/fml/thread.h
-FILE: ../../../flutter/fml/thread_checker.cc
-FILE: ../../../flutter/fml/thread_checker.h
-FILE: ../../../flutter/fml/thread_checker_unittests.cc
 FILE: ../../../flutter/fml/thread_local.h
 FILE: ../../../flutter/fml/thread_local_unittests.cc
 FILE: ../../../flutter/fml/thread_unittests.cc
