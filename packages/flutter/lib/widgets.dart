@@ -43,6 +43,7 @@ export 'src/widgets/page_storage.dart';
 export 'src/widgets/page_view.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
+export 'src/widgets/placeholder.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/raw_keyboard_listener.dart';

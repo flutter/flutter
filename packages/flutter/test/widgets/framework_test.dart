@@ -11,11 +11,6 @@ class TestState extends State<StatefulWidget> {
   Widget build(BuildContext context) => null;
 }
 
-// TODO(ianh): Remove this once we add the real Placeholder widget
-class Placeholder extends Container {
-  Placeholder({ Key key }) : super(key: key);
-}
-
 void main() {
   testWidgets('UniqueKey control test', (WidgetTester tester) async {
     final Key key = new UniqueKey();
@@ -445,7 +440,7 @@ void main() {
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(new Container(key: key));
     expect(log, isEmpty);
-    await tester.pumpWidget(new Placeholder());
+    await tester.pumpWidget(const Placeholder());
     debugPrint = oldCallback;
     debugPrintGlobalKeyedWidgetLifecycle = false;
 
