@@ -207,22 +207,22 @@ TracingController& Shell::tracing_controller() {
 }
 
 void Shell::InitGpuThread() {
-  gpu_thread_checker_.reset(new fml::ThreadChecker());
+  gpu_thread_checker_.reset(new ftl::ThreadChecker());
 }
 
 void Shell::InitUIThread() {
-  ui_thread_checker_.reset(new fml::ThreadChecker());
+  ui_thread_checker_.reset(new ftl::ThreadChecker());
 }
 
 void Shell::AddRasterizer(const ftl::WeakPtr<Rasterizer>& rasterizer) {
   FTL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCalledOnValidThread());
+             gpu_thread_checker_->IsCreationThreadCurrent());
   rasterizers_.push_back(rasterizer);
 }
 
 void Shell::PurgeRasterizers() {
   FTL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCalledOnValidThread());
+             gpu_thread_checker_->IsCreationThreadCurrent());
   rasterizers_.erase(
       std::remove_if(rasterizers_.begin(), rasterizers_.end(), IsInvalid),
       rasterizers_.end());
@@ -230,19 +230,21 @@ void Shell::PurgeRasterizers() {
 
 void Shell::GetRasterizers(std::vector<ftl::WeakPtr<Rasterizer>>* rasterizers) {
   FTL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCalledOnValidThread());
+             gpu_thread_checker_->IsCreationThreadCurrent());
   *rasterizers = rasterizers_;
 }
 
 void Shell::AddPlatformView(const ftl::WeakPtr<PlatformView>& platform_view) {
-  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->IsCalledOnValidThread());
+  FTL_DCHECK(ui_thread_checker_ &&
+             ui_thread_checker_->IsCreationThreadCurrent());
   if (platform_view) {
     platform_views_.push_back(platform_view);
   }
 }
 
 void Shell::PurgePlatformViews() {
-  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->IsCalledOnValidThread());
+  FTL_DCHECK(ui_thread_checker_ &&
+             ui_thread_checker_->IsCreationThreadCurrent());
   platform_views_.erase(std::remove_if(platform_views_.begin(),
                                        platform_views_.end(), IsViewInvalid),
                         platform_views_.end());
@@ -250,7 +252,8 @@ void Shell::PurgePlatformViews() {
 
 void Shell::GetPlatformViews(
     std::vector<ftl::WeakPtr<PlatformView>>* platform_views) {
-  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->IsCalledOnValidThread());
+  FTL_DCHECK(ui_thread_checker_ &&
+             ui_thread_checker_->IsCreationThreadCurrent());
   *platform_views = platform_views_;
 }
 
@@ -317,7 +320,8 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
                                       int64_t* dart_isolate_id,
                                       std::string* isolate_name,
                                       ftl::AutoResetWaitableEvent* latch) {
-  FTL_DCHECK(ui_thread_checker_ && ui_thread_checker_->IsCalledOnValidThread());
+  FTL_DCHECK(ui_thread_checker_ &&
+             ui_thread_checker_->IsCreationThreadCurrent());
 
   *view_existed = false;
 
