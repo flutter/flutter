@@ -21,24 +21,40 @@ const String _kTextInputClientChannel = 'flutter/textinputclient';
 /// * [WidgetTester.showKeyboard], which uses this class to simulate showing the
 ///   popup keyboard and initializing its text.
 class TestTextInput {
+  /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
-    SystemChannels.textInput.setMockMethodCallHandler(handleTextInputCall);
+    SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
   }
 
   int _client = 0;
   Map<String, dynamic> editingState;
 
-  Future<dynamic> handleTextInputCall(MethodCall methodCall) async {
+  Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0];
         break;
+      case 'TextInput.clearClient':
+        _client = 0;
+        _isVisible = false;
+        break;
       case 'TextInput.setEditingState':
         editingState = methodCall.arguments;
+        break;
+      case 'TextInput.show':
+        _isVisible = true;
+        break;
+      case 'TextInput.hide':
+        _isVisible = false;
         break;
     }
   }
 
+  /// Whether the onscreen keyboard is visible to the user.
+  bool get isVisible => _isVisible;
+  bool _isVisible = false;
+
+  /// Simulates the user changing the [TextEditingValue] to the given value.
   void updateEditingValue(TextEditingValue value) {
     expect(_client, isNonZero);
     BinaryMessages.handlePlatformMessage(
@@ -53,10 +69,16 @@ class TestTextInput {
     );
   }
 
+  /// Simulates the user typing the given text.
   void enterText(String text) {
     updateEditingValue(new TextEditingValue(
       text: text,
       composing: new TextRange(start: 0, end: text.length),
     ));
+  }
+
+  /// Simulates the user hiding the onscreen keyboard.
+  void hide() {
+    _isVisible = false;
   }
 }

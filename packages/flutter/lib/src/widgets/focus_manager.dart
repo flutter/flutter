@@ -31,6 +31,7 @@ import 'package:flutter/foundation.dart';
 class FocusNode extends ChangeNotifier {
   FocusScopeNode _parent;
   FocusManager _manager;
+  bool _hasKeyboardToken = false;
 
   /// Whether this node has the overall focus.
   ///
@@ -47,6 +48,27 @@ class FocusNode extends ChangeNotifier {
   ///
   /// This object notifies its listeners whenever this value changes.
   bool get hasFocus => _manager?._currentFocus == this;
+
+  /// Removes the keyboard token from this focus node if it has one.
+  ///
+  /// This mechanism helps distinguish between an input control gaining focus by
+  /// default and gaining focus as a result of an explicit user action.
+  ///
+  /// When a focus node requests the focus (either via
+  /// [FocusScopeNode.requestFocus] or [FocusScopeNode.autofocus]), the focus
+  /// node receives a keyboard token if it does not already have one. Later,
+  /// when the focus node becomes focused, the widget that manages the
+  /// [TextInputConnection] should show the keyboard (i.e., call
+  /// [TextInputConnection.show]) only if it successfully consumes the keyboard
+  /// token from the focus node.
+  ///
+  /// Returns whether this function successfully consumes a keyboard token.
+  bool consumeKeyboardToken() {
+    if (!_hasKeyboardToken)
+      return false;
+    _hasKeyboardToken = false;
+    return true;
+  }
 
   /// Cancels any outstanding requests for focus.
   ///
@@ -216,13 +238,9 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
     assert(node != null);
     if (_focus == node)
       return;
-    assert(node._parent == null);
     _focus?.unfocus();
-    assert(_focus == null);
-    _focus = node;
-    _focus._parent = this;
-    _focus._manager = _manager;
-    _didChangeFocusChain();
+    node._hasKeyboardToken = true;
+    _setFocus(node);
   }
 
   /// If this scope lacks a focus, request that the given node becomes the
@@ -235,8 +253,10 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
   /// microtask.
   void autofocus(FocusNode node) {
     assert(node != null);
-    if (_focus == null)
-      requestFocus(node);
+    if (_focus == null) {
+      node._hasKeyboardToken = true;
+      _setFocus(node);
+    }
   }
 
   /// Adopts the given node if it is focused in another scope.
@@ -250,7 +270,19 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
       return;
     node.unfocus();
     assert(node._parent == null);
-    autofocus(node);
+    if (_focus == null)
+      _setFocus(node);
+  }
+
+  void _setFocus(FocusNode node) {
+    assert(node != null);
+    assert(node._parent == null);
+    assert(_focus == null);
+    _focus = node;
+    _focus._parent = this;
+    _focus._manager = _manager;
+    _focus._hasKeyboardToken = true;
+    _didChangeFocusChain();
   }
 
   void _resignFocus(FocusNode node) {
