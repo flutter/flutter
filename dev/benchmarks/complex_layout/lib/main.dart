@@ -57,23 +57,21 @@ class TileScrollLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[];
-    for (int i = 0; i < 200; i++) {
-      children.add(new Padding(
-        padding:const EdgeInsets.all(5.0),
-        child: new Material(
-          elevation: i % 5 + 1,
-          color: Colors.white,
-          child: new IconBar(),
-        ),
-      ));
-    }
-
     return new Scaffold(
       appBar: new AppBar(title: const Text('Tile Scrolling Layout')),
-      body: new ListView(
+      body: new ListView.builder(
         key: const Key('tiles-scroll'),
-        children: children
+        itemCount: 200,
+        itemBuilder: (BuildContext context, int index) {
+          return new Padding(
+            padding:const EdgeInsets.all(5.0),
+            child: new Material(
+              elevation: index % 5 + 1,
+              color: Colors.white,
+              child: new IconBar(),
+            ),
+          );
+        }
       ),
       drawer: const GalleryDrawer(),
     );
