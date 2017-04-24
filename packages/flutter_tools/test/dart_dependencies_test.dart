@@ -27,8 +27,8 @@ void main()  {
       final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, packagesPath);
       final Set<String> dependencies = builder.build();
-      expect(dependencies.contains(fs.path.canonicalize(mainPath)), isTrue);
-      expect(dependencies.contains(fs.path.canonicalize(fs.path.join(testPath, 'foo.dart'))), isTrue);
+      expect(dependencies.contains(canonicalizePath(mainPath)), isTrue);
+      expect(dependencies.contains(canonicalizePath(fs.path.join(testPath, 'foo.dart'))), isTrue);
     });
 
     testUsingContext('syntax_error', () {

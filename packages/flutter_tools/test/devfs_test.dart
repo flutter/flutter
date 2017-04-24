@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -181,7 +182,7 @@ void main() {
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
             .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => fs.path.canonicalize(file.path))
+            .map((FileSystemEntity file) => canonicalizePath(file.path))
             .toList());
       }
       final int bytes = await devFS.update(fileFilter: fileFilter);

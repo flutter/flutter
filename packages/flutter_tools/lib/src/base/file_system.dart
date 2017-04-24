@@ -134,3 +134,11 @@ Directory getReplaySource(String dirname, String basename) {
     throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
   return dir;
 }
+
+/// Canonicalizes [path].
+///
+/// This function implements the behaviour of `canonicalize` from
+/// `package:path`. However, unlike the original, it does not change the ASCII
+/// case of the path. Changing the case can break hot reload in some situations,
+/// for an example see: https://github.com/flutter/flutter/issues/9539.
+String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path));

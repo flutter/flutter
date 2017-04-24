@@ -9,9 +9,9 @@ import '../dart/package_map.dart';
 
 class DartDependencySetBuilder {
   DartDependencySetBuilder(String mainScriptPath, String packagesFilePath) :
-    _mainScriptPath = fs.path.canonicalize(mainScriptPath),
+    _mainScriptPath = canonicalizePath(mainScriptPath),
     _mainScriptUri = fs.path.toUri(mainScriptPath),
-    _packagesFilePath = fs.path.canonicalize(packagesFilePath);
+    _packagesFilePath = canonicalizePath(packagesFilePath);
 
   final String _mainScriptPath;
   final String _packagesFilePath;
@@ -48,7 +48,7 @@ class DartDependencySetBuilder {
           }
           resolvedUri = newResolvedUri;
         }
-        final String path = fs.path.canonicalize(resolvedUri.toFilePath());
+        final String path = canonicalizePath(resolvedUri.toFilePath());
         if (!dependencies.contains(path)) {
           if (!fs.isFileSync(path)) {
             throw new DartDependencyException(
