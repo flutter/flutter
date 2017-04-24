@@ -62,7 +62,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     _formWasEdited = true;
     final RegExp phoneExp = new RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value))
-      return '(###) ###-#### - Please enter a valid phone number.';
+      return '(###) ###-#### - Please enter a valid US phone number.';
     return null;
   }
 

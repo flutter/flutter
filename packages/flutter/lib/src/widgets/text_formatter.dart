@@ -88,12 +88,14 @@ class _SimpleTextInputFormatter extends TextInputFormatter {
 class BlacklistingTextInputFormatter extends TextInputFormatter {
   BlacklistingTextInputFormatter(
     this.blacklistedPattern, 
-    {this.replacementString: ''}
+    {
+      this.replacementString: '',
+    }
   ) : assert(blacklistedPattern != null);
 
   /// A [Pattern] to match and replace incoming [TextEditingValue]s.
   final Pattern blacklistedPattern;
-  
+
   /// String used to replace found patterns.
   final String replacementString;
 
@@ -107,8 +109,9 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
       return newValue;
     return _selectionAwareTextManipulation(
       newValue, 
-      (String substring) => 
-          substring.replaceAll(blacklistedPattern, replacementString),
+      (String substring) {
+        return substring.replaceAll(blacklistedPattern, replacementString);
+      },
     );
   }
 
@@ -147,10 +150,12 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
       return newValue;
     return _selectionAwareTextManipulation(
       newValue, 
-      (String substring) => whitelistedPattern
-          .allMatches(substring)
-          .map((Match match) => match.group(0))
-          .join(),
+      (String substring) {
+        return whitelistedPattern
+            .allMatches(substring)
+            .map((Match match) => match.group(0))
+            .join();
+      } ,
     );
   }
 
