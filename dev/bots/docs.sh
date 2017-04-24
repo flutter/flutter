@@ -18,4 +18,9 @@ cp dev/docs/google2ed1af765c529f57.html dev/docs/doc
 if [ "$TRAVIS_PULL_REQUEST" = "false" ] && [ "$TRAVIS_BRANCH" = "master" ]; then
   cd dev/docs
   firebase deploy --project docs-flutter-io
+  exit_code=$?
+  if [[ $exit_code -ne 0 ]]; then
+      >&2 echo "Error deploying docs via firebase ($exit_code)"
+      exit $exit_code
+  fi
 fi
