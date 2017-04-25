@@ -346,7 +346,7 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String projectAssets,
   }) async {
-    if (device.isLocalEmulator && !isEmulatorBuildMode(options.buildMode))
+    if (await device.isLocalEmulator && !isEmulatorBuildMode(options.buildMode))
       throw '${toTitleCase(getModeName(options.buildMode))} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
@@ -381,7 +381,7 @@ class AppDomain extends Domain {
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
       'directory': projectDirectory,
-      'supportsRestart': isRestartSupported(enableHotReload, device)
+      'supportsRestart': isRestartSupported(enableHotReload, device),
     });
 
     Completer<DebugConnectionInfo> connectionInfoCompleter;
@@ -505,6 +505,8 @@ class AppDomain extends Domain {
   }
 }
 
+typedef void _DeviceEventHandler(Device device);
+
 /// This domain lets callers list and monitor connected devices.
 ///
 /// It exports a `getDevices()` call, as well as firing `device.added` and
@@ -530,13 +532,18 @@ class DeviceDomain extends Domain {
       _discoverers.add(deviceDiscovery);
 
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.onAdded.listen((Device device) {
-        sendEvent('device.added', _deviceToMap(device));
-      });
-      discoverer.onRemoved.listen((Device device) {
-        sendEvent('device.removed', _deviceToMap(device));
-      });
+      discoverer.onAdded.listen(_onDeviceEvent('device.added'));
+      discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
+  }
+
+  Future<Null> _deviceEvents = new Future<Null>.value();
+  _DeviceEventHandler _onDeviceEvent(String eventName) {
+    return (Device device) {
+      _deviceEvents = _deviceEvents.then((_) async {
+        sendEvent(eventName, await _deviceToMap(device));
+      });
+    };
   }
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
@@ -638,18 +645,16 @@ void stdoutCommandResponse(Map<String, dynamic> command) {
 }
 
 dynamic _jsonEncodeObject(dynamic object) {
-  if (object is Device)
-    return _deviceToMap(object);
   if (object is OperationResult)
     return _operationResultToMap(object);
   return object;
 }
 
-Map<String, dynamic> _deviceToMap(Device device) {
+Future<Map<String, dynamic>> _deviceToMap(Device device) async {
   return <String, dynamic>{
     'id': device.id,
     'name': device.name,
-    'platform': getNameForTargetPlatform(device.targetPlatform),
+    'platform': getNameForTargetPlatform(await device.targetPlatform),
     'emulator': device.isLocalEmulator
   };
 }
@@ -663,8 +668,6 @@ Map<String, dynamic> _operationResultToMap(OperationResult result) {
 
 dynamic _toJsonable(dynamic obj) {
   if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null)
-    return obj;
-  if (obj is Device)
     return obj;
   if (obj is OperationResult)
     return obj;
