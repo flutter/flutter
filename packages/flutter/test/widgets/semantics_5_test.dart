@@ -14,16 +14,17 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           const Semantics(
             // this tests that empty nodes disappear
           ),
           const Semantics(
             // this tests whether you can have a container with no other semantics
-            container: true
+            container: true,
           ),
           const Semantics(
-            label: 'label' // (force a fork)
+            label: 'label', // (force a fork)
           ),
         ]
       )

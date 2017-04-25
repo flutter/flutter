@@ -428,7 +428,10 @@ class InputDecorator extends StatelessWidget {
       ));
     }
 
-    final Widget stack = new Stack(children: stackChildren);
+    final Widget stack = new Stack(
+      sizing: StackFit.passthrough,
+      children: stackChildren
+    );
 
     if (decoration.icon != null) {
       assert(!isCollapsed);

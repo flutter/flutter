@@ -200,6 +200,48 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
   }
 }
 
+/// How to size the non-positioned children of a [Stack].
+///
+/// This enum is used with [Stack.sizing] and [RenderStack.sizing] to control
+/// how the [BoxConstraints] passed from the stack's parent to the stack's child
+/// are adjusted.
+///
+/// See also:
+///
+///  * [Stack], the widget that uses this.
+///  * [RenderStack], the render object that implements the stack algorithm.
+enum StackFit {
+  /// The constraints passed to the stack from its parent are loosened.
+  ///
+  /// For example, if the stack has constraints that force it to 350x600, then
+  /// this would allow the non-positioned children of the stack to have any
+  /// width from zero to 350 and any height from zero to 600.
+  ///
+  /// See also:
+  ///
+  ///  * [Center], which loosens the constraints passed to its child and then
+  ///    centers the child in itself.
+  ///  * [BoxConstraints.loosen], which implements the loosening of box
+  ///    constraints.
+  loose,
+
+  /// The constraints passed to the stack from its parent are tightened to the
+  /// biggest size allowed.
+  ///
+  /// For example, if the stack has loose constraints with a width in the range
+  /// 10 to 100 and a height in the range 0 to 600, then the non-positioned
+  /// children of the stack would all be sized as 100 pixels wide and 600 high.
+  expand,
+
+  /// The constraints passed to the stack from its parent are passed unmodified
+  /// to the non-positioned children.
+  ///
+  /// For example, if a [Stack] is an [Expanded] child of a [Row], the
+  /// horizontal constraints will be tight and the vertical constraints will be
+  /// loose.
+  passthrough,
+}
+
 /// Whether overflowing children should be clipped, or their overflow be
 /// visible.
 enum Overflow {
@@ -255,10 +297,14 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    FractionalOffset alignment: FractionalOffset.center,
+    StackFit sizing: StackFit.loose,
     Overflow overflow: Overflow.clip
   }) : _alignment = alignment,
+       _sizing = sizing,
        _overflow = overflow {
+    assert(alignment != null);
+    assert(sizing != null);
     assert(overflow != null);
     addAll(children);
   }
@@ -269,6 +315,37 @@ class RenderStack extends RenderBox
   void setupParentData(RenderBox child) {
     if (child.parentData is! StackParentData)
       child.parentData = new StackParentData();
+  }
+
+  /// How to align the non-positioned children in the stack.
+  ///
+  /// The non-positioned children are placed relative to each other such that
+  /// the points determined by [alignment] are co-located. For example, if the
+  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// each non-positioned child will be located at the same global coordinate.
+  FractionalOffset get alignment => _alignment;
+  FractionalOffset _alignment;
+  set alignment(FractionalOffset value) {
+    assert(value != null);
+    if (_alignment != value) {
+      _alignment = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// How to size the non-positioned children in the stack.
+  ///
+  /// The constraints passed into the [RenderStack] from its parent are either
+  /// loosened ([StackFit.loose]) or tightened to their biggest size
+  /// ([StackFit.expand]).
+  StackFit get sizing => _sizing;
+  StackFit _sizing;
+  set sizing(StackFit value) {
+    assert(value != null);
+    if (_sizing != value) {
+      _sizing = value;
+      markNeedsLayout();
+    }
   }
 
   /// Whether overflowing children should be clipped. See [Overflow].
@@ -282,21 +359,6 @@ class RenderStack extends RenderBox
     if (_overflow != value) {
       _overflow = value;
       markNeedsPaint();
-    }
-  }
-
-  /// How to align the non-positioned children in the stack.
-  ///
-  /// The non-positioned children are placed relative to each other such that
-  /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
-  /// each non-positioned child will be located at the same global coordinate.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
-    if (_alignment != value) {
-      _alignment = value;
-      markNeedsLayout();
     }
   }
 
@@ -343,8 +405,23 @@ class RenderStack extends RenderBox
     _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
 
-    double width = 0.0;
-    double height = 0.0;
+    double width = constraints.minWidth;
+    double height = constraints.minHeight;
+
+    BoxConstraints nonPositionedConstraints;
+    assert(sizing != null);
+    switch (sizing) {
+      case StackFit.loose:
+        nonPositionedConstraints = constraints.loosen();
+        break;
+      case StackFit.expand:
+        nonPositionedConstraints = new BoxConstraints.tight(constraints.biggest);
+        break;
+      case StackFit.passthrough:
+        nonPositionedConstraints = constraints;
+        break;
+    }
+    assert(nonPositionedConstraints != null);
 
     RenderBox child = firstChild;
     while (child != null) {
@@ -353,8 +430,7 @@ class RenderStack extends RenderBox
       if (!childParentData.isPositioned) {
         hasNonPositionedChildren = true;
 
-        child.layout(constraints, parentUsesSize: true);
-        childParentData.offset = Offset.zero;
+        child.layout(nonPositionedConstraints, parentUsesSize: true);
 
         final Size childSize = child.size;
         width = math.max(width, childSize.width);

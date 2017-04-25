@@ -2407,7 +2407,7 @@ class RenderOffstage extends RenderProxyBox {
     if (value == _offstage)
       return;
     _offstage = value;
-    markNeedsLayout();
+    markNeedsLayoutForSizedByParentChange();
   }
 
   @override

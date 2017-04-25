@@ -19,6 +19,7 @@ void main() {
     label = '1';
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           new MergeSemantics(
             child: new Semantics(
@@ -26,19 +27,20 @@ void main() {
               container: true,
               child: new Semantics(
                 container: true,
-                label: label
+                label: label,
               )
             )
           ),
           new MergeSemantics(
             child: new Stack(
+              sizing: StackFit.expand,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
                 new Semantics(
-                  label: label
-                )
+                  label: label,
+                ),
               ]
             )
           ),
@@ -69,6 +71,7 @@ void main() {
     label = '2';
     await tester.pumpWidget(
       new Stack(
+        sizing: StackFit.expand,
         children: <Widget>[
           new MergeSemantics(
             child: new Semantics(
@@ -76,18 +79,19 @@ void main() {
               container: true,
               child: new Semantics(
                 container: true,
-                label: label
+                label: label,
               )
             )
           ),
           new MergeSemantics(
             child: new Stack(
+              sizing: StackFit.expand,
               children: <Widget>[
                 const Semantics(
-                  checked: true
+                  checked: true,
                 ),
                 new Semantics(
-                  label: label
+                  label: label,
                 )
               ]
             )

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('InputDecorator always expands', (WidgetTester tester) async {
+  testWidgets('InputDecorator always expands horizontally', (WidgetTester tester) async {
     final Key key = new UniqueKey();
 
     await tester.pumpWidget(new Material(

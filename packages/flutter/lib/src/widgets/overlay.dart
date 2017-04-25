@@ -198,9 +198,8 @@ class Overlay extends StatefulWidget {
   /// The initial entries will be inserted into the overlay when its associated
   /// [OverlayState] is initialized.
   ///
-  /// Rather than creating an overlay, consider using the overlay that has
-  /// already been created by the [WidgetsApp] or the [MaterialApp] for this
-  /// application.
+  /// Rather than creating an overlay, consider using the overlay that is
+  /// created by the [WidgetsApp] or the [MaterialApp] for the application.
   const Overlay({
     Key key,
     this.initialEntries: const <OverlayEntry>[]
@@ -362,7 +361,10 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
       }
     }
     return new _Theatre(
-      onstage: new Stack(children: onstageChildren.reversed.toList(growable: false)),
+      onstage: new Stack(
+        sizing: StackFit.expand,
+        children: onstageChildren.reversed.toList(growable: false),
+      ),
       offstage: offstageChildren,
     );
   }

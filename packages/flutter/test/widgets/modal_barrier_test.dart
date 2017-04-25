@@ -76,7 +76,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));  // end transition
 
     expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'because the barrier was dismissed');
+      reason: 'The route should have been dismissed by tapping the barrier.');
   });
 }
 

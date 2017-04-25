@@ -343,4 +343,70 @@ void main() {
     box.paint(context, Offset.zero);
     expect(context.invocations.first.memberName, equals(#paintChild));
   });
+
+  testWidgets('Stack sizing: default', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    await tester.pumpWidget(
+      new Center(
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 2.0,
+            maxWidth: 3.0,
+            minHeight: 5.0,
+            maxHeight: 7.0,
+          ),
+          child: new Stack(
+            children: <Widget>[
+              new LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  logs.add(constraints.toString());
+                  return const Placeholder();
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(logs, <String>['BoxConstraints(0.0<=w<=3.0, 0.0<=h<=7.0)']);
+  });
+
+  testWidgets('Stack sizing: explicit', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget buildStack(StackFit sizing) {
+      return new Center(
+        child: new ConstrainedBox(
+          constraints: const BoxConstraints(
+            minWidth: 2.0,
+            maxWidth: 3.0,
+            minHeight: 5.0,
+            maxHeight: 7.0,
+          ),
+          child: new Stack(
+            sizing: sizing,
+            children: <Widget>[
+              new LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  logs.add(constraints.toString());
+                  return const Placeholder();
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    await tester.pumpWidget(buildStack(StackFit.loose));
+    logs.add('=1=');
+    await tester.pumpWidget(buildStack(StackFit.expand));
+    logs.add('=2=');
+    await tester.pumpWidget(buildStack(StackFit.passthrough));
+    expect(logs, <String>[
+      'BoxConstraints(0.0<=w<=3.0, 0.0<=h<=7.0)',
+      '=1=',
+      'BoxConstraints(w=3.0, h=7.0)',
+      '=2=',
+      'BoxConstraints(2.0<=w<=3.0, 5.0<=h<=7.0)'
+    ]);
+  });
 }
