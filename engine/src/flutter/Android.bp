@@ -7,4 +7,5 @@ cc_library_headers {
 subdirs = [
     "app",
     "libs/minikin",
+    "tests",
 ]
