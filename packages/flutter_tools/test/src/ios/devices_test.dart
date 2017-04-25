@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
@@ -38,23 +39,23 @@ void main() {
         // Let everything else return exit code 0 so process.dart doesn't crash.
         // The matcher order is important.
         when(
-          mockProcessManager.runSync(any, environment: null, workingDirectory:  null)
+          mockProcessManager.run(any, environment: null, workingDirectory:  null)
         ).thenReturn(
-          new ProcessResult(2, 0, '', null)
+          new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
         );
         // Let `which idevicescreenshot` fail with exit code 1.
         when(
           mockProcessManager.runSync(
             <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
         ).thenReturn(
-          new ProcessResult(1, 1, '', null)
+          new ProcessResult(1, 1, '', '')
         );
 
         iosDeviceUnderTest = new IOSDevice('1234');
-        iosDeviceUnderTest.takeScreenshot(mockOutputFile);
+        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.runSync(
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verifyNever(mockProcessManager.runSync(
+        verifyNever(mockProcessManager.run(
           <String>['idevicescreenshot', fs.path.join('some', 'test', 'path', 'image.png')],
           environment: null,
           workingDirectory: null
@@ -74,23 +75,23 @@ void main() {
         // Let everything else return exit code 0.
         // The matcher order is important.
         when(
-          mockProcessManager.runSync(any, environment: null, workingDirectory:  null)
+          mockProcessManager.run(any, environment: null, workingDirectory:  null)
         ).thenReturn(
-          new ProcessResult(4, 0, '', null)
+          new Future<ProcessResult>.value(new ProcessResult(4, 0, '', ''))
         );
         // Let there be idevicescreenshot in the PATH.
         when(
           mockProcessManager.runSync(
             <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
         ).thenReturn(
-          new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), null)
+          new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), '')
         );
 
         iosDeviceUnderTest = new IOSDevice('1234');
-        iosDeviceUnderTest.takeScreenshot(mockOutputFile);
+        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.runSync(
           <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verify(mockProcessManager.runSync(
+        verify(mockProcessManager.run(
           <String>[
             fs.path.join('some', 'path', 'to', 'iscreenshot'),
             fs.path.join('some', 'test', 'path', 'image.png')
