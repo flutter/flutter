@@ -18,7 +18,7 @@
 #include <cutils/log.h>
 
 #include "minikin/GraphemeBreak.h"
-#include "util/UnicodeUtils.h"
+#include "UnicodeUtils.h"
 
 namespace minikin {
 

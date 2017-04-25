@@ -16,8 +16,8 @@
 #include <benchmark/benchmark.h>
 
 #include <minikin/Hyphenator.h>
-#include <util/FileUtils.h>
-#include <util/UnicodeUtils.h>
+#include <FileUtils.h>
+#include <UnicodeUtils.h>
 
 namespace minikin {
 
