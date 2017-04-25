@@ -41,7 +41,7 @@ class CommandResult {
   /// Optional dimension data that can be appended to the timing event.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
-  String analyticsParameters;
+  List<String> analyticsParameters;
   /// Optional epoch time when the command's non-interactive wait time is 
   /// complete during the command's execution. Use to measure user perceivable
   /// latency without measuring user interaction time. 
@@ -139,18 +139,27 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<Null> run() {
+  Future<CommandResult> run() async {
     final Stopwatch stopwatch = new Stopwatch()..start();
-    final UsageTimer analyticsTimer = usagePath == null ? null : flutterUsage.startTimer(name);
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
 
-    return verifyThenRunCommand().whenComplete(() {
-      final int ms = stopwatch.elapsedMilliseconds;
-      printTrace("'flutter $name' took ${ms}ms.");
-      analyticsTimer?.finish();
-    });
+    final CommandResult commandResult = await verifyThenRunCommand();
+
+    final Duration elapsedDuration = stopwatch.elapsed;
+    printTrace("'flutter $name' took ${elapsedDuration.inMilliseconds}ms.");
+    if (usagePath != null) {
+      flutterUsage.sendTiming(
+        'flutter', 
+        usagePath, 
+        commandResult?.exitTime ?? elapsedDuration, 
+        label: commandResult?.exitCode.toString() 
+            + commandResult?.analyticsParameters?.join('-'),
+      );
+    }
+
+    return commandResult;
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -161,7 +170,7 @@ abstract class FlutterCommand extends Command<Null> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<Null> verifyThenRunCommand() async {
+  Future<CommandResult> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache)
@@ -176,10 +185,12 @@ abstract class FlutterCommand extends Command<Null> {
     if (commandPath != null)
       flutterUsage.sendCommand(commandPath);
 
-    await runCommand();
+    return await runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
+  /// Optionally provide a [CommandResult] to send more details about the 
+  /// execution for analytics.
   Future<CommandResult> runCommand();
 
   /// Find and return the target [Device] based upon currently connected
