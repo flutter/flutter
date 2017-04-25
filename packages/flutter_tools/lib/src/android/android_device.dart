@@ -108,7 +108,8 @@ class AndroidDevice extends Device {
   }
 
   @override
-  String get sdkNameAndVersion => 'Android $_sdkVersion (API $_apiVersion)';
+  Future<String> get sdkNameAndVersion async =>
+      'Android ${await _sdkVersion} (API ${await _apiVersion})';
 
   Future<String> get _sdkVersion => _getProperty('ro.build.version.release');
 

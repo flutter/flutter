@@ -80,7 +80,7 @@ class FuchsiaDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
 
   @override
-  String get sdkNameAndVersion => 'Fuchsia';
+  Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   _FuchsiaLogReader _logReader;
   @override

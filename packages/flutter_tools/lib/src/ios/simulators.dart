@@ -555,7 +555,7 @@ class IOSSimulator extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  String get sdkNameAndVersion => category;
+  Future<String> get sdkNameAndVersion async => category;
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {

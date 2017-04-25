@@ -163,7 +163,7 @@ abstract class Device {
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
 
-  String get sdkNameAndVersion;
+  Future<String> get sdkNameAndVersion;
 
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
@@ -254,7 +254,7 @@ abstract class Device {
         device.name,
         device.id,
         '${getNameForTargetPlatform(targetPlatform)}',
-        '${device.sdkNameAndVersion}$supportIndicator',
+        '${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
 
