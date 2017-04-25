@@ -22,6 +22,34 @@ import 'flutter_command_runner.dart';
 
 typedef void Validator();
 
+enum ExitCode {
+  success,
+  warning,
+  fail,
+}
+
+class CommandResult {
+  CommandResult(
+    this.exitCode,
+    {
+      this.analyticsParameters,
+      this.exitTime,
+    }
+  );
+
+  ExitCode exitCode;
+  /// Optional dimension data that can be appended to the timing event.
+  /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
+  /// Do not add PII.
+  String analyticsParameters;
+  /// Optional epoch time when the command's non-interactive wait time is 
+  /// complete during the command's execution. Use to measure user perceivable
+  /// latency without measuring user interaction time. 
+  /// 
+  /// Will automatically measure the command's complete time if not provided. 
+  DateTime exitTime;
+}
+
 abstract class FlutterCommand extends Command<Null> {
   FlutterCommand() {
     commandValidator = commonCommandValidator;
@@ -152,7 +180,7 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   /// Subclasses must implement this to execute the command.
-  Future<Null> runCommand();
+  Future<CommandResult> runCommand();
 
   /// Find and return the target [Device] based upon currently connected
   /// devices and criteria entered by the user on the command line.

@@ -81,8 +81,19 @@ class Usage {
       _analytics.sendEvent(category, parameter);
   }
 
-  void sendTiming(String category, String variableName, Duration duration) {
-    _analytics.sendTiming(variableName, duration.inMilliseconds, category: category);
+  void sendTiming(
+    String category, 
+    String variableName, 
+    Duration duration,
+    {
+      String label,
+    }) {
+    _analytics.sendTiming(
+      variableName, 
+      duration.inMilliseconds, 
+      category: category,
+      label: label,
+    );
   }
 
   UsageTimer startTimer(String event) {

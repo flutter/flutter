@@ -221,7 +221,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<Null> runCommand() async {
-
     Cache.releaseLockEarly();
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
