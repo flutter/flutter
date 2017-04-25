@@ -10,7 +10,6 @@ import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
-import 'scroll_position.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
 import 'viewport.dart';

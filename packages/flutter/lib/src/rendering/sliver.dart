@@ -109,6 +109,24 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
   return null;
 }
 
+/// Returns whether travelling along the given axis direction visits coordinates
+/// along that axis in numerically decreasing order.
+///
+/// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
+/// and false for [AxisDirection.down] for [AxisDirection.right].
+bool axisDirectionIsReversed(AxisDirection axisDirection) {
+  assert(axisDirection != null);
+  switch (axisDirection) {
+    case AxisDirection.up:
+    case AxisDirection.left:
+      return true;
+    case AxisDirection.down:
+    case AxisDirection.right:
+      return false;
+  }
+  return null;
+}
+
 /// Flips the [AxisDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
 ///
 /// Specifically, returns `axisDirection` if `growthDirection` is

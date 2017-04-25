@@ -152,7 +152,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
         _accepted[isLeading] = confirmationNotification._accepted;
       }
       assert(controller != null);
-      assert(notification.axis == widget.axis);
+      assert(notification.metrics.axis == widget.axis);
       if (_accepted[isLeading]) {
         if (notification.velocity != 0.0) {
           assert(notification.dragDetails == null);
@@ -166,7 +166,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
             assert(renderer.hasSize);
             final Size size = renderer.size;
             final Offset position = renderer.globalToLocal(notification.dragDetails.globalPosition);
-            switch (notification.axis) {
+            switch (notification.metrics.axis) {
               case Axis.horizontal:
                 controller.pull(notification.overscroll.abs(), size.width, position.dy.clamp(0.0, size.height), size.height);
                 break;

@@ -338,15 +338,15 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 // where a scrollable TabBar has a non-zero initialIndex. In that case we can
 // only compute the scroll position's initial scroll offset (the "correct"
 // pixels value) after the TabBar viewport width and scroll limits are known.
-class _TabBarScrollPosition extends ScrollPosition {
+class _TabBarScrollPosition extends ScrollPositionWithSingleContext {
   _TabBarScrollPosition({
     ScrollPhysics physics,
-    AbstractScrollState state,
+    ScrollContext context,
     ScrollPosition oldPosition,
     this.tabBar,
   }) : super(
     physics: physics,
-    state: state,
+    context: context,
     initialPixels: null,
     oldPosition: oldPosition,
   );
@@ -372,10 +372,10 @@ class _TabBarScrollController extends ScrollController {
   final _TabBarState tabBar;
 
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
     return new _TabBarScrollPosition(
       physics: physics,
-      state: state,
+      context: context,
       oldPosition: oldPosition,
       tabBar: tabBar,
     );

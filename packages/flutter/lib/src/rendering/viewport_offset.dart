@@ -164,7 +164,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType(${description.join(", ")})';
+    return '$runtimeType#$hashCode(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].

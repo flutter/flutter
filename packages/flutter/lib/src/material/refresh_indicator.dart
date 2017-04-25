@@ -177,14 +177,14 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     if (notification.depth != 0)
       return false;
     if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
-        _mode == null && _start(notification.axisDirection)) {
+        _mode == null && _start(notification.metrics.axisDirection)) {
       setState(() {
         _mode = _RefreshIndicatorMode.drag;
       });
       return false;
     }
     bool indicatorAtTopNow;
-    switch (notification.axisDirection) {
+    switch (notification.metrics.axisDirection) {
       case AxisDirection.down:
         indicatorAtTopNow = true;
         break;
