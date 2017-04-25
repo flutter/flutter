@@ -543,6 +543,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.flexibleSpace,
     @required this.bottom,
     @required this.elevation,
+    @required this.forceElevated,
     @required this.backgroundColor,
     @required this.brightness,
     @required this.iconTheme,
@@ -565,6 +566,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final Widget flexibleSpace;
   final PreferredSizeWidget bottom;
   final int elevation;
+  final bool forceElevated;
   final Color backgroundColor;
   final Brightness brightness;
   final IconThemeData iconTheme;
@@ -604,7 +606,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         actions: actions,
         flexibleSpace: flexibleSpace,
         bottom: bottom,
-        elevation: overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4 : 0,
+        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4 : 0,
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
@@ -685,6 +687,7 @@ class SliverAppBar extends StatefulWidget {
     this.flexibleSpace,
     this.bottom,
     this.elevation,
+    this.forceElevated: false,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
@@ -695,11 +698,13 @@ class SliverAppBar extends StatefulWidget {
     this.floating: false,
     this.pinned: false,
     this.snap: false,
-  }) : assert(primary != null),
+  }) : assert(forceElevated != null),
+       assert(primary != null),
        assert(floating != null),
        assert(pinned != null),
-       assert(pinned && floating ? bottom != null : true),
+       assert(!pinned || !floating || bottom != null, 'A pinned and floating app bar must have a bottom widget.'),
        assert(snap != null),
+       assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        super(key: key);
 
   /// A widget to display before the [title].
@@ -765,16 +770,29 @@ class SliverAppBar extends StatefulWidget {
   ///  * [PreferredSize], which can be used to give an arbitrary widget a preferred size.
   final PreferredSizeWidget bottom;
 
-  /// The z-coordinate at which to place this app bar.
+  /// The z-coordinate at which to place this app bar when it is above other
+  /// content.
   ///
   /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
   ///
   /// Defaults to 4, the appropriate elevation for app bars.
   ///
-  /// The elevation is ignored when the app bar has no content underneath it.
-  /// For example, if the app bar is [pinned] but no content is scrolled under
-  /// it, or if it scrolls with the content.
+  /// If [forceElevated] is false, the elevation is ignored when the app bar has
+  /// no content underneath it. For example, if the app bar is [pinned] but no
+  /// content is scrolled under it, or if it scrolls with the content, then no
+  /// shadow is drawn, regardless of the value of [elevation].
   final int elevation;
+
+  /// Whether to show the shadow appropriate for the [elevation] even if the
+  /// content is not scrolled under the [AppBar].
+  ///
+  /// Defaults to false, meaning that the [elevation] is only applied when the
+  /// [AppBar] is being displayed over content that is scrolled under it.
+  ///
+  /// When set to true, the [elevation] is applied regardless.
+  ///
+  /// Ignored when [elevation] is zero.
+  final bool forceElevated;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
@@ -829,12 +847,9 @@ class SliverAppBar extends StatefulWidget {
   /// Otherwise, the user will need to scroll near the top of the scroll view to
   /// reveal the app bar.
   ///
-  /// See also:
-  ///
-  ///   * If [snap] is true then a scroll that exposes the app bar will trigger
-  ///     an animation that slides the entire app bar into view. Similarly if
-  ///     a scroll dismisses the app bar, the animation will slide it completely
-  ///     out of view.
+  /// If [snap] is true then a scroll that exposes the app bar will trigger an
+  /// animation that slides the entire app bar into view. Similarly if a scroll
+  /// dismisses the app bar, the animation will slide it completely out of view.
   final bool floating;
 
   /// Whether the app bar should remain visible at the start of the scroll view.
@@ -905,6 +920,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         flexibleSpace: widget.flexibleSpace,
         bottom: widget.bottom,
         elevation: widget.elevation,
+        forceElevated: widget.forceElevated,
         backgroundColor: widget.backgroundColor,
         brightness: widget.brightness,
         iconTheme: widget.iconTheme,

@@ -55,7 +55,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification)
-      _controller.update(notification.metrics, notification.axisDirection);
+      _controller.update(notification.metrics, notification.metrics.axisDirection);
     return false;
   }
 

@@ -5,15 +5,15 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
-class TestScrollPosition extends ScrollPosition {
+class TestScrollPosition extends ScrollPositionWithSingleContext {
   TestScrollPosition({
     ScrollPhysics physics,
-    AbstractScrollState state,
+    ScrollContext state,
     double initialPixels: 0.0,
     ScrollPosition oldPosition,
   }) : super(
     physics: physics,
-    state: state,
+    context: state,
     initialPixels: initialPixels,
     oldPosition: oldPosition,
   );
@@ -21,10 +21,10 @@ class TestScrollPosition extends ScrollPosition {
 
 class TestScrollController extends ScrollController {
   @override
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
+  ScrollPosition createScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
     return new TestScrollPosition(
       physics: physics,
-      state: state,
+      state: context,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
     );

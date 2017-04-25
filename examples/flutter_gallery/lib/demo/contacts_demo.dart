@@ -87,7 +87,7 @@ class ContactsDemo extends StatefulWidget {
   ContactsDemoState createState() => new ContactsDemoState();
 }
 
-enum AppBarBehavior { normal, pinned, floating }
+enum AppBarBehavior { normal, pinned, floating, snapping }
 
 class ContactsDemoState extends State<ContactsDemo> {
   static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
@@ -110,7 +110,8 @@ class ContactsDemoState extends State<ContactsDemo> {
             new SliverAppBar(
               expandedHeight: _appBarHeight,
               pinned: _appBarBehavior == AppBarBehavior.pinned,
-              floating: _appBarBehavior == AppBarBehavior.floating,
+              floating: _appBarBehavior == AppBarBehavior.floating || _appBarBehavior == AppBarBehavior.snapping,
+              snap: _appBarBehavior == AppBarBehavior.snapping,
               actions: <Widget>[
                 new IconButton(
                   icon: const Icon(Icons.create),
@@ -139,6 +140,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                     const PopupMenuItem<AppBarBehavior>(
                       value: AppBarBehavior.floating,
                       child: const Text('App bar floats')
+                    ),
+                    const PopupMenuItem<AppBarBehavior>(
+                      value: AppBarBehavior.snapping,
+                      child: const Text('App bar snaps')
                     ),
                   ],
                 ),

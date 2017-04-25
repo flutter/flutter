@@ -14,8 +14,9 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'notification_listener.dart';
 import 'scroll_configuration.dart';
+import 'scroll_context.dart';
 import 'scroll_controller.dart';
-import 'scroll_notification.dart';
+import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
@@ -68,7 +69,8 @@ class Scrollable extends StatefulWidget {
     return widget?.scrollable;
   }
 
-  /// Scrolls the closest enclosing scrollable to make the given context visible.
+  /// Scrolls the scrollables that enclose the given context so as to make the
+  /// given context visible.
   static Future<Null> ensureVisible(BuildContext context, {
     double alignment: 0.0,
     Duration duration: Duration.ZERO,
@@ -91,7 +93,7 @@ class Scrollable extends StatefulWidget {
     if (futures.isEmpty || duration == Duration.ZERO)
       return new Future<Null>.value();
     if (futures.length == 1)
-      return futures.first;
+      return futures.single;
     return Future.wait<Null>(futures);
   }
 }
@@ -128,15 +130,17 @@ class _ScrollableScope extends InheritedWidget {
 /// This class is not intended to be subclassed. To specialize the behavior of a
 /// [Scrollable], provide it with a [ScrollPhysics].
 class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
-    implements AbstractScrollState {
-  /// The controller for this [Scrollable] widget's viewport position.
+    implements ScrollContext {
+  /// The manager for this [Scrollable] widget's viewport position.
   ///
   /// To control what kind of [ScrollPosition] is created for a [Scrollable],
-  /// provide it with custom [ScrollPhysics] that creates the appropriate
-  /// [ScrollPosition] controller in its [ScrollPhysics.createScrollPosition]
-  /// method.
+  /// provide it with custom [ScrollController] that creates the appropriate
+  /// [ScrollPosition] in its [ScrollController.createScrollPosition] method.
   ScrollPosition get position => _position;
   ScrollPosition _position;
+
+  @override
+  AxisDirection get axisDirection => widget.axisDirection;
 
   ScrollBehavior _configuration;
   ScrollPhysics _physics;
@@ -224,6 +228,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
                 ..minFlingDistance = _physics?.minFlingDistance
                 ..minFlingVelocity = _physics?.minFlingVelocity
                 ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -238,6 +243,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
                 ..onStart = _handleDragStart
                 ..onUpdate = _handleDragUpdate
                 ..onEnd = _handleDragEnd
+                ..onCancel = _handleDragCancel
                 ..minFlingDistance = _physics?.minFlingDistance
                 ..minFlingVelocity = _physics?.minFlingVelocity
                 ..maxFlingVelocity = _physics?.maxFlingVelocity;
@@ -268,54 +274,41 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  @protected
-  void dispatchNotification(Notification notification) {
-    assert(mounted);
-    notification.dispatch(_gestureDetectorKey.currentContext);
-  }
+  BuildContext get notificationContext => _gestureDetectorKey.currentContext;
 
   // TOUCH HANDLERS
 
-  DragScrollActivity _drag;
-
-  bool get _reverseDirection {
-    assert(widget.axisDirection != null);
-    switch (widget.axisDirection) {
-      case AxisDirection.up:
-      case AxisDirection.left:
-        return true;
-      case AxisDirection.down:
-      case AxisDirection.right:
-        return false;
-    }
-    return null;
-  }
+  Drag _drag;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
-    position.touched();
+    position.didTouch();
   }
 
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
-    _drag = position.beginDragActivity(details);
+    _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    // _drag might be null if the drag activity ended and called didEndDrag.
-    _drag?.update(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.update(details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    // _drag might be null if the drag activity ended and called didEndDrag.
-    _drag?.end(details, reverse: _reverseDirection);
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.end(details);
     assert(_drag == null);
   }
 
-  @override
-  @protected
-  void didEndDrag() {
+  void _handleDragCancel() {
+    // _drag might be null if the drag activity ended and called _disposeDrag.
+    _drag?.cancel();
+    assert(_drag == null);
+  }
+
+  void _disposeDrag() {
     _drag = null;
   }
 

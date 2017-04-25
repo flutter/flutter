@@ -1129,7 +1129,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       onPointerUp: _handlePointerUpOrCancel,
       onPointerCancel: _handlePointerUpOrCancel,
       child: new AbsorbPointer(
-        absorbing: false,
+        absorbing: false, // it's mutated directly by _cancelActivePointers above
         child: new FocusScope(
           node: focusScopeNode,
           autofocus: true,

@@ -7,7 +7,10 @@ import 'dart:async';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
+import 'scroll_context.dart';
+import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
 
 class ScrollController extends ChangeNotifier {
   ScrollController({
@@ -22,6 +25,12 @@ class ScrollController extends ChangeNotifier {
   /// controller will have their offset initialized to this value.
   final double initialScrollOffset;
 
+  /// The currently attached positions.
+  ///
+  /// This should not be mutated directly. [ScrollPosition] objects can be added
+  /// and removed using [attach] and [detach].
+  @protected
+  Iterable<ScrollPosition> get positions => _positions;
   final List<ScrollPosition> _positions = <ScrollPosition>[];
 
   /// Whether any [ScrollPosition] objects have attached themselves to the
@@ -32,6 +41,10 @@ class ScrollController extends ChangeNotifier {
   /// called.
   bool get hasClients => _positions.isNotEmpty;
 
+  /// Returns the attached [ScrollPosition], from which the actual scroll offset
+  /// of the [ScrollView] can be obtained.
+  ///
+  /// Calling this is only valid when only a single position is attached.
   ScrollPosition get position {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     assert(_positions.length == 1, 'ScrollController attached to multiple scroll views.');
@@ -71,7 +84,7 @@ class ScrollController extends ChangeNotifier {
   }) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
     final List<Future<Null>> animations = new List<Future<Null>>(_positions.length);
-    for (int i = 0; i < _positions.length; i++)
+    for (int i = 0; i < _positions.length; i += 1)
       animations[i] = _positions[i].animateTo(offset, duration: duration, curve: curve);
     return Future.wait<Null>(animations).then((List<Null> _) => null);
   }
@@ -121,18 +134,22 @@ class ScrollController extends ChangeNotifier {
     super.dispose();
   }
 
-  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
-    return new ScrollPosition(
+  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
+    return new ScrollPositionWithSingleContext(
       physics: physics,
-      state: state,
+      context: context,
       oldPosition: oldPosition,
     );
   }
 
-  ScrollPosition createScrollPosition(ScrollPhysics physics, AbstractScrollState state, ScrollPosition oldPosition) {
-    return new ScrollPosition(
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition oldPosition,
+  ) {
+    return new ScrollPositionWithSingleContext(
       physics: physics,
-      state: state,
+      context: context,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
     );
@@ -140,18 +157,22 @@ class ScrollController extends ChangeNotifier {
 
   @override
   String toString() {
-    final StringBuffer result = new StringBuffer();
-    result.write('$runtimeType#$hashCode(');
+    final List<String> description = <String>[];
+    debugFillDescription(description);
+    return '$runtimeType#$hashCode(${description.join(", ")})';
+  }
+
+  @mustCallSuper
+  void debugFillDescription(List<String> description) {
     if (initialScrollOffset != 0.0)
-      result.write('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
+      description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
     if (_positions.isEmpty) {
-      result.write('no clients');
+      description.add('no clients');
     } else if (_positions.length == 1) {
-      result.write('one client, offset $offset');
+      // Don't actually list the client itself, since its toString may refer to us.
+      description.add('one client, offset ${offset.toStringAsFixed(1)}');
     } else {
-      result.write('${_positions.length} clients');
+      description.add('${_positions.length} clients');
     }
-    result.write(')');
-    return result.toString();
   }
 }
