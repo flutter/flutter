@@ -27,8 +27,8 @@ void main()  {
       final DartDependencySetBuilder builder =
           new DartDependencySetBuilder(mainPath, packagesPath);
       final Set<String> dependencies = builder.build();
-      expect(dependencies.contains(fs.path.canonicalize(mainPath)), isTrue);
-      expect(dependencies.contains(fs.path.canonicalize(fs.path.join(testPath, 'foo.dart'))), isTrue);
+      expect(dependencies.contains(canonicalizePath(mainPath)), isTrue);
+      expect(dependencies.contains(canonicalizePath(fs.path.join(testPath, 'foo.dart'))), isTrue);
     });
 
     testUsingContext('syntax_error', () {
@@ -72,6 +72,15 @@ void main()  {
         expect(error.toString(), contains('rochambeau'));
         expect(error.toString(), contains('pubspec.yaml'));
       }
+    });
+
+    testUsingContext('does not change ASCI casing of path', () {
+      final String testPath = fs.path.join(dataPath, 'asci_casing');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder = new DartDependencySetBuilder(mainPath, packagesPath);
+      final Set<String> deps = builder.build();
+      expect(deps, contains(endsWith('This_Import_Has_fuNNy_casING.dart')));
     });
   });
 }

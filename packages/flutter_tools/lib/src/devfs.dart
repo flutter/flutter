@@ -499,7 +499,6 @@ class DevFS {
                    String relativePath,
                    Uri directoryUriOnDevice, {
                    bool ignoreDotFiles: true,
-                   Set<String> fileFilter
                    }) {
     if (file is Directory) {
       // Skip non-files.
@@ -509,13 +508,6 @@ class DevFS {
     if (ignoreDotFiles && fs.path.basename(file.path).startsWith('.')) {
       // Skip dot files.
       return true;
-    }
-    if (fileFilter != null) {
-      final String canonicalizeFilePath = fs.path.canonicalize(file.absolute.path);
-      if ((fileFilter != null) && !fileFilter.contains(canonicalizeFilePath)) {
-        // Skip files that are not included in the filter.
-        return true;
-      }
     }
     return false;
   }
@@ -542,8 +534,7 @@ class DevFS {
     directoryUriOnDevice =
         _directoryUriOnDevice(directoryUriOnDevice, directory);
     try {
-      final String absoluteDirectoryPath =
-          fs.path.canonicalize(fs.path.absolute(directory.path));
+      final String absoluteDirectoryPath = canonicalizePath(directory.path);
       // For each file in the file filter.
       for (String filePath in fileFilter) {
         if (!filePath.startsWith(absoluteDirectoryPath)) {
@@ -600,7 +591,7 @@ class DevFS {
         }
         final String relativePath =
           fs.path.relative(file.path, from: directory.path);
-        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles, fileFilter: fileFilter)) {
+        if (_shouldSkip(file, relativePath, directoryUriOnDevice, ignoreDotFiles: ignoreDotFiles)) {
           continue;
         }
         final Uri deviceUri = directoryUriOnDevice.resolveUri(fs.path.toUri(relativePath));

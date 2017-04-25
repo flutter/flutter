@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -121,6 +122,21 @@ void main() {
       FileSystem: () => fs,
     });
 
+    testUsingContext('add new file to local file system and preserve unusal file name casing', () async {
+      final String filePathWithUnusalCasing = fs.path.join('FooBar', 'TEST.txt');
+      final File file = fs.file(fs.path.join(basePath, filePathWithUnusalCasing));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
+      final int bytes = await devFS.update();
+      devFSOperations.expectMessages(<String>[
+        'writeFile test FooBar/TEST.txt',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 7);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
     testUsingContext('modify existing file on local file system', () async {
       await devFS.update();
       final File file = fs.file(fs.path.join(basePath, filePath));
@@ -181,7 +197,7 @@ void main() {
         fileFilter.addAll(fs.directory(pkgUri)
             .listSync(recursive: true)
             .where((FileSystemEntity file) => file is File)
-            .map((FileSystemEntity file) => fs.path.canonicalize(file.path))
+            .map((FileSystemEntity file) => canonicalizePath(file.path))
             .toList());
       }
       final int bytes = await devFS.update(fileFilter: fileFilter);
