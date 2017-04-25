@@ -193,7 +193,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
         assert(tracker != null);
 
         Velocity velocity = tracker.getVelocity();
-        if (velocity != null && _isFlingGesture(velocity)) {
+        if (_isFlingGesture(velocity)) {
           final Offset pixelsPerSecond = velocity.pixelsPerSecond;
           if (pixelsPerSecond.distanceSquared > kMaxFlingVelocity * kMaxFlingVelocity)
             velocity = new Velocity(pixelsPerSecond: (pixelsPerSecond / pixelsPerSecond.distance) * kMaxFlingVelocity);

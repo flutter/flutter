@@ -71,4 +71,9 @@ void main() {
       }
     }
   });
+
+  test('No data velocity estimation', () {
+    final VelocityTracker tracker = new VelocityTracker();
+    expect(tracker.getVelocity(), Velocity.zero);
+  });
 }
