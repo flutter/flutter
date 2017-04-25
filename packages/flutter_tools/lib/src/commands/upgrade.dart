@@ -28,7 +28,7 @@ class UpgradeCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() async {
     try {
-      runCheckedSync(<String>[
+      await runCheckedAsync(<String>[
         'git', 'rev-parse', '@{u}'
       ], workingDirectory: Cache.flutterRoot);
     } catch (e) {

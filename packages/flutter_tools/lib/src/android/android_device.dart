@@ -166,7 +166,7 @@ class AndroidDevice extends Device {
       // output lines like this, which we want to ignore:
       //   adb server is out of date.  killing..
       //   * daemon started successfully *
-      runCheckedSync(<String>[getAdbPath(androidSdk), 'start-server']);
+      await runCheckedAsync(<String>[getAdbPath(androidSdk), 'start-server']);
 
       // Sample output: '22'
       final String sdkVersion = await _getProperty('ro.build.version.sdk');
@@ -254,7 +254,7 @@ class AndroidDevice extends Device {
     if (!_checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
-    final String uninstallOut = runCheckedSync(adbCommandForDevice(<String>['uninstall', app.id]));
+    final String uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
     final RegExp failureExp = new RegExp(r'^Failure.*$', multiLine: true);
     final String failure = failureExp.stringMatch(uninstallOut);
     if (failure != null) {
@@ -370,7 +370,7 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
     }
     cmd.add(apk.launchActivity);
-    final String result = runCheckedSync(cmd);
+    final String result = (await runCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
       printError(result.trim());
@@ -456,16 +456,15 @@ class AndroidDevice extends Device {
   bool get supportsScreenshot => true;
 
   @override
-  Future<Null> takeScreenshot(File outputFile) {
+  Future<Null> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
-    runCheckedSync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
-    runCheckedSync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
-    runCheckedSync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
-    return new Future<Null>.value();
+    await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
+    await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
+    await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
   }
 
   @override
-  Future<List<DiscoveredApp>> discoverApps() {
+  Future<List<DiscoveredApp>> discoverApps() async {
     final RegExp discoverExp = new RegExp(r'DISCOVER: (.*)');
     final List<DiscoveredApp> result = <DiscoveredApp>[];
     final StreamSubscription<String> logs = getLogReader().logLines.listen((String line) {
@@ -476,14 +475,13 @@ class AndroidDevice extends Device {
       }
     });
 
-    runCheckedSync(adbCommandForDevice(<String>[
+    await runCheckedAsync(adbCommandForDevice(<String>[
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    return new Future<List<DiscoveredApp>>.delayed(const Duration(seconds: 1), () {
-      logs.cancel();
-      return result;
-    });
+    await new Future<Null>.delayed(const Duration(seconds: 1));
+    logs.cancel();
+    return result;
   }
 }
 
@@ -745,7 +743,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       hostPort = await portScanner.findAvailablePort();
     }
 
-    runCheckedSync(device.adbCommandForDevice(
+    await runCheckedAsync(device.adbCommandForDevice(
       <String>['forward', 'tcp:$hostPort', 'tcp:$devicePort']
     ));
 
@@ -754,7 +752,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<Null> unforward(ForwardedPort forwardedPort) async {
-    runCheckedSync(device.adbCommandForDevice(
+    await runCheckedAsync(device.adbCommandForDevice(
       <String>['forward', '--remove', 'tcp:${forwardedPort.hostPort}']
     ));
   }

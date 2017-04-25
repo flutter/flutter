@@ -273,24 +273,24 @@ Future<String> _buildAotSnapshot(
     final List<String> commonBuildOptions = <String>['-arch', 'arm64', '-miphoneos-version-min=8.0'];
 
     if (interpreter) {
-      runCheckedSync(<String>['mv', vmSnapshotData, fs.path.join(outputDir.path, kVmSnapshotData)]);
-      runCheckedSync(<String>['mv', isolateSnapshotData, fs.path.join(outputDir.path, kIsolateSnapshotData)]);
+      await runCheckedAsync(<String>['mv', vmSnapshotData, fs.path.join(outputDir.path, kVmSnapshotData)]);
+      await runCheckedAsync(<String>['mv', isolateSnapshotData, fs.path.join(outputDir.path, kIsolateSnapshotData)]);
 
-      runCheckedSync(<String>[
+      await runCheckedAsync(<String>[
         'xxd', '--include', kVmSnapshotData, fs.path.basename(kVmSnapshotDataC)
       ], workingDirectory: outputDir.path);
-      runCheckedSync(<String>[
+      await runCheckedAsync(<String>[
         'xxd', '--include', kIsolateSnapshotData, fs.path.basename(kIsolateSnapshotDataC)
       ], workingDirectory: outputDir.path);
 
-      runCheckedSync(<String>['xcrun', 'cc']
+      await runCheckedAsync(<String>['xcrun', 'cc']
         ..addAll(commonBuildOptions)
         ..addAll(<String>['-c', kVmSnapshotDataC, '-o', kVmSnapshotDataO]));
-      runCheckedSync(<String>['xcrun', 'cc']
+      await runCheckedAsync(<String>['xcrun', 'cc']
         ..addAll(commonBuildOptions)
         ..addAll(<String>['-c', kIsolateSnapshotDataC, '-o', kIsolateSnapshotDataO]));
     } else {
-      runCheckedSync(<String>['xcrun', 'cc']
+      await runCheckedAsync(<String>['xcrun', 'cc']
         ..addAll(commonBuildOptions)
         ..addAll(<String>['-c', assembly, '-o', assemblyO]));
     }
@@ -313,7 +313,7 @@ Future<String> _buildAotSnapshot(
     } else {
       linkCommand.add(assemblyO);
     }
-    runCheckedSync(linkCommand);
+    await runCheckedAsync(linkCommand);
   }
 
   return outputPath;

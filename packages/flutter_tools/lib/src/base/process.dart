@@ -250,16 +250,6 @@ String runCheckedSync(List<String> cmd, {
   );
 }
 
-/// Run cmd and return stdout on success.
-///
-/// Throws the standard error output if cmd exits with a non-zero value.
-String runSyncAndThrowStdErrOnError(List<String> cmd) {
-  return _runWithLoggingSync(cmd,
-                             checked: true,
-                             throwStandardErrorOnError: true,
-                             hideStdout: true);
-}
-
 /// Run cmd and return stdout.
 String runSync(List<String> cmd, {
   String workingDirectory,

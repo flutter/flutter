@@ -541,7 +541,7 @@ class IOSSimulator extends Device {
       ApplicationPackage app, String localFile, String targetFile) async {
     if (platform.isMacOS) {
       final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      runCheckedSync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
+      await runCheckedAsync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
       return true;
     }
     return false;

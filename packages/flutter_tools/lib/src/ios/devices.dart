@@ -164,7 +164,7 @@ class IOSDevice extends Device {
     }
 
     try {
-      runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -370,8 +370,7 @@ class IOSDevice extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    runCheckedSync(<String>[screenshotPath, outputFile.path]);
-    return new Future<Null>.value();
+    return runCheckedAsync(<String>[screenshotPath, outputFile.path]);
   }
 }
 
