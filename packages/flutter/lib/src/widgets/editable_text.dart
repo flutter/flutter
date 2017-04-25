@@ -118,7 +118,7 @@ class EditableText extends StatefulWidget {
   ///
   /// The [controller], [focusNode], [style], and [cursorColor] arguments must
   /// not be null.
-  const EditableText({
+  EditableText({
     Key key,
     @required this.controller,
     @required this.focusNode,

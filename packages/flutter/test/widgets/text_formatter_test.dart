@@ -4,15 +4,14 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:mockito/mockito.dart';
 
 void main() {
   TextEditingValue testOldValue;
   TextEditingValue testNewValue;
 
   test('withFunction wraps formatting function', () {
-    testOldValue = new TextEditingValue();
-    testNewValue = new TextEditingValue();
+    testOldValue = const TextEditingValue();
+    testNewValue = const TextEditingValue();
 
     TextEditingValue calledOldValue;
     TextEditingValue calledNewValue;
@@ -35,9 +34,9 @@ void main() {
       // a1b(2c3
       // d4)e5f6 
       // where the parentheses are the selection range.
-      testNewValue = new TextEditingValue(
+      testNewValue = const TextEditingValue(
         text: 'a1b2c3\nd4e5f6',
-        selection: new TextSelection(
+        selection: const TextSelection(
           baseOffset: 3,
           extentOffset: 9,
         ),
@@ -52,11 +51,59 @@ void main() {
       // Expecting
       // 1(23
       // 4)56 
-      expect(actualValue, new TextEditingValue(
+      expect(actualValue, const TextEditingValue(
         text: '123\n456',
-        selection: new TextSelection(
+        selection: const TextSelection(
           baseOffset: 1,
           extentOffset: 5,
+        ),
+      ));
+    });
+
+    test('test single line formatter', () {
+      final TextEditingValue actualValue = 
+          BlacklistingTextInputFormatter.singleLineFormatter
+              .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // a1b(2c3d4)e5f6 
+      expect(actualValue, const TextEditingValue(
+        text: 'a1b2c3d4e5f6',
+        selection: const TextSelection(
+          baseOffset: 3,
+          extentOffset: 8,
+        ),
+      ));
+    });
+
+    test('test whitelisting formatter', () {
+      final TextEditingValue actualValue = 
+          new WhitelistingTextInputFormatter(new RegExp(r'[a-c]'))
+              .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // ab(c)
+      expect(actualValue, const TextEditingValue(
+        text: 'abc',
+        selection: const TextSelection(
+          baseOffset: 2,
+          extentOffset: 3,
+        ),
+      ));
+    });
+
+    test('test digits only formatter', () {
+      final TextEditingValue actualValue = 
+          WhitelistingTextInputFormatter.digitsOnly
+              .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // 1(234)56 
+      expect(actualValue, const TextEditingValue(
+        text: '123456',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 4,
         ),
       ));
     });

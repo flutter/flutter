@@ -104,9 +104,6 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    // Don't apply formatting to text still under composition.
-    if (!newValue.composing.isCollapsed)
-      return newValue;
     return _selectionAwareTextManipulation(
       newValue, 
       (String substring) {
@@ -145,9 +142,6 @@ class WhitelistingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    // Don't apply formatting to text still under composition.
-    if (!newValue.composing.isCollapsed)
-      return newValue;
     return _selectionAwareTextManipulation(
       newValue, 
       (String substring) {
@@ -170,12 +164,10 @@ TextEditingValue _selectionAwareTextManipulation(
 ) {
   final int selectionStartIndex = value.selection.start;
   final int selectionEndIndex = value.selection.end;
+  String manipulatedText;
+  TextSelection manipulatedSelection;
   if (selectionStartIndex < 0 || selectionEndIndex < 0) {
-    return new TextEditingValue(
-      text: substringManipulation(value.text),
-      selection: const TextSelection.collapsed(offset: -1), 
-      composing: TextRange.empty,
-    );
+    manipulatedText = substringManipulation(value.text);
   } else {
     final String beforeSelection = substringManipulation(
       value.text.substring(0, selectionStartIndex)
@@ -186,13 +178,17 @@ TextEditingValue _selectionAwareTextManipulation(
     final String afterSelection = substringManipulation(
       value.text.substring(selectionEndIndex)
     );
-    return new TextEditingValue(
-      text: beforeSelection + inSelection + afterSelection,
-      selection: value.selection.copyWith(
-        baseOffset: beforeSelection.length,
-        extentOffset: beforeSelection.length + inSelection.length,
-      ),
-      composing: TextRange.empty,
+    manipulatedText = beforeSelection + inSelection + afterSelection;
+    manipulatedSelection = value.selection.copyWith(
+      baseOffset: beforeSelection.length,
+      extentOffset: beforeSelection.length + inSelection.length,
     );
   }
+  return new TextEditingValue(
+    text: manipulatedText,
+    selection: manipulatedSelection ?? const TextSelection.collapsed(offset: -1), 
+    composing: manipulatedText == value.text 
+        ? value.composing
+        : TextRange.empty,
+  );
 }
