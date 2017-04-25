@@ -325,7 +325,7 @@ class _OrderPageState extends State<OrderPage> {
 // final value of the order field.
 class ShrineOrderRoute extends ShrinePageRoute<Order> {
   ShrineOrderRoute({
-    this.order,
+    @required this.order,
     WidgetBuilder builder,
     RouteSettings settings: const RouteSettings(),
   }) : super(builder: builder, settings: settings) {

@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -177,7 +178,7 @@ class _SingleChildViewport extends SingleChildRenderObjectWidget {
 class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMixin<RenderBox> implements RenderAbstractViewport {
   _RenderSingleChildViewport({
     AxisDirection axisDirection: AxisDirection.down,
-    ViewportOffset offset,
+    @required ViewportOffset offset,
     RenderBox child,
   }) : _axisDirection = axisDirection,
        _offset = offset {
