@@ -309,7 +309,10 @@ class RunCommand extends RunCommandBase {
       throwToolExit(null, exitCode: result);
     return new CommandResult(
       ExitCode.success,
-      analyticsParameters: <String>[hotMode ? "hot" : "cold"],
+      analyticsParameters: <String>[
+        hotMode ? "hot" : "cold",
+        getModeName(getBuildMode()),
+      ],
       exitTime: appStartedTime,
     );
   }

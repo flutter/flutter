@@ -10,6 +10,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
@@ -35,7 +36,7 @@ class CommandResult {
       this.analyticsParameters,
       this.exitTime,
     }
-  );
+  ) { assert(exitCode != null); }
 
   ExitCode exitCode;
   /// Optional dimension data that can be appended to the timing event.
@@ -139,27 +140,28 @@ abstract class FlutterCommand extends Command<Null> {
   /// and [runCommand] to execute the command
   /// so that this method can record and report the overall time to analytics.
   @override
-  Future<CommandResult> run() async {
-    final Stopwatch stopwatch = new Stopwatch()..start();
+  Future<Null> run() async {
+    final DateTime startTime = new DateTime.now();
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
 
     final CommandResult commandResult = await verifyThenRunCommand();
 
-    final Duration elapsedDuration = stopwatch.elapsed;
-    printTrace("'flutter $name' took ${elapsedDuration.inMilliseconds}ms.");
+    final DateTime endTime = new DateTime.now();
+    printTrace("'flutter $name' took ${endTime.difference(startTime).inMilliseconds}ms.");
     if (usagePath != null) {
       flutterUsage.sendTiming(
         'flutter', 
-        usagePath, 
-        commandResult?.exitTime ?? elapsedDuration, 
-        label: commandResult?.exitCode.toString() 
-            + commandResult?.analyticsParameters?.join('-'),
+        name, 
+        (commandResult?.exitTime ?? endTime).difference(startTime), 
+        label: (
+            <String>[]
+                ..add(getEnumName(commandResult?.exitCode))
+                ..addAll(commandResult?.analyticsParameters ?? const Iterable<String>.empty())
+        ).where((String label) => label != null && label.isNotEmpty).join('-'),
       );
     }
-
-    return commandResult;
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -184,7 +186,6 @@ abstract class FlutterCommand extends Command<Null> {
     final String commandPath = await usagePath;
     if (commandPath != null)
       flutterUsage.sendCommand(commandPath);
-
     return await runCommand();
   }
 
