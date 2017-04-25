@@ -1788,10 +1788,10 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// The interface used by [CustomPaint] (in the widgets library) and
 /// [RenderCustomPaint] (in the rendering library).
 ///
-/// To implement a custom painter, subclass this interface to define your custom
-/// paint delegate. [CustomPaint] subclasses must implement the [paint] and
-/// [shouldRepaint] methods, and may optionally also implement the [hitTest]
-/// method.
+/// To implement a custom painter, either subclass or implement this interface
+/// to define your custom paint delegate. [CustomPaint] subclasses must
+/// implement the [paint] and [shouldRepaint] methods, and may optionally also
+/// implement the [hitTest] method.
 ///
 /// The [paint] method is called whenever the custom object needs to be repainted.
 ///
@@ -1799,20 +1799,41 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
-/// The most efficient way to trigger a repaint is to supply a repaint argument
-/// to the constructor of the [CustomPainter]. The custom object will listen to
-/// this animation and repaint whenever the animation ticks, avoiding both the
-/// build and layout phases of the pipeline.
+/// The most efficient way to trigger a repaint is to either extend this class
+/// and supply a `repaint` argument to the constructor of the [CustomPainter],
+/// where that object notifies its listeners when it is time to repaint, or to
+/// extend [Listenable] (e.g. via [ChangeNotifier]) and implement
+/// [CustomPainter], so that the object itself provides the notifications
+/// directly. In either case, the [CustomPaint] widget or [RenderCustomPaint]
+/// render object will listen to the [Listenable] and repaint whenever the
+/// animation ticks, avoiding both the build and layout phases of the pipeline.
 ///
 /// The [hitTest] method is called when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
-abstract class CustomPainter {
+abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
-  /// The painter will repaint whenever [repaint] notifies its listeners.
+  /// The painter will repaint whenever `repaint` notifies its listeners.
   const CustomPainter({ Listenable repaint }) : _repaint = repaint;
 
   final Listenable _repaint;
+
+  /// Register a closure to be notified when it is time to repaint.
+  ///
+  /// The [CustomPainter] implementation merely forwards to the same method on
+  /// the [Listenable] provided to the constructor in the `repaint` argument, if
+  /// it was not null.
+  @override
+  void addListener(VoidCallback listener) => _repaint?.addListener(listener);
+
+  /// Remove a previously registered closure from the list of closures that the
+  /// object notifies when it is time to repaint.
+  ///
+  /// The [CustomPainter] implementation merely forwards to the same method on
+  /// the [Listenable] provided to the constructor in the `repaint` argument, if
+  /// it was not null.
+  @override
+  void removeListener(VoidCallback listener) => _repaint?.removeListener(listener);
 
   /// Called whenever the object needs to paint. The given [Canvas] has its
   /// coordinate space configured such that the origin is at the top left of the
@@ -1884,7 +1905,7 @@ abstract class CustomPainter {
   bool hitTest(Offset position) => null;
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => '$runtimeType#$hashCode(${ _repaint?.toString() ?? "" })';
 }
 
 /// Provides a canvas on which to draw during the paint phase.
@@ -1898,7 +1919,7 @@ abstract class CustomPainter {
 /// those bounds, there might be insufficient memory allocated to rasterize the
 /// painting commands and the resulting behavior is undefined.)
 ///
-/// Painters are implemented by subclassing [CustomPainter].
+/// Painters are implemented by subclassing or implementing [CustomPainter].
 ///
 /// Because custom paint calls its painters during paint, you cannot mark the
 /// tree as needing a new layout during the callback (the layout for this frame
@@ -1986,8 +2007,8 @@ class RenderCustomPaint extends RenderProxyBox {
       markNeedsPaint();
     }
     if (attached) {
-      oldPainter?._repaint?.removeListener(markNeedsPaint);
-      newPainter?._repaint?.addListener(markNeedsPaint);
+      oldPainter?.removeListener(markNeedsPaint);
+      newPainter?.addListener(markNeedsPaint);
     }
   }
 
@@ -2011,14 +2032,14 @@ class RenderCustomPaint extends RenderProxyBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _painter?._repaint?.addListener(markNeedsPaint);
-    _foregroundPainter?._repaint?.addListener(markNeedsPaint);
+    _painter?.addListener(markNeedsPaint);
+    _foregroundPainter?.addListener(markNeedsPaint);
   }
 
   @override
   void detach() {
-    _painter?._repaint?.removeListener(markNeedsPaint);
-    _foregroundPainter?._repaint?.removeListener(markNeedsPaint);
+    _painter?.removeListener(markNeedsPaint);
+    _foregroundPainter?.removeListener(markNeedsPaint);
     super.detach();
   }
 
