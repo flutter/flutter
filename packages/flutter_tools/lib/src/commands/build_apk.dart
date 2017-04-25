@@ -16,7 +16,12 @@ import 'build.dart';
 export '../android/android_device.dart' show AndroidDevice;
 
 class ApkKeystoreInfo {
-  ApkKeystoreInfo({ this.keystore, this.password, this.keyAlias, @required this.keyPassword }) {
+  ApkKeystoreInfo({
+    @required this.keystore,
+    this.password,
+    this.keyAlias,
+    @required this.keyPassword,
+  }) {
     assert(keystore != null);
   }
 
