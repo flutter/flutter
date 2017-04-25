@@ -181,7 +181,7 @@ class HotRunner extends ResidentRunner {
     package = getApplicationPackageForPlatform(targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
-      String message = 'No application found for ${targetPlatform}.';
+      String message = 'No application found for $targetPlatform.';
       final String hint = getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';

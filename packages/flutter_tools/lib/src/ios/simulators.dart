@@ -592,8 +592,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    SimControl.instance.takeScreenshot(outputFile.path);
-    return new Future<Null>.value();
+    return SimControl.instance.takeScreenshot(outputFile.path);
   }
 }
 

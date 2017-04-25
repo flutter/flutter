@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
@@ -128,9 +129,9 @@ void main() {
       mockProcessManager = new MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
-        mockProcessManager.runSync(any, environment: null, workingDirectory:  null)
+        mockProcessManager.run(any, environment: null, workingDirectory:  null)
       ).thenReturn(
-        new ProcessResult(2, 0, '', null)
+        new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );
       // Doesn't matter what the device is.
       deviceUnderTest = new IOSSimulator('x', name: 'iPhone SE');
@@ -148,14 +149,14 @@ void main() {
 
     testUsingContext(
       'Xcode 8.2+ supports screenshots',
-      () {
+      () async {
         when(mockXcode.xcodeMajorVersion).thenReturn(8);
         when(mockXcode.xcodeMinorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         final MockFile mockFile = new MockFile();
         when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
-        deviceUnderTest.takeScreenshot(mockFile);
-        verify(mockProcessManager.runSync(
+        await deviceUnderTest.takeScreenshot(mockFile);
+        verify(mockProcessManager.run(
           <String>[
               '/usr/bin/xcrun',
               'simctl',
