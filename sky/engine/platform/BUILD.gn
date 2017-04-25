@@ -97,7 +97,6 @@ source_set("platform") {
     "fonts/harfbuzz/HarfBuzzFaceSkia.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.cpp",
     "fonts/harfbuzz/HarfBuzzShaper.h",
-    "fonts/linux/FontPlatformDataLinux.cpp",
     "fonts/opentype/OpenTypeTypes.h",
     "fonts/skia/FontCacheSkia.cpp",
     "fonts/skia/FontCustomPlatformDataSkia.cpp",
@@ -258,6 +257,10 @@ source_set("platform") {
       "fonts/opentype/OpenTypeVerticalData.cpp",
       "fonts/opentype/OpenTypeVerticalData.h",
     ]
+  }
+
+  if (is_linux || is_fuchsia) {
+    sources += [ "fonts/linux/FontPlatformDataLinux.cpp" ]
   }
 
   if (is_ios || is_mac) {
