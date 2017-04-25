@@ -6,7 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  /*
   testWidgets('ListView can handle shrinking top elements', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
     await tester.pumpWidget(new ListView(
@@ -53,7 +52,6 @@ void main() {
     expect(controller.offset, equals(0.0));
     expect(tester.getTopLeft(find.text('2')).dy, equals(200.0));
   });
-  */
 
   testWidgets('ListView can handle inserts at 0', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
