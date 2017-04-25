@@ -97,6 +97,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
          earliestScrollOffset = childScrollOffset(earliestUsefulChild)) {
       // We have to add children before the earliestUsefulChild.
       earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+
       if (earliestUsefulChild == null) {
         // We ran out of children before reaching the scroll offset.
         // We must inform our parent that this sliver cannot fulfill
@@ -108,6 +109,27 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         childParentData.layoutOffset = 0.0;
         return;
       }
+
+      if (earliestScrollOffset - paintExtentOf(firstChild) < 0.0) {
+        // The first child doesn't fit within the viewport (underflow) and
+        // there may be additional children above it. Find the real first child
+        // and then correct the scroll position so that there's room for all and
+        // so that the trailing edge of the original firstChild appears where it
+        // was before the scroll offset correction.
+        double correction = 0.0;
+        while (earliestUsefulChild != null) {
+          assert(firstChild == earliestUsefulChild);
+          correction += paintExtentOf(firstChild);
+          earliestUsefulChild = insertAndLayoutLeadingChild(childConstraints, parentUsesSize: true);
+        }
+        geometry = new SliverGeometry(
+          scrollOffsetCorrection: correction - earliestScrollOffset,
+        );
+        final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+        childParentData.layoutOffset = 0.0;
+        return;
+      }
+
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
       childParentData.layoutOffset = earliestScrollOffset - paintExtentOf(firstChild);
       assert(earliestUsefulChild == firstChild);
