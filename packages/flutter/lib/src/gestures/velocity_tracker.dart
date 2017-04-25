@@ -125,18 +125,16 @@ class _PointAtTime {
   String toString() => '_PointAtTime($point at $time)';
 }
 
-/// Computes a pointer's velocity based on data from PointerMove events.
+/// Computes a pointer's velocity based on data from [PointerMove] events.
 ///
-/// The input data is provided by calling addPosition(). Adding data
-/// is cheap.
+/// The input data is provided by calling [addPosition]. Adding data is cheap.
 ///
-/// To obtain a velocity, call [getVelocity] or [getVelocityEstimate].
-/// This will compute the velocity based on the data added so far. Only
-/// call this when you need to use the velocity, as it is comparatively
-/// expensive.
+/// To obtain a velocity, call [getVelocity] or [getVelocityEstimate]. This will
+/// compute the velocity based on the data added so far. Only call these when
+/// you need to use the velocity, as they are comparatively expensive.
 ///
-/// The quality of the velocity estimation will be better if more data
-/// points have been received.
+/// The quality of the velocity estimation will be better if more data points
+/// have been received.
 class VelocityTracker {
   static const int _kAssumePointerMoveStoppedMilliseconds = 40;
   static const int _kHistorySize = 20;
@@ -157,6 +155,10 @@ class VelocityTracker {
 
   /// Returns an estimate of the velocity of the object being tracked by the
   /// tracker given the current information available to the tracker.
+  ///
+  /// Information is added using [addPosition].
+  ///
+  /// Returns null if there is no data on which to base an estimate.
   VelocityEstimate getVelocityEstimate() {
     final List<double> x = <double>[];
     final List<double> y = <double>[];
@@ -228,12 +230,12 @@ class VelocityTracker {
   ///
   /// This can be expensive. Only call this when you need the velocity.
   ///
-  /// getVelocity() will return null if no estimate is available or if
-  /// the velocity is zero.
+  /// Returns [Velocity.zero] if there is no data from which to compute an
+  /// estimate or if the estimated velocity is zero.
   Velocity getVelocity() {
     final VelocityEstimate estimate = getVelocityEstimate();
     if (estimate == null || estimate.pixelsPerSecond == Offset.zero)
-      return null;
+      return Velocity.zero;
     return new Velocity(pixelsPerSecond: estimate.pixelsPerSecond);
   }
 }
