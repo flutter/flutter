@@ -154,7 +154,11 @@ abstract class FlutterCommand extends Command<Null> {
       flutterUsage.sendTiming(
         'flutter', 
         name, 
+        // If the command provides its own end time, use it. Otherwise report
+        // the duration of the entire execution.
         (commandResult?.exitTime ?? endTime).difference(startTime), 
+        // Report in the form of `success-[parameter1-parameter2]`, all of which
+        // can be null if the command doesn't provide a FlutterCommandResult.
         label: (
             <String>[]
                 ..add(getEnumName(commandResult?.exitCode))
