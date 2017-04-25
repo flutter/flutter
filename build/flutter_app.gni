@@ -9,6 +9,15 @@ import("//flutter/lib/ui/dart_ui.gni")
 import("//apps/mozart/lib/flutter/sdk_ext/sdk_ext.gni")
 import("//lib/fidl/dart/sdk_ext/sdk_ext.gni")
 
+gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
+gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
+gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
+
+flutter_root = "//lib/flutter"
+flutter_tools_label = "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
+flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
+flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
+
 # Defines a Flutter application
 #
 # Parameters
@@ -61,10 +70,6 @@ template("flutter_app") {
     bundle_name = "${target_name}.flx"
   }
 
-  gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
-  gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
-  gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
-
   flutter_core_snapshot_label = "//flutter/lib/snapshot:generate_snapshot_bin"
   flutter_core_snapshot_gen_dir =
       get_label_info(flutter_core_snapshot_label, "target_gen_dir")
@@ -72,11 +77,6 @@ template("flutter_app") {
       "$flutter_core_snapshot_gen_dir/vm_isolate_snapshot.bin"
   flutter_core_snapshot_isolate_data =
       "$flutter_core_snapshot_gen_dir/isolate_snapshot.bin"
-
-  flutter_root = "//lib/flutter"
-  flutter_tools_label = "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
-  flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
-  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$target_gen_dir/$bundle_name"
@@ -213,15 +213,6 @@ template("flutter_aot_app") {
     bundle_name = "${target_name}.flx"
   }
 
-  gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
-  gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
-  gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
-
-  flutter_root = "//lib/flutter"
-  flutter_tools_label = "$flutter_root/packages/flutter_tools($host_toolchain)"
-  flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
-  flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/flutter_tools"
-
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
   bundle_path = "$target_gen_dir/$bundle_name"
   bundle_depfile = "$target_gen_dir/$bundle_name.d"
@@ -270,6 +261,8 @@ template("flutter_aot_app") {
       rebase_path("//flutter/runtime/dart_vm_entry_points.txt"),
       "--entry-points-manifest",
       rebase_path("//flutter/runtime/dart_vm_entry_points_fuchsia.txt"),
+      "--entry-points-manifest",
+      rebase_path("//dart/runtime/bin/dart_io_entries.txt"),
 
       "--main-dart",
       rebase_path(main_dart),
