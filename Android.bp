@@ -8,4 +8,5 @@ subdirs = [
     "app",
     "libs/minikin",
     "sample",
+    "tests",
 ]
