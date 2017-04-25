@@ -73,5 +73,14 @@ void main()  {
         expect(error.toString(), contains('pubspec.yaml'));
       }
     });
+
+    testUsingContext('does not change ASCI casing of path', () {
+      final String testPath = fs.path.join(dataPath, 'asci_casing');
+      final String mainPath = fs.path.join(testPath, 'main.dart');
+      final String packagesPath = fs.path.join(testPath, '.packages');
+      final DartDependencySetBuilder builder = new DartDependencySetBuilder(mainPath, packagesPath);
+      final Set<String> deps = builder.build();
+      expect(deps, contains(endsWith('This_Import_Has_fuNNy_casING.dart')));
+    });
   });
 }

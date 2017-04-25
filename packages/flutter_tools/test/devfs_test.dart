@@ -122,6 +122,21 @@ void main() {
       FileSystem: () => fs,
     });
 
+    testUsingContext('add new file to local file system and preserve unusal file name casing', () async {
+      final String filePathWithUnusalCasing = fs.path.join('FooBar', 'TEST.txt');
+      final File file = fs.file(fs.path.join(basePath, filePathWithUnusalCasing));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3, 4, 5, 6, 7]);
+      final int bytes = await devFS.update();
+      devFSOperations.expectMessages(<String>[
+        'writeFile test FooBar/TEST.txt',
+      ]);
+      expect(devFS.assetPathsToEvict, isEmpty);
+      expect(bytes, 7);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
     testUsingContext('modify existing file on local file system', () async {
       await devFS.update();
       final File file = fs.file(fs.path.join(basePath, filePath));

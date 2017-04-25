@@ -59,4 +59,30 @@ void main() {
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
   });
+
+  group('canonicalizePath', () {
+    test('does not lowercase on Windows', () {
+      String path = 'C:\\Foo\\bAr\\cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // fs.path.canonicalize does lowercase on Windows
+      expect(fs.path.canonicalize(path), isNot(path));
+
+      path = '..\\bar\\.\\\\Foo';
+      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+      // fs.path.canonicalize should return the same result (modulo casing)
+      expect(fs.path.canonicalize(path), expected.toLowerCase());
+    }, testOn: 'windows');
+
+    test('does not lowercase on posix', () {
+      String path = '/Foo/bAr/cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // fs.path.canonicalize and canonicalizePath should be the same on Posix
+      expect(fs.path.canonicalize(path), path);
+
+      path = '../bar/.//Foo';
+      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+    }, testOn: 'posix');
+  });
 }
