@@ -89,9 +89,13 @@ void main() {
       ]);
     });
 
-    await tester.pumpWidget(const Center(
-      child: const LicensePage()
-    ));
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Center(
+          child: const LicensePage()
+        ),
+      ),
+    );
 
     expect(licenseFuture, isNotNull);
     await licenseFuture;

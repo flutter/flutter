@@ -769,6 +769,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
     EdgeInsets padding = MediaQuery.of(context).padding;
     final ThemeData themeData = Theme.of(context);
     if (!widget.resizeToAvoidBottomPadding)

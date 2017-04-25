@@ -13,31 +13,33 @@ void main() {
     final Key avatarD = const Key('D');
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new UserAccountsDrawerHeader(
-            currentAccountPicture: new CircleAvatar(
-              key: avatarA,
-              child: const Text('A'),
+      new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new UserAccountsDrawerHeader(
+              currentAccountPicture: new CircleAvatar(
+                key: avatarA,
+                child: const Text('A'),
+              ),
+              otherAccountsPictures: <Widget>[
+                const CircleAvatar(
+                  child: const Text('B'),
+                ),
+                new CircleAvatar(
+                  key: avatarC,
+                  child: const Text('C'),
+                ),
+                new CircleAvatar(
+                  key: avatarD,
+                  child: const Text('D'),
+                ),
+                const CircleAvatar(
+                  child: const Text('E'),
+                )
+              ],
+              accountName: const Text("name"),
+              accountEmail: const Text("email"),
             ),
-            otherAccountsPictures: <Widget>[
-              const CircleAvatar(
-                child: const Text('B'),
-              ),
-              new CircleAvatar(
-                key: avatarC,
-                child: const Text('C'),
-              ),
-              new CircleAvatar(
-                key: avatarD,
-                child: const Text('D'),
-              ),
-              const CircleAvatar(
-                child: const Text('E'),
-              )
-            ],
-            accountName: const Text("name"),
-            accountEmail: const Text("email"),
           ),
         ),
       ),
@@ -87,15 +89,17 @@ void main() {
       VoidCallback onDetailsPressed,
       EdgeInsets margin,
     }) {
-      return new Material(
-        child: new Center(
-          child: new UserAccountsDrawerHeader(
-            currentAccountPicture: currentAccountPicture,
-            otherAccountsPictures: otherAccountsPictures,
-            accountName: accountName,
-            accountEmail: accountEmail,
-            onDetailsPressed: onDetailsPressed,
-            margin: margin,
+      return new MaterialApp(
+        home: new Material(
+          child: new Center(
+            child: new UserAccountsDrawerHeader(
+              currentAccountPicture: currentAccountPicture,
+              otherAccountsPictures: otherAccountsPictures,
+              accountName: accountName,
+              accountEmail: accountEmail,
+              onDetailsPressed: onDetailsPressed,
+              margin: margin,
+            ),
           ),
         ),
       );

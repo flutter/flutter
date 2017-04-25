@@ -72,6 +72,7 @@ class DrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    assert(debugCheckHasMediaQuery(context));
     final ThemeData theme = Theme.of(context);
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     return new Container(

@@ -463,7 +463,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
           showCursor: _showCursor,
           maxLines: widget.maxLines,
           selectionColor: widget.selectionColor,
-          textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+          textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
           textAlign: widget.textAlign,
           obscureText: widget.obscureText,
           offset: offset,

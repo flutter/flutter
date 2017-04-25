@@ -26,12 +26,15 @@ class MockClipboard {
 }
 
 Widget overlay(Widget child) {
-  return new Overlay(
-    initialEntries: <OverlayEntry>[
-      new OverlayEntry(
-        builder: (BuildContext context) => child,
-      ),
-    ],
+  return new MediaQuery(
+    data: const MediaQueryData(),
+    child: new Overlay(
+      initialEntries: <OverlayEntry>[
+        new OverlayEntry(
+          builder: (BuildContext context) => child,
+        ),
+      ],
+    ),
   );
 }
 
@@ -229,20 +232,23 @@ void main() {
     final TextEditingController controller = new TextEditingController();
 
     Widget builder() {
-      return new Overlay(
-        initialEntries: <OverlayEntry>[
-          new OverlayEntry(
-            builder: (BuildContext context) {
-              return new Center(
-                child: new Material(
-                  child: new TextField(
-                    controller: controller,
+      return new MediaQuery(
+        data: const MediaQueryData(),
+        child: new Overlay(
+          initialEntries: <OverlayEntry>[
+            new OverlayEntry(
+              builder: (BuildContext context) {
+                return new Center(
+                  child: new Material(
+                    child: new TextField(
+                      controller: controller,
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       );
     }
 
