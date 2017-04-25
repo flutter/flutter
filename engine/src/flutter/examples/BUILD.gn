@@ -5,6 +5,7 @@
 group("examples") {
   deps = [
     "hello_flutter",
+    "hello_flutter:hello_flutter_aot",
     "spinning_square",
   ]
 }
