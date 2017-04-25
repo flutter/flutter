@@ -29,8 +29,8 @@ enum ExitCode {
   fail,
 }
 
-class CommandResult {
-  CommandResult(
+class FlutterCommandResult {
+  FlutterCommandResult(
     this.exitCode,
     {
       this.analyticsParameters,
@@ -146,7 +146,7 @@ abstract class FlutterCommand extends Command<Null> {
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
 
-    final CommandResult commandResult = await verifyThenRunCommand();
+    final FlutterCommandResult commandResult = await verifyThenRunCommand();
 
     final DateTime endTime = new DateTime.now();
     printTrace("'flutter $name' took ${endTime.difference(startTime).inMilliseconds}ms.");
@@ -172,7 +172,7 @@ abstract class FlutterCommand extends Command<Null> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<CommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache)
@@ -190,9 +190,9 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   /// Subclasses must implement this to execute the command.
-  /// Optionally provide a [CommandResult] to send more details about the 
+  /// Optionally provide a [FlutterCommandResult] to send more details about the 
   /// execution for analytics.
-  Future<CommandResult> runCommand();
+  Future<FlutterCommandResult> runCommand();
 
   /// Find and return the target [Device] based upon currently connected
   /// devices and criteria entered by the user on the command line.

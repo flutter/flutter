@@ -197,7 +197,7 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<CommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     commandValidator();
     device = await findTargetDevice();
     if (device == null)
@@ -220,7 +220,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<CommandResult> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -246,7 +246,7 @@ class RunCommand extends RunCommandBase {
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
-      return new CommandResult(
+      return new FlutterCommandResult(
         ExitCode.success,
         analyticsParameters: <String>["daemon"],
         exitTime: appStartedTime,
@@ -307,7 +307,7 @@ class RunCommand extends RunCommandBase {
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
-    return new CommandResult(
+    return new FlutterCommandResult(
       ExitCode.success,
       analyticsParameters: <String>[
         hotMode ? "hot" : "cold",
