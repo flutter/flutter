@@ -18,8 +18,8 @@
 #include <memory>
 
 #include <minikin/FontCollection.h>
-#include <util/FontTestUtils.h>
-#include <util/UnicodeUtils.h>
+#include <FontTestUtils.h>
+#include <UnicodeUtils.h>
 #include <MinikinInternal.h>
 
 namespace minikin {
