@@ -1,0 +1,11 @@
+name: platform_channels
+description: A Flutter app for integration-testing platform channels.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

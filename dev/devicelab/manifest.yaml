@@ -83,9 +83,15 @@ tasks:
     required_agent_capabilities: ["has-android-device"]
     flaky: true
 
-  platform_channel_test:
+  platform_channel_sample_test:
     description: >
      Runs a driver test on the Platform Channel sample app on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  platform_channel_integration_test:
+    description: >
+      Checks that platform channels work on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
@@ -154,9 +160,15 @@ tasks:
 
   # iOS on-device tests
 
-  platform_channel_test_ios:
+  platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  platform_channel_integration_test_ios:
+    description: >
+      Checks that platform channels work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
