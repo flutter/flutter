@@ -61,11 +61,12 @@ class ColdRunner extends ResidentRunner {
       printStatus('Launching ${getDisplayPath(mainPath)} on ${device.name} in $modeName mode...');
     }
 
-    package = getApplicationPackageForPlatform(device.targetPlatform, applicationBinary: applicationBinary);
+    final TargetPlatform targetPlatform = await device.targetPlatform;
+    package = getApplicationPackageForPlatform(targetPlatform, applicationBinary: applicationBinary);
 
     if (package == null) {
-      String message = 'No application found for ${device.targetPlatform}.';
-      final String hint = getMissingPackageHintForPlatform(device.targetPlatform);
+      String message = 'No application found for $targetPlatform.';
+      final String hint = getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null)
         message += '\n$hint';
       printError(message);

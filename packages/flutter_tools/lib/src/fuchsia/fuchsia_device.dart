@@ -37,22 +37,22 @@ class FuchsiaDevice extends Device {
   final String name;
 
   @override
-  bool get isLocalEmulator => false;
+  Future<bool> get isLocalEmulator async => false;
 
   @override
   bool get supportsStartPaused => false;
 
   @override
-  bool isAppInstalled(ApplicationPackage app) => false;
+  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
 
   @override
-  bool isLatestBuildInstalled(ApplicationPackage app) => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> installApp(ApplicationPackage app) => new Future<bool>.value(false);
 
   @override
-  bool uninstallApp(ApplicationPackage app) => false;
+  Future<bool> uninstallApp(ApplicationPackage app) async => false;
 
   @override
   bool isSupported() => true;
@@ -77,10 +77,10 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.fuchsia;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.fuchsia;
 
   @override
-  String get sdkNameAndVersion => 'Fuchsia';
+  Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   _FuchsiaLogReader _logReader;
   @override

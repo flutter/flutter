@@ -87,7 +87,7 @@ class IOSDevice extends Device {
   _IOSDevicePortForwarder _portForwarder;
 
   @override
-  bool get isLocalEmulator => false;
+  Future<bool> get isLocalEmulator async => false;
 
   @override
   bool get supportsStartPaused => false;
@@ -139,10 +139,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isAppInstalled(ApplicationPackage app) {
+  Future<bool> isAppInstalled(ApplicationPackage app) async {
     try {
-      final String apps = runCheckedSync(<String>[installerPath, '--list-apps']);
-      if (new RegExp(app.id, multiLine: true).hasMatch(apps)) {
+      final RunResult apps = await runCheckedAsync(<String>[installerPath, '--list-apps']);
+      if (new RegExp(app.id, multiLine: true).hasMatch(apps.stdout)) {
         return true;
       }
     } catch (e) {
@@ -152,7 +152,7 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool isLatestBuildInstalled(ApplicationPackage app) => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async {
@@ -164,7 +164,7 @@ class IOSDevice extends Device {
     }
 
     try {
-      runCheckedSync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
+      await runCheckedAsync(<String>[installerPath, '-i', iosApp.deviceBundlePath]);
       return true;
     } catch (e) {
       return false;
@@ -172,9 +172,9 @@ class IOSDevice extends Device {
   }
 
   @override
-  bool uninstallApp(ApplicationPackage app) {
+  Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      runCheckedSync(<String>[installerPath, '-U', app.id]);
+      await runCheckedAsync(<String>[installerPath, '-U', app.id]);
       return true;
     } catch (e) {
       return false;
@@ -343,10 +343,10 @@ class IOSDevice extends Device {
   }
 
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  String get sdkNameAndVersion => 'iOS $_sdkVersion ($_buildVersion)';
+  Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion ($_buildVersion)';
 
   String get _sdkVersion => _getDeviceInfo(id, 'ProductVersion');
 
@@ -370,8 +370,7 @@ class IOSDevice extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    runCheckedSync(<String>[screenshotPath, outputFile.path]);
-    return new Future<Null>.value();
+    return runCheckedAsync(<String>[screenshotPath, outputFile.path]);
   }
 }
 

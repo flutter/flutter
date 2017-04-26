@@ -37,42 +37,40 @@ class DeviceManager {
 
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
-  /// Return the devices with a name or id matching [deviceId].
-  /// This does a case insentitive compare with [deviceId].
-  Future<List<Device>> getDevicesById(String deviceId) async {
+  Stream<Device> getDevicesById(String deviceId) async* {
+    final Stream<Device> devices = getAllConnectedDevices();
     deviceId = deviceId.toLowerCase();
-    final List<Device> devices = await getAllConnectedDevices();
-    final Device device = devices.firstWhere(
-        (Device device) =>
-            device.id.toLowerCase() == deviceId ||
-            device.name.toLowerCase() == deviceId,
-        orElse: () => null);
+    bool exactlyMatchesDeviceId(Device device) =>
+        device.id.toLowerCase() == deviceId ||
+        device.name.toLowerCase() == deviceId;
+    bool startsWithDeviceId(Device device) =>
+        device.id.toLowerCase().startsWith(deviceId) ||
+        device.name.toLowerCase().startsWith(deviceId);
 
-    if (device != null)
-      return <Device>[device];
+    final Device exactMatch = await devices.firstWhere(
+        exactlyMatchesDeviceId, defaultValue: () => null);
+    if (exactMatch != null) {
+      yield exactMatch;
+      return;
+    }
 
     // Match on a id or name starting with [deviceId].
-    return devices.where((Device device) {
-      return (device.id.toLowerCase().startsWith(deviceId) ||
-        device.name.toLowerCase().startsWith(deviceId));
-    }).toList();
+    await for (Device device in devices.where(startsWithDeviceId))
+      yield device;
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
-  Future<List<Device>> getDevices() async {
-    if (specifiedDeviceId == null) {
-      return getAllConnectedDevices();
-    } else {
-      return getDevicesById(specifiedDeviceId);
-    }
+  Stream<Device> getDevices() {
+    return hasSpecifiedDeviceId
+        ? getDevicesById(specifiedDeviceId)
+        : getAllConnectedDevices();
   }
 
   /// Return the list of all connected devices.
-  Future<List<Device>> getAllConnectedDevices() async {
-    return _deviceDiscoverers
+  Stream<Device> getAllConnectedDevices() {
+    return new Stream<Device>.fromIterable(_deviceDiscoverers
       .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
-      .expand((DeviceDiscovery discoverer) => discoverer.devices)
-      .toList();
+      .expand((DeviceDiscovery discoverer) => discoverer.devices));
   }
 }
 
@@ -141,19 +139,19 @@ abstract class Device {
   bool get supportsStartPaused => true;
 
   /// Whether it is an emulated device running on localhost.
-  bool get isLocalEmulator;
+  Future<bool> get isLocalEmulator;
 
   /// Check if a version of the given app is already installed
-  bool isAppInstalled(ApplicationPackage app);
+  Future<bool> isAppInstalled(ApplicationPackage app);
 
   /// Check if the latest build of the [app] is already installed.
-  bool isLatestBuildInstalled(ApplicationPackage app);
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
 
   /// Install an app package on the current device
   Future<bool> installApp(ApplicationPackage app);
 
   /// Uninstall an app package from the current device
-  bool uninstallApp(ApplicationPackage app);
+  Future<bool> uninstallApp(ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -162,9 +160,10 @@ abstract class Device {
   // supported by Flutter, and, if not, why.
   String supportMessage() => isSupported() ? "Supported" : "Unsupported";
 
-  TargetPlatform get targetPlatform;
+  /// The device's platform.
+  Future<TargetPlatform> get targetPlatform;
 
-  String get sdkNameAndVersion;
+  Future<String> get sdkNameAndVersion;
 
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
@@ -238,23 +237,24 @@ abstract class Device {
   @override
   String toString() => name;
 
-  static Iterable<String> descriptions(List<Device> devices) {
+  static Stream<String> descriptions(List<Device> devices) async* {
     if (devices.isEmpty)
-      return <String>[];
+      return;
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
     for (Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
-      if (device.isLocalEmulator) {
-        final String type = device.targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+      final TargetPlatform targetPlatform = await device.targetPlatform;
+      if (await device.isLocalEmulator) {
+        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
         device.name,
         device.id,
-        '${getNameForTargetPlatform(device.targetPlatform)}',
-        '${device.sdkNameAndVersion}$supportIndicator',
+        '${getNameForTargetPlatform(targetPlatform)}',
+        '${await device.sdkNameAndVersion}$supportIndicator',
       ]);
     }
 
@@ -266,13 +266,13 @@ abstract class Device {
     }
 
     // Join columns into lines of text
-    return table.map((List<String> row) =>
-        indices.map((int i) => row[i].padRight(widths[i])).join(' • ') +
-        ' • ${row.last}');
+    for (List<String> row in table) {
+      yield indices.map((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+    }
   }
 
-  static void printDevices(List<Device> devices) {
-    descriptions(devices).forEach(printStatus);
+  static Future<Null> printDevices(List<Device> devices) async {
+    await descriptions(devices).forEach(printStatus);
   }
 }
 

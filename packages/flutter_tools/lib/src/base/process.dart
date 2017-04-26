@@ -221,6 +221,15 @@ bool exitsHappy(List<String> cli) {
   }
 }
 
+Future<bool> exitsHappyAsync(List<String> cli) async {
+  _traceCommand(cli);
+  try {
+    return (await processManager.run(cli)).exitCode == 0;
+  } catch (error) {
+    return false;
+  }
+}
+
 /// Run cmd and return stdout.
 ///
 /// Throws an error if cmd exits with a non-zero value.
@@ -239,16 +248,6 @@ String runCheckedSync(List<String> cmd, {
     noisyErrors: true,
     environment: environment,
   );
-}
-
-/// Run cmd and return stdout on success.
-///
-/// Throws the standard error output if cmd exits with a non-zero value.
-String runSyncAndThrowStdErrOnError(List<String> cmd) {
-  return _runWithLoggingSync(cmd,
-                             checked: true,
-                             throwStandardErrorOnError: true,
-                             hideStdout: true);
 }
 
 /// Run cmd and return stdout.

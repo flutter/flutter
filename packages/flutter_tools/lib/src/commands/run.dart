@@ -153,14 +153,14 @@ class RunCommand extends RunCommandBase {
   Device device;
 
   @override
-  String get usagePath {
+  Future<String> get usagePath async {
     final String command = shouldUseHotMode() ? 'hotrun' : name;
 
     if (device == null)
       return command;
 
     // Return 'run/ios'.
-    return '$command/${getNameForTargetPlatform(device.targetPlatform)}';
+    return '$command/${getNameForTargetPlatform(await device.targetPlatform)}';
   }
 
   @override
@@ -249,7 +249,7 @@ class RunCommand extends RunCommandBase {
       return null;
     }
 
-    if (device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
+    if (await device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
       throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
 
     if (hotMode) {

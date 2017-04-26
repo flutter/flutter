@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
 
 import 'base/context.dart';
@@ -96,7 +97,8 @@ class Usage {
       _analytics.sendException('${exception.runtimeType}\n${sanitizeStacktrace(trace)}');
   }
 
-  /// Fires whenever analytics data is sent over the network; public for testing.
+  /// Fires whenever analytics data is sent over the network.
+  @visibleForTesting
   Stream<Map<String, dynamic>> get onSend => _analytics.onSend;
 
   /// Returns when the last analytics event has been sent, or after a fixed

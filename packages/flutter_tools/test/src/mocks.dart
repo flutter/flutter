@@ -31,7 +31,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.android_arm;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
 
   @override
   bool isSupported() => true;
@@ -39,7 +39,7 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
 
 class MockIOSDevice extends Mock implements IOSDevice {
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;
@@ -47,7 +47,7 @@ class MockIOSDevice extends Mock implements IOSDevice {
 
 class MockIOSSimulator extends Mock implements IOSSimulator {
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
   bool isSupported() => true;

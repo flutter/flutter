@@ -224,8 +224,8 @@ class SimControl {
 
   bool _isAnyConnected() => getConnectedDevices().isNotEmpty;
 
-  bool isInstalled(String appId) {
-    return exitsHappy(<String>[
+  Future<bool> isInstalled(String appId) {
+    return exitsHappyAsync(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
@@ -234,23 +234,23 @@ class SimControl {
     ]);
   }
 
-  void install(String deviceId, String appPath) {
-    runCheckedSync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
+  Future<Null> install(String deviceId, String appPath) {
+    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'install', deviceId, appPath]);
   }
 
-  void uninstall(String deviceId, String appId) {
-    runCheckedSync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
+  Future<Null> uninstall(String deviceId, String appId) {
+    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId]);
   }
 
-  void launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
+  Future<Null> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
     final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
-    runCheckedSync(args);
+    return runCheckedAsync(args);
   }
 
-  void takeScreenshot(String outputPath) {
-    runCheckedSync(<String>[_xcrunPath, 'simctl', 'io', 'booted', 'screenshot', outputPath]);
+  Future<Null> takeScreenshot(String outputPath) {
+    return runCheckedAsync(<String>[_xcrunPath, 'simctl', 'io', 'booted', 'screenshot', outputPath]);
   }
 }
 
@@ -313,7 +313,7 @@ class IOSSimulator extends Device {
   final String category;
 
   @override
-  bool get isLocalEmulator => true;
+  Future<bool> get isLocalEmulator async => true;
 
   @override
   bool get supportsHotMode => true;
@@ -335,12 +335,12 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool isAppInstalled(ApplicationPackage app) {
+  Future<bool> isAppInstalled(ApplicationPackage app) {
     return SimControl.instance.isInstalled(app.id);
   }
 
   @override
-  bool isLatestBuildInstalled(ApplicationPackage app) => false;
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async {
@@ -354,9 +354,9 @@ class IOSSimulator extends Device {
   }
 
   @override
-  bool uninstallApp(ApplicationPackage app) {
+  Future<bool> uninstallApp(ApplicationPackage app) async {
     try {
-      SimControl.instance.uninstall(id, app.id);
+      await SimControl.instance.uninstall(id, app.id);
       return true;
     } catch (e) {
       return false;
@@ -495,21 +495,18 @@ class IOSSimulator extends Device {
     }
   }
 
-  bool _applicationIsInstalledAndRunning(ApplicationPackage app) {
-    final bool isInstalled = isAppInstalled(app);
-
-    final bool isRunning = exitsHappy(<String>[
-      '/usr/bin/killall',
-      'Runner',
+  Future<bool> _applicationIsInstalledAndRunning(ApplicationPackage app) async {
+    final List<bool> criteria = await Future.wait(<Future<bool>>[
+      isAppInstalled(app),
+      exitsHappyAsync(<String>['/usr/bin/killall', 'Runner']),
     ]);
-
-    return isInstalled && isRunning;
+    return criteria.reduce((bool a, bool b) => a && b);
   }
 
   Future<Null> _setupUpdatedApplicationBundle(ApplicationPackage app) async {
     await _sideloadUpdatedAssetsForInstalledApplicationBundle(app);
 
-    if (!_applicationIsInstalledAndRunning(app))
+    if (!await _applicationIsInstalledAndRunning(app))
       return _buildAndInstallApplicationBundle(app);
   }
 
@@ -544,7 +541,7 @@ class IOSSimulator extends Device {
       ApplicationPackage app, String localFile, String targetFile) async {
     if (platform.isMacOS) {
       final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      runCheckedSync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
+      await runCheckedAsync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
       return true;
     }
     return false;
@@ -555,10 +552,10 @@ class IOSSimulator extends Device {
   }
 
   @override
-  TargetPlatform get targetPlatform => TargetPlatform.ios;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  String get sdkNameAndVersion => category;
+  Future<String> get sdkNameAndVersion async => category;
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
@@ -595,8 +592,7 @@ class IOSSimulator extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) {
-    SimControl.instance.takeScreenshot(outputFile.path);
-    return new Future<Null>.value();
+    return SimControl.instance.takeScreenshot(outputFile.path);
   }
 }
 

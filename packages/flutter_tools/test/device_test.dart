@@ -14,7 +14,7 @@ void main() {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
       final DeviceManager deviceManager = new DeviceManager();
-      final List<Device> devices = await deviceManager.getDevices();
+      final List<Device> devices = await deviceManager.getDevices().toList();
       expect(devices, isList);
     });
 
@@ -26,7 +26,7 @@ void main() {
       final DeviceManager deviceManager = new TestDeviceManager(devices);
 
       Future<Null> expectDevice(String id, List<Device> expected) async {
-        expect(await deviceManager.getDevicesById(id), expected);
+        expect(await deviceManager.getDevicesById(id).toList(), expected);
       }
       expectDevice('01abfc49119c410e', <Device>[device2]);
       expectDevice('Nexus 5X', <Device>[device2]);
@@ -44,8 +44,8 @@ class TestDeviceManager extends DeviceManager {
   TestDeviceManager(this.allDevices);
 
   @override
-  Future<List<Device>> getAllConnectedDevices() async {
-    return allDevices;
+  Stream<Device> getAllConnectedDevices() {
+    return new Stream<Device>.fromIterable(allDevices);
   }
 }
 

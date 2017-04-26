@@ -44,7 +44,7 @@ class ConfigCommand extends FlutterCommand {
 
   /// Return `null` to disable tracking of the `config` command.
   @override
-  String get usagePath => null;
+  Future<String> get usagePath => null;
 
   @override
   Future<Null> runCommand() async {

@@ -56,7 +56,7 @@ void main() {
       Usage: () => new Usage(),
     });
 
-    // Ensure we con't send for the 'flutter config' command.
+    // Ensure we don't send for the 'flutter config' command.
     testUsingContext('config doesn\'t send', () async {
       int count = 0;
       flutterUsage.onSend.listen((Map<String, dynamic> data) => count++);

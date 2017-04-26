@@ -134,20 +134,19 @@ class MockDeviceManager implements DeviceManager {
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
 
   @override
-  Future<List<Device>> getAllConnectedDevices() => new Future<List<Device>>.value(devices);
+  Stream<Device> getAllConnectedDevices() => new Stream<Device>.fromIterable(devices);
 
   @override
-  Future<List<Device>> getDevicesById(String deviceId) async {
-    return devices.where((Device device) => device.id == deviceId).toList();
+  Stream<Device> getDevicesById(String deviceId) {
+    return new Stream<Device>.fromIterable(
+        devices.where((Device device) => device.id == deviceId));
   }
 
   @override
-  Future<List<Device>> getDevices() async {
-    if (specifiedDeviceId == null) {
-      return getAllConnectedDevices();
-    } else {
-      return getDevicesById(specifiedDeviceId);
-    }
+  Stream<Device> getDevices() {
+    return hasSpecifiedDeviceId
+        ? getDevicesById(specifiedDeviceId)
+        : getAllConnectedDevices();
   }
 
   void addDevice(Device device) => devices.add(device);

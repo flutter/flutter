@@ -165,7 +165,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         // Check for compatibility between libimobiledevice and Xcode.
         // TODO(cbracken) remove this check once libimobiledevice > 1.2.0 is released.
         final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-        if (result.exitCode == 0 && result.stdout.isNotEmpty && !exitsHappy(<String>['ideviceName'])) {
+        if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['ideviceName'])) {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
             'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'

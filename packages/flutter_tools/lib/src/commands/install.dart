@@ -31,7 +31,7 @@ class InstallCommand extends FlutterCommand {
 
   @override
   Future<Null> runCommand() async {
-    final ApplicationPackage package = applicationPackages.getPackageForPlatform(device.targetPlatform);
+    final ApplicationPackage package = applicationPackages.getPackageForPlatform(await device.targetPlatform);
 
     Cache.releaseLockEarly();
 
@@ -46,9 +46,9 @@ Future<bool> installApp(Device device, ApplicationPackage package, { bool uninst
   if (package == null)
     return false;
 
-  if (uninstall && device.isAppInstalled(package)) {
+  if (uninstall && await device.isAppInstalled(package)) {
     printStatus('Uninstalling old version...');
-    if (!device.uninstallApp(package))
+    if (!await device.uninstallApp(package))
       printError('Warning: uninstalling old version failed');
   }
 

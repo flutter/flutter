@@ -86,7 +86,7 @@ class _ZipToolBuilder extends ZipBuilder {
 
     final Iterable<String> compressedNames = _getCompressedNames();
     if (compressedNames.isNotEmpty) {
-      runCheckedSync(
+      await runCheckedAsync(
         <String>['zip', '-q', outFile.absolute.path]..addAll(compressedNames),
         workingDirectory: zipBuildDir.path
       );
@@ -94,7 +94,7 @@ class _ZipToolBuilder extends ZipBuilder {
 
     final Iterable<String> storedNames = _getStoredNames();
     if (storedNames.isNotEmpty) {
-      runCheckedSync(
+      await runCheckedAsync(
         <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(storedNames),
         workingDirectory: zipBuildDir.path
       );

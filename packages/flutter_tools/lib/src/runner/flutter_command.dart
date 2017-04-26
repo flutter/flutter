@@ -102,7 +102,7 @@ abstract class FlutterCommand extends Command<Null> {
 
   /// The path to send to Google Analytics. Return `null` here to disable
   /// tracking of the command.
-  String get usagePath => name;
+  Future<String> get usagePath async => name;
 
   /// Runs this command.
   ///
@@ -144,9 +144,9 @@ abstract class FlutterCommand extends Command<Null> {
 
     setupApplicationPackages();
 
-    final String commandPath = usagePath;
+    final String commandPath = await usagePath;
     if (commandPath != null)
-      flutterUsage.sendCommand(usagePath);
+      flutterUsage.sendCommand(commandPath);
 
     await runCommand();
   }
@@ -158,14 +158,14 @@ abstract class FlutterCommand extends Command<Null> {
   /// devices and criteria entered by the user on the command line.
   /// If a device cannot be found that meets specified criteria,
   /// then print an error message and return `null`.
-  Future<Device> findTargetDevice({bool androidOnly: false}) async {
+  Future<Device> findTargetDevice() async {
     if (!doctor.canLaunchAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' "
           "for information about installing additional components.");
       return null;
     }
 
-    List<Device> devices = await deviceManager.getDevices();
+    List<Device> devices = await deviceManager.getDevices().toList();
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
       printStatus("No devices found with name or id "
@@ -178,9 +178,6 @@ abstract class FlutterCommand extends Command<Null> {
 
     devices = devices.where((Device device) => device.isSupported()).toList();
 
-    if (androidOnly)
-      devices = devices.where((Device device) => device.targetPlatform == TargetPlatform.android_arm).toList();
-
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');
       return null;
@@ -191,10 +188,10 @@ abstract class FlutterCommand extends Command<Null> {
       } else {
         printStatus("More than one device connected; please specify a device with "
             "the '-d <deviceId>' flag.");
-        devices = await deviceManager.getAllConnectedDevices();
+        devices = await deviceManager.getAllConnectedDevices().toList();
       }
       printStatus('');
-      Device.printDevices(devices);
+      await Device.printDevices(devices);
       return null;
     }
     return devices.single;

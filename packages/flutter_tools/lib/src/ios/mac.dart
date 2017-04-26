@@ -399,7 +399,7 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
       continue;
     }
     // Shell out so permissions on the dylib are preserved.
-    runCheckedSync(<String>['/bin/cp', dylib.path, frameworksDirectory.path]);
+    await runCheckedAsync(<String>['/bin/cp', dylib.path, frameworksDirectory.path]);
   }
 }
 

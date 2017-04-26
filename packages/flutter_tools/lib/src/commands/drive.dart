@@ -183,7 +183,7 @@ void restoreTargetDeviceFinder() {
 }
 
 Future<Device> findTargetDevice() async {
-  final List<Device> devices = await deviceManager.getDevices();
+  final List<Device> devices = await deviceManager.getDevices().toList();
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
@@ -192,7 +192,7 @@ Future<Device> findTargetDevice() async {
     }
     if (devices.length > 1) {
       printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
-      Device.printDevices(devices);
+      await Device.printDevices(devices);
       return null;
     }
     return devices.first;
@@ -203,16 +203,24 @@ Future<Device> findTargetDevice() async {
     // On Mac we look for the iOS Simulator. If available, we use that. Then
     // we look for an Android device. If there's one, we use that. Otherwise,
     // we launch a new iOS Simulator.
-    final Device reusableDevice = devices.firstWhere(
-      (Device d) => d.isLocalEmulator,
-      orElse: () {
-        return devices.firstWhere((Device d) => d is AndroidDevice,
-            orElse: () => null);
+    Device reusableDevice;
+    for (Device device in devices) {
+      if (await device.isLocalEmulator) {
+        reusableDevice = device;
+        break;
       }
-    );
+    }
+    if (reusableDevice == null) {
+      for (Device device in devices) {
+        if (device is AndroidDevice) {
+          reusableDevice = device;
+          break;
+        }
+      }
+    }
 
     if (reusableDevice != null) {
-      printStatus('Found connected ${reusableDevice.isLocalEmulator ? "emulator" : "device"} "${reusableDevice.name}"; will reuse it.');
+      printStatus('Found connected ${await reusableDevice.isLocalEmulator ? "emulator" : "device"} "${reusableDevice.name}"; will reuse it.');
       return reusableDevice;
     }
 
@@ -262,8 +270,8 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 
   printTrace('Installing application package.');
   final ApplicationPackage package = command.applicationPackages
-      .getPackageForPlatform(command.device.targetPlatform);
-  if (command.device.isAppInstalled(package))
+      .getPackageForPlatform(await command.device.targetPlatform);
+  if (await command.device.isAppInstalled(package))
     command.device.uninstallApp(package);
   command.device.installApp(package);
 
@@ -335,7 +343,7 @@ void restoreAppStopper() {
 
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  final ApplicationPackage package = command.applicationPackages.getPackageForPlatform(command.device.targetPlatform);
+  final ApplicationPackage package = command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;
