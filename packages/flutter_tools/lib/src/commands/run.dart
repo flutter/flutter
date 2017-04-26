@@ -247,7 +247,7 @@ class RunCommand extends RunCommandBase {
       if (result != 0)
         throwToolExit(null, exitCode: result);
       return new FlutterCommandResult(
-        ExitCode.success,
+        ExitStatus.success,
         analyticsParameters: <String>["daemon"],
         exitTime: appStartedTime,
       );
@@ -297,8 +297,10 @@ class RunCommand extends RunCommandBase {
     // need to know about analytics. 
     //
     // Do not add more operations to the future.
-    final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync()
-        ..future.then((Null _) { appStartedTime = clock.now(); });
+    final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
+    appStartedTimeRecorder.future.then(
+      (Null _) { appStartedTime = clock.now(); }
+    );
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,
@@ -308,7 +310,7 @@ class RunCommand extends RunCommandBase {
     if (result != 0)
       throwToolExit(null, exitCode: result);
     return new FlutterCommandResult(
-      ExitCode.success,
+      ExitStatus.success,
       analyticsParameters: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),

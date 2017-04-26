@@ -23,36 +23,38 @@ import 'flutter_command_runner.dart';
 
 typedef void Validator();
 
-enum ExitCode {
+enum ExitStatus {
   success,
   warning,
   fail,
 }
 
-String _getNullableExitCodeName(ExitCode code) {
-  return code == null ? null : getEnumName(code);
-}
-
+/// [FlutterCommand]s' subclasses' [FlutterCommand.runCommand] can optionally
+/// provide a [FlutterCommandResult] to furnish additional information for 
+/// analytics.
 class FlutterCommandResult {
   FlutterCommandResult(
-    this.exitCode,
-    {
-      this.analyticsParameters,
-      this.exitTime,
-    }
-  ) { assert(exitCode != null); }
+    this.exitStatus, {
+    this.analyticsParameters,
+    this.exitTime,
+  }) { 
+    assert(exitStatus != null); 
+  }
 
-  ExitCode exitCode;
+  final ExitStatus exitStatus;
+
   /// Optional dimension data that can be appended to the timing event.
   /// https://developers.google.com/analytics/devguides/collection/analyticsjs/field-reference#timingLabel
   /// Do not add PII.
-  List<String> analyticsParameters;
+  final List<String> analyticsParameters;
+
   /// Optional epoch time when the command's non-interactive wait time is 
   /// complete during the command's execution. Use to measure user perceivable
   /// latency without measuring user interaction time. 
   /// 
-  /// Will automatically measure the command's complete time if not provided. 
-  DateTime exitTime;
+  /// [FlutterCommand] will automatically measure and report the command's
+  /// complete time if not provided.
+  final DateTime exitTime;
 }
 
 abstract class FlutterCommand extends Command<Null> {
@@ -155,11 +157,13 @@ abstract class FlutterCommand extends Command<Null> {
     final DateTime endTime = clock.now();
     printTrace("'flutter $name' took ${endTime.difference(startTime).inMilliseconds}ms.");
     if (usagePath != null) {
-      final String label = (
-          <String>[]
-              ..add(_getNullableExitCodeName(commandResult?.exitCode))
-              ..addAll(commandResult?.analyticsParameters ?? const Iterable<String>.empty())
-      )
+      final List<String> labels = <String>[];
+      if (commandResult?.exitStatus != null)
+        labels.add(getEnumName(commandResult.exitStatus));
+      if (commandResult?.analyticsParameters?.isNotEmpty ?? false)
+        labels.addAll(commandResult?.analyticsParameters);
+
+      final String label = labels
           .where((String label) => label != null && label.isNotEmpty)
           .join('-');
       flutterUsage.sendTiming(

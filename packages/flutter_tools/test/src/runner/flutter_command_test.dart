@@ -58,7 +58,7 @@ void main() {
 
       expect(
         verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
-        <dynamic>['flutter', 'dummy', new Duration(milliseconds: 1000), null]
+        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
     },
     overrides: <Type, Generator>{
@@ -92,7 +92,7 @@ void main() {
       );
 
       final FlutterCommandResult commandResult = new FlutterCommandResult(
-        ExitCode.fail,
+        ExitStatus.fail,
         // nulls should be cleaned up.
         analyticsParameters: <String> ['blah1', 'blah2', null, 'blah3'],
         exitTime: new DateTime.fromMillisecondsSinceEpoch(1500)
@@ -107,7 +107,7 @@ void main() {
         <dynamic>[
           'flutter', 
           'dummy', 
-          new Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
+          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
           'fail-blah1-blah2-blah3',
         ],
       );    

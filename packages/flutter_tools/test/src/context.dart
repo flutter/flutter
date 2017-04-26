@@ -209,9 +209,6 @@ class MockUsage implements Usage {
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
 
   @override
-  UsageTimer startTimer(String event) => new _MockUsageTimer(event);
-
-  @override
   void sendException(dynamic exception, StackTrace trace) { }
 
   @override
@@ -222,16 +219,6 @@ class MockUsage implements Usage {
 
   @override
   void printWelcome() { }
-}
-
-class _MockUsageTimer implements UsageTimer {
-  _MockUsageTimer(this.event);
-
-  @override
-  final String event;
-
-  @override
-  void finish() { }
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
