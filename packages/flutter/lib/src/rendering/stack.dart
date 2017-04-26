@@ -202,7 +202,7 @@ class StackParentData extends ContainerBoxParentDataMixin<RenderBox> {
 
 /// How to size the non-positioned children of a [Stack].
 ///
-/// This enum is used with [Stack.sizing] and [RenderStack.sizing] to control
+/// This enum is used with [Stack.fit] and [RenderStack.fit] to control
 /// how the [BoxConstraints] passed from the stack's parent to the stack's child
 /// are adjusted.
 ///
@@ -298,13 +298,13 @@ class RenderStack extends RenderBox
   RenderStack({
     List<RenderBox> children,
     FractionalOffset alignment: FractionalOffset.center,
-    StackFit sizing: StackFit.loose,
+    StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip
   }) : _alignment = alignment,
-       _sizing = sizing,
+       _fit = fit,
        _overflow = overflow {
     assert(alignment != null);
-    assert(sizing != null);
+    assert(fit != null);
     assert(overflow != null);
     addAll(children);
   }
@@ -338,12 +338,12 @@ class RenderStack extends RenderBox
   /// The constraints passed into the [RenderStack] from its parent are either
   /// loosened ([StackFit.loose]) or tightened to their biggest size
   /// ([StackFit.expand]).
-  StackFit get sizing => _sizing;
-  StackFit _sizing;
-  set sizing(StackFit value) {
+  StackFit get fit => _fit;
+  StackFit _fit;
+  set fit(StackFit value) {
     assert(value != null);
-    if (_sizing != value) {
-      _sizing = value;
+    if (_fit != value) {
+      _fit = value;
       markNeedsLayout();
     }
   }
@@ -409,8 +409,8 @@ class RenderStack extends RenderBox
     double height = constraints.minHeight;
 
     BoxConstraints nonPositionedConstraints;
-    assert(sizing != null);
-    switch (sizing) {
+    assert(fit != null);
+    switch (fit) {
       case StackFit.loose:
         nonPositionedConstraints = constraints.loosen();
         break;

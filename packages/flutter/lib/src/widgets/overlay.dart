@@ -362,7 +362,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     }
     return new _Theatre(
       onstage: new Stack(
-        sizing: StackFit.expand,
+        fit: StackFit.expand,
         children: onstageChildren.reversed.toList(growable: false),
       ),
       offstage: offstageChildren,
