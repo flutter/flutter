@@ -22,7 +22,7 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
-        sizing: StackFit.expand,
+        fit: StackFit.expand,
         children: <Widget>[
           const Semantics(
             label: 'L1',
@@ -30,7 +30,7 @@ void main() {
           new Semantics(
             label: 'L2',
             child: new Stack(
-              sizing: StackFit.expand,
+              fit: StackFit.expand,
               children: <Widget>[
                 const Semantics(
                   checked: true,
@@ -78,7 +78,7 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
-        sizing: StackFit.expand,
+        fit: StackFit.expand,
         children: <Widget>[
           const Semantics(
             label: 'L1',
@@ -86,7 +86,7 @@ void main() {
           new Semantics(
             label: 'L2',
             child: new Stack(
-              sizing: StackFit.expand,
+              fit: StackFit.expand,
               children: <Widget>[
                 const Semantics(
                   checked: true,
@@ -122,13 +122,13 @@ void main() {
     //
     await tester.pumpWidget(
       new Stack(
-        sizing: StackFit.expand,
+        fit: StackFit.expand,
         children: <Widget>[
           const Semantics(),
           new Semantics(
             label: 'L2',
             child: new Stack(
-              sizing: StackFit.expand,
+              fit: StackFit.expand,
               children: <Widget>[
                 const Semantics(
                   checked: true,

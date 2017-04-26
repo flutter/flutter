@@ -383,7 +383,7 @@ void main() {
             maxHeight: 7.0,
           ),
           child: new Stack(
-            sizing: sizing,
+            fit: sizing,
             children: <Widget>[
               new LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {

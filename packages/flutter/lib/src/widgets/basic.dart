@@ -1648,7 +1648,7 @@ class Stack extends MultiChildRenderObjectWidget {
   Stack({
     Key key,
     this.alignment: FractionalOffset.topLeft,
-    this.sizing: StackFit.loose,
+    this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
@@ -1666,7 +1666,7 @@ class Stack extends MultiChildRenderObjectWidget {
   /// The constraints passed into the [Stack] from its parent are either
   /// loosened ([StackFit.loose]) or tightened to their biggest size
   /// ([StackFit.expand]).
-  final StackFit sizing;
+  final StackFit fit;
 
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
@@ -1678,7 +1678,7 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
-      sizing: sizing,
+      fit: fit,
       overflow: overflow,
     );
   }
@@ -1687,7 +1687,7 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
-      ..sizing = sizing
+      ..fit = fit
       ..overflow = overflow;
   }
 }
@@ -1710,7 +1710,7 @@ class IndexedStack extends Stack {
     StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, sizing: sizing, children: children);
+  }) : super(key: key, alignment: alignment, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;

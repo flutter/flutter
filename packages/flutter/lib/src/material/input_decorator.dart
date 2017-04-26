@@ -429,7 +429,7 @@ class InputDecorator extends StatelessWidget {
     }
 
     final Widget stack = new Stack(
-      sizing: StackFit.passthrough,
+      fit: StackFit.passthrough,
       children: stackChildren
     );
 
