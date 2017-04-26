@@ -10,10 +10,10 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-TaskFunction createPlatformChannelIntegrationTest() {
+TaskFunction createChannelsIntegrationTest() {
   return new DriverTest(
-    '${flutterDirectory.path}/dev/integration_tests/platform_channels',
-    'test_driver/main_test.dart',
+    '${flutterDirectory.path}/dev/integration_tests/channels',
+    'lib/main.dart',
   );
 }
 
