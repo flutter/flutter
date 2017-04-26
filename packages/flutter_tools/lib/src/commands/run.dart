@@ -310,8 +310,10 @@ class RunCommand extends RunCommandBase {
     return new FlutterCommandResult(
       ExitCode.success,
       analyticsParameters: <String>[
-        hotMode ? "hot" : "cold",
+        hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
+        getNameForTargetPlatform(device.targetPlatform),
+        device.isLocalEmulator ? 'emulator' : null,
       ],
       exitTime: appStartedTime,
     );
