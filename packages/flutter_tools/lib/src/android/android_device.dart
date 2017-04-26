@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import '../android/android_sdk.dart';
 import '../application_package.dart';
+import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -61,16 +62,18 @@ class AndroidDevice extends Device {
       try {
         // We pass an encoding of LATIN1 so that we don't try and interpret the
         // `adb shell getprop` result as UTF8.
-        final ProcessResult result = processManager.runSync(
+        final ProcessResult result = await processManager.run(
           propCommand,
           stdoutEncoding: LATIN1
-        );
+        ).timeout(const Duration(seconds: 5));
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
           printError('Error retrieving device properties for $name.');
         }
-      } catch (error) {
+      } on TimeoutException catch (_) {
+        throwToolExit('adb not responding');
+      } on ProcessException catch (error) {
         printError('Error retrieving device properties for $name: $error');
       }
     }
@@ -145,13 +148,13 @@ class AndroidDevice extends Device {
     return true;
   }
 
-  bool _checkForSupportedAdbVersion() {
+  Future<bool> _checkForSupportedAdbVersion() async {
     if (androidSdk == null)
       return false;
 
     try {
-      final String adbVersion = runCheckedSync(<String>[getAdbPath(androidSdk), 'version']);
-      if (_isValidAdbVersion(adbVersion))
+      final RunResult adbVersion = await runCheckedAsync(<String>[getAdbPath(androidSdk), 'version']);
+      if (_isValidAdbVersion(adbVersion.stdout))
         return true;
       printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
     } catch (error, trace) {
@@ -231,7 +234,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    if (!_checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
@@ -252,7 +255,7 @@ class AndroidDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
-    if (!_checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return false;
 
     final String uninstallOut = (await runCheckedAsync(adbCommandForDevice(<String>['uninstall', app.id]))).stdout;
@@ -306,7 +309,7 @@ class AndroidDevice extends Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
   }) async {
-    if (!_checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
+    if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
     if (await targetPlatform != TargetPlatform.android_arm && mode != BuildMode.debug) {
