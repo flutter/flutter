@@ -1860,13 +1860,12 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
         && entry.name != 'yasm' // build-time dependency only
         && entry.name != 'binutils' // build-time dependency only
         && entry.name != 'instrumented_libraries' // unused according to chinmay
+        && entry.name != 'android_tools' // excluded on advice
         && super.shouldRecurse(entry);
   }
 
   @override
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
-    if (entry.name == 'android_tools')
-      return new RepositoryAndroidToolsDirectory(this, entry);
     if (entry.name == 'android_platform')
       return new RepositoryAndroidPlatformDirectory(this, entry);
     if (entry.name == 'boringssl')
