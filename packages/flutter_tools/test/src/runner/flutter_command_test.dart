@@ -139,7 +139,7 @@ class DummyFlutterCommand extends FlutterCommand {
   String get description => 'does nothing';
 
   @override
-  Future<String> get usagePath => noUsagePath ? null : super.usagePath;
+  Future<String> get usagePath => (noUsagePath ? null : super.usagePath);
 
   @override
   String get name => 'dummy';
