@@ -20,11 +20,16 @@ void main() {
     MockCache cache;
     MockClock clock;
     MockUsage usage;
+    List<int> mockTimes;
 
     setUp(() {
       cache = new MockCache();
       clock = new MockClock();
       usage = new MockUsage();
+      when(usage.isFirstRun).thenReturn(false);
+      when(clock.now()).thenAnswer(
+        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+      );
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
@@ -46,11 +51,8 @@ void main() {
     });
 
     testUsingContext('report execution timing by default', () async {
-      final List<int> mockTimes = <int>[1000, 2000];
       // Crash if called a third time which is unexpected.
-      when(clock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
+      mockTimes = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = new DummyFlutterCommand();
       await flutterCommand.run();
@@ -67,11 +69,8 @@ void main() {
     });
 
     testUsingContext('no timing report without usagePath', () async {
-      final List<int> mockTimes = <int>[1000, 2000];
       // Crash if called a third time which is unexpected.
-      when(clock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
+      mockTimes = <int>[1000, 2000];
 
       final DummyFlutterCommand flutterCommand = 
           new DummyFlutterCommand(noUsagePath: true);
@@ -85,11 +84,8 @@ void main() {
     });
     
     testUsingContext('report additional FlutterCommandResult data', () async {
-      final List<int> mockTimes = <int>[1000, 2000];
       // Crash if called a third time which is unexpected.
-      when(clock.now()).thenAnswer(
-        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
+      mockTimes = <int>[1000, 2000];
 
       final FlutterCommandResult commandResult = new FlutterCommandResult(
         ExitStatus.fail,
@@ -124,8 +120,8 @@ void main() {
 class DummyFlutterCommand extends FlutterCommand {
 
   DummyFlutterCommand({
-    this.shouldUpdateCache, 
-    this.noUsagePath, 
+    this.shouldUpdateCache : false, 
+    this.noUsagePath : false, 
     this.flutterCommandResult
   });
 
@@ -139,7 +135,7 @@ class DummyFlutterCommand extends FlutterCommand {
   String get description => 'does nothing';
 
   @override
-  Future<String> get usagePath => (noUsagePath ? null : super.usagePath);
+  Future<String> get usagePath => noUsagePath ? null : super.usagePath;
 
   @override
   String get name => 'dummy';
