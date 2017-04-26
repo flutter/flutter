@@ -110,7 +110,8 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         return;
       }
 
-      if (earliestScrollOffset - paintExtentOf(firstChild) < 0.0) {
+      final double firstChildScrollOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      if (firstChildScrollOffset < 0.0) {
         // The first child doesn't fit within the viewport (underflow) and
         // there may be additional children above it. Find the real first child
         // and then correct the scroll position so that there's room for all and
@@ -134,7 +135,7 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
       }
 
       final SliverMultiBoxAdaptorParentData childParentData = earliestUsefulChild.parentData;
-      childParentData.layoutOffset = earliestScrollOffset - paintExtentOf(firstChild);
+      childParentData.layoutOffset = firstChildScrollOffset;
       assert(earliestUsefulChild == firstChild);
       leadingChildWithLayout = earliestUsefulChild;
       trailingChildWithLayout ??= earliestUsefulChild;
