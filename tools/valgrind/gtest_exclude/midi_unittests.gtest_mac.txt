@@ -1,2 +1,0 @@
-# Hangs the whole Mac Valgrind bot: http://crbug.com/462483
-MidiManagerMacTest.MidiNotification

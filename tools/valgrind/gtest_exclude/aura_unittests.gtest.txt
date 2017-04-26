@@ -1,2 +1,0 @@
-# Flaky under Valgrind, see http://crbug.com/348331
-WindowEventDispatcherTest.TouchMovesHeld
