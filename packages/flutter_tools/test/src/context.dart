@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/port_scanner.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -55,7 +56,8 @@ void _defaultInitializeContext(AppContext testContext) {
     })
     ..putIfAbsent(SimControl, () => new MockSimControl())
     ..putIfAbsent(Usage, () => new MockUsage())
-    ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion());
+    ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())
+    ..putIfAbsent(Clock, () => new Clock());
 }
 
 void testUsingContext(String description, dynamic testMethod(), {
@@ -233,3 +235,5 @@ class _MockUsageTimer implements UsageTimer {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+
+class MockClock extends Mock implements Clock {}

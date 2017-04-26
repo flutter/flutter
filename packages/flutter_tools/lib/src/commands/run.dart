@@ -242,7 +242,7 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
-      final DateTime appStartedTime = new DateTime.now();
+      final DateTime appStartedTime = clock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
@@ -298,7 +298,7 @@ class RunCommand extends RunCommandBase {
     //
     // Do not add more operations to the future.
     final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync()
-        ..future.then((Null _) { appStartedTime = new DateTime.now(); });
+        ..future.then((Null _) { appStartedTime = clock.now(); });
 
     final int result = await runner.run(
       appStartedCompleter: appStartedTimeRecorder,

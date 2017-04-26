@@ -29,6 +29,10 @@ enum ExitCode {
   fail,
 }
 
+String _getNullableExitCodeName(ExitCode code) {
+  return code == null ? null : getEnumName(code);
+}
+
 class FlutterCommandResult {
   FlutterCommandResult(
     this.exitCode,
@@ -141,16 +145,23 @@ abstract class FlutterCommand extends Command<Null> {
   /// so that this method can record and report the overall time to analytics.
   @override
   Future<Null> run() async {
-    final DateTime startTime = new DateTime.now();
+    final DateTime startTime = clock.now();
 
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
 
     final FlutterCommandResult commandResult = await verifyThenRunCommand();
 
-    final DateTime endTime = new DateTime.now();
+    final DateTime endTime = clock.now();
     printTrace("'flutter $name' took ${endTime.difference(startTime).inMilliseconds}ms.");
     if (usagePath != null) {
+      final String label = (
+          <String>[]
+              ..add(_getNullableExitCodeName(commandResult?.exitCode))
+              ..addAll(commandResult?.analyticsParameters ?? const Iterable<String>.empty())
+      )
+          .where((String label) => label != null && label.isNotEmpty)
+          .join('-');
       flutterUsage.sendTiming(
         'flutter', 
         name, 
@@ -159,11 +170,7 @@ abstract class FlutterCommand extends Command<Null> {
         (commandResult?.exitTime ?? endTime).difference(startTime), 
         // Report in the form of `success-[parameter1-parameter2]`, all of which
         // can be null if the command doesn't provide a FlutterCommandResult.
-        label: (
-            <String>[]
-                ..add(getEnumName(commandResult?.exitCode))
-                ..addAll(commandResult?.analyticsParameters ?? const Iterable<String>.empty())
-        ).where((String label) => label != null && label.isNotEmpty).join('-'),
+        label: label == '' ? null : label,
       );
     }
   }
