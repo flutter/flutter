@@ -173,17 +173,17 @@ class _TestAppState extends State<TestApp> {
       title: 'Channels Test',
       home: new Scaffold(
         appBar: new AppBar(
-          title: new Text('Channels Test'),
+          title: const Text('Channels Test'),
         ),
         body: new Padding(
-          padding: new EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: new FutureBuilder<TestStepResult>(
             future: _result,
             builder: _buildTestResultWidget,
           ),
         ),
         floatingActionButton: new FloatingActionButton(
-          key: new ValueKey<String>('step'),
+          key: const ValueKey<String>('step'),
           onPressed: _executeNextStep,
           child: new Icon(Icons.navigate_next),
         ),

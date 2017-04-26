@@ -44,9 +44,9 @@ class TestStepResult {
   factory TestStepResult.fromSnapshot(AsyncSnapshot<TestStepResult> snapshot) {
     switch (snapshot.connectionState) {
       case ConnectionState.none:
-        return new TestStepResult('Not started', nothing, TestStatus.ok);
+        return const TestStepResult('Not started', nothing, TestStatus.ok);
       case ConnectionState.waiting:
-        return new TestStepResult('Executing', nothing, TestStatus.pending);
+        return const TestStepResult('Executing', nothing, TestStatus.pending);
       case ConnectionState.done:
         if (snapshot.hasData) {
           return snapshot.data;
@@ -75,13 +75,13 @@ class TestStepResult {
       children: <Widget>[
         new Text('Step: $name', style: bold),
         new Text(description),
-        new Text(' '),
+        const Text(' '),
         new Text('Msg sent: ${_toString(messageSent)}'),
         new Text('Msg rvcd: ${_toString(messageReceived)}'),
         new Text('Reply echo: ${_toString(replyEcho)}'),
         new Text('Msg echo: ${_toString(messageEcho)}'),
         new Text('Error: ${_toString(error)}'),
-        new Text(' '),
+        const Text(' '),
         new Text(
           status.toString().substring('TestStatus.'.length),
           key: new ValueKey<String>(

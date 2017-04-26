@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
