@@ -116,6 +116,9 @@ class RenderSliverList extends RenderSliverMultiBoxAdaptor {
         // and then correct the scroll position so that there's room for all and
         // so that the trailing edge of the original firstChild appears where it
         // was before the scroll offset correction.
+        // TODO(hansmuller): do this work incrementally, instead of all at once,
+        // i.e. find a way to avoid visiting ALL of the children whose offset
+        // is < 0 before returning for the scroll correction.
         double correction = 0.0;
         while (earliestUsefulChild != null) {
           assert(firstChild == earliestUsefulChild);
