@@ -10,6 +10,7 @@ import 'package:file/record_replay.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
+import 'platform.dart';
 import 'process.dart';
 
 export 'package:file/file.dart';
@@ -142,3 +143,9 @@ Directory getReplaySource(String dirname, String basename) {
 /// case of the path. Changing the case can break hot reload in some situations,
 /// for an example see: https://github.com/flutter/flutter/issues/9539.
 String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path));
+
+/// Escapes [path].
+///
+/// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
+/// path unchanged.
+String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;

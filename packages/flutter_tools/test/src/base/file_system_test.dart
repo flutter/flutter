@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 
 import '../common.dart';
@@ -84,5 +85,23 @@ void main() {
       final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
       expect(canonicalizePath(path), expected);
     }, testOn: 'posix');
+  });
+
+  group('escapePath', () {
+    testUsingContext('on Windows', () {
+      expect(escapePath('C:\\foo\\bar\\cool.dart'), 'C:\\\\foo\\\\bar\\\\cool.dart');
+      expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
+      expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => new FakePlatform(operatingSystem: 'windows')
+    });
+
+    testUsingContext('on Linux', () {
+      expect(escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
+      expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
+      expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => new FakePlatform(operatingSystem: 'linux')
+    });
   });
 }

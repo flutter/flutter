@@ -146,8 +146,8 @@ File ensureLocalProperties() {
   final File localProperties = fs.file('android/local.properties');
   if (!localProperties.existsSync()) {
     localProperties.writeAsStringSync(
-        'sdk.dir=${_escapePath(androidSdk.directory)}\n'
-        'flutter.sdk=${_escapePath(Cache.flutterRoot)}\n'
+        'sdk.dir=${escapePath(androidSdk.directory)}\n'
+        'flutter.sdk=${escapePath(Cache.flutterRoot)}\n'
     );
   }
   return localProperties;
@@ -179,8 +179,6 @@ Future<Null> buildGradleProject(BuildMode buildMode, String target, String kerne
       return buildGradleProjectV2(gradle, buildModeName, target, kernelPath);
   }
 }
-
-String _escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
 
 Future<Null> buildGradleProjectV1(String gradle) async {
   // Run 'gradle build'.
