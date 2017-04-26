@@ -40,7 +40,8 @@ void main() {
       ],
     );
 
-    final String dump = tree.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
+    final String dump =
+        tree.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
     expect(dump, equals('''TestTree#000
  ├─child node A: TestTree#000
  │
