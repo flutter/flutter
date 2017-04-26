@@ -22,6 +22,7 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
 #include "lib/ftl/files/unique_fd.h"
+#include "third_party/skia/include/core/SkGraphics.h"
 
 namespace shell {
 namespace {
@@ -99,6 +100,8 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
 
   fml::icu::InitializeICU(icu_data_path);
+
+  SkGraphics::Init();
 
   blink::Settings settings;
   settings.application_library_path = application_library_path;
