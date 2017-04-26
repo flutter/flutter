@@ -64,7 +64,7 @@ template("process_nibs_mac") {
       "-i",
       "{{source}}",
       "-o",
-      invoker_out_dir,
+      rebase_path("$root_build_dir/$invoker_out_dir"),
       "-m",
       invoker.module,
     ]
