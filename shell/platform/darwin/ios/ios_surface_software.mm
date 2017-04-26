@@ -101,12 +101,12 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
   }
 
   // Create the CGImageRef representation on the pixmap.
-  fml::CFRef<CGImageRef> pixmap_image(CGImageCreate(pixmap.width(),      // width
-                                                    pixmap.height(),     // height
-                                                    8,                   // bits per component
-                                                    32,                  // bits per pixel
-                                                    4 * pixmap.width(),  // bytes per row
-                                                    colorspace,          // colorspace
+  fml::CFRef<CGImageRef> pixmap_image(CGImageCreate(pixmap.width(),     // width
+                                                    pixmap.height(),    // height
+                                                    8,                  // bits per component
+                                                    32,                 // bits per pixel
+                                                    pixmap.rowBytes(),  // bytes per row
+                                                    colorspace,         // colorspace
                                                     kCGImageAlphaPremultipliedLast,  // bitmap info
                                                     pixmap_data_provider,      // data provider
                                                     nullptr,                   // decode array
