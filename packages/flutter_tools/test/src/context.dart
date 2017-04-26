@@ -57,7 +57,7 @@ void _defaultInitializeContext(AppContext testContext) {
     ..putIfAbsent(SimControl, () => new MockSimControl())
     ..putIfAbsent(Usage, () => new MockUsage())
     ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())
-    ..putIfAbsent(Clock, () => new Clock());
+    ..putIfAbsent(Clock, () => new MockClock());
 }
 
 void testUsingContext(String description, dynamic testMethod(), {
