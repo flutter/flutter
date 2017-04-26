@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:meta/meta.dart';
+import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -164,7 +165,7 @@ abstract class FlutterCommand extends Command<Null> {
         labels.addAll(commandResult?.analyticsParameters);
 
       final String label = labels
-          .where((String label) => label != null && label.isNotEmpty)
+          .where((String label) => !isBlank(label))
           .join('-');
       flutterUsage.sendTiming(
         'flutter', 

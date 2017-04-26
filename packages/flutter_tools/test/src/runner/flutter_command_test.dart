@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/usage.dart';
-import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
+import 'package:quiver/time.dart';
 import 'package:test/test.dart';
 
 import '../context.dart';
@@ -139,7 +139,7 @@ class DummyFlutterCommand extends FlutterCommand {
   String get description => 'does nothing';
 
   @override
-  String get usagePath => noUsagePath ? null : super.usagePath;
+  Future<String> get usagePath => noUsagePath ? null : super.usagePath;
 
   @override
   String get name => 'dummy';

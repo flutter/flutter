@@ -8,6 +8,7 @@ import 'dart:math' show Random;
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
+import 'package:quiver/time.dart';
 
 import 'context.dart';
 import 'file_system.dart';
@@ -205,13 +206,4 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
-Clock get clock => Clock.instance;
-
-/// An injectable testable clock providing DateTime functions.
-class Clock {
-  /// Returns [Clock] active in the current app context.
-  static Clock get instance => context.putIfAbsent(Clock, () => new Clock());
-
-  /// Returns a new instance of the current DateTime.
-  DateTime now() => new DateTime.now();
-}
+Clock get clock => context.putIfAbsent(Clock, () => new Clock());

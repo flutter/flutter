@@ -314,8 +314,8 @@ class RunCommand extends RunCommandBase {
       analyticsParameters: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
-        getNameForTargetPlatform(device.targetPlatform),
-        device.isLocalEmulator ? 'emulator' : null,
+        getNameForTargetPlatform(await device.targetPlatform),
+        await device.isLocalEmulator ? 'emulator' : null,
       ],
       exitTime: appStartedTime,
     );
