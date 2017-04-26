@@ -467,4 +467,40 @@ void main() {
       <Key>[null, key1, null, key2, null],
     );
   });
+
+  testWidgets('Element diagnostics', (WidgetTester tester) async {
+    GlobalKey key0;
+    await tester.pumpWidget(new Column(
+      key: key0 = new GlobalKey(),
+      children: <Widget>[
+        new Container(),
+        new Container(key: new GlobalKey()),
+        new Container(child: new Container()),
+        new Container(key: new GlobalKey()),
+        new Container(),
+      ],
+    ));
+    final MultiChildRenderObjectElement element = key0.currentContext;
+
+    final String dump =
+        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '');
+    expect(dump, equals('''Column([GlobalKey]; renderObject: RenderFlex)
+├Container()
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+├Container([GlobalKey])
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+├Container()
+│└Container()
+│ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
+│  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+├Container([GlobalKey])
+│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
+│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+└Container()
+ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox relayoutBoundary=up1)
+  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox relayoutBoundary=up2)
+'''));
+  });
 }
