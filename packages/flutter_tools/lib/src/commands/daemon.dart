@@ -655,7 +655,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'id': device.id,
     'name': device.name,
     'platform': getNameForTargetPlatform(await device.targetPlatform),
-    'emulator': device.isLocalEmulator
+    'emulator': await device.isLocalEmulator,
   };
 }
 
