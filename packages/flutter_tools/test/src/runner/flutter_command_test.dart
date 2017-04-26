@@ -95,7 +95,7 @@ void main() {
         ExitStatus.fail,
         // nulls should be cleaned up.
         analyticsParameters: <String> ['blah1', 'blah2', null, 'blah3'],
-        exitTime: new DateTime.fromMillisecondsSinceEpoch(1500)
+        endTimeOverride: new DateTime.fromMillisecondsSinceEpoch(1500)
       );
 
       final DummyFlutterCommand flutterCommand = 

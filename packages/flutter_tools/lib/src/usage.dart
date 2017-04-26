@@ -84,16 +84,17 @@ class Usage {
   void sendTiming(
     String category, 
     String variableName, 
-    Duration duration,
-    {
-      String label,
+    Duration duration, {
+    String label,
     }) {
+    if (!suppressAnalytics) {
     _analytics.sendTiming(
-      variableName, 
-      duration.inMilliseconds, 
-      category: category,
-      label: label,
-    );
+        variableName, 
+        duration.inMilliseconds, 
+        category: category,
+        label: label,
+      );
+    }
   }
 
   void sendException(dynamic exception, StackTrace trace) {

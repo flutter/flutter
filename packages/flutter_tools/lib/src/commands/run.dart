@@ -248,8 +248,8 @@ class RunCommand extends RunCommandBase {
         throwToolExit(null, exitCode: result);
       return new FlutterCommandResult(
         ExitStatus.success,
-        analyticsParameters: <String>["daemon"],
-        exitTime: appStartedTime,
+        analyticsParameters: <String>['daemon'],
+        endTimeOverride: appStartedTime,
       );
     }
 
@@ -299,7 +299,7 @@ class RunCommand extends RunCommandBase {
     // Do not add more operations to the future.
     final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
     appStartedTimeRecorder.future.then(
-      (Null _) { appStartedTime = clock.now(); }
+      (_) { appStartedTime = clock.now(); }
     );
 
     final int result = await runner.run(
@@ -317,7 +317,7 @@ class RunCommand extends RunCommandBase {
         getNameForTargetPlatform(await device.targetPlatform),
         await device.isLocalEmulator ? 'emulator' : null,
       ],
-      exitTime: appStartedTime,
+      endTimeOverride: appStartedTime,
     );
   }
 }

@@ -206,4 +206,4 @@ class Uuid {
       value.toRadixString(16).padLeft(count, '0');
 }
 
-Clock get clock => context.putIfAbsent(Clock, () => new Clock());
+Clock get clock => context.putIfAbsent(Clock, () => const Clock());
