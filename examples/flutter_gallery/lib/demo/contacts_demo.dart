@@ -151,6 +151,7 @@ class ContactsDemoState extends State<ContactsDemo> {
               flexibleSpace: new FlexibleSpaceBar(
                 title: const Text('Ali Connors'),
                 background: new Stack(
+                  fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
                       'packages/flutter_gallery_assets/ali_connors.jpg',
