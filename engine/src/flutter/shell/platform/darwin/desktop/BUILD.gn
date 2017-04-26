@@ -2,8 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/config/mac/rules.gni")
-
 assert(is_mac)
 
 source_set("mac_desktop_platform") {
@@ -44,23 +42,28 @@ executable("shell_standalone") {
   ]
 }
 
-resource_copy_mac("mac_desktop_resources") {
-  app_name = "FlutterTester"
-  if (is_fuchsia_host) {
-    resources = [ "//third_party/icu/common/icudtl.dat" ]
-  } else {
-    resources = [ "//third_party/icu/android/icudtl.dat" ]
+if (!is_fuchsia_host) {
+
+  import("//build/config/mac/rules.gni")
+
+  resource_copy_mac("mac_desktop_resources") {
+    app_name = "FlutterTester"
+    if (is_fuchsia_host) {
+      resources = [ "//third_party/icu/common/icudtl.dat" ]
+    } else {
+      resources = [ "//third_party/icu/android/icudtl.dat" ]
+    }
+    bundle_directory = "."
   }
-  bundle_directory = "."
-}
 
-mac_app("shell_application_bundle") {
-  app_name = "FlutterTester"
-  info_plist = "Info.plist"
-  xibs = [ "flutter_mac.xib" ]
+  mac_app("shell_application_bundle") {
+    app_name = "FlutterTester"
+    info_plist = "Info.plist"
+    xibs = [ "flutter_mac.xib" ]
 
-  deps = [
-    ":mac_desktop_platform",
-    ":mac_desktop_resources",
-  ]
+    deps = [
+      ":mac_desktop_platform",
+      ":mac_desktop_resources",
+    ]
+  }
 }

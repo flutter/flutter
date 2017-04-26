@@ -7,9 +7,13 @@ assert(is_mac || is_ios)
 group("darwin") {
   if (is_mac) {
     deps = [
-      "desktop:shell_application_bundle",
       "desktop:shell_standalone",
     ]
+    if (!is_fuchsia_host) {
+      deps += [
+        "desktop:shell_application_bundle",
+      ]
+    }
   } else if (is_ios) {
     deps = [
       "ios:flutter_framework",
