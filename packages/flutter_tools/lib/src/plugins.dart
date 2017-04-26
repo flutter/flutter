@@ -29,7 +29,7 @@ class Plugin {
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
-  final String pubspecPath = packageRoot.resolve('pubspec.yaml').path;
+  final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!fs.isFileSync(pubspecPath))
     return null;
   final dynamic pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
@@ -38,8 +38,9 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   final dynamic flutterConfig = pubspec['flutter'];
   if (flutterConfig == null || !flutterConfig.containsKey('plugin'))
     return null;
-  printTrace('Found plugin $name at ${packageRoot.path}');
-  return new Plugin.fromYaml(name, packageRoot.path, flutterConfig['plugin']);
+  final String packageRootPath = fs.path.fromUri(packageRoot);
+  printTrace('Found plugin $name at $packageRootPath');
+  return new Plugin.fromYaml(name, packageRootPath, flutterConfig['plugin']);
 }
 
 List<Plugin> _findPlugins(String directory) {
@@ -64,7 +65,7 @@ List<Plugin> _findPlugins(String directory) {
 void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
   final String pluginManifest =
-      plugins.map((Plugin p) => '${p.name}=${p.path}').join('\n');
+    plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsProperties.writeAsStringSync('$pluginManifest\n');
   } else {
