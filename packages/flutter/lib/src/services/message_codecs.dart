@@ -53,7 +53,7 @@ class StringCodec implements MessageCodec<String> {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * `null`
+/// * null
 /// * [bool]s
 /// * [num]s
 /// * [String]s
@@ -62,9 +62,9 @@ class StringCodec implements MessageCodec<String> {
 ///
 /// On Android, messages are decoded using the `org.json` library.
 /// On iOS, messages are decoded using the `NSJSONSerialization` library.
-/// In both cases, the use of top-level simple messages (`null`, [bool], [num],
+/// In both cases, the use of top-level simple messages (null, [bool], [num],
 /// and [String]) is supported (by the Flutter SDK). The decoded value will be
-/// `null`/`nil` for `null`, and identical to what would result from decoding a
+/// null/nil for null, and identical to what would result from decoding a
 /// singleton JSON array with a Boolean, number, or string value, and then
 /// extracting its single element.
 class JSONMessageCodec implements MessageCodec<dynamic> {
@@ -170,7 +170,7 @@ class JSONMethodCodec implements MethodCodec {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * `null`
+/// * null
 /// * [bool]s
 /// * [num]s
 /// * [String]s
@@ -180,7 +180,7 @@ class JSONMethodCodec implements MethodCodec {
 ///
 /// On Android, messages are represented as follows:
 ///
-/// * `null`: `null`
+/// * null: null
 /// * [bool]: `java.lang.Boolean`
 /// * [int]: `java.lang.Integer` for values that are representable using 32-bit
 ///   two's complement; otherwise, `java.lang.Long` for values that are
@@ -197,7 +197,7 @@ class JSONMethodCodec implements MethodCodec {
 ///
 /// On iOS, messages are represented as follows:
 ///
-/// * `null`: `nil`
+/// * null: nil
 /// * [bool]: `NSNumber numberWithBool:`
 /// * [int]: `NSNumber numberWithInt:` for values that are representable using
 ///   32-bit two's complement; otherwise, `NSNumber numberWithLong:` for values
