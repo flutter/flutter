@@ -475,7 +475,7 @@ class PaintingContext {
         canvas.drawShadow(
           new Path()..addRRect(offsetClipRRect),
           const Color(0xFF000000),
-          elevation,
+          elevation.toDouble(),
           color.alpha != 0xFF,
         );
       }
