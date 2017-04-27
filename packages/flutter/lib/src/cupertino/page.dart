@@ -27,17 +27,99 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
 
 // BoxDecoration from no shadow to page shadow mimicking iOS page transitions.
 final DecorationTween _kShadowTween = new DecorationTween(
-  begin: BoxDecoration.none, // No shadow initially.
-  end: const BoxDecoration(
-    boxShadow: const <BoxShadow>[
-      const BoxShadow(
-        blurRadius: 10.0,
-        spreadRadius: 4.0,
-        color: const Color(0x38000000),
-      ),
-    ],
+  begin: const _CupertinoEdgeShadowDecoration(
+    edgeGradient: const LinearGradient(
+      begin: const FractionalOffset(0.95, 0.0),
+      end: FractionalOffset.topRight,
+      colors: const <Color>[
+        const Color(0x00000000), 
+        const Color(0x00000000),
+        const Color(0x00000000)
+      ],
+      stops: const <double>[0.0, 0.6, 1.0],
+    ), 
+  ),
+  end: const _CupertinoEdgeShadowDecoration(
+    edgeGradient: const LinearGradient(
+      begin: const FractionalOffset(0.95, 0.0),
+      end: FractionalOffset.topRight,
+      colors: const <Color>[
+        const Color(0x00000000), 
+        const Color(0x12000000),
+        const Color(0x38000000)
+      ],
+      stops: const <double>[0.0, 0.6, 1.0],
+    ), 
   ),
 );
+
+class _CupertinoEdgeShadowDecoration extends Decoration {
+  const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
+
+  static const _CupertinoEdgeShadowDecoration none = 
+      const _CupertinoEdgeShadowDecoration();
+
+  /// A gradient to draw to the left of the box being decorated.
+  final LinearGradient edgeGradient;
+
+  /// Linearly interpolate between two edge shadow decorations decorations.
+  ///
+  /// See also [Decoration.lerp].
+  static _CupertinoEdgeShadowDecoration lerp(
+    _CupertinoEdgeShadowDecoration a, 
+    _CupertinoEdgeShadowDecoration b, 
+    double t
+  ) {
+    if (a == null && b == null)
+      return null;
+    return new _CupertinoEdgeShadowDecoration(
+      edgeGradient: LinearGradient.lerp(a?.edgeGradient, b?.edgeGradient, t),
+    );
+  }
+
+  @override
+  _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
+    if (a is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
+    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+  }
+
+  @override
+  _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
+    if (b is! _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
+    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+  }
+  
+  @override
+  _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
+    return new _CupertinoEdgeShadowPainter(this, onChanged);
+  }
+}
+
+class _CupertinoEdgeShadowPainter extends BoxPainter {
+  _CupertinoEdgeShadowPainter(@required this._decoration, VoidCallback onChange) : super(onChange) {
+    assert(_decoration != null);
+  }
+
+  final _CupertinoEdgeShadowDecoration _decoration;
+
+  @override
+  void paint(Canvas canvas, Offset offset, ImageConfiguration configuration) {
+    final LinearGradient gradient = _decoration.edgeGradient;
+    if (gradient == null)
+      return;
+    // The drawable space for the gradient is box size one box wide to
+    // the left of the box.
+    final Rect rect = 
+        (offset & configuration.size).translate(-configuration.size.width, 0.0);
+    print('translated $rect');
+
+    final Paint paint = new Paint()
+      ..shader = gradient.createShader(rect);
+    canvas.drawRect(rect, paint);
+  }
+}
 
 /// Provides the native iOS page transition animation.
 ///
