@@ -21,12 +21,12 @@ import 'platform_channel.dart';
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
-  /// Returns `null` if the message is `null`.
+  /// Returns null if the message is null.
   ByteData encodeMessage(T message);
 
   /// Decodes the specified [message] from binary.
   ///
-  /// Returns `null` if the message is `null`.
+  /// Returns null if the message is null.
   T decodeMessage(ByteData message);
 }
 
@@ -155,10 +155,10 @@ class PlatformException implements Exception {
   /// An error code.
   final String code;
 
-  /// A human-readable error message, possibly `null`.
+  /// A human-readable error message, possibly null.
   final String message;
 
-  /// Error details, possibly `null`.
+  /// Error details, possibly null.
   final dynamic details;
 
   @override
@@ -174,13 +174,13 @@ class PlatformException implements Exception {
 ///   with a [MissingPluginException], if no plugin handler for the method call
 ///   was found.
 /// * [OptionalMethodChannel.invokeMethod], which completes the returned future
-///   with `null`, if no plugin handler for the method call was found.
+///   with null, if no plugin handler for the method call was found.
 class MissingPluginException implements Exception {
   /// Creates a [MissingPluginException] with an optional human-readable
   /// error message.
   MissingPluginException([this.message]);
 
-  /// A human-readable error message, possibly `null`.
+  /// A human-readable error message, possibly null.
   final String message;
 
   @override
