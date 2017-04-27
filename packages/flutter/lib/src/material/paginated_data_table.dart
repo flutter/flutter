@@ -388,9 +388,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                   // TODO(ianh): This decoration will prevent ink splashes from being visible.
                   // Instead, we should have a widget that prints the decoration on the material.
                   // See https://github.com/flutter/flutter/issues/3782
-                  decoration: _selectedRowCount > 0 ? new BoxDecoration(
-                    backgroundColor: themeData.secondaryHeaderColor
-                  ) : null,
+                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
                   child: new Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: headerWidgets

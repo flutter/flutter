@@ -253,7 +253,7 @@ class DayPicker extends StatelessWidget {
           // The selected day gets a circle background highlight, and a contrasting text color.
           itemStyle = themeData.accentTextTheme.body2;
           decoration = new BoxDecoration(
-            backgroundColor: themeData.accentColor,
+            color: themeData.accentColor,
             shape: BoxShape.circle
           );
         } else if (disabled) {

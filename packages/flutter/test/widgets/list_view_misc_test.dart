@@ -72,21 +72,17 @@ void main() {
         reverse: reverse,
         children: <Widget>[
           new GestureDetector(
-            onTap: () { ++first; },
+            onTap: () { first += 1; },
             child: new Container(
               height: 350.0, // more than half the height of the test area
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF00FF00)
-              )
+              color: const Color(0xFF00FF00),
             )
           ),
           new GestureDetector(
-            onTap: () { ++second; },
+            onTap: () { second += 1; },
             child: new Container(
               height: 350.0, // more than half the height of the test area
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF0000FF)
-              )
+              color: const Color(0xFF0000FF),
             )
           )
         ]

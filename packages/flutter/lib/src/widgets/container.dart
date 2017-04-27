@@ -122,7 +122,7 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : decoration = decoration ?? (color != null ? new BoxDecoration(backgroundColor: color) : null),
+  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
@@ -161,6 +161,10 @@ class Container extends StatelessWidget {
   final EdgeInsets padding;
 
   /// The decoration to paint behind the [child].
+  ///
+  /// A shorthand for specifying just a solid color is available in the
+  /// constructor: set the `color` argument instead of the `decoration`
+  /// argument.
   final Decoration decoration;
 
   /// The decoration to paint in front of the [child].
@@ -234,18 +238,18 @@ class Container extends StatelessWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (constraints != null)
-      description.add('$constraints');
     if (alignment != null)
       description.add('$alignment');
+    if (padding != null)
+      description.add('padding: $padding');
     if (decoration != null)
       description.add('bg: $decoration');
     if (foregroundDecoration != null)
       description.add('fg: $foregroundDecoration');
+    if (constraints != null)
+      description.add('$constraints');
     if (margin != null)
       description.add('margin: $margin');
-    if (padding != null)
-      description.add('padding: $padding');
     if (transform != null)
       description.add('has transform');
   }

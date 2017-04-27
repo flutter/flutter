@@ -315,7 +315,7 @@ class MiniIconWithText extends StatelessWidget {
             width: 16.0,
             height: 16.0,
             decoration: new BoxDecoration(
-              backgroundColor: Theme.of(context).primaryColor,
+              color: Theme.of(context).primaryColor,
               shape: BoxShape.circle
             ),
             child: new Icon(icon, color: Colors.white, size: 12.0)
@@ -332,9 +332,7 @@ class FatDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: 8.0,
-      decoration: new BoxDecoration(
-        backgroundColor: Theme.of(context).dividerColor
-      )
+      color: Theme.of(context).dividerColor,
     );
   }
 }
@@ -436,7 +434,7 @@ class ItemImageBox extends StatelessWidget {
                   left: 4.0,
                   child: new Container(
                     decoration: new BoxDecoration(
-                      backgroundColor: Colors.black54,
+                      color: Colors.black54,
                       borderRadius: new BorderRadius.circular(2.0)
                     ),
                     padding: const EdgeInsets.all(4.0),
@@ -506,9 +504,7 @@ class ItemGalleryBox extends StatelessWidget {
                           children: <Widget>[
                             new Expanded(
                               child: new Container(
-                                decoration: new BoxDecoration(
-                                  backgroundColor: Theme.of(context).primaryColor,
-                                ),
+                                color: Theme.of(context).primaryColor,
                                 child: new Center(
                                   child: new Text(tabName, style: Theme.of(context).textTheme.headline.copyWith(color: Colors.white)),
                                 )
@@ -665,10 +661,8 @@ class FancyDrawerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Container(
-      decoration: const BoxDecoration(
-        backgroundColor: Colors.purple
-      ),
-      height: 200.0
+      color: Colors.purple,
+      height: 200.0,
     );
   }
 }

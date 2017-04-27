@@ -110,9 +110,7 @@ class SectionIndicator extends StatelessWidget {
       child: new Container(
         width: kSectionIndicatorWidth,
         height: 3.0,
-        decoration: new BoxDecoration(
-          backgroundColor: Colors.white.withOpacity(opacity),
-        ),
+        color: Colors.white.withOpacity(opacity),
       ),
     );
   }
@@ -132,7 +130,7 @@ class SectionDetailView extends StatelessWidget {
     final Widget image = new DecoratedBox(
       decoration: new BoxDecoration(
         borderRadius: new BorderRadius.circular(6.0),
-        backgroundImage: new BackgroundImage(
+        image: new DecorationImage(
           image: new AssetImage(detail.imageAsset),
           fit: BoxFit.cover,
           alignment: FractionalOffset.center,
@@ -156,7 +154,7 @@ class SectionDetailView extends StatelessWidget {
     }
 
     return new DecoratedBox(
-      decoration: new BoxDecoration(backgroundColor: Colors.grey.shade200),
+      decoration: new BoxDecoration(color: Colors.grey.shade200),
       child: item,
     );
   }

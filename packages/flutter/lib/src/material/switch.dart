@@ -325,8 +325,8 @@ class _RenderSwitch extends RenderToggleable {
 
   BoxDecoration _createDefaultThumbDecoration(Color color, ImageProvider image) {
     return new BoxDecoration(
-      backgroundColor: color,
-      backgroundImage: image == null ? null : new BackgroundImage(image: image),
+      color: color,
+      image: image == null ? null : new DecorationImage(image: image),
       shape: BoxShape.circle,
       boxShadow: kElevationToShadow[1]
     );

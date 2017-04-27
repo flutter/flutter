@@ -273,11 +273,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
             children: <Widget>[
               new GestureDetector(
                 onTap: close,
-                child: new DecoratedBox(
-                  decoration: new BoxDecoration(
-                    backgroundColor: _color.evaluate(_controller)
-                  ),
-                  child: new Container(),
+                child: new Container(
+                  color: _color.evaluate(_controller)
                 ),
               ),
               new Align(

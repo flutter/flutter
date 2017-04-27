@@ -12,9 +12,7 @@ void main() {
     bool didReceiveTap = false;
     await tester.pumpWidget(
       new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00),
-        ),
+        color: const Color(0xFF00FF00),
         child: new Stack(
           children: <Widget>[
             new Positioned(
@@ -27,8 +25,7 @@ void main() {
                       didReceiveTap = true;
                     },
                     child: new Container(
-                      decoration: const BoxDecoration(
-                          backgroundColor: const Color(0xFF0000FF)),
+                      color: const Color(0xFF0000FF),
                       width: 100.0,
                       height: 100.0,
                       child: const Center(

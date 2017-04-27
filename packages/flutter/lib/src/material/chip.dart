@@ -112,7 +112,7 @@ class Chip extends StatelessWidget {
         height: _kChipHeight,
         padding: new EdgeInsets.only(left: leftPadding, right: rightPadding),
         decoration: new BoxDecoration(
-          backgroundColor: Colors.grey.shade300,
+          color: Colors.grey.shade300,
           borderRadius: new BorderRadius.circular(16.0)
         ),
         child: new Row(

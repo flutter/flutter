@@ -964,16 +964,16 @@ void paintImage({
     canvas.restore();
 }
 
-/// A background image for a box.
+/// An image for a box decoration.
 ///
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 @immutable
-class BackgroundImage {
-  /// Creates a background image.
+class DecorationImage {
+  /// Creates an image to show in a [BoxDecoration].
   ///
   /// The [image] argument must not be null.
-  const BackgroundImage({
+  const DecorationImage({
     this.image,
     this.fit,
     this.repeat: ImageRepeat.noRepeat,
@@ -982,16 +982,16 @@ class BackgroundImage {
     this.alignment,
   });
 
-  /// The image to be painted into the background.
+  /// The image to be painted into the decoration.
   final ImageProvider image;
 
-  /// How the background image should be inscribed into the box.
+  /// How the image should be inscribed into the box.
   ///
   /// The default varies based on the other fields. See the discussion at
   /// [paintImage].
   final BoxFit fit;
 
-  /// How to paint any portions of the box not covered by the background image.
+  /// How to paint any portions of the box not covered by the image.
   final ImageRepeat repeat;
 
   /// The center slice for a nine-patch image.
@@ -1003,7 +1003,7 @@ class BackgroundImage {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
-  /// A color filter to apply to the background image before painting it.
+  /// A color filter to apply to the image before painting it.
   final ColorFilter colorFilter;
 
   /// How to align the image within its bounds.
@@ -1019,9 +1019,9 @@ class BackgroundImage {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! BackgroundImage)
+    if (runtimeType != other.runtimeType)
       return false;
-    final BackgroundImage typedOther = other;
+    final DecorationImage typedOther = other;
     return image == typedOther.image &&
            fit == typedOther.fit &&
            repeat == typedOther.repeat &&
@@ -1034,19 +1034,19 @@ class BackgroundImage {
   int get hashCode => hashValues(image, fit, repeat, centerSlice, colorFilter, alignment);
 
   @override
-  String toString() => 'BackgroundImage($image, $fit, $repeat)';
+  String toString() => '$runtimeType($image, $fit, $repeat)';
 }
 
 /// An immutable description of how to paint a box.
 ///
 /// The following example uses the [Container] widget from the widgets layer to
-/// draw a background image with a border:
+/// draw an image with a border:
 ///
 /// ```dart
 /// new Container(
 ///   decoration: new BoxDecoration(
-///     backgroundColor: const Color(0xff7c94b6),
-///     backgroundImage: new BackgroundImage(
+///     color: const Color(0xff7c94b6),
+///     image: new DecorationImage(
 ///       image: new ExactAssetImage('images/flowers.jpeg'),
 ///       fit: BoxFit.cover,
 ///     ),
@@ -1060,8 +1060,8 @@ class BackgroundImage {
 class BoxDecoration extends Decoration {
   /// Creates a box decoration.
   ///
-  /// * If [backgroundColor] is null, this decoration does not paint a background color.
-  /// * If [backgroundImage] is null, this decoration does not paint a background image.
+  /// * If [color] is null, this decoration does not paint a background color.
+  /// * If [image] is null, this decoration does not paint a background image.
   /// * If [border] is null, this decoration does not paint a border.
   /// * If [borderRadius] is null, this decoration uses more efficient background
   ///   painting commands. The [borderRadius] argument must be be null if [shape] is
@@ -1069,8 +1069,8 @@ class BoxDecoration extends Decoration {
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
   const BoxDecoration({
-    this.backgroundColor,
-    this.backgroundImage,
+    this.color,
+    this.image,
     this.border,
     this.borderRadius,
     this.boxShadow,
@@ -1092,13 +1092,13 @@ class BoxDecoration extends Decoration {
   ///
   /// The color is filled into the shape of the box (e.g., either a rectangle,
   /// potentially with a border radius, or a circle).
-  final Color backgroundColor;
+  final Color color;
 
   /// An image to paint above the background color. If [shape] is [BoxShape.circle]
   /// then the image is clipped to the circle's boundary.
-  final BackgroundImage backgroundImage;
+  final DecorationImage image;
 
-  /// A border to draw above the background.
+  /// A border to draw above the background [color] or [image].
   final Border border;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
@@ -1106,13 +1106,15 @@ class BoxDecoration extends Decoration {
   /// Applies only to boxes with rectangular shapes.
   final BorderRadius borderRadius;
 
-  /// A list of shadows cast by this box behind the background.
+  /// A list of shadows cast by this box behind the box.
+  ///
+  /// The shadow follows the [shape] of the box.
   final List<BoxShadow> boxShadow;
 
-  /// A gradient to use when filling the background.
+  /// A gradient to use when filling the box.
   final Gradient gradient;
 
-  /// The shape to fill the background color into and to cast as a shadow.
+  /// The shape to fill the background [color] into and to cast as the [boxShadow].
   final BoxShape shape;
 
   /// The inset space occupied by the border.
@@ -1123,8 +1125,8 @@ class BoxDecoration extends Decoration {
   BoxDecoration scale(double factor) {
     // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
-      backgroundColor: Color.lerp(null, backgroundColor, factor),
-      backgroundImage: backgroundImage,
+      color: Color.lerp(null, color, factor),
+      image: image,
       border: Border.lerp(null, border, factor),
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
@@ -1150,8 +1152,8 @@ class BoxDecoration extends Decoration {
       return a.scale(1.0 - t);
     // TODO(abarth): lerp ALL the fields.
     return new BoxDecoration(
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      backgroundImage: b.backgroundImage,
+      color: Color.lerp(a.color, b.color, t),
+      image: b.image,
       border: Border.lerp(a.border, b.border, t),
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
@@ -1178,11 +1180,11 @@ class BoxDecoration extends Decoration {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! BoxDecoration)
+    if (runtimeType != other.runtimeType)
       return false;
     final BoxDecoration typedOther = other;
-    return backgroundColor == typedOther.backgroundColor &&
-           backgroundImage == typedOther.backgroundImage &&
+    return color == typedOther.color &&
+           image == typedOther.image &&
            border == typedOther.border &&
            borderRadius == typedOther.borderRadius &&
            boxShadow == typedOther.boxShadow &&
@@ -1193,8 +1195,8 @@ class BoxDecoration extends Decoration {
   @override
   int get hashCode {
     return hashValues(
-      backgroundColor,
-      backgroundImage,
+      color,
+      image,
       border,
       borderRadius,
       boxShadow,
@@ -1209,10 +1211,10 @@ class BoxDecoration extends Decoration {
   @override
   String toString([String prefix = '', String indentPrefix]) {
     final List<String> result = <String>[];
-    if (backgroundColor != null)
-      result.add('${prefix}backgroundColor: $backgroundColor');
-    if (backgroundImage != null)
-      result.add('${prefix}backgroundImage: $backgroundImage');
+    if (color != null)
+      result.add('${prefix}color: $color');
+    if (image != null)
+      result.add('${prefix}image: $image');
     if (border != null)
       result.add('${prefix}border: $border');
     if (borderRadius != null)
@@ -1260,7 +1262,7 @@ class BoxDecoration extends Decoration {
 
   @override
   _BoxDecorationPainter createBoxPainter([VoidCallback onChanged]) {
-    assert(onChanged != null || backgroundImage == null);
+    assert(onChanged != null || image == null);
     return new _BoxDecorationPainter(this, onChanged);
   }
 }
@@ -1282,8 +1284,8 @@ class _BoxDecorationPainter extends BoxPainter {
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = new Paint();
 
-      if (_decoration.backgroundColor != null)
-        paint.color = _decoration.backgroundColor;
+      if (_decoration.color != null)
+        paint.color = _decoration.color;
 
       if (_decoration.gradient != null) {
         paint.shader = _decoration.gradient.createShader(rect);
@@ -1329,7 +1331,7 @@ class _BoxDecorationPainter extends BoxPainter {
   }
 
   void _paintBackgroundColor(Canvas canvas, Rect rect) {
-    if (_decoration.backgroundColor != null || _decoration.gradient != null)
+    if (_decoration.color != null || _decoration.gradient != null)
       _paintBox(canvas, rect, _getBackgroundPaint(rect));
   }
 
@@ -1337,7 +1339,7 @@ class _BoxDecorationPainter extends BoxPainter {
   ImageInfo _image;
 
   void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
-    final BackgroundImage backgroundImage = _decoration.backgroundImage;
+    final DecorationImage backgroundImage = _decoration.image;
     if (backgroundImage == null)
       return;
     final ImageStream newImageStream = backgroundImage.image.resolve(configuration);

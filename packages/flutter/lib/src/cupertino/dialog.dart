@@ -40,7 +40,7 @@ const double _kCupertinoDialogWidth = 270.0;
 const BoxDecoration _kCupertinoDialogDecoration = const BoxDecoration(
   // TODO(abarth): Rather than being opaque, this decoration should actually be
   // partially transparent and have a subtle background blur effect.
-  backgroundColor: const Color(0xFFF8F8F8),
+  color: const Color(0xFFF8F8F8),
   borderRadius: const BorderRadius.all(const Radius.circular(15.0)),
 );
 

@@ -66,12 +66,12 @@ class MarkdownStyleSheet {
       listIndent: 32.0,
       blockquotePadding: 8.0,
       blockquoteDecoration: new BoxDecoration(
-        backgroundColor: Colors.blue.shade100,
+        color: Colors.blue.shade100,
         borderRadius: new BorderRadius.circular(2.0)
       ),
       codeblockPadding: 8.0,
       codeblockDecoration: new BoxDecoration(
-        backgroundColor: Colors.grey.shade100,
+        color: Colors.grey.shade100,
         borderRadius: new BorderRadius.circular(2.0)
       )
     );
@@ -103,12 +103,12 @@ class MarkdownStyleSheet {
       listIndent: 32.0,
       blockquotePadding: 8.0,
       blockquoteDecoration: new BoxDecoration(
-        backgroundColor: Colors.blue.shade100,
+        color: Colors.blue.shade100,
         borderRadius: new BorderRadius.circular(2.0)
       ),
       codeblockPadding: 8.0,
       codeblockDecoration: new BoxDecoration(
-        backgroundColor: Colors.grey.shade100,
+        color: Colors.grey.shade100,
         borderRadius: new BorderRadius.circular(2.0)
       )
     );

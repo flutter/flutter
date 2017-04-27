@@ -20,11 +20,11 @@ void main() {
 
   testWidgets('DecorationTween control test', (WidgetTester tester) async {
     final DecorationTween tween = new DecorationTween(
-      begin: const BoxDecoration(backgroundColor: const Color(0xFF00FF00)),
-      end: const BoxDecoration(backgroundColor: const Color(0xFFFFFF00))
+      begin: const BoxDecoration(color: const Color(0xFF00FF00)),
+      end: const BoxDecoration(color: const Color(0xFFFFFF00))
     );
     final BoxDecoration result = tween.lerp(0.25);
-    expect(result.backgroundColor, const Color(0xFF3FFF00));
+    expect(result.color, const Color(0xFF3FFF00));
   });
 
   testWidgets('EdgeInsetsTween control test', (WidgetTester tester) async {

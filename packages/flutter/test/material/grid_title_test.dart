@@ -20,7 +20,7 @@ void main() {
       ),
       child: new DecoratedBox(
         decoration: new BoxDecoration(
-          backgroundColor: Colors.green[500],
+          color: Colors.green[500],
         ),
       ),
       footer: new GridTileBar(

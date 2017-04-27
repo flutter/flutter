@@ -36,9 +36,7 @@ void main() {
     await tester.pumpWidget(new SingleChildScrollView(
       child: new Container(
         height: 2000.0,
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00),
-        ),
+        color: const Color(0xFF00FF00),
       ),
     ));
 
@@ -56,9 +54,7 @@ void main() {
     await tester.pumpWidget(new SingleChildScrollView(
       child: new Container(
         height: 2000.0,
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00),
-        ),
+        color: const Color(0xFF00FF00),
       ),
     ));
 
@@ -66,9 +62,7 @@ void main() {
       controller: controller,
       child: new Container(
         height: 2000.0,
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00),
-        ),
+        color: const Color(0xFF00FF00),
       ),
     ));
 
@@ -84,9 +78,7 @@ void main() {
         primary: true,
         child: new Container(
           height: 2000.0,
-          decoration: const BoxDecoration(
-            backgroundColor: const Color(0xFF00FF00),
-          ),
+          color: const Color(0xFF00FF00),
         ),
       ),
     ));
@@ -107,9 +99,7 @@ void main() {
             return new SingleChildScrollView(
               child: new Container(
                 height: 2000.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00),
-                ),
+                color: const Color(0xFF00FF00),
               ),
             );
           },
@@ -126,9 +116,7 @@ void main() {
               controller: controller,
               child: new Container(
                 height: 2000.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00),
-                ),
+                color: const Color(0xFF00FF00),
               ),
             );
           },

@@ -27,9 +27,7 @@ void main() {
             log.add(state);
           },
           child: new Container(
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
             child: new Text(state),
           ),
         );
@@ -95,9 +93,7 @@ void main() {
             log.add(state);
           },
           child: new Container(
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
             child: new Text(state),
           ),
         );
@@ -310,7 +306,7 @@ void main() {
 
     final Container container = new Container(
       decoration: const BoxDecoration(
-        backgroundColor: green,
+        color: green,
       ),
     );
 

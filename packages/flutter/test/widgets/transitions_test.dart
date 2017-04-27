@@ -18,7 +18,7 @@ void main() {
   group('DecoratedBoxTransition test', () {
     final DecorationTween decorationTween = new DecorationTween(
       begin: new BoxDecoration(
-        backgroundColor: const Color(0xFFFFFFFF),
+        color: const Color(0xFFFFFFFF),
         border: new Border.all(
           color: const Color(0xFF000000),
           style: BorderStyle.solid,
@@ -33,7 +33,7 @@ void main() {
         )],
       ),
       end: new BoxDecoration(
-        backgroundColor: const Color(0xFF000000),
+        color: const Color(0xFF000000),
         border: new Border.all(
           color: const Color(0xFF202020),
           style: BorderStyle.solid,
@@ -65,7 +65,7 @@ void main() {
             tester.renderObject(find.byType(DecoratedBox));
         BoxDecoration actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.backgroundColor, const Color(0xFFFFFFFF));
+        expect(actualDecoration.color, const Color(0xFFFFFFFF));
         expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
         expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
         expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
@@ -76,7 +76,7 @@ void main() {
         actualBox = tester.renderObject(find.byType(DecoratedBox));
         actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.backgroundColor, const Color(0xFF7F7F7F));
+        expect(actualDecoration.color, const Color(0xFF7F7F7F));
         expect(actualDecoration.border.left.width, 2.5);
         expect(actualDecoration.border.left.style, BorderStyle.solid);
         expect(actualDecoration.border.left.color, const Color(0xFF101010));
@@ -93,7 +93,7 @@ void main() {
         actualBox = tester.renderObject(find.byType(DecoratedBox));
         actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.backgroundColor, const Color(0xFF000000));
+        expect(actualDecoration.color, const Color(0xFF000000));
         expect(actualDecoration.boxShadow, null);
       }
     );
@@ -117,7 +117,7 @@ void main() {
           tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration;
 
-      expect(actualDecoration.backgroundColor, const Color(0xFFFFFFFF));
+      expect(actualDecoration.color, const Color(0xFFFFFFFF));
       expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
       expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
       expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
@@ -130,7 +130,7 @@ void main() {
 
       // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
-      expect(actualDecoration.backgroundColor, const Color(0xFF505050));
+      expect(actualDecoration.color, const Color(0xFF505050));
       expect(actualDecoration.border.left.width, closeTo(1.9, 0.1));
       expect(actualDecoration.border.left.style, BorderStyle.solid);
       expect(actualDecoration.border.left.color, const Color(0xFF151515));

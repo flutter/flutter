@@ -71,9 +71,7 @@ class CustomIcon extends StatelessWidget {
       margin: const EdgeInsets.all(4.0),
       width: iconTheme.size - 8.0,
       height: iconTheme.size - 8.0,
-      decoration: new BoxDecoration(
-        backgroundColor: iconTheme.color,
-      ),
+      color: iconTheme.color,
     );
   }
 }

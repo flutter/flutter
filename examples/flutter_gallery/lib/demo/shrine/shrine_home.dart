@@ -157,7 +157,7 @@ abstract class _PriceItem extends StatelessWidget {
   Widget buildItem(BuildContext context, TextStyle style, EdgeInsets padding) {
     BoxDecoration decoration;
     if (_shoppingCart[product] != null)
-      decoration = new BoxDecoration(backgroundColor: ShrineTheme.of(context).priceHighlightColor);
+      decoration = new BoxDecoration(color: ShrineTheme.of(context).priceHighlightColor);
 
     return new Container(
       padding: padding,
@@ -258,7 +258,7 @@ class _Heading extends StatelessWidget {
         : (screenSize.height - kToolbarHeight) * 0.70,
       child: new Container(
         decoration: new BoxDecoration(
-          backgroundColor: theme.cardBackgroundColor,
+          color: theme.cardBackgroundColor,
           border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
         ),
         child: new CustomMultiChildLayout(

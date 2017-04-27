@@ -25,7 +25,7 @@ class Rectangle extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Expanded(
       child: new Container(
-        decoration: new BoxDecoration(backgroundColor: color)
+        color: color,
       )
     );
   }

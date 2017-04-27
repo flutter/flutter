@@ -31,10 +31,10 @@ class _DropdownMenuPainter extends CustomPainter {
     this.selectedIndex,
     this.resize,
   }) : _painter = new BoxDecoration(
-         // If you add a background image here, you must provide a real
+         // If you add an image here, you must provide a real
          // configuration in the paint() function and you must provide some sort
          // of onChanged callback here.
-         backgroundColor: color,
+         color: color,
          borderRadius: new BorderRadius.circular(2.0),
          boxShadow: kElevationToShadow[elevation]
        ).createBoxPainter(),

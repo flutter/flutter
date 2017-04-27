@@ -517,7 +517,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
         widgets.add(
           new Container(
             decoration: new BoxDecoration(
-              backgroundColor: Theme.of(context).cardColor,
+              color: Theme.of(context).cardColor,
               borderRadius: _borderRadius(i - 1, widgets.isEmpty, false),
               shape: BoxShape.rectangle
             ),
@@ -588,7 +588,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
       widgets.add(
         new Container(
           decoration: new BoxDecoration(
-            backgroundColor: Theme.of(context).cardColor,
+            color: Theme.of(context).cardColor,
             borderRadius: _borderRadius(i - 1, widgets.isEmpty, true),
             shape: BoxShape.rectangle
           ),

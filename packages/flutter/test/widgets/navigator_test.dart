@@ -13,11 +13,9 @@ class FirstWidget extends StatelessWidget {
         Navigator.pushNamed(context, '/second');
       },
       child: new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFFFFFF00)
-        ),
-        child: const Text('X')
-      )
+        color: const Color(0xFFFFFF00),
+        child: const Text('X'),
+      ),
     );
   }
 }
@@ -33,11 +31,9 @@ class SecondWidgetState extends State<SecondWidget> {
     return new GestureDetector(
       onTap: () => Navigator.pop(context),
       child: new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFFFF00FF)
-        ),
-        child: const Text('Y')
-      )
+        color: const Color(0xFFFF00FF),
+        child: const Text('Y'),
+      ),
     );
   }
 }
