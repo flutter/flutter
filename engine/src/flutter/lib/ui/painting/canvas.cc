@@ -380,7 +380,7 @@ void Canvas::drawAtlas(const Paint& paint,
 
 void Canvas::drawShadow(const CanvasPath* path,
                         SkColor color,
-                        int elevation,
+                        double elevation,
                         bool transparentOccluder) {
   flow::PhysicalModelLayer::DrawShadow(canvas_,
                                        path->path(),

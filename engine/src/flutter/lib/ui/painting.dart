@@ -1608,13 +1608,13 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// Draws a shadow for a [Path] representing the given material elevation.
   ///
   /// transparentOccluder should be true if the occluding object is not opaque.
-  void drawShadow(Path path, Color color, int elevation, bool transparentOccluder) {
+  void drawShadow(Path path, Color color, double elevation, bool transparentOccluder) {
     _drawShadow(path, color.value, elevation, transparentOccluder);
   }
 
   void _drawShadow(Path path,
                    int color,
-                   int elevation,
+                   double elevation,
                    bool transparentOccluder) native "Canvas_drawShadow";
 }
 

@@ -155,7 +155,7 @@ void SceneBuilder::pushShaderMask(Shader* shader,
 }
 
 void SceneBuilder::pushPhysicalModel(const RRect& rrect,
-                                     int elevation,
+                                     double elevation,
                                      int color) {
   SkRect cullRect;
   if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))

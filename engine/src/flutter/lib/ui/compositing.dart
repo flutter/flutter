@@ -132,11 +132,11 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Rasterization will be clipped to the given shape.
   ///
   /// See [pop] for details about the operation stack.
-  void pushPhysicalModel({ RRect rrect, int elevation, Color color }) {
+  void pushPhysicalModel({ RRect rrect, double elevation, Color color }) {
     _pushPhysicalModel(rrect._value, elevation, color.value);
   }
   void _pushPhysicalModel(Float32List rrect,
-                          int elevation,
+                          double elevation,
                           int color) native "SceneBuilder_pushPhysicalModel";
 
   /// Ends the effect of the most recently pushed operation.
