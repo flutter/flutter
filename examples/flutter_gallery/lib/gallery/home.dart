@@ -190,6 +190,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
 
     if (showPreviewBanner) {
       home = new Stack(
+        fit: StackFit.expand,
         children: <Widget>[
           home,
           new FadeTransition(
