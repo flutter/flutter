@@ -507,7 +507,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef Future<Null> _DeviceEventHandler(Device device);
+typedef void _DeviceEventHandler(Device device);
 
 /// This domain lets callers list and monitor connected devices.
 ///
@@ -536,9 +536,13 @@ class DeviceDomain extends Domain {
     discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
   }
 
+  Future<Null> _serializeDeviceEvents = new Future<Null>.value();
+
   _DeviceEventHandler _onDeviceEvent(String eventName) {
-    return (Device device) async {
-      sendEvent(eventName, await _deviceToMap(device));
+    return (Device device) {
+      _serializeDeviceEvents = _serializeDeviceEvents.then((_) async {
+        sendEvent(eventName, await _deviceToMap(device));
+      });
     };
   }
 
