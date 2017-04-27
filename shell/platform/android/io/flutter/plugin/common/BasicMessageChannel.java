@@ -154,12 +154,7 @@ public final class BasicMessageChannel<T> {
                 handler.onMessage(codec.decodeMessage(message), new Reply<T>() {
                     @Override
                     public void reply(T reply) {
-                        try {
-                            callback.reply(codec.encodeMessage(reply));
-                        } catch (RuntimeException e) {
-                            Log.e(TAG + name, "Failed to encode reply", e);
-                            callback.reply(null);
-                        }
+                        callback.reply(codec.encodeMessage(reply));
                     }
                 });
             } catch (RuntimeException e) {
