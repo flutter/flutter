@@ -330,8 +330,10 @@ class RunCommand extends RunCommandBase {
       analyticsParameters: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
-        getNameForTargetPlatform(await device.targetPlatform),
-        await device.isLocalEmulator ? 'emulator' : null,
+        devices.length == 1 
+            ? getNameForTargetPlatform(await devices[0].targetPlatform)
+            : 'multiple',
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null
       ],
       endTimeOverride: appStartedTime,
     );
