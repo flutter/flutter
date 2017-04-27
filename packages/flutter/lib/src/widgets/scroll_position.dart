@@ -12,19 +12,36 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'scroll_activity.dart';
+import 'scroll_context.dart';
 import 'scroll_metrics.dart';
+import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 
+// ## Subclassing ScrollPosition
+//
+//  * Describe how to impelement [absorb]
+//     - May need to start an idle activity
+//     - May need to update the activity's idea of what the delegate is
+//     - etc
+//  * Need to call [didUpdateScrollDirection] when changing [userScrollDirection]
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollPosition({
     @required this.physics,
+    @required this.context,
     ScrollPosition oldPosition,
+    this.debugLabel,
   }) {
+    assert(physics != null);
+    assert(context != null);
+    assert(context.vsync != null);
     if (oldPosition != null)
       absorb(oldPosition);
   }
 
   final ScrollPhysics physics;
+  final ScrollContext context;
+  final String debugLabel;
 
   @override
   double get minScrollExtent => _minScrollExtent;
@@ -62,11 +79,21 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @mustCallSuper
   void absorb(ScrollPosition other) {
     assert(other != null);
+    assert(other.context == context);
     assert(_pixels == null);
     _minScrollExtent = other.minScrollExtent;
     _maxScrollExtent = other.maxScrollExtent;
     _pixels = other._pixels;
     _viewportDimension = other.viewportDimension;
+
+    assert(activity == null);
+    assert(other.activity != null);
+    _activity = other.activity;
+    other._activity = null;
+    if (other.runtimeType != runtimeType)
+      activity.resetActivity();
+    context.setIgnorePointer(activity.shouldIgnorePointer);
+    isScrollingNotifier.value = activity.isScrolling;
   }
 
   /// Update the scroll position ([pixels]) to a given pixel value.
@@ -228,7 +255,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   @protected
-  void applyNewDimensions();
+  @mustCallSuper
+  void applyNewDimensions() {
+    assert(pixels != null);
+    activity.applyNewDimensions();
+  }
 
   /// Animates the position such that the given object is as visible as possible
   /// by just scrolling this position.
@@ -277,13 +308,83 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback);
 
   @protected
-  void didUpdateScrollPositionBy(double delta);
+  ScrollActivity get activity => _activity;
+  ScrollActivity _activity;
 
-  @protected
-  void didOverscrollBy(double value);
+  /// Change the current [activity], disposing of the old one and
+  /// sending scroll notifications as necessary.
+  ///
+  /// If the argument is null, this method has no effect. This is convenient for
+  /// cases where the new activity is obtained from another method, and that
+  /// method might return null, since it means the caller does not have to
+  /// explictly null-check the argument.
+  void beginActivity(ScrollActivity newActivity) {
+    if (newActivity == null)
+      return;
+    bool wasScrolling, oldIgnorePointer;
+    if (_activity != null) {
+      oldIgnorePointer = _activity.shouldIgnorePointer;
+      wasScrolling = _activity.isScrolling;
+      if (wasScrolling && !newActivity.isScrolling)
+        didEndScroll();
+      _activity.dispose();
+    } else {
+      oldIgnorePointer = false;
+      wasScrolling = false;
+    }
+    _activity = newActivity;
+    isScrollingNotifier.value = activity.isScrolling;
+    if (oldIgnorePointer != activity.shouldIgnorePointer)
+      context.setIgnorePointer(activity.shouldIgnorePointer);
+    if (!wasScrolling && _activity.isScrolling)
+      didStartScroll();
+  }
+
+
+  // NOTIFICATION DISPATCH
+
+  /// Called by [beginActivity] to report when an activity has started.
+  void didStartScroll() {
+    activity.dispatchScrollStartNotification(cloneMetrics(), context.notificationContext);
+  }
+
+  /// Called by [setPixels] to report a change to the [pixels] position.
+  void didUpdateScrollPositionBy(double delta) {
+    activity.dispatchScrollUpdateNotification(cloneMetrics(), context.notificationContext, delta);
+  }
+
+  /// Called by [beginActivity] to report when an activity has ended.
+  void didEndScroll() {
+    activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
+  }
+
+  /// Called by [setPixels] to report overscroll when an attempt is made to
+  /// change the [pixels] position. Overscroll is the amount of change that was
+  /// not applied to the [pixels] value.
+  void didOverscrollBy(double value) {
+    assert(activity.isScrolling);
+    activity.dispatchOverscrollNotification(cloneMetrics(), context.notificationContext, value);
+  }
+
+  /// Dispatches a notification that the [userScrollDirection] has changed.
+  ///
+  /// Subclasses should call this function when they change [userScrollDirection].
+  void didUpdateScrollDirection(ScrollDirection direction) {
+    new UserScrollNotification(metrics: cloneMetrics(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+  }
+
+  @override
+  void dispose() {
+    assert(pixels != null);
+    activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
+    _activity = null;
+    super.dispose();
+  }
 
   @override
   void debugFillDescription(List<String> description) {
+    if (debugLabel != null)
+      description.add(debugLabel);
     super.debugFillDescription(description);
     description.add('range: ${minScrollExtent?.toStringAsFixed(1)}..${maxScrollExtent?.toStringAsFixed(1)}');
     description.add('viewport: ${viewportDimension?.toStringAsFixed(1)}');
