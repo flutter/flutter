@@ -5,6 +5,7 @@ dart:isolate,::,_getIsolateScheduleImmediateClosure
 dart:isolate,::,_setupHooks
 dart:isolate,::,_startMainIsolate
 dart:ui,::,_beginFrame
+dart:ui,::,_drawFrame
 dart:ui,::,_dispatchPlatformMessage
 dart:ui,::,_dispatchPointerDataPacket
 dart:ui,::,_dispatchSemanticsAction

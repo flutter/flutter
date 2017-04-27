@@ -10,6 +10,7 @@
 #include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_library_natives.h"
+#include "lib/tonic/dart_microtask_queue.h"
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/dart_byte_data.h"
 
@@ -221,6 +222,10 @@ void Window::BeginFrame(ftl::TimePoint frameTime) {
                   {
                       Dart_NewInteger(microseconds),
                   });
+
+  tonic::DartMicrotaskQueue::RunMicrotasks();
+
+  DartInvokeField(library_.value(), "_drawFrame", {});
 }
 
 void Window::CompletePlatformMessageEmptyResponse(int response_id) {

@@ -83,6 +83,11 @@ void _beginFrame(int microseconds) {
     window.onBeginFrame(new Duration(microseconds: microseconds));
 }
 
+void _drawFrame() {
+  if (window.onDrawFrame != null)
+    window.onDrawFrame();
+}
+
 // If this value changes, update the encoding code in the following files:
 //
 //  * pointer_data.cc
