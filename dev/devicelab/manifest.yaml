@@ -83,7 +83,13 @@ tasks:
     required_agent_capabilities: ["has-android-device"]
     flaky: true
 
-  platform_channel_test:
+  channels_integration_test:
+    description: >
+      Checks that platform channels work on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+
+  platform_channel_sample_test:
     description: >
      Runs a driver test on the Platform Channel sample app on Android.
     stage: devicelab
@@ -154,7 +160,13 @@ tasks:
 
   # iOS on-device tests
 
-  platform_channel_test_ios:
+  channels_integration_test_ios:
+    description: >
+      Checks that platform channels work on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+
+  platform_channel_sample_test_ios:
     description: >
       Runs a driver test on the Platform Channel sample app on iOS.
     stage: devicelab_ios
@@ -206,6 +218,13 @@ tasks:
     required_agent_capabilities: ["has-ios-device"]
 
   # Tests running on Windows host
+
+  channels_integration_test_win:
+    description: >
+      Checks that platform channels work when app is launched from Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
+    flaky: true
 
   flutter_gallery_win__build:
     description: >

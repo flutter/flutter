@@ -9,7 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
 void main() {
-  group('PlatformMessageChannel', () {
+  group('BasicMessageChannel', () {
     const MessageCodec<String> string = const StringCodec();
     const BasicMessageChannel<String> channel = const BasicMessageChannel<String>('ch', string);
     test('can send string message and get reply', () async {
@@ -34,7 +34,7 @@ void main() {
     });
   });
 
-  group('PlatformMethodChannel', () {
+  group('MethodChannel', () {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
     const MethodChannel channel = const MethodChannel('ch7', jsonMethod);
@@ -89,8 +89,75 @@ void main() {
         fail('MissingPluginException expected');
       }
     });
+    test('can handle method call with no registered plugin', () async {
+      channel.setMethodCallHandler(null);
+      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      expect(envelope, isNull);
+    });
+    test('can handle method call of unimplemented method', () async {
+      channel.setMethodCallHandler((MethodCall call) async {
+        throw new MissingPluginException();
+      });
+      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      expect(envelope, isNull);
+    });
+    test('can handle method call with successful result', () async {
+      channel.setMethodCallHandler((MethodCall call) async => '${call.arguments}, world');
+      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      expect(jsonMethod.decodeEnvelope(envelope), equals('hello, world'));
+    });
+    test('can handle method call with expressive error result', () async {
+      channel.setMethodCallHandler((MethodCall call) async {
+        throw new PlatformException(code: 'bad', message: 'sayHello failed', details: null);
+      });
+      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      try {
+        jsonMethod.decodeEnvelope(envelope);
+        fail('Exception expected');
+      } on PlatformException catch(e) {
+        expect(e.code, equals('bad'));
+        expect(e.message, equals('sayHello failed'));
+      } catch (e) {
+        fail('PlatformException expected');
+      }
+    });
+    test('can handle method call with other error result', () async {
+      channel.setMethodCallHandler((MethodCall call) async {
+        throw new ArgumentError('bad');
+      });
+      final ByteData call = jsonMethod.encodeMethodCall(new MethodCall('sayHello', 'hello'));
+      ByteData envelope;
+      await BinaryMessages.handlePlatformMessage('ch7', call, (ByteData result) {
+        envelope = result;
+      });
+      try {
+        jsonMethod.decodeEnvelope(envelope);
+        fail('Exception expected');
+      } on PlatformException catch(e) {
+        expect(e.code, equals('error'));
+        expect(e.message, equals('Invalid argument(s): bad'));
+      } catch (e) {
+        fail('PlatformException expected');
+      }
+    });
   });
-  group('PlatformEventChannel', () {
+  group('EventChannel', () {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
     const EventChannel channel = const EventChannel('ch', jsonMethod);
