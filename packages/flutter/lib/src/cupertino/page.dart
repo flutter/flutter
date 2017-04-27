@@ -25,41 +25,38 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   end: FractionalOffset.topLeft,
 );
 
-// BoxDecoration from no shadow to page shadow mimicking iOS page transitions.
-final DecorationTween _kShadowTween = new DecorationTween(
-  begin: const _CupertinoEdgeShadowDecoration(
-    edgeGradient: const LinearGradient(
-      begin: const FractionalOffset(0.95, 0.0),
-      end: FractionalOffset.topRight,
-      colors: const <Color>[
-        const Color(0x00000000), 
-        const Color(0x00000000),
-        const Color(0x00000000)
-      ],
-      stops: const <double>[0.0, 0.6, 1.0],
-    ), 
-  ),
+// BoxDecoration from no shadow to page shadow mimicking iOS page transitions
+// using gradients.
+final DecorationTween _kGradientShadowTween = new DecorationTween(
+  begin: _CupertinoEdgeShadowDecoration.none,
   end: const _CupertinoEdgeShadowDecoration(
     edgeGradient: const LinearGradient(
+      // Spans 5% of the page.
       begin: const FractionalOffset(0.95, 0.0),
       end: FractionalOffset.topRight,
       colors: const <Color>[
         const Color(0x00000000), 
+        const Color(0x04000000),
         const Color(0x12000000),
         const Color(0x38000000)
       ],
-      stops: const <double>[0.0, 0.6, 1.0],
+      stops: const <double>[0.0, 0.3, 0.6, 1.0],
     ), 
   ),
 );
 
+/// A custom [Decoration] used to paint an extra shadow on the left edge of the 
+/// box it's decorating. It's like a [BoxDecoration] with only a gradient except 
+/// it paints to the left of the box instead of behind the box.
 class _CupertinoEdgeShadowDecoration extends Decoration {
   const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
 
   static const _CupertinoEdgeShadowDecoration none = 
       const _CupertinoEdgeShadowDecoration();
 
-  /// A gradient to draw to the left of the box being decorated.
+  /// A gradient to draw to the left of the box being decorated. 
+  /// FractionalOffsets are relative to the original box translated one box
+  /// width to the left.
   final LinearGradient edgeGradient;
 
   /// Linearly interpolate between two edge shadow decorations decorations.
@@ -95,6 +92,21 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   _CupertinoEdgeShadowPainter createBoxPainter([VoidCallback onChanged]) {
     return new _CupertinoEdgeShadowPainter(this, onChanged);
   }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other is! _CupertinoEdgeShadowDecoration)
+      return false;
+    final _CupertinoEdgeShadowDecoration typedOther = other;
+    return edgeGradient == typedOther.edgeGradient;
+  }
+
+  @override
+  int get hashCode {
+    return edgeGradient.hashCode;
+  }
 }
 
 class _CupertinoEdgeShadowPainter extends BoxPainter {
@@ -113,10 +125,9 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     // the left of the box.
     final Rect rect = 
         (offset & configuration.size).translate(-configuration.size.width, 0.0);
-    print('translated $rect');
-
     final Paint paint = new Paint()
       ..shader = gradient.createShader(rect);
+
     canvas.drawRect(rect, paint);
   }
 }
@@ -153,7 +164,12 @@ class CupertinoPageTransition extends StatelessWidget {
           reverseCurve: Curves.easeIn,
         )
       ),
-      _primaryShadowAnimation = _kShadowTween.animate(primaryRouteAnimation),
+      _primaryShadowAnimation = _kGradientShadowTween.animate(
+        new CurvedAnimation(
+          parent: primaryRouteAnimation,
+          curve: Curves.easeOut,
+        )
+      ),
       super(key: key);
 
   // When this page is coming in to cover another page.
