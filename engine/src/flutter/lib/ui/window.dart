@@ -149,6 +149,12 @@ class Window {
   /// last time this callback was invoked.
   FrameCallback onBeginFrame;
 
+  /// A callback that is invoked for each frame after onBeginFrame has
+  /// completed and after the microtask queue has been drained.  This can be
+  /// used to implement a second phase of frame rendering that happens
+  /// after any deferred work queued by the onBeginFrame phase.
+  VoidCallback onDrawFrame;
+
   /// A callback that is invoked when pointer data is available.
   PointerDataPacketCallback onPointerDataPacket;
 
