@@ -62,7 +62,7 @@ class DeviceManager {
         device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId);
 
-    final Device exactMatch = await devices.firstWhere(
+    final Device exactMatch = devices.firstWhere(
         exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
       yield exactMatch;
