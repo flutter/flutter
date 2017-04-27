@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
+import 'package:mockito/mockito.dart';
+import 'package:quiver/time.dart';
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -75,6 +77,38 @@ void main() {
     });
   });
 
+  group('analytics with mocks', () {
+    Usage mockUsage;
+    Clock mockClock;
+    List<int> mockTimes;
+
+    setUp(() {
+      mockUsage = new MockUsage();
+      when(mockUsage.isFirstRun).thenReturn(false);
+      mockClock = new MockClock();
+      when(mockClock.now()).thenAnswer(
+        (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
+      );
+    });
+
+    testUsingContext('flutter commands send timing events', () async {
+      mockTimes = <int>[1000, 2000];
+      final DoctorCommand command = new DoctorCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      verify(mockClock.now()).called(2);
+
+      expect(
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), null]
+      );
+    }, overrides: <Type, Generator>{
+      Clock: () => mockClock,
+      Usage: () => mockUsage,
+    });
+  });
+
   group('analytics bots', () {
     testUsingContext('don\'t send on bots', () async {
       int count = 0;
@@ -90,3 +124,5 @@ void main() {
     });
   });
 }
+
+class MockUsage extends Mock implements Usage {}

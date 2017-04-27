@@ -21,7 +21,7 @@ import 'platform_messages.dart';
 /// platform side. The Dart type of messages sent and received is [T],
 /// but only the values supported by the specified [MessageCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
-/// will result in exceptions being thrown. The `null` message is supported
+/// will result in exceptions being thrown. The null message is supported
 /// for all codecs.
 ///
 /// The logical identity of the channel is given by its name. Identically named
@@ -31,32 +31,32 @@ import 'platform_messages.dart';
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
   ///
-  /// Neither [name] nor [codec] may be `null`.
+  /// Neither [name] nor [codec] may be null.
   const BasicMessageChannel(this.name, this.codec);
 
-  /// The logical channel on which communication happens, not `null`.
+  /// The logical channel on which communication happens, not null.
   final String name;
 
-  /// The message codec used by this channel, not `null`.
+  /// The message codec used by this channel, not null.
   final MessageCodec<T> codec;
 
   /// Sends the specified [message] to the platform plugins on this channel.
   ///
   /// Returns a [Future] which completes to the received response, which may
-  /// be `null`.
+  /// be null.
   Future<T> send(T message) async {
     return codec.decodeMessage(await BinaryMessages.send(name, codec.encodeMessage(message)));
   }
 
   /// Sets a callback for receiving messages from the platform plugins on this
-  /// channel. Messages may be `null`.
+  /// channel. Messages may be null.
   ///
   /// The given callback will replace the currently registered callback for this
-  /// channel, if any. To remove the handler, pass `null` as the `handler`
+  /// channel, if any. To remove the handler, pass null as the `handler`
   /// argument.
   ///
   /// The handler's return value is sent back to the platform plugins as a
-  /// message reply. It may be `null`.
+  /// message reply. It may be null.
   void setMessageHandler(Future<T> handler(T message)) {
     if (handler == null) {
       BinaryMessages.setMessageHandler(name, null);
@@ -68,13 +68,13 @@ class BasicMessageChannel<T> {
   }
 
   /// Sets a mock callback for intercepting messages sent on this channel.
-  /// Messages may be `null`.
+  /// Messages may be null.
   ///
   /// The given callback will replace the currently registered mock callback for
-  /// this channel, if any. To remove the mock handler, pass `null` as the
+  /// this channel, if any. To remove the mock handler, pass null as the
   /// `handler` argument.
   ///
-  /// The handler's return value is used as a message reply. It may be `null`.
+  /// The handler's return value is used as a message reply. It may be null.
   ///
   /// This is intended for testing. Messages intercepted in this manner are not
   /// sent to platform plugins.
@@ -99,7 +99,7 @@ class BasicMessageChannel<T> {
 /// platform side. The Dart type of arguments and results is `dynamic`,
 /// but only values supported by the specified [MethodCodec] can be used.
 /// The use of unsupported values should be considered programming errors, and
-/// will result in exceptions being thrown. The `null` value is supported
+/// will result in exceptions being thrown. The null value is supported
 /// for all codecs.
 ///
 /// The logical identity of the channel is given by its name. Identically named
@@ -112,20 +112,20 @@ class MethodChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be `null`.
+  /// Neither [name] nor [codec] may be null.
   const MethodChannel(this.name, [this.codec = const StandardMethodCodec()]);
 
-  /// The logical channel on which communication happens, not `null`.
+  /// The logical channel on which communication happens, not null.
   final String name;
 
-  /// The message codec used by this channel, not `null`.
+  /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
   /// Returns a [Future] which completes to one of the following:
   ///
-  /// * a result (possibly `null`), on successful invocation;
+  /// * a result (possibly null), on successful invocation;
   /// * a [PlatformException], if the invocation failed in the platform plugin;
   /// * a [MissingPluginException], if the method has not been implemented by a
   ///   platform plugin.
@@ -143,7 +143,7 @@ class MethodChannel {
   /// Sets a callback for receiving method calls on this channel.
   ///
   /// The given callback will replace the currently registered callback for this
-  /// channel, if any. To remove the handler, pass `null` as the
+  /// channel, if any. To remove the handler, pass null as the
   /// `handler` argument.
   ///
   /// If the future returned by the handler completes with a result, that value
@@ -164,7 +164,7 @@ class MethodChannel {
   /// Sets a mock callback for intercepting method invocations on this channel.
   ///
   /// The given callback will replace the currently registered mock callback for
-  /// this channel, if any. To remove the mock handler, pass `null` as the
+  /// this channel, if any. To remove the mock handler, pass null as the
   /// `handler` argument.
   ///
   /// Later calls to [invokeMethod] will result in a successful result,
@@ -238,20 +238,20 @@ class EventChannel {
   /// The [codec] used will be [StandardMethodCodec], unless otherwise
   /// specified.
   ///
-  /// Neither [name] nor [codec] may be `null`.
+  /// Neither [name] nor [codec] may be null.
   const EventChannel(this.name, [this.codec = const StandardMethodCodec()]);
 
-  /// The logical channel on which communication happens, not `null`.
+  /// The logical channel on which communication happens, not null.
   final String name;
 
-  /// The message codec used by this channel, not `null`.
+  /// The message codec used by this channel, not null.
   final MethodCodec codec;
 
   /// Sets up a broadcast stream for receiving events on this channel.
   ///
   /// Returns a broadcast [Stream] which emits events to listeners as follows:
   ///
-  /// * a decoded data event (possibly `null`) for each successful event
+  /// * a decoded data event (possibly null) for each successful event
   /// received from the platform plugin;
   /// * an error event containing a [PlatformException] for each error event
   /// received from the platform plugin;

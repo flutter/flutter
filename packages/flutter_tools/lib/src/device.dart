@@ -53,7 +53,7 @@ class DeviceManager {
   bool get hasSpecifiedAllDevices => _specifiedDeviceId == 'all';
 
   Stream<Device> getDevicesById(String deviceId) async* {
-    final Stream<Device> devices = getAllConnectedDevices();
+    final List<Device> devices = await getAllConnectedDevices().toList();
     deviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
         device.id.toLowerCase() == deviceId ||
@@ -62,15 +62,15 @@ class DeviceManager {
         device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId);
 
-    final Device exactMatch = await devices.firstWhere(
-        exactlyMatchesDeviceId, defaultValue: () => null);
+    final Device exactMatch = devices.firstWhere(
+        exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
       yield exactMatch;
       return;
     }
 
     // Match on a id or name starting with [deviceId].
-    await for (Device device in devices.where(startsWithDeviceId))
+    for (Device device in devices.where(startsWithDeviceId))
       yield device;
   }
 

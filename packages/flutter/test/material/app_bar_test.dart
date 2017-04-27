@@ -8,29 +8,32 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
-  return new Scaffold(
-    body: new DefaultTabController(
-      length: 3,
-      child: new CustomScrollView(
-        primary: true,
-        slivers: <Widget>[
-          new SliverAppBar(
-            title: const Text('AppBar Title'),
-            floating: floating,
-            pinned: pinned,
-            expandedHeight: expandedHeight,
-            snap: snap,
-            bottom: new TabBar(
-              tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+  return new MediaQuery(
+    data: const MediaQueryData(),
+    child: new Scaffold(
+      body: new DefaultTabController(
+        length: 3,
+        child: new CustomScrollView(
+          primary: true,
+          slivers: <Widget>[
+            new SliverAppBar(
+              title: const Text('AppBar Title'),
+              floating: floating,
+              pinned: pinned,
+              expandedHeight: expandedHeight,
+              snap: snap,
+              bottom: new TabBar(
+                tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+              ),
             ),
-          ),
-          new SliverToBoxAdapter(
-            child: new Container(
-              height: 1200.0,
-              color: Colors.orange[400],
+            new SliverToBoxAdapter(
+              child: new Container(
+                height: 1200.0,
+                color: Colors.orange[400],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );
@@ -246,12 +249,14 @@ void main() {
 
   testWidgets('AppBar with no Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new SizedBox(
-        height: kToolbarHeight,
-        child: new AppBar(
-          leading: const Text('L'),
-          title: const Text('No Scaffold'),
-          actions: <Widget>[const Text('A1'), const Text('A2')],
+      new MaterialApp(
+        home: new SizedBox(
+          height: kToolbarHeight,
+          child: new AppBar(
+            leading: const Text('L'),
+            title: const Text('No Scaffold'),
+            actions: <Widget>[const Text('A1'), const Text('A2')],
+          ),
         ),
       ),
     );
@@ -265,13 +270,15 @@ void main() {
 
   testWidgets('AppBar render at zero size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new Container(
-          height: 0.0,
-          width: 0.0,
-          child: new Scaffold(
-            appBar: new AppBar(
-              title: const Text('X'),
+      new MaterialApp(
+        home: new Center(
+          child: new Container(
+            height: 0.0,
+            width: 0.0,
+            child: new Scaffold(
+              appBar: new AppBar(
+                title: const Text('X'),
+              ),
             ),
           ),
         ),

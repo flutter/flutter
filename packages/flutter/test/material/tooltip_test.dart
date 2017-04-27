@@ -406,9 +406,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.green[500]
-              )
+              color: Colors.green[500],
             )
           )
         )
@@ -483,9 +481,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.green[500]
-              )
+              color: Colors.green[500],
             )
           )
         )

@@ -200,7 +200,7 @@ void main() {
     final Key key = const Key('container');
 
     final BoxDecoration kBoxDecoration = const BoxDecoration(
-      backgroundColor: const Color(0xFF00FF00)
+      color: const Color(0xFF00FF00),
     );
 
     await tester.pumpWidget(

@@ -244,9 +244,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
             child: new Container(
               width: 120.0,
               height: 120.0,
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF882222)
-              )
+              color: const Color(0xFF882222),
             )
           ),
           new Opacity(

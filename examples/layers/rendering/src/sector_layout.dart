@@ -166,9 +166,9 @@ abstract class RenderDecoratedSector extends RenderSector {
     if (_decoration == null)
       return;
 
-    if (_decoration.backgroundColor != null) {
+    if (_decoration.color != null) {
       final Canvas canvas = context.canvas;
-      final Paint paint = new Paint()..color = _decoration.backgroundColor;
+      final Paint paint = new Paint()..color = _decoration.color;
       final Path path = new Path();
       final double outerRadius = (parentData.radius + deltaRadius);
       final Rect outerBounds = new Rect.fromLTRB(offset.dx-outerRadius, offset.dy-outerRadius, offset.dx+outerRadius, offset.dy+outerRadius);
@@ -558,7 +558,7 @@ class RenderSolidColor extends RenderDecoratedSector {
   RenderSolidColor(this.backgroundColor, {
     this.desiredDeltaRadius: double.INFINITY,
     this.desiredDeltaTheta: kTwoPi
-  }) : super(new BoxDecoration(backgroundColor: backgroundColor));
+  }) : super(new BoxDecoration(color: backgroundColor));
 
   double desiredDeltaRadius;
   double desiredDeltaTheta;
@@ -578,9 +578,9 @@ class RenderSolidColor extends RenderDecoratedSector {
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) {
-      decoration = const BoxDecoration(backgroundColor: const Color(0xFFFF0000));
+      decoration = const BoxDecoration(color: const Color(0xFFFF0000));
     } else if (event is PointerUpEvent) {
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
+      decoration = new BoxDecoration(color: backgroundColor);
     }
   }
 }

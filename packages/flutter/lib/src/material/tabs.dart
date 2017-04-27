@@ -930,9 +930,9 @@ class TabPageSelectorIndicator extends StatelessWidget {
       height: 12.0,
       margin: const EdgeInsets.all(4.0),
       decoration: new BoxDecoration(
-        backgroundColor: backgroundColor,
+        color: backgroundColor,
         border: new Border.all(color: borderColor),
-        shape: BoxShape.circle
+        shape: BoxShape.circle,
       ),
     );
   }

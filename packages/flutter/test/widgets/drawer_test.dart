@@ -83,9 +83,7 @@ void main() {
                 const Text('drawer'),
                 new Container(
                   height: 1000.0,
-                  decoration: new BoxDecoration(
-                    backgroundColor: Colors.blue[500]
-                  )
+                  color: Colors.blue[500],
                 ),
               ]
             )

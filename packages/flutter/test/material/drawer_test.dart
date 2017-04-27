@@ -10,24 +10,26 @@ void main() {
     final Key containerKey = const Key('container');
 
     await tester.pumpWidget(
-      new Scaffold(
-        drawer: new Drawer(
-          child: new ListView(
-            children: <Widget>[
-              new DrawerHeader(
-                child: new Container(
-                  key: containerKey,
-                  child: const Text('header')
-                )
-              ),
-              const ListTile(
-                leading: const Icon(Icons.archive),
-                title: const Text('Archive')
-              )
-            ]
-          )
-        )
-      )
+      new MaterialApp(
+        home: new Scaffold(
+          drawer: new Drawer(
+            child: new ListView(
+              children: <Widget>[
+                new DrawerHeader(
+                  child: new Container(
+                    key: containerKey,
+                    child: const Text('header'),
+                  ),
+                ),
+                const ListTile(
+                  leading: const Icon(Icons.archive),
+                  title: const Text('Archive'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(find.text('Archive'), findsNothing);

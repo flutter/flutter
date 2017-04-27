@@ -192,7 +192,7 @@ class _TwoLevelSublistState extends State<TwoLevelSublist> with SingleTickerProv
   Widget buildList(BuildContext context, Widget child) {
     return new Container(
       decoration: new BoxDecoration(
-        backgroundColor: _backgroundColor.evaluate(_easeOutAnimation),
+        color: _backgroundColor.evaluate(_easeOutAnimation),
         border: new Border(
           top: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
           bottom: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation))

@@ -287,7 +287,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         child: new Container(
           decoration: new BoxDecoration(
             borderRadius: radius,
-            backgroundColor: backgroundColor,
+            color: backgroundColor,
             shape: widget.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
           ),
           child: contents

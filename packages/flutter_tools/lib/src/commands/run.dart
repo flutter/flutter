@@ -200,7 +200,7 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<Null> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     commandValidator();
     devices = await findAllTargetDevices();
     if (devices == null)
@@ -225,7 +225,7 @@ class RunCommand extends RunCommandBase {
   }
 
   @override
-  Future<Null> runCommand() async {
+  Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -250,10 +250,15 @@ class RunCommand extends RunCommandBase {
       } catch (error) {
         throwToolExit(error.toString());
       }
+      final DateTime appStartedTime = clock.now();
       final int result = await app.runner.waitForAppToFinish();
       if (result != 0)
         throwToolExit(null, exitCode: result);
-      return null;
+      return new FlutterCommandResult(
+        ExitStatus.success,
+        analyticsParameters: <String>['daemon'],
+        endTimeOverride: appStartedTime,
+      );
     }
 
     for (Device device in devices) {
@@ -303,11 +308,34 @@ class RunCommand extends RunCommandBase {
       );
     }
 
+    DateTime appStartedTime;
+    // Sync completer so the completing agent attaching to the resident doesn't 
+    // need to know about analytics. 
+    //
+    // Do not add more operations to the future.
+    final Completer<Null> appStartedTimeRecorder = new Completer<Null>.sync();
+    appStartedTimeRecorder.future.then(
+      (_) { appStartedTime = clock.now(); }
+    );
+
     final int result = await runner.run(
+      appStartedCompleter: appStartedTimeRecorder,
       route: route,
       shouldBuild: !runningWithPrebuiltApplication && argResults['build'],
     );
     if (result != 0)
       throwToolExit(null, exitCode: result);
+    return new FlutterCommandResult(
+      ExitStatus.success,
+      analyticsParameters: <String>[
+        hotMode ? 'hot' : 'cold',
+        getModeName(getBuildMode()),
+        devices.length == 1 
+            ? getNameForTargetPlatform(await devices[0].targetPlatform)
+            : 'multiple',
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null
+      ],
+      endTimeOverride: appStartedTime,
+    );
   }
 }

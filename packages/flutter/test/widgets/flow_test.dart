@@ -43,9 +43,7 @@ void main() {
         child: new Container(
           width: 100.0,
           height: 100.0,
-          decoration: const BoxDecoration(
-            backgroundColor: const Color(0xFF0000FF)
-          ),
+          color: const Color(0xFF0000FF),
           child: new Text('$i')
         )
       );

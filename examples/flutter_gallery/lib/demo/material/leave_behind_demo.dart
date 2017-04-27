@@ -115,7 +115,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
       ),
       child: new Container(
         decoration: new BoxDecoration(
-          backgroundColor: theme.canvasColor,
+          color: theme.canvasColor,
           border: new Border(bottom: new BorderSide(color: theme.dividerColor))
         ),
         child: new ListTile(

@@ -10,6 +10,9 @@ import 'package:flutter/foundation.dart' show ReadBuffer, WriteBuffer, required;
 import 'message_codec.dart';
 
 /// [MessageCodec] with unencoded binary messages represented using [ByteData].
+///
+/// On Android, messages will be represented using `java.nio.ByteBuffer`.
+/// On iOS, messages will be represented using `NSData`.
 class BinaryCodec implements MessageCodec<ByteData> {
   /// Creates a [MessageCodec] with unencoded binary messages represented using
   /// [ByteData].
@@ -23,6 +26,9 @@ class BinaryCodec implements MessageCodec<ByteData> {
 }
 
 /// [MessageCodec] with UTF-8 encoded String messages.
+///
+/// On Android, messages will be represented using `java.util.String`.
+/// On iOS, messages will be represented using `NSString`.
 class StringCodec implements MessageCodec<String> {
   /// Creates a [MessageCodec] with UTF-8 encoded String messages.
   const StringCodec();
@@ -47,12 +53,20 @@ class StringCodec implements MessageCodec<String> {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * `null`
+/// * null
 /// * [bool]s
 /// * [num]s
 /// * [String]s
 /// * [List]s of supported values
 /// * [Map]s from strings to supported values
+///
+/// On Android, messages are decoded using the `org.json` library.
+/// On iOS, messages are decoded using the `NSJSONSerialization` library.
+/// In both cases, the use of top-level simple messages (null, [bool], [num],
+/// and [String]) is supported (by the Flutter SDK). The decoded value will be
+/// null/nil for null, and identical to what would result from decoding a
+/// singleton JSON array with a Boolean, number, or string value, and then
+/// extracting its single element.
 class JSONMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as defined by the JSON codec of the
   // dart:convert package. The format used must match the Android and
@@ -156,13 +170,45 @@ class JSONMethodCodec implements MethodCodec {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * `null`
+/// * null
 /// * [bool]s
 /// * [num]s
 /// * [String]s
 /// * [Uint8List]s, [Int32List]s, [Int64List]s, [Float64List]s
 /// * [List]s of supported values
 /// * [Map]s from supported values to supported values
+///
+/// On Android, messages are represented as follows:
+///
+/// * null: null
+/// * [bool]: `java.lang.Boolean`
+/// * [int]: `java.lang.Integer` for values that are representable using 32-bit
+///   two's complement; otherwise, `java.lang.Long` for values that are
+///   representable using 64-bit two's complement; otherwise,
+///   `java.math.BigInteger`.
+/// * [double]: `java.lang.Double`
+/// * [String]: `java.lang.String`
+/// * [Uint8List]: `byte[]`
+/// * [Int32List]: `int[]`
+/// * [Int64List]: `long[]`
+/// * [Float64List]: `double[]`
+/// * [List]: `java.util.ArrayList`
+/// * [Map]: `java.util.HashMap`
+///
+/// On iOS, messages are represented as follows:
+///
+/// * null: nil
+/// * [bool]: `NSNumber numberWithBool:`
+/// * [int]: `NSNumber numberWithInt:` for values that are representable using
+///   32-bit two's complement; otherwise, `NSNumber numberWithLong:` for values
+///   that are representable using 64-bit two's complement; otherwise,
+///   `FlutterStandardBigInteger`.
+/// * [double]: `NSNumber numberWithDouble:`
+/// * [String]: `NSString`
+/// * [Uint8List], [Int32List], [Int64List], [Float64List]:
+///   `FlutterStandardTypedData`
+/// * [List]: `NSArray`
+/// * [Map]: `NSDictionary`
 class StandardMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.

@@ -62,7 +62,7 @@ class GridTileBar extends StatelessWidget {
   Widget build(BuildContext context) {
     BoxDecoration decoration;
     if (backgroundColor != null)
-      decoration = new BoxDecoration(backgroundColor: backgroundColor);
+      decoration = new BoxDecoration(color: backgroundColor);
 
     final List<Widget> children = <Widget>[];
     final EdgeInsets padding = new EdgeInsets.only(

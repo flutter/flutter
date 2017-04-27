@@ -81,15 +81,20 @@ class Usage {
       _analytics.sendEvent(category, parameter);
   }
 
-  void sendTiming(String category, String variableName, Duration duration) {
-    _analytics.sendTiming(variableName, duration.inMilliseconds, category: category);
-  }
-
-  UsageTimer startTimer(String event) {
-    if (suppressAnalytics)
-      return new _MockUsageTimer();
-    else
-      return new UsageTimer._(event, _analytics.startTimer(event, category: 'flutter'));
+  void sendTiming(
+    String category, 
+    String variableName, 
+    Duration duration, {
+    String label,
+    }) {
+    if (!suppressAnalytics) {
+      _analytics.sendTiming(
+        variableName, 
+        duration.inMilliseconds, 
+        category: category,
+        label: label,
+      );
+    }
   }
 
   void sendException(dynamic exception, StackTrace trace) {
@@ -137,25 +142,4 @@ class Usage {
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
-}
-
-class UsageTimer {
-  UsageTimer._(this.event, this._timer);
-
-  final String event;
-  final AnalyticsTimer _timer;
-
-  void finish() {
-    _timer.finish();
-  }
-}
-
-class _MockUsageTimer implements UsageTimer {
-  @override
-  String event;
-  @override
-  AnalyticsTimer _timer;
-
-  @override
-  void finish() { }
 }

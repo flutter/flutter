@@ -203,7 +203,7 @@ class Text extends StatelessWidget {
       textAlign: textAlign ?? defaultTextStyle.textAlign,
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
-      textScaleFactor: textScaleFactor ?? MediaQuery.of(context).textScaleFactor,
+      textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,

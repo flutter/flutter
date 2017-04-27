@@ -29,11 +29,11 @@ class ExampleDragTargetState extends State<ExampleDragTarget> {
           height: 100.0,
           margin: const EdgeInsets.all(10.0),
           decoration: new BoxDecoration(
+            color: data.isEmpty ? _color : Colors.grey.shade200,
             border: new Border.all(
               width: 3.0,
               color: data.isEmpty ? Colors.white : Colors.blue
             ),
-            backgroundColor: data.isEmpty ? _color : Colors.grey.shade200
           )
         );
       }
@@ -63,7 +63,7 @@ class DotState extends State<Dot> {
         width: widget.size,
         height: widget.size,
         decoration: new BoxDecoration(
-          backgroundColor: widget.color,
+          color: widget.color,
           border: new Border.all(width: taps.toDouble()),
           shape: BoxShape.circle
         ),

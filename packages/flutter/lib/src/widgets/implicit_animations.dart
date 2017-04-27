@@ -241,51 +241,80 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// The [curve] and [duration] arguments must not be null.
   AnimatedContainer({
     Key key,
-    this.child,
-    this.constraints,
-    this.decoration,
-    this.foregroundDecoration,
-    this.margin,
+    this.alignment,
     this.padding,
+    Color color,
+    Decoration decoration,
+    this.foregroundDecoration,
+    double width,
+    double height,
+    BoxConstraints constraints,
+    this.margin,
     this.transform,
-    this.width,
-    this.height,
+    this.child,
     Curve curve: Curves.linear,
     @required Duration duration,
-  }) : super(key: key, curve: curve, duration: duration) {
-    assert(decoration == null || decoration.debugAssertIsValid());
-    assert(foregroundDecoration == null || foregroundDecoration.debugAssertIsValid());
+  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+       constraints =
+        (width != null || height != null)
+          ? constraints?.tighten(width: width, height: height)
+            ?? new BoxConstraints.tightFor(width: width, height: height)
+          : constraints,
+       super(key: key, curve: curve, duration: duration) {
     assert(margin == null || margin.isNonNegative);
     assert(padding == null || padding.isNonNegative);
+    assert(decoration == null || decoration.debugAssertIsValid());
     assert(constraints == null || constraints.debugAssertIsValid());
+    assert(color == null || decoration == null,
+      'Cannot provide both a color and a decoration\n'
+      'The color argument is just a shorthand for "decoration: new BoxDecoration(backgroundColor: color)".'
+    );
   }
 
-  /// The widget below this widget in the tree.
+  /// The [child] contained by the container.
+  ///
+  /// If null, and if the [constraints] are unbounded or also null, the
+  /// container will expand to fill all available space in its parent, unless
+  /// the parent provides unbounded constraints, in which case the container
+  /// will attempt to be as small as possible.
   final Widget child;
 
-  /// Additional constraints to apply to the child.
-  final BoxConstraints constraints;
+  /// Align the [child] within the container.
+  ///
+  /// If non-null, the container will expand to fill its parent and position its
+  /// child within itself according to the given value. If the incoming
+  /// constraints are unbounded, then the child will be shrink-wrapped instead.
+  ///
+  /// Ignored if [child] is null.
+  final FractionalOffset alignment;
 
-  /// The decoration to paint behind the child.
+  /// Empty space to inscribe inside the [decoration]. The [child], if any, is
+  /// placed inside this padding.
+  final EdgeInsets padding;
+
+  /// The decoration to paint behind the [child].
+  ///
+  /// A shorthand for specifying just a solid color is available in the
+  /// constructor: set the `color` argument instead of the `decoration`
+  /// argument.
   final Decoration decoration;
 
   /// The decoration to paint in front of the child.
   final Decoration foregroundDecoration;
 
-  /// Empty space to surround the decoration.
-  final EdgeInsets margin;
+  /// Additional constraints to apply to the child.
+  ///
+  /// The constructor `width` and `height` arguments are combined with the
+  /// `constraints` argument to set this property.
+  ///
+  /// The [padding] goes inside the constraints.
+  final BoxConstraints constraints;
 
-  /// Empty space to inscribe inside the decoration.
-  final EdgeInsets padding;
+  /// Empty space to surround the [decoration] and [child].
+  final EdgeInsets margin;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
-
-  /// If non-null, requires the decoration to have this width.
-  final double width;
-
-  /// If non-null, requires the decoration to have this height.
-  final double height;
 
   @override
   _AnimatedContainerState createState() => new _AnimatedContainerState();
@@ -293,82 +322,74 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (constraints != null)
-      description.add('$constraints');
-    if (decoration != null)
-      description.add('has background');
-    if (foregroundDecoration != null)
-      description.add('has foreground');
-    if (margin != null)
-      description.add('margin: $margin');
+    if (alignment != null)
+      description.add('$alignment');
     if (padding != null)
       description.add('padding: $padding');
+    if (decoration != null)
+      description.add('bg: $decoration');
+    if (foregroundDecoration != null)
+      description.add('fg: $foregroundDecoration');
+    if (constraints != null)
+      description.add('$constraints');
+    if (margin != null)
+      description.add('margin: $margin');
     if (transform != null)
       description.add('has transform');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
   }
 }
 
 class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
-  BoxConstraintsTween _constraints;
+  FractionalOffsetTween _alignment;
+  EdgeInsetsTween _padding;
   DecorationTween _decoration;
   DecorationTween _foregroundDecoration;
+  BoxConstraintsTween _constraints;
   EdgeInsetsTween _margin;
-  EdgeInsetsTween _padding;
   Matrix4Tween _transform;
-  Tween<double> _width;
-  Tween<double> _height;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    // TODO(ianh): Use constructor tear-offs when it becomes possible
-    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new FractionalOffsetTween(begin: value));
+    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
     _decoration = visitor(_decoration, widget.decoration, (dynamic value) => new DecorationTween(begin: value));
     _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
+    _constraints = visitor(_constraints, widget.constraints, (dynamic value) => new BoxConstraintsTween(begin: value));
     _margin = visitor(_margin, widget.margin, (dynamic value) => new EdgeInsetsTween(begin: value));
-    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsTween(begin: value));
     _transform = visitor(_transform, widget.transform, (dynamic value) => new Matrix4Tween(begin: value));
-    _width = visitor(_width, widget.width, (dynamic value) => new Tween<double>(begin: value));
-    _height = visitor(_height, widget.height, (dynamic value) => new Tween<double>(begin: value));
   }
 
   @override
   Widget build(BuildContext context) {
     return new Container(
       child: widget.child,
-      constraints: _constraints?.evaluate(animation),
+      alignment: _alignment?.evaluate(animation),
+      padding: _padding?.evaluate(animation),
       decoration: _decoration?.evaluate(animation),
       foregroundDecoration: _foregroundDecoration?.evaluate(animation),
+      constraints: _constraints?.evaluate(animation),
       margin: _margin?.evaluate(animation),
-      padding: _padding?.evaluate(animation),
       transform: _transform?.evaluate(animation),
-      width: _width?.evaluate(animation),
-      height: _height?.evaluate(animation)
     );
   }
 
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    if (_constraints != null)
-      description.add('has constraints');
-    if (_decoration != null)
-      description.add('has background');
-    if (_foregroundDecoration != null)
-      description.add('has foreground');
-    if (_margin != null)
-      description.add('has margin');
+    if (_alignment != null)
+      description.add('$_alignment');
     if (_padding != null)
-      description.add('has padding');
+      description.add('padding: $_padding');
+    if (_decoration != null)
+      description.add('bg: $_decoration');
+    if (_foregroundDecoration != null)
+      description.add('fg: $_foregroundDecoration');
+    if (_constraints != null)
+      description.add('$_constraints');
+    if (_margin != null)
+      description.add('margin: $_margin');
     if (_transform != null)
       description.add('has transform');
-    if (_width != null)
-      description.add('has width');
-    if (_height != null)
-      description.add('has height');
   }
 }
 
@@ -475,7 +496,6 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    // TODO(ianh): Use constructor tear-offs when it becomes possible
     _left = visitor(_left, widget.left, (dynamic value) => new Tween<double>(begin: value));
     _top = visitor(_top, widget.top, (dynamic value) => new Tween<double>(begin: value));
     _right = visitor(_right, widget.right, (dynamic value) => new Tween<double>(begin: value));
@@ -559,7 +579,6 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    // TODO(ianh): Use constructor tear-offs when it becomes possible
     _opacity = visitor(_opacity, widget.opacity, (dynamic value) => new Tween<double>(begin: value));
   }
 
@@ -613,7 +632,6 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    // TODO(ianh): Use constructor tear-offs when it becomes possible
     _style = visitor(_style, widget.style, (dynamic value) => new TextStyleTween(begin: value));
   }
 

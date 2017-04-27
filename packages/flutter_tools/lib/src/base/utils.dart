@@ -8,7 +8,9 @@ import 'dart:math' show Random;
 
 import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
+import 'package:quiver/time.dart';
 
+import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
@@ -203,3 +205,5 @@ class Uuid {
   String _printDigits(int value, int count) =>
       value.toRadixString(16).padLeft(count, '0');
 }
+
+Clock get clock => context.putIfAbsent(Clock, () => const Clock());

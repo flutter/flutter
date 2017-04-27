@@ -94,8 +94,8 @@ class CircleAvatar extends StatelessWidget {
       height: radius * 2.0,
       duration: kThemeChangeDuration,
       decoration: new BoxDecoration(
-        backgroundColor: backgroundColor ?? theme.primaryColor,
-        backgroundImage: backgroundImage != null ? new BackgroundImage(
+        color: backgroundColor ?? theme.primaryColor,
+        image: backgroundImage != null ? new DecorationImage(
           image: backgroundImage
         ) : null,
         shape: BoxShape.circle,

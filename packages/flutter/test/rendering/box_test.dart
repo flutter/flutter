@@ -12,7 +12,7 @@ void main() {
   test("should size to render view", () {
     final RenderBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(
-        backgroundColor: const Color(0xFF00FF00),
+        color: const Color(0xFF00FF00),
         gradient: new RadialGradient(
           center: FractionalOffset.topLeft, radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]],
@@ -31,7 +31,7 @@ void main() {
     );
     final RenderBox inner = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        backgroundColor: const Color(0xFF00FF00),
+        color: const Color(0xFF00FF00),
       ),
       child: size,
     );
@@ -46,7 +46,7 @@ void main() {
     );
     final RenderBox outer = new RenderDecoratedBox(
       decoration: const BoxDecoration(
-        backgroundColor: const Color(0xFF0000FF)
+        color: const Color(0xFF0000FF),
       ),
       child: flex,
     );

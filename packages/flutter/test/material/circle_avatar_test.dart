@@ -24,7 +24,7 @@ void main() {
     expect(box.size.height, equals(100.0));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
-    expect(decoration.backgroundColor, equals(backgroundColor));
+    expect(decoration.color, equals(backgroundColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(Colors.white));
@@ -48,7 +48,7 @@ void main() {
     expect(box.size.height, equals(40.0));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
-    expect(decoration.backgroundColor, equals(fallback.primaryColor));
+    expect(decoration.color, equals(fallback.primaryColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(foregroundColor));
@@ -73,7 +73,7 @@ void main() {
     final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
     final RenderDecoratedBox child = box.child;
     final BoxDecoration decoration = child.decoration;
-    expect(decoration.backgroundColor, equals(theme.primaryColor));
+    expect(decoration.color, equals(theme.primaryColor));
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));

@@ -19,9 +19,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF0000FF),
-              ),
+              color: const Color(0xFF0000FF),
             ),
           ),
           new Positioned(
@@ -38,9 +36,7 @@ void main() {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: const BoxDecoration(
-                      backgroundColor: const Color(0xFF00FFFF),
-                    ),
+                    color: const Color(0xFF00FFFF),
                   ),
                 ),
               ),
@@ -68,9 +64,7 @@ void main() {
             child: new Container(
               width: 100.0,
               height: 100.0,
-              decoration: const BoxDecoration(
-                backgroundColor: const Color(0xFF0000FF),
-              ),
+              color: const Color(0xFF0000FF),
             ),
           ),
           new Positioned(
@@ -87,9 +81,7 @@ void main() {
                     didReceiveTap = true;
                   },
                   child: new Container(
-                    decoration: const BoxDecoration(
-                      backgroundColor: const Color(0xFF00FFFF),
-                    ),
+                    color: const Color(0xFF00FFFF),
                   ),
                 ),
               ),
@@ -116,9 +108,7 @@ void main() {
           child: new Container(
             width: 100.0,
             height: 100.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
           ),
         ),
         new Positioned(
@@ -136,9 +126,7 @@ void main() {
                   didReceiveTap = true;
                 },
                 child: new Container(
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF00FFFF),
-                  ),
+                  color: const Color(0xFF00FFFF),
                 ),
               ),
             ),
@@ -166,9 +154,7 @@ void main() {
               child: new Opacity(
                 opacity: 0.9,
                 child: new Container(
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF00FF00),
-                  ),
+                  color: const Color(0xFF00FF00),
                 ),
               ),
             ),
