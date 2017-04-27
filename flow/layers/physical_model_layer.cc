@@ -25,7 +25,7 @@ void PhysicalModelLayer::Preroll(PrerollContext* context, const SkMatrix& matrix
   // The margin is hardcoded to an arbitrary maximum for now because Skia
   // doesn't provide a way to calculate it.
   SkRect bounds(rrect_.getBounds());
-  bounds.outset(50.0, 50.0);
+  bounds.outset(20.0, 20.0);
   set_paint_bounds(bounds);
 
   context->child_paint_bounds = bounds;
@@ -77,11 +77,14 @@ void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,
     SkShadowFlags flags = transparentOccluder ?
         SkShadowFlags::kTransparentOccluder_ShadowFlag :
         SkShadowFlags::kNone_ShadowFlag;
+    const SkRect& bounds = path.getBounds();
+    SkScalar shadow_x = (bounds.left() + bounds.right()) / 2;
+    SkScalar shadow_y = bounds.top() - 600.0f;
     SkShadowUtils::DrawShadow(canvas, path,
-                              elevation * 2,
-                              SkPoint3::Make(0.0f, 0.0f, 600.0f),
+                              elevation,
+                              SkPoint3::Make(shadow_x, shadow_y, 600.0f),
                               800.0f,
-                              0.2f, 0.2f,
+                              0.039f, 0.25f,
                               color,
                               flags);
 }
