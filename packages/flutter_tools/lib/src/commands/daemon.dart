@@ -353,11 +353,13 @@ class AppDomain extends Domain {
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
 
+    final FlutterDevice flutterDevice = new FlutterDevice(device);
+
     ResidentRunner runner;
 
     if (enableHotReload) {
       runner = new HotRunner(
-        device,
+        <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
         usesTerminalUI: false,
@@ -368,7 +370,7 @@ class AppDomain extends Domain {
       );
     } else {
       runner = new ColdRunner(
-        device,
+        <FlutterDevice>[flutterDevice],
         target: target,
         debuggingOptions: options,
         usesTerminalUI: false,
@@ -448,7 +450,7 @@ class AppDomain extends Domain {
     if (app == null)
       throw "app '$appId' not found";
 
-    final Isolate isolate = app.runner.currentView.uiIsolate;
+    final Isolate isolate = app.runner.flutterDevices.first.views.first.uiIsolate;
     final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
     if (result == null)
       return new OperationResult(1, 'method not available: $methodName');

@@ -150,17 +150,20 @@ class RunCommand extends RunCommandBase {
     };
   }
 
-  Device device;
+  List<Device> devices;
 
   @override
   Future<String> get usagePath async {
     final String command = shouldUseHotMode() ? 'hotrun' : name;
 
-    if (device == null)
+    if (devices == null)
       return command;
 
     // Return 'run/ios'.
-    return '$command/${getNameForTargetPlatform(await device.targetPlatform)}';
+    if (devices.length > 1)
+      return '$command/all';
+    else
+      return '$command/${getNameForTargetPlatform(await devices[0].targetPlatform)}';
   }
 
   @override
@@ -199,9 +202,11 @@ class RunCommand extends RunCommandBase {
   @override
   Future<Null> verifyThenRunCommand() async {
     commandValidator();
-    device = await findTargetDevice();
-    if (device == null)
+    devices = await findAllTargetDevices();
+    if (devices == null)
       throwToolExit(null);
+    if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication)
+      throwToolExit('Using -d all with --use-application-binary is not supported');
     return super.verifyThenRunCommand();
   }
 
@@ -221,7 +226,6 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<Null> runCommand() async {
-
     Cache.releaseLockEarly();
 
     // Enable hot mode by default if `--no-hot` was not passed and we are in
@@ -229,17 +233,20 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     if (argResults['machine']) {
+      if (devices.length > 1)
+        throwToolExit('--machine does not support -d all.');
       final Daemon daemon = new Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: new NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
         app = await daemon.appDomain.startApp(
-          device, fs.currentDirectory.path, targetFile, route,
+          devices.first, fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: argResults['use-application-binary'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: argResults['packages'],
-          projectAssets: argResults['project-assets']);
+          projectAssets: argResults['project-assets']
+        );
       } catch (error) {
         throwToolExit(error.toString());
       }
@@ -249,12 +256,16 @@ class RunCommand extends RunCommandBase {
       return null;
     }
 
-    if (await device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
-      throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+    for (Device device in devices) {
+      if (await device.isLocalEmulator && !isEmulatorBuildMode(getBuildMode()))
+        throwToolExit('${toTitleCase(getModeName(getBuildMode()))} mode is not supported for emulators.');
+    }
 
     if (hotMode) {
-      if (!device.supportsHotMode)
-        throwToolExit('Hot mode is not supported by this device. Run with --no-hot.');
+      for (Device device in devices) {
+        if (!device.supportsHotMode)
+          throwToolExit('Hot mode is not supported by ${device.name}. Run with --no-hot.');
+      }
     }
 
     final String pidFile = argResults['pid-file'];
@@ -262,11 +273,15 @@ class RunCommand extends RunCommandBase {
       // Write our pid to the file.
       fs.file(pidFile).writeAsStringSync(pid.toString());
     }
-    ResidentRunner runner;
 
+    final List<FlutterDevice> flutterDevices = devices.map((Device device) {
+      return new FlutterDevice(device);
+    }).toList();
+
+    ResidentRunner runner;
     if (hotMode) {
       runner = new HotRunner(
-        device,
+        flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
@@ -279,7 +294,7 @@ class RunCommand extends RunCommandBase {
       );
     } else {
       runner = new ColdRunner(
-        device,
+        flutterDevices,
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,

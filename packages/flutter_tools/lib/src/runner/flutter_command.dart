@@ -154,11 +154,11 @@ abstract class FlutterCommand extends Command<Null> {
   /// Subclasses must implement this to execute the command.
   Future<Null> runCommand();
 
-  /// Find and return the target [Device] based upon currently connected
+  /// Find and return all target [Device]s based upon currently connected
   /// devices and criteria entered by the user on the command line.
-  /// If a device cannot be found that meets specified criteria,
+  /// If no device can be found that meets specified criteria,
   /// then print an error message and return `null`.
-  Future<Device> findTargetDevice() async {
+  Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' "
           "for information about installing additional components.");
@@ -171,6 +171,9 @@ abstract class FlutterCommand extends Command<Null> {
       printStatus("No devices found with name or id "
           "matching '${deviceManager.specifiedDeviceId}'");
       return null;
+    } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
+      printStatus("No devices found");
+      return null;
     } else if (devices.isEmpty) {
       printNoConnectedDevices();
       return null;
@@ -181,20 +184,39 @@ abstract class FlutterCommand extends Command<Null> {
     if (devices.isEmpty) {
       printStatus('No supported devices connected.');
       return null;
-    } else if (devices.length > 1) {
+    } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
         printStatus("Found ${devices.length} devices with name or id matching "
             "'${deviceManager.specifiedDeviceId}':");
       } else {
         printStatus("More than one device connected; please specify a device with "
-            "the '-d <deviceId>' flag.");
+            "the '-d <deviceId>' flag, or use '-d all' to act on all devices.");
         devices = await deviceManager.getAllConnectedDevices().toList();
       }
       printStatus('');
       await Device.printDevices(devices);
       return null;
     }
-    return devices.single;
+    return devices;
+  }
+
+  /// Find and return the target [Device] based upon currently connected
+  /// devices and criteria entered by the user on the command line.
+  /// If a device cannot be found that meets specified criteria,
+  /// then print an error message and return `null`.
+  Future<Device> findTargetDevice() async {
+    List<Device> deviceList = await findAllTargetDevices();
+    if (deviceList == null)
+      return null;
+    if (deviceList.length > 1) {
+      printStatus("More than one device connected; please specify a device with "
+        "the '-d <deviceId>' flag.");
+      deviceList = await deviceManager.getAllConnectedDevices().toList();
+      printStatus('');
+      await Device.printDevices(deviceList);
+      return null;
+    }
+    return deviceList.single;
   }
 
   void printNoConnectedDevices() {

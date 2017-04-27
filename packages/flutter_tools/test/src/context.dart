@@ -127,11 +127,27 @@ class MockPortScanner extends PortScanner {
 class MockDeviceManager implements DeviceManager {
   List<Device> devices = <Device>[];
 
+  String _specifiedDeviceId;
+
   @override
-  String specifiedDeviceId;
+  String get specifiedDeviceId {
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
+      return null;
+    return _specifiedDeviceId;
+  }
+
+  @override
+  set specifiedDeviceId(String id) {
+    _specifiedDeviceId = id;
+  }
 
   @override
   bool get hasSpecifiedDeviceId => specifiedDeviceId != null;
+
+  @override
+  bool get hasSpecifiedAllDevices {
+    return _specifiedDeviceId != null && _specifiedDeviceId == 'all';
+  }
 
   @override
   Stream<Device> getAllConnectedDevices() => new Stream<Device>.fromIterable(devices);
