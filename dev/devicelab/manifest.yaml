@@ -165,6 +165,7 @@ tasks:
       Checks that platform channels work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   platform_channel_sample_test_ios:
     description: >
