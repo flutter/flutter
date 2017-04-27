@@ -441,7 +441,16 @@ class AppDomain extends Domain {
     });
   }
 
-  Future<OperationResult> callServiceExtension(Map<String, dynamic> args) async {
+  /// Returns an error, or the service extension result (a map with two fixed
+  /// keys, `type` and `method`). The result may have one or more additional keys,
+  /// depending on the specific service extension end-point. For example:
+  ///
+  ///     {
+  ///       "value":"android",
+  ///       "type":"_extensionType",
+  ///       "method":"ext.flutter.platformOverride"
+  ///     }
+  Future<Map<String, dynamic>> callServiceExtension(Map<String, dynamic> args) async {
     final String appId = _getStringArg(args, 'appId', required: true);
     final String methodName = _getStringArg(args, 'methodName');
     final Map<String, String> params = args['params'] ?? <String, String>{};
@@ -453,12 +462,12 @@ class AppDomain extends Domain {
     final Isolate isolate = app.runner.flutterDevices.first.views.first.uiIsolate;
     final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
     if (result == null)
-      return new OperationResult(1, 'method not available: $methodName');
+      throw 'method not available: $methodName';
 
     if (result.containsKey('error'))
-      return new OperationResult(1, result['error']);
-    else
-      return OperationResult.ok;
+      throw result['error'];
+
+    return result;
   }
 
   Future<bool> stop(Map<String, dynamic> args) async {
