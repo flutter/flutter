@@ -20,9 +20,8 @@ import 'ticker_provider.dart';
 abstract class ScrollActivityDelegate {
   AxisDirection get axisDirection;
 
-  double get pixels;
   double setPixels(double pixels);
-  double applyUserOffset(double delta);
+  void applyUserOffset(double delta);
 
   void goIdle();
   void goBallistic(double velocity);
@@ -107,21 +106,28 @@ class IdleScrollActivity extends ScrollActivity {
   bool get isScrolling => false;
 }
 
-class DragScrollActivity extends ScrollActivity implements Drag {
-  DragScrollActivity(
+class ScrollDragController implements Drag {
+  ScrollDragController(
     ScrollActivityDelegate delegate,
     DragStartDetails details,
     this.onDragCanceled,
-  ) : _lastDetails = details, super(delegate);
+  ) : _delegate = delegate, _lastDetails = details;
+
+  ScrollActivityDelegate get delegate => _delegate;
+  ScrollActivityDelegate _delegate;
 
   final VoidCallback onDragCanceled;
 
-  @override
-  void didTouch() {
-    assert(false);
-  }
-
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
+
+  /// Updates the controller's link to the [ScrollActivityDelegate].
+  ///
+  /// This should only be called when a controller is being moved from a defunct
+  /// (or about-to-be defunct) [ScrollActivityDelegate] object to a new one.
+  void updateDelegate(ScrollActivityDelegate value) {
+    assert(_delegate != value);
+    _delegate = value;
+  }
 
   @override
   void update(DragUpdateDetails details) {
@@ -133,8 +139,6 @@ class DragScrollActivity extends ScrollActivity implements Drag {
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
     delegate.applyUserOffset(offset);
-    // We ignore any reported overscroll returned by setPixels,
-    // because it gets reported via the reportOverscroll path.
   }
 
   @override
@@ -155,41 +159,59 @@ class DragScrollActivity extends ScrollActivity implements Drag {
     delegate.goBallistic(0.0);
   }
 
-  @override
+  @mustCallSuper
   void dispose() {
     _lastDetails = null;
     if (onDragCanceled != null)
       onDragCanceled();
-    super.dispose();
   }
 
+  dynamic get lastDetails => _lastDetails;
   dynamic _lastDetails;
+}
+
+class DragScrollActivity extends ScrollActivity {
+  DragScrollActivity(
+    ScrollActivityDelegate delegate,
+    ScrollDragController controller,
+  ) : _controller = controller, super(delegate);
+
+  ScrollDragController _controller;
+
+  @override
+  void didTouch() {
+    assert(false);
+  }
 
   @override
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
-    assert(_lastDetails is DragStartDetails);
-    new ScrollStartNotification(metrics: metrics, context: context, dragDetails: _lastDetails).dispatch(context);
+    final dynamic lastDetails = _controller.lastDetails;
+    assert(lastDetails is DragStartDetails);
+    new ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
   void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
-    assert(_lastDetails is DragUpdateDetails);
-    new ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: _lastDetails).dispatch(context);
+    final dynamic lastDetails = _controller.lastDetails;
+    assert(lastDetails is DragUpdateDetails);
+    new ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
-    assert(_lastDetails is DragUpdateDetails);
-    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: _lastDetails).dispatch(context);
+    final dynamic lastDetails = _controller.lastDetails;
+    assert(lastDetails is DragUpdateDetails);
+    new OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails).dispatch(context);
   }
 
   @override
   void dispatchScrollEndNotification(ScrollMetrics metrics, BuildContext context) {
     // We might not have DragEndDetails yet if we're being called from beginActivity.
+    final dynamic lastDetails = _controller.lastDetails;
     new ScrollEndNotification(
       metrics: metrics,
       context: context,
-      dragDetails: _lastDetails is DragEndDetails ? _lastDetails : null
+      dragDetails: lastDetails is DragEndDetails ? lastDetails : null
     ).dispatch(context);
   }
 
@@ -198,6 +220,12 @@ class DragScrollActivity extends ScrollActivity implements Drag {
 
   @override
   bool get isScrolling => true;
+
+  @override
+  void dispose() {
+    _controller = null;
+    super.dispose();
+  }
 }
 
 class BallisticScrollActivity extends ScrollActivity {
