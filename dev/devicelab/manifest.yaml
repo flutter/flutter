@@ -219,6 +219,13 @@ tasks:
 
   # Tests running on Windows host
 
+  channels_integration_test_win:
+    description: >
+      Checks that platform channels work when app is launched from Windows.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows"]
+    flaky: true
+
   flutter_gallery_win__build:
     description: >
       Collects various performance metrics from AOT builds of the Flutter
