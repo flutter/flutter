@@ -7,16 +7,21 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
 import 'scroll_view.dart';
 import 'ticker_provider.dart';
 
+/// Signature for the builder callback used by [AnimatedList].
 typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animation<double> animation);
+
+/// Signature for the builder callback used by [AnimatedList.remove].
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
-typedef void AnimatedListInitialItemsBuilder(AnimatedListState list);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = const Duration(milliseconds: 3000);
 
+// Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
@@ -31,19 +36,47 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to insert or remove items. To
-/// refer to the [AnimatedListState] either provide a [GlobalKey] or use
-/// the static [of] method from a item's input callback.
+/// This widget's [AnimatedListState] can be used to dynmically insert or remove
+/// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
+/// use the static [of] method from a item's input callback.
+///
+/// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
-  AnimatedList({ Key key,  this.itemBuilder, this.initialItemCount: 0 }) : super(key: key) {
+  AnimatedList({
+    Key key,
+    @required this.itemBuilder,
+    this.initialItemCount: 0,
+    this.scrollDirection: Axis.vertical,
+    this.reverse: false,
+    this.controller,
+    this.primary,
+    this.physics,
+    this.shrinkWrap: false,
+    this.padding,
+  }) : super(key: key) {
     assert(itemBuilder != null);
     assert(initialItemCount != null && initialItemCount >= 0);
   }
 
   final AnimatedListItemBuilder itemBuilder;
   final int initialItemCount;
+  final Axis scrollDirection;
+  final bool reverse;
+  final ScrollController controller;
+  final bool primary;
+  final ScrollPhysics physics;
+  final bool shrinkWrap;
+  final EdgeInsets padding;
+  final double itemExtent;
 
-  // TBD: explain that this is typically used by List item handlers that want to refer to the list.
+  /// The state from the closest instance of this class that encloses the given context.
+  ///
+  /// This method is typically used by [AnimatedList] item widgets that insert or
+  /// remove items in response to user input.
+  ///
+  /// ```dart
+  /// AnimatedListState animatedList = AnimatedList.of(context);
+  /// ```
   static AnimatedListState of(BuildContext context, { bool nullOk: false }) {
     assert(nullOk != null);
     assert(context != null);
@@ -66,6 +99,30 @@ class AnimatedList extends StatefulWidget {
   AnimatedListState createState() => new AnimatedListState();
 }
 
+/// The state for a scrolling container that animates items when they are
+/// inserted or removed.
+///
+/// When an item is inserted with [insertItem] an animation begins running.
+/// The animation is passed to [itemBuilder] whenever the item's widget
+/// is needed.
+///
+/// When an item is removed with [removeItem] its animation is reversed.
+/// The removed item's animation  is passed to the [removeItem] builder
+/// parameter.
+///
+/// An app that needs to insert or remove items in response to an event
+/// can refer to the [AnimatedList]'s state with a global key:
+///
+/// ```dart
+/// GlobalKey<AnimatedListState> listKey = new GlobalKey<AnimatedListState>();
+/// ...
+/// new AnimatedList(key: listKey, ...);
+/// ...
+/// listKey.currentState.insert(123);
+/// ```
+///
+/// AnimatedList item input handlers can also refer to their [AnimatedListState]
+/// with the static [of] method.
 class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
@@ -131,6 +188,12 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     return index;
   }
 
+  /// Insert an item at [index] and start an animation that will be passed
+  /// to [itemBuilder] when the item is visible.
+  ///
+  /// This method's semantics are the same as Dart's [List.insert] method:
+  /// it increases the length of the list by one and shifts all items at or
+  /// after [index] towards the end of the list.
   void insertItem(int index, { Duration duration: _kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
@@ -164,8 +227,20 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     });
   }
 
+  /// Remove the item at [index] and start an animation that will be passed
+  /// to [builder] when the item is visible.
+  ///
+  /// Items are removed immediately. After an item has been removed, its index
+  /// will no longer be passed to the [itemBuilder]. However the item will still
+  /// appear in the list for [duration] and during that time [builder] must
+  /// construct its widget as needed.
+  ///
+  /// This method's semantics are the same as Dart's [List.remove] method:
+  /// it decreases the length of the list by one and shifts all items at or
+  /// before [index] towards the beginning of the list.
   void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration: _kDuration }) {
     assert(index != null && index >= 0);
+    assert(builder != null);
     assert(duration != null);
 
     final int itemIndex = _indexToItemIndex(index);
@@ -213,6 +288,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     return new ListView.builder(
       itemBuilder: _itemBuilder,
       itemCount: _itemsCount,
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.controller,
+      primary: widget.primary,
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      padding: widget.padding,
     );
   }
 }
