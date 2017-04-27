@@ -10,14 +10,6 @@ import '../framework/framework.dart';
 import '../framework/ios.dart';
 import '../framework/utils.dart';
 
-
-TaskFunction createPlatformServiceDriverTest() {
-  return new DriverTest(
-      '${flutterDirectory.path}/examples/platform_channel',
-      'test_driver/button_tap.dart',
-  );
-}
-
 TaskFunction createComplexLayoutScrollPerfTest() {
   return new PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
@@ -171,40 +163,6 @@ class PerfTest {
         'worst_frame_rasterizer_time_millis',
         'missed_frame_rasterizer_budget_count',
       ]);
-    });
-  }
-}
-
-
-class DriverTest {
-
-  DriverTest(this.testDirectory, this.testTarget);
-
-  final String testDirectory;
-  final String testTarget;
-
-  Future<TaskResult> call() {
-    return inDirectory(testDirectory, () async {
-      final Device device = await devices.workingDevice;
-      await device.unlock();
-      final String deviceId = device.deviceId;
-      await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
-
-      await flutter('drive', options: <String>[
-        '-v',
-        '-t',
-        testTarget,
-        '-d',
-        deviceId,
-      ]);
-
-      return new TaskResult.success(null);
     });
   }
 }

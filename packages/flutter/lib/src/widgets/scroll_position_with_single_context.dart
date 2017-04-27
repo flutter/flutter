@@ -48,23 +48,19 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// implementation of that method.
   ScrollPositionWithSingleContext({
     @required ScrollPhysics physics,
-    @required this.context,
+    @required ScrollContext context,
     double initialPixels: 0.0,
     ScrollPosition oldPosition,
-  }) : super(physics: physics, oldPosition: oldPosition) {
+    String debugLabel,
+  }) : super(physics: physics, context: context, oldPosition: oldPosition, debugLabel: debugLabel) {
     // If oldPosition is not null, the superclass will first call absorb(),
     // which may set _pixels and _activity.
-    assert(physics != null);
-    assert(context != null);
-    assert(context.vsync != null);
     if (pixels == null && initialPixels != null)
       correctPixels(initialPixels);
     if (activity == null)
       goIdle();
     assert(activity != null);
   }
-
-  final ScrollContext context;
 
   @override
   AxisDirection get axisDirection => context.axisDirection;
@@ -100,27 +96,21 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// the activity and scroll activities tend to use those metrics when being
   /// restarted.
   @override
-  void absorb(ScrollPosition otherPosition) {
-    assert(otherPosition != null);
-    if (otherPosition is! ScrollPositionWithSingleContext) {
-      super.absorb(otherPosition);
+  void absorb(ScrollPosition other) {
+    super.absorb(other);
+    if (other is! ScrollPositionWithSingleContext) {
       goIdle();
       return;
     }
-    final ScrollPositionWithSingleContext other = otherPosition;
-    assert(other != this);
-    assert(other.context == context);
-    super.absorb(other);
-    _userScrollDirection = other._userScrollDirection;
-    assert(activity == null);
-    assert(other.activity != null);
-    other.activity.updateDelegate(this);
-    _activity = other.activity;
-    other._activity = null;
-    if (other.runtimeType != runtimeType)
-      activity.resetActivity();
-    context.setIgnorePointer(shouldIgnorePointer);
-    isScrollingNotifier.value = _activity.isScrolling;
+    activity.updateDelegate(this);
+    final ScrollPositionWithSingleContext typedOther = other;
+    _userScrollDirection = typedOther._userScrollDirection;
+    assert(_currentDrag == null);
+    if (typedOther._currentDrag != null) {
+      _currentDrag = typedOther._currentDrag;
+      _currentDrag.updateDelegate(this);
+      typedOther._currentDrag = null;
+    }
   }
 
   /// Notifies the activity that the dimensions of the underlying viewport or
@@ -136,60 +126,31 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// * [ScrollPosition.applyContentDimensions], which is called after new
   ///   viewport dimensions are established, and also if new content dimensions
   ///   are established, and which calls [ScrollPosition.applyNewDimensions].
-  @mustCallSuper
   @override
   void applyNewDimensions() {
-    assert(pixels != null);
-    activity.applyNewDimensions();
+    super.applyNewDimensions();
     context.setCanDrag(physics.shouldAcceptUserOffset(this));
   }
 
 
   // SCROLL ACTIVITIES
 
-  @protected
-  ScrollActivity get activity => _activity;
-  ScrollActivity _activity;
-
-  @protected
-  bool get shouldIgnorePointer => activity?.shouldIgnorePointer;
-
-  /// Change the current [activity], disposing of the old one and
-  /// sending scroll notifications as necessary.
-  ///
-  /// If the argument is null, this method has no effect. This is convenient for
-  /// cases where the new activity is obtained from another method, and that
-  /// method might return null, since it means the caller does not have to
-  /// explictly null-check the argument.
+  @override
   void beginActivity(ScrollActivity newActivity) {
     if (newActivity == null)
       return;
     assert(newActivity.delegate == this);
-    bool wasScrolling, oldIgnorePointer;
-    if (_activity != null) {
-      oldIgnorePointer = _activity.shouldIgnorePointer;
-      wasScrolling = _activity.isScrolling;
-      if (wasScrolling && !newActivity.isScrolling)
-        _didEndScroll();
-      _activity.dispose();
-    } else {
-      oldIgnorePointer = false;
-      wasScrolling = false;
-    }
-    _activity = newActivity;
-    isScrollingNotifier.value = activity.isScrolling;
+    super.beginActivity(newActivity);
+    _currentDrag?.dispose();
+    _currentDrag = null;
     if (!activity.isScrolling)
       updateUserScrollDirection(ScrollDirection.idle);
-    if (oldIgnorePointer != shouldIgnorePointer)
-      context.setIgnorePointer(shouldIgnorePointer);
-    if (!wasScrolling && _activity.isScrolling)
-      _didStartScroll();
   }
 
   @override
-  double applyUserOffset(double delta) {
+  void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    return setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
 
   /// End the current [ScrollActivity], replacing it with an
@@ -236,7 +197,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     if (userScrollDirection == value)
       return;
     _userScrollDirection = value;
-    _didUpdateScrollDirection(value);
+    didUpdateScrollDirection(value);
   }
 
   // FEATURES USED BY SCROLL CONTROLLERS
@@ -304,9 +265,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       final double oldPixels = pixels;
       forcePixels(value);
       notifyListeners();
-      _didStartScroll();
+      didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
-      _didEndScroll();
+      didEndScroll();
     }
     goBallistic(0.0);
   }
@@ -320,9 +281,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       final double oldPixels = pixels;
       forcePixels(value);
       notifyListeners();
-      _didStartScroll();
+      didStartScroll();
       didUpdateScrollPositionBy(pixels - oldPixels);
-      _didEndScroll();
+      didEndScroll();
     }
   }
 
@@ -334,57 +295,27 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     activity.didTouch();
   }
 
+  ScrollDragController _currentDrag;
+
   /// Start a drag activity corresponding to the given [DragStartDetails].
   ///
-  /// The `dragCancelCallback` argument will be invoked if the drag is ended
+  /// The `onDragCanceled` argument will be invoked if the drag is ended
   /// prematurely (e.g. from another activity taking over). See
-  /// [DragScrollActivity.onDragCanceled] for details.
+  /// [ScrollDragController.onDragCanceled] for details.
   @override
-  DragScrollActivity drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    beginActivity(new DragScrollActivity(this, details, dragCancelCallback));
-    return activity;
+  Drag drag(DragStartDetails details, VoidCallback onDragCanceled) {
+    final ScrollDragController drag = new ScrollDragController(this, details, onDragCanceled);
+    beginActivity(new DragScrollActivity(this, drag));
+    assert(_currentDrag == null);
+    _currentDrag = drag;
+    return drag;
   }
 
   @override
   void dispose() {
-    assert(pixels != null);
-    activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
-    _activity = null;
+    _currentDrag?.dispose();
+    _currentDrag = null;
     super.dispose();
-  }
-
-
-  // NOTIFICATION DISPATCH
-
-  /// Called by [beginActivity] to report when an activity has started.
-  void _didStartScroll() {
-    activity.dispatchScrollStartNotification(cloneMetrics(), context.notificationContext);
-  }
-
-  /// Called by [setPixels] to report a change to the [pixels] position.
-  @override
-  void didUpdateScrollPositionBy(double delta) {
-    activity.dispatchScrollUpdateNotification(cloneMetrics(), context.notificationContext, delta);
-  }
-
-  /// Called by [beginActivity] to report when an activity has ended.
-  void _didEndScroll() {
-    activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
-  }
-
-  /// Called by [setPixels] to report overscroll when an attempt is made to
-  /// change the [pixels] position. Overscroll is the amount of change that was
-  /// not applied to the [pixels] value.
-  @override
-  void didOverscrollBy(double value) {
-    assert(activity.isScrolling);
-    activity.dispatchOverscrollNotification(cloneMetrics(), context.notificationContext, value);
-  }
-
-  /// Called by [updateUserScrollDirection] to report that the
-  /// [userScrollDirection] has changed.
-  void _didUpdateScrollDirection(ScrollDirection direction) {
-    new UserScrollNotification(metrics: cloneMetrics(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
   }
 
   @override

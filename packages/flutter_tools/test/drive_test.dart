@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
@@ -242,7 +244,7 @@ void main() {
       testUsingContext('uses existing emulator', () async {
         withMockDevice();
         when(mockDevice.name).thenReturn('mock-simulator');
-        when(mockDevice.isLocalEmulator).thenReturn(true);
+        when(mockDevice.isLocalEmulator).thenReturn(new Future<bool>.value(true));
 
         final Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');
@@ -254,7 +256,7 @@ void main() {
       testUsingContext('uses existing Android device if and there are no simulators', () async {
         mockDevice = new MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
-        when(mockDevice.isLocalEmulator).thenReturn(false);
+        when(mockDevice.isLocalEmulator).thenReturn(new Future<bool>.value(false));
         withMockDevice(mockDevice);
 
         final Device device = await findTargetDevice();

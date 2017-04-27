@@ -29,6 +29,35 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   );
 }
 
+class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
+  List<Device> _devices = <Device>[];
+  StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
+  StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
+
+  MockPollingDeviceDiscovery() : super('mock');
+
+  @override
+  List<Device> pollingGetDevices() => _devices;
+
+  @override
+  bool get supportsPlatform => true;
+
+  void addDevice(MockAndroidDevice device) {
+    _devices.add(device);
+
+    _onAddedController.add(device);
+  }
+
+  @override
+  List<Device> get devices => _devices;
+
+  @override
+  Stream<Device> get onAdded => _onAddedController.stream;
+
+  @override
+  Stream<Device> get onRemoved => _onRemovedController.stream;
+}
+
 class MockAndroidDevice extends Mock implements AndroidDevice {
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.android_arm;
