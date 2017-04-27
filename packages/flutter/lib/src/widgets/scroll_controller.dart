@@ -15,6 +15,7 @@ import 'scroll_position_with_single_context.dart';
 class ScrollController extends ChangeNotifier {
   ScrollController({
     this.initialScrollOffset: 0.0,
+    this.debugLabel,
   }) {
     assert(initialScrollOffset != null);
   }
@@ -24,6 +25,8 @@ class ScrollController extends ChangeNotifier {
   /// New [ScrollPosition] objects that are created and attached to this
   /// controller will have their offset initialized to this value.
   final double initialScrollOffset;
+
+  final String debugLabel;
 
   /// The currently attached positions.
   ///
@@ -152,6 +155,7 @@ class ScrollController extends ChangeNotifier {
       context: context,
       initialPixels: initialScrollOffset,
       oldPosition: oldPosition,
+      debugLabel: debugLabel,
     );
   }
 
@@ -164,6 +168,8 @@ class ScrollController extends ChangeNotifier {
 
   @mustCallSuper
   void debugFillDescription(List<String> description) {
+    if (debugLabel != null)
+      description.add(debugLabel);
     if (initialScrollOffset != 0.0)
       description.add('initialScrollOffset: ${initialScrollOffset.toStringAsFixed(1)}, ');
     if (_positions.isEmpty) {
