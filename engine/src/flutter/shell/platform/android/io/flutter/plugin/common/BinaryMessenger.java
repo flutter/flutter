@@ -17,8 +17,8 @@ public interface BinaryMessenger {
      * Sends a binary message to the Flutter application.
      *
      * @param channel the name {@link String} of the logical channel used for the message.
-     * @param message the message payload, a {@link ByteBuffer} with the message bytes between position
-     * zero and current position, or null.
+     * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
+     * between position zero and current position, or null.
      */
     void send(String channel, ByteBuffer message);
 
@@ -28,8 +28,8 @@ public interface BinaryMessenger {
      * <p>Any uncaught exception thrown by the reply callback will be caught and logged.</p>
      *
      * @param channel the name {@link String} of the logical channel used for the message.
-     * @param message the message payload, a {@link ByteBuffer} with the message bytes between position
-     * zero and current position, or null.
+     * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
+     * between position zero and current position, or null.
      * @param callback a {@link BinaryReply} callback invoked when the Flutter application responds to the
      * message, possibly null.
      */
@@ -79,8 +79,8 @@ public interface BinaryMessenger {
         /**
          * Handles the specified reply.
          *
-         * @param reply the reply payload, a {@link ByteBuffer} or null. Senders of outgoing
-         * replies must place the reply bytes between position zero and current position.
+         * @param reply the reply payload, a direct-allocated {@link ByteBuffer} or null. Senders of
+         * outgoing replies must place the reply bytes between position zero and current position.
          * Reply receivers can read from the buffer directly.
          */
         void reply(ByteBuffer reply);

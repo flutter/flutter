@@ -91,13 +91,8 @@ public final class EventChannel {
         /**
          * Handles a request to set up an event stream.
          *
-         * <p>Any uncaught exception thrown by this method, or the preceding arguments
-         * decoding, will be caught by the channel implementation and logged. An error result
-         * message will be sent back to Flutter.</p>
-         *
-         * <p>Any uncaught exception thrown during encoding an event or error submitted to the
-         * {@link EventSink} is treated similarly: the exception is logged, and an error event
-         * is sent to Flutter.</p>
+         * <p>Any uncaught exception thrown by this method will be caught by the channel
+         * implementation and logged. An error result message will be sent back to Flutter.</p>
          *
          * @param arguments stream configuration arguments, possibly null.
          * @param events an {@link EventSink} for emitting events to the Flutter receiver.
@@ -107,9 +102,8 @@ public final class EventChannel {
         /**
          * Handles a request to tear down an event stream.
          *
-         * <p>Any uncaught exception thrown by this method, or the preceding arguments
-         * decoding, will be caught by the channel implementation and logged. An error result
-         * result message will be sent back to Flutter.</p>
+         * <p>Any uncaught exception thrown by this method will be caught by the channel
+         * implementation and logged. An error result message will be sent back to Flutter.</p>
          *
          * @param arguments stream configuration arguments, possibly null.
          */
@@ -156,18 +150,13 @@ public final class EventChannel {
 
         @Override
         public void onMessage(ByteBuffer message, final BinaryReply reply) {
-            try {
-                final MethodCall call = codec.decodeMethodCall(message);
-                if (call.method.equals("listen")) {
-                    onListen(call.arguments, reply);
-                } else if (call.method.equals("cancel")) {
-                    onCancel(call.arguments, reply);
-                } else {
-                    reply.reply(null);
-                }
-            } catch (RuntimeException e) {
-                Log.e(TAG + name, "Failed to decode event stream lifecycle call", e);
-                reply.reply(codec.encodeErrorEnvelope("decode", e.getMessage(), null));
+            final MethodCall call = codec.decodeMethodCall(message);
+            if (call.method.equals("listen")) {
+                onListen(call.arguments, reply);
+            } else if (call.method.equals("cancel")) {
+                onCancel(call.arguments, reply);
+            } else {
+                reply.reply(null);
             }
         }
 
@@ -180,7 +169,7 @@ public final class EventChannel {
                 } catch (RuntimeException e) {
                     activeSink.set(null);
                     Log.e(TAG + name, "Failed to open event stream", e);
-                    callback.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             } else {
                 callback.reply(codec.encodeErrorEnvelope("error", "Stream already active", null));
@@ -195,7 +184,7 @@ public final class EventChannel {
                     callback.reply(codec.encodeSuccessEnvelope(null));
                 } catch (RuntimeException e) {
                     Log.e(TAG + name, "Failed to close event stream", e);
-                    callback.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
+                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
                 }
             } else {
                 callback.reply(codec.encodeErrorEnvelope("error", "No active stream to cancel", null));
@@ -210,12 +199,7 @@ public final class EventChannel {
                  if (hasEnded.get() || activeSink.get() != this) {
                      return;
                  }
-                 try {
-                     EventChannel.this.messenger.send(name, codec.encodeSuccessEnvelope(event));
-                 } catch (RuntimeException e) {
-                     Log.e(TAG + name, "Failed to encode event", e);
-                     EventChannel.this.messenger.send(name, codec.encodeErrorEnvelope("encode", e.getMessage(), null));
-                 }
+                 EventChannel.this.messenger.send(name, codec.encodeSuccessEnvelope(event));
              }
 
              @Override
@@ -223,14 +207,9 @@ public final class EventChannel {
                  if (hasEnded.get() || activeSink.get() != this) {
                      return;
                  }
-                 try {
-                   EventChannel.this.messenger.send(
-                       name,
-                       codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
-                 } catch (RuntimeException e) {
-                     Log.e(TAG + name, "Failed to encode error", e);
-                     EventChannel.this.messenger.send(name, codec.encodeErrorEnvelope("encode", e.getMessage(), null));
-                 }
+                 EventChannel.this.messenger.send(
+                     name,
+                     codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
              }
 
              @Override

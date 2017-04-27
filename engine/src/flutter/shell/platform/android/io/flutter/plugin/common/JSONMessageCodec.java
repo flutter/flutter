@@ -26,7 +26,12 @@ public final class JSONMessageCodec implements MessageCodec<Object> {
         if (message == null) {
             return null;
         }
-        return StringCodec.INSTANCE.encodeMessage(JSONUtil.wrap(message).toString());
+        final Object wrapped = JSONUtil.wrap(message);
+        if (wrapped instanceof String) {
+          return StringCodec.INSTANCE.encodeMessage(JSONObject.quote((String) wrapped));
+        } else {
+          return StringCodec.INSTANCE.encodeMessage(wrapped.toString());
+        }
     }
 
     @Override

@@ -114,11 +114,8 @@ public final class MethodChannel {
          * handlers. The result may be submitted asynchronously. Calls to unknown or unimplemented methods
          * should be handled using {@link Result#notImplemented()}.</p>
          *
-         * <p>Any uncaught exception thrown by this method, or the preceding method call decoding, will be
-         * caught by the channel implementation and logged, and an error result will be sent back to Flutter.</p>
-         *
-         * <p>Any uncaught exception thrown during encoding a result submitted to the {@link Result}
-         * is treated similarly: the exception is logged, and an error result is sent to Flutter.</p>
+         * <p>Any uncaught exception thrown by this method will be caught by the channel implementation and
+         * logged, and an error result will be sent back to Flutter.</p>
          *
          * @param call A {@link MethodCall}.
          * @param result A {@link Result} used for submitting the result of the call.
@@ -169,8 +166,7 @@ public final class MethodChannel {
                     callback.notImplemented();
                 } else {
                     try {
-                        final Object result = codec.decodeEnvelope(reply);
-                        callback.success(result);
+                        callback.success(codec.decodeEnvelope(reply));
                     } catch (FlutterException e) {
                         callback.error(e.code, e.getMessage(), e.details);
                     }
@@ -190,35 +186,17 @@ public final class MethodChannel {
 
         @Override
         public void onMessage(ByteBuffer message, final BinaryReply reply) {
-            MethodCall call;
-            try {
-                call = codec.decodeMethodCall(message);
-            } catch (RuntimeException e) {
-                Log.e(TAG + name, "Failed to decode method call", e);
-                reply.reply(codec.encodeErrorEnvelope("decode", e.getMessage(), null));
-                return;
-            }
+            final MethodCall call = codec.decodeMethodCall(message);
             try {
                 handler.onMethodCall(call, new Result() {
                     @Override
                     public void success(Object result) {
-                        try {
-                            reply.reply(codec.encodeSuccessEnvelope(result));
-                        } catch (RuntimeException e) {
-                            Log.e(TAG + name, "Failed to encode success result", e);
-                            reply.reply(codec.encodeErrorEnvelope("encode", e.getMessage(), null));
-                        }
+                        reply.reply(codec.encodeSuccessEnvelope(result));
                     }
 
                     @Override
                     public void error(String errorCode, String errorMessage, Object errorDetails) {
-                        try {
-                            reply.reply(codec.encodeErrorEnvelope(
-                                    errorCode, errorMessage, errorDetails));
-                        } catch (RuntimeException e) {
-                            Log.e(TAG + name, "Failed to encode error result", e);
-                            reply.reply(codec.encodeErrorEnvelope("encode", e.getMessage(), null));
-                        }
+                        reply.reply(codec.encodeErrorEnvelope(errorCode, errorMessage, errorDetails));
                     }
 
                     @Override
@@ -228,7 +206,7 @@ public final class MethodChannel {
                 });
             } catch (RuntimeException e) {
                 Log.e(TAG + name, "Failed to handle method call", e);
-                reply.reply(codec.encodeErrorEnvelope("uncaught", e.getMessage(), null));
+                reply.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
             }
         }
     }
