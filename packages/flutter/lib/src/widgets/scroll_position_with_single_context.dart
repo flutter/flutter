@@ -112,6 +112,14 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     assert(other.context == context);
     super.absorb(other);
     _userScrollDirection = other._userScrollDirection;
+
+    assert(_currentDrag == null);
+    if (other._currentDrag != null) {
+      other._currentDrag.updateDelegate(this);
+      _currentDrag = other._currentDrag;
+      other._currentDrag = null;
+    }
+
     assert(activity == null);
     assert(other.activity != null);
     other.activity.updateDelegate(this);
@@ -176,6 +184,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       oldIgnorePointer = false;
       wasScrolling = false;
     }
+    _currentDrag?.dispose();
+    _currentDrag = null;
     _activity = newActivity;
     isScrollingNotifier.value = activity.isScrolling;
     if (!activity.isScrolling)
@@ -187,9 +197,9 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  double applyUserOffset(double delta) {
+  void applyUserOffset(double delta) {
     updateUserScrollDirection(delta > 0.0 ? ScrollDirection.forward : ScrollDirection.reverse);
-    return setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
+    setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
 
   /// End the current [ScrollActivity], replacing it with an
@@ -334,20 +344,27 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     activity.didTouch();
   }
 
+  ScrollDragController _currentDrag;
+
   /// Start a drag activity corresponding to the given [DragStartDetails].
   ///
-  /// The `dragCancelCallback` argument will be invoked if the drag is ended
+  /// The `onDragCanceled` argument will be invoked if the drag is ended
   /// prematurely (e.g. from another activity taking over). See
-  /// [DragScrollActivity.onDragCanceled] for details.
+  /// [ScrollDragController.onDragCanceled] for details.
   @override
-  DragScrollActivity drag(DragStartDetails details, VoidCallback dragCancelCallback) {
-    beginActivity(new DragScrollActivity(this, details, dragCancelCallback));
-    return activity;
+  Drag drag(DragStartDetails details, VoidCallback onDragCanceled) {
+    final ScrollDragController drag = new ScrollDragController(this, details, onDragCanceled);
+    beginActivity(new DragScrollActivity(this, drag));
+    assert(_currentDrag == null);
+    _currentDrag = drag;
+    return drag;
   }
 
   @override
   void dispose() {
     assert(pixels != null);
+    _currentDrag?.dispose();
+    _currentDrag = null;
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();

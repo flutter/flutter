@@ -89,28 +89,28 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(_pixels != null);
     assert(SchedulerBinding.instance.schedulerPhase.index <= SchedulerPhase.transientCallbacks.index);
     if (newPixels != pixels) {
-      final double overScroll = applyBoundaryConditions(newPixels);
+      final double overscroll = applyBoundaryConditions(newPixels);
       assert(() {
         final double delta = newPixels - pixels;
-        if (overScroll.abs() > delta.abs()) {
+        if (overscroll.abs() > delta.abs()) {
           throw new FlutterError(
             '$runtimeType.applyBoundaryConditions returned invalid overscroll value.\n'
             'setPixels() was called to change the scroll offset from $pixels to $newPixels.\n'
             'That is a delta of $delta units.\n'
-            '$runtimeType.applyBoundaryConditions reported an overscroll of $overScroll units.'
+            '$runtimeType.applyBoundaryConditions reported an overscroll of $overscroll units.'
           );
         }
         return true;
       });
       final double oldPixels = _pixels;
-      _pixels = newPixels - overScroll;
+      _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
         notifyListeners();
         didUpdateScrollPositionBy(_pixels - oldPixels);
       }
-      if (overScroll != 0.0) {
-        didOverscrollBy(overScroll);
-        return overScroll;
+      if (overscroll != 0.0) {
+        didOverscrollBy(overscroll);
+        return overscroll;
       }
     }
     return 0.0;
