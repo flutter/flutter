@@ -718,8 +718,9 @@ class LinearGradient extends Gradient {
     if (a.stops != null && b.stops != null) {
       for (int i = 0; i < a.stops.length; i++)
         interpolatedStops.add(ui.lerpDouble(a.stops[i], b.stops[i], t));
-    } else 
+    } else {
       interpolatedStops = a.stops ?? b.stops;
+    }
     return new LinearGradient(
       begin: FractionalOffset.lerp(a.begin, b.begin, t),
       end: FractionalOffset.lerp(a.end, b.end, t),
