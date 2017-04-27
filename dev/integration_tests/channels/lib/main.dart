@@ -185,7 +185,7 @@ class _TestAppState extends State<TestApp> {
         floatingActionButton: new FloatingActionButton(
           key: const ValueKey<String>('step'),
           onPressed: _executeNextStep,
-          child: new Icon(Icons.navigate_next),
+          child: const Icon(Icons.navigate_next),
         ),
       ),
     );
