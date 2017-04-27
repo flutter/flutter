@@ -159,7 +159,7 @@ class Canvas : public ftl::RefCountedThreadSafe<Canvas>,
 
   void drawShadow(const CanvasPath* path,
                   SkColor color,
-                  int elevation,
+                  double elevation,
                   bool transparentOccluder);
 
   SkCanvas* canvas() const { return canvas_; }

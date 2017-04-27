@@ -15,11 +15,11 @@ class PhysicalModelLayer : public ContainerLayer {
   ~PhysicalModelLayer() override;
 
   void set_rrect(const SkRRect& rrect) { rrect_ = rrect; }
-  void set_elevation(int elevation) { elevation_ = elevation; }
+  void set_elevation(double elevation) { elevation_ = elevation; }
   void set_color(SkColor color) { color_ = color; }
 
   static void DrawShadow(SkCanvas* canvas, const SkPath& path,
-                         SkColor color, int elevation, bool transparentOccluder);
+                         SkColor color, double elevation, bool transparentOccluder);
 
  protected:
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
@@ -32,7 +32,7 @@ class PhysicalModelLayer : public ContainerLayer {
 
  private:
   SkRRect rrect_;
-  int elevation_;
+  double elevation_;
   SkColor color_;
 };
 

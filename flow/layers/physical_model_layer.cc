@@ -72,7 +72,7 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
 }
 
 void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,
-                                    SkColor color, int elevation,
+                                    SkColor color, double elevation,
                                     bool transparentOccluder) {
     SkShadowFlags flags = transparentOccluder ?
         SkShadowFlags::kTransparentOccluder_ShadowFlag :
