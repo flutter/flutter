@@ -231,6 +231,31 @@ void main() {
       responses.close();
       commands.close();
     });
+
+    _testUsingContext('device.notify', () {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger
+      );
+
+      final MockPollingDeviceDiscovery discoverer = new MockPollingDeviceDiscovery();
+      daemon.deviceDomain.addDeviceDiscoverer(discoverer);
+      discoverer.addDevice(new MockAndroidDevice());
+
+      return responses.stream.first.then((Map<String, dynamic> response) {
+        expect(response['event'], 'device.added');
+        expect(response['params'], isMap);
+
+        final Map<String, dynamic> params = response['params'];
+        expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
+
+        responses.close();
+        commands.close();
+      });
+    });
   });
 }
 

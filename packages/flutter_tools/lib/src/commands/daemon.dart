@@ -521,28 +521,26 @@ class DeviceDomain extends Domain {
     registerHandler('forward', forward);
     registerHandler('unforward', unforward);
 
-    PollingDeviceDiscovery deviceDiscovery = new AndroidDevices();
-    if (deviceDiscovery.supportsPlatform)
-      _discoverers.add(deviceDiscovery);
-
-    deviceDiscovery = new IOSDevices();
-    if (deviceDiscovery.supportsPlatform)
-      _discoverers.add(deviceDiscovery);
-
-    deviceDiscovery = new IOSSimulators();
-    if (deviceDiscovery.supportsPlatform)
-      _discoverers.add(deviceDiscovery);
-
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
-      discoverer.onAdded.listen(_onDeviceEvent('device.added'));
-      discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
-    }
+    addDeviceDiscoverer(new AndroidDevices());
+    addDeviceDiscoverer(new IOSDevices());
+    addDeviceDiscoverer(new IOSSimulators());
   }
 
-  Future<Null> _deviceEvents = new Future<Null>.value();
+  void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
+    if (!discoverer.supportsPlatform)
+      return;
+
+    _discoverers.add(discoverer);
+
+    discoverer.onAdded.listen(_onDeviceEvent('device.added'));
+    discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
+  }
+
+  Future<Null> _serializeDeviceEvents = new Future<Null>.value();
+
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
-      _deviceEvents = _deviceEvents.then((_) async {
+      _serializeDeviceEvents = _serializeDeviceEvents.then((_) async {
         sendEvent(eventName, await _deviceToMap(device));
       });
     };
@@ -673,6 +671,7 @@ dynamic _toJsonable(dynamic obj) {
     return obj;
   if (obj is OperationResult)
     return obj;
+  assert(false, 'obj not jsonable');
   return '$obj';
 }
 
