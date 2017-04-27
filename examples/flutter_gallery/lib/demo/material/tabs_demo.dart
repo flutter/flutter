@@ -45,12 +45,6 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
       title: 'Green comfort chair',
       imageAsset: 'packages/flutter_gallery_assets/shrine/products/chair.png',
     ),
-  ],
-  new _Page(label: 'RIGHT'): <_CardData>[
-    const _CardData(
-      title: 'Beachball',
-      imageAsset: 'packages/flutter_gallery_assets/shrine/products/beachball.png',
-    ),
     const _CardData(
       title: 'Old Binoculars',
       imageAsset: 'packages/flutter_gallery_assets/shrine/products/binoculars.png',
@@ -70,6 +64,12 @@ final Map<_Page, List<_CardData>> _allPages = <_Page, List<_CardData>>{
     const _CardData(
       title: 'Perfect Goldfish Bowl',
       imageAsset: 'packages/flutter_gallery_assets/shrine/products/fish_bowl.png',
+    ),
+  ],
+  new _Page(label: 'RIGHT'): <_CardData>[
+    const _CardData(
+      title: 'Beachball',
+      imageAsset: 'packages/flutter_gallery_assets/shrine/products/beachball.png',
     ),
   ],
 };
@@ -119,25 +119,34 @@ class TabsDemo extends StatelessWidget {
     return new DefaultTabController(
       length: _allPages.length,
       child: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('Tabs and scrolling'),
-          bottom: new TabBar(
-            tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+        body: new NestedScrollView(
+          headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+            return <Widget>[
+              new SliverAppBar(
+                title: const Text('Tabs and scrolling'),
+                pinned: true,
+                expandedHeight: 150.0,
+                forceElevated: innerBoxIsScrolled,
+                bottom: new TabBar(
+                  tabs: _allPages.keys.map((_Page page) => new Tab(text: page.label)).toList(),
+                ),
+              ),
+            ];
+          },
+          body: new TabBarView(
+            children: _allPages.keys.map((_Page page) {
+              return new ListView(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                itemExtent: _CardDataItem.height,
+                children: _allPages[page].map((_CardData data) {
+                  return new Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: new _CardDataItem(page: page, data: data),
+                  );
+                }).toList(),
+              );
+            }).toList(),
           ),
-        ),
-        body: new TabBarView(
-          children: _allPages.keys.map((_Page page) {
-            return new ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              itemExtent: _CardDataItem.height,
-              children: _allPages[page].map((_CardData data) {
-                return new Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: new _CardDataItem(page: page, data: data),
-                );
-              }).toList(),
-            );
-          }).toList(),
         ),
       ),
     );
