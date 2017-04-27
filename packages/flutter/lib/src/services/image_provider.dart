@@ -311,7 +311,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 });
+  const NetworkImage(this.url, { this.scale: 1.0 }) : assert(url != null);
 
   /// The URL from which the image will be fetched.
   final String url;

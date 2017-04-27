@@ -16,6 +16,7 @@ import '../device.dart';
 import '../flx.dart' as flx;
 import '../fuchsia/fuchsia_device.dart';
 import '../globals.dart';
+import '../resident_runner.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
@@ -112,18 +113,21 @@ class FuchsiaReloadCommand extends FlutterCommand {
     final List<String> fullAddresses = targetPorts.map(
       (int p) => '$_address:$p'
     ).toList();
+    final List<Uri> observatoryUris = fullAddresses.map(
+      (String a) => Uri.parse('http://$a')
+    ).toList();
     final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0]);
+    final FlutterDevice flutterDevice = new FlutterDevice(device);
+    flutterDevice.observatoryUris = observatoryUris;
     final HotRunner hotRunner = new HotRunner(
-      device,
+      <FlutterDevice>[flutterDevice],
       debuggingOptions: new DebuggingOptions.enabled(getBuildMode()),
       target: _target,
       projectRootPath: _fuchsiaProjectPath,
       packagesFilePath: _dotPackagesPath
     );
-    final List<Uri> observatoryUris =
-      fullAddresses.map((String a) => Uri.parse('http://$a')).toList();
     printStatus('Connecting to $_binaryName');
-    await hotRunner.attach(observatoryUris, isolateFilter: isolateName);
+    await hotRunner.attach(viewFilter: isolateName);
   }
 
   // A cache of VMService connections.
@@ -151,12 +155,12 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 
   // Find ports where there is a view isolate with the given name
-  Future<List<int>> _filterPorts(List<int> ports, String isolateFilter) async {
+  Future<List<int>> _filterPorts(List<int> ports, String viewFilter) async {
     final List<int> result = <int>[];
     for (FlutterView v in await _getViews(ports)) {
       final Uri addr = v.owner.vmService.httpAddress;
       printTrace('At $addr, found view: ${v.uiIsolate.name}');
-      if (v.uiIsolate.name.indexOf(isolateFilter) == 0)
+      if (v.uiIsolate.name.indexOf(viewFilter) == 0)
         result.add(addr.port);
     }
     return result;

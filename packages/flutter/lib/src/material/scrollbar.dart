@@ -43,25 +43,25 @@ class Scrollbar extends StatefulWidget {
 }
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
-  _ScrollbarController _controller;
+  _ScrollbarPainter _painter;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _controller ??= new _ScrollbarController(this);
-    _controller.color = Theme.of(context).highlightColor;
+    _painter ??= new _ScrollbarPainter(this);
+    _painter.color = Theme.of(context).highlightColor;
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification)
-      _controller.update(notification.metrics, notification.metrics.axisDirection);
+      _painter.update(notification.metrics, notification.metrics.axisDirection);
     return false;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _painter.dispose();
     super.dispose();
   }
 
@@ -73,7 +73,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
       // boundaries when the scroll bars are invisible.
       child: new RepaintBoundary(
         child: new CustomPaint(
-          foregroundPainter: new _ScrollbarPainter(_controller),
+          foregroundPainter: _painter,
           child: new RepaintBoundary(
             child: widget.child,
           ),
@@ -83,8 +83,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   }
 }
 
-class _ScrollbarController extends ChangeNotifier {
-  _ScrollbarController(TickerProvider vsync) {
+class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
+  _ScrollbarPainter(TickerProvider vsync) {
     assert(vsync != null);
     _fadeController = new AnimationController(duration: _kThumbFadeDuration, vsync: vsync);
     _opacity = new CurvedAnimation(parent: _fadeController, curve: Curves.fastOutSlowIn)
@@ -161,6 +161,7 @@ class _ScrollbarController extends ChangeNotifier {
     painter(canvas, size, thumbOffset, thumbExtent);
   }
 
+  @override
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null || _lastMetrics == null || _opacity.value == 0.0)
       return;
@@ -179,20 +180,10 @@ class _ScrollbarController extends ChangeNotifier {
         break;
     }
   }
-}
-
-class _ScrollbarPainter extends CustomPainter {
-  _ScrollbarPainter(this.controller) : super(repaint: controller);
-
-  final _ScrollbarController controller;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    controller.paint(canvas, size);
-  }
+  bool hitTest(Offset position) => null;
 
   @override
-  bool shouldRepaint(_ScrollbarPainter oldDelegate) {
-    return oldDelegate.controller != controller;
-  }
+  bool shouldRepaint(_ScrollbarPainter oldDelegate) => false;
 }

@@ -11,6 +11,8 @@ void main() {
   );
 }
 
+enum ScrollMode { complex, tile }
+
 class ComplexLayoutApp extends StatefulWidget {
   @override
   ComplexLayoutAppState createState() => new ComplexLayoutAppState();
@@ -24,8 +26,7 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     return new MaterialApp(
       theme: lightTheme ? new ThemeData.light() : new ThemeData.dark(),
       title: 'Advanced Layout',
-      home: const ComplexLayout()
-    );
+      home: scrollMode == ScrollMode.complex ? const ComplexLayout() : const TileScrollLayout());
   }
 
   bool _lightTheme = true;
@@ -36,10 +37,44 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     });
   }
 
+  ScrollMode _scrollMode = ScrollMode.complex;
+  ScrollMode get scrollMode => _scrollMode;
+  set scrollMode(ScrollMode mode) {
+    setState(() {
+      _scrollMode = mode;
+    });
+  }
+
   void toggleAnimationSpeed() {
     setState(() {
       timeDilation = (timeDilation != 1.0) ? 1.0 : 5.0;
     });
+  }
+}
+
+class TileScrollLayout extends StatelessWidget {
+  const TileScrollLayout({ Key key }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(title: const Text('Tile Scrolling Layout')),
+      body: new ListView.builder(
+        key: const Key('tiles-scroll'),
+        itemCount: 200,
+        itemBuilder: (BuildContext context, int index) {
+          return new Padding(
+            padding:const EdgeInsets.all(5.0),
+            child: new Material(
+              elevation: index % 5 + 1,
+              color: Colors.white,
+              child: new IconBar(),
+            ),
+          );
+        }
+      ),
+      drawer: const GalleryDrawer(),
+    );
   }
 }
 
@@ -73,7 +108,7 @@ class ComplexLayoutState extends State<ComplexLayout> {
         children: <Widget>[
           new Expanded(
             child: new ListView.builder(
-              key: const Key('main-scroll'), // this key is used by the driver test
+              key: const Key('complex-scroll'), // this key is used by the driver test
               itemBuilder: (BuildContext context, int index) {
                 if (index % 2 == 0)
                   return new FancyImageItem(index, key: new ValueKey<int>(index));
@@ -571,12 +606,22 @@ class GalleryDrawer extends StatelessWidget {
     ComplexLayoutApp.of(context).lightTheme = value;
   }
 
+  void _changeScrollMode(BuildContext context, ScrollMode mode) {
+    ComplexLayoutApp.of(context).scrollMode = mode;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
       child: new ListView(
         children: <Widget>[
           new FancyDrawerHeader(),
+          new ListTile(
+            key: const Key('scroll-switcher'),
+            onTap: () { _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex); },
+            trailing: new Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex')
+          ),
           new ListTile(
             leading: const Icon(Icons.brightness_5),
             title: const Text('Light'),

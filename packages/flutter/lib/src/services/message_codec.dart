@@ -7,9 +7,12 @@ import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
+import 'platform_channel.dart';
+
 /// A message encoding/decoding mechanism.
 ///
-/// Both operations throw [FormatException], if conversion fails.
+/// Both operations throw an exception, if conversion fails. Such situations
+/// should be treated as programming errors.
 ///
 /// See also:
 ///
@@ -92,15 +95,7 @@ class MethodCall {
 
 /// A codec for method calls and enveloped results.
 ///
-/// Result envelopes are binary messages with enough structure that the codec can
-/// distinguish between a successful result and an error. In the former case,
-/// the codec must be able to extract the result payload, possibly `null`. In
-/// the latter case, the codec must be able to extract an error code string,
-/// a (human-readable) error message string, and a value providing any
-/// additional error details, possibly `null`. These data items are used to
-/// populate a [PlatformException].
-///
-/// All operations throw [FormatException], if conversion fails.
+/// All operations throw an exception, if conversion fails.
 ///
 /// See also:
 ///
@@ -109,7 +104,7 @@ class MethodCall {
 /// * [PlatformEventChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MethodCodec {
-  /// Encodes the specified [methodCall] in binary.
+  /// Encodes the specified [methodCall] into binary.
   ByteData encodeMethodCall(MethodCall methodCall);
 
   /// Decodes the specified [methodCall] from binary.
@@ -139,10 +134,10 @@ abstract class MethodCodec {
 ///
 /// * [MethodCodec], which throws a [PlatformException], if a received result
 ///   envelope represents an error.
-/// * [PlatformMethodChannel.invokeMethod], which completes the returned future
+/// * [MethodChannel.invokeMethod], which completes the returned future
 ///   with a [PlatformException], if invoking the platform plugin method
 ///   results in an error envelope.
-/// * [PlatformEventChannel.receiveBroadcastStream], which emits
+/// * [EventChannel.receiveBroadcastStream], which emits
 ///   [PlatformException]s as error events, whenever an event received from the
 ///   platform plugin is wrapped in an error envelope.
 class PlatformException implements Exception {
@@ -175,9 +170,11 @@ class PlatformException implements Exception {
 ///
 /// See also:
 ///
-/// * [PlatformMethodChannel.invokeMethod], which completes the returned future
+/// * [MethodChannel.invokeMethod], which completes the returned future
 ///   with a [MissingPluginException], if no plugin handler for the method call
 ///   was found.
+/// * [OptionalMethodChannel.invokeMethod], which completes the returned future
+///   with `null`, if no plugin handler for the method call was found.
 class MissingPluginException implements Exception {
   /// Creates a [MissingPluginException] with an optional human-readable
   /// error message.
