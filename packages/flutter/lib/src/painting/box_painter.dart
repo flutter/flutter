@@ -686,7 +686,7 @@ class LinearGradient extends Gradient {
   LinearGradient scale(double factor) {
     return new LinearGradient(
       begin: begin,
-      end: begin + (end - begin) * factor,
+      end: end,
       colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
       stops: stops,
       tileMode: tileMode,
@@ -696,8 +696,8 @@ class LinearGradient extends Gradient {
   /// Linearly interpolate between two [LinearGradient]s.
   ///
   /// If either gradient is null, this function linearly interpolates from a
-  /// a gradient that matches the other gradient in stops and tileMode but 
-  /// a collapsed begin and end and with the same colors but transparent.
+  /// a gradient that matches the other gradient in begin, end, stops and 
+  /// tileMode and with the same colors but transparent.
   static LinearGradient lerp(LinearGradient a, LinearGradient b, double t) {
     if (a == null && b == null)
       return null;

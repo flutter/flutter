@@ -91,8 +91,7 @@ void main() {
 
     expect(actual, const LinearGradient(
       begin: FractionalOffset.bottomRight,
-      // No change on y axis since begin.y == end.y in the non-null gradient.
-      end: const FractionalOffset(0.925, 1.0),
+      end: const FractionalOffset(0.7, 1.0),
       colors: const <Color>[
         const Color(0x00FFFFFF),
         const Color(0x04777777),
