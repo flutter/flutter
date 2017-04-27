@@ -19,9 +19,7 @@ void main() {
           },
           child: new Container(
             height: 200.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
             child: new Text(state),
           ),
         );
@@ -51,9 +49,7 @@ void main() {
         children: kStates.take(n).map<Widget>((String state) {
           return new Container(
             height: 200.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
             child: new Text(state),
           );
         }).toList()
@@ -87,9 +83,7 @@ void main() {
                 },
                 child: new Container(
                   height: 200.0,
-                  decoration: const BoxDecoration(
-                    backgroundColor: const Color(0xFF0000FF),
-                  ),
+                  color: const Color(0xFF0000FF),
                   child: new Text(state),
                 ),
               );

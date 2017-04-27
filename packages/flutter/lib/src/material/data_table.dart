@@ -499,7 +499,7 @@ class DataTable extends StatelessWidget {
     final BoxDecoration _kSelectedDecoration = new BoxDecoration(
       border: new Border(bottom: new BorderSide(color: theme.dividerColor)),
       // The backgroundColor has to be transparent so you can see the ink on the material
-      backgroundColor: (Theme.of(context).brightness == Brightness.light) ? _kGrey100Opacity : _kGrey300Opacity
+      color: (Theme.of(context).brightness == Brightness.light) ? _kGrey100Opacity : _kGrey300Opacity
     );
     final BoxDecoration _kUnselectedDecoration = new BoxDecoration(
       border: new Border(bottom: new BorderSide(color: theme.dividerColor))

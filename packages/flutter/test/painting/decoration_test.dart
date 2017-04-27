@@ -52,12 +52,12 @@ class AsyncTestImageProvider extends ImageProvider<int> {
   }
 }
 
-class BackgroundImageProvider extends ImageProvider<BackgroundImageProvider> {
+class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
 
   @override
-  Future<BackgroundImageProvider> obtainKey(ImageConfiguration configuration) {
-    return new SynchronousFuture<BackgroundImageProvider>(this);
+  Future<DelayedImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<DelayedImageProvider>(this);
   }
 
   @override
@@ -66,7 +66,7 @@ class BackgroundImageProvider extends ImageProvider<BackgroundImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(BackgroundImageProvider key) {
+  ImageStreamCompleter load(DelayedImageProvider key) {
     return new OneFrameImageStreamCompleter(_completer.future);
   }
 
@@ -91,24 +91,24 @@ class TestImage extends ui.Image {
 
 void main() {
   test("Decoration.lerp()", () {
-    final BoxDecoration a = const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF));
-    final BoxDecoration b = const BoxDecoration(backgroundColor: const Color(0x00000000));
+    final BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
+    final BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));
 
     BoxDecoration c = Decoration.lerp(a, b, 0.0);
-    expect(c.backgroundColor, equals(a.backgroundColor));
+    expect(c.color, equals(a.color));
 
     c = Decoration.lerp(a, b, 0.25);
-    expect(c.backgroundColor, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
+    expect(c.color, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
 
     c = Decoration.lerp(a, b, 1.0);
-    expect(c.backgroundColor, equals(b.backgroundColor));
+    expect(c.color, equals(b.color));
   });
 
   test("BoxDecorationImageListenerSync", () {
     final ImageProvider imageProvider = new SynchronousTestImageProvider();
-    final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+    final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
 
-    final BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
+    final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
     bool onChangedCalled = false;
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
       onChangedCalled = true;
@@ -125,9 +125,9 @@ void main() {
   test("BoxDecorationImageListenerAsync", () {
     new FakeAsync().run((FakeAsync async) {
       final ImageProvider imageProvider = new AsyncTestImageProvider();
-      final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+      final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
 
-      final BoxDecoration boxDecoration = new BoxDecoration(backgroundImage: backgroundImage);
+      final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
       bool onChangedCalled = false;
       final BoxPainter boxPainter = boxDecoration.createBoxPainter(() {
         onChangedCalled = true;
@@ -149,13 +149,13 @@ void main() {
   test("BoxDecoration backgroundImage clip", () {
     void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
       new FakeAsync().run((FakeAsync async) {
-        final BackgroundImageProvider imageProvider = new BackgroundImageProvider();
-        final BackgroundImage backgroundImage = new BackgroundImage(image: imageProvider);
+        final DelayedImageProvider imageProvider = new DelayedImageProvider();
+        final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
 
         final BoxDecoration boxDecoration = new BoxDecoration(
           shape: shape,
           borderRadius: borderRadius,
-          backgroundImage: backgroundImage,
+          image: backgroundImage,
         );
 
         final List<Invocation> invocations = <Invocation>[];
@@ -168,7 +168,7 @@ void main() {
           onChangedCalled = true;
         });
 
-        // _BoxDecorationPainter._paintBackgroundImage() resolves the background
+        // _BoxDecorationPainter._paintDecorationImage() resolves the background
         // image and adds a listener to the resolved image stream.
         boxPainter.paint(canvas, Offset.zero, imageConfiguration);
         imageProvider.complete();

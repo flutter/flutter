@@ -225,9 +225,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
     return new Container(
       width: visible ? 1.0 : 0.0,
       height: 16.0,
-      decoration: new BoxDecoration(
-        backgroundColor: Colors.grey.shade400,
-      ),
+      color: Colors.grey.shade400,
     );
   }
 
@@ -276,7 +274,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
         curve: Curves.fastOutSlowIn,
         duration: kThemeAnimationDuration,
         decoration: new BoxDecoration(
-          backgroundColor: _circleColor(index),
+          color: _circleColor(index),
           shape: BoxShape.circle,
         ),
         child: new Center(
@@ -484,9 +482,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               child: new SizedBox(
                 width: _isLast(index) ? 0.0 : 1.0,
                 child: new Container(
-                  decoration: new BoxDecoration(
-                    backgroundColor: Colors.grey.shade400,
-                  ),
+                  color: Colors.grey.shade400,
                 ),
               ),
             ),
@@ -585,9 +581,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
             child: new Container(
               margin: const EdgeInsets.symmetric(horizontal: 8.0),
               height: 1.0,
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.grey.shade400,
-              ),
+              color: Colors.grey.shade400,
             ),
           ),
         );

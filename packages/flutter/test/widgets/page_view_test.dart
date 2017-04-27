@@ -22,9 +22,7 @@ void main() {
           },
           child: new Container(
             height: 200.0,
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
             child: new Text(state),
           ),
         );
@@ -83,9 +81,7 @@ void main() {
         children: new List<Widget>.generate(10, (int i) {
           return new Container(
             key: new ValueKey<int>(i),
-            decoration: const BoxDecoration(
-              backgroundColor: const Color(0xFF0000FF),
-            ),
+            color: const Color(0xFF0000FF),
           );
         }),
       ),

@@ -210,9 +210,7 @@ void main() {
               new Container(
                 width: 2000.0,
                 height: 2000.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00),
-                ),
+                color: const Color(0xFF00FF00),
               ),
             ],
           ),

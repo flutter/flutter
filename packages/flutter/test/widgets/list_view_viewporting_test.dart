@@ -201,9 +201,7 @@ void main() {
         key: new ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        decoration: new BoxDecoration(
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
+        color: Theme.of(context).primaryColor,
         child: new Text('$index'),
       );
     };
@@ -223,7 +221,7 @@ void main() {
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
     BoxDecoration decoraton = widget.decoration;
-    expect(decoraton.backgroundColor, equals(Colors.blue[500]));
+    expect(decoraton.color, equals(Colors.blue[500]));
 
     setState(() {
       themeData = new ThemeData(primarySwatch: Colors.green);
@@ -233,7 +231,7 @@ void main() {
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
     decoraton = widget.decoration;
-    expect(decoraton.backgroundColor, equals(Colors.green[500]));
+    expect(decoraton.color, equals(Colors.green[500]));
   });
 
   testWidgets('ListView padding', (WidgetTester tester) async {
@@ -242,9 +240,7 @@ void main() {
         key: new ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        decoration: new BoxDecoration(
-          backgroundColor: Colors.green[500]
-        ),
+        color: Colors.green[500],
         child: new Text('$index'),
       );
     };

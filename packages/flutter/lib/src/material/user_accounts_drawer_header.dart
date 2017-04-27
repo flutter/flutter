@@ -183,7 +183,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
     assert(debugCheckHasMaterial(context));
     return new DrawerHeader(
       decoration: widget.decoration ?? new BoxDecoration(
-        backgroundColor: Theme.of(context).primaryColor,
+        color: Theme.of(context).primaryColor,
       ),
       margin: widget.margin,
       child: new Column(

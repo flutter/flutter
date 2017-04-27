@@ -22,9 +22,7 @@ void main() {
         didEndDrag = true;
       },
       child: new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
-        )
+        color: const Color(0xFF00FF00),
       )
     );
 
@@ -69,9 +67,7 @@ void main() {
       onHorizontalDragUpdate: (DragUpdateDetails details) { fail("gesture should not match"); },
       onHorizontalDragEnd: (DragEndDetails details) { fail("gesture should not match"); },
       child: new Container(
-        decoration: const BoxDecoration(
-          backgroundColor: const Color(0xFF00FF00)
-        )
+        color: const Color(0xFF00FF00),
       )
     );
     await tester.pumpWidget(widget);
@@ -107,9 +103,7 @@ void main() {
           didEndPan = true;
         },
         child: new Container(
-          decoration: const BoxDecoration(
-            backgroundColor: const Color(0xFF00FF00)
-          )
+          color: const Color(0xFF00FF00),
         )
       )
     );
@@ -141,9 +135,7 @@ void main() {
               child: new Container(
                 width: 100.0,
                 height: 100.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFF00FF00)
-                )
+                color: const Color(0xFF00FF00),
               )
             ),
             new Container(

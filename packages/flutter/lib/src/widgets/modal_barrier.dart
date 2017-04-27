@@ -38,7 +38,7 @@ class ModalBarrier extends StatelessWidget {
           constraints: const BoxConstraints.expand(),
           child: color == null ? null : new DecoratedBox(
             decoration: new BoxDecoration(
-              backgroundColor: color
+              color: color
             )
           )
         )

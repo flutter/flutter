@@ -16,7 +16,7 @@ void main() {
         decoration: new BoxDecoration(
           shape: BoxShape.circle,
           border: new Border.all(width: 10.0, color: const Color(0x80FF00FF)),
-          backgroundColor: Colors.teal[600]
+          color: Colors.teal[600]
         )
       )
     );

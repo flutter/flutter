@@ -269,9 +269,7 @@ void main() {
         home: new Scaffold(
           body: new SingleChildScrollView(
             child: new Container(
-              decoration: new BoxDecoration(
-                backgroundColor: Colors.amber[500],
-              ),
+              color: Colors.amber[500],
               height: 5000.0,
               child: const Text('body'),
             ),

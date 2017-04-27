@@ -7,15 +7,15 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 final BoxDecoration kBoxDecorationA = const BoxDecoration(
-  backgroundColor: const Color(0xFFFF0000)
+  color: const Color(0xFFFF0000),
 );
 
 final BoxDecoration kBoxDecorationB = const BoxDecoration(
-  backgroundColor: const Color(0xFF00FF00)
+  color: const Color(0xFF00FF00),
 );
 
 final BoxDecoration kBoxDecorationC = const BoxDecoration(
-  backgroundColor: const Color(0xFF0000FF)
+  color: const Color(0xFF0000FF),
 );
 
 class TestBuildCounter extends StatelessWidget {

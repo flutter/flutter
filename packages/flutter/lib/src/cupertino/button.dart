@@ -177,7 +177,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             child: new DecoratedBox(
               decoration: new BoxDecoration(
                 borderRadius: const BorderRadius.all(const Radius.circular(8.0)),
-                backgroundColor: backgroundColor != null && !enabled
+                color: backgroundColor != null && !enabled
                     ? _kDisabledBackground
                     : backgroundColor,
               ),

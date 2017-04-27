@@ -136,7 +136,7 @@ void main() {
       '/': (_) => new Scaffold(
         key: containerKey1,
         body: new Container(
-          decoration: const BoxDecoration(backgroundColor: const Color(0xff00ffff)),
+          color: const Color(0xff00ffff),
           child: const Hero(
             tag: kHeroTag,
             child: const Text('Home')
@@ -147,7 +147,7 @@ void main() {
         key: containerKey2,
         body: new Container(
           padding: const EdgeInsets.all(100.0),
-          decoration: const BoxDecoration(backgroundColor: const Color(0xffff00ff)),
+          color: const Color(0xffff00ff),
           child: const Hero(
             tag: kHeroTag,
             child: const Text('Settings')

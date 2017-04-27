@@ -19,18 +19,18 @@ void main() {
     final RenderFlex row = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
     style = const TextStyle(fontSize: 15.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
-      decoration: const BoxDecoration(backgroundColor: const Color(0x7FFFCCCC)),
+      decoration: const BoxDecoration(color: const Color(0x7FFFCCCC)),
       child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo'))
     ));
     style = const TextStyle(fontSize: 10.0, color: const Color(0xFF000000));
     row.add(new RenderDecoratedBox(
-      decoration: const BoxDecoration(backgroundColor: const Color(0x7FCCFFCC)),
+      decoration: const BoxDecoration(color: const Color(0x7FCCFFCC)),
       child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo'))
     ));
     final RenderFlex subrow = new RenderFlex(crossAxisAlignment: crossAxisAlignment, textBaseline: TextBaseline.alphabetic);
     style = const TextStyle(fontSize: 25.0, color: const Color(0xFF000000));
     subrow.add(new RenderDecoratedBox(
-      decoration: const BoxDecoration(backgroundColor: const Color(0x7FCCCCFF)),
+      decoration: const BoxDecoration(color: const Color(0x7FCCCCFF)),
       child: new RenderParagraph(new TextSpan(style: style, text: 'foo foo foo foo'))
     ));
     subrow.add(new RenderSolidColorBox(const Color(0x7FCCFFFF), desiredSize: const Size(30.0, 40.0)));
@@ -67,7 +67,7 @@ void main() {
   addJustificationRow(MainAxisAlignment.spaceAround);
 
   final RenderDecoratedBox root = new RenderDecoratedBox(
-    decoration: const BoxDecoration(backgroundColor: const Color(0xFFFFFFFF)),
+    decoration: const BoxDecoration(color: const Color(0xFFFFFFFF)),
     child: new RenderPadding(child: table, padding: const EdgeInsets.symmetric(vertical: 50.0))
   );
 

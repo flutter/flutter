@@ -192,9 +192,7 @@ void main() {
                           key: const ValueKey<int>(0),
                           width: 100.0,
                           height: 100.0,
-                          decoration: const BoxDecoration(
-                            backgroundColor: const Color(0xFFFFFFFF),
-                          ),
+                          color: const Color(0xFFFFFFFF),
                         ),
                       ),
                     ),
@@ -444,9 +442,7 @@ void main() {
                         key: const ValueKey<int>(0),
                         width: 100.0,
                         height: 100.0,
-                        decoration: const BoxDecoration(
-                          backgroundColor: const Color(0xFFFFFFFF),
-                        ),
+                        color: const Color(0xFFFFFFFF),
                       ),
                     ),
                   ),

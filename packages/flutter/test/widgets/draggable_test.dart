@@ -993,16 +993,12 @@ void main() {
             },
             child: new Draggable<dynamic>(
               child: new Container(
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFFFFFF00)
-                )
+                color: const Color(0xFFFFFF00),
               ),
               feedback: new Container(
                 width: 100.0,
                 height: 100.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFFFF0000)
-                )
+                color: const Color(0xFFFF0000),
               )
             )
           )
@@ -1028,16 +1024,12 @@ void main() {
             onTap: () { /* registers a tap recognizer */ },
             child: new Draggable<dynamic>(
               child: new Container(
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFFFFFF00)
-                )
+                color: const Color(0xFFFFFF00),
               ),
               feedback: new Container(
                 width: 100.0,
                 height: 100.0,
-                decoration: const BoxDecoration(
-                  backgroundColor: const Color(0xFFFF0000)
-                )
+                color: const Color(0xFFFF0000),
               )
             )
           )
