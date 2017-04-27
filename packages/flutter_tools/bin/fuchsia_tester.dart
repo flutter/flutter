@@ -28,12 +28,10 @@ import '../lib/src/usage.dart';
 const String _kOptionPackages = "packages";
 const String _kOptionShell = "shell";
 const String _kOptionTestDirectory = "test-directory";
-const String _kOptionFlutterRoot = "flutter-root";
 const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionShell,
   _kOptionTestDirectory,
-  _kOptionFlutterRoot,
 ];
 
 Future<Null> main(List<String> args) async {
@@ -65,40 +63,41 @@ Future<Null> run(List<String> args) async {
   final ArgParser parser = new ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
     ..addOption(_kOptionShell, help: 'The Flutter shell binary')
-    ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
-    ..addOption(_kOptionFlutterRoot, help: 'Flutter root');
+    ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests');
   final ArgResults argResults = parser.parse(args);
   if (_kRequiredOptions
       .any((String option) => !argResults.options.contains(option))) {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
-  // TODO(pylaligand): use a temp directory instead.
-  Cache.flutterRoot = argResults[_kOptionFlutterRoot];
-  final Directory testDirectory =
-      fs.directory(argResults[_kOptionTestDirectory]);
-  final Iterable<String> tests = _findTests(testDirectory);
+  final Directory tempDirectory =
+      fs.systemTempDirectory.createTempSync('fuchsia_tester');
+  try {
+    Cache.flutterRoot = tempDirectory.path;
+    final Directory testDirectory =
+        fs.directory(argResults[_kOptionTestDirectory]);
+    final Iterable<String> tests = _findTests(testDirectory);
 
-  final List<String> testArgs = <String>[];
-  testArgs.add('--');
-  testArgs.addAll(tests);
+    final List<String> testArgs = <String>[];
+    testArgs.add('--');
+    testArgs.addAll(tests);
 
-  final String shellPath = argResults[_kOptionShell];
-  if (!fs.isFileSync(shellPath)) {
-    throwToolExit('Cannot find Flutter shell at $shellPath');
-  }
-  loader.installHook(
-    shellPath: shellPath,
-    debuggerMode: false,
-  );
+    final String shellPath = argResults[_kOptionShell];
+    if (!fs.isFileSync(shellPath)) {
+      throwToolExit('Cannot find Flutter shell at $shellPath');
+    }
+    loader.installHook(
+      shellPath: shellPath,
+      debuggerMode: false,
+    );
 
-  PackageMap.globalPackagesPath =
-      fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
-  fs.currentDirectory = testDirectory;
+    PackageMap.globalPackagesPath =
+        fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
+    fs.currentDirectory = testDirectory;
 
-  await test.main(testArgs);
-
-  if (exitCode != 0) {
+    await test.main(testArgs);
     exit(exitCode);
+  } finally {
+    tempDirectory.deleteSync(recursive: true);
   }
 }
