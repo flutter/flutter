@@ -78,8 +78,6 @@ template("flutter_content_handler") {
       if (flutter_use_vulkan_native_surface) {
         defines += [ "FLUTTER_USE_VULKAN_NATIVE_SURFACE=1" ]
         sources += [
-          "direct_input.cc",
-          "direct_input.h",
           "vulkan_native_rasterizer.cc",
           "vulkan_native_rasterizer.h",
         ]

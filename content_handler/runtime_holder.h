@@ -24,10 +24,6 @@
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
 
-#if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
-#include "flutter/content_handler/direct_input.h"
-#endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
-
 namespace flutter_runner {
 class Rasterizer;
 
@@ -93,9 +89,6 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   mozart::ViewManagerPtr view_manager_;
   fidl::Binding<mozart::ViewListener> view_listener_binding_;
   fidl::Binding<mozart::InputListener> input_listener_binding_;
-#if FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
-  std::unique_ptr<DirectInput> direct_input_;
-#endif  // FLUTTER_ENABLE_VULKAN && FLUTTER_USE_VULKAN_NATIVE_SURFACE
   mozart::InputConnectionPtr input_connection_;
   mozart::ViewPtr view_;
   mozart::ViewPropertiesPtr view_properties_;

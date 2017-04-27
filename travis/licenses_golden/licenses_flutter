@@ -1357,8 +1357,6 @@ ORIGIN: ../../../flutter/content_handler/content_handler_thread.cc + ../../../LI
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/content_handler/content_handler_thread.cc
 FILE: ../../../flutter/content_handler/content_handler_thread.h
-FILE: ../../../flutter/content_handler/direct_input.cc
-FILE: ../../../flutter/content_handler/direct_input.h
 FILE: ../../../flutter/content_handler/service_protocol_hooks.cc
 FILE: ../../../flutter/content_handler/service_protocol_hooks.h
 FILE: ../../../flutter/content_handler/software_rasterizer.cc
