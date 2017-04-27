@@ -211,6 +211,7 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
     timeout_in_minutes: 30
+    flaky: true
 
   flutter_view_ios__start_up:
     description: >
