@@ -169,8 +169,8 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 
   NSInteger selectionBase = [state[@"selectionBase"] intValue];
   NSInteger selectionExtent = [state[@"selectionExtent"] intValue];
-  NSUInteger start = MAX(0, MIN(selectionBase, selectionExtent));
-  NSUInteger end = MAX(0, MAX(selectionBase, selectionExtent));
+  NSUInteger start = MIN(MAX(0, MIN(selectionBase, selectionExtent)), (NSInteger)self.text.length);
+  NSUInteger end = MIN(MAX(0, MAX(selectionBase, selectionExtent)), (NSInteger)self.text.length);
   NSRange selectedRange = NSMakeRange(start, end - start);
   [self setSelectedTextRange:[FlutterTextRange rangeWithNSRange:selectedRange]
           updateEditingState:NO];
