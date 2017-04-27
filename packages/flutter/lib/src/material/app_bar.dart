@@ -341,6 +341,7 @@ class _AppBarState extends State<AppBar> {
 
   @override
   Widget build(BuildContext context) {
+    assert(!widget.primary || debugCheckHasMediaQuery(context));
     final ThemeData themeData = Theme.of(context);
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
@@ -906,6 +907,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    assert(!widget.primary || debugCheckHasMediaQuery(context));
     final double topPadding = widget.primary ? MediaQuery.of(context).padding.top : 0.0;
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;

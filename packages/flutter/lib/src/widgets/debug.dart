@@ -5,7 +5,9 @@
 import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
+import 'media_query.dart';
 import 'table.dart';
 
 // Any changes to this file should be reflected in the debugAssertAllWidgetVarsUnset()
@@ -146,6 +148,39 @@ bool debugCheckHasTable(BuildContext context) {
         '  ${context.widget}\n'
         'The ownership chain for the affected widget is:\n'
         '  ${element.debugGetCreatorChain(10)}'
+      );
+    }
+    return true;
+  });
+  return true;
+}
+
+/// Asserts that the given context has a [MediaQuery] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's [build] method:
+///
+/// ```dart
+/// assert(debugCheckHasMediaQuery(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasMediaQuery(BuildContext context) {
+  assert(() {
+    if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
+      final Element element = context;
+      throw new FlutterError(
+        'No MediaQuery widget found.\n'
+        '${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.\n'
+        'The specific widget that could not find a MediaQuery ancestor was:\n'
+        '  ${context.widget}\n'
+        'The ownership chain for the affected widget is:\n'
+        '  ${element.debugGetCreatorChain(10)}\n'
+        'Typically, the MediaQuery widget is introduced by the MaterialApp or '
+        'WidgetsApp widget at the top of your application widget tree.'
       );
     }
     return true;

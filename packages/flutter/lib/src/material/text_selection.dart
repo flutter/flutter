@@ -151,6 +151,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   @override
   Widget buildToolbar(
       BuildContext context, Offset position, TextSelectionDelegate delegate) {
+    assert(debugCheckHasMediaQuery(context));
     final Size screenSize = MediaQuery.of(context).size;
     return new ConstrainedBox(
       constraints: new BoxConstraints.loose(screenSize),

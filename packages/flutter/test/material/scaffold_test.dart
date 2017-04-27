@@ -11,9 +11,16 @@ void main() {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Scaffold(
       appBar: new AppBar(title: const Text('Title')),
-      body: new Container(key: bodyKey)
+      body: new Container(key: bodyKey),
     ));
+    expect(tester.takeException(), isFlutterError);
 
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        appBar: new AppBar(title: const Text('Title')),
+        body: new Container(key: bodyKey),
+      ),
+    ));
     RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
@@ -82,37 +89,37 @@ void main() {
   });
 
   testWidgets('Floating action animation', (WidgetTester tester) async {
-    await tester.pumpWidget(const Scaffold(
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
         child: const Text("1")
       )
-    ));
+    )));
 
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(const Scaffold(
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('two'),
         onPressed: null,
         child: const Text("2")
       )
-    ));
+    )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
     await tester.pumpWidget(new Container());
     expect(tester.binding.transientCallbackCount, 0);
-    await tester.pumpWidget(const Scaffold());
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold()));
     expect(tester.binding.transientCallbackCount, 0);
 
-    await tester.pumpWidget(const Scaffold(
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       floatingActionButton: const FloatingActionButton(
         key: const Key('one'),
         onPressed: null,
         child: const Text("1")
       )
-    ));
+    )));
 
     expect(tester.binding.transientCallbackCount, greaterThan(0));
   });
@@ -367,7 +374,14 @@ void main() {
     testWidgets('body size with container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new Container(key: testKey))
+        new MediaQuery(
+          data: const MediaQueryData(),
+          child: new Scaffold(
+            body: new Container(
+              key: testKey,
+            ),
+          ),
+        ),
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
@@ -376,7 +390,15 @@ void main() {
     testWidgets('body size with sized container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new Container(key: testKey, height: 100.0))
+        new MediaQuery(
+          data: const MediaQueryData(),
+          child: new Scaffold(
+            body: new Container(
+              key: testKey,
+              height: 100.0,
+            ),
+          ),
+        ),
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 100.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
@@ -385,7 +407,16 @@ void main() {
     testWidgets('body size with centered container', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new Center(child: new Container(key: testKey)))
+        new MediaQuery(
+          data: const MediaQueryData(),
+          child: new Scaffold(
+            body: new Center(
+              child: new Container(
+                key: testKey,
+              ),
+            ),
+          ),
+        ),
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(800.0, 600.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
@@ -394,7 +425,16 @@ void main() {
     testWidgets('body size with button', (WidgetTester tester) async {
       final Key testKey = new UniqueKey();
       await tester.pumpWidget(
-        new Scaffold(body: new FlatButton(key: testKey, onPressed: () { }, child: const Text('')))
+        new MediaQuery(
+          data: const MediaQueryData(),
+          child: new Scaffold(
+            body: new FlatButton(
+              key: testKey,
+              onPressed: () { },
+              child: const Text(''),
+            ),
+          ),
+        ),
       );
       expect(tester.element(find.byKey(testKey)).size, const Size(88.0, 36.0));
       expect(tester.renderObject<RenderBox>(find.byKey(testKey)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));

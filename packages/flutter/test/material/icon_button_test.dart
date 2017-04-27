@@ -172,15 +172,17 @@ void main() {
 
   testWidgets('IconButton AppBar size', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Scaffold(
-        appBar: new AppBar(
-          actions: <Widget>[
-            new IconButton(
-              padding: EdgeInsets.zero,
-              onPressed: mockOnPressedFunction,
-              icon: const Icon(Icons.ac_unit),
-            ),
-          ],
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            actions: <Widget>[
+              new IconButton(
+                padding: EdgeInsets.zero,
+                onPressed: mockOnPressedFunction,
+                icon: const Icon(Icons.ac_unit),
+              ),
+            ],
+          ),
         ),
       ),
     );

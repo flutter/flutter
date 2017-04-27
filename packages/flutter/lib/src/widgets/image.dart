@@ -27,10 +27,10 @@ export 'package:flutter/services.dart' show
 ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size size }) {
   return new ImageConfiguration(
     bundle: DefaultAssetBundle.of(context),
-    devicePixelRatio: MediaQuery.of(context).devicePixelRatio,
+    devicePixelRatio: MediaQuery.of(context, nullOk: true)?.devicePixelRatio ?? 1.0,
     // TODO(ianh): provide the locale
     size: size,
-    platform: Platform.operatingSystem
+    platform: Platform.operatingSystem,
   );
 }
 
