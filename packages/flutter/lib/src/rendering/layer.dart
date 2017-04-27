@@ -657,7 +657,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushPhysicalModel(
       rrect: clipRRect.shift(layerOffset),
-      elevation: elevation,
+      elevation: elevation.toDouble(),
       color: color,
     );
     addChildrenToScene(builder, layerOffset);
