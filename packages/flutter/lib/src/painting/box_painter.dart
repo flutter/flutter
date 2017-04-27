@@ -637,7 +637,10 @@ class LinearGradient extends Gradient {
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp
-  });
+  }) : assert(begin != null),
+       assert(end != null),
+       assert(colors != null),
+       assert(tileMode != null);
 
   /// The offset from coordinate (0.0,0.0) at which stop 0.0 of the
   /// gradient is placed, in a coordinate space that maps the top left
@@ -676,6 +679,54 @@ class LinearGradient extends Gradient {
       begin.withinRect(rect),
       end.withinRect(rect),
       colors, stops, tileMode,
+    );
+  }
+
+  /// Returns a new [LinearGradient] with its properties scaled by the given factor.
+  LinearGradient scale(double factor) {
+    return new LinearGradient(
+      begin: begin,
+      end: end,
+      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
+      stops: stops,
+      tileMode: tileMode,
+    );
+  }
+
+  /// Linearly interpolate between two [LinearGradient]s.
+  ///
+  /// If either gradient is null, this function linearly interpolates from a
+  /// a gradient that matches the other gradient in begin, end, stops and 
+  /// tileMode and with the same colors but transparent.
+  static LinearGradient lerp(LinearGradient a, LinearGradient b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    // Interpolation is only possible when the lengths of colors and stops are
+    // the same or stops is null for one.
+    // TODO(xster): lerp unsimilar LinearGradients in the future by scaling 
+    // lists of LinearGradients. 
+    assert(a.colors.length == b.colors.length);
+    assert(a.stops == null || b.stops == null || a.stops.length == b.stops.length);
+    final List<Color> interpolatedColors = <Color>[];
+    for (int i = 0; i < a.colors.length; i++) 
+      interpolatedColors.add(Color.lerp(a.colors[i], b.colors[i], t));
+    List<double> interpolatedStops;
+    if (a.stops != null && b.stops != null) {
+      for (int i = 0; i < a.stops.length; i++)
+        interpolatedStops.add(ui.lerpDouble(a.stops[i], b.stops[i], t));
+    } else {
+      interpolatedStops = a.stops ?? b.stops;
+    }
+    return new LinearGradient(
+      begin: FractionalOffset.lerp(a.begin, b.begin, t),
+      end: FractionalOffset.lerp(a.end, b.end, t),
+      colors: interpolatedColors,
+      stops: interpolatedStops,
+      tileMode: t < 0.5 ? a.tileMode : b.tileMode,
     );
   }
 
