@@ -88,7 +88,7 @@ class Usage {
     String label,
     }) {
     if (!suppressAnalytics) {
-    _analytics.sendTiming(
+      _analytics.sendTiming(
         variableName, 
         duration.inMilliseconds, 
         category: category,
