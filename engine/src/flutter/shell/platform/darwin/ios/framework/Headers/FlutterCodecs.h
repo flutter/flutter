@@ -40,6 +40,12 @@ FLUTTER_EXPORT
 /**
  A `FlutterMessageCodec` using unencoded binary messages, represented as
  `NSData` instances.
+
+ This codec is guaranteed to be compatible with the corresponding
+ [BinaryCodec](https://docs.flutter.io/flutter/services/BinaryCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
+
+ On the Dart side, messages are represented using `ByteData`.
  */
 FLUTTER_EXPORT
 @interface FlutterBinaryCodec : NSObject<FlutterMessageCodec>
@@ -47,6 +53,10 @@ FLUTTER_EXPORT
 
 /**
  A `FlutterMessageCodec` using UTF-8 encoded `NSString` messages.
+
+ This codec is guaranteed to be compatible with the corresponding
+ [StringCodec](https://docs.flutter.io/flutter/services/StringCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
  */
 FLUTTER_EXPORT
 @interface FlutterStringCodec : NSObject<FlutterMessageCodec>
@@ -55,7 +65,16 @@ FLUTTER_EXPORT
 /**
  A `FlutterMessageCodec` using UTF-8 encoded JSON messages.
 
- Supports the same values as `NSJSONSerialization`.
+ This codec is guaranteed to be compatible with the corresponding
+ [JSONMessageCodec](https://docs.flutter.io/flutter/services/JSONMessageCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
+
+ Supports values accepted by `NSJSONSerialization` plus top-level
+ `nil`, `NSNumber`, and `NSString`.
+
+ On the Dart side, JSON messages are handled by the JSON facilities of the
+ [`dart:convert`](https://api.dartlang.org/stable/dart-convert/JSON-constant.html)
+ package.
  */
 FLUTTER_EXPORT
 @interface FlutterJSONMessageCodec : NSObject<FlutterMessageCodec>
@@ -64,19 +83,29 @@ FLUTTER_EXPORT
 /**
  A `FlutterMessageCodec` using the Flutter standard binary encoding.
 
- The standard encoding is guaranteed to be compatible with the corresponding
- standard codec for PlatformMessageChannels on the Flutter side. These parts
- of the Flutter SDK are evolved synchronously.
+ This codec is guaranteed to be compatible with the corresponding
+ [StandardMessageCodec](https://docs.flutter.io/flutter/services/StandardMessageCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
 
  Supported messages are acyclic values of these forms:
 
  - `nil` or `NSNull`
  - `NSNumber` (including their representation of Boolean values)
  - `FlutterStandardBigInteger`
- - `FlutterStandardTypedData`
  - `NSString`
+ - `FlutterStandardTypedData`
  - `NSArray` of supported values
  - `NSDictionary` with supported keys and values
+
+ On the Dart side, these values are represented as follows:
+
+ - `nil` or `NSNull`: `null`
+ - `NSNumber`: `bool`, `int`, or `double`, depending on the contained value.
+ - `FlutterStandardBigInteger`: `int`
+ - `NSString`: `String`
+ - `FlutterStandardTypedData`: `Uint8List`, `Int32List`, `Int64List`, or `Float64List`
+ - `NSArray`: `List`
+ - `NSDictionary`: `Map`
  */
 FLUTTER_EXPORT
 @interface FlutterStandardMessageCodec : NSObject<FlutterMessageCodec>
@@ -308,7 +337,13 @@ FLUTTER_EXPORT
 
 /**
  A `FlutterMethodCodec` using UTF-8 encoded JSON method calls and result
- envelopes. Values supported as methods arguments and result payloads are
+ envelopes.
+
+ This codec is guaranteed to be compatible with the corresponding
+ [JSONMethodCodec](https://docs.flutter.io/flutter/services/JSONMethodCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
+
+ Values supported as methods arguments and result payloads are
  those supported as top-level or leaf values by `FlutterJSONMessageCodec`.
  */
 FLUTTER_EXPORT
@@ -318,9 +353,9 @@ FLUTTER_EXPORT
 /**
  A `FlutterMethodCodec` using the Flutter standard binary encoding.
 
- The standard codec is guaranteed to be compatible with the corresponding
- standard codec for PlatformMethodChannels on the Flutter side. These parts of
- the Flutter SDK are evolved synchronously.
+ This codec is guaranteed to be compatible with the corresponding
+ [StandardMethodCodec](https://docs.flutter.io/flutter/services/StandardMethodCodec-class.html)
+ on the Dart side. These parts of the Flutter SDK are evolved synchronously.
 
  Values supported as method arguments and result payloads are those supported by
  `FlutterStandardMessageCodec`.

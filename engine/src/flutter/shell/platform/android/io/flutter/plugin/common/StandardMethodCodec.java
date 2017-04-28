@@ -11,15 +11,14 @@ import java.nio.ByteOrder;
 /**
  * A {@link MethodCodec} using the Flutter standard binary encoding.
  *
- * The standard codec is guaranteed to be compatible with the corresponding standard codec for
- * PlatformMethodChannels on the Flutter side. These parts of the Flutter SDK are evolved
- * synchronously.
+ * <p>This codec is guaranteed to be compatible with the corresponding
+ * <a href="https://docs.flutter.io/flutter/services/StandardMethodCodec-class.html">StandardMethodCodec</a>
+ * on the Dart side. These parts of the Flutter SDK are evolved synchronously.</p>
  *
- * Values supported as method arguments and result payloads are those supported by
- * {@link StandardMessageCodec}.
+ * <p>Values supported as method arguments and result payloads are those supported by
+ * {@link StandardMessageCodec}.</p>
  */
 public final class StandardMethodCodec implements MethodCodec {
-    // This codec must match the Dart codec of the same name in package flutter/services.
     public static final StandardMethodCodec INSTANCE = new StandardMethodCodec();
 
     private StandardMethodCodec() {

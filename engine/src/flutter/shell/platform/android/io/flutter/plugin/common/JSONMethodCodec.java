@@ -7,8 +7,13 @@ import org.json.JSONObject;
 
 /**
  * A {@link MethodCodec} using UTF-8 encoded JSON method calls and result envelopes.
- * Values supported as methods arguments and result payloads are those supported by
- * {@link JSONMessageCodec}.
+ *
+ * <p>This codec is guaranteed to be compatible with the corresponding
+ * <a href="https://docs.flutter.io/flutter/services/JSONMethodCodec-class.html">JSONMethodCodec</a>
+ * on the Dart side. These parts of the Flutter SDK are evolved synchronously.</p>
+ *
+ * <p>Values supported as methods arguments and result payloads are those supported by
+ * {@link JSONMessageCodec}.</p>
  */
 public final class JSONMethodCodec implements MethodCodec {
     // This codec must match the Dart codec of the same name in package flutter/services.
