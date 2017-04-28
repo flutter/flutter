@@ -96,6 +96,7 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
+      when(mockDoctor.diagnose()).thenReturn(true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -108,6 +109,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       Clock: () => mockClock,
+      Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
 
