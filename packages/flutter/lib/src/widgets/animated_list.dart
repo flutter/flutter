@@ -19,7 +19,7 @@ typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animatio
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
-const Duration _kDuration = const Duration(milliseconds: 3000);
+const Duration _kDuration = const Duration(milliseconds: 300);
 
 // Incoming and outgoing AnimatedList items.
 class _ActiveItem implements Comparable<_ActiveItem> {
@@ -67,7 +67,6 @@ class AnimatedList extends StatefulWidget {
   final ScrollPhysics physics;
   final bool shrinkWrap;
   final EdgeInsets padding;
-  final double itemExtent;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -214,11 +213,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 
     final AnimationController controller = new AnimationController(duration: duration, vsync: this);
     final _ActiveItem incomingItem = new _ActiveItem.incoming(controller, itemIndex);
-    _incomingItems
-      ..add(incomingItem)
-      ..sort();
-
     setState(() {
+      _incomingItems
+        ..add(incomingItem)
+        ..sort();
       _itemsCount += 1;
     });
 
@@ -251,9 +249,11 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     final AnimationController controller = incomingItem?.controller
       ?? new AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = new _ActiveItem.outgoing(controller, itemIndex, builder);
-    _outgoingItems
-      ..add(outgoingItem)
-      ..sort();
+    setState(() {
+      _outgoingItems
+        ..add(outgoingItem)
+        ..sort();
+    });
 
     controller.reverse().then((Null value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
