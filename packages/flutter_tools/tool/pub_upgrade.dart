@@ -7,8 +7,13 @@ Future<Null> _streamStd(Stream<List<int>> source, Stdout target) => source
     .transform(const LineSplitter())
     .forEach(target.writeln);
 
-Future<Null> main() async {
-  final Process process = await Process.start('pub', <String>[
+Future<Null> main(List<String> args) async {
+  String pub = 'pub';
+  if (args.isNotEmpty) {
+    pub = args.single;
+  }
+
+  final Process process = await Process.start(pub, <String>[
     'upgrade',
     '--verbosity=error'
   ], environment: <String, String>{
