@@ -75,7 +75,7 @@ String getGradleAppOutDirV2() {
   return _cachedGradleAppOutDirV2;
 }
 
-// Note: this call takes about a second to complete.
+// Note: this call takes about a second to complete. Foo
 String _calculateGradleAppOutDirV2() {
   final String gradle = ensureGradle();
   ensureLocalProperties();
