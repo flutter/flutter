@@ -137,20 +137,24 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
   }
 }
 
-/// Provides the native iOS page transition animation.
+/// Provides an iOS-style page transition animation.
 ///
 /// The page slides in from the right and exits in reverse. It also shifts to the left in
 /// a parallax motion when another page enters to cover it.
 class CupertinoPageTransition extends StatelessWidget {
+  /// Creates an iOS-style page transition.
+  ///
+  ///  * `primaryRouteAnimation` is a linear route animation from 0.0 to 1.0
+  ///    when this screen is being pushed.
+  ///  * `secondaryRouteAnimation` is a linear route animation from 0.0 to 1.0
+  ///    when another screen is being pushed on top of this one.
+  ///  * `linearTransition` is whether to perform primary transition linearly.
+  ///    Used to precisely track back gesture drags.
   CupertinoPageTransition({
     Key key,
-    // Linear route animation from 0.0 to 1.0 when this screen is being pushed.
     @required Animation<double> primaryRouteAnimation,
-    // Linear route animation from 0.0 to 1.0 when another screen is being pushed on top of this
-    // one.
     @required Animation<double> secondaryRouteAnimation,
     @required this.child,
-    // Perform primary transition linearly. Use to precisely track back gesture drags.
     bool linearTransition,
   }) :
       _primaryPositionAnimation = linearTransition
@@ -182,6 +186,8 @@ class CupertinoPageTransition extends StatelessWidget {
   // When this page is becoming covered by another page.
   final Animation<FractionalOffset> _secondaryPositionAnimation;
   final Animation<Decoration> _primaryShadowAnimation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -201,9 +207,12 @@ class CupertinoPageTransition extends StatelessWidget {
   }
 }
 
-/// Transitions used for summoning fullscreen dialogs in iOS such as creating a new
-/// calendar event etc by bringing in the next screen from the bottom.
+/// An iOS-style transition used for summoning fullscreen dialogs.
+///
+/// For example, used when creating a new calendar event by bringing in the next
+/// screen from the bottom.
 class CupertinoFullscreenDialogTransition extends StatelessWidget {
+  /// Creates an iOS-style transition used for summoning fullscreen dialogs.
   CupertinoFullscreenDialogTransition({
     Key key,
     @required Animation<double> animation,
@@ -217,6 +226,8 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
        super(key: key);
 
   final Animation<FractionalOffset> _positionAnimation;
+
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override
@@ -228,9 +239,13 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
   }
 }
 
-/// This class responds to drag gestures to control the route's transition
-/// animation progress. Used for iOS back gesture.
+/// A controller for an iOS-style back gesture.
+///
+/// Uses a drag gesture to control the route's transition animation progress.
 class CupertinoBackGestureController extends NavigationGestureController {
+  /// Creates a controller for an iOS-style back gesture.
+  ///
+  /// The [navigator] and [controller] arguments must not be null.
   CupertinoBackGestureController({
     @required NavigatorState navigator,
     @required this.controller,
@@ -238,6 +253,8 @@ class CupertinoBackGestureController extends NavigationGestureController {
     assert(controller != null);
   }
 
+  /// The animation controller that the route uses to drive its transition
+  /// animation.
   final AnimationController controller;
 
   @override

@@ -29,11 +29,11 @@ abstract class PreferredSizeWidget implements Widget {
   Size get preferredSize;
 }
 
-/// Give an arbitrary widget a preferred size.
+/// A widget with a preferred size.
 ///
-/// This class does not impose any constraints on its child, it doesn't affect
-/// the child's layout in any way. It just advertises a default size which
-/// can be used by the parent.
+/// This widget does not impose any constraints on its child, and it doesn't
+/// affect the child's layout in any way. It just advertises a preferred size
+/// which can be used by the parent.
 ///
 /// See also:
 ///
@@ -42,12 +42,14 @@ abstract class PreferredSizeWidget implements Widget {
 ///    its preferred size.
 ///  * [AppBar] and [TabBar], which implement PreferredSizeWidget.
 class PreferredSize extends StatelessWidget implements PreferredSizeWidget {
+  /// Creates a widget that has a preferred size.
   const PreferredSize({
     Key key,
     @required this.child,
     @required this.preferredSize,
   }) : super(key: key);
 
+  /// The widget below this widget in the tree.
   final Widget child;
 
   @override

@@ -190,7 +190,7 @@ class Material extends StatefulWidget {
   /// The default radius of an ink splash in logical pixels.
   static const double defaultSplashRadius = 35.0;
 
-  // Temporary flag used to enable the PhysicalModel shadow implementation.
+  /// Temporary flag used to enable the PhysicalModel shadow implementation.
   static bool debugEnablePhysicalModel = false;
 }
 

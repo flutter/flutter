@@ -915,6 +915,7 @@ class _TabBarViewState extends State<TabBarView> {
 ///
 /// Used by [TabPageSelector] to indicate the selected page.
 class TabPageSelectorIndicator extends StatelessWidget {
+  /// Creates an indicator used by [TabPageSelector].
   const TabPageSelectorIndicator({ Key key, this.backgroundColor, this.borderColor }) : super(key: key);
 
   /// The indicator circle's background color.
