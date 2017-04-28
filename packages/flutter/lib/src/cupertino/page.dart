@@ -25,15 +25,16 @@ final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
   end: FractionalOffset.topLeft,
 );
 
-// BoxDecoration from no shadow to page shadow mimicking iOS page transitions
-// using gradients.
+// Custom decoration from no shadow to page shadow mimicking iOS page 
+// transitions using gradients.
 final DecorationTween _kGradientShadowTween = new DecorationTween(
-  begin: _CupertinoEdgeShadowDecoration.none,
+  begin: _CupertinoEdgeShadowDecoration.none, // No decoration initially.
   end: const _CupertinoEdgeShadowDecoration(
     edgeGradient: const LinearGradient(
       // Spans 5% of the page.
       begin: const FractionalOffset(0.95, 0.0),
       end: FractionalOffset.topRight,
+      // Eyeballed gradient used to mimic a drop shadow on the left side only.
       colors: const <Color>[
         const Color(0x00000000), 
         const Color(0x04000000),
@@ -51,6 +52,7 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 class _CupertinoEdgeShadowDecoration extends Decoration {
   const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
 
+  /// A Decoration with no decorating properties.
   static const _CupertinoEdgeShadowDecoration none = 
       const _CupertinoEdgeShadowDecoration();
 
@@ -109,10 +111,13 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   }
 }
 
+/// A [BoxPainter] used to draw the page transition shadow using gradients.
 class _CupertinoEdgeShadowPainter extends BoxPainter {
-  _CupertinoEdgeShadowPainter(@required this._decoration, VoidCallback onChange) : super(onChange) {
-    assert(_decoration != null);
-  }
+  _CupertinoEdgeShadowPainter(
+    @required this._decoration, 
+    VoidCallback onChange
+  ) : assert(_decoration != null),
+      super(onChange);
 
   final _CupertinoEdgeShadowDecoration _decoration;
 
@@ -121,8 +126,8 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     final LinearGradient gradient = _decoration.edgeGradient;
     if (gradient == null)
       return;
-    // The drawable space for the gradient is box size one box wide to
-    // the left of the box.
+    // The drawable space for the gradient is a rect with the same size as 
+    // its parent box one box width to the left of the box.
     final Rect rect = 
         (offset & configuration.size).translate(-configuration.size.width, 0.0);
     final Paint paint = new Paint()
