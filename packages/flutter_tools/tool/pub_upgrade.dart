@@ -1,11 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
-
-Future<Null> _streamStd(Stream<List<int>> source, Stdout target) => source
-    .transform(SYSTEM_ENCODING.decoder)
-    .transform(const LineSplitter())
-    .forEach(target.writeln);
 
 Future<Null> main(List<String> args) async {
   String pub = 'pub';
@@ -23,8 +17,8 @@ Future<Null> main(List<String> args) async {
   final List<dynamic> result =
       await Future.wait<Future<dynamic>>(<Future<dynamic>>[
     process.exitCode,
-    _streamStd(process.stdout, stdout),
-    _streamStd(process.stderr, stderr)
+    process.stdout.forEach(stdout.write),
+    process.stderr.forEach(stderr.write)
   ]);
 
   exitCode = result.first;
