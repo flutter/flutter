@@ -177,8 +177,11 @@ using namespace shell;
 
 - (NSDictionary*)getClipboardData:(NSString*)format {
   UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-  if (!format || [format isEqualToString:@(kTextPlainFormat)])
-    return @{ @"text" : pasteboard.string };
+  if (!format || [format isEqualToString:@(kTextPlainFormat)]) {
+    NSString* stringInPasteboard = pasteboard.string;
+    // The pasteboard may contain an item but it may not be a string (an image for instance).
+    return stringInPasteboard == nil ? nil : @{@"text" : stringInPasteboard};
+  }
   return nil;
 }
 
