@@ -75,6 +75,7 @@ class TextField extends StatefulWidget {
     this.maxLines: 1,
     this.onChanged,
     this.onSubmitted,
+    this.inputFormatters,
   }) : super(key: key);
 
   /// Controls the text being edited.
@@ -140,6 +141,10 @@ class TextField extends StatefulWidget {
   /// Called when the user indicates that they are done editing the text in the
   /// field.
   final ValueChanged<String> onSubmitted;
+
+  /// Optional input validation and formatting overrides. Formatters are run 
+  /// in the provided order when the text input changes.
+  final List<TextInputFormatter> inputFormatters;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
@@ -223,6 +228,7 @@ class _TextFieldState extends State<TextField> {
         selectionControls: materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
+        inputFormatters: widget.inputFormatters,
       ),
     );
 

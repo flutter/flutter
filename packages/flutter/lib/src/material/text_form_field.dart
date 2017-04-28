@@ -43,6 +43,7 @@ class TextFormField extends FormField<String> {
     int maxLines: 1,
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
+    List<TextInputFormatter> inputFormatters,
   }) : super(
     key: key,
     initialValue: controller != null ? controller.value.text : '',
@@ -59,6 +60,7 @@ class TextFormField extends FormField<String> {
         obscureText: obscureText,
         maxLines: maxLines,
         onChanged: field.onChanged,
+        inputFormatters: inputFormatters,
       );
     },
   );
