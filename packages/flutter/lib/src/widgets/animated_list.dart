@@ -38,7 +38,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// This widget's [AnimatedListState] can be used to dynmically insert or remove
 /// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
-/// use the static [of] method from a item's input callback.
+/// use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
