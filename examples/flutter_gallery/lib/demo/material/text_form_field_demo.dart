@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TextFormFieldDemo extends StatefulWidget {
   const TextFormFieldDemo({ Key key }) : super(key: key);
@@ -36,6 +37,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   bool _formWasEdited = false;
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
   final GlobalKey<FormFieldState<String>> _passwordFieldKey = new GlobalKey<FormFieldState<String>>();
+  final _UsNumberTextInputFormatter _phoneNumberFormatter = new _UsNumberTextInputFormatter();
   void _handleSubmitted() {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
@@ -59,9 +61,9 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   String _validatePhoneNumber(String value) {
     _formWasEdited = true;
-    final RegExp phoneExp = new RegExp(r'^\d\d\d-\d\d\d\-\d\d\d\d$');
+    final RegExp phoneExp = new RegExp(r'^\(\d\d\d\) \d\d\d\-\d\d\d\d$');
     if (!phoneExp.hasMatch(value))
-      return '###-###-#### - Please enter a valid phone number.';
+      return '(###) ###-#### - Please enter a valid US phone number.';
     return null;
   }
 
@@ -131,6 +133,12 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
               keyboardType: TextInputType.phone,
               onSaved: (String value) { person.phoneNumber = value; },
               validator: _validatePhoneNumber,
+              // TextInputFormatters are applied in sequence.
+              inputFormatters: <TextInputFormatter> [
+                WhitelistingTextInputFormatter.digitsOnly,
+                // Fit the validating format.
+                _phoneNumberFormatter,
+              ],
             ),
             new TextFormField(
               decoration: const InputDecoration(
@@ -181,6 +189,43 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           ],
         )
       ),
+    );
+  }
+}
+
+/// Format incoming numeric text to fit the format of (###) ###-#### ##...
+class _UsNumberTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue
+  ) {
+    final int newTextLength = newValue.text.length;
+    int selectionIndex = newValue.selection.end;
+    int usedSubstringIndex = 0;
+    final StringBuffer newText = new StringBuffer();
+    if (newTextLength >= 1) {
+      newText.write('(');
+      if (newValue.selection.end >= 1) selectionIndex++;
+    }
+    if (newTextLength >= 4) {
+      newText.write(newValue.text.substring(0, usedSubstringIndex = 3) + ') ');
+      if (newValue.selection.end >= 3) selectionIndex += 2;
+    }
+    if (newTextLength >= 7) {
+      newText.write(newValue.text.substring(3, usedSubstringIndex = 6) + '-');
+      if (newValue.selection.end >= 6) selectionIndex++;
+    }
+    if (newTextLength >= 11) {
+      newText.write(newValue.text.substring(6, usedSubstringIndex = 10) + ' ');
+      if (newValue.selection.end >= 10) selectionIndex++;
+    }
+    // Dump the rest.
+    if (newTextLength >= usedSubstringIndex)
+      newText.write(newValue.text.substring(usedSubstringIndex));
+    return new TextEditingValue(
+      text: newText.toString(),
+      selection: new TextSelection.collapsed(offset: selectionIndex),
     );
   }
 }
