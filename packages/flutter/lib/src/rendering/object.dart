@@ -2685,6 +2685,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
 ///
 /// Provides a child model for a render object subclass that has a unique child.
 abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> implements RenderObject {
+  /// Checks whether the given render object has the correct [runtimeType] to be
+  /// a child of this render object.
+  ///
+  /// Does nothing if assertions are disabled.
+  ///
+  /// Always returns true.
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {
@@ -2811,6 +2817,12 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
   /// The number of children.
   int get childCount => _childCount;
 
+  /// Checks whether the given render object has the correct [runtimeType] to be
+  /// a child of this render object.
+  ///
+  /// Does nothing if assertions are disabled.
+  ///
+  /// Always returns true.
   bool debugValidateChild(RenderObject child) {
     assert(() {
       if (child is! ChildType) {

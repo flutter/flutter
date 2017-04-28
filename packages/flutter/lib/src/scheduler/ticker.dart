@@ -363,6 +363,8 @@ class TickerFuture implements Future<Null> {
     _secondaryCompleter?.completeError(new TickerCanceled(ticker));
   }
 
+  /// A future that resolves when this future resolves or throws when the ticker
+  /// is canceled.
   Future<Null> get orCancel {
     if (_secondaryCompleter == null) {
       _secondaryCompleter = new Completer<Null>();

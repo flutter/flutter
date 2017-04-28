@@ -61,7 +61,7 @@ class BackButton extends StatelessWidget {
   }
 }
 
-/// A material design close button.
+/// A Material Design close button.
 ///
 /// A [CloseButton] is an [IconButton] with a "close" icon. When pressed, the
 /// close button calls [Navigator.maybePop] to return to the previous route.
@@ -73,10 +73,11 @@ class BackButton extends StatelessWidget {
 ///
 ///  * [AppBar], which automatically uses a [CloseButton] in its
 ///    [AppBar.leading] slot when appropriate.
-///  * [BackButton], which is more appropriate for middle nodes in the 
+///  * [BackButton], which is more appropriate for middle nodes in the
 ///    navigation tree or where pages can be popped instantaneously with
 ///    no user data consequence.
 class CloseButton extends StatelessWidget {
+  /// Creates a Material Design close button.
   const CloseButton({ Key key }) : super(key: key);
 
   @override

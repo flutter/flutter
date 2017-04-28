@@ -169,7 +169,7 @@ void main() {
           (ByteData reply) {},
         );
       }
-      bool cancelled = false;
+      bool canceled = false;
       BinaryMessages.setMockMessageHandler(
         'ch',
         (ByteData message) async {
@@ -181,7 +181,7 @@ void main() {
             emitEvent(null);
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else if (methodCall['method'] == 'cancel') {
-            cancelled = true;
+            canceled = true;
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {
             fail('Expected listen or cancel');
@@ -191,7 +191,7 @@ void main() {
       final List<dynamic> events = await channel.receiveBroadcastStream('hello').toList();
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
       await new Future<Null>.delayed(Duration.ZERO);
-      expect(cancelled, isTrue);
+      expect(canceled, isTrue);
     });
   });
 }

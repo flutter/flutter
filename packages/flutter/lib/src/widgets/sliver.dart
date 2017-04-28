@@ -692,6 +692,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 ///  * [SliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class SliverFillRemaining extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
     Key key,
     Widget child,

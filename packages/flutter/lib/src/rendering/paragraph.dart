@@ -190,6 +190,9 @@ class RenderParagraph extends RenderBox {
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
 
+  /// Whether this paragraph currently has a [ui.Shader] for its overflow effect.
+  ///
+  /// Used to test this object. Not for use in production.
   @visibleForTesting
   bool get debugHasOverflowShader => _overflowShader != null;
 
