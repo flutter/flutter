@@ -209,7 +209,7 @@ class MarkdownBuilder implements md.NodeVisitor {
       }
     }
 
-    return new Image.network(path, width: width, height: height);
+    return new Image.network(path, style: new ImageStyle(width: width, height: height));
   }
 
   Widget _buildBullet(String listTag) {
