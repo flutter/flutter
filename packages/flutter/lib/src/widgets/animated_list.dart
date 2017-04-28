@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart' show binarySearch;
+
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -25,6 +27,7 @@ const Duration _kDuration = const Duration(milliseconds: 300);
 class _ActiveItem implements Comparable<_ActiveItem> {
   _ActiveItem.incoming(this.controller, this.itemIndex) : removedItemBuilder = null;
   _ActiveItem.outgoing(this.controller, this.itemIndex, this.removedItemBuilder);
+  _ActiveItem.index(this.itemIndex) : controller = null, removedItemBuilder = null;
 
   final AnimationController controller;
   final AnimatedListRemovedItemBuilder removedItemBuilder;
@@ -217,19 +220,13 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   }
 
   _ActiveItem _removeActiveItemAt(List<_ActiveItem> items, int itemIndex) {
-    for (int i = 0; i < items.length; i++) {
-      if (items[i].itemIndex == itemIndex)
-        return items.removeAt(i);
-    }
-    return null;
+    final int i = binarySearch(items, new _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items.removeAt(i);
   }
 
   _ActiveItem _activeItemAt(List<_ActiveItem> items, int itemIndex) {
-    for (int i = 0; i < items.length; i++) {
-      if (items[i].itemIndex == itemIndex)
-        return items[i];
-    }
-    return null;
+    final int i = binarySearch(items, new _ActiveItem.index(itemIndex));
+    return i == -1 ? null : items[i];
   }
 
   // The insertItem() and removeItem() index parameters are defined as if the
@@ -332,6 +329,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     controller.reverse().then((Null value) {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
+      // Decrement the incoming and outgoing item indices to account
+      // for the removal.
       for (_ActiveItem item in _incomingItems) {
         if (item.itemIndex > outgoingItem.itemIndex)
           item.itemIndex -= 1;
