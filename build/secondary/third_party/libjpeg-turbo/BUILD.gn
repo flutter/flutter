@@ -65,12 +65,12 @@ source_set("libjpeg") {
     "//third_party/libjpeg-turbo/jutils.c",
   ]
 
-  if (current_cpu == "arm" && current_os != "ios") {
+  if (current_cpu == "arm") {
     sources += [
       "//third_party/libjpeg-turbo/simd/jsimd_arm.c",
       "//third_party/libjpeg-turbo/simd/jsimd_arm_neon.S",
     ]
-  } else if (current_cpu == "arm64" && current_os != "ios") {
+  } else if (current_cpu == "arm64") {
     sources += [
       "//third_party/libjpeg-turbo/simd/jsimd_arm64.c",
       "//third_party/libjpeg-turbo/simd/jsimd_arm64_neon.S",
