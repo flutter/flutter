@@ -61,7 +61,7 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          gaplessPlayback: true,
+          style: const ImageStyle(gaplessPlayback: true),
           image: imageProvider1
         )
       ),
@@ -83,7 +83,7 @@ void main() {
       new Container(
         key: key,
         child: new Image(
-          gaplessPlayback: true,
+          style: const ImageStyle(gaplessPlayback: true),
           image: imageProvider2
         )
       ),
@@ -136,7 +136,7 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        gaplessPlayback: true,
+        style: const ImageStyle(gaplessPlayback: true),
         image: imageProvider1
       ),
       null,
@@ -156,7 +156,7 @@ void main() {
     await tester.pumpWidget(
       new Image(
         key: key,
-        gaplessPlayback: true,
+        style: const ImageStyle(gaplessPlayback: true),
         image: imageProvider2
       ),
       null,
@@ -310,8 +310,10 @@ void main() {
     await tester.pumpWidget(
       new Image(
         image: new TestImageProvider(),
-        color: const Color(0xFF00FF00),
-        colorBlendMode: BlendMode.clear
+        style: const ImageStyle(
+          color: const Color(0xFF00FF00),
+          colorBlendMode: BlendMode.clear
+        )
       )
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
