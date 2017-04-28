@@ -26,6 +26,11 @@ import 'package:flutter/rendering.dart';
 /// The above values are also exposed in terms of [extentBefore],
 /// [extentInside], and [extentAfter], which may be more useful for use cases
 /// such as scroll bars; for example, see [Scrollbar].
+///
+/// See also:
+///
+///  * [FixedScrollMetrics], which is an immutable object that implements this
+///    interface.
 abstract class ScrollMetrics {
   /// Creates a [ScrollMetrics] that has the same properties as this object.
   ///
@@ -33,16 +38,34 @@ abstract class ScrollMetrics {
   /// of the current state.
   ScrollMetrics cloneMetrics() => new FixedScrollMetrics.clone(this);
 
+  /// The minimum in-range value for [pixels].
+  ///
+  /// The actual [pixels] value might be [outOfRange].
   double get minScrollExtent;
+
+  /// The maximum in-range value for [pixels].
+  ///
+  /// The actual [pixels] value might be [outOfRange].
   double get maxScrollExtent;
+
+  /// The current scroll position, in logical pixels along the [axisDirection].
   double get pixels;
+
+  /// The extent of the viewport along the [axisDirection].
   double get viewportDimension;
+
+  /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
 
+  /// The axis in which the scroll view scrolls.
   Axis get axis => axisDirectionToAxis(axisDirection);
 
+  /// Whether the [pixels] value is outside the [minScrollExtent] and
+  /// [maxScrollExtent].
   bool get outOfRange => pixels < minScrollExtent || pixels > maxScrollExtent;
 
+  /// Whether the [pixels] value is exactly at the [minScrollExtent] or the
+  /// [maxScrollExtent].
   bool get atEdge => pixels == minScrollExtent || pixels == maxScrollExtent;
 
   /// The quantity of content conceptually "above" the currently visible content
@@ -72,8 +95,12 @@ abstract class ScrollMetrics {
   }
 }
 
+/// An immutable snapshot of values associated with a [Scrollable] viewport.
+///
+/// For details, see [ScrollMetrics], which defines this object's interfaces.
 @immutable
 class FixedScrollMetrics extends ScrollMetrics {
+  /// Creates an immutable snapshot of values associated with a [Scrollable] viewport.
   FixedScrollMetrics({
     @required this.minScrollExtent,
     @required this.maxScrollExtent,
@@ -82,6 +109,7 @@ class FixedScrollMetrics extends ScrollMetrics {
     @required this.axisDirection,
   });
 
+  /// Creates an immutable snapshot of the given metrics.
   FixedScrollMetrics.clone(ScrollMetrics parent) :
     minScrollExtent = parent.minScrollExtent,
     maxScrollExtent = parent.maxScrollExtent,

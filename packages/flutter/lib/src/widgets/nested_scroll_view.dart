@@ -24,7 +24,8 @@ import 'scroll_view.dart';
 import 'sliver.dart';
 import 'ticker_provider.dart';
 
-typedef List<Widget> NestedScrollViewOuterSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
+/// Signature used by [NestedScrollView] for building its header.
+typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
 class NestedScrollView extends StatefulWidget {
   NestedScrollView({
@@ -49,7 +50,7 @@ class NestedScrollView extends StatefulWidget {
 
   final ScrollPhysics physics;
 
-  final NestedScrollViewOuterSliversBuilder headerSliverBuilder;
+  final NestedScrollViewHeaderSliversBuilder headerSliverBuilder;
 
   final Widget body;
 
@@ -415,9 +416,9 @@ class _NestedScrollCoorindator implements ScrollActivityDelegate {
 
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback) {
     final ScrollDragController drag = new ScrollDragController(
-      this,
-      details,
-      dragCancelCallback,
+      delegate: this,
+      details: details,
+      onDragCanceled: dragCancelCallback,
     );
     beginActivity(
       new DragScrollActivity(_outerPosition, drag),

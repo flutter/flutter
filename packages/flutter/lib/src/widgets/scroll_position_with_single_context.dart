@@ -304,7 +304,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// [ScrollDragController.onDragCanceled] for details.
   @override
   Drag drag(DragStartDetails details, VoidCallback onDragCanceled) {
-    final ScrollDragController drag = new ScrollDragController(this, details, onDragCanceled);
+    final ScrollDragController drag = new ScrollDragController(
+      delegate: this,
+      details: details,
+      onDragCanceled: onDragCanceled,
+    );
     beginActivity(new DragScrollActivity(this, drag));
     assert(_currentDrag == null);
     _currentDrag = drag;
