@@ -18,11 +18,11 @@ import java.util.Map.Entry;
 /**
  * MessageCodec using the Flutter standard binary encoding.
  *
- * The standard encoding is guaranteed to be compatible with the corresponding standard codec
- * for PlatformMessageChannels on the Flutter side. These parts of the Flutter SDK are evolved
- * synchronously.
+ * <p>This codec is guaranteed to be compatible with the corresponding
+ * <a href="https://docs.flutter.io/flutter/services/StandardMessageCodec-class.html">StandardMessageCodec</a>
+ * on the Dart side. These parts of the Flutter SDK are evolved synchronously.</p>
  *
- * Supported messages are acyclic values of these forms:
+ * <p>Supported messages are acyclic values of these forms:</p>
  *
  * <ul>
  *     <li>null</li>
@@ -34,9 +34,24 @@ import java.util.Map.Entry;
  *     <li>Lists of supported values</li>
  *     <li>Maps with supported keys and values</li>
  * </ul>
+ *
+ * <p>On the Dart side, these values are represented as follows:</p>
+ *
+ * <ul>
+ *     <li>null: null</li>
+ *     <li>Boolean: bool</li>
+ *     <li>Byte, Short, Integer, Long, BigInteger: int</li>
+ *     <li>Float, Double: double</li>
+ *     <li>String: String</li>
+ *     <li>byte[]: Uint8List</li>
+ *     <li>int[]: Int32List</li>
+ *     <li>long[]: Int64List</li>
+ *     <li>double[]: Float64List</li>
+ *     <li>List: List</li>
+ *     <li>Map: Map</li>
+ * </ul>
  */
 public final class StandardMessageCodec implements MessageCodec<Object> {
-    // This codec must match the Dart codec of the same name in package flutter/services.
     public static final StandardMessageCodec INSTANCE = new StandardMessageCodec();
 
     private StandardMessageCodec() {

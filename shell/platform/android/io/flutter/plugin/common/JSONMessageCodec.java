@@ -12,7 +12,15 @@ import org.json.JSONTokener;
 /**
  * A {@link MessageCodec} using UTF-8 encoded JSON messages.
  *
- * Supports the same Java values as {@link JSONObject#wrap(Object)}.
+ * <p>This codec is guaranteed to be compatible with the corresponding
+ * <a href="https://docs.flutter.io/flutter/services/JSONMessageCodec-class.html">JSONMessageCodec</a>
+ * on the Dart side. These parts of the Flutter SDK are evolved synchronously.</p>
+ *
+ * <p>Supports the same Java values as {@link JSONObject#wrap(Object)}.</p>
+ *
+ * <p>On the Dart side, JSON messages are handled by the JSON facilities of the
+ * <a href="https://api.dartlang.org/stable/dart-convert/JSON-constant.html">dart:convert</a>
+ * package.</p>
  */
 public final class JSONMessageCodec implements MessageCodec<Object> {
     // This codec must match the Dart codec of the same name in package flutter/services.
