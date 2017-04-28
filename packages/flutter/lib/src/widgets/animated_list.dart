@@ -42,6 +42,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
+  /// Creates a scrolling container that animates items when they are inserted or removed.
   AnimatedList({
     Key key,
     @required this.itemBuilder,
@@ -58,14 +59,87 @@ class AnimatedList extends StatefulWidget {
     assert(initialItemCount != null && initialItemCount >= 0);
   }
 
+  /// Called, as needed, to build list item widgets.
+  ///
+  /// List items are only built when they're scrolled into view.
+  ///
+  /// The [AnimatedListItemBuilder] index parameter indicates the item's
+  /// posiition in the list. The value of the index parameter will be between 0 and
+  /// [initialItemCount] plus the total number of items that have been inserted
+  /// with [AnimatedListState.insertItem] and less the total number of items
+  /// that have been removed with [AnimatedList.removeItem].
+  ///
+  /// Implementations of this callback should assume that [AnimatedList.removeItem]
+  /// removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
+
+  /// The number of items the list will start with.
+  ///
+  /// The appareance of the initial items is not animated. They are
+  /// are created, as needed, by [itemBuilder] with an animation paramter
+  /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
+
+  /// The axis along which the scroll view scrolls.
+  ///
+  /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
+
+  /// Whether the scroll view scrolls in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from
+  /// left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
+  /// scrolls from top to bottom when [reverse] is false and from bottom to top
+  /// when [reverse] is true.
+  ///
+  /// Defaults to false.
   final bool reverse;
+
+  /// An object that can be used to control the position to which this scroll
+  /// view is scrolled.
+  ///
+  /// Must be null if [primary] is true.
   final ScrollController controller;
+
+  /// Whether this is the primary scroll view associated with the parent
+  /// [PrimaryScrollController].
+  ///
+  /// On iOS, this identifies the scroll view that will scroll to top in
+  /// response to a tap in the status bar.
+  ///
+  /// Defaults to true when [scrollDirection] is [Axis.vertical] and
+  /// [controller] is null.
   final bool primary;
+
+  /// How the scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
+
+  /// Whether the extent of the scroll view in the [scrollDirection] should be
+  /// determined by the contents being viewed.
+  ///
+  /// If the scroll view does not shrink wrap, then the scroll view will expand
+  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
+  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
+  /// be true.
+  ///
+  /// Shrink wrapping the content of the scroll view is significantly more
+  /// expensive than expanding to the maximum allowed size because the content
+  /// can expand and contract during scrolling, which means the size of the
+  /// scroll view needs to be recomputed whenever the scroll position changes.
+  ///
+  /// Defaults to false.
   final bool shrinkWrap;
+
+  /// The amount of space by which to inset the children.
   final EdgeInsets padding;
 
   /// The state from the closest instance of this class that encloses the given context.
