@@ -70,7 +70,6 @@ export 'src/widgets/sliver_persistent_header.dart';
 export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
-export 'src/widgets/text_formatter.dart';
 export 'src/widgets/text_selection.dart';
 export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';

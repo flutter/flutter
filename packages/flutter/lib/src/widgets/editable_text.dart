@@ -17,7 +17,6 @@ import 'media_query.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
-import 'text_formatter.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
