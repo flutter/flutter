@@ -89,9 +89,12 @@ abstract class ScrollMetrics {
   /// described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
 
+  @protected
+  String superToString() => super.toString();
+
   @override
   String toString() {
-    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)}})';
+    return '$runtimeType(${extentBefore.toStringAsFixed(1)}..[${extentInside.toStringAsFixed(1)}]..${extentAfter.toStringAsFixed(1)})';
   }
 }
 

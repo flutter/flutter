@@ -278,4 +278,24 @@ void main() {
     );
     expect(innerScrollable.controller, isNull);
   });
+
+  testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(primary: true);
+    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+  });
+
+  testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(primary: false);
+    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+  });
+
+  testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(scrollDirection: Axis.vertical);
+    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+  });
+
+  testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(scrollDirection: Axis.horizontal);
+    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+  });
 }

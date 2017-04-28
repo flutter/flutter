@@ -48,6 +48,7 @@ void main() {
     scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) {
       return new ListView(
         shrinkWrap: true,
+        primary: false,
         children: <Widget>[
           new Container(height: 100.0, child: const Text('One')),
           new Container(height: 100.0, child: const Text('Two')),

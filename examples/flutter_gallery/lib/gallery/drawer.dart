@@ -298,6 +298,6 @@ class GalleryDrawer extends StatelessWidget {
       ));
     }
 
-    return new Drawer(child: new ListView(children: allDrawerItems));
+    return new Drawer(child: new ListView(primary: false, children: allDrawerItems));
   }
 }

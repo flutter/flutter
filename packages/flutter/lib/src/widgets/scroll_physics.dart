@@ -325,6 +325,8 @@ class ClampingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
+///  * [DefaultScrollPhysics], which can be used instead of this class when
+///    the default behavior is desired instead.
 ///  * [BouncingScrollPhysics], which provides the bouncing overscroll behavior
 ///    found on iOS.
 ///  * [ClampingScrollPhysics], which provides the clamping overscroll behavior
@@ -338,4 +340,20 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => true;
+}
+
+/// Scroll physics that only lets the user scroll if there is content to scroll,
+/// and in general has default behavior.
+///
+/// See also:
+///
+///  * [AlwaysScrollableScrollPhysics], which is similar except that the user
+///    can always attempt to scroll, even when there isn't sufficient content.
+class DefaultScrollPhysics extends ScrollPhysics {
+  /// Creates a scroll physics object that does nothing different from the
+  /// default.
+  const DefaultScrollPhysics({ ScrollPhysics parent }) : super(parent);
+
+  @override
+  DefaultScrollPhysics applyTo(ScrollPhysics parent) => new DefaultScrollPhysics(parent: parent);
 }
