@@ -97,9 +97,11 @@ void main() {
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
     // The shadow should be drawn to one screen width to the left of where 
-    // the page 2 box is.
+    // the page 2 box is. `paints` tests relative to the painter's given canvas
+    // rather than relative to the screen so assert that it's one screen
+    // width to the left of 0 offset box rect.
     expect(box, paints..rect(
-      rect: new Rect.fromLTWH(widget2TopLeft.dx - 800, 0.0, 800.0, 600.0)
+      rect: new Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
     ));
 
     await tester.pumpAndSettle();
@@ -111,10 +113,6 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    // The shadow should be entirely offscreen to the left now.
-    expect(box, paints..rect(
-      rect: new Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
-    ));
 
     widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
@@ -127,10 +125,6 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is leaving towards the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow is still one screen width to the left of page 2.
-    expect(box, paints..rect(
-      rect: new Rect.fromLTWH(widget2TopLeft.dx - 800.0, 0.0, 800.0, 600.0)
-    ));
 
     await tester.pumpAndSettle();
 
