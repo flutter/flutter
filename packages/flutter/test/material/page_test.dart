@@ -4,7 +4,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('test Android page transition', (WidgetTester tester) async {
@@ -77,14 +79,14 @@ void main() {
     final Offset widget1InitialTopLeft = tester.getTopLeft(find.text('Page 1'));
 
     tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
 
     Offset widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
-    DecoratedBox box = tester.element(find.byKey(page2Key)).ancestorWidgetOfExactType(DecoratedBox);
-    BoxDecoration decoration = box.decoration;
-    BoxShadow shadow = decoration.boxShadow[0];
+    final RenderDecoratedBox box = tester.element(find.byKey(page2Key))
+        .ancestorRenderObjectOfType(const TypeMatcher<RenderDecoratedBox>());
 
     // Page 1 is moving to the left.
     expect(widget1TransientTopLeft.dx < widget1InitialTopLeft.dx, true);
@@ -94,9 +96,14 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is coming in from the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be exactly half its maximum extent.
-    expect(shadow.blurRadius, 5.0);
-    expect(shadow.spreadRadius, 2.0);
+    // The shadow should be drawn to one screen width to the left of where 
+    // the page 2 box is. `paints` tests relative to the painter's given canvas
+    // rather than relative to the screen so assert that it's one screen
+    // width to the left of 0 offset box rect and nothing is drawn inside the 
+    // box's rect.
+    expect(box, paints..rect(
+      rect: new Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
+    ));
 
     await tester.pumpAndSettle();
 
@@ -107,9 +114,6 @@ void main() {
     tester.state<NavigatorState>(find.byType(Navigator)).pop();
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
-    box = tester.element(find.byKey(page2Key)).ancestorWidgetOfExactType(DecoratedBox);
-    decoration = box.decoration;
-    shadow = decoration.boxShadow[0];
 
     widget1TransientTopLeft = tester.getTopLeft(find.text('Page 1'));
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
@@ -122,9 +126,6 @@ void main() {
     expect(widget1InitialTopLeft.dy == widget2TopLeft.dy, true);
     // Page 2 is leaving towards the right.
     expect(widget2TopLeft.dx > widget1InitialTopLeft.dx, true);
-    // The shadow should be exactly 2/3 of its maximum extent.
-    expect(shadow.blurRadius, closeTo(6.6, 0.1));
-    expect(shadow.spreadRadius, closeTo(2.6, 0.1));
 
     await tester.pumpAndSettle();
 
