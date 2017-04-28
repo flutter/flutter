@@ -320,6 +320,54 @@ void main() {
     expect(renderer.color, const Color(0xFF00FF00));
     expect(renderer.colorBlendMode, BlendMode.clear);
   });
+
+  testWidgets('Images inherit ImageStyle parameters', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        new Image(
+            image: new TestImageProvider(),
+            style: const ImageStyle(
+                color: const Color(0xFF00FF00)
+            )
+        )
+    );
+    RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.color, const Color(0xFF00FF00));
+    expect(renderer.colorBlendMode, isNull);
+    await tester.pumpWidget(
+        DefaultImageStyle.merge(
+            style: const ImageStyle(
+                color: const Color(0xFFFFFF00),
+                colorBlendMode: BlendMode.clear
+            ),
+            child: new Image(
+                image: new TestImageProvider(),
+                style: const ImageStyle(
+                    color: const Color(0xFF00FF00)
+                )
+            )
+        )
+    );
+    renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.color, const Color(0xFF00FF00));
+    expect(renderer.colorBlendMode, BlendMode.clear);
+    await tester.pumpWidget(
+        DefaultImageStyle.merge(
+            style: const ImageStyle(
+                color: const Color(0xFFFFFF00),
+                colorBlendMode: BlendMode.lighten
+            ),
+            child: new Image(
+                image: new TestImageProvider(),
+                style: const ImageStyle(
+                    color: const Color(0xFF00FF00)
+                )
+            )
+        )
+    );
+    renderer = tester.renderObject<RenderImage>(find.byType(Image));
+    expect(renderer.color, const Color(0xFF00FF00));
+    expect(renderer.colorBlendMode, BlendMode.lighten);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {

@@ -38,9 +38,6 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
 @immutable
 class ImageStyle {
   /// Creates an image style.
-  ///
-  /// The [repeat] argument must not be null.
-  /// TODO(ds84182): Can [repeat] be null? Maybe.
   const ImageStyle({
     this.width,
     this.height,
@@ -48,10 +45,15 @@ class ImageStyle {
     this.colorBlendMode,
     this.fit,
     this.alignment,
-    this.repeat: ImageRepeat.noRepeat,
+    this.repeat,
     this.centerSlice,
-    this.gaplessPlayback: false
+    this.gaplessPlayback
   });
+
+  const ImageStyle.fallback() : this(
+    repeat: ImageRepeat.noRepeat,
+    gaplessPlayback: false
+  );
 
   /// If non-null, require the image to have this width.
   ///
@@ -203,6 +205,84 @@ class ImageStyle {
   }
 }
 
+/// The image style to apply to descendant [Image] widgets without explicit style.
+class DefaultImageStyle extends InheritedWidget {
+  /// Creates a default image style for the given subtree.
+  ///
+  /// Consider using [DefaultImageStyle.merge] to inherit styling information
+  /// from the current default image style for a given [BuildContext].
+  /// In the case that [DefaultImageStyle.merge] cannot be used, make sure to
+  /// inherit style values from [new ImageStyle.fallback].
+  /// This is done automatically for you when you use [DefaultImageStyle.merge].
+  const DefaultImageStyle({
+    Key key,
+    @required this.style,
+    @required Widget child,
+  }) : assert(style != null),
+       assert(child != null),
+       super(key: key, child: child);
+
+  /// A const-constructible default image style that provides fallback values.
+  ///
+  /// Returned from [of] when the given [BuildContext] doesn't have an enclosing default image style.
+  ///
+  /// This constructor creates a [DefaultImageStyle] that lacks a [child], which
+  /// means the constructed value cannot be incorporated into the tree.
+  const DefaultImageStyle.fallback()
+      : style = const ImageStyle.fallback();
+
+  /// Creates a default image style that overrides the image styles in scope at
+  /// this point in the widget tree.
+  ///
+  /// The given [style] is merged with the [style] from the default image style
+  /// for the [BuildContext] where the widget is inserted.
+  static Widget merge({
+    Key key,
+    ImageStyle style,
+    @required Widget child,
+  }) {
+    assert(child != null);
+    return new Builder(
+      builder: (BuildContext context) {
+        final DefaultImageStyle parent = DefaultImageStyle.of(context);
+        return new DefaultImageStyle(
+          key: key,
+          style: parent.style.merge(style),
+          child: child
+        );
+      },
+    );
+  }
+
+  /// The image style to apply.
+  final ImageStyle style;
+
+  /// The closest instance of this class that encloses the given context.
+  ///
+  /// If no such instance exists, returns an instance created by
+  /// [DefaultImageStyle.fallback], which contains fallback values.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// DefaultImageStyle style = DefaultImageStyle.of(context);
+  /// ```
+  static DefaultImageStyle of(BuildContext context) {
+    return context.inheritFromWidgetOfExactType(DefaultImageStyle) ?? const DefaultImageStyle.fallback();
+  }
+
+  @override
+  bool updateShouldNotify(DefaultImageStyle old) {
+    return style != old.style;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    '$style'.split('\n').forEach(description.add);
+  }
+}
+
 /// A widget that displays an image.
 ///
 /// Several constructors are provided for the various ways that an image can be
@@ -335,17 +415,19 @@ class _ImageState extends State<Image> {
   }
 
   void _resolveImage() {
+    final ImageStyle style = DefaultImageStyle.of(context)
+        .style.merge(widget.style);
     final ImageStream oldImageStream = _imageStream;
     _imageStream = widget.image.resolve(createLocalImageConfiguration(
       context,
-      size: widget.style.width != null &&
-          widget.style.height != null ?
-            new Size(widget.style.width, widget.style.height) : null
+      size: style.width != null &&
+          style.height != null ?
+            new Size(style.width, style.height) : null
     ));
     assert(_imageStream != null);
     if (_imageStream.key != oldImageStream?.key) {
       oldImageStream?.removeListener(_handleImageChanged);
-      if (!widget.style.gaplessPlayback)
+      if (!style.gaplessPlayback)
         setState(() { _imageInfo = null; });
       _imageStream.addListener(_handleImageChanged);
     }
@@ -366,17 +448,19 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
+    final ImageStyle style = DefaultImageStyle.of(context)
+        .style.merge(widget.style);
     return new RawImage(
       image: _imageInfo?.image,
-      width: widget.style.width,
-      height: widget.style.height,
+      width: style.width,
+      height: style.height,
       scale: _imageInfo?.scale ?? 1.0,
-      color: widget.style.color,
-      colorBlendMode: widget.style.colorBlendMode,
-      fit: widget.style.fit,
-      alignment: widget.style.alignment,
-      repeat: widget.style.repeat,
-      centerSlice: widget.style.centerSlice
+      color: style.color,
+      colorBlendMode: style.colorBlendMode,
+      fit: style.fit,
+      alignment: style.alignment,
+      repeat: style.repeat,
+      centerSlice: style.centerSlice
     );
   }
 
