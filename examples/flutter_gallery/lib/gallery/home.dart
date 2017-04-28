@@ -54,8 +54,10 @@ class _AppBarBackground extends StatelessWidget {
               bottom: 0.0,
               child: new Image.asset(
                 layer.assetName,
-                fit: BoxFit.cover,
-                height: _kFlexibleSpaceMaxHeight
+                style: const ImageStyle(
+                  fit: BoxFit.cover,
+                  height: _kFlexibleSpaceMaxHeight,
+                ),
               )
             );
           }).toList()

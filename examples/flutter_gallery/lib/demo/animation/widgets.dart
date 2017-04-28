@@ -35,9 +35,11 @@ class SectionCard extends StatelessWidget {
         ),
         child: new Image.asset(
           section.backgroundAsset,
-          color: const Color.fromRGBO(255, 255, 255, 0.075),
-          colorBlendMode: BlendMode.modulate,
-          fit: BoxFit.cover,
+          style: const ImageStyle(
+            color: const Color.fromRGBO(255, 255, 255, 0.075),
+            colorBlendMode: BlendMode.modulate,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );

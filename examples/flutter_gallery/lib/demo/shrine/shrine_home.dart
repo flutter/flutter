@@ -132,7 +132,10 @@ class _VendorItem extends StatelessWidget {
             width: 24.0,
             child: new ClipRRect(
               borderRadius: new BorderRadius.circular(12.0),
-              child: new Image.asset(vendor.avatarAsset, fit: BoxFit.cover),
+              child: new Image.asset(
+                vendor.avatarAsset,
+                style: const ImageStyle(fit: BoxFit.cover),
+              ),
             ),
           ),
           const SizedBox(width: 8.0),
@@ -270,7 +273,10 @@ class _Heading extends StatelessWidget {
             ),
             new LayoutId(
               id: _HeadingLayout.image,
-              child: new Image.asset(product.imageAsset, fit: BoxFit.cover),
+              child: new Image.asset(
+                product.imageAsset,
+                style: const ImageStyle(fit: BoxFit.cover),
+              ),
             ),
             new LayoutId(
               id: _HeadingLayout.title,
@@ -318,7 +324,10 @@ class _ProductItem extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: new Hero(
                     tag: product.tag,
-                    child: new Image.asset(product.imageAsset, fit: BoxFit.contain),
+                    child: new Image.asset(
+                      product.imageAsset,
+                      style: const ImageStyle(fit: BoxFit.contain),
+                    ),
                   ),
                 ),
               new Padding(
