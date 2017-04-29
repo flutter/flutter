@@ -45,7 +45,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'ad0844ced8c1e8d1d4bf1caa154171133534bbe8',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '49dc17e37e24ae153a3d2426c958254be1904562',
 
    # Fuchsia compatibility
    #
