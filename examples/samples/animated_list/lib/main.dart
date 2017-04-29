@@ -179,7 +179,7 @@ class _AnimatedListSampleState extends State<AnimatedListSample> {
   Widget build(BuildContext context) {
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text('AnimatedList'),
+        title: const Text('AnimatedList'),
         actions: <Widget>[
           new IconButton(
             icon: const Icon(Icons.add_circle),
