@@ -1261,6 +1261,10 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
       child.parentData = new SliverPhysicalParentData();
   }
 
+  /// Sets the [SliverPhysicalParentData.paintOffset] for the given child
+  /// according to the [SliverConstraints.axisDirection] and
+  /// [SliverConstraints.growthDirection] and the given geometry.
+  @protected
   void setChildParentData(RenderObject child, SliverConstraints constraints, SliverGeometry geometry) {
     final SliverPhysicalParentData childParentData = child.parentData;
     assert(constraints.axisDirection != null);
