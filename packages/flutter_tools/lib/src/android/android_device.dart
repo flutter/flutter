@@ -64,12 +64,14 @@ class AndroidDevice extends Device {
         // `adb shell getprop` result as UTF8.
         final ProcessResult result = await processManager.run(
           propCommand,
-          stdoutEncoding: LATIN1
+          stdoutEncoding: LATIN1,
+          stderrEncoding: LATIN1,
         ).timeout(const Duration(seconds: 5));
         if (result.exitCode == 0) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
-          printError('Error retrieving device properties for $name.');
+          printError('Error retrieving device properties for $name:');
+          printError(result.stderr);
         }
       } on TimeoutException catch (_) {
         throwToolExit('adb not responding');
@@ -515,6 +517,7 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
 
   if (mockAdbOutput == null) {
     final String adbPath = getAdbPath(androidSdk);
+    printTrace('Listing devices using $adbPath');
     if (adbPath == null)
       return <AndroidDevice>[];
     text = runSync(<String>[adbPath, 'devices', '-l']);
@@ -532,6 +535,12 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon '))
       continue;
+
+    // Skip lines about adb server and client version not matching
+    if (line.startsWith('adb server version')) {
+      printStatus(line);
+      continue;
+    }
 
     if (line.startsWith('List of devices'))
       continue;
