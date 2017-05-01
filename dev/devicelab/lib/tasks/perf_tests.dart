@@ -49,7 +49,7 @@ TaskFunction createComplexLayoutBuildTest() {
 TaskFunction createHelloWorldMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/examples/hello_world',
-    'io.flutter.examples.HelloWorld',
+    'io.flutter.examples.hello_world',
   );
 }
 
