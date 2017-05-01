@@ -348,9 +348,9 @@ bool _checkXcodeVersion() {
 }
 
 final String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the native platform side's plugin code that responds to your
+  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your
   plugin usage on the Dart side.
-  Without resolving native dependencies with CocoaPods, plugins usage will not work on iOS. 
+  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS. 
   For more info, see https://flutter.io/platform-plugins''';
 
 final String cocoaPodsInstallInstructions = '''
