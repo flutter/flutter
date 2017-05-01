@@ -472,6 +472,12 @@ class PaintingContext {
       childContext._stopRecordingIfNeeded();
     } else {
       if (elevation != 0) {
+        // The drawShadow call doesn't add the region of the shadow to the
+        // picture's bounds, so we draw a hardcoded amount of extra space to
+        // account for the maximum potential area of the shadow.
+        // TODO(jsimmons): remove this when Skia does it for us.
+        canvas.drawRect(offsetBounds.inflate(20.0),
+                        new Paint()..color=const Color(0));
         canvas.drawShadow(
           new Path()..addRRect(offsetClipRRect),
           const Color(0xFF000000),
