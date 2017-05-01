@@ -12,7 +12,34 @@ import 'scroll_physics.dart';
 import 'scroll_position.dart';
 import 'scroll_position_with_single_context.dart';
 
+/// Controls a scrollable widget.
+///
+/// Scroll controllers are typically stored as member variables in [State]
+/// objects and are reused in each [State.build]. A single scroll controller can
+/// be used to control multiple scrollable widgets, but some operations, such
+/// as reading the scroll [offset], require the controller to be used with a
+/// single scrollable widget.
+///
+/// A scroll controller creates a [ScrollPosition] to manage the state specific
+/// to an individual [Scrollable] widget. To use a custom [ScrollPosition],
+/// subclass [ScrollController] and override [createScrollPosition].
+///
+/// Typically used with [ListView], [GridView], [CustomScrollView].
+///
+/// See also:
+///
+///  * [ListView], [GridView], [CustomScrollView], which can be controlled by a
+///    [ScrollController].
+///  * [Scrollable], which is the lower-level widget that creates and associates
+///    [ScrollPosition] objects with [ScrollController] objects.
+///  * [PageController], which is an analogous object for controlling a
+///    [PageView].
+///  * [ScrollPosition], which manages the scroll offset for an individual
+///    scrolling widget.
 class ScrollController extends ChangeNotifier {
+  /// Creates a controller for a scrollable widget.
+  ///
+  /// The [initialScrollOffset] must not be null.
   ScrollController({
     this.initialScrollOffset: 0.0,
     this.debugLabel,
@@ -24,8 +51,12 @@ class ScrollController extends ChangeNotifier {
   ///
   /// New [ScrollPosition] objects that are created and attached to this
   /// controller will have their offset initialized to this value.
+  ///
+  /// Defaults to 0.0.
   final double initialScrollOffset;
 
+  /// A label that is used in the [toString] output. Intended to aid with
+  /// identifying scroll controller instances in debug output.
   final String debugLabel;
 
   /// The currently attached positions.
@@ -54,6 +85,9 @@ class ScrollController extends ChangeNotifier {
     return _positions.single;
   }
 
+  /// The current scroll offset of the scrollable widget.
+  ///
+  /// Requires the controller to be controlling exactly one scrollable widget.
   double get offset => position.pixels;
 
   /// Animates the position from its current value to the given value.
@@ -137,14 +171,15 @@ class ScrollController extends ChangeNotifier {
     super.dispose();
   }
 
-  static ScrollPosition createDefaultScrollPosition(ScrollPhysics physics, ScrollContext context, ScrollPosition oldPosition) {
-    return new ScrollPositionWithSingleContext(
-      physics: physics,
-      context: context,
-      oldPosition: oldPosition,
-    );
-  }
-
+  /// Creates a [ScrollPosition] for use by a [Scrollable] widget.
+  ///
+  /// Subclasses can override this function to customize the [ScrollPosition]
+  /// used by the scrollable widgets they control. For example, [PageController]
+  /// overrides this function to return a page-oriented scroll position
+  /// subclass that keeps the same page visible when the scrollable widget
+  /// resizes.
+  ///
+  /// By default, returns a [ScrollPositionWithSingleContext].
   ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
