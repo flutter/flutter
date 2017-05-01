@@ -347,11 +347,32 @@ bool _checkXcodeVersion() {
   return true;
 }
 
+final String noCocoaPodsConsequence = '''
+  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your
+  plugin usage on the Dart side.
+  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS. 
+  For more info, see https://flutter.io/platform-plugins''';
+
+final String cocoaPodsInstallInstructions = '''
+  brew update
+  brew install cocoapods
+  pod setup''';
+
+final String cocoaPodsUpgradeInstructions = '''
+  brew update
+  brew upgrade cocoapods
+  pod setup''';
+
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
     if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
-      printError('Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.');
+      printError(
+        'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
+        '$noCocoaPodsConsequence\n'
+        'To install:\n'
+        '$cocoaPodsInstallInstructions\n'
+      );
       return;
     }
     try {
