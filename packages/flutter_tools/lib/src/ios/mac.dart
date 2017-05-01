@@ -348,9 +348,8 @@ bool _checkXcodeVersion() {
 }
 
 final String noCocoaPodsConsequence = '''
-  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your
-  plugin usage on the Dart side.
-  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS. 
+  CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
+  Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
   For more info, see https://flutter.io/platform-plugins''';
 
 final String cocoaPodsInstallInstructions = '''
@@ -372,6 +371,16 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
         '$noCocoaPodsConsequence\n'
         'To install:\n'
         '$cocoaPodsInstallInstructions\n'
+      );
+      return;
+    }
+    if (!doctor.iosWorkflow.cocoaPodsInitialized) {
+      printError(
+        'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
+        '$noCocoaPodsConsequence\n'
+        'To initialize CocoaPods, run:\n'
+        '  pod setup\n'
+        'once to finalize CocoaPods\' installation.'
       );
       return;
     }

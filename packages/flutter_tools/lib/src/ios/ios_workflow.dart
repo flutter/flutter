@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -69,6 +71,13 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     } on FormatException {
       return false;
     }
+  }
+
+  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
+  bool get cocoaPodsInitialized {
+    return fs.isDirectorySync(
+      fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')
+    );
   }
 
   @override
@@ -176,7 +185,18 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       }
       if (cocoaPodsInstalledAndMeetsVersionCheck) {
-        messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+        if (cocoaPodsInitialized) {
+          messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
+        } else {
+          brewStatus = ValidationType.partial;
+          messages.add(new ValidationMessage.error(
+            'CocoaPods installed but not initialized.\n'
+            '$noCocoaPodsConsequence\n'
+            'To initialize CocoaPods, run:\n'
+            '  pod setup\n'
+            'once to finalize CocoaPods\' installation.'
+          ));
+        }
       } else {
         brewStatus = ValidationType.partial;
         if (!hasCocoaPods) {
