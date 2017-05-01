@@ -129,6 +129,75 @@ void main() {
     drag.dispose();
   });
 
+  testGesture('Drag with multiple pointers', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag1 = new HorizontalDragGestureRecognizer();
+    final VerticalDragGestureRecognizer drag2 = new VerticalDragGestureRecognizer();
+
+    final List<String> log = <String>[];
+    drag1.onDown = (_) { log.add('drag1-down'); };
+    drag1.onStart = (_) { log.add('drag1-start'); };
+    drag1.onUpdate = (_) { log.add('drag1-update'); };
+    drag1.onEnd = (_) { log.add('drag1-end'); };
+    drag1.onCancel = () { log.add('drag1-cancel'); };
+    drag2.onDown = (_) { log.add('drag2-down'); };
+    drag2.onStart = (_) { log.add('drag2-start'); };
+    drag2.onUpdate = (_) { log.add('drag2-update'); };
+    drag2.onEnd = (_) { log.add('drag2-end'); };
+    drag2.onCancel = () { log.add('drag2-cancel'); };
+
+    final TestPointer pointer5 = new TestPointer(5);
+    final PointerDownEvent down5 = pointer5.down(const Offset(10.0, 10.0));
+    drag1.addPointer(down5);
+    drag2.addPointer(down5);
+    tester.closeArena(5);
+    tester.route(down5);
+    log.add('-a');
+
+    tester.route(pointer5.move(const Offset(100.0, 0.0)));
+    log.add('-b');
+    tester.route(pointer5.move(const Offset(50.0, 50.0)));
+    log.add('-c');
+
+    final TestPointer pointer6 = new TestPointer(6);
+    final PointerDownEvent down6 = pointer6.down(const Offset(20.0, 20.0));
+    drag1.addPointer(down6);
+    drag2.addPointer(down6);
+    tester.closeArena(6);
+    tester.route(down6);
+    log.add('-d');
+
+    tester.route(pointer5.move(const Offset(0.0, 100.0)));
+    log.add('-e');
+    tester.route(pointer5.move(const Offset(70.0, 70.0)));
+    log.add('-f');
+
+    tester.route(pointer5.up());
+    tester.route(pointer6.up());
+
+    drag1.dispose();
+    drag2.dispose();
+
+    expect(log, <String>[
+      'drag1-down',
+      'drag2-down',
+      '-a',
+      'drag2-cancel',
+      'drag1-start',
+      'drag1-update',
+      '-b',
+      'drag1-update',
+      '-c',
+      'drag2-down',
+      'drag2-cancel',
+      '-d',
+      'drag1-update',
+      '-e',
+      'drag1-update',
+      '-f',
+      'drag1-end'
+    ]);
+  });
+
   testGesture('Clamp max velocity', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
 

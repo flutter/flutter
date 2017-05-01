@@ -139,11 +139,35 @@ void main() {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
+    // The ideal behaviour here would be a single start/end pair, but for
+    // simplicity of implementation we compromise here and accept two. Should
+    // you find a way to make this work with just one without complicating the
+    // API, feel free to change the expectation here.
+
     expect(log, equals(<String>[]));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     await tester.pump(const Duration(seconds: 1));
     log.removeWhere((String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start']));
+    await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
+    log.removeWhere((String value) => value == 'scroll-update');
+    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
+    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(seconds: 1));
+    log.removeWhere((String value) => value == 'scroll-update');
+    expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start', 'scroll-end']));
+  });
+
+  testWidgets('fling, pause, fling generates two start/end pairs', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+    await tester.pumpWidget(_buildScroller(log: log));
+
+    expect(log, equals(<String>[]));
+    await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
+    await tester.pump(const Duration(seconds: 1));
+    log.removeWhere((String value) => value == 'scroll-update');
+    expect(log, equals(<String>['scroll-start']));
+    await tester.pump(const Duration(minutes: 1));
     await tester.flingFrom(const Offset(100.0, 100.0), const Offset(-50.0, -50.0), 500.0);
     log.removeWhere((String value) => value == 'scroll-update');
     expect(log, equals(<String>['scroll-start', 'scroll-end', 'scroll-start']));
