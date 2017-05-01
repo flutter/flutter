@@ -62,7 +62,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     }
   }
 
-  bool get cocoaPodsInstalledAndMeetsVersionCheck {
+  bool get isCocoaPodsInstalledAndMeetsVersionCheck {
     if (!hasCocoaPods)
       return false;
     try {
@@ -74,7 +74,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   }
 
   /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  bool get cocoaPodsInitialized {
+  bool get isCocoaPodsInitialized {
     return fs.isDirectorySync(
       fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')
     );
@@ -184,8 +184,8 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           ));
         }
       }
-      if (cocoaPodsInstalledAndMeetsVersionCheck) {
-        if (cocoaPodsInitialized) {
+      if (isCocoaPodsInstalledAndMeetsVersionCheck) {
+        if (isCocoaPodsInitialized) {
           messages.add(new ValidationMessage('CocoaPods version $cocoaPodsVersionText'));
         } else {
           brewStatus = ValidationType.partial;

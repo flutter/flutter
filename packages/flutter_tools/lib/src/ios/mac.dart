@@ -364,7 +364,7 @@ final String cocoaPodsUpgradeInstructions = '''
 
 Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
   if (fs.file(fs.path.join(bundle.path, 'Podfile')).existsSync()) {
-    if (!doctor.iosWorkflow.cocoaPodsInstalledAndMeetsVersionCheck) {
+    if (!doctor.iosWorkflow.isCocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = doctor.iosWorkflow.cocoaPodsMinimumVersion;
       printError(
         'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
@@ -374,7 +374,7 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
       );
       return;
     }
-    if (!doctor.iosWorkflow.cocoaPodsInitialized) {
+    if (!doctor.iosWorkflow.isCocoaPodsInitialized) {
       printError(
         'Warning: CocoaPods installed but not initialized. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'
