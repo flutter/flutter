@@ -50,10 +50,13 @@ class TestServiceExtensionsBinding extends BindingBase
   void scheduleFrame() {
     frameScheduled = true;
   }
-  void doFrame() {
+  Future<Null> doFrame() async {
     frameScheduled = false;
     if (ui.window.onBeginFrame != null)
       ui.window.onBeginFrame(Duration.ZERO);
+    await flushMicrotasks();
+    if (ui.window.onDrawFrame != null)
+      ui.window.onDrawFrame();
   }
 
   Future<Null> flushMicrotasks() {
@@ -72,7 +75,7 @@ Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingRes
   await binding.flushMicrotasks();
   expect(binding.frameScheduled, isTrue);
   expect(completed, isFalse);
-  binding.doFrame();
+  await binding.doFrame();
   await binding.flushMicrotasks();
   expect(completed, isTrue);
   expect(binding.frameScheduled, isFalse);
@@ -85,7 +88,7 @@ void main() {
   test('Service extensions - pretest', () async {
     binding = new TestServiceExtensionsBinding();
     expect(binding.frameScheduled, isTrue);
-    binding.doFrame(); // initial frame scheduled by creating the binding
+    await binding.doFrame(); // initial frame scheduled by creating the binding
     expect(binding.frameScheduled, isFalse);
 
     expect(debugPrint, equals(debugPrintThrottled));
@@ -134,6 +137,7 @@ void main() {
   test('Service extensions - debugDumpRenderTree', () async {
     Map<String, String> result;
 
+    await binding.doFrame();
     result = await binding.testExtension('debugDumpRenderTree', <String, String>{});
     expect(result, <String, String>{});
     expect(console, <Matcher>[
@@ -165,7 +169,7 @@ void main() {
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, isFalse);
-    binding.doFrame();
+    await binding.doFrame();
     await binding.flushMicrotasks();
     expect(completed, isTrue);
     expect(binding.frameScheduled, isFalse);
@@ -179,7 +183,7 @@ void main() {
     pendingResult = binding.testExtension('debugPaint', <String, String>{ 'enabled': 'false' });
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
-    binding.doFrame();
+    await binding.doFrame();
     expect(binding.frameScheduled, isFalse);
     result = await pendingResult;
     expect(result, <String, String>{ 'enabled': 'false' });
@@ -294,7 +298,7 @@ void main() {
     await binding.flushMicrotasks();
     expect(completed, false);
     expect(binding.frameScheduled, isTrue);
-    binding.doFrame();
+    await binding.doFrame();
     await binding.flushMicrotasks();
     expect(completed, true);
     expect(binding.frameScheduled, isFalse);
@@ -319,7 +323,7 @@ void main() {
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);
-    binding.doFrame();
+    await binding.doFrame();
     await binding.flushMicrotasks();
     expect(completed, true);
     expect(binding.frameScheduled, isFalse);

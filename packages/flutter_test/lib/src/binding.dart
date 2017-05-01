@@ -28,7 +28,7 @@ import 'test_text_input.dart';
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
 ///
-/// See [WidgetsBinding.beginFrame] for a more detailed description of some of
+/// See [WidgetsBinding.drawFrame] for a more detailed description of some of
 /// these phases.
 enum EnginePhase {
   /// The build phase in the widgets library. See [BuildOwner.buildScope].
@@ -490,6 +490,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   void initInstances() {
     super.initInstances();
     ui.window.onBeginFrame = null;
+    ui.window.onDrawFrame = null;
   }
 
   FakeAsync _fakeAsync;
@@ -519,13 +520,25 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         _fakeAsync.elapse(duration);
       _phase = newPhase;
       if (hasScheduledFrame) {
+        _fakeAsync.flushMicrotasks();
         handleBeginFrame(new Duration(
           milliseconds: _clock.now().millisecondsSinceEpoch,
         ));
+        _fakeAsync.flushMicrotasks();
+        handleDrawFrame();
       }
       _fakeAsync.flushMicrotasks();
       return new Future<Null>.value();
     });
+  }
+
+  @override
+  void scheduleWarmUpFrame() {
+    // We override the default version of this so that the application-startup warm-up frame
+    // does not schedule timers which we might never get around to running.
+    handleBeginFrame(null);
+    _fakeAsync.flushMicrotasks();
+    handleDrawFrame();
   }
 
   @override
@@ -537,9 +550,9 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   EnginePhase _phase = EnginePhase.sendSemanticsTree;
 
-  // Cloned from RendererBinding.beginFrame() but with early-exit semantics.
+  // Cloned from RendererBinding.drawFrame() but with early-exit semantics.
   @override
-  void beginFrame() {
+  void drawFrame() {
     assert(inTest);
     try {
       debugBuildingDirtyElements = true;
@@ -599,14 +612,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   void _verifyInvariants() {
     super._verifyInvariants();
-    assert(() {
-      'A periodic Timer is still running even after the widget tree was disposed.';
-      return _fakeAsync.periodicTimerCount == 0;
-    });
-    assert(() {
-      'A Timer is still pending even after the widget tree was disposed.';
-      return _fakeAsync.nonPeriodicTimerCount == 0;
-    });
+    assert(
+      _fakeAsync.periodicTimerCount == 0,
+      'A periodic Timer is still running even after the widget tree was disposed.'
+    );
+    assert(
+      _fakeAsync.nonPeriodicTimerCount == 0,
+      'A Timer is still pending even after the widget tree was disposed.'
+    );
     assert(_fakeAsync.microtaskCount == 0); // Shouldn't be possible.
   }
 
@@ -740,12 +753,19 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// ```
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
+  bool _doDrawThisFrame;
+
   @override
   void handleBeginFrame(Duration rawTimeStamp) {
+    assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
-        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint))
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
+      _doDrawThisFrame = true;
       super.handleBeginFrame(rawTimeStamp);
+    } else {
+      _doDrawThisFrame = false;
+    }
     _viewNeedsPaint = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
@@ -755,6 +775,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     } else {
       ui.window.scheduleFrame();
     }
+  }
+
+  @override
+  void handleDrawFrame() {
+    assert(_doDrawThisFrame != null);
+    if (_doDrawThisFrame)
+      super.handleDrawFrame();
+    _doDrawThisFrame = null;
   }
 
   @override

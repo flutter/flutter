@@ -210,6 +210,26 @@ class EditableText extends StatefulWidget {
 
   @override
   EditableTextState createState() => new EditableTextState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('controller: $controller');
+    description.add('focusNode: $focusNode');
+    if (obscureText != false)
+      description.add('obscureText: $obscureText');
+    description.add('$style');
+    if (textAlign != null)
+      description.add('$textAlign');
+    if (textScaleFactor != null)
+      description.add('textScaleFactor: $textScaleFactor');
+    if (maxLines != 1)
+      description.add('maxLines: $maxLines');
+    if (autofocus != false)
+      description.add('autofocus: $autofocus');
+    if (keyboardType != null)
+      description.add('keyboardType: $keyboardType');
+  }
 }
 
 /// State for a [EditableText].

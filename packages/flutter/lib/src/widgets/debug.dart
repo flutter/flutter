@@ -45,6 +45,8 @@ bool debugPrintBuildScope = false;
 /// To see when a widget is rebuilt, see [debugPrintRebuildDirtyWidgets].
 ///
 /// To see when the dirty list is flushed, see [debugPrintBuildDirtyElements].
+///
+/// To see when a frame is scheduled, see [debugPrintScheduleFrameStacks].
 bool debugPrintScheduleBuildForStacks = false;
 
 /// Log when widgets with global keys are deactivated and log when they are
