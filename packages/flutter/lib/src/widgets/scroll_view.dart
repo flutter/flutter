@@ -114,11 +114,19 @@ abstract class ScrollView extends StatelessWidget {
   /// To force the scroll view to always be scrollable even if there is
   /// insufficient content, as if [primary] was true but without necessarily
   /// setting it to true, provide an [AlwaysScrollableScrollPhysics] physics
-  /// object.
+  /// object, as in:
+  ///
+  /// ```dart
+  ///   physics: const AlwaysScrollableScrollPhysics(),
+  /// ```
   ///
   /// To force the scroll view to use the default platform conventions and not
   /// be scrollable if there is insufficient content, regardless of the value of
-  /// [primary], provide a [DefaultScrollPhysics] object.
+  /// [primary], provide an explicit [ScrollPhysics] object, as in:
+  ///
+  /// ```dart
+  ///   physics: const ScrollPhysics(),
+  /// ```
   final ScrollPhysics physics;
 
   /// Whether the extent of the scroll view in the [scrollDirection] should be

@@ -382,9 +382,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   @override
-  String toString() => super.superToString();
-
-  @override
   void debugFillDescription(List<String> description) {
     if (debugLabel != null)
       description.add(debugLabel);
