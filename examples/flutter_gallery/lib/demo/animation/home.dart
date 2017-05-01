@@ -365,6 +365,59 @@ class _AllSectionsView extends AnimatedWidget {
   }
 }
 
+// Support snapping scrolls to the midScrollOffset: the point at which the
+// app bar's height is _kAppBarMidHeight and only one section heading is
+// visible.
+class _SnappingScrollPhysics extends ClampingScrollPhysics {
+  _SnappingScrollPhysics(this.midScrollOffset) : super();
+
+  final double midScrollOffset;
+
+  @override
+  _SnappingScrollPhysics applyTo(ScrollPhysics parent) => new _SnappingScrollPhysics(midScrollOffset);
+
+  Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
+    final double velocity = math.max(dragVelocity, minFlingVelocity);
+    return new ScrollSpringSimulation(spring, offset, midScrollOffset, velocity, tolerance: tolerance);
+  }
+
+  Simulation _toZeroScrollOffsetSimulation(double offset, double dragVelocity) {
+    final double velocity = math.max(dragVelocity, minFlingVelocity);
+    return new ScrollSpringSimulation(spring, offset, 0.0, velocity, tolerance: tolerance);
+  }
+
+  @override
+  Simulation createBallisticSimulation(ScrollMetrics position, double dragVelocity) {
+    final Simulation simulation = super.createBallisticSimulation(position, dragVelocity);
+    final double offset = position.pixels;
+
+    if (simulation != null) {
+      // The drag ended with sufficient velocity to trigger creating a simulation.
+      // If the simulation is headed up towards midScrollOffset but will not reach it,
+      // then snap it there. Similarly if the simulation is headed down past
+      // midScrollOffset but will not reach zero, then snap it to zero.
+      final double simulationEnd = simulation.x(double.INFINITY);
+      if (simulationEnd >= midScrollOffset)
+        return simulation;
+      if (dragVelocity > 0.0)
+        return _toMidScrollOffsetSimulation(offset, dragVelocity);
+      if (dragVelocity <= 0.0)
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+    } else {
+      // The user ended the drag with little or no velocity. If they
+      // didn't leave the the offset above midScrollOffset, then
+      // snap to midScrollOffset if they're more than halfway there,
+      // otherwise snap to zero.
+      final double snapThreshold = midScrollOffset / 2.0;
+      if (offset >=  snapThreshold && offset < midScrollOffset)
+        return _toMidScrollOffsetSimulation(offset, dragVelocity);
+      if (offset > 0.0 && offset < snapThreshold)
+        return _toZeroScrollOffsetSimulation(offset, dragVelocity);
+    }
+    return simulation;
+  }
+}
+
 class AnimationDemoHome extends StatefulWidget {
   const AnimationDemoHome({ Key key }) : super(key: key);
 
@@ -478,6 +531,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
         children: <Widget>[
           new CustomScrollView(
             controller: _scrollController,
+            physics: new _SnappingScrollPhysics(appBarMidScrollOffset),
             slivers: <Widget>[
               // Start out below the status bar, gradually move to the top of the screen.
               new _StatusBarPaddingSliver(
