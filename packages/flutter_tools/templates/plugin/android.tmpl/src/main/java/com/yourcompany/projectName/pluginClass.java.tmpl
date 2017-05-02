@@ -1,24 +1,24 @@
 package {{androidIdentifier}};
 
-import io.flutter.app.FlutterActivity;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.MethodCall;
+import io.flutter.plugin.common.PluginRegistry.PluginContext;
 
 /**
  * {{pluginClass}}
  */
 public class {{pluginClass}} implements MethodCallHandler {
-  private FlutterActivity activity;
+  private final PluginContext context;
 
-  public static {{pluginClass}} register(FlutterActivity activity) {
-    return new {{pluginClass}}(activity);
+  public static void register(PluginContext context) {
+    final {{pluginClass}} instance = new {{pluginClass}}(context);
+    context.newMethodChannel("{{projectName}}").setMethodCallHandler(instance);
   }
 
-  private {{pluginClass}}(FlutterActivity activity) {
-    this.activity = activity;
-    new MethodChannel(activity.getFlutterView(), "{{projectName}}").setMethodCallHandler(this);
+  private {{pluginClass}}(PluginContext context) {
+    this.context = context;
   }
 
   @Override

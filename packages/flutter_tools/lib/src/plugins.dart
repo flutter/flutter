@@ -75,9 +75,7 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   }
 }
 
-const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
-
-import io.flutter.app.FlutterActivity;
+const String _androidPluginRegistryTemplate = '''package io.flutter.plugin.common;
 
 {{#plugins}}
 import {{package}}.{{class}};
@@ -86,15 +84,11 @@ import {{package}}.{{class}};
 /**
  * Generated file. Do not edit.
  */
-
-public class PluginRegistry {
+public final class GeneratedPluginRegistry extends PluginRegistry {
+    @Override
+    public void registerPlugins(PluginContext context) {
 {{#plugins}}
-    public {{class}} {{name}};
-{{/plugins}}
-
-    public void registerAll(FlutterActivity activity) {
-{{#plugins}}
-        {{name}} = {{class}}.register(activity);
+        {{class}}.register(context);
 {{/plugins}}
     }
 }
@@ -117,9 +111,9 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
       new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
   final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
   final Directory registryDirectory =
-      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
+      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugin', 'common'));
   registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('PluginRegistry.java');
+  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistry.java');
   registryFile.writeAsStringSync(pluginRegistry);
 }
 
@@ -136,7 +130,7 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 #import "{{class}}.h"
 {{/plugins}}
 
-@interface PluginRegistry : NSObject
+@interface PluginRegistry : FlutterPluginRegistry
 
 {{#plugins}}
 @property (readonly, nonatomic) {{class}} *{{name}};
@@ -161,6 +155,7 @@ const String _iosPluginRegistryImplementationTemplate = '''//
   if (self = [super init]) {
 {{#plugins}}
     _{{name}} = [[{{class}} alloc] initWithController:controller];
+    [self registerPlugin:_{{name}}];
 {{/plugins}}
   }
   return self;
