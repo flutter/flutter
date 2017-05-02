@@ -215,7 +215,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
 /// These physics cause the page view to snap to page boundaries.
 class PageScrollPhysics extends ScrollPhysics {
   /// Creates physics for a [PageView].
-  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent);
+  const PageScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics parent) => new PageScrollPhysics(parent: parent);

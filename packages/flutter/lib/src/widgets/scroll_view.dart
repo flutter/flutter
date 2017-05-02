@@ -49,9 +49,10 @@ abstract class ScrollView extends StatelessWidget {
     this.reverse: false,
     this.controller,
     bool primary,
-    this.physics,
+    ScrollPhysics physics,
     this.shrinkWrap: false,
   }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key) {
     assert(reverse != null);
     assert(shrinkWrap != null);
@@ -90,7 +91,11 @@ abstract class ScrollView extends StatelessWidget {
   /// Whether this is the primary scroll view associated with the parent
   /// [PrimaryScrollController].
   ///
-  /// On iOS, this identifies the scroll view that will scroll to top in
+  /// When this is true, the scroll view is scrollable even if it does not have
+  /// sufficient content to actually scroll. Otherwise, by default the user can
+  /// only scroll the view if it has sufficient content. See [physics].
+  ///
+  /// On iOS, this also identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
   /// Defaults to true when [scrollDirection] is [Axis.vertical] and
@@ -102,7 +107,26 @@ abstract class ScrollView extends StatelessWidget {
   /// For example, determines how the scroll view continues to animate after the
   /// user stops dragging the scroll view.
   ///
-  /// Defaults to matching platform conventions.
+  /// Defaults to matching platform conventions. Furthermore, if [primary] is
+  /// false, then the user cannot scroll if there is insufficient content to
+  /// scroll, while if [primary] is true, they can always attempt to scroll.
+  ///
+  /// To force the scroll view to always be scrollable even if there is
+  /// insufficient content, as if [primary] was true but without necessarily
+  /// setting it to true, provide an [AlwaysScrollableScrollPhysics] physics
+  /// object, as in:
+  ///
+  /// ```dart
+  ///   physics: const AlwaysScrollableScrollPhysics(),
+  /// ```
+  ///
+  /// To force the scroll view to use the default platform conventions and not
+  /// be scrollable if there is insufficient content, regardless of the value of
+  /// [primary], provide an explicit [ScrollPhysics] object, as in:
+  ///
+  /// ```dart
+  ///   physics: const ScrollPhysics(),
+  /// ```
   final ScrollPhysics physics;
 
   /// Whether the extent of the scroll view in the [scrollDirection] should be

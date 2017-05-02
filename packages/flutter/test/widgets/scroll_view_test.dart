@@ -278,4 +278,86 @@ void main() {
     );
     expect(innerScrollable.controller, isNull);
   });
+
+  testWidgets('Primary ListViews are always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(primary: true);
+    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+  });
+
+  testWidgets('Non-primary ListViews are not always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(primary: false);
+    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+  });
+
+  testWidgets('Defaulting-to-primary ListViews are always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(scrollDirection: Axis.vertical);
+    expect(view.physics, const isInstanceOf<AlwaysScrollableScrollPhysics>());
+  });
+
+  testWidgets('Defaulting-to-not-primary ListViews are not always scrollable', (WidgetTester tester) async {
+    final ListView view = new ListView(scrollDirection: Axis.horizontal);
+    expect(view.physics, isNot(const isInstanceOf<AlwaysScrollableScrollPhysics>()));
+  });
+
+  testWidgets('primary:true leads to scrolling', (WidgetTester tester) async {
+    bool scrolled = false;
+    await tester.pumpWidget(
+      new NotificationListener<OverscrollNotification>(
+        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+        child: new ListView(
+          primary: true,
+          children: <Widget>[],
+        ),
+      ),
+    );
+    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+    expect(scrolled, isTrue);
+  });
+
+  testWidgets('primary:false leads to no scrolling', (WidgetTester tester) async {
+    bool scrolled = false;
+    await tester.pumpWidget(
+      new NotificationListener<OverscrollNotification>(
+        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+        child: new ListView(
+          primary: false,
+          children: <Widget>[],
+        ),
+      ),
+    );
+    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+    expect(scrolled, isFalse);
+  });
+
+  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behaviour', (WidgetTester tester) async {
+    bool scrolled = false;
+    await tester.pumpWidget(
+      new NotificationListener<OverscrollNotification>(
+        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+        child: new ListView(
+          primary: false,
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: <Widget>[],
+        ),
+      ),
+    );
+    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+    expect(scrolled, isTrue);
+  });
+
+  testWidgets('physics:ScrollPhysics actually overrides primary:true default behaviour', (WidgetTester tester) async {
+    bool scrolled = false;
+    await tester.pumpWidget(
+      new NotificationListener<OverscrollNotification>(
+        onNotification: (OverscrollNotification message) { scrolled = true; return false; },
+        child: new ListView(
+          primary: true,
+          physics: const ScrollPhysics(),
+          children: <Widget>[],
+        ),
+      ),
+    );
+    await tester.dragFrom(const Offset(100.0, 100.0), const Offset(0.0, 100.0));
+    expect(scrolled, isFalse);
+  });
 }

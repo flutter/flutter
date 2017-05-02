@@ -42,6 +42,7 @@ class _ListDemoState extends State<ListDemo> {
         ),
         child: new ListView(
           shrinkWrap: true,
+          primary: false,
           children: <Widget>[
             new ListTile(
               dense: true,
