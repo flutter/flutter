@@ -120,8 +120,16 @@ class ClampingScrollSimulation extends Simulation {
     _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
   }
 
+  /// The position of the particle at the beginning of the simulation.
   final double position;
+
+  /// The velocity at which the particle is traveling at the beginning of the
+  /// simulation.
   final double velocity;
+
+  /// The amount of friction the particle experiences as it travels.
+  ///
+  /// The more friction the particle experiences, the sooner it stops.
   final double friction;
 
   double _duration;

@@ -62,7 +62,7 @@ bool debugPaintBaselinesEnabled = false;
 /// The color to use when painting alphabetic baselines.
 Color debugPaintAlphabeticBaselineColor = _kDebugPaintAlphabeticBaselineColor;
 
-/// The color ot use when painting ideographic baselines.
+/// The color to use when painting ideographic baselines.
 Color debugPaintIdeographicBaselineColor = _kDebugPaintIdeographicBaselineColor;
 
 /// Causes each Layer to paint a box around its bounds.
