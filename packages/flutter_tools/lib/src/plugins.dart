@@ -149,13 +149,12 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 
 #import "PluginRegistry.h"
 
-@implementation PluginRegistry
+@implementation PluginRegistry : NSObject
 
 - (instancetype)initWithController:(FlutterViewController *)controller {
   if (self = [super init]) {
 {{#plugins}}
     _{{name}} = [[{{class}} alloc] initWithController:controller];
-    [self registerPlugin:_{{name}}];
 {{/plugins}}
   }
   return self;
