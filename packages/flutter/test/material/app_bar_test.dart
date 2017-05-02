@@ -90,6 +90,48 @@ void main() {
     size = tester.getSize(title);
     expect(center.dx, greaterThan(400 - size.width / 2.0));
     expect(center.dx, lessThan(400 + size.width / 2.0));
+
+    // One action is still centered.
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: const Text('X'),
+            actions: <Widget>[
+              const Icon(Icons.thumb_up),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    center = tester.getCenter(title);
+    size = tester.getSize(title);
+    expect(center.dx, greaterThan(400 - size.width / 2.0));
+    expect(center.dx, lessThan(400 + size.width / 2.0));
+
+    // Two actions is left aligned again.
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        theme: new ThemeData(platform: TargetPlatform.iOS),
+        home: new Scaffold(
+          appBar: new AppBar(
+            title: const Text('X'),
+            actions: <Widget>[
+              const Icon(Icons.thumb_up),
+              const Icon(Icons.thumb_up),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    center = tester.getCenter(title);
+    size = tester.getSize(title);
+    expect(center.dx, lessThan(400 - size.width / 2.0));
   });
 
   testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
@@ -104,7 +146,6 @@ void main() {
         )
       )
     );
-
 
     final Finder title = find.text('X');
     final Offset center = tester.getCenter(title);

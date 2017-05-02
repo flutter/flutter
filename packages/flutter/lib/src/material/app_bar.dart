@@ -311,7 +311,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
       case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
-        return true;
+        return actions == null || actions.length < 2;
     }
     return null;
   }
