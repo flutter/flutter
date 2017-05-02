@@ -90,7 +90,7 @@ GOTO :after_subroutine
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
-    CALL "%pub%" upgrade --verbosity=error --no-packages-dir
+    CALL "%dart%" tool\pub_upgrade.dart "%pub%"
     POPD
     CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     >"%stamp_path%" ECHO %revision%
