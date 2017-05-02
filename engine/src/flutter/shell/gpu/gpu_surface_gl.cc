@@ -8,7 +8,6 @@
 #include "lib/ftl/arraysize.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkSurface.h"
-#include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/gl/GrGLInterface.h"
 
 namespace shell {
