@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 /// A library to render markdown formatted text.
+///
+/// To use, import `package:flutter/flutter_markdown.dart`.
 library flutter_markdown;
 
 export 'src/builder.dart';
