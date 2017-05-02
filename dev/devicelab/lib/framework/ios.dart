@@ -9,6 +9,8 @@ import 'package:file/file.dart';
 import 'package:file/local.dart' as io;
 import 'package:path/path.dart' as path;
 
+import 'utils.dart';
+
 const String _kProvisioningConfigFileEnvironmentVariable = 'FLUTTER_DEVICELAB_XCODE_PROVISIONING_CONFIG';
 const String _kTestXcconfigFileName = 'TestConfig.xcconfig';
 const FileSystem _fs = const io.LocalFileSystem();
@@ -21,6 +23,11 @@ Future<Null> prepareProvisioningCertificates(String flutterProjectPath) async {
 
   final File testXcconfig = _fs.file(path.join(flutterProjectPath, 'ios/Flutter/$_kTestXcconfigFileName'));
   await testXcconfig.writeAsString(certificateConfig);
+}
+
+Future<Null> runPodInstallForCustomPodfile(String flutterProjectPath) async {
+  final String iosPath = path.join(flutterProjectPath, 'ios');
+  exec('pod', <String>['install', '--project-directory=$iosPath']);
 }
 
 Future<Null> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
