@@ -76,25 +76,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     correctPixels(pixels + correction);
   }
 
-  /// Take any current applicable state from the given [ScrollPosition].
-  ///
-  /// This method is called by the constructor, before calling [ensureActivity],
-  /// if it is given an `oldPosition`. It adopts the old position's current
-  /// [activity] as its own.
-  ///
-  /// This method is destructive to the other [ScrollPosition]. The other
-  /// object must be disposed immediately after this call (in the same call
-  /// stack, before microtask resolution, by whomever called this object's
-  /// constructor).
-  ///
-  /// If the old [ScrollPosition] object is a different [runtimeType] than this
-  /// one, the [ScrollActivity.resetActivity] method is invoked on the newly
-  /// adopted [ScrollActivity].
-  ///
-  /// When overriding this method, call `super.absorb` after setting any
-  /// metrics-related or activity-related state, since this method may restart
-  /// the activity and scroll activities tend to use those metrics when being
-  /// restarted.
   @override
   void absorb(ScrollPosition other) {
     super.absorb(other);
@@ -113,27 +94,11 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  /// Notifies the activity that the dimensions of the underlying viewport or
-  /// contents have changed.
-  ///
-  /// When this method is called, it should be called _after_ any corrections
-  /// are applied to [pixels] using [correctPixels], not before.
-  ///
-  /// See also:
-  ///
-  /// * [ScrollPosition.applyViewportDimension], which is called when new
-  ///   viewport dimensions are established.
-  /// * [ScrollPosition.applyContentDimensions], which is called after new
-  ///   viewport dimensions are established, and also if new content dimensions
-  ///   are established, and which calls [ScrollPosition.applyNewDimensions].
   @override
   void applyNewDimensions() {
     super.applyNewDimensions();
     context.setCanDrag(physics.shouldAcceptUserOffset(this));
   }
-
-
-  // SCROLL ACTIVITIES
 
   @override
   void beginActivity(ScrollActivity newActivity) {
@@ -153,8 +118,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     setPixels(pixels - physics.applyPhysicsToUserOffset(this, delta));
   }
 
-  /// End the current [ScrollActivity], replacing it with an
-  /// [IdleScrollActivity].
   @override
   void goIdle() {
     beginActivity(new IdleScrollActivity(this));
@@ -180,10 +143,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  /// The direction that the user most recently began scrolling in.
-  ///
-  /// If the user is not scrolling, this will return [ScrollDirection.idle] even
-  /// if there is an [activity] currently animating the position.
   @override
   ScrollDirection get userScrollDirection => _userScrollDirection;
   ScrollDirection _userScrollDirection = ScrollDirection.idle;
@@ -200,35 +159,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     didUpdateScrollDirection(value);
   }
 
-  // FEATURES USED BY SCROLL CONTROLLERS
-
-  /// Animates the position from its current value to the given value.
-  ///
-  /// Any active animation is canceled. If the user is currently scrolling, that
-  /// action is canceled.
-  ///
-  /// The returned [Future] will complete when the animation ends, whether it
-  /// completed successfully or whether it was interrupted prematurely.
-  ///
-  /// An animation will be interrupted whenever the user attempts to scroll
-  /// manually, or whenever another activity is started, or whenever the
-  /// animation reaches the edge of the viewport and attempts to overscroll. (If
-  /// the [ScrollPosition] does not overscroll but instead allows scrolling
-  /// beyond the extents, then going beyond the extents will not interrupt the
-  /// animation.)
-  ///
-  /// The animation is indifferent to changes to the viewport or content
-  /// dimensions.
-  ///
-  /// Once the animation has completed, the scroll position will attempt to
-  /// begin a ballistic activity in case its value is not stable (for example,
-  /// if it is scrolled beyond the extents and in that situation the scroll
-  /// position would normally bounce back).
-  ///
-  /// The duration must not be zero. To jump to a particular value without an
-  /// animation, use [jumpTo].
-  ///
-  /// The animation is handled by an [DrivenScrollActivity].
   @override
   Future<Null> animateTo(double to, {
     @required Duration duration,
@@ -246,18 +176,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     return activity.done;
   }
 
-  /// Jumps the scroll position from its current value to the given value,
-  /// without animation, and without checking if the new value is in range.
-  ///
-  /// Any active animation is canceled. If the user is currently scrolling, that
-  /// action is canceled.
-  ///
-  /// If this method changes the scroll position, a sequence of start/update/end
-  /// scroll notifications will be dispatched. No overscroll notifications can
-  /// be generated by this method.
-  ///
-  /// If settle is true then, immediately after the jump, a ballistic activity
-  /// is started, in case the value was out of range.
   @override
   void jumpTo(double value) {
     goIdle();
@@ -272,7 +190,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     goBallistic(0.0);
   }
 
-  /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   @Deprecated('This will lead to bugs.')
   @override
   void jumpToWithoutSettling(double value) {
@@ -287,8 +204,6 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  ScrollDragController _currentDrag;
-
   @override
   ScrollHoldController hold(VoidCallback holdCancelCallback) {
     final HoldScrollActivity activity = new HoldScrollActivity(
@@ -299,11 +214,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     return activity;
   }
 
-  /// Start a drag activity corresponding to the given [DragStartDetails].
-  ///
-  /// The `onDragCanceled` argument will be invoked if the drag is ended
-  /// prematurely (e.g. from another activity taking over). See
-  /// [ScrollDragController.onDragCanceled] for details.
+  ScrollDragController _currentDrag;
+
   @override
   Drag drag(DragStartDetails details, VoidCallback onDragCanceled) {
     final ScrollDragController drag = new ScrollDragController(

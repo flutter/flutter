@@ -81,16 +81,15 @@ class ScrollPhysics {
 
   /// Determines the overscroll by applying the boundary conditions.
   ///
-  /// Called by [ScrollPositionWithSingleContext.applyBoundaryConditions], which
-  /// is called by [ScrollPositionWithSingleContext.setPixels] just before the
-  /// [ScrollPosition.pixels] value is updated, to determine how much of the
-  /// offset is to be clamped off and sent to
-  /// [ScrollPositionWithSingleContext.didOverscrollBy].
+  /// Called by [ScrollPosition.applyBoundaryConditions], which is called by
+  /// [ScrollPosition.setPixels] just before the [ScrollPosition.pixels] value
+  /// is updated, to determine how much of the offset is to be clamped off and
+  /// sent to [ScrollPosition.didOverscrollBy].
   ///
   /// The `value` argument is guaranteed to not equal [pixels] when this is
   /// called.
   ///
-  /// It is possible for this method to be called when the [position] describes
+  /// It is possible for this method to be called when the `position` describes
   /// an already-out-of-bounds position. In that case, the boundary conditions
   /// should usually only prevent a further increase in the extent to which the
   /// position is out of bounds, allowing a decrease to be applied successfully,

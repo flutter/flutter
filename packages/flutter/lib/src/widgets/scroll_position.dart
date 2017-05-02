@@ -20,14 +20,46 @@ import 'scroll_physics.dart';
 
 export 'scroll_activity.dart' show ScrollHoldController;
 
-// ## Subclassing ScrollPosition
-//
-//  * Describe how to impelement [absorb]
-//     - May need to start an idle activity
-//     - May need to update the activity's idea of what the delegate is
-//     - etc
-//  * Need to call [didUpdateScrollDirection] when changing [userScrollDirection]
+/// Determines which portion of the content is visible in a scroll view.
+///
+/// The [pixels] value determines the scroll offset that the scroll view uses to
+/// select which part of its content to display. As the user scrolls the
+/// viewport, this value changes, which changes the content that is displayed.
+///
+/// The [ScrollPosition] applies [physics] to scrolling, and stores the
+/// [minScrollExtent] and [maxScrollExtent].
+///
+/// Scrolling is controlled by the current [activity], which is set by
+/// [beginActivity]. [ScrollPosition] itself does not start any activities.
+/// Instead, concrete subclasses, such as [ScrollPositionWithSingleContext],
+/// typically start activities in response to user input or instructions from a
+/// [ScrollController].
+///
+/// This object is a [Listable] that notifies its listeners when [pixels]
+/// changes.
+///
+/// ## Subclassing ScrollPosition
+///
+/// Over time, a [Scrollable] might have many different [ScrollPosition]
+/// objects. For example, if [Scrollable.physics] changes type, [Scrollable]
+/// creates a new [ScrollPosition] with the new physics. To transfer state from
+/// the old instance to the new instance, subclasses implement [absorb]. See
+/// [absorb] for more details.
+///
+/// Subclasses also need to call [didUpdateScrollDirection] whenever
+/// [userScrollDirection] changes values.
+///
+/// See also:
+///
+///  * [Scrollable], which uses a [ScrollPosition] to determine which portion of
+///    its content to display.
+///  * [ScrollController], which can be used with [ListView], [GridView] and
+///    other scrollable widgets to control a [ScrollPosition].
+///  * [ScrollPositionWithSingleContext], which is the most commonly used
+///    concrete subclass of [ScrollPosition].
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
+  /// Creates an object that determines which portion of the content is visible
+  /// in a scroll view.
   ScrollPosition({
     @required this.physics,
     @required this.context,
@@ -41,8 +73,19 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       absorb(oldPosition);
   }
 
+  /// How the scroll position should respond to user input.
+  ///
+  /// For example, determines how the widget continues to animate after the
+  /// user stops dragging the scroll view.
   final ScrollPhysics physics;
+
+  /// Where the scrolling is taking place.
+  ///
+  /// Typically implemented by [ScrollableState].
   final ScrollContext context;
+
+  /// A label that is used in the [toString] output. Intended to aid with
+  /// identifying animation controller instances in debug output.
   final String debugLabel;
 
   @override
@@ -72,11 +115,30 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Take any current applicable state from the given [ScrollPosition].
   ///
   /// This method is called by the constructor if it is given an `oldPosition`.
+  /// The `other` argument might not have the same [runtimeType] as this object.
   ///
   /// This method can be destructive to the other [ScrollPosition]. The other
   /// object must be disposed immediately after this call (in the same call
   /// stack, before microtask resolution, by whomever called this object's
   /// constructor).
+  ///
+  /// If the old [ScrollPosition] object is a different [runtimeType] than this
+  /// one, the [ScrollActivity.resetActivity] method is invoked on the newly
+  /// adopted [ScrollActivity].
+  ///
+  /// ## Overriding
+  ///
+  /// Overrides of this method must call `super.absorb` after setting any
+  /// metrics-related or activity-related state, since this method may restart
+  /// the activity and scroll activities tend to use those metrics when being
+  /// restarted.
+  ///
+  /// Overrides of this method might need to start an [IdleScrollActivity] if
+  /// they are unable to absorb the activity from the other [ScrollPosition].
+  ///
+  /// Overrides of this method might also need to update the delegates of
+  /// absorbed scroll activities if they use themselves as a
+  /// [ScrollActivityDelegate].
   @protected
   @mustCallSuper
   void absorb(ScrollPosition other) {
@@ -206,6 +268,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     notifyListeners();
   }
 
+  /// Returns the overscroll by applying the boundary conditions.
+  ///
+  /// If the given value is in bounds, returns 0.0. Otherwise, returns the
+  /// amount of value that cannot be applied to [pixels] as a result of the
+  /// boundary conditions. If the [physics] allow out-of-bounds scrolling, this
+  /// method always returns 0.0.
   @protected
   double applyBoundaryConditions(double value) {
     final double result = physics.applyBoundaryConditions(this, value);
@@ -256,6 +324,25 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
+  /// Notifies the activity that the dimensions of the underlying viewport or
+  /// contents have changed.
+  ///
+  /// Called after [applyViewportDimension] or [applyContentDimensions] have
+  /// changed the [minScrollExtent], the [maxScrollExtent], or the
+  /// [viewportDimension]. When this method is called, it should be called
+  /// _after_ any corrections are applied to [pixels] using [correctPixels], not
+  /// before.
+  ///
+  /// The default implementation informs the [activity] of the new dimensions by
+  /// calling [ScrollActivityDelegate.applyNewDimensions].
+  ///
+  /// See also:
+  ///
+  /// * [applyViewportDimension], which is called when new
+  ///   viewport dimensions are established.
+  /// * [applyContentDimensions], which is called after new
+  ///   viewport dimensions are established, and also if new content dimensions
+  ///   are established, and which calls [ScrollPosition.applyNewDimensions].
   @protected
   @mustCallSuper
   void applyNewDimensions() {
@@ -294,21 +381,73 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// [State.dispose] method.
   final ValueNotifier<bool> isScrollingNotifier = new ValueNotifier<bool>(false);
 
+  /// Animates the position from its current value to the given value.
+  ///
+  /// Any active animation is canceled. If the user is currently scrolling, that
+  /// action is canceled.
+  ///
+  /// The returned [Future] will complete when the animation ends, whether it
+  /// completed successfully or whether it was interrupted prematurely.
+  ///
+  /// An animation will be interrupted whenever the user attempts to scroll
+  /// manually, or whenever another activity is started, or whenever the
+  /// animation reaches the edge of the viewport and attempts to overscroll. (If
+  /// the [ScrollPosition] does not overscroll but instead allows scrolling
+  /// beyond the extents, then going beyond the extents will not interrupt the
+  /// animation.)
+  ///
+  /// The animation is indifferent to changes to the viewport or content
+  /// dimensions.
+  ///
+  /// Once the animation has completed, the scroll position will attempt to
+  /// begin a ballistic activity in case its value is not stable (for example,
+  /// if it is scrolled beyond the extents and in that situation the scroll
+  /// position would normally bounce back).
+  ///
+  /// The duration must not be zero. To jump to a particular value without an
+  /// animation, use [jumpTo].
+  ///
+  /// The animation is typically handled by an [DrivenScrollActivity].
   Future<Null> animateTo(double to, {
     @required Duration duration,
     @required Curve curve,
   });
 
+  /// Jumps the scroll position from its current value to the given value,
+  /// without animation, and without checking if the new value is in range.
+  ///
+  /// Any active animation is canceled. If the user is currently scrolling, that
+  /// action is canceled.
+  ///
+  /// If this method changes the scroll position, a sequence of start/update/end
+  /// scroll notifications will be dispatched. No overscroll notifications can
+  /// be generated by this method.
+  ///
+  /// If settle is true then, immediately after the jump, a ballistic activity
+  /// is started, in case the value was out of range.
   void jumpTo(double value);
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
   @Deprecated('This will lead to bugs.')
   void jumpToWithoutSettling(double value);
 
+  /// Stop the current activity and start a [HoldScrollActivity].
   ScrollHoldController hold(VoidCallback holdCancelCallback);
 
+  /// Start a drag activity corresponding to the given [DragStartDetails].
+  ///
+  /// The `onDragCanceled` argument will be invoked if the drag is ended
+  /// prematurely (e.g. from another activity taking over). See
+  /// [ScrollDragController.onDragCanceled] for details.
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback);
 
+  /// The currently operative [ScrollActivity].
+  ///
+  /// If the scroll position is not performing any more specific activity, the
+  /// activity will be an [IdleScrollActivity]. To determine whether the scroll
+  /// position is idle, check the [isScrollingNotifier].
+  ///
+  /// Call [beginActivity] to change the current activity.
   @protected
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
@@ -335,9 +474,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       wasScrolling = false;
     }
     _activity = newActivity;
-    isScrollingNotifier.value = activity.isScrolling;
     if (oldIgnorePointer != activity.shouldIgnorePointer)
       context.setIgnorePointer(activity.shouldIgnorePointer);
+    isScrollingNotifier.value = activity.isScrolling;
     if (!wasScrolling && _activity.isScrolling)
       didStartScroll();
   }
