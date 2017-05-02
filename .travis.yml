@@ -1,5 +1,5 @@
-os:
-  - linux
+os: linux
+dist: trusty
 sudo: false
 addons:
   apt:
