@@ -15,12 +15,34 @@ import 'scroll_simulation.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
+/// Determines the physics of a [Scrollable] widget.
+///
+/// For example, determines how the [Scrollable] will behave when the user
+/// reaches the maximum scroll extent or when the user stops scrolling.
+///
+/// When starting a physics [Simulation], the current scroll position and
+/// velocity are used as the initial conditions for the particle in the
+/// simulation. The movement of the particle in the simulation is then used to
+/// determine the scroll position for the widget.
 @immutable
 class ScrollPhysics {
+  /// Creates an object with the default scroll physics.
   const ScrollPhysics({ this.parent });
 
+  /// If non-null, determines the default behavior for each method.
+  ///
+  /// If a subclass of [ScrollPhysics] does not override a method, that subclass
+  /// will inherit an implementation from this base class that defers to
+  /// [parent]. This mechanism lets you assemble novel combinations of
+  /// [ScrollPhysics] subclasses at runtime.
   final ScrollPhysics parent;
 
+  /// Return a [ScrollPhysics] with the same [runtimeType] where the [parent]
+  /// has been replaced with the given [parent].
+  ///
+  /// The returned object will combine some of the behaviors from this
+  /// [ScrollPhysics] instance and some of the behaviors from the given
+  /// [ScrollPhysics] instance.
   ScrollPhysics applyTo(ScrollPhysics parent) => new ScrollPhysics(parent: parent);
 
   /// Used by [DragScrollActivity] and other user-driven activities to
@@ -111,6 +133,7 @@ class ScrollPhysics {
     ratio: 1.1,
   );
 
+  /// The spring to use for ballistic simulations.
   SpringDescription get spring => parent?.spring ?? _kDefaultSpring;
 
   /// The default accuracy to which scrolling is computed.
@@ -121,6 +144,7 @@ class ScrollPhysics {
     distance: 1.0 / ui.window.devicePixelRatio // logical pixels
   );
 
+  /// The tolerance to use for ballistic simulations.
   Tolerance get tolerance => parent?.tolerance ?? _kDefaultTolerance;
 
   /// The minimum distance an input pointer drag must have moved to

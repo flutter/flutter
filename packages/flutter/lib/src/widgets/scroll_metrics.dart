@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-/// A description of a [Scrollable]'s contents, useful for modelling the state
+/// A description of a [Scrollable]'s contents, useful for modeling the state
 /// of its viewport.
 ///
 /// This class defines a current position, [pixels], and a range of values

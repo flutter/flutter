@@ -24,9 +24,53 @@ import 'viewport.dart';
 
 export 'package:flutter/physics.dart' show Tolerance;
 
+/// Signature used by [Scrollable] to build the viewport through which the
+/// scrollable content is displayed.
 typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 
+/// A widget that scrolls.
+///
+/// [Scrollable] implements the interaction model for a scrollable widget,
+/// including gesture recognition, but does not have an opinion about how the
+/// viewport, which actually displays the children, is constructed.
+///
+/// It's rare to construct a [Scrollable] directly. Instead, consider [ListView]
+/// or [GridView], which combine scrolling, viewporting, and a layout model. To
+/// combine layout models (or to use a custom layout mode), consider using
+/// [CustomScrollView].
+///
+/// The static [Scrollable.of] and [Scrollable.ensureVisible] functions are
+/// often used to interact with the [Scrollable] widget inside a [ListView] or
+/// a [GridView].
+///
+/// To further customize scrolling behavior with a [Scrollable]:
+///
+/// 1. You can provide a [viewportBuilder] to customize the child model. For
+///    example, [SingleChildScrollView] uses a viewport that displays a single
+///    box child whereas [CustomScrollView] uses a [Viewport] or a
+///    [ShrinkWrappingViewport], both of which display a list of slivers.
+///
+/// 2. You can provide a custom [ScrollController] that creates a custom
+///    [ScrollPosition] subclass. For example, [PageView] uses a
+///    [PageController], which creates a page-oriented scroll position subclass
+///    that keeps the same page visible when the [Scrollable] resizes.
+///
+/// See also:
+///
+///  * [ListView], which is a commonly used [ScrollView] that displays a
+///    scrolling, linear list of child widgets.
+///  * [PageView], which is a scrolling list of child widgets that are each the
+///    size of the viewport.
+///  * [GridView], which is a [ScrollView] that displays a scrolling, 2D array
+///    of child widgets.
+///  * [CustomScrollView], which is a [ScrollView] that creates custom scroll
+///    effects using slivers.
+///  * [SingleChildScrollView], which is a scrollable widget that has a single
+///    child.
 class Scrollable extends StatefulWidget {
+  /// Creates a widget that scrolls.
+  ///
+  /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
     Key key,
     this.axisDirection: AxisDirection.down,
@@ -37,14 +81,50 @@ class Scrollable extends StatefulWidget {
        assert(viewportBuilder != null),
        super (key: key);
 
+  /// The direction in which this widget scrolls.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], increasing
+  /// the scroll position will cause content below the bottom of the viewport to
+  /// become visible through the viewport. Similarly, if [axisDirection] is
+  /// [AxisDirection.right], increasing the scroll position will cause content
+  /// beyond the right edge of the viewport to become visible through the
+  /// viewport.
+  ///
+  /// Defaults to [AxisDirection.down].
   final AxisDirection axisDirection;
 
+  /// An object that can be used to control the position to which this widget is
+  /// scrolled.
+  ///
+  /// See also:
+  ///
+  ///  * [ensureVisible], which animates the scroll position to reveal a given
+  ///    [BuildContext].
   final ScrollController controller;
 
+  /// How the widgets should respond to user input.
+  ///
+  /// For example, determines how the widget continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
+  /// Builds the viewport through which the scrollable content is displayed.
+  ///
+  /// A typical viewport uses the given [ViewportOffset] to determine which part
+  /// of its content is actually visible through the viewport.
+  ///
+  /// See also:
+  ///
+  ///  * [Viewport], which is a viewport that displays a list of slivers.
+  ///  * [ShrinkWrappingViewport], which is a viewport that displays a list of
+  ///    slivers and sizes itself based on the size of the slivers.
   final ViewportBuilder viewportBuilder;
 
+  /// The axis along which the scroll view scrolls.
+  ///
+  /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
 
   @override
