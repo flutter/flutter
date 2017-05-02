@@ -93,7 +93,6 @@ GOTO :after_subroutine
 
     REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
-    SET PUB_ENVIRONMENT=flutter_install:%PUB_ENVIRONMENT%
     IF "%TRAVIS%" == "true" GOTO on_bot
     IF "%BOT%" == "true" GOTO on_bot
     IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
@@ -102,8 +101,9 @@ GOTO :after_subroutine
     IF "%CI%" == "true" GOTO on_bot
     GOTO not_on_bot
     :on_bot
-      SET PUB_ENVIRONMENT=flutter_bot:%PUB_ENVIRONMENT%
+      SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
     :not_on_bot
+    SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
     CALL "%pub%" upgrade --verbosity=error --no-packages-dir
     ENDLOCAL
 
