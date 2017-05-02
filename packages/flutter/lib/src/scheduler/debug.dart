@@ -30,6 +30,17 @@ bool debugPrintBeginFrameBanner = false;
 /// determining if code is running during a frame or between frames.
 bool debugPrintEndFrameBanner = false;
 
+/// Log the call stacks that cause a frame to be scheduled.
+///
+/// This is called whenever [Scheduler.scheduleFrame] schedules a frame. This
+/// can happen for various reasons, e.g. when a [Ticker] or
+/// [AnimationController] is started, or when [RenderObject.markNeedsLayout] is
+/// called, or when [State.setState] is called.
+///
+/// To get a stack specifically when widgets are scheduled to be built, see
+/// [debugPrintScheduleBuildForStacks].
+bool debugPrintScheduleFrameStacks = false;
+
 /// Returns true if none of the scheduler library debug variables have been changed.
 ///
 /// This function is used by the test framework to ensure that debug variables

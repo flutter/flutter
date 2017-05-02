@@ -144,7 +144,7 @@ void main() {
       duration: const Duration(milliseconds: 100),
     );
 
-    // Item's 0, 1, 2 at 0, 100, 200. All heights 100.
+    // Items 0, 1, 2 at 0, 100, 200. All heights 100.
     expect(itemTop(0), 0.0);
     expect(itemBottom(0), 100.0);
     expect(itemTop(1), 100.0);
@@ -154,7 +154,7 @@ void main() {
 
     // Newly removed item 0's height should animate from 100 to 0 over 100ms
 
-    // Item's 0, 1, 2 at 0, 50, 150. Item 0's height is 50.
+    // Items 0, 1, 2 at 0, 50, 150. Item 0's height is 50.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 50));
     expect(itemTop(0), 0.0);
@@ -164,10 +164,8 @@ void main() {
     expect(itemTop(2), 150.0);
     expect(itemBottom(2), 250.0);
 
-    // Item's 0, 1, 2 at 0, 0, 0. Item 0's height is 0.
+    // Items 1, 2 at 0, 100.
     await tester.pumpAndSettle();
-    expect(itemTop(0), 0.0);
-    expect(itemBottom(0), 0.0);
     expect(itemTop(1), 0.0);
     expect(itemBottom(1), 100.0);
     expect(itemTop(2), 100.0);

@@ -272,7 +272,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       }
       return true;
     });
-    scheduleFrame();
+    ensureVisualUpdate();
   }
 
   /// Whether we are currently in a frame. This is used to verify
@@ -286,7 +286,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 
   /// Pump the build and rendering pipeline to generate a frame.
   ///
-  /// This method is called by [handleBeginFrame], which itself is called
+  /// This method is called by [handleDrawFrame], which itself is called
   /// automatically by the engine when when it is time to lay out and paint a
   /// frame.
   ///
@@ -299,50 +299,57 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// driving [AnimationController] objects, which means all of the active
   /// [Animation] objects tick at this point.
   ///
-  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
-  /// the most notable is this method, [beginFrame], which proceeds as follows:
+  /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
+  /// scheduled by transient frame callbacks get to run. This typically includes
+  /// callbacks for futures from [Ticker]s and [AnimationController]s that
+  /// completed this frame.
   ///
-  /// 2. The build phase: All the dirty [Element]s in the widget tree are
+  /// After [handleBeginFrame], [handleDrawFrame], which is registered with
+  /// [ui.window.onDrawFrame], is called, which invokes all the persistent frame
+  /// callbacks, of which the most notable is this method, [drawFrame], which
+  /// proceeds as follows:
+  ///
+  /// 3. The build phase: All the dirty [Element]s in the widget tree are
   /// rebuilt (see [State.build]). See [State.setState] for further details on
   /// marking a widget dirty for building. See [BuildOwner] for more information
   /// on this step.
   ///
-  /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// 4. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
   /// for further details on marking an object dirty for layout.
   ///
-  /// 4. The compositing bits phase: The compositing bits on any dirty
+  /// 5. The compositing bits phase: The compositing bits on any dirty
   /// [RenderObject] objects are updated. See
   /// [RenderObject.markNeedsCompositingBitsUpdate].
   ///
-  /// 5. The paint phase: All the dirty [RenderObject]s in the system are
+  /// 6. The paint phase: All the dirty [RenderObject]s in the system are
   /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// 7. The compositing phase: The layer tree is turned into a [ui.Scene] and
   /// sent to the GPU.
   ///
-  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
   /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 3-7, see [PipelineOwner].
+  /// For more details on steps 4-8, see [PipelineOwner].
   ///
-  /// 8. The finalization phase in the widgets layer: The widgets tree is
+  /// 9. The finalization phase in the widgets layer: The widgets tree is
   /// finalized. This causes [State.dispose] to be invoked on any objects that
   /// were removed from the widgets tree this frame. See
   /// [BuildOwner.finalizeTree] for more details.
   ///
-  /// 9. The finalization phase in the scheduler layer: After [beginFrame]
-  /// returns, [handleBeginFrame] then invokes post-frame callbacks (registered
-  /// with [addPostFrameCallback].
+  /// 10. The finalization phase in the scheduler layer: After [drawFrame]
+  /// returns, [handleDrawFrame] then invokes post-frame callbacks (registered
+  /// with [addPostFrameCallback]).
   //
   // When editing the above, also update rendering/binding.dart's copy.
   @override
-  void beginFrame() {
+  void drawFrame() {
     assert(!debugBuildingDirtyElements);
     assert(() {
       debugBuildingDirtyElements = true;
@@ -351,7 +358,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
-      super.beginFrame();
+      super.drawFrame();
       buildOwner.finalizeTree();
     } finally {
       assert(() {
@@ -429,7 +436,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
 void runApp(Widget app) {
   WidgetsFlutterBinding.ensureInitialized()
     ..attachRootWidget(app)
-    ..handleBeginFrame(null);
+    ..scheduleWarmUpFrame();
 }
 
 /// Print a string representation of the currently running app.

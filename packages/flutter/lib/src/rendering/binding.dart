@@ -167,12 +167,12 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   }
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
-    beginFrame();
+    drawFrame();
   }
 
   /// Pump the rendering pipeline to generate a frame.
   ///
-  /// This method is called by [handleBeginFrame], which itself is called
+  /// This method is called by [handleDrawFrame], which itself is called
   /// automatically by the engine when when it is time to lay out and paint a
   /// frame.
   ///
@@ -185,48 +185,66 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// driving [AnimationController] objects, which means all of the active
   /// [Animation] objects tick at this point.
   ///
-  /// [handleBeginFrame] then invokes all the persistent frame callbacks, of which
-  /// the most notable is this method, [beginFrame], which proceeds as follows:
+  /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
+  /// scheduled by transient frame callbacks get to run. This typically includes
+  /// callbacks for futures from [Ticker]s and [AnimationController]s that
+  /// completed this frame.
   ///
-  /// 2. The layout phase: All the dirty [RenderObject]s in the system are laid
+  /// After [handleBeginFrame], [handleDrawFrame], which is registered with
+  /// [ui.window.onDrawFrame], is called, which invokes all the persistent frame
+  /// callbacks, of which the most notable is this method, [drawFrame], which
+  /// proceeds as follows:
+  ///
+  /// 3. The layout phase: All the dirty [RenderObject]s in the system are laid
   /// out (see [RenderObject.performLayout]). See [RenderObject.markNeedsLayout]
   /// for further details on marking an object dirty for layout.
   ///
-  /// 3. The compositing bits phase: The compositing bits on any dirty
+  /// 4. The compositing bits phase: The compositing bits on any dirty
   /// [RenderObject] objects are updated. See
   /// [RenderObject.markNeedsCompositingBitsUpdate].
   ///
-  /// 4. The paint phase: All the dirty [RenderObject]s in the system are
+  /// 5. The paint phase: All the dirty [RenderObject]s in the system are
   /// repainted (see [RenderObject.paint]). This generates the [Layer] tree. See
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 5. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
   /// sent to the GPU.
   ///
-  /// 6. The semantics phase: All the dirty [RenderObject]s in the system have
+  /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
   /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.
   ///
-  /// For more details on steps 2-6, see [PipelineOwner].
+  /// For more details on steps 3-7, see [PipelineOwner].
   ///
-  /// 7. The finalization phase: After [beginFrame] returns, [handleBeginFrame]
-  /// then invokes post-frame callbacks (registered with [addPostFrameCallback].
+  /// 8. The finalization phase: After [drawFrame] returns, [handleDrawFrame]
+  /// then invokes post-frame callbacks (registered with [addPostFrameCallback]).
   ///
   /// Some bindings (for example, the [WidgetsBinding]) add extra steps to this
-  /// list (for example, see [WidgetsBinding.beginFrame]).
+  /// list (for example, see [WidgetsBinding.drawFrame]).
   //
   // When editing the above, also update widgets/binding.dart's copy.
   @protected
-  void beginFrame() {
+  void drawFrame() {
     assert(renderView != null);
     pipelineOwner.flushLayout();
     pipelineOwner.flushCompositingBits();
     pipelineOwner.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
     pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
+  }
+
+  /// Schedule a frame to run as soon as possible, rather than waiting for
+  /// the engine to request a frame.
+  ///
+  /// This is used during application startup so that the first frame (which is
+  /// likely to be quite expensive) gets a few extra milliseconds to run.
+  void scheduleWarmUpFrame() {
+    // We use timers here to ensure that microtasks flush in between.
+    Timer.run(() { handleBeginFrame(null); });
+    Timer.run(() { handleDrawFrame(); });
   }
 
   @override
@@ -238,7 +256,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     } finally {
       Timeline.finishSync();
     }
-    handleBeginFrame(null);
+    scheduleWarmUpFrame();
     await endOfFrame;
   }
 

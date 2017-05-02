@@ -15,7 +15,7 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
   EnginePhase phase = EnginePhase.composite;
 
   @override
-  void beginFrame() {
+  void drawFrame() {
     assert(phase != EnginePhase.build, 'rendering_tester does not support testing the build phase; use flutter_test instead');
     pipelineOwner.flushLayout();
     if (phase == EnginePhase.layout)
@@ -82,7 +82,7 @@ void pumpFrame({ EnginePhase phase: EnginePhase.layout }) {
   assert(renderer.renderView != null);
   assert(renderer.renderView.child != null); // call layout() first!
   renderer.phase = phase;
-  renderer.beginFrame();
+  renderer.drawFrame();
 }
 
 class TestCallbackPainter extends CustomPainter {

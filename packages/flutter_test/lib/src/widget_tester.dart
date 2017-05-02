@@ -210,10 +210,9 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   }
 
   /// Repeatedly calls [pump] with the given `duration` until there are no
-  /// longer any transient callbacks scheduled. This will call [pump] at least
-  /// once, even if no transient callbacks are scheduled when the function is
-  /// called, in case there are dirty widgets to rebuild which will themselves
-  /// register new transient callbacks.
+  /// longer any frames scheduled. This will call [pump] at least once, even if
+  /// no frames are scheduled when the function is called, to flush any pending
+  /// microtasks which may themselves schedule a frame.
   ///
   /// This essentially waits for all animations to have completed.
   ///
@@ -251,13 +250,26 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           throw new FlutterError('pumpAndSettle timed out');
         await binding.pump(duration, phase);
         count += 1;
-      } while (hasRunningAnimations);
+      } while (binding.hasScheduledFrame);
     }).then<int>((Null _) => count);
   }
 
-  /// Whether ther are any any transient callbacks scheduled.
+  /// Whether there are any any transient callbacks scheduled.
   ///
   /// This essentially checks whether all animations have completed.
+  ///
+  /// See also:
+  ///
+  ///  * [pumpAndSettle], which essentially calls [pump] until there are no
+  ///    scheduled frames.
+  ///
+  ///  * [SchedulerBinding.transientCallbackCount], which is the value on which
+  ///    this is based.
+  ///
+  ///  * [SchedulerBinding.hasScheduledFrame], which is true whenever a frame is
+  ///    pending. [SchedulerBinding.hasScheduledFrame] is made true when a
+  ///    widget calls [State.setState], even if there are no transient callbacks
+  ///    scheduled. This is what [pumpAndSettle] uses.
   bool get hasRunningAnimations => binding.transientCallbackCount > 0;
 
   @override
