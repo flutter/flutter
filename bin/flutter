@@ -81,7 +81,11 @@ fi
     "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
 
     echo Building flutter tool...
-    (cd "$FLUTTER_TOOLS_DIR"; "$PUB" upgrade --verbosity=error --no-packages-dir)
+    pub_env="flutter_install:$PUB_ENVIRONMENT"
+    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
+      pub_env="flutter_bot:$pub_env"
+    fi
+    (cd "$FLUTTER_TOOLS_DIR"; PUB_ENVIRONMENT=$pub_env "$PUB" upgrade --verbosity=error --no-packages-dir)
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi
