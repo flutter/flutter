@@ -379,7 +379,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final dynamic initialValue;
-  final int elevation;
+  final double elevation;
   final ThemeData theme;
 
   @override
@@ -433,15 +433,14 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 /// a [Theme] to use for the menu.
 ///
 /// The `elevation` argument specifies the z-coordinate at which to place the
-/// menu. The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9,
-/// 12, 16, 24. The elevation defaults to 8, the appropriate elevation for popup
+/// menu. The elevation defaults to 8, the appropriate elevation for popup
 /// menus.
 Future<T> showMenu<T>({
   @required BuildContext context,
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  int elevation: 8
+  double elevation: 8.0
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
@@ -481,7 +480,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.initialValue,
     this.onSelected,
     this.tooltip: 'Show menu',
-    this.elevation: 8,
+    this.elevation: 8.0,
     this.padding: const EdgeInsets.all(8.0),
     this.child
   }) : assert(itemBuilder != null),
@@ -503,9 +502,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   final String tooltip;
 
   /// The z-coordinate at which to place the menu when open.
-  ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  final int elevation;
+  final double elevation;
 
   /// Matches IconButton's 8 dps padding by default. In some cases, notably where
   /// this button appears as the trailing element of a list item, it's useful to be able

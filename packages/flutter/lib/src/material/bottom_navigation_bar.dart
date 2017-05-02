@@ -448,7 +448,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       children: <Widget>[
         new Positioned.fill(
           child: new Material( // Casts shadow.
-            elevation: 8,
+            elevation: 8.0,
             color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null
           )
         ),

@@ -193,7 +193,7 @@ class StockHomeState extends State<StockHome> {
 
   Widget buildAppBar() {
     return new AppBar(
-      elevation: 0,
+      elevation: 0.0,
       title: new Text(StockStrings.of(context).title()),
       actions: <Widget>[
         new IconButton(

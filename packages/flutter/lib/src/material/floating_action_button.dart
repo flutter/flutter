@@ -48,8 +48,8 @@ class FloatingActionButton extends StatefulWidget {
     this.tooltip,
     this.backgroundColor,
     this.heroTag,
-    this.elevation: 6,
-    this.highlightElevation: 12,
+    this.elevation: 6.0,
+    this.highlightElevation: 12.0,
     @required this.onPressed,
     this.mini: false
   }) : super(key: key);
@@ -80,18 +80,14 @@ class FloatingActionButton extends StatefulWidget {
 
   /// The z-coordinate at which to place this button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 6, the appropriate elevation for floating action buttons.
-  final int elevation;
+  final double elevation;
 
   /// The z-coordinate at which to place this button when the user is touching the button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 12, the appropriate elevation for floating action buttons
   /// while they are being touched.
-  final int highlightElevation;
+  final double highlightElevation;
 
   /// Controls the size of this button.
   ///

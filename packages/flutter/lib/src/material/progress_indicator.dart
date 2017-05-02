@@ -480,7 +480,7 @@ class _RefreshProgressIndicatorState extends _CircularProgressIndicatorState {
       child: new Material(
         type: MaterialType.circle,
         color: widget.backgroundColor ?? Theme.of(context).canvasColor,
-        elevation: 2,
+        elevation: 2.0,
         child: new Padding(
           padding: const EdgeInsets.all(12.0),
           child: new CustomPaint(

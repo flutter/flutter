@@ -472,7 +472,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   final BorderRadius borderRadius;
 
   /// The z-coordinate at which to place this physical object.
-  final int elevation;
+  final double elevation;
 
   /// The background color.
   final Color color;

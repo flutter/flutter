@@ -237,7 +237,7 @@ class SnackBar extends StatelessWidget {
               Scaffold.of(context).removeCurrentSnackBar(reason: SnackBarClosedReason.swipe);
             },
             child: new Material(
-              elevation: 6,
+              elevation: 6.0,
               color: backgroundColor ?? _kSnackBackground,
               child: new Theme(
                 data: darkTheme,

@@ -43,9 +43,9 @@ class RaisedButton extends StatelessWidget {
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
-    this.elevation: 2,
-    this.highlightElevation: 8,
-    this.disabledElevation: 0,
+    this.elevation: 2.0,
+    this.highlightElevation: 8.0,
+    this.disabledElevation: 0.0,
     this.colorBrightness,
     this.child
   }) : super(key: key);
@@ -97,25 +97,19 @@ class RaisedButton extends StatelessWidget {
 
   /// The z-coordinate at which to place this button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 2, the appropriate elevation for raised buttons.
-  final int elevation;
+  final double elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 8, the appropriate elevation for raised buttons while they are
   /// being touched.
-  final int highlightElevation;
+  final double highlightElevation;
 
   /// The z-coordinate at which to place this button when disabled.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 0, the appropriate elevation for disabled raised buttons.
-  final int disabledElevation;
+  final double disabledElevation;
 
   /// The theme brightness to use for this button.
   ///

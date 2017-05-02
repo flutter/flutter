@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
-import 'shadows.dart';
 import 'theme.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
@@ -113,7 +112,7 @@ class Material extends StatefulWidget {
   const Material({
     Key key,
     this.type: MaterialType.canvas,
-    this.elevation: 0,
+    this.elevation: 0.0,
     this.color,
     this.textStyle,
     this.borderRadius,
@@ -133,10 +132,8 @@ class Material extends StatefulWidget {
 
   /// The z-coordinate at which to place this material.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 0.
-  final int elevation;
+  final double elevation;
 
   /// The color to paint the material.
   ///
@@ -189,9 +186,6 @@ class Material extends StatefulWidget {
 
   /// The default radius of an ink splash in logical pixels.
   static const double defaultSplashRadius = 35.0;
-
-  /// Temporary flag used to enable the PhysicalModel shadow implementation.
-  static bool debugEnablePhysicalModel = false;
 }
 
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
@@ -237,63 +231,38 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       )
     );
 
-    if (Material.debugEnablePhysicalModel) {
-      if (widget.type == MaterialType.circle) {
-        contents = new PhysicalModel(
-          shape: BoxShape.circle,
-          elevation: widget.elevation,
-          color: backgroundColor,
-          child: contents,
-        );
-      } else if (widget.type == MaterialType.transparency) {
-        if (radius == null) {
-          contents = new ClipRect(child: contents);
-        } else {
-          contents = new ClipRRect(
-            borderRadius: radius,
-            child: contents
-          );
-        }
+    if (widget.type == MaterialType.circle) {
+      contents = new AnimatedPhysicalModel(
+        curve: Curves.fastOutSlowIn,
+        duration: kThemeChangeDuration,
+        shape: BoxShape.circle,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        animateColor: false,
+        child: contents,
+      );
+    } else if (widget.type == MaterialType.transparency) {
+      if (radius == null) {
+        contents = new ClipRect(child: contents);
       } else {
-        contents = new PhysicalModel(
-          shape: BoxShape.rectangle,
-          borderRadius: radius ?? BorderRadius.zero,
-          elevation: widget.elevation,
-          color: backgroundColor,
-          child: contents,
-        );
-      }
-    } else {
-      if (widget.type == MaterialType.circle) {
-        contents = new ClipOval(child: contents);
-      } else if (kMaterialEdges[widget.type] != null) {
         contents = new ClipRRect(
           borderRadius: radius,
           child: contents
         );
       }
-    }
-
-    if (widget.type != MaterialType.transparency) {
-      contents = new AnimatedContainer(
+    } else {
+      contents = new AnimatedPhysicalModel(
         curve: Curves.fastOutSlowIn,
         duration: kThemeChangeDuration,
-        decoration: new BoxDecoration(
-          borderRadius: radius,
-          boxShadow: widget.elevation == 0 || Material.debugEnablePhysicalModel ?
-              null : kElevationToShadow[widget.elevation],
-          shape: widget.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
-        ),
-        child: new Container(
-          decoration: new BoxDecoration(
-            borderRadius: radius,
-            color: backgroundColor,
-            shape: widget.type == MaterialType.circle ? BoxShape.circle : BoxShape.rectangle
-          ),
-          child: contents
-        )
+        shape: BoxShape.rectangle,
+        borderRadius: radius ?? BorderRadius.zero,
+        elevation: widget.elevation,
+        color: backgroundColor,
+        animateColor: false,
+        child: contents,
       );
     }
+
     return contents;
   }
 }

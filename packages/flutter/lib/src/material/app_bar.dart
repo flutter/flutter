@@ -157,7 +157,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actions,
     this.flexibleSpace,
     this.bottom,
-    this.elevation: 4,
+    this.elevation: 4.0,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
@@ -236,10 +236,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The z-coordinate at which to place this app bar.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 4, the appropriate elevation for app bars.
-  final int elevation;
+  final double elevation;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
@@ -566,7 +564,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final List<Widget> actions;
   final Widget flexibleSpace;
   final PreferredSizeWidget bottom;
-  final int elevation;
+  final double elevation;
   final bool forceElevated;
   final Color backgroundColor;
   final Brightness brightness;
@@ -607,7 +605,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         actions: actions,
         flexibleSpace: flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4 : 0,
+        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
@@ -774,15 +772,13 @@ class SliverAppBar extends StatefulWidget {
   /// The z-coordinate at which to place this app bar when it is above other
   /// content.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 4, the appropriate elevation for app bars.
   ///
   /// If [forceElevated] is false, the elevation is ignored when the app bar has
   /// no content underneath it. For example, if the app bar is [pinned] but no
   /// content is scrolled under it, or if it scrolls with the content, then no
   /// shadow is drawn, regardless of the value of [elevation].
-  final int elevation;
+  final double elevation;
 
   /// Whether to show the shadow appropriate for the [elevation] even if the
   /// content is not scrolled under the [AppBar].
