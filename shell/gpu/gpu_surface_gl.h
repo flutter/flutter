@@ -9,6 +9,7 @@
 #include "flutter/synchronization/debug_thread_checker.h"
 #include "lib/ftl/macros.h"
 #include "lib/ftl/memory/weak_ptr.h"
+#include "third_party/skia/include/gpu/GrContext.h"
 
 namespace shell {
 
