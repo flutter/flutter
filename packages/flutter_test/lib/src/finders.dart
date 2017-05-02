@@ -89,6 +89,16 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byType(Type type, { bool skipOffstage: true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
+  /// Finds widgets by searching for widgets with a particular icon data.
+  ///
+  /// Example:
+  ///
+  ///     expect(find.byIcon(Icons.inbox), findsOneWidget);
+  ///
+  /// If the `skipOffstage` argument is true (the default), then this skips
+  /// nodes that are [Offstage] or that are from inactive [Route]s.
+  Finder byIcon(IconData icon, { bool skipOffstage: true }) => new _WidgetIconFinder(icon, skipOffstage: skipOffstage);
+
   /// Finds widgets by searching for elements with a particular type.
   ///
   /// This does not do subclass tests, so for example
@@ -425,6 +435,21 @@ class _WidgetTypeFinder extends MatchFinder {
   @override
   bool matches(Element candidate) {
     return candidate.widget.runtimeType == widgetType;
+  }
+}
+
+class _WidgetIconFinder extends MatchFinder {
+  _WidgetIconFinder(this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
+
+  final IconData icon;
+
+  @override
+  String get description => 'icon "$icon"';
+
+  @override
+  bool matches(Element candidate) {
+    final Widget widget = candidate.widget;
+    return widget is Icon && widget.icon == icon;
   }
 }
 
