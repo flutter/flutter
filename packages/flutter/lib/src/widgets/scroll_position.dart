@@ -18,6 +18,8 @@ import 'scroll_metrics.dart';
 import 'scroll_notification.dart';
 import 'scroll_physics.dart';
 
+export 'scroll_activity.dart' show ScrollHoldController;
+
 // ## Subclassing ScrollPosition
 //
 //  * Describe how to impelement [absorb]
@@ -303,7 +305,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @Deprecated('This will lead to bugs.')
   void jumpToWithoutSettling(double value);
 
-  void didTouch();
+  ScrollHoldController hold(VoidCallback holdCancelCallback);
 
   Drag drag(DragStartDetails details, VoidCallback dragCancelCallback);
 

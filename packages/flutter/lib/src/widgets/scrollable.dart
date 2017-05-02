@@ -361,33 +361,47 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   // TOUCH HANDLERS
 
   Drag _drag;
+  ScrollHoldController _hold;
 
   void _handleDragDown(DragDownDetails details) {
     assert(_drag == null);
-    position.didTouch();
+    assert(_hold == null);
+    _hold = position.hold(_disposeHold);
   }
 
   void _handleDragStart(DragStartDetails details) {
     assert(_drag == null);
+    assert(_hold != null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
+    assert(_hold == null);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
     _drag?.update(details);
   }
 
   void _handleDragEnd(DragEndDetails details) {
     // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
     _drag?.end(details);
     assert(_drag == null);
   }
 
   void _handleDragCancel() {
+    // _hold might be null if the drag started.
     // _drag might be null if the drag activity ended and called _disposeDrag.
+    assert(_hold == null || _drag == null);
+    _hold?.cancel();
     _drag?.cancel();
+    assert(_hold == null);
     assert(_drag == null);
+  }
+
+  void _disposeHold() {
+    _hold = null;
   }
 
   void _disposeDrag() {

@@ -62,6 +62,10 @@ class DragStartDetails {
   /// Defaults to the origin if not specified in the constructor.
   final Offset globalPosition;
 
+  // TODO(ianh): Expose the current position, so that you can have a no-jump
+  // drag even when disambiguating (though of course it would lag the finger
+  // instead).
+
   @override
   String toString() => '$runtimeType($globalPosition)';
 }

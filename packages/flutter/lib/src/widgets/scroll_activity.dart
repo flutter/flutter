@@ -104,9 +104,6 @@ abstract class ScrollActivity {
     new ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
-  /// Called when the user touches the scroll view that is performing this activity.
-  void didTouch() { }
-
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() { }
 
@@ -127,12 +124,15 @@ abstract class ScrollActivity {
   }
 
   @override
-  String toString() => '$runtimeType';
+  String toString() => '$runtimeType#$hashCode';
 }
 
 /// A scroll activity that does nothing.
 ///
 /// When a scroll view is not scrolling, it is performing the idle activity.
+///
+/// If the [Scrollable] changes dimensions, this activity triggers a ballistic
+/// activity to restore the view.
 class IdleScrollActivity extends ScrollActivity {
   /// Creates a scroll activity that does nothing.
   IdleScrollActivity(ScrollActivityDelegate delegate) : super(delegate);
@@ -147,6 +147,56 @@ class IdleScrollActivity extends ScrollActivity {
 
   @override
   bool get isScrolling => false;
+}
+
+/// Interface for holding a [Scrollable] stationary.
+///
+/// An object that implements this interface is returned by
+/// [ScrollPosition.hold]. It holds the scrollable stationary until an activity
+/// is started or the [cancel] method is called.
+abstract class ScrollHoldController {
+  /// Release the [Scrollable], potentially letting it go ballistic if
+  /// necessary.
+  void cancel();
+}
+
+/// A scroll activity that does nothing but can be released to resume
+/// normal idle behavior.
+///
+/// This is used while the user is touching the [Scrollable] but before the
+/// touch has become a [Drag].
+///
+/// For the purposes of [ScrollNotification]s, this activity does not constitute
+/// scrolling, and does not prevent the user from interacting with the contents
+/// of the [Scrollable] (unlike when a drag has begun or there is a scroll
+/// animation underway).
+class HoldScrollActivity extends ScrollActivity implements ScrollHoldController {
+  /// Creates a scroll activity that does nothing.
+  HoldScrollActivity({
+    @required ScrollActivityDelegate delegate,
+    this.onHoldCanceled,
+  }) : super(delegate);
+
+  /// Called when [dispose] is called.
+  final VoidCallback onHoldCanceled;
+
+  @override
+  bool get shouldIgnorePointer => false;
+
+  @override
+  bool get isScrolling => false;
+
+  @override
+  void cancel() {
+    delegate.goBallistic(0.0);
+  }
+
+  @override
+  void dispose() {
+    if (onHoldCanceled != null)
+      onHoldCanceled();
+    super.dispose();
+  }
 }
 
 /// Scrolls a scroll view as the user drags their finger across the screen.
@@ -217,7 +267,7 @@ class ScrollDragController implements Drag {
     delegate.goBallistic(0.0);
   }
 
-  /// Called when the delegate is no longer sending events to this object.
+  /// Called by the delegate when it is no longer sending events to this object.
   @mustCallSuper
   void dispose() {
     _lastDetails = null;
@@ -229,6 +279,11 @@ class ScrollDragController implements Drag {
   /// [DragEndDetails] object.
   dynamic get lastDetails => _lastDetails;
   dynamic _lastDetails;
+
+  @override
+  String toString() {
+    return '$runtimeType#$hashCode';
+  }
 }
 
 /// The activity a scroll view performs when a the user drags their finger
@@ -247,11 +302,6 @@ class DragScrollActivity extends ScrollActivity {
   ) : _controller = controller, super(delegate);
 
   ScrollDragController _controller;
-
-  @override
-  void didTouch() {
-    assert(false);
-  }
 
   @override
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
@@ -296,6 +346,11 @@ class DragScrollActivity extends ScrollActivity {
     _controller = null;
     super.dispose();
   }
+
+  @override
+  String toString() {
+    return '$runtimeType#$hashCode($_controller)';
+  }
 }
 
 /// An activity that animates a scroll view based on a physics [simulation].
@@ -338,11 +393,6 @@ class BallisticScrollActivity extends ScrollActivity {
   @override
   void resetActivity() {
     delegate.goBallistic(velocity);
-  }
-
-  @override
-  void didTouch() {
-    delegate.goIdle();
   }
 
   @override
@@ -390,7 +440,7 @@ class BallisticScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType($_controller)';
+    return '$runtimeType#$hashCode($_controller)';
   }
 }
 
@@ -446,11 +496,6 @@ class DrivenScrollActivity extends ScrollActivity {
   /// pixels per second).
   double get velocity => _controller.velocity;
 
-  @override
-  void didTouch() {
-    delegate.goIdle();
-  }
-
   void _tick() {
     if (delegate.setPixels(_controller.value) != 0.0)
       delegate.goIdle();
@@ -480,6 +525,6 @@ class DrivenScrollActivity extends ScrollActivity {
 
   @override
   String toString() {
-    return '$runtimeType($_controller)';
+    return '$runtimeType#$hashCode($_controller)';
   }
 }
