@@ -6,8 +6,16 @@ import("//flutter/build/flutter_app.gni")
 
 flutter_app("hello_flutter") {
   main_dart = "lib/main.dart"
+
+  deps = [
+    "//lib/flutter/packages/flutter",
+  ]
 }
 
 flutter_aot_app("hello_flutter_aot") {
   main_dart = "lib/main.dart"
+
+  deps = [
+    "//lib/flutter/packages/flutter",
+  ]
 }
