@@ -15,7 +15,11 @@ Artifacts get artifacts => Artifacts.instance;
 
 /// Display an error level message to the user. Commands should use this if they
 /// fail in some way.
-void printError(String message, [StackTrace stackTrace]) => logger.printError(message, stackTrace);
+///
+/// Set `emphasis` to true to make the output bold if it's supported.
+void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+  logger.printError(message, stackTrace: stackTrace, emphasis: emphasis);
+}
 
 /// Display normal output of the command. This should be used for things like
 /// progress messages, success messages, or just normal command output.

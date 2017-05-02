@@ -155,7 +155,7 @@ abstract class IOSApp extends ApplicationPackage {
       final Directory payloadDir = fs.directory(fs.path.join(tempDir.path, 'Payload'));
       bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
     } on StateError catch (e, stackTrace) {
-      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace);
+      printError('Invalid prebuilt iOS binary: ${e.toString()}', stackTrace: stackTrace);
       return null;
     }
 
