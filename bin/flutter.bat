@@ -91,7 +91,7 @@ GOTO :after_subroutine
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
 
-    REM Makes changes to PUB_ENVIRONMENT only visiable to commands within SETLOCAL/ENDLOCAL
+    REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
     SETLOCAL
     SET PUB_ENVIRONMENT=flutter_install:%PUB_ENVIRONMENT%
     IF "%TRAVIS%" == "true" GOTO on_bot
