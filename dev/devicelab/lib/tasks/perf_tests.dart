@@ -72,6 +72,9 @@ TaskFunction createFlutterViewStartupTest() {
   return new StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
+      // This project has a non-standard CocoaPods Podfile. Run pod install
+      // before building the project.
+      runPodInstall: true,
   );
 }
 
@@ -79,10 +82,14 @@ TaskFunction createFlutterViewStartupTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  StartupTest(this.testDirectory, { this.reportMetrics: true });
+  StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
 
   final String testDirectory;
   final bool reportMetrics;
+  /// Used to trigger a `pod install` when the project has a custom Podfile and
+  /// flutter build ios won't automatically run `pod install` via the managed
+  /// plugin system.
+  final bool runPodInstall;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
@@ -90,6 +97,8 @@ class StartupTest {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+        if (runPodInstall)
+          await runPodInstallForCustomPodfile(testDirectory);
         await prepareProvisioningCertificates(testDirectory);
         // This causes an Xcode project to be created.
         await flutter('build', options: <String>['ios', '--profile']);
