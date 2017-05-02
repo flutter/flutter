@@ -358,6 +358,9 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   @override
   BuildContext get notificationContext => _gestureDetectorKey.currentContext;
 
+  @override
+  BuildContext get storageContext => context;
+
   // TOUCH HANDLERS
 
   Drag _drag;

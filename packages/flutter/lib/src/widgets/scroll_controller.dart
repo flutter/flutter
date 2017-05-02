@@ -180,7 +180,24 @@ class ScrollController extends ChangeNotifier {
   /// resizes.
   ///
   /// By default, returns a [ScrollPositionWithSingleContext].
-  ScrollPosition createScrollPosition(
+  ///
+  /// The arguments are generally passed to the [ScrollPosition] being created:
+  ///
+  ///  * `physics`: An instance of [ScrollPhysics] that determines how the
+  ///    [ScrollPosition] should react to user interactions, how it should
+  ///    simulate scrolling when released or flung, etc. The value will not be
+  ///    null. It typically comes from the [ScrollView] or other widget that
+  ///    creates the [Scrollable], or, if none was provided, from the ambient
+  ///    [ScrollConfiguration].
+  ///  * `context`: A [ScrollContext] used for communicating with the object
+  ///    that is to own the [ScrollPosition] (typically, this is the
+  ///    [Scrollable] itself).
+  ///  * `oldPosition`: If this is not the first time a [ScrollPosition] has
+  ///    been created for this [Scrollable], this will be the previous instance.
+  ///    This is used when the environment has changed and the [Scrollable]
+  ///    needs to recreate the [ScrollPosition] object. It is null the first
+  ///    time the [ScrollPosition] is created.
+ ScrollPosition createScrollPosition(
     ScrollPhysics physics,
     ScrollContext context,
     ScrollPosition oldPosition,

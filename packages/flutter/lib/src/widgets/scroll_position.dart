@@ -12,6 +12,7 @@ import 'package:flutter/scheduler.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
+import 'page_storage.dart';
 import 'scroll_activity.dart';
 import 'scroll_context.dart';
 import 'scroll_metrics.dart';
@@ -71,6 +72,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(context.vsync != null);
     if (oldPosition != null)
       absorb(oldPosition);
+    restoreScrollOffset();
   }
 
   /// How the scroll position should respond to user input.
@@ -259,13 +261,52 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// To cause the position to jump or animate to a new value, consider [jumpTo]
   /// or [animateTo].
   ///
-  /// This should not be called during layout. Consider [correctPixels] if you
-  /// find you need to adjust the position during layout.
+  /// This should not be called during layout (e.g. when setting the initial
+  /// scroll offset). Consider [correctPixels] if you find you need to adjust
+  /// the position during layout.
   @protected
   void forcePixels(double value) {
-    assert(_pixels != null);
+    assert(pixels != null);
     _pixels = value;
     notifyListeners();
+  }
+
+  /// Called whenever scrolling ends, to store the current scroll offset in a
+  /// storage mechanism with a lifetime that matches the app's lifetime.
+  ///
+  /// The stored value will be used by [restoreScrollOffset] when the
+  /// [ScrollPosition] is recreated, in the case of the [Scrollable] being
+  /// disposed then recreated in the same session. This might happen, for
+  /// instance, if a [ListView] is on one of the pages inside a [TabBarView],
+  /// and that page is displayed, then hidden, then displayed again.
+  ///
+  /// The default implementation writes the [pixels] using the nearest
+  /// [PageStorage] found from the [context]'s [ScrollContext.storageContext]
+  /// property.
+  @protected
+  void saveScrollOffset() {
+    PageStorage.of(context.storageContext)?.writeState(context.storageContext, pixels);
+  }
+
+  /// Called whenever the [ScrollPosition] is created, to restore the scroll
+  /// offset if possible.
+  ///
+  /// The value is stored by [saveScrollOffset] when the scroll position
+  /// changes, so that it can be restored in the case of the [Scrollable] being
+  /// disposed then recreated in the same session. This might happen, for
+  /// instance, if a [ListView] is on one of the pages inside a [TabBarView],
+  /// and that page is displayed, then hidden, then displayed again.
+  ///
+  /// The default implementation reads the value from the nearest [PageStorage]
+  /// found from the [context]'s [ScrollContext.storageContext] property, and
+  /// sets it using [correctPixels], if [pixels] is still null.
+  @protected
+  void restoreScrollOffset() {
+    if (pixels == null) {
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
+      if (value != null)
+        correctPixels(value);
+    }
   }
 
   /// Returns the overscroll by applying the boundary conditions.
@@ -467,7 +508,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       oldIgnorePointer = _activity.shouldIgnorePointer;
       wasScrolling = _activity.isScrolling;
       if (wasScrolling && !newActivity.isScrolling)
-        didEndScroll();
+        didEndScroll(); // notifies and then saves the scroll offset
       _activity.dispose();
     } else {
       oldIgnorePointer = false;
@@ -495,8 +536,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }
 
   /// Called by [beginActivity] to report when an activity has ended.
+  ///
+  /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
     activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
+    saveScrollOffset();
   }
 
   /// Called by [setPixels] to report overscroll when an attempt is made to

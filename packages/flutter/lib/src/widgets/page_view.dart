@@ -12,6 +12,7 @@ import 'package:flutter/rendering.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
+import 'page_storage.dart';
 import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_metrics.dart';
@@ -186,6 +187,20 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   }
 
   double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+
+  @override
+  void saveScrollOffset() {
+    PageStorage.of(context.storageContext)?.writeState(context.storageContext, getPageFromPixels(pixels, viewportDimension));
+  }
+
+  @override
+  void restoreScrollOffset() {
+    if (pixels == null) {
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
+      if (value != null)
+        correctPixels(getPixelsFromPage(value));
+    }
+  }
 
   @override
   bool applyViewportDimension(double viewportDimension) {
