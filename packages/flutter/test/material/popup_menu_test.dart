@@ -13,7 +13,7 @@ void main() {
         routes: <String, WidgetBuilder> {
           '/next': (BuildContext context) {
             return const Text('Next');
-          }
+          },
         },
         home: new Material(
           child: new Center(
@@ -29,15 +29,15 @@ void main() {
                       const PopupMenuItem<int>(
                         value: 1,
                         child: const Text('One')
-                      )
+                      ),
                     ];
-                  }
+                  },
                 );
-              }
-            )
-          )
-        )
-      )
+              },
+            ),
+          ),
+        ),
+      ),
     );
 
     await tester.tap(find.byKey(targetKey));
@@ -54,5 +54,40 @@ void main() {
 
     expect(find.text('One'), findsNothing);
     expect(find.text('Next'), findsOneWidget);
+  });
+
+  testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
+    Widget build(TargetPlatform platform) {
+      return new MaterialApp(
+        theme: new ThemeData(platform: platform),
+        home: new Scaffold(
+          appBar: new AppBar(
+            actions: <Widget>[
+              new PopupMenuButton<int>(
+                itemBuilder: (BuildContext context) {
+                  return <PopupMenuItem<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: const Text('One')
+                    ),
+                  ];
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(TargetPlatform.android));
+
+    expect(find.byIcon(Icons.more_vert), findsOneWidget);
+    expect(find.byIcon(Icons.more_horiz), findsNothing);
+
+    await tester.pumpWidget(build(TargetPlatform.iOS));
+    await tester.pumpAndSettle(); // Run theme change animation.
+
+    expect(find.byIcon(Icons.more_vert), findsNothing);
+    expect(find.byIcon(Icons.more_horiz), findsOneWidget);
   });
 }

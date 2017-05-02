@@ -543,11 +543,23 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     });
   }
 
+  Icon _getIcon(TargetPlatform platform) {
+    assert(platform != null);
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return const Icon(Icons.more_vert);
+      case TargetPlatform.iOS:
+        return const Icon(Icons.more_horiz);
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.child == null) {
       return new IconButton(
-        icon: const Icon(Icons.more_vert),
+        icon: _getIcon(Theme.of(context).platform),
         padding: widget.padding,
         tooltip: widget.tooltip,
         onPressed: showButtonMenu,
