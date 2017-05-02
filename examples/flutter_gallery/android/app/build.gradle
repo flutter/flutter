@@ -24,6 +24,9 @@ android {
 
     defaultConfig {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "io.flutter.examples.gallery"
     }
 
     buildTypes {
