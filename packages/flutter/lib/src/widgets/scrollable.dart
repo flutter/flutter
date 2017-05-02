@@ -18,6 +18,7 @@ import 'scroll_context.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_position.dart';
+import 'scroll_position_with_single_context.dart';
 import 'ticker_provider.dart';
 import 'viewport.dart';
 
@@ -162,7 +163,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     }
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
-      ?? ScrollController.createDefaultScrollPosition(_physics, this, oldPosition);
+      ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
+
     assert(position != null);
     controller?.attach(position);
   }
