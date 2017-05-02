@@ -63,7 +63,7 @@ GOTO :after_subroutine
   IF !dart_required_version! NEQ !dart_installed_version! GOTO do_sdk_update_and_snapshot
   IF NOT EXIST "%snapshot_path%" GOTO do_snapshot
   IF NOT EXIST "%stamp_path%" GOTO do_snapshot
-  SET /p stamp_value=<"%stamp_path%"
+  SET /P stamp_value=<"%stamp_path%"
   IF !stamp_value! NEQ !revision! GOTO do_snapshot
   REM Compare "last modified" timestamps
   SET pubspec_yaml_path=%flutter_tools_dir%\pubspec.yaml
@@ -90,7 +90,23 @@ GOTO :after_subroutine
     ECHO: > "%cache_dir%\.dartignore"
     ECHO Updating flutter tool...
     PUSHD "%flutter_tools_dir%"
+
+    REM Makes changes to PUB_ENVIRONMENT only visible to commands within SETLOCAL/ENDLOCAL
+    SETLOCAL
+    IF "%TRAVIS%" == "true" GOTO on_bot
+    IF "%BOT%" == "true" GOTO on_bot
+    IF "%CONTINUOUS_INTEGRATION%" == "true" GOTO on_bot
+    IF "%CHROME_HEADLESS%" == "1" GOTO on_bot
+    IF "%APPVEYOR%" == "true" GOTO on_bot
+    IF "%CI%" == "true" GOTO on_bot
+    GOTO not_on_bot
+    :on_bot
+      SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
+    :not_on_bot
+    SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
     CALL "%pub%" upgrade --verbosity=error --no-packages-dir
+    ENDLOCAL
+
     POPD
     CALL "%dart%" --snapshot="%snapshot_path%" --packages="%flutter_tools_dir%\.packages" "%script_path%"
     >"%stamp_path%" ECHO %revision%
