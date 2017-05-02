@@ -65,6 +65,7 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   return new AndroidBackButtonMemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
     'io.flutter.examples.gallery',
+    'io.flutter.examples.gallery.MainActivity',
   );
 }
 
@@ -300,8 +301,9 @@ class MemoryTest {
 class AndroidBackButtonMemoryTest {
   final String testDirectory;
   final String packageName;
+  final String activityName;
 
-  AndroidBackButtonMemoryTest(this.testDirectory, this.packageName);
+  AndroidBackButtonMemoryTest(this.testDirectory, this.packageName, this.activityName);
 
   Future<TaskResult> call() {
     return inDirectory(testDirectory, () async {
@@ -332,7 +334,7 @@ class AndroidBackButtonMemoryTest {
       for (int i = 0; i < 10; i++) {
         await device.shellExec('input', <String>['keyevent', 'KEYCODE_BACK']);
         await new Future<Null>.delayed(const Duration(milliseconds: 1000));
-        final String output = await device.shellEval('am', <String>['start', '-n', 'io.flutter.examples.gallery/io.flutter.app.FlutterActivity']);
+        final String output = await device.shellEval('am', <String>['start', '-n', '$packageName/$activityName']);
         print(output);
         if (output.contains('Error'))
           return new TaskResult.failure('unable to launch activity');
