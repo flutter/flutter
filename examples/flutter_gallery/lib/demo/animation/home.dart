@@ -369,12 +369,17 @@ class _AllSectionsView extends AnimatedWidget {
 // app bar's height is _kAppBarMidHeight and only one section heading is
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
-  _SnappingScrollPhysics(this.midScrollOffset) : super();
+  _SnappingScrollPhysics({ ScrollPhysics parent, this.midScrollOffset }) : super(parent: parent);
 
   final double midScrollOffset;
 
   @override
-  _SnappingScrollPhysics applyTo(ScrollPhysics parent) => new _SnappingScrollPhysics(midScrollOffset);
+  _SnappingScrollPhysics applyTo(ScrollPhysics parent) {
+    return new _SnappingScrollPhysics(
+      parent: parent,
+      midScrollOffset: midScrollOffset
+    );
+  }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
     final double velocity = math.max(dragVelocity, minFlingVelocity);
@@ -401,7 +406,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
         return simulation;
       if (dragVelocity > 0.0)
         return _toMidScrollOffsetSimulation(offset, dragVelocity);
-      if (dragVelocity <= 0.0)
+      if (dragVelocity < 0.0)
         return _toZeroScrollOffsetSimulation(offset, dragVelocity);
     } else {
       // The user ended the drag with little or no velocity. If they
@@ -531,7 +536,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
         children: <Widget>[
           new CustomScrollView(
             controller: _scrollController,
-            physics: new _SnappingScrollPhysics(appBarMidScrollOffset),
+            physics: new _SnappingScrollPhysics(midScrollOffset: appBarMidScrollOffset),
             slivers: <Widget>[
               // Start out below the status bar, gradually move to the top of the screen.
               new _StatusBarPaddingSliver(
