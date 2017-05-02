@@ -130,7 +130,7 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 #import "{{class}}.h"
 {{/plugins}}
 
-@interface PluginRegistry : FlutterPluginRegistry
+@interface PluginRegistry : NSObject
 
 {{#plugins}}
 @property (readonly, nonatomic) {{class}} *{{name}};
@@ -149,7 +149,7 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 
 #import "PluginRegistry.h"
 
-@implementation PluginRegistry : NSObject
+@implementation PluginRegistry
 
 - (instancetype)initWithController:(FlutterViewController *)controller {
   if (self = [super init]) {
