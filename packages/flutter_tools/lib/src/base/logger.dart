@@ -60,7 +60,7 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     _status?.cancel();
     _status = null;
 
@@ -146,8 +146,8 @@ class BufferLogger extends Logger {
   String get traceText => _trace.toString();
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis }) {
-    return _error.writeln(message);
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+    _error.writeln(message);
   }
 
 
@@ -190,7 +190,7 @@ class VerboseLogger extends Logger {
   bool get isVerbose => true;
 
   @override
-  void printError(String message, { StackTrace stackTrace, bool emphasis }) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     _emit(_LogType.error, message, stackTrace);
   }
 
