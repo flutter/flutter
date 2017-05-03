@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -217,7 +217,7 @@ void main() {
       expect(response['event'], 'daemon.showMessage');
       expect(response['params'], contains('Unable to discover Android devices'));
     }, overrides: <Type, Generator>{
-      Doctor: () => new FailingAndroidDoctor(),
+      Doctor: () => new MockDoctor(androidCanListDevices: false),
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
@@ -260,24 +260,36 @@ void main() {
         commands.close();
       });
     }, overrides: <Type, Generator>{
-      Xcode: () => new SucceedingXcode(),
+      Doctor: () => new MockDoctor(),
     });
   });
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
-class FailingAndroidDoctor extends Doctor {
+class MockDoctor extends Doctor {
+  final bool androidCanListDevices;
+  final bool iosCanListDevices;
+
+  MockDoctor({this.androidCanListDevices: true, this.iosCanListDevices: true});
+
   @override
-  AndroidWorkflow get androidWorkflow => new FailingAndroidWorkflow();
+  AndroidWorkflow get androidWorkflow => new MockAndroidWorkflow(androidCanListDevices);
+
+  @override
+  IOSWorkflow get iosWorkflow => new MockIosWorkflow(iosCanListDevices);
 }
 
-class FailingAndroidWorkflow extends AndroidWorkflow {
+class MockAndroidWorkflow extends AndroidWorkflow {
   @override
-  bool get canListDevices => false;
+  final bool canListDevices;
+
+  MockAndroidWorkflow(this.canListDevices);
 }
 
-class SucceedingXcode extends Xcode {
+class MockIosWorkflow extends IOSWorkflow {
   @override
-  bool get isInstalledAndMeetsVersionCheck => true;
+  final bool canListDevices;
+
+  MockIosWorkflow(this.canListDevices);
 }
