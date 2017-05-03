@@ -78,4 +78,21 @@ void main() {
 
     expect(result1, greaterThan(result2)); // iOS (result1) is slipperier than Android (result2)
   });
+
+  testWidgets('Holding scroll', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    await tester.drag(find.byType(Viewport), const Offset(0.0, 200.0));
+    expect(getScrollOffset(tester), -200.0);
+    await tester.pump(); // trigger ballistic
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(getScrollOffset(tester), greaterThan(-200.0));
+    expect(getScrollOffset(tester), lessThan(0.0));
+    final double position = getScrollOffset(tester);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    expect(await tester.pumpAndSettle(), 1);
+    expect(getScrollOffset(tester), position);
+    await gesture.up();
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 2);
+    expect(getScrollOffset(tester), 0.0);
+  });
 }

@@ -287,15 +287,17 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     }
   }
 
-  /// Inform the current activity that the user touched the area to which this
-  /// object relates.
-  @override
-  void didTouch() {
-    assert(activity != null);
-    activity.didTouch();
-  }
-
   ScrollDragController _currentDrag;
+
+  @override
+  ScrollHoldController hold(VoidCallback holdCancelCallback) {
+    final HoldScrollActivity activity = new HoldScrollActivity(
+      delegate: this,
+      onHoldCanceled: holdCancelCallback,
+    );
+    beginActivity(activity);
+    return activity;
+  }
 
   /// Start a drag activity corresponding to the given [DragStartDetails].
   ///

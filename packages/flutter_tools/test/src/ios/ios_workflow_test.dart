@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
@@ -16,10 +19,12 @@ void main() {
   group('iOS Workflow validation', () {
     MockXcode xcode;
     MockProcessManager processManager;
+    FileSystem fs;
 
     setUp(() {
       xcode = new MockXcode();
       processManager = new MockProcessManager();
+      fs = new MemoryFileSystem();
     });
 
     testUsingContext('Emit missing status when nothing is installed', () async {
@@ -143,7 +148,7 @@ void main() {
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{ Xcode: () => xcode });
 
-    testUsingContext('Succeeds when all checks pass', () async {
+    testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.xcodeVersionText)
           .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
@@ -156,8 +161,31 @@ void main() {
           .thenReturn(exitsHappy);
 
       final ValidationResult result = await new IOSWorkflowTestTarget().validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      Xcode: () => xcode,
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('Succeeds when all checks pass', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+
+      when(processManager.runSync(argThat(contains('idevice_id'))))
+          .thenReturn(exitsHappy);
+      when(processManager.run(argThat(contains('idevice_id')), workingDirectory: any, environment: any))
+          .thenReturn(exitsHappy);
+
+      ensureDirectoryExists(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
+
+      final ValidationResult result = await new IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
       Xcode: () => xcode,
       ProcessManager: () => processManager,
     });

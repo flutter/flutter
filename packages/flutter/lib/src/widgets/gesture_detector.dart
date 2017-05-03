@@ -504,6 +504,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     {
       final HorizontalDragGestureRecognizer recognizer = owner._recognizers[HorizontalDragGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -516,6 +518,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     {
       final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -531,6 +535,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     {
       final VerticalDragGestureRecognizer recognizer = owner._recognizers[VerticalDragGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)
@@ -543,6 +549,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     {
       final PanGestureRecognizer recognizer = owner._recognizers[PanGestureRecognizer];
       if (recognizer != null) {
+        if (recognizer.onDown != null)
+          recognizer.onDown(new DragDownDetails());
         if (recognizer.onStart != null)
           recognizer.onStart(new DragStartDetails());
         if (recognizer.onUpdate != null)

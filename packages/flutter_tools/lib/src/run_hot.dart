@@ -304,8 +304,11 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _restartFromSources() async {
-    printTrace('Refreshing active FlutterViews before restarting.');
-    await refreshViews();
+    if (!_isPaused()) {
+      printTrace('Refreshing active FlutterViews before restarting.');
+      await refreshViews();
+    }
+
     final Stopwatch restartTimer = new Stopwatch();
     restartTimer.start();
     final bool updatedDevFS = await _updateDevFS();
@@ -401,14 +404,18 @@ class HotRunner extends ResidentRunner {
   }
 
   Future<OperationResult> _reloadSources({ bool pause: false }) async {
-    printTrace('Refreshing active FlutterViews before reloading.');
-    await refreshViews();
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         if (view.uiIsolate == null)
           throw 'Application isolate not found';
       }
     }
+
+    if (!_isPaused()) {
+      printStatus('Refreshing active FlutterViews before reloading.');
+      await refreshViews();
+    }
+
     // The initial launch is from a script snapshot. When we reload from source
     // on top of a script snapshot, the first reload will be a worst case reload
     // because all of the sources will end up being dirty (library paths will
@@ -561,6 +568,21 @@ class HotRunner extends ResidentRunner {
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage
     );
+  }
+
+  bool _isPaused() {
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        if (view.uiIsolate != null) {
+          final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+          if (pauseEvent != null && pauseEvent.isPauseEvent) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 
   @override

@@ -116,6 +116,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _pendingDragOffset = Offset.zero;
       if (onDown != null)
         invokeCallback<Null>('onDown', () => onDown(new DragDownDetails(globalPosition: _initialPosition))); // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
+    } else if (_state == _DragState.accepted) {
+      resolve(GestureDisposition.accepted);
     }
   }
 

@@ -844,6 +844,9 @@ class Isolate extends ServiceObjectOwner {
   Isolate get isolate => this;
 
   DateTime startTime;
+
+  /// The last pause event delivered to the isolate. If the isolate is running,
+  /// this will be a resume event.
   ServiceEvent pauseEvent;
 
   final Map<String, ServiceObject> _cache = <String, ServiceObject>{};
