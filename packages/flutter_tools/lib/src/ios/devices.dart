@@ -27,10 +27,13 @@ const String _kIdeviceinstallerInstructions =
 const Duration kPortForwardTimeout = const Duration(seconds: 10);
 
 class IOSDevices extends PollingDeviceDiscovery {
-  IOSDevices() : super('IOSDevices');
+  IOSDevices() : super('iOS devices');
 
   @override
   bool get supportsPlatform => platform.isMacOS;
+
+  @override
+  bool get canListAnything => doctor.iosWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => IOSDevice.getAttachedDevices();

@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:test/test.dart';
 
 import 'src/context.dart';
@@ -22,22 +21,11 @@ void main() {
   AppContext appContext;
   NotifyingLogger notifyingLogger;
 
-  void _testUsingContext(String description, dynamic testMethod()) {
-    test(description, () {
-      return appContext.runInZone(testMethod);
-    });
-  }
-
   group('daemon', () {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext.setVariable(Platform, const LocalPlatform());
       appContext.setVariable(Logger, notifyingLogger);
-      appContext.setVariable(Doctor, new Doctor());
-      if (platform.isMacOS)
-        appContext.setVariable(Xcode, new Xcode());
-      appContext.setVariable(DeviceManager, new MockDeviceManager());
     });
 
     tearDown(() {
@@ -46,7 +34,7 @@ void main() {
       notifyingLogger.dispose();
     });
 
-    _testUsingContext('daemon.version', () async {
+    testUsingContext('daemon.version command should succeed', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -55,7 +43,7 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isNotEmpty);
       expect(response['result'] is String, true);
@@ -63,7 +51,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('daemon.logMessage', () {
+    testUsingContext('printError should send daemon.logMessage event', () {
       return appContext.runInZone(() async {
         final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
         final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
@@ -73,9 +61,9 @@ void main() {
           notifyingLogger: notifyingLogger
         );
         printError('daemon.logMessage test');
-        final Map<String, dynamic> response = await responses.stream.where((Map<String, dynamic> map) {
+        final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
           return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
-        }).first;
+        });
         expect(response['id'], isNull);
         expect(response['event'], 'daemon.logMessage');
         final Map<String, String> logMessage = response['params'];
@@ -86,7 +74,7 @@ void main() {
       });
     });
 
-    _testUsingContext('daemon.logMessage logToStdout', () async {
+    testUsingContext('printStatus should log to stdout when logToStdout is enabled', () async {
       final StringBuffer buffer = new StringBuffer();
 
       await runZoned(() async {
@@ -110,7 +98,7 @@ void main() {
       expect(buffer.toString().trim(), 'daemon.logMessage test');
     });
 
-    _testUsingContext('daemon.shutdown', () async {
+    testUsingContext('daemon.shutdown command should stop daemon', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -126,7 +114,7 @@ void main() {
       });
     });
 
-    _testUsingContext('daemon.start', () async {
+    testUsingContext('app.start without a deviceId should report an error', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -140,14 +128,14 @@ void main() {
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.start' });
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('deviceId is required'));
       responses.close();
       commands.close();
     });
 
-    _testUsingContext('daemon.restart', () async {
+    testUsingContext('app.restart without an appId should report an error', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -161,14 +149,14 @@ void main() {
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.restart' });
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
       responses.close();
       commands.close();
     });
 
-    _testUsingContext('daemon.callServiceExtension', () async {
+    testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -188,14 +176,14 @@ void main() {
           'methodName': 'ext.flutter.debugPaint'
         }
       });
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
       responses.close();
       commands.close();
     });
 
-    _testUsingContext('daemon.stop', () async {
+    testUsingContext('app.stop without appId should report an error', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -209,14 +197,32 @@ void main() {
       );
 
       commands.add(<String, dynamic>{ 'id': 0, 'method': 'app.stop' });
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['error'], contains('appId is required'));
       responses.close();
       commands.close();
     });
 
-    _testUsingContext('device.getDevices', () async {
+    testUsingContext('daemon should send showMessage on startup if no Android devices are available', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger,
+      );
+
+      final Map<String, dynamic> response = await responses.stream.first;
+      expect(response['event'], 'daemon.showMessage');
+      expect(response['params'], isMap);
+      expect(response['params'], containsPair('title', 'Unable to list devices'));
+      expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
+    }, overrides: <Type, Generator>{
+      Doctor: () => new MockDoctor(androidCanListDevices: false),
+    });
+
+    testUsingContext('device.getDevices should respond with list', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -225,14 +231,14 @@ void main() {
         notifyingLogger: notifyingLogger
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
-      final Map<String, dynamic> response = await responses.stream.where(_notEvent).first;
+      final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
       expect(response['id'], 0);
       expect(response['result'], isList);
       responses.close();
       commands.close();
     });
 
-    _testUsingContext('device.notify', () {
+    testUsingContext('should send device.added event when device is discovered', () {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -255,8 +261,37 @@ void main() {
         responses.close();
         commands.close();
       });
+    }, overrides: <Type, Generator>{
+      Doctor: () => new MockDoctor(),
     });
   });
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
+
+class MockDoctor extends Doctor {
+  final bool androidCanListDevices;
+  final bool iosCanListDevices;
+
+  MockDoctor({this.androidCanListDevices: true, this.iosCanListDevices: true});
+
+  @override
+  AndroidWorkflow get androidWorkflow => new MockAndroidWorkflow(androidCanListDevices);
+
+  @override
+  IOSWorkflow get iosWorkflow => new MockIosWorkflow(iosCanListDevices);
+}
+
+class MockAndroidWorkflow extends AndroidWorkflow {
+  @override
+  final bool canListDevices;
+
+  MockAndroidWorkflow(this.canListDevices);
+}
+
+class MockIosWorkflow extends IOSWorkflow {
+  @override
+  final bool canListDevices;
+
+  MockIosWorkflow(this.canListDevices);
+}
