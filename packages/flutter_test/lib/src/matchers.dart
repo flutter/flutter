@@ -9,30 +9,62 @@ import 'finders.dart';
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsNothing);
+/// ```dart
+/// expect(find.text('Save'), findsNothing);
+/// ```
+///
+/// See also:
+///
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidgets], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 
 /// Asserts that the [Finder] locates at least one widget in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsWidgets);
+/// ```dart
+/// expect(find.text('Save'), findsWidgets);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsOneWidgets], when you want the finder to find exactly one widget.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
 
 /// Asserts that the [Finder] locates at exactly one widget in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsOneWidget);
+/// ```dart
+/// expect(find.text('Save'), findsOneWidget);
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
 
 /// Asserts that the [Finder] locates the specified number of widgets in the widget tree.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save'), findsNWidgets(2));
+/// ```dart
+/// expect(find.text('Save'), findsNWidgets(2));
+/// ```
+///
+/// See also:
+///
+///  * [findsNothing], when you want the finder to not find anything.
+///  * [findsWidgets], when you want the finder to find one or more widgets.
+///  * [findsOneWidgets], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
@@ -41,21 +73,41 @@ Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 /// It's important to use a full finder, since by default finders exclude
 /// offstage widgets.
 ///
-/// Example:
+/// ## Sample code
 ///
-///     expect(find.text('Save', skipOffstage: false), isOffstage);
+/// ```dart
+/// expect(find.text('Save', skipOffstage: false), isOffstage);
+/// ```
+///
+/// See also:
+///
+///  * [isOnStage], the opposite.
 const Matcher isOffstage = const _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Offstage] widget ancestors.
+///
+/// See also:
+///
+///  * [isOffStage], the opposite.
 const Matcher isOnstage = const _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
 /// least one [Card] widget ancestor.
+///
+/// See also:
+///
+///  * [isNotInCard], the opposite.
 const Matcher isInCard = const _IsInCard();
 
 /// Asserts that the [Finder] locates the a single widget that has no
 /// [Card] widget ancestors.
+///
+/// This is equivalent to `isNot(isInCard)`.
+///
+/// See also:
+///
+///  * [isInCard], the opposite.
 const Matcher isNotInCard = const _IsNotInCard();
 
 /// Asserts that an object's toString() is a plausible one-line description.
@@ -66,15 +118,47 @@ const Matcher isNotInCard = const _IsNotInCard();
 const Matcher hasOneLineDescription = const _HasOneLineDescription();
 
 /// A matcher for functions that throw [FlutterError].
+///
+/// This is equivalent to `throwsA(const isInstanceOf<FlutterError>())`.
+///
+/// See also:
+///
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
+///
+/// This is equivalent to `throwsA(const isInstanceOf<AssertionError>())`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 Matcher throwsAssertionError = throwsA(isAssertionError);
 
 /// A matcher for [FlutterError].
+///
+/// This is equivalent to `const isInstanceOf<FlutterError>()`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isAssertionError], to test if any object is any kind of [AssertionError].
 const Matcher isFlutterError = const isInstanceOf<FlutterError>();
 
 /// A matcher for [AssertionError].
+///
+/// This is equivalent to `const isInstanceOf<AssertionError>()`.
+///
+/// See also:
+///
+///  * [throwsFlutterError], to test if a function throws a [FlutterError].
+///  * [throwsAssertionError], to test if a function throws any [AssertionError].
+///  * [isFlutterError], to test if any object is a [FlutterError].
 const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
@@ -84,6 +168,13 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 /// using the `epsilon` argument. This matcher is intended to compare floating
 /// point numbers that are the result of different sequences of operations, such
 /// that they may have accumulated slightly different errors.
+///
+/// See also:
+///
+///  * [closeTo], which is identical except that the epsilon argument is
+///    required and not named.
+///  * [isInclusiveRange], which matches if the argument is in a specified
+///    range.
 Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);
 }

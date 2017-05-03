@@ -319,20 +319,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  bool _hasDrawer = false;
-  bool _canPop = false;
-  bool _useCloseButton = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
-    _hasDrawer = scaffold?.hasDrawer ?? false;
-    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
-    _canPop = parentRoute?.canPop ?? false;
-    _useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
-  }
-
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
   }
@@ -341,6 +327,12 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final ThemeData themeData = Theme.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
+    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+
+    final bool hasDrawer = scaffold?.hasDrawer ?? false;
+    final bool canPop = parentRoute?.canPop ?? false;
+    final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
@@ -365,15 +357,15 @@ class _AppBarState extends State<AppBar> {
     final List<Widget> toolbarChildren = <Widget>[];
     Widget leading = widget.leading;
     if (leading == null) {
-      if (_hasDrawer) {
+      if (hasDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
       } else {
-        if (_canPop)
-          leading = _useCloseButton ? const CloseButton() : const BackButton();
+        if (canPop)
+          leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {
