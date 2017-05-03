@@ -27,6 +27,9 @@ import 'ticker_provider.dart';
 /// Signature used by [NestedScrollView] for building its header.
 typedef List<Widget> NestedScrollViewHeaderSliversBuilder(BuildContext context, bool innerBoxIsScrolled);
 
+// TODO(abarth): Make this configurable with a controller.
+const double _kInitialScrollOffset = 0.0;
+
 class NestedScrollView extends StatefulWidget {
   NestedScrollView({
     Key key,
@@ -44,20 +47,38 @@ class NestedScrollView extends StatefulWidget {
 
   // TODO(ianh): we should expose a controller so you can call animateTo, etc.
 
+  /// The axis along which the scroll view scrolls.
+  ///
+  /// Defaults to [Axis.vertical].
   final Axis scrollDirection;
 
+  /// Whether the scroll view scrolls in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [scrollDirection] is [Axis.horizontal], then the scroll view scrolls from
+  /// left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
+  /// scrolls from top to bottom when [reverse] is false and from bottom to top
+  /// when [reverse] is true.
+  ///
+  /// Defaults to false.
   final bool reverse;
 
+  /// How the scroll view should respond to user input.
+  ///
+  /// For example, determines how the scroll view continues to animate after the
+  /// user stops dragging the scroll view.
+  ///
+  /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
 
   final NestedScrollViewHeaderSliversBuilder headerSliverBuilder;
 
   final Widget body;
 
-  double get initialScrollOffset => 0.0;
-
-  @protected
-  List<Widget> buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
+  List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
     final List<Widget> slivers = <Widget>[];
     slivers.addAll(headerSliverBuilder(context, bodyIsScrolled));
     slivers.add(new SliverFillRemaining(
@@ -79,7 +100,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
   @override
   void initState() {
     super.initState();
-    _coordinator = new _NestedScrollCoordinator(context, widget.initialScrollOffset);
+    _coordinator = new _NestedScrollCoordinator(context, _kInitialScrollOffset);
   }
 
   @override
@@ -102,7 +123,7 @@ class _NestedScrollViewState extends State<NestedScrollView> {
       reverse: widget.reverse,
       physics: new ClampingScrollPhysics(parent: widget.physics),
       controller: _coordinator._outerController,
-      slivers: widget.buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
+      slivers: widget._buildSlivers(context, _coordinator._innerController, _coordinator.hasScrolledBody),
     );
   }
 }

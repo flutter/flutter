@@ -50,16 +50,29 @@ abstract class RenderAbstractViewport implements RenderObject {
   double getOffsetToReveal(RenderObject target, double alignment);
 }
 
-// ///
-// /// See also:
-// ///
-// /// - [RenderSliver], which explains more about the Sliver protocol.
-// /// - [RenderBox], which explains more about the Box protocol.
-// /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
-// ///   placed inside a [RenderSliver] (the opposite of this class).
+/// A base class for render objects that are bigger on the inside.
+///
+/// This render object provides the shared code for render objects that host
+/// [RenderSliver] render objects inside a [RenderBox]. The viewport establishes
+/// an [axisDirection], which orients the sliver's coordinate system, which is
+/// based on scroll offsets rather than cartesian coordinates.
+///
+/// The viewport also listens to an [offset], which determines the
+/// [SliverConstraints.scrollOffset] input to the sliver layout protocol.
+///
+/// Subclasses typically override [performLayout] and call
+/// [layoutChildSequence], perhaps multiple times.
+///
+/// See also:
+///
+///  * [RenderSliver], which explains more about the Sliver protocol.
+///  * [RenderBox], which explains more about the Box protocol.
+///  * [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
+///    placed inside a [RenderSliver] (the opposite of this class).
 abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMixin<RenderSliver>>
     extends RenderBox with ContainerRenderObjectMixin<RenderSliver, ParentDataClass>
     implements RenderAbstractViewport {
+  /// Initializes fields for subclasses.
   RenderViewportBase({
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
@@ -525,15 +538,37 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   Iterable<RenderSliver> get childrenInHitTestOrder;
 }
 
-// ///
-// /// See also:
-// ///
-// /// - [RenderSliver], which explains more about the Sliver protocol.
-// /// - [RenderBox], which explains more about the Box protocol.
-// /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
-// ///   placed inside a [RenderSliver] (the opposite of this class).
-// /// - [RenderShrinkWrappingViewport], a variant of [RenderViewport] that
-// ///   shrink-wraps its contents along the main axis.
+/// A render object that is bigger on the inside.
+///
+/// [RenderViewport] is the visual workhorse of the scrolling machinery. It
+/// displays a subset of its children according to its own dimensions and the
+/// given [offset]. As the offset varies, different children are visible through
+/// the viewport.
+///
+/// [RenderViewport] hosts a bidirectional list of slivers, anchored on a
+/// [center] sliver, which is placed at the zero scroll offset. The center
+/// widget is displayed in the viewport according to the [anchor] property.
+///
+/// Slivers that are earlier in the child list than [center] are displayed in
+/// reverse order in the reverse [axisDirection] starting from the [center]. For
+/// example, if the [axisDirection] is [AxisDirection.down], the first sliver
+/// before [center] is placed above the [center]. The slivers that are later in
+/// the child list than [center] are placed in order in the [axisDirection]. For
+/// example, in the preceeding scenario, the first sliver after [center] is
+/// placed below the [center].
+///
+/// [RenderViewport] cannot contain [RenderBox] children directly. Instead, use
+/// a [RenderSliverList], [RenderSliverFixedExtentList], [RenderSliverGrid], or
+/// a [RenderSliverToBoxAdapter], for example.
+///
+/// See also:
+///
+///  * [RenderSliver], which explains more about the Sliver protocol.
+///  * [RenderBox], which explains more about the Box protocol.
+///  * [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
+///    placed inside a [RenderSliver] (the opposite of this class).
+///  * [RenderShrinkWrappingViewport], a variant of [RenderViewport] that
+///    shrink-wraps its contents along the main axis.
 class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentData> {
   /// Creates a viewport for [RenderSliver] objects.
   ///
@@ -944,14 +979,31 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
   }
 }
 
-// ///
-// /// See also:
-// ///
-// /// - [RenderViewport], a viewport that does not shrink-wrap its contents
-// /// - [RenderSliver], which explains more about the Sliver protocol.
-// /// - [RenderBox], which explains more about the Box protocol.
-// /// - [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
-// ///   placed inside a [RenderSliver] (the opposite of this class).
+/// A render object that is bigger on the inside and shrink wraps its children
+/// in the main axis.
+///
+/// [RenderShrinkWrappingViewport] displays a subset of its children according
+/// to its own dimensions and the given [offset]. As the offset varies, different
+/// children are visible through the viewport.
+///
+/// [RenderShrinkWrappingViewport] differs from [RenderViewport] in that
+/// [RenderViewport] expands to fill the main axis whereas
+/// [RenderShrinkWrappingViewport] sizes itself to match its children in the
+/// main axis. This shrink wrapping behavior is expensive because the children,
+/// and hence the viewport, could potentially change size whenever the [offset]
+/// changes (e.g., because of a collapsing header).
+///
+/// [RenderShrinkWrappingViewport] cannot contain [RenderBox] children directly.
+/// Instead, use a [RenderSliverList], [RenderSliverFixedExtentList],
+/// [RenderSliverGrid], or a [RenderSliverToBoxAdapter], for example.
+///
+/// See also:
+///
+///  * [RenderViewport], a viewport that does not shrink-wrap its contents
+///  * [RenderSliver], which explains more about the Sliver protocol.
+///  * [RenderBox], which explains more about the Box protocol.
+///  * [RenderSliverToBoxAdapter], which allows a [RenderBox] object to be
+///    placed inside a [RenderSliver] (the opposite of this class).
 class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalContainerParentData> {
   /// Creates a viewport (for [RenderSliver] objects) that shrink-wraps its
   /// contents.
