@@ -66,6 +66,7 @@ cc_library {
     ],
     header_libs: ["libminikin_headers"],
     export_header_lib_headers: ["libminikin_headers"],
+    export_shared_lib_headers: ["libicuuc"],
 
     clang: true,
     sanitize: {
