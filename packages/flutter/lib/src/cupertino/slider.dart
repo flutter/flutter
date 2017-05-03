@@ -100,8 +100,6 @@ class CupertinoSlider extends StatefulWidget {
 
   /// The number of discrete divisions.
   ///
-  /// Typically used with [label] to show the current discrete value.
-  ///
   /// If null, the slider is continuous.
   final int divisions;
 

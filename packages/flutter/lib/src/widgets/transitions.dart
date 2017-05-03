@@ -397,7 +397,7 @@ class RelativePositionedTransition extends AnimatedWidget {
 /// * [AnimatedContainer], a more full-featured container that also animates on
 ///   decoration using an internal animation.
 class DecoratedBoxTransition extends AnimatedWidget {
-  /// Creates an animated [DecorationBox] whose [Decoration] animation updates
+  /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
   ///
   /// The [decoration] and [position] cannot be null.

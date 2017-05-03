@@ -111,7 +111,7 @@ class TextTheme {
 
   /// Very, very large text.
   ///
-  /// Used for the date in [DatePicker].
+  /// Used for the date in the dialog shown by [showDatePicker].
   final TextStyle display3;
 
   /// Very large text.
@@ -120,10 +120,12 @@ class TextTheme {
   /// Large text.
   final TextStyle display1;
 
-  /// Used for large text in dialogs (e.g., the month and year in [DatePicker]).
+  /// Used for large text in dialogs (e.g., the month and year in the dialog
+  /// shown by [showDatePicker]).
   final TextStyle headline;
 
-  /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title] and [Dialog.title]).
+  /// Used for the primary text in app bars and dialogs (e.g., [AppBar.title]
+  /// and [AlertDialog.title]).
   final TextStyle title;
 
   /// Used for the primary text in lists (e.g., [ListTile.title]).

@@ -838,8 +838,6 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This does not include the status bar height (which will be automatically
   /// included if [primary] is true).
-  ///
-  /// See also [AppBar.getExpandedHeightFor].
   final double expandedHeight;
 
   /// Whether the app bar should become visible as soon as the user scrolls

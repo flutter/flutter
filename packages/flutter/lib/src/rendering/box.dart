@@ -22,7 +22,7 @@ class _DebugSize extends Size {
 
 /// Immutable layout constraints for [RenderBox] layout.
 ///
-/// A size respects a BoxConstraints if, and only if, all of the following
+/// A size respects a [BoxConstraints] if, and only if, all of the following
 /// relations hold:
 ///
 /// * `minWidth <= size.width <= maxWidth`
@@ -343,7 +343,8 @@ class BoxConstraints extends Constraints {
 
   /// Linearly interpolate between two BoxConstraints.
   ///
-  /// If either is null, this function interpolates from [BoxConstraints.zero].
+  /// If either is null, this function interpolates from a [BoxConstraints]
+  /// object whose fields are all set to 0.0.
   static BoxConstraints lerp(BoxConstraints a, BoxConstraints b, double t) {
     if (a == null && b == null)
       return null;

@@ -35,9 +35,8 @@ import 'typography.dart';
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Radio]
-///  * [Switch]
+///  * [Radio], for selecting among a set of explicit values.
+///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/sliders.html>
 class Slider extends StatefulWidget {
   /// Creates a material design slider.

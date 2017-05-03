@@ -11,7 +11,7 @@ import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
 
-/// An interpolation between two [BoxConstraint]s.
+/// An interpolation between two [BoxConstraints].
 class BoxConstraintsTween extends Tween<BoxConstraints> {
   /// Creates a box constraints tween.
   ///
