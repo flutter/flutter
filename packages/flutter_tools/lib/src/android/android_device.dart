@@ -17,6 +17,7 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
+import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 
@@ -27,10 +28,13 @@ import 'android_sdk.dart';
 const String _defaultAdbPath = 'adb';
 
 class AndroidDevices extends PollingDeviceDiscovery {
-  AndroidDevices() : super('AndroidDevices');
+  AndroidDevices() : super('Android devices');
 
   @override
   bool get supportsPlatform => true;
+
+  @override
+  bool get canListAnything => doctor.androidWorkflow.canListDevices;
 
   @override
   List<Device> pollingGetDevices() => getAdbDevices();

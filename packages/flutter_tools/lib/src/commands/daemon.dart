@@ -15,7 +15,6 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
@@ -63,17 +62,7 @@ class DaemonCommand extends FlutterCommand {
       final int code = await daemon.onExit;
       if (code != 0)
         throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-    }, onError: _handleError);
-  }
-
-  dynamic _handleError(dynamic error, StackTrace stackTrace) {
-    if (error is ToolExit) {
-      printError(error.message);
-      exit(error.exitCode);
-    } else {
-      printError('Error from flutter daemon: $error', stackTrace: stackTrace);
-    }
-    return null;
+    });
   }
 }
 
@@ -82,7 +71,9 @@ typedef void DispatchCommand(Map<String, dynamic> command);
 typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 
 class Daemon {
-  Daemon(Stream<Map<String, dynamic>> commandStream, this.sendCommand, {
+  Daemon(
+    Stream<Map<String, dynamic>> commandStream,
+    this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout: false
@@ -536,9 +527,6 @@ typedef void _DeviceEventHandler(Device device);
 /// `device.removed` events.
 class DeviceDomain extends Domain {
   DeviceDomain(Daemon daemon) : super(daemon, 'device') {
-    if (!doctor.canListAnything) {
-      daemon.shutdown(error: new ToolExit('Unable to locate a development device', exitCode: 1));
-    }
     registerHandler('getDevices', getDevices);
     registerHandler('enable', enable);
     registerHandler('disable', disable);
@@ -553,6 +541,12 @@ class DeviceDomain extends Domain {
   void addDeviceDiscoverer(PollingDeviceDiscovery discoverer) {
     if (!discoverer.supportsPlatform)
       return;
+
+    if (!discoverer.canListAnything)
+      sendEvent(
+          'daemon.showMessage',
+          'Unable to discover ${discoverer.name}. Please run "flutter doctor" '
+          'to diagnose potential issues');
 
     _discoverers.add(discoverer);
 
@@ -665,7 +659,8 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+  final String encoded = JSON.encode(command, toEncodable: _jsonEncodeObject);
+  stdout.writeln('[$encoded]');
 }
 
 dynamic _jsonEncodeObject(dynamic object) {

@@ -92,6 +92,11 @@ class DeviceManager {
 /// An abstract class to discover and enumerate a specific type of devices.
 abstract class DeviceDiscovery {
   bool get supportsPlatform;
+
+  /// Whether this device discovery is capable of listing any devices given the
+  /// current environment configuration.
+  bool get canListAnything;
+
   List<Device> get devices;
 }
 
