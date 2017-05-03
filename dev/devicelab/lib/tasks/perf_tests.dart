@@ -65,7 +65,7 @@ TaskFunction createGalleryBackButtonMemoryTest() {
   return new AndroidBackButtonMemoryTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
     'io.flutter.examples.gallery',
-    'io.flutter.examples.gallery.MainActivity',
+    'io.flutter.app.FlutterActivity',
   );
 }
 
