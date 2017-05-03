@@ -542,11 +542,17 @@ class DeviceDomain extends Domain {
     if (!discoverer.supportsPlatform)
       return;
 
-    if (!discoverer.canListAnything)
+    if (!discoverer.canListAnything) {
       sendEvent(
-          'daemon.showMessage',
-          'Unable to discover ${discoverer.name}. Please run "flutter doctor" '
-          'to diagnose potential issues');
+        'daemon.showMessage',
+        <String, String>{
+          'title': 'Unable to list devices',
+          'message':
+              'Unable to discover ${discoverer.name}. Please run '
+              '"flutter doctor" to diagnose potential issues',
+        },
+      );
+    }
 
     _discoverers.add(discoverer);
 
