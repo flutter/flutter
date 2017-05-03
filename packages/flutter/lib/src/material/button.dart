@@ -20,9 +20,9 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ButtonTheme]
-///  * [RaisedButton]
-///  * [FlatButton]
+///  * [ButtonTheme], which uses this enum to define the [ButtonTheme.textTheme].
+///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
+///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
   /// The button should use the normal color (e.g., black or white depending on the [ThemeData.brightness]) for its text.
   normal,
@@ -35,9 +35,9 @@ enum ButtonTextTheme {
 ///
 /// See also:
 ///
-///  * [ButtonTextTheme]
-///  * [RaisedButton]
-///  * [FlatButton]
+///  * [ButtonTextTheme], which is used by [textTheme].
+///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
+///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
 class ButtonTheme extends InheritedWidget {
   /// Creates a button theme.
   ///
@@ -121,6 +121,13 @@ class ButtonTheme extends InheritedWidget {
 ///
 /// MaterialButtons whose [onPressed] handler is null will be disabled. To have
 /// an enabled button, make sure to pass a non-null value for onPressed.
+///
+/// If you want an ink-splash effect for taps, but don't want to use a button,
+/// consider using [InkWell] directly.
+///
+/// See also:
+///
+///  * [IconButton], to create buttons that contain icons rather than text.
 class MaterialButton extends StatefulWidget {
   /// Creates a material button.
   ///

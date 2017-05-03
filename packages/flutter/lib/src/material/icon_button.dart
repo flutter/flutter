@@ -23,7 +23,7 @@ const double _kMinButtonSize = 48.0;
 /// A material design icon button.
 ///
 /// An icon button is a picture printed on a [Material] widget that reacts to
-/// touches by filling with color.
+/// touches by filling with color (ink).
 ///
 /// Icon buttons are commonly used in the [AppBar.actions] field, but they can
 /// be used in many other places as well.
@@ -33,12 +33,19 @@ const double _kMinButtonSize = 48.0;
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Will be automatically sized up to the recommended 48 logical pixels if smaller.
+/// The hit region of an icon button will, if possible, be at least 48.0 pixels
+/// in size, regardless of the actual [iconSize]. The [alignment] controls how
+/// the icon itself is positioned within the hit region.
 ///
 /// See also:
 ///
-///  * [Icons]
-///  * [AppBar]
+///  * [Icons], a library of predefined icons.
+///  * [BackButton], an icon button for a "back" affordance which adapts to the
+///    current platform's conventions.
+///  * [CloseButton], an icon button for closing pages.
+///  * [AppBar], to show a toolbar at the top of an application.
+///  * [RaisedButton] and [FlatButton], for buttons with text in them.
+///  * [InkResponse] and [InkWell], for the ink splash effect itself.
 class IconButton extends StatelessWidget {
   /// Creates an icon button.
   ///
