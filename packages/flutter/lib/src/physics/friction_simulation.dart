@@ -71,7 +71,7 @@ class FrictionSimulation extends Simulation {
   @override
   double dx(double time) => _v * math.pow(_drag, time);
 
-  /// The value of [x] at `double.INFINITY`;
+  /// The value of [x] at `double.INFINITY`.
   double get finalX => _x - _v / _dragLog;
 
   /// The time at which the value of `x(time)` will equal [x].

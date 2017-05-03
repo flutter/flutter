@@ -282,13 +282,18 @@ void main() {
     // We've overscrolled (0.1 > 0.07). Trigger the underscroll
     // simulation, and reverse direction
     expect(scroll.isDone(0.1), false);
-    expect(scroll.x(0.1), closeTo(-300.0, 1.0));
-    expect(scroll.dx(0.1), closeTo(730, 1.0));
+    expect(scroll.x(0.1), closeTo(-287.0, 1.0));
+    expect(scroll.dx(0.1), closeTo(-1888, 1.0));
 
     // Headed back towards 0.0 and slowing down.
     expect(scroll.isDone(0.5), false);
-    expect(scroll.x(0.5), closeTo(-16.0, 1.0));
-    expect(scroll.dx(0.5), closeTo(131.0, 1.0));
+    expect(scroll.x(0.5), closeTo(-23.0, 1.0));
+    expect(scroll.dx(0.5), closeTo(188.0, 1.0));
+
+    // Now jump back to the beginning, because we can.
+    expect(scroll.isDone(0.0), false);
+    expect(scroll.x(0.0), closeTo(500.0, .0001));
+    expect(scroll.dx(0.0), closeTo(-7500.0, .0001));
 
     expect(scroll.isDone(2.0), true);
     expect(scroll.x(2.0), 0.0);

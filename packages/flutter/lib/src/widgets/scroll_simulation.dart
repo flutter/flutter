@@ -44,19 +44,18 @@ class BouncingScrollSimulation extends Simulation {
     assert(spring != null);
 
     if (position < leadingExtent) {
-      _simulation = _underscrollSimulation(position, velocity);
+      _springSimulation = _underscrollSimulation(position, velocity);
     } else if (position > trailingExtent) {
-      _simulation = _overscrollSimulation(position, velocity);
+      _springSimulation = _overscrollSimulation(position, velocity);
     } else {
-      final FrictionSimulation friction = new FrictionSimulation(0.135, position, velocity, tolerance: tolerance);
-      final double finalX = friction.finalX;
+      _frictionSimulation = new FrictionSimulation(0.135, position, velocity);
+      final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent)
-        _updateTime = friction.timeAtX(trailingExtent);
+        _springTime = _frictionSimulation.timeAtX(trailingExtent);
       else if (velocity < 0.0 && finalX < leadingExtent)
-        _updateTime = friction.timeAtX(leadingExtent);
-      assert(_updateTime != null ? _updateTime.isFinite : true);
-      _simulation = friction;
+        _springTime = _frictionSimulation.timeAtX(leadingExtent);
     }
+    assert(_springTime != null ? _springTime.isFinite : true);
   }
 
   /// When [x] falls below this value the simulation switches from an internal friction
@@ -70,59 +69,50 @@ class BouncingScrollSimulation extends Simulation {
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  Simulation _simulation;
-  double _updateTime;
-  double _timeOffset = 0.0;
+  FrictionSimulation _frictionSimulation; // Null if we started out springing.
+  Simulation _springSimulation; // Non-null if we're springing.
+  double _springTime; // Start springing when time exceeds _springTime.
+  double _timeOffset = 0.0; // When we actually started springing, or zero.
+
+  Simulation _simulation(double time) {
+    Simulation simulation;
+    if (_frictionSimulation == null) {
+      _timeOffset = 0.0;
+      simulation = _springSimulation;
+    } else if (_springTime != null && time > _springTime) {
+      if (_springSimulation == null) {
+        _timeOffset = _springTime;
+        final double x = _frictionSimulation.x(time);
+        final double dx = _frictionSimulation.dx(time);
+        _springSimulation = dx < 0
+          ? _underscrollSimulation(x, dx)
+          : _overscrollSimulation(x, dx);
+      }
+      simulation = _springSimulation;
+    } else {
+      _timeOffset = 0.0;
+      _springSimulation = null;
+      simulation = _frictionSimulation;
+    }
+    return simulation..tolerance = tolerance;
+  }
 
   Simulation _underscrollSimulation(double x, double dx) {
-    return new ScrollSpringSimulation(spring, x, leadingExtent, dx, tolerance: tolerance);
+    return new ScrollSpringSimulation(spring, x, leadingExtent, dx);
   }
 
   Simulation _overscrollSimulation(double x, double dx) {
-    return new ScrollSpringSimulation(spring, x, trailingExtent, dx, tolerance: tolerance);
-  }
-
-  void _maybeUpdateSimulation(double time) {
-    if (_updateTime == null || time < _updateTime)
-      return;
-
-    assert(_timeOffset == 0.0);
-    final double x = _simulation.x(time);
-    final double dx = _simulation.dx(time);
-    if (x < leadingExtent) {
-      _simulation = _underscrollSimulation(x, dx);
-    } else {
-      assert(x > trailingExtent);
-      _simulation = _overscrollSimulation(x, dx);
-    }
-
-    _timeOffset = time - _updateTime;
-    _updateTime = null;
+    return new ScrollSpringSimulation(spring, x, trailingExtent, dx);
   }
 
   @override
-  set tolerance(Tolerance tolerance) {
-    super.tolerance = tolerance;
-    _simulation.tolerance = tolerance;
-  }
+  double x(double time) => _simulation(time).x(time - _timeOffset);
 
   @override
-  double x(double time) {
-    _maybeUpdateSimulation(time);
-    return _simulation.x(time - _timeOffset);
-  }
+  double dx(double time) => _simulation(time).dx(time - _timeOffset);
 
   @override
-  double dx(double time) {
-    _maybeUpdateSimulation(time);
-    return _simulation.dx(time - _timeOffset);
-  }
-
-  @override
-  bool isDone(double time) {
-    _maybeUpdateSimulation(time);
-    return _simulation.isDone(time - _timeOffset);
-  }
+  bool isDone(double time) => _simulation(time).isDone(time - _timeOffset);
 
   @override
   String toString() {
