@@ -12,7 +12,7 @@ import 'package:flutter/physics.dart';
 /// See also:
 ///
 ///  * [ClampingScrollSimulation], which implements Android scroll physics.
-class BouncingScrollSimulation extends SimulationGroup {
+class BouncingScrollSimulation extends Simulation {
   /// Creates a simulation group for scrolling on iOS, with the given
   /// parameters.
   ///
@@ -31,68 +31,102 @@ class BouncingScrollSimulation extends SimulationGroup {
   BouncingScrollSimulation({
     @required double position,
     @required double velocity,
-    @required double leadingExtent,
-    @required double trailingExtent,
-    @required SpringDescription spring,
+    @required this.leadingExtent,
+    @required this.trailingExtent,
+    @required this.spring,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : _leadingExtent = leadingExtent,
-       _trailingExtent = trailingExtent,
-       _spring = spring,
-       super(tolerance: tolerance) {
+  }) : super(tolerance: tolerance) {
     assert(position != null);
     assert(velocity != null);
-    assert(_leadingExtent != null);
-    assert(_trailingExtent != null);
-    assert(_leadingExtent <= _trailingExtent);
-    assert(_spring != null);
-    _chooseSimulation(position, velocity, 0.0);
+    assert(leadingExtent != null);
+    assert(trailingExtent != null);
+    assert(leadingExtent <= trailingExtent);
+    assert(spring != null);
+
+    if (position < leadingExtent) {
+      _simulation = _underscrollSimulation(position, velocity);
+    } else if (position > trailingExtent) {
+      _simulation = _overscrollSimulation(position, velocity);
+    } else {
+      final FrictionSimulation friction = new FrictionSimulation(0.135, position, velocity, tolerance: tolerance);
+      final double finalX = friction.finalX;
+      if (velocity > 0.0 && finalX > trailingExtent)
+        _updateTime = friction.timeAtX(trailingExtent);
+      else if (velocity < 0.0 && finalX < leadingExtent)
+        _updateTime = friction.timeAtX(leadingExtent);
+      assert(_updateTime != null ? _updateTime.isFinite : true);
+      _simulation = friction;
+    }
   }
 
-  final double _leadingExtent;
-  final double _trailingExtent;
-  final SpringDescription _spring;
+  /// When [x] falls below this value the simulation switches from an internal friction
+  /// model to a spring model which causes [x] to "spring" back to [leadingExtent].
+  final double leadingExtent;
 
-  bool _isSpringing = false;
-  Simulation _currentSimulation;
-  double _offset = 0.0;
+  /// When [x] exceeds this value the simulation switches from an internal friction
+  /// model to a spring model which causes [x] to "spring" back to [trailingExtent].
+  final double trailingExtent;
 
-  // This simulation can only step forward.
-  @override
-  bool step(double time) => _chooseSimulation(
-    _currentSimulation.x(time - _offset),
-    _currentSimulation.dx(time - _offset),
-    time,
-  );
+  /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
+  final SpringDescription spring;
 
-  @override
-  Simulation get currentSimulation => _currentSimulation;
+  Simulation _simulation;
+  double _updateTime;
+  double _timeOffset = 0.0;
 
-  @override
-  double get currentIntervalOffset => _offset;
+  Simulation _underscrollSimulation(double x, double dx) {
+    return new ScrollSpringSimulation(spring, x, leadingExtent, dx, tolerance: tolerance);
+  }
 
-  bool _chooseSimulation(double position, double velocity, double intervalOffset) {
-    if (!_isSpringing) {
-      if (position > _trailingExtent) {
-        _isSpringing = true;
-        _offset = intervalOffset;
-        _currentSimulation = new ScrollSpringSimulation(_spring, position, _trailingExtent, velocity, tolerance: tolerance);
-        return true;
-      } else if (position < _leadingExtent) {
-        _isSpringing = true;
-        _offset = intervalOffset;
-        _currentSimulation = new ScrollSpringSimulation(_spring, position, _leadingExtent, velocity, tolerance: tolerance);
-        return true;
-      } else if (_currentSimulation == null) {
-        _currentSimulation = new FrictionSimulation(0.135, position, velocity, tolerance: tolerance);
-        return true;
-      }
+  Simulation _overscrollSimulation(double x, double dx) {
+    return new ScrollSpringSimulation(spring, x, trailingExtent, dx, tolerance: tolerance);
+  }
+
+  void _maybeUpdateSimulation(double time) {
+    if (_updateTime == null || time < _updateTime)
+      return;
+
+    assert(_timeOffset == 0.0);
+    final double x = _simulation.x(time);
+    final double dx = _simulation.dx(time);
+    if (x < leadingExtent) {
+      _simulation = _underscrollSimulation(x, dx);
+    } else {
+      assert(x > trailingExtent);
+      _simulation = _overscrollSimulation(x, dx);
     }
-    return false;
+
+    _timeOffset = time - _updateTime;
+    _updateTime = null;
+  }
+
+  @override
+  set tolerance(Tolerance tolerance) {
+    super.tolerance = tolerance;
+    _simulation.tolerance = tolerance;
+  }
+
+  @override
+  double x(double time) {
+    _maybeUpdateSimulation(time);
+    return _simulation.x(time - _timeOffset);
+  }
+
+  @override
+  double dx(double time) {
+    _maybeUpdateSimulation(time);
+    return _simulation.dx(time - _timeOffset);
+  }
+
+  @override
+  bool isDone(double time) {
+    _maybeUpdateSimulation(time);
+    return _simulation.isDone(time - _timeOffset);
   }
 
   @override
   String toString() {
-    return '$runtimeType(leadingExtent: $_leadingExtent, trailingExtent: $_trailingExtent)';
+    return '$runtimeType(leadingExtent: $leadingExtent, trailingExtent: $trailingExtent)';
   }
 }
 
