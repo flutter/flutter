@@ -73,20 +73,30 @@ class SawTooth extends Curve {
   }
 }
 
-/// A curve that is 0.0 until [start], then curved from 0.0 to 1.0 at [end], then 1.0.
+/// A curve that is 0.0 until [begin], then curved (according to [curve] from
+/// 0.0 to 1.0 at [end], then 1.0.
+///
+/// An [Interval] can be used to delay an animation. For example, a six second
+/// animation that uses an [Interval] with its [begin] set to 0.5 and its [end]
+/// set to 1.0 will essentially become a three-second animation that starts
+/// three seconds later.
 class Interval extends Curve {
   /// Creates an interval curve.
   ///
-  /// The [start] and [end] arguments must not be null.
+  /// The arguments must not be null.
   const Interval(this.begin, this.end, { this.curve: Curves.linear });
 
-  /// The smallest value for which this interval is 0.0.
+  /// The largest value for which this interval is 0.0.
+  ///
+  /// From t=0.0 to t=`begin`, the interval's value is 0.0.
   final double begin;
 
   /// The smallest value for which this interval is 1.0.
+  ///
+  /// From t=`end` to t=1.0, the interval's value is 1.0.
   final double end;
 
-  /// The curve to apply between [start] and [end].
+  /// The curve to apply between [begin] and [end].
   final Curve curve;
 
   @override

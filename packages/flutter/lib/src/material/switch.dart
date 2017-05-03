@@ -28,9 +28,9 @@ import 'toggleable.dart';
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Radio]
-///  * [Slider]
+///  * [Checkbox], another widget with similar semantics.
+///  * [Radio], for selecting among a set of explicit values.
+///  * [Slider], for selecting a value in a range.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-switch>
 class Switch extends StatefulWidget {
   /// Creates a material design switch.

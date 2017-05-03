@@ -34,7 +34,7 @@ enum ScrollDirection {
 
 /// Returns the opposite of the given [ScrollDirection].
 ///
-/// Specifically, returns [AxisDirection.reverse] for [AxisDirection.forward]
+/// Specifically, returns [ScrollDirection.reverse] for [ScrollDirection.forward]
 /// (and vice versa) and returns [ScrollDirection.idle] for
 /// [ScrollDirection.idle].
 ScrollDirection flipScrollDirection(ScrollDirection direction) {

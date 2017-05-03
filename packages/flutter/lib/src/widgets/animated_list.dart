@@ -17,7 +17,7 @@ import 'ticker_provider.dart';
 /// Signature for the builder callback used by [AnimatedList].
 typedef Widget AnimatedListItemBuilder(BuildContext context, int index, Animation<double> animation);
 
-/// Signature for the builder callback used by [AnimatedList.remove].
+/// Signature for the builder callback used by [AnimatedListState.removeItem].
 typedef Widget AnimatedListRemovedItemBuilder(BuildContext context, Animation<double> animation);
 
 // The default insert/remove animation duration.
@@ -67,13 +67,13 @@ class AnimatedList extends StatefulWidget {
   /// List items are only built when they're scrolled into view.
   ///
   /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// posiition in the list. The value of the index parameter will be between 0 and
-  /// [initialItemCount] plus the total number of items that have been inserted
-  /// with [AnimatedListState.insertItem] and less the total number of items
-  /// that have been removed with [AnimatedList.removeItem].
+  /// posiition in the list. The value of the index parameter will be between 0
+  /// and [initialItemCount] plus the total number of items that have been
+  /// inserted with [AnimatedListState.insertItem] and less the total number of
+  /// items that have been removed with [AnimatedListState.removeItem].
   ///
-  /// Implementations of this callback should assume that [AnimatedList.removeItem]
-  /// removes an item immediately.
+  /// Implementations of this callback should assume that
+  /// [AnimatedListState.removeItem] removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
 
   /// The number of items the list will start with.

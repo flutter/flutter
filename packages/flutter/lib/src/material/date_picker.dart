@@ -172,7 +172,7 @@ const _DayPickerGridDelegate _kDayPickerGridDelegate = const _DayPickerGridDeleg
 class DayPicker extends StatelessWidget {
   /// Creates a day picker.
   ///
-  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
+  /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
   DayPicker({
     Key key,
     @required this.selectedDate,
@@ -323,7 +323,8 @@ class DayPicker extends StatelessWidget {
 class MonthPicker extends StatefulWidget {
   /// Creates a month picker.
   ///
-  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
+  /// Rarely used directly. Instead, typically used as part of the dialog shown
+  /// by [showDatePicker].
   MonthPicker({
     Key key,
     @required this.selectedDate,
@@ -511,7 +512,8 @@ class YearPicker extends StatefulWidget {
   /// The [selectedDate] and [onChanged] arguments must not be null. The
   /// [lastDate] must be after the [firstDate].
   ///
-  /// Rarely used directly. Instead, typically used as part of a [DatePicker].
+  /// Rarely used directly. Instead, typically used as part of the dialog shown
+  /// by [showDatePicker].
   YearPicker({
     Key key,
     @required this.selectedDate,
@@ -687,7 +689,6 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
-
     return new Dialog(
       child: new OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {

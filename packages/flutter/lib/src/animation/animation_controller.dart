@@ -165,9 +165,9 @@ class AnimationController extends Animation<double>
   /// identifying animation controller instances in debug output.
   final String debugLabel;
 
-  /// Returns an [Animated<double>] for this animation controller,
-  /// so that a pointer to this object can be passed around without
-  /// allowing users of that pointer to mutate the AnimationController state.
+  /// Returns an [Animation<double>] for this animation controller, so that a
+  /// pointer to this object can be passed around without allowing users of that
+  /// pointer to mutate the [AnimationController] state.
   Animation<double> get view => this;
 
   /// The length of time this animation should last.

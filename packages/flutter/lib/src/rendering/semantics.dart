@@ -18,8 +18,8 @@ export 'dart:ui' show SemanticsAction;
 /// being tapped, etc.
 ///
 /// These handlers will only be called if the relevant flag is set
-/// (e.g. [handleSemanticTap]() will only be called if
-/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown]() will only
+/// (e.g. [handleSemanticTap] will only be called if
+/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown] will only
 /// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
