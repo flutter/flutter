@@ -52,7 +52,11 @@ typedef GestureRecognizer GestureRecognizerFactory(GestureRecognizer recognizer)
 /// them to the callbacks. To ignore accessibility events, set
 /// [excludeFromSemantics] to true.
 ///
-/// See http://flutter.io/gestures/ for additional information.
+/// See <http://flutter.io/gestures/> for additional information.
+///
+/// Material design applications typically react to touches with ink splash
+/// effects. The [InkWell] class implements this effect and can be used in place
+/// of a [GestureDetector] for handling taps.
 class GestureDetector extends StatelessWidget {
   /// Creates a widget that detects gestures.
   ///

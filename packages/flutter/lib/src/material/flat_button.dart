@@ -40,6 +40,7 @@ import 'theme.dart';
 ///    material.
 ///  * [DropdownButton], which offers the user a choice of a number of options.
 ///  * [SimpleDialogOption], which is used in [SimpleDialog]s.
+///  * [IconButton], to create buttons that just contain icons.
 ///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * <https://material.google.com/components/buttons.html>
 class FlatButton extends StatelessWidget {

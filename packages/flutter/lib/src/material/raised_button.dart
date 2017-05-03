@@ -25,11 +25,16 @@ import 'theme.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
+/// If you want an ink-splash effect for taps, but don't want to use a button,
+/// consider using [InkWell] directly.
+///
 /// See also:
 ///
-///  * [FlatButton]
-///  * [DropdownButton]
-///  * [FloatingActionButton]
+///  * [FlatButton], a material design button without a shadow.
+///  * [DropdownButton], a button that shows options to select from.
+///  * [FloatingActionButton], the round button in material applications.
+///  * [IconButton], to create buttons that just contain icons.
+///  * [InkWell], which implements the ink splash part of a flat button.
 ///  * <https://material.google.com/components/buttons.html>
 class RaisedButton extends StatelessWidget {
   /// Creates a raised button.
