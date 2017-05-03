@@ -54,7 +54,7 @@ class _CupertinoDialogDemoState extends State<CupertinoDialogDemo> {
                     new CupertinoDialogAction(
                       child: const Text('Discard'),
                       isDestructive: true,
-                      onPressed: () { Navigator.pop(context, 'OK'); }
+                      onPressed: () { Navigator.pop(context, 'Discard'); }
                     ),
                     new CupertinoDialogAction(
                       child: const Text('Cancel', style: const TextStyle(fontWeight: FontWeight.w600)),
