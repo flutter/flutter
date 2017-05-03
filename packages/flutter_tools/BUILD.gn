@@ -8,7 +8,7 @@ import("//build/dart/dart_tool.gni")
 dart_package("flutter_tools") {
   package_name = "flutter_tools"
 
-  source_dir = "lib"
+  analysis_options = "//lib/flutter/.analysis_options"
 
   deps = [
     "//dart/pkg/analyzer",
@@ -42,6 +42,8 @@ dart_package("flutter_tools") {
 dart_tool("fuchsia_builder") {
   main_dart = "bin/fuchsia_builder.dart"
 
+  analysis_options = "//lib/flutter/.analysis_options"
+
   deps = [
     ":flutter_tools",
   ]
@@ -49,6 +51,8 @@ dart_tool("fuchsia_builder") {
 
 dart_tool("fuchsia_tester") {
   main_dart = "bin/fuchsia_tester.dart"
+
+  analysis_options = "//lib/flutter/.analysis_options"
 
   deps = [
     ":flutter_tools",
