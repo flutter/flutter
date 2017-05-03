@@ -6,14 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
-import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:test/test.dart';
 
+import 'src/common.dart';
 import 'src/context.dart';
 import 'src/mocks.dart';
 
@@ -22,22 +20,11 @@ void main() {
   AppContext appContext;
   NotifyingLogger notifyingLogger;
 
-  void _testUsingContext(String description, dynamic testMethod()) {
-    test(description, () {
-      return appContext.runInZone(testMethod);
-    });
-  }
-
   group('daemon', () {
     setUp(() {
       appContext = new AppContext();
       notifyingLogger = new NotifyingLogger();
-      appContext.setVariable(Platform, const LocalPlatform());
       appContext.setVariable(Logger, notifyingLogger);
-      appContext.setVariable(Doctor, new Doctor());
-      if (platform.isMacOS)
-        appContext.setVariable(Xcode, new Xcode());
-      appContext.setVariable(DeviceManager, new MockDeviceManager());
     });
 
     tearDown(() {
@@ -46,7 +33,7 @@ void main() {
       notifyingLogger.dispose();
     });
 
-    _testUsingContext('daemon.version', () async {
+    testUsingContext('daemon.version', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -63,7 +50,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('daemon.logMessage', () {
+    testUsingContext('daemon.logMessage', () {
       return appContext.runInZone(() async {
         final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
         final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
@@ -86,7 +73,7 @@ void main() {
       });
     });
 
-    _testUsingContext('daemon.logMessage logToStdout', () async {
+    testUsingContext('daemon.logMessage logToStdout', () async {
       final StringBuffer buffer = new StringBuffer();
 
       await runZoned(() async {
@@ -110,7 +97,7 @@ void main() {
       expect(buffer.toString().trim(), 'daemon.logMessage test');
     });
 
-    _testUsingContext('daemon.shutdown', () async {
+    testUsingContext('daemon.shutdown', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -126,7 +113,7 @@ void main() {
       });
     });
 
-    _testUsingContext('daemon.start', () async {
+    testUsingContext('daemon.start', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -147,7 +134,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('daemon.restart', () async {
+    testUsingContext('daemon.restart', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -168,7 +155,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('daemon.callServiceExtension', () async {
+    testUsingContext('daemon.callServiceExtension', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -195,7 +182,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('daemon.stop', () async {
+    testUsingContext('daemon.stop', () async {
       final DaemonCommand command = new DaemonCommand();
       applyMocksToCommand(command);
 
@@ -216,7 +203,20 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('device.getDevices', () async {
+    testUsingContext('device when !doctor.canListAnything', () async {
+      final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
+      daemon = new Daemon(
+          commands.stream,
+          responses.add,
+          notifyingLogger: notifyingLogger,
+      );
+      expect(daemon.onExit, throwsToolExit(1));
+    }, overrides: <Type, Generator>{
+      Doctor: () => new FailingDoctor(),
+    });
+
+    testUsingContext('device.getDevices', () async {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -232,7 +232,7 @@ void main() {
       commands.close();
     });
 
-    _testUsingContext('device.notify', () {
+    testUsingContext('device.notify', () {
       final StreamController<Map<String, dynamic>> commands = new StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = new StreamController<Map<String, dynamic>>();
       daemon = new Daemon(
@@ -260,3 +260,12 @@ void main() {
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
+
+class FailingDoctor extends Doctor {
+  @override
+  bool get canListAnything => false;
+
+  // True for testing.
+  @override
+  bool get canLaunchAnything => false;
+}
