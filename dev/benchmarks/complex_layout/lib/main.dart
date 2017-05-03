@@ -66,7 +66,7 @@ class TileScrollLayout extends StatelessWidget {
           return new Padding(
             padding:const EdgeInsets.all(5.0),
             child: new Material(
-              elevation: index % 5 + 1,
+              elevation: (index % 5 + 1).toDouble(),
               color: Colors.white,
               child: new IconBar(),
             ),

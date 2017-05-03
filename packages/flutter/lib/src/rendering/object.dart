@@ -456,7 +456,7 @@ class PaintingContext {
   /// * `color` is the background color.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
-  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, int elevation, Color color, PaintingContextCallback painter) {
+  void pushPhysicalModel(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, double elevation, Color color, PaintingContextCallback painter) {
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {

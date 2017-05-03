@@ -192,17 +192,13 @@ class MaterialButton extends StatefulWidget {
 
   /// The z-coordinate at which to place this button.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 0.
-  final int elevation;
+  final double elevation;
 
   /// The z-coordinate at which to place this button when highlighted.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 0.
-  final int highlightElevation;
+  final double highlightElevation;
 
   /// The smallest horizontal extent that the button will occupy.
   ///
@@ -290,7 +286,7 @@ class _MaterialButtonState extends State<MaterialButton> {
     final TextStyle style = theme.textTheme.button.copyWith(color: textColor);
     final ButtonTheme buttonTheme = ButtonTheme.of(context);
     final double height = widget.height ?? buttonTheme.height;
-    final int elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0;
+    final double elevation = (_highlight ? widget.highlightElevation : widget.elevation) ?? 0.0;
     final bool hasColorOrElevation = (widget.color != null || elevation > 0);
     Widget contents = IconTheme.merge(
       data: new IconThemeData(

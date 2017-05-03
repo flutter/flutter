@@ -51,7 +51,7 @@ class Dialog extends StatelessWidget {
         child: new ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 280.0),
           child: new Material(
-            elevation: 24,
+            elevation: 24.0,
             color: _getColor(context),
             type: MaterialType.card,
             child: child

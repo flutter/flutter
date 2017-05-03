@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -42,6 +43,17 @@ class EdgeInsetsTween extends Tween<EdgeInsets> {
 
   @override
   EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
+}
+
+/// An interpolation between two [BorderRadius]s.
+class BorderRadiusTween extends Tween<BorderRadius> {
+  /// Creates a border radius tween.
+  ///
+  /// The [begin] and [end] arguments must not be null.
+  BorderRadiusTween({ BorderRadius begin, BorderRadius end }) : super(begin: begin, end: end);
+
+  @override
+  BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
@@ -640,6 +652,89 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
     return new DefaultTextStyle(
       style: _style.evaluate(animation),
       child: widget.child
+    );
+  }
+}
+
+/// Animated version of [PhysicalModel].
+class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates the properties of a [PhysicalModel].
+  ///
+  /// The [child], [shape], [borderRadius], [elevation], [color], [curve], and
+  /// [duration] arguments must not be null.
+  ///
+  /// Animating [color] is optional and is controlled by the [animateColor] flag.
+  const AnimatedPhysicalModel({
+    Key key,
+    @required this.child,
+    @required this.shape,
+    this.borderRadius: BorderRadius.zero,
+    @required this.elevation,
+    @required this.color,
+    this.animateColor: true,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(child != null),
+       assert(shape != null),
+       assert(borderRadius != null),
+       assert(elevation != null),
+       assert(color != null),
+       super(key: key, curve: curve, duration: duration);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The type of shape.
+  ///
+  /// This property is not animated.
+  final BoxShape shape;
+
+  /// The target border radius of the rounded corners for a rectangle shape.
+  final BorderRadius borderRadius;
+
+  /// The target z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The target background color.
+  final Color color;
+
+  /// Whether the color should be animated.
+  final bool animateColor;
+
+  @override
+  _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('shape: $shape');
+    description.add('borderRadius: $borderRadius');
+    description.add('elevation: $elevation');
+    description.add('color: $color');
+    description.add('animateColor: $animateColor');
+  }
+}
+
+class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysicalModel> {
+  BorderRadiusTween _borderRadius;
+  Tween<double> _elevation;
+  ColorTween _color;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => new BorderRadiusTween(begin: value));
+    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
+    _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new PhysicalModel(
+      child: widget.child,
+      shape: widget.shape,
+      borderRadius: _borderRadius.evaluate(animation),
+      elevation: _elevation.evaluate(animation),
+      color: widget.animateColor ? _color.evaluate(animation) : widget.color,
     );
   }
 }

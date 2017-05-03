@@ -116,7 +116,7 @@ class _CalculatorState extends State<Calculator> {
     return new Scaffold(
       appBar: new AppBar(
         backgroundColor: Theme.of(context).canvasColor,
-        elevation: 0
+        elevation: 0.0
       ),
       body: new Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,

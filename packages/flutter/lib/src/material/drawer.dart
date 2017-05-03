@@ -68,16 +68,14 @@ class Drawer extends StatelessWidget {
   /// Typically used in the [Scaffold.drawer] property.
   const Drawer({
     Key key,
-    this.elevation: 16,
+    this.elevation: 16.0,
     this.child
   }) : super(key: key);
 
   /// The z-coordinate at which to place this drawer.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 16, the appropriate elevation for drawers.
-  final int elevation;
+  final double elevation;
 
   /// The widget below this widget in the tree.
   ///
