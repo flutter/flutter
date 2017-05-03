@@ -66,7 +66,7 @@ class DaemonCommand extends FlutterCommand {
   }
 
   dynamic _handleError(dynamic error, StackTrace stackTrace) {
-    printError('Error from flutter daemon: $error', stackTrace);
+    printError('Error from flutter daemon: $error', stackTrace: stackTrace);
     return null;
   }
 }
@@ -690,7 +690,7 @@ class NotifyingLogger extends Logger {
   Stream<LogMessage> get onMessage => _messageController.stream;
 
   @override
-  void printError(String message, [StackTrace stackTrace]) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     _messageController.add(new LogMessage('error', message, stackTrace));
   }
 
@@ -757,7 +757,7 @@ class _AppRunLogger extends Logger {
   int _nextProgressId = 0;
 
   @override
-  void printError(String message, [StackTrace stackTrace]) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     if (logToStdout) {
       stderr.writeln(message);
       if (stackTrace != null)

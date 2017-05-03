@@ -25,7 +25,7 @@ abstract class Logger {
 
   /// Display an error level message to the user. Commands should use this if they
   /// fail in some way.
-  void printError(String message, [StackTrace stackTrace]);
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false });
 
   /// Display normal output of the command. This should be used for things like
   /// progress messages, success messages, or just normal command output.
@@ -60,10 +60,12 @@ class StdoutLogger extends Logger {
   bool get isVerbose => false;
 
   @override
-  void printError(String message, [StackTrace stackTrace]) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     _status?.cancel();
     _status = null;
 
+    if (emphasis)
+      message = terminal.bolden(message);
     stderr.writeln(message);
     if (stackTrace != null)
       stderr.writeln(stackTrace.toString());
@@ -144,7 +146,10 @@ class BufferLogger extends Logger {
   String get traceText => _trace.toString();
 
   @override
-  void printError(String message, [StackTrace stackTrace]) => _error.writeln(message);
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
+    _error.writeln(message);
+  }
+
 
   @override
   void printStatus(
@@ -185,7 +190,7 @@ class VerboseLogger extends Logger {
   bool get isVerbose => true;
 
   @override
-  void printError(String message, [StackTrace stackTrace]) {
+  void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
     _emit(_LogType.error, message, stackTrace);
   }
 

@@ -160,7 +160,7 @@ class AndroidDevice extends Device {
         return true;
       printError('The ADB at "${getAdbPath(androidSdk)}" is too old; please install version 1.0.32 or later.');
     } catch (error, trace) {
-      printError('Error running ADB: $error', trace);
+      printError('Error running ADB: $error', stackTrace: trace);
     }
 
     return false;
