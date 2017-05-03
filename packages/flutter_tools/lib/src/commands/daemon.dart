@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
+import '../doctor.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/devices.dart';
@@ -66,7 +67,12 @@ class DaemonCommand extends FlutterCommand {
   }
 
   dynamic _handleError(dynamic error, StackTrace stackTrace) {
-    printError('Error from flutter daemon: $error', stackTrace: stackTrace);
+    if (error is ToolExit) {
+      printError(error.message);
+      exit(error.exitCode);
+    } else {
+      printError('Error from flutter daemon: $error', stackTrace: stackTrace);
+    }
     return null;
   }
 }
@@ -87,7 +93,7 @@ class Daemon {
     _registerDomain(deviceDomain = new DeviceDomain(this));
 
     // Start listening.
-    commandStream.listen(
+    _commandSubscription = commandStream.listen(
       _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
@@ -99,6 +105,7 @@ class Daemon {
   DaemonDomain daemonDomain;
   AppDomain appDomain;
   DeviceDomain deviceDomain;
+  StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
   final DaemonCommand daemonCommand;
@@ -143,10 +150,15 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown() {
+  void shutdown({dynamic error}) {
+    _commandSubscription?.cancel();
     _domainMap.values.forEach((Domain domain) => domain.dispose());
-    if (!_onExitCompleter.isCompleted)
-      _onExitCompleter.complete(0);
+    if (!_onExitCompleter.isCompleted) {
+      if (error == null)
+        _onExitCompleter.complete(0);
+      else
+        _onExitCompleter.completeError(error);
+    }
   }
 }
 
@@ -524,6 +536,9 @@ typedef void _DeviceEventHandler(Device device);
 /// `device.removed` events.
 class DeviceDomain extends Domain {
   DeviceDomain(Daemon daemon) : super(daemon, 'device') {
+    if (!doctor.canListAnything) {
+      daemon.shutdown(error: new ToolExit('Unable to locate a development device', exitCode: 1));
+    }
     registerHandler('getDevices', getDevices);
     registerHandler('enable', enable);
     registerHandler('disable', disable);
