@@ -24,6 +24,7 @@ android {
 
     defaultConfig {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        applicationId "com.example.platformchannel"
     }
 
     buildTypes {
