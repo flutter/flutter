@@ -45,17 +45,26 @@ class BouncingScrollSimulation extends Simulation {
 
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
+      _springTime = double.NEGATIVE_INFINITY;
     } else if (position > trailingExtent) {
       _springSimulation = _overscrollSimulation(position, velocity);
+      _springTime = double.NEGATIVE_INFINITY;
     } else {
       _frictionSimulation = new FrictionSimulation(0.135, position, velocity);
       final double finalX = _frictionSimulation.finalX;
-      if (velocity > 0.0 && finalX > trailingExtent)
+      if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
-      else if (velocity < 0.0 && finalX < leadingExtent)
+        _springSimulation = _overscrollSimulation(trailingExtent, _frictionSimulation.dx(_springTime));
+        assert(_springTime.isFinite);
+      } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation.timeAtX(leadingExtent);
+        _springSimulation = _underscrollSimulation(leadingExtent, _frictionSimulation.dx(_springTime));
+        assert(_springTime.isFinite);
+      } else {
+        _springTime = double.INFINITY;
+      }
     }
-    assert(_springTime != null ? _springTime.isFinite : true);
+    assert(_springTime != null);
   }
 
   /// When [x] falls below this value the simulation switches from an internal friction
@@ -69,33 +78,10 @@ class BouncingScrollSimulation extends Simulation {
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
   final SpringDescription spring;
 
-  FrictionSimulation _frictionSimulation; // Null if we started out springing.
-  Simulation _springSimulation; // Non-null if we're springing.
-  double _springTime; // Start springing when time exceeds _springTime.
-  double _timeOffset = 0.0; // When we actually started springing, or zero.
-
-  Simulation _simulation(double time) {
-    Simulation simulation;
-    if (_frictionSimulation == null) {
-      _timeOffset = 0.0;
-      simulation = _springSimulation;
-    } else if (_springTime != null && time > _springTime) {
-      if (_springSimulation == null) {
-        _timeOffset = _springTime;
-        final double x = _frictionSimulation.x(time);
-        final double dx = _frictionSimulation.dx(time);
-        _springSimulation = dx < 0
-          ? _underscrollSimulation(x, dx)
-          : _overscrollSimulation(x, dx);
-      }
-      simulation = _springSimulation;
-    } else {
-      _timeOffset = 0.0;
-      _springSimulation = null;
-      simulation = _frictionSimulation;
-    }
-    return simulation..tolerance = tolerance;
-  }
+  FrictionSimulation _frictionSimulation;
+  Simulation _springSimulation;
+  double _springTime;
+  double _timeOffset = 0.0;
 
   Simulation _underscrollSimulation(double x, double dx) {
     return new ScrollSpringSimulation(spring, x, leadingExtent, dx);
@@ -103,6 +89,18 @@ class BouncingScrollSimulation extends Simulation {
 
   Simulation _overscrollSimulation(double x, double dx) {
     return new ScrollSpringSimulation(spring, x, trailingExtent, dx);
+  }
+
+  Simulation _simulation(double time) {
+    Simulation simulation;
+    if (time  > _springTime) {
+      _timeOffset = _springTime.isFinite ? _springTime : 0.0;
+      simulation = _springSimulation;
+    } else {
+      _timeOffset = 0.0;
+      simulation = _frictionSimulation;
+    }
+    return simulation..tolerance = tolerance;
   }
 
   @override
