@@ -194,7 +194,11 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
 
 }
 
-void injectPlugins({String directory}) {
+/// Finds Flutter plugins in the pubspec.yaml, creates platform injection
+/// registries classes and add them to the build depedencies.
+///
+/// Returns whether any Flutter plugins are added.
+bool injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
   _writeFlutterPluginsList(directory, plugins);
@@ -202,4 +206,5 @@ void injectPlugins({String directory}) {
     _writeAndroidPluginRegistry(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
     _writeIOSPluginRegistry(directory, plugins);
+  return plugins.isNotEmpty;
 }

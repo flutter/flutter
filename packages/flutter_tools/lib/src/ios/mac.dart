@@ -152,9 +152,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  injectPlugins();
+  final bool hasFlutterPlugins = injectPlugins();
 
-  await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+  if (hasFlutterPlugins)
+    await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
