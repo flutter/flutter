@@ -40,7 +40,7 @@ const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered ma
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
-final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
+final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V6;
 
 /// Configure the `test` package to work with Flutter.
 ///
@@ -171,7 +171,7 @@ class _FlutterPlatform extends PlatformPlugin {
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-        encodedWebsocketUrl: Uri.encodeComponent("ws://${_kHost.address}:${server.port}"),
+        encodedWebsocketUrl: Uri.encodeComponent("ws://[${_kHost.address}]:${server.port}"),
       ));
 
       // Start the engine subprocess.
