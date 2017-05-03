@@ -215,8 +215,8 @@ class Overlay extends StatefulWidget {
   /// To add entries to an [Overlay] that is already in the tree, use
   /// [Overlay.of] to obtain the [OverlayState] (or assign a [GlobalKey] to the
   /// [Overlay] widget and obtain the [OverlayState] via
-  /// [GlobalKey.currentState]), and then use [OverlayState.add] or
-  /// [OverlayState.addAll].
+  /// [GlobalKey.currentState]), and then use [OverlayState.insert] or
+  /// [OverlayState.insertAll].
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
