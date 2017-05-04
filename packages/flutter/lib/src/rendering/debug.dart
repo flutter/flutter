@@ -111,7 +111,7 @@ bool debugCheckIntrinsicSizes = false;
 /// Adds [Timeline] events for every RenderObject painted.
 ///
 /// For details on how to use [Timeline] events in the Dart Observatory to
-/// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+/// optimize your app, see: https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
 bool debugProfilePaintsEnabled = false;
 
 

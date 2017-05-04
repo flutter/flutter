@@ -351,7 +351,7 @@ class RenderStack extends RenderBox
   /// Whether overflowing children should be clipped. See [Overflow].
   ///
   /// Some children in a stack might overflow its box. When this flag is set to
-  /// [Overflow.clipped], children cannot paint outside of the stack's box.
+  /// [Overflow.clip], children cannot paint outside of the stack's box.
   Overflow get overflow => _overflow;
   Overflow _overflow;
   set overflow(Overflow value) {

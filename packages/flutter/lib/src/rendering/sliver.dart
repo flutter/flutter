@@ -254,8 +254,17 @@ class SliverConstraints extends Constraints {
   ///
   /// For example, if [growthDirection] is [GrowthDirection.reverse] and
   /// [axisDirection] is [AxisDirection.down], then a
-  /// [userScrollDirection.forward] means that the user is scrolling up, in the
+  /// [ScrollDirection.forward] means that the user is scrolling up, in the
   /// positive [scrollOffset] direction.
+  ///
+  /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
+  /// even if there is (for example) a [ScrollActivity] currently animating the
+  /// position.
+  ///
+  /// This is used by some slivers to determine how to react to a change in
+  /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
+  /// only expand a floating app bar when the [userScrollDirection] is in the
+  /// positive scroll offset direction.
   final ScrollDirection userScrollDirection;
 
   /// The scroll offset, in this sliver's coordinate system, that corresponds to

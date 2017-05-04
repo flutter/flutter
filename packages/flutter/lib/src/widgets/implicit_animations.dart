@@ -243,10 +243,10 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// duration. Properties that are null are not animated.
 ///
 /// This class is useful for generating simple implicit transitions between
-/// different parameters to [Container] with its internal
-/// [AnimationController]. For more complex animations, you'll likely want to
-/// use a subclass of [Transition] such as the [DecoratedBoxTransition] or use
-/// your own [AnimationController].
+/// different parameters to [Container] with its internal [AnimationController].
+/// For more complex animations, you'll likely want to use a subclass of
+/// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
+/// [AnimationController].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///

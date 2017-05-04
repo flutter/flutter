@@ -47,7 +47,7 @@ class ScrollPhysics {
 
   /// Used by [DragScrollActivity] and other user-driven activities to
   /// convert an offset in logical pixels as provided by the [DragUpdateDetails]
-  /// into a delta to apply using [setPixels].
+  /// into a delta to apply using [ScrollActivityDelegate.setPixels].
   ///
   /// This is used by some [ScrollPosition] subclasses to apply friction during
   /// overscroll situations.
@@ -86,8 +86,8 @@ class ScrollPhysics {
   /// is updated, to determine how much of the offset is to be clamped off and
   /// sent to [ScrollPosition.didOverscrollBy].
   ///
-  /// The `value` argument is guaranteed to not equal [pixels] when this is
-  /// called.
+  /// The `value` argument is guaranteed to not equal the [ScrollMetrics.pixels]
+  /// of the `position` argument when this is called.
   ///
   /// It is possible for this method to be called when the `position` describes
   /// an already-out-of-bounds position. In that case, the boundary conditions
@@ -189,8 +189,8 @@ class ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ViewportScrollBehavior], which uses this to provide the iOS component of
-///    its scroll behavior.
+///  * [ScrollConfiguration], which uses this to provide the the default
+///    scroll behavior on iOS.
 ///  * [ClampingScrollPhysics], which is the analogous physics for Android's
 ///    clamping behavior.
 class BouncingScrollPhysics extends ScrollPhysics {
@@ -264,11 +264,11 @@ class BouncingScrollPhysics extends ScrollPhysics {
 ///
 /// See also:
 ///
-///  * [ViewportScrollBehavior], which uses this to provide the Android component
-///    of its scroll behavior.
+///  * [ScrollConfiguration], which uses this to provide the the default
+///    scroll behavior on Android.
 ///  * [BouncingScrollPhysics], which is the analogous physics for iOS' bouncing
 ///    behavior.
-///  * [GlowingOverscrollIndicator], which is used by [ViewportScrollBehavior] to
+///  * [GlowingOverscrollIndicator], which is used by [ScrollConfiguration] to
 ///    provide the glowing effect that is usually found with this clamping effect
 ///    on Android.
 class ClampingScrollPhysics extends ScrollPhysics {

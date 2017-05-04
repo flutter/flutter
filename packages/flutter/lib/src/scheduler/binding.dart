@@ -98,7 +98,7 @@ class _FrameCallbackEntry {
 /// The values of this enum are ordered in the same order as the phases occur,
 /// so their relative index values can be compared to each other.
 ///
-/// See also [WidgetsBinding.beginFrame].
+/// See also the discussion at [WidgetsBinding.drawFrame].
 enum SchedulerPhase {
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
@@ -113,7 +113,7 @@ enum SchedulerPhase {
   /// Typically, these callbacks handle updating objects to new animation
   /// states.
   ///
-  /// See [handleBeginFrame].
+  /// See [SchedulerBinding.handleBeginFrame].
   transientCallbacks,
 
   /// Microtasks scheduled during the processing of transient callbacks are
@@ -127,7 +127,7 @@ enum SchedulerPhase {
   /// [WidgetsBinding.addPersistentFrameCallback]) are currently executing.
   ///
   /// Typically, this is the build/layout/paint pipeline. See
-  /// [WidgetsBinding.drawFrame] and [handleDrawFrame].
+  /// [WidgetsBinding.drawFrame] and [SchedulerBinding.handleDrawFrame].
   persistentCallbacks,
 
   /// The post-frame callbacks (scheduled by
@@ -136,24 +136,24 @@ enum SchedulerPhase {
   /// Typically, these callbacks handle cleanup and scheduling of work for the
   /// next frame.
   ///
-  /// See [handleDrawFrame].
+  /// See [SchedulerBinding.handleDrawFrame].
   postFrameCallbacks,
 }
 
 /// Scheduler for running the following:
 ///
-/// * _Transient callbacks_, triggered by the system's [ui.window.onBeginFrame]
+/// * _Transient callbacks_, triggered by the system's [Window.onBeginFrame]
 ///   callback, for synchronizing the application's behavior to the system's
 ///   display. For example, [Ticker]s and [AnimationController]s trigger from
 ///   these.
 ///
-/// * _Persistent callbacks_, triggered by the system's [ui.window.onDrawFrame]
+/// * _Persistent callbacks_, triggered by the system's [Window.onDrawFrame]
 ///   callback, for updating the system's display after transient callbacks have
 ///   executed. For example, the rendering layer uses this to drive its
 ///   rendering pipeline.
 ///
 /// * _Post-frame callbacks_, which are run after persistent callbacks, just
-///   before returning from the [ui.window.onDrawFrame] callback.
+///   before returning from the [Window.onDrawFrame] callback.
 ///
 /// * Non-rendering tasks, to be run between frames. These are given a
 ///   priority and are executed in priority order according to a
@@ -475,7 +475,7 @@ abstract class SchedulerBinding extends BindingBase {
   }
 
   /// If necessary, schedules a new frame by calling
-  /// [ui.window.scheduleFrame].
+  /// [Window.scheduleFrame].
   ///
   /// After this is called, the engine will (eventually) call
   /// [handleBeginFrame]. (This call might be delayed, e.g. if the device's

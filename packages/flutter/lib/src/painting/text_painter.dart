@@ -95,9 +95,15 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// The string used to ellipsize overflowing text.  Setting this to a nonempty
+  /// The string used to ellipsize overflowing text. Setting this to a non-empty
   /// string will cause this string to be substituted for the remaining text
-  /// if the text can not fit within the specificed maximum width.
+  /// if the text can not fit within the specified maximum width.
+  ///
+  /// Specifically, the ellipsis is applied to the last line before the line
+  /// truncated by [maxLines], if [maxLines] is non-null and that line overflows
+  /// the width constraint, or to the first line that is wider than the width
+  /// constraint, if [maxLines] is null. The width constraint is the `maxWidth`
+  /// passed to [layout].
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   String get ellipsis => _ellipsis;
@@ -111,10 +117,11 @@ class TextPainter {
     _needsLayout = true;
   }
 
-  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  /// An optional maximum number of lines for the text to span, wrapping if
+  /// necessary.
   ///
-  /// If the text exceeds the given number of lines, it will be truncated according
-  /// to [overflow].
+  /// If the text exceeds the given number of lines, it is truncated such that
+  /// subsequent lines are dropped.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
   int get maxLines => _maxLines;
@@ -129,10 +136,10 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  /// The height of a zero-width space in [style] in logical pixels.
+  /// The height of a zero-width space in [text] in logical pixels.
   ///
-  /// Not every line of text in [style] will have this height, but this height
-  /// is "typical" for text in [style] and useful for sizing other objects
+  /// Not every line of text in [text] will have this height, but this height
+  /// is "typical" for text in [text] and useful for sizing other objects
   /// relative a typical line of text.
   double get preferredLineHeight {
     assert(text != null);
@@ -198,7 +205,8 @@ class TextPainter {
     return new Size(width, height);
   }
 
-  /// Returns the distance from the top of the text to the first baseline of the given type.
+  /// Returns the distance from the top of the text to the first baseline of the
+  /// given type.
   ///
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
@@ -213,10 +221,17 @@ class TextPainter {
     return null;
   }
 
-  /// Whether the previous call to [layout] attempted to produce more than
-  /// [maxLines] lines.
+  /// Whether any text was truncated or ellipsized.
   ///
-  /// If [didExceedMaxLines] is true, then any overflow effect is operative.
+  /// If [maxLines] is not null, this is true if there were more lines to be
+  /// drawn than the given [maxLines], and thus at least one line was omitted in
+  /// the output; otherwise it is false.
+  ///
+  /// If [maxLines] is null, this is true if [ellipsis] is not the empty string
+  /// and there was a line that overflowed the `maxWidth` argument passed to
+  /// [layout]; otherwise it is false.
+  ///
+  /// Valid only after [layout] has been called.
   bool get didExceedMaxLines {
     assert(!_needsLayout);
     return _paragraph.didExceedMaxLines;

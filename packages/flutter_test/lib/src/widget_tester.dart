@@ -181,7 +181,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// this method works when the test is run with `flutter run`.
   Future<Null> pumpWidget(Widget widget, [
     Duration duration,
-    EnginePhase phase = EnginePhase.sendSemanticsTree
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard(() {
       binding.attachRootWidget(widget);
@@ -204,7 +204,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   Future<Null> pump([
     Duration duration,
-    EnginePhase phase = EnginePhase.sendSemanticsTree
+    EnginePhase phase = EnginePhase.sendSemanticsUpdate,
   ]) {
     return TestAsyncUtils.guard(() => binding.pump(duration, phase));
   }
@@ -235,7 +235,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// matches the expected number of pumps.
   Future<int> pumpAndSettle([
       Duration duration = const Duration(milliseconds: 100),
-      EnginePhase phase = EnginePhase.sendSemanticsTree,
+      EnginePhase phase = EnginePhase.sendSemanticsUpdate,
       Duration timeout = const Duration(minutes: 10),
     ]) {
     assert(duration != null);
@@ -448,7 +448,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Returns the TestTextInput singleton.
   ///
   /// Typical app tests will not need to use this value. To add text to widgets
-  /// like [TextField] or [FormTextField], call [enterText].
+  /// like [TextField] or [TextFormField], call [enterText].
   TestTextInput get testTextInput => binding.testTextInput;
 
   /// Give the text input widget specified by [finder] the focus, as if the
@@ -456,10 +456,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
-  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
+  /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
   ///
   /// Tests that just need to add text to widgets like [TextField]
-  /// or [FormTextField] only need to call [enterText].
+  /// or [TextFormField] only need to call [enterText].
   Future<Null> showKeyboard(Finder finder) async {
     return TestAsyncUtils.guard(() async {
       final EditableTextState editable = state(find.descendant(
@@ -479,7 +479,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   ///
   /// The widget specified by [finder] must be an [EditableText] or have
   /// an [EditableText] descendant. For example `find.byType(TextField)`
-  /// or `find.byType(FormTextField)`, or `find.byType(EditableText)`.
+  /// or `find.byType(TextFormField)`, or `find.byType(EditableText)`.
   ///
   /// To just give [finder] the focus without entering any text,
   /// see [showKeyboard].

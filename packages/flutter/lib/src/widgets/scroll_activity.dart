@@ -25,6 +25,7 @@ import 'ticker_provider.dart';
 /// See also:
 ///
 ///  * [ScrollActivity], which uses this class as its delegate.
+///  * [ScrollPositionWithSingleContext], the main implementation of this interface.
 abstract class ScrollActivityDelegate {
   /// The direction in which the scroll view scrolls.
   AxisDirection get axisDirection;
@@ -353,7 +354,7 @@ class DragScrollActivity extends ScrollActivity {
   }
 }
 
-/// An activity that animates a scroll view based on a physics [simulation].
+/// An activity that animates a scroll view based on a physics [Simulation].
 ///
 /// A [BallisticScrollActivity] is typically used when the user lifts their
 /// finger off the screen to continue the scrolling gesture with the current velocity.

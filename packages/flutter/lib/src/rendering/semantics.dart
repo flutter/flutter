@@ -17,10 +17,9 @@ export 'dart:ui' show SemanticsAction;
 /// Interface for [RenderObject]s to implement when they want to support
 /// being tapped, etc.
 ///
-/// These handlers will only be called if the relevant flag is set
-/// (e.g. [handleSemanticTap] will only be called if
-/// [SemanticsNode.canBeTapped] is true, [handleSemanticScrollDown] will only
-/// be called if [SemanticsNode.canBeScrolledVertically] is true, etc).
+/// The handler will only be called for a particular flag if that flag is set
+/// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
+/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
 abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   /// Called when the object implementing this interface receives a
   /// [SemanticsAction]. For example, if the user of an accessibility tool
@@ -36,7 +35,7 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
 /// corresponds to the [RenderObject]. (One [SemanticsNode] can
 /// correspond to multiple [RenderObject] objects.)
 ///
-/// See [RenderObject.getSemanticsAnnotators()] for details on the
+/// See [RenderObject.semanticsAnnotator] for details on the
 /// contract that semantic annotators must follow.
 typedef void SemanticsAnnotator(SemanticsNode semantics);
 
@@ -74,7 +73,7 @@ class SemanticsData {
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
 
-  /// A bit field of [SemanticsActions] that apply to this node.
+  /// A bit field of [SemanticsAction]s that apply to this node.
   final int actions;
 
   /// A textual description of this node.
@@ -606,8 +605,9 @@ class SemanticsNode extends AbstractNode {
 /// Owns [SemanticsNode] objects and notifies listeners of changes to the
 /// render tree semantics.
 ///
-/// To listen for semantic updates, call [PipelineOwner.addSemanticsListener],
-/// which will create a [SemanticsOwner] if necessary.
+/// To listen for semantic updates, call [PipelineOwner.ensureSemantics] to
+/// obtain a [SemanticsHandle]. This will create a [SemanticsOwner] if
+/// necessary.
 class SemanticsOwner extends ChangeNotifier {
   final Set<SemanticsNode> _dirtyNodes = new Set<SemanticsNode>();
   final Map<int, SemanticsNode> _nodes = <int, SemanticsNode>{};
@@ -626,7 +626,7 @@ class SemanticsOwner extends ChangeNotifier {
     super.dispose();
   }
 
-  /// Update the semantics using [ui.window.updateSemantics].
+  /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
     if (_dirtyNodes.isEmpty)
       return;
@@ -745,7 +745,7 @@ class SemanticsOwner extends ChangeNotifier {
     return node._canPerformAction(action) ? node._actionHandler : null;
   }
 
-  /// Asks the [SemanticsNode] with at the given position to perform the given action.
+  /// Asks the [SemanticsNode] at the given position to perform the given action.
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.

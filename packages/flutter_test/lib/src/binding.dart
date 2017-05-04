@@ -54,8 +54,8 @@ enum EnginePhase {
   flushSemantics,
 
   /// The final phase in the rendering library, wherein semantics information is
-  /// sent to the embedder. See [SemanticsNode.sendSemanticsTree].
-  sendSemanticsTree,
+  /// sent to the embedder. See [SemanticsNode.sendSemanticsUpdate].
+  sendSemanticsUpdate,
 }
 
 /// Parts of the system that can generate pointer events that reach the test
@@ -162,7 +162,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// See also [LiveTestWidgetsFlutterBindingFramePolicy], which affects how
   /// this method works when the test is run with `flutter run`.
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]);
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]);
 
   /// Artificially calls dispatchLocaleChanged on the Widget binding,
   /// then flushes microtasks.
@@ -512,7 +512,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   int get microtaskCount => _fakeAsync.microtaskCount;
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
     return TestAsyncUtils.guard(() {
       assert(inTest);
       assert(_clock != null);
@@ -548,7 +548,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return result;
   }
 
-  EnginePhase _phase = EnginePhase.sendSemanticsTree;
+  EnginePhase _phase = EnginePhase.sendSemanticsUpdate;
 
   // Cloned from RendererBinding.drawFrame() but with early-exit semantics.
   @override
@@ -568,7 +568,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
               renderView.compositeFrame(); // this sends the bits to the GPU
               if (_phase != EnginePhase.composite) {
                 pipelineOwner.flushSemantics();
-                assert(_phase == EnginePhase.flushSemantics || _phase == EnginePhase.sendSemanticsTree);
+                assert(_phase == EnginePhase.flushSemantics ||
+                       _phase == EnginePhase.sendSemanticsUpdate);
               }
             }
           }
@@ -837,8 +838,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsTree ]) {
-    assert(newPhase == EnginePhase.sendSemanticsTree);
+  Future<Null> pump([ Duration duration, EnginePhase newPhase = EnginePhase.sendSemanticsUpdate ]) {
+    assert(newPhase == EnginePhase.sendSemanticsUpdate);
     assert(inTest);
     assert(!_expectingFrame);
     assert(_pendingFrame == null);

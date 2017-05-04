@@ -32,7 +32,8 @@ class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, Ser
     pipelineOwner.flushSemantics();
     if (phase == EnginePhase.flushSemantics)
       return;
-    assert(phase == EnginePhase.flushSemantics || phase == EnginePhase.sendSemanticsTree);
+    assert(phase == EnginePhase.flushSemantics ||
+           phase == EnginePhase.sendSemanticsUpdate);
   }
 }
 

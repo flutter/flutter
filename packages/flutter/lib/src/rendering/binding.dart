@@ -113,7 +113,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
 
   /// Called when the system metrics change.
   ///
-  /// See [ui.window.onMetricsChanged].
+  /// See [Window.onMetricsChanged].
   void handleMetricsChanged() {
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
@@ -179,11 +179,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
-  /// registered with [scheduleFrameCallback] and [addFrameCallback], in
-  /// registration order. This includes all the [Ticker] instances that are
-  /// driving [AnimationController] objects, which means all of the active
-  /// [Animation] objects tick at this point.
+  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
+  /// registered with [scheduleFrameCallback], in registration order. This
+  /// includes all the [Ticker] instances that are driving [AnimationController]
+  /// objects, which means all of the active [Animation] objects tick at this
+  /// point.
   ///
   /// 2. Microtasks: After [handleBeginFrame] returns, any microtasks that got
   /// scheduled by transient frame callbacks get to run. This typically includes
@@ -191,7 +191,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [ui.window.onDrawFrame], is called, which invokes all the persistent frame
+  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
   /// callbacks, of which the most notable is this method, [drawFrame], which
   /// proceeds as follows:
   ///
@@ -208,11 +208,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 6. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// 6. The compositing phase: The layer tree is turned into a [Scene] and
   /// sent to the GPU.
   ///
   /// 7. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
+  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.

@@ -60,7 +60,7 @@ class MaterialGap extends MergeableMaterialItem {
   }) : assert(key != null),
        super(key);
 
-  /// The main axis extent of this gap. For example, if the [MergableMaterial]
+  /// The main axis extent of this gap. For example, if the [MergeableMaterial]
   /// is vertical, then this is the height of the gap.
   final double size;
 

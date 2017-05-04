@@ -59,7 +59,7 @@ class BottomNavigationBarItem {
 
   /// The icon of the item.
   ///
-  /// Typically the icon is an [Icon] or an [IconImage] widget. If another type
+  /// Typically the icon is an [Icon] or an [ImageIcon] widget. If another type
   /// of widget is provided then it should configure itself to match the current
   /// [IconTheme] size and color.
   final Widget icon;

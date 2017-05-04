@@ -36,7 +36,7 @@ export 'scroll_activity.dart' show ScrollHoldController;
 /// typically start activities in response to user input or instructions from a
 /// [ScrollController].
 ///
-/// This object is a [Listable] that notifies its listeners when [pixels]
+/// This object is a [Listenable] that notifies its listeners when [pixels]
 /// changes.
 ///
 /// ## Subclassing ScrollPosition
@@ -375,7 +375,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// before.
   ///
   /// The default implementation informs the [activity] of the new dimensions by
-  /// calling [ScrollActivityDelegate.applyNewDimensions].
+  /// calling its [ScrollActivity.applyNewDimensions] method.
   ///
   /// See also:
   ///

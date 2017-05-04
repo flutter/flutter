@@ -935,7 +935,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// For a render box to be accessible, implement the
 /// [describeApproximatePaintClip] and [visitChildrenForSemantics] methods, and
-/// the [semanticAnnotator] getter. The default implementations are sufficient
+/// the [semanticsAnnotator] getter. The default implementations are sufficient
 /// for objects that only affect layout, but nodes that represent interactive
 /// components or information (diagrams, text, images, etc) should provide more
 /// complete implementations. For more information, see the documentation for
@@ -1089,11 +1089,23 @@ abstract class RenderBox extends RenderObject {
   /// children. It is the size that is needed to paint the box's contents (in
   /// this case, the children) _without clipping_ that matters.
   ///
-  /// In many cases, viewports do not have efficient access to all the children,
-  /// and therefore cannot actually return a valid answer. In this case, when
-  /// [RenderObject.debugCheckingIntrinsics] is false and asserts are enabled,
-  /// the intrinsic functions should throw; in other cases, they should return
-  /// 0.0. See [RenderVirtualViewport.debugThrowIfNotCheckingIntrinsics].
+  /// ### When the intrinsic dimensions cannot be known
+  ///
+  /// There are cases where render objects do not have an efficient way to
+  /// compute their intrinsic dimensions. For example, it may be prohibitively
+  /// expensive to reify and measure every child of a lazy viewport (viewports
+  /// generally only instantiate the actually visible children), or the
+  /// dimensions may be computed by a callback about which the render object
+  /// cannot reason.
+  ///
+  /// In such cases, it may be impossible (or at least impractical) to actually
+  /// return a valid answer. In such cases, the intrinsic functions should throw
+  /// when [RenderObject.debugCheckingIntrinsics] is false and asserts are
+  /// enabled, and return 0.0 otherwise.
+  ///
+  /// See the implementations of [LayoutBuilder] or [RenderViewportBase] for
+  /// examples (in particular,
+  /// [RenderViewportBase.debugThrowIfNotCheckingIntrinsics]).
   ///
   /// ### Aspect-ratio-driven boxes
   ///

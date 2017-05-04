@@ -452,7 +452,7 @@ enum TableCellVerticalAlignment {
   /// Cells with this alignment are aligned such that they all share the same
   /// baseline. Cells with no baseline are top-aligned instead. The baseline
   /// used is specified by [RenderTable.baseline]. It is not valid to use the
-  /// baseline value if [RenderTable.baseline] is not specified.
+  /// baseline value if [RenderTable.textBaseline] is not specified.
   ///
   /// This vertial alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.

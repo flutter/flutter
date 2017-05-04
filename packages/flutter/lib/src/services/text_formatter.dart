@@ -133,7 +133,7 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 class WhitelistingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that allows only the insertion of whitelisted characters patterns.
   ///
-  /// The [blacklistedPattern] must not be null.
+  /// The [whitelistedPattern] must not be null.
   WhitelistingTextInputFormatter(this.whitelistedPattern) :
     assert(whitelistedPattern != null);
 

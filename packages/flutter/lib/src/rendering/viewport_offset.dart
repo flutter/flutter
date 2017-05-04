@@ -55,7 +55,7 @@ ScrollDirection flipScrollDirection(ScrollDirection direction) {
 /// select which part of its content to display. As the user scrolls the
 /// viewport, this value changes, which changes the content that is displayed.
 ///
-/// This object is a [Listable] that notifies its listeners when [pixels]
+/// This object is a [Listenable] that notifies its listeners when [pixels]
 /// changes.
 ///
 /// See also:
@@ -155,13 +155,15 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// The direction in which the user is trying to change [pixels], relative to
   /// the viewport's [RenderViewport.axisDirection].
   ///
-  /// If the user is not scrolling, this will return [ScrollDirection.idle] even
-  /// if there is an [activity] currently animating the position.
+  /// If the _user_ is not scrolling, this will return [ScrollDirection.idle]
+  /// even if there is (for example) a [ScrollActivity] currently animating the
+  /// position.
   ///
-  /// This is used by some slivers to determine how to react to a change in
-  /// scroll offset. For example, [RenderSliverFloatingPersistentHeader] will
-  /// only expand a floating app bar when the [userScrollDirection] is in the
-  /// positive scroll offset direction.
+  /// This is exposed in [SliverConstraints.userScrollDirection], which is used
+  /// by some slivers to determine how to react to a change in scroll offset.
+  /// For example, [RenderSliverFloatingPersistentHeader] will only expand a
+  /// floating app bar when the [userScrollDirection] is in the positive scroll
+  /// offset direction.
   ScrollDirection get userScrollDirection;
 
   @override

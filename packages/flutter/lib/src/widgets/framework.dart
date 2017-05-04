@@ -734,9 +734,10 @@ abstract class State<T extends StatefulWidget> {
   /// A [State] object's configuration is the corresponding [StatefulWidget]
   /// instance. This property is initialized by the framework before calling
   /// [initState]. If the parent updates this location in the tree to a new
-  /// widget with the same [runtimeType] and [key] as the current configuration,
-  /// the framework will update this property to refer to the new widget and
-  /// then call [didUpdateWidget], passing the old configuration as an argument.
+  /// widget with the same [runtimeType] and [Widget.key] as the current
+  /// configuration, the framework will update this property to refer to the new
+  /// widget and then call [didUpdateWidget], passing the old configuration as
+  /// an argument.
   T get widget => _widget;
   T _widget;
 
@@ -806,10 +807,10 @@ abstract class State<T extends StatefulWidget> {
   /// Called whenever the widget configuration changes.
   ///
   /// If the parent widget rebuilds and request that this location in the tree
-  /// update to display a new widget with the same [runtimeType] and [key], the
-  /// framework will update the [widget] property of this [State] object to
-  /// refer to the new widget and then call the this method with the previous
-  /// widget as an argument.
+  /// update to display a new widget with the same [runtimeType] and
+  /// [Widget.key], the framework will update the [widget] property of this
+  /// [State] object to refer to the new widget and then call the this method
+  /// with the previous widget as an argument.
   ///
   /// Override this method to respond to changes in the [widget] widget (e.g.,
   /// to start implicit animations).
@@ -1517,8 +1518,8 @@ abstract class BuildContext {
   /// [RenderObjectWidget].
   ///
   /// This method will only return a valid result after the build phase is
-  /// complete. It is therefore not valid to call this from the [build] function
-  /// itself. It should only be called from interaction event handlers (e.g.
+  /// complete. It is therefore not valid to call this from a build method.
+  /// It should only be called from interaction event handlers (e.g.
   /// gesture callbacks) or layout or paint callbacks.
   ///
   /// If the render object is a [RenderBox], which is the common case, then the
@@ -1527,8 +1528,8 @@ abstract class BuildContext {
   /// from paint callbacks or interaction event handlers (e.g. gesture
   /// callbacks).
   ///
-  /// For details on the different phases of a frame, see
-  /// [WidgetsBinding.beginFrame].
+  /// For details on the different phases of a frame, see the discussion at
+  /// [WidgetsBinding.drawFrame].
   ///
   /// Calling this method is theoretically relatively expensive (O(N) in the
   /// depth of the tree), but in practice is usually cheap because the tree
@@ -1539,12 +1540,12 @@ abstract class BuildContext {
   /// The size of the [RenderBox] returned by [findRenderObject].
   ///
   /// This getter will only return a valid result after the layout phase is
-  /// complete. It is therefore not valid to call this from the [build] function
-  /// itself. It should only be called from paint callbacks or interaction event
+  /// complete. It is therefore not valid to call this from a build method.
+  /// It should only be called from paint callbacks or interaction event
   /// handlers (e.g. gesture callbacks).
   ///
-  /// For details on the different phases of a frame, see
-  /// [WidgetsBinding.beginFrame].
+  /// For details on the different phases of a frame, see the discussion at
+  /// [WidgetsBinding.drawFrame].
   ///
   /// This getter will only return a valid result if [findRenderObject] actually
   /// returns a [RenderBox]. If [findRenderObject] returns a render object that
@@ -1750,7 +1751,7 @@ class BuildOwner {
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
-  /// when [WidgetsBinding.beginFrame] calls [buildScope].
+  /// when [WidgetsBinding.drawFrame] calls [buildScope].
   void scheduleBuildFor(Element element) {
     assert(element != null);
     assert(element.owner == this);
@@ -1832,8 +1833,8 @@ class BuildOwner {
   /// `callback`, if any. Then, builds all the elements that were marked as
   /// dirty using [scheduleBuildFor], in depth order.
   ///
-  /// This mechanism prevents build functions from transitively requiring other
-  /// build functions to run, potentially causing infinite loops.
+  /// This mechanism prevents build methods from transitively requiring other
+  /// build methods to run, potentially causing infinite loops.
   ///
   /// The dirty list is processed after `callback` returns, building all the
   /// elements that were marked as dirty using [scheduleBuildFor], in depth
@@ -1843,11 +1844,16 @@ class BuildOwner {
   ///
   /// To flush the current dirty list without performing any other work, this
   /// function can be called with no callback. This is what the framework does
-  /// each frame, in [WidgetsBinding.beginFrame].
+  /// each frame, in [WidgetsBinding.drawFrame].
   ///
   /// Only one [buildScope] can be active at a time.
   ///
   /// A [buildScope] implies a [lockState] scope as well.
+  ///
+  /// To print a console message every time this method is called, set
+  /// [debugPrintBuildScope] to true. This is useful when debugging problems
+  /// involving widgets not getting marked dirty, or getting marked dirty too
+  /// often.
   void buildScope(Element context, [VoidCallback callback]) {
     if (callback == null && _dirtyElements.isEmpty)
       return;
@@ -1970,7 +1976,7 @@ class BuildOwner {
   /// Complete the element build pass by unmounting any elements that are no
   /// longer active.
   ///
-  /// This is called by [WidgetsBinding.beginFrame].
+  /// This is called by [WidgetsBinding.drawFrame].
   ///
   /// In debug mode, this also runs some sanity checks, for example checking for
   /// duplicate global keys.
@@ -3058,7 +3064,7 @@ abstract class Element implements BuildContext {
 
 /// A widget that renders an exception's message.
 ///
-/// This widget is used when a build function fails, to help with determining
+/// This widget is used when a build method fails, to help with determining
 /// where the problem lies. Exceptions are also logged to the console, which you
 /// can read using `flutter logs`. The console will also include additional
 /// information such as the stack trace for the exception.
@@ -3096,7 +3102,7 @@ typedef Widget WidgetBuilder(BuildContext context);
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list.
 ///
-/// Used by [LazyBlockBuilder.builder].
+/// Used by [ListView.builder] and other APIs that use lazily-generated widgets.
 typedef Widget IndexedWidgetBuilder(BuildContext context, int index);
 
 /// An [Element] that composes other [Element]s.
@@ -3285,7 +3291,7 @@ class StatefulElement extends ComponentElement {
   void activate() {
     super.activate();
     // Since the State could have observed the deactivate() and thus disposed of
-    // resources allocated in the build function, we have to rebuild the widget
+    // resources allocated in the build method, we have to rebuild the widget
     // so that its State can reallocate its resources.
     assert(_active); // otherwise markNeedsBuild is a no-op
     markNeedsBuild();
@@ -3588,7 +3594,7 @@ class InheritedElement extends ProxyElement {
 /// ### Updating children
 ///
 /// Early in the lifecycle of an element, the framework calls the [mount]
-/// method. This method should call [inflateChild] for each child, passing in
+/// method. This method should call [updateChild] for each child, passing in
 /// the widget for that child, and the slot for that child, thus obtaining a
 /// list of child [Element]s.
 ///
@@ -3607,9 +3613,9 @@ class InheritedElement extends ProxyElement {
 /// method may be useful in this regard.
 ///
 /// [updateChild] should be called for children in their logical order. The
-/// order can matter; for example, if two of the children use [Focus.at]'s
-/// `autofocus` feature in their build method, then the first one to be updated
-/// will gain the focus.
+/// order can matter; for example, if two of the children use [PageStorage]'s
+/// `writeState` feature in their build method (and neither has a [key]), then
+/// the state written by the first will be overwritten by the second.
 ///
 /// #### Dynamically determining the children during the build phase
 ///
@@ -3623,8 +3629,9 @@ class InheritedElement extends ProxyElement {
 /// the [update] method won't work: layout of this element's render object
 /// hasn't started yet at that point. Instead, the [update] method can mark the
 /// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [performLayout] method can call back to the element
-/// to have it generate the widgets and call [updateChild] accordingly.
+/// then the render object's [RenderOBject.performLayout] method can call back
+/// to the element to have it generate the widgets and call [updateChild]
+/// accordingly.
 ///
 /// For a render object to call an element during layout, it must use
 /// [RenderObject.invokeLayoutCallback]. For an element to call [updateChild]
@@ -4011,7 +4018,7 @@ abstract class RootRenderObjectElement extends RenderObjectElement {
   /// [WidgetsBinding.buildOwner], and assigns it to the widget tree in the call
   /// to [runApp]. The binding is responsible for driving the build pipeline by
   /// calling the build owner's [BuildOwner.buildScope] method. See
-  /// [WidgetsBinding.beginFrame].
+  /// [WidgetsBinding.drawFrame].
   void assignOwner(BuildOwner owner) {
     _owner = owner;
   }

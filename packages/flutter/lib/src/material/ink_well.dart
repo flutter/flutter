@@ -24,7 +24,7 @@ import 'theme.dart';
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///
 /// If a Widget uses this class directly, it should include the following line
-/// at the top of its [build] function to call [debugCheckHasMaterial]:
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
@@ -254,7 +254,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> {
 /// Must have an ancestor [Material] widget in which to cause ink reactions.
 ///
 /// If a Widget uses this class directly, it should include the following line
-/// at the top of its [build] function to call [debugCheckHasMaterial]:
+/// at the top of its build function to call [debugCheckHasMaterial]:
 ///
 /// ```dart
 /// assert(debugCheckHasMaterial(context));

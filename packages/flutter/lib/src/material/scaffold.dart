@@ -314,7 +314,7 @@ class Scaffold extends StatefulWidget {
   ///
   /// If you have a column of widgets that should normally fit on the screen,
   /// but may overflow and would in such cases need to scroll, consider using a
-  /// [ScrollList] as the body of the scaffold. This is also a good choice for
+  /// [ListView] as the body of the scaffold. This is also a good choice for
   /// the case where your body is a scrollable list.
   final Widget body;
 
@@ -922,7 +922,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
 /// An interface for controlling a feature of a [Scaffold].
 ///
-/// Commonly obtained from [Scaffold.showSnackBar] or [Scaffold.showBottomSheet].
+/// Commonly obtained from [ScaffoldState.showSnackBar] or [ScaffoldState.showBottomSheet].
 class ScaffoldFeatureController<T extends Widget, U> {
   const ScaffoldFeatureController._(this._widget, this._completer, this.close, this.setState);
   final T _widget;
@@ -1005,7 +1005,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
 
 /// A [ScaffoldFeatureController] for persistent bottom sheets.
 ///
-/// This is the type of objects returned by [Scaffold.showBottomSheet].
+/// This is the type of objects returned by [ScaffoldState.showBottomSheet].
 class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_PersistentBottomSheet, T> {
   const PersistentBottomSheetController._(
     _PersistentBottomSheet widget,

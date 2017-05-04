@@ -85,7 +85,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// A container first surrounds the child with [padding] (inflated by any
 /// borders present in the [decoration]) and then applies additional
-/// [constraints] to the padded extent (incorporating the [width] and [height]
+/// [constraints] to the padded extent (incorporating the `width` and `height`
 /// as constraints, if either is non-null). The container is then surrounded by
 /// additional empty space described from the [margin].
 ///

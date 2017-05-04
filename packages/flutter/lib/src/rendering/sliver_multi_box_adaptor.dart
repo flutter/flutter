@@ -52,7 +52,8 @@ abstract class RenderSliverBoxChildManager {
   ///
   /// The index of the given child can be obtained using the
   /// [RenderSliverMultiBoxAdaptor.indexOf] method, which reads it from the
-  /// [SliverMultiBoxAdaptorParentData.index] field of the child's [parentData].
+  /// [SliverMultiBoxAdaptorParentData.index] field of the child's
+  /// [RenderObject.parentData].
   void removeChild(RenderBox child);
 
   /// Called to estimate the total scrollable extents of this object.
@@ -70,8 +71,8 @@ abstract class RenderSliverBoxChildManager {
   /// Called during [RenderSliverMultiBoxAdaptor.adoptChild].
   ///
   /// Subclasses must ensure that the [SliverMultiBoxAdaptorParentData.index]
-  /// field of the child's [parentData] accurately reflects the child's index in
-  /// the child list after this function returns.
+  /// field of the child's [RenderObject.parentData] accurately reflects the
+  /// child's index in the child list after this function returns.
   void didAdoptChild(RenderBox child);
 
   /// Called during layout to indicate whether this object provided insufficient

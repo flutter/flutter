@@ -47,8 +47,8 @@ abstract class StreamBuilderBase<T, S> extends StatefulWidget {
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
-  /// [afterDisconnecting], if the previous stream was not null, followed by
-  /// [afterConnecting], if the new stream is not null.
+  /// [afterDisconnected], if the previous stream was not null, followed by
+  /// [afterConnected], if the new stream is not null.
   final Stream<T> stream;
 
   /// Returns the initial summary of stream interaction, typically representing
@@ -349,17 +349,17 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 ///
 /// Widget rebuilding is scheduled by the completion of the future, using
 /// [State.setState], but is otherwise decoupled from the timing of the future.
-/// The [build] method is called at the discretion of the Flutter pipeline, and
+/// The [builder] callback is called at the discretion of the Flutter pipeline, and
 /// will thus receive a timing-dependent sub-sequence of the snapshots that
 /// represent the interaction with the future.
 ///
-/// For a future that completes successfully with data, the [build] method may
+/// For a future that completes successfully with data, the [builder] may
 /// be called with either both or only the latter of the following snapshots:
 ///
 /// * `new AsyncSnapshot<String>(ConnectionState.waiting, null, null)`
 /// * `new AsyncSnapshot<String>(ConnectionState.done, 'some data', null)`
 ///
-/// For a future completing with an error, the [build] method may be called with
+/// For a future completing with an error, the [builder] may be called with
 /// either both or only the latter of:
 ///
 /// * `new AsyncSnapshot<String>(ConnectionState.waiting, null, null)`

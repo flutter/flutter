@@ -157,7 +157,7 @@ class DataCell {
   /// Creates an object to hold the data for a cell in a [DataTable].
   ///
   /// The first argument is the widget to show for the cell, typically
-  /// a [Text] or [DropdownButton] widget; this becomes the [widget]
+  /// a [Text] or [DropdownButton] widget; this becomes the [child]
   /// property and must not be null.
   ///
   /// If the cell has no data, then a [Text] widget with placeholder
@@ -166,7 +166,7 @@ class DataCell {
   const DataCell(this.child, {
     this.placeholder: false,
     this.showEditIcon: false,
-    this.onTap
+    this.onTap,
   });
 
   /// A cell that has no content and has zero width and height.
@@ -201,7 +201,7 @@ class DataCell {
   ///
   /// If non-null, tapping the cell will call this callback. If
   /// null, tapping the cell will attempt to select the row (if
-  /// [TableRow.onSelectChanged] is provided).
+  /// [DataRow.onSelectChanged] is provided).
   final VoidCallback onTap;
 
   bool get _debugInteractive => onTap != null;
