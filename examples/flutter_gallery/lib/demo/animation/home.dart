@@ -479,7 +479,8 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
       return new SectionDetailView(detail: detail);
     });
     return ListTile.divideTiles(context: context, tiles: detailItems).map((Widget item) {
-        return new SliverToBoxAdapter(child: item);
+        return item;
+        //return new SliverToBoxAdapter(child: item);
     });
   }
 
@@ -571,8 +572,9 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                     child: new PageView(
                       controller: _detailsPageController,
                       children: allSections.map((Section section) {
-                        return new CustomScrollView(
-                          slivers: _detailItemsFor(section).toList(),
+                        return new Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _detailItemsFor(section).toList(),
                         );
                       }).toList(),
                     ),
