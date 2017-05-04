@@ -43,6 +43,11 @@ class TestCommand extends FlutterCommand {
       help: 'Whether to merge converage data with "coverage/lcov.base.info".\n'
             'Implies collecting coverage data. (Requires lcov)'
     );
+    argParser.addFlag('ipv6',
+        negatable: false,
+        hide: true,
+        help: 'Whether to use IPv6 for the test harness server socket.'
+    );
     argParser.addOption('coverage-path',
       defaultsTo: 'coverage/lcov.info',
       help: 'Where to store coverage information (if coverage is enabled).'
@@ -197,6 +202,10 @@ class TestCommand extends FlutterCommand {
     }
     testArgs.addAll(files);
 
+    final InternetAddressType serverType = argResults['ipv6']
+        ? InternetAddressType.IP_V6
+        : InternetAddressType.IP_V4;
+
     final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
     if (!fs.isFileSync(shellPath))
       throwToolExit('Cannot find Flutter shell at $shellPath');
@@ -204,6 +213,7 @@ class TestCommand extends FlutterCommand {
       shellPath: shellPath,
       collector: collector,
       debuggerMode: argResults['start-paused'],
+      serverType: serverType,
     );
 
     Cache.releaseLockEarly();
