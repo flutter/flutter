@@ -84,13 +84,12 @@ import {{package}}.{{class}};
 /**
  * Generated file. Do not edit.
  */
-public final class GeneratedPluginRegistry extends PluginRegistry {
-    @Override
-    public void registerPlugins(PluginContext context) {
+public final class GeneratedPluginRegistrant {
+  public static void registerWith(PluginRegistry registry) {
 {{#plugins}}
-        {{class}}.register(context);
+    {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
 {{/plugins}}
-    }
+  }
 }
 ''';
 
@@ -113,7 +112,7 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
   final Directory registryDirectory =
       fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugin', 'common'));
   registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistry.java');
+  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
   registryFile.writeAsStringSync(pluginRegistry);
 }
 
