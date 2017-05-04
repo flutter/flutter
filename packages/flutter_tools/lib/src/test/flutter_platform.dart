@@ -218,7 +218,6 @@ class _FlutterPlatform extends PlatformPlugin {
       int processObservatoryPort;
       _pipeStandardStreamsToConsole(
         process,
-        host,
         reportObservatoryPort: (int detectedPort) {
           assert(processObservatoryPort == null);
           assert(explicitObservatoryPort == null ||
@@ -493,8 +492,7 @@ void main() {
   }
 
   void _pipeStandardStreamsToConsole(
-    Process process,
-    InternetAddress host, {
+    Process process, {
     void startTimeoutTimer(),
     void reportObservatoryPort(int port),
   }) {
