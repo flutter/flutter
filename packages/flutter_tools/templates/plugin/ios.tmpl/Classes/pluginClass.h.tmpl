@@ -1,5 +1,5 @@
 #import <Flutter/Flutter.h>
 
-@interface {{pluginClass}} : NSObject
-- initWithController:(FlutterViewController *)controller;
+@interface {{pluginClass}} : NSObject<FlutterPlugin>
++ (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar;
 @end

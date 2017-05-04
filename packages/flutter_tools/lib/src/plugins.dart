@@ -121,8 +121,8 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 //  Generated file. Do not edit.
 //
 
-#ifndef PluginRegistry_h
-#define PluginRegistry_h
+#ifndef GeneratedPluginRegistrant_h
+#define GeneratedPluginRegistrant_h
 
 #import <Flutter/Flutter.h>
 
@@ -130,34 +130,25 @@ const String _iosPluginRegistryHeaderTemplate = '''//
 #import "{{class}}.h"
 {{/plugins}}
 
-@interface PluginRegistry : NSObject
-
-{{#plugins}}
-@property (readonly, nonatomic) {{class}} *{{name}};
-{{/plugins}}
-
-- (instancetype)initWithController:(FlutterViewController *)controller;
-
+@interface GeneratedPluginRegistrant : NSObject
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry;
 @end
 
-#endif /* PluginRegistry_h */
+#endif /* GeneratedPluginRegistrant_h */
 ''';
 
 const String _iosPluginRegistryImplementationTemplate = '''//
 //  Generated file. Do not edit.
 //
 
-#import "PluginRegistry.h"
+#import "GeneratedPluginRegistrant.h"
 
-@implementation PluginRegistry
+@implementation GeneratedPluginRegistrant
 
-- (instancetype)initWithController:(FlutterViewController *)controller {
-  if (self = [super init]) {
++ (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
 {{#plugins}}
-    _{{name}} = [[{{class}} alloc] initWithController:controller];
+  [{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{class}}"]];
 {{/plugins}}
-  }
-  return self;
 }
 
 @end
@@ -181,9 +172,9 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
       new mustache.Template(_iosPluginRegistryImplementationTemplate).renderString(context);
   final Directory registryDirectory = fs.directory(fs.path.join(directory, 'ios', 'Runner'));
   registryDirectory.createSync(recursive: true);
-  final File registryHeaderFile = registryDirectory.childFile('PluginRegistry.h');
+  final File registryHeaderFile = registryDirectory.childFile('GeneratedPluginRegistrant.h');
   registryHeaderFile.writeAsStringSync(pluginRegistryHeader);
-  final File registryImplementationFile = registryDirectory.childFile('PluginRegistry.m');
+  final File registryImplementationFile = registryDirectory.childFile('GeneratedPluginRegistrant.m');
   registryImplementationFile.writeAsStringSync(pluginRegistryImplementation);
 
 }
