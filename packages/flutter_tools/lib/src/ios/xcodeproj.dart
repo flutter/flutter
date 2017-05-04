@@ -16,7 +16,12 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String target) {
+void updateXcodeGeneratedProperties(
+  String projectPath,
+  BuildMode mode,
+  String target,
+  bool hasPlugins,
+) {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');
@@ -44,6 +49,11 @@ void updateXcodeGeneratedProperties(String projectPath, BuildMode mode, String t
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
+
+  // If the project isn't using platform plugins, don't assume CocoaPods will be
+  // needed and depended on.
+  if (hasPlugins)
+    localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
 
   final File localsFile = fs.file(fs.path.join(projectPath, 'ios', 'Flutter', 'Generated.xcconfig'));
   localsFile.createSync(recursive: true);

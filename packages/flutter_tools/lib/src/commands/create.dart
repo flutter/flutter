@@ -141,7 +141,12 @@ class CreateCommand extends FlutterCommand {
     printStatus('Wrote $generatedCount files.');
     printStatus('');
 
-    updateXcodeGeneratedProperties(appPath, BuildMode.debug, flx.defaultMainPath);
+    updateXcodeGeneratedProperties(
+      appPath,
+      BuildMode.debug,
+      flx.defaultMainPath,
+      false, // No plugins or CocoaPods by default.
+    );
 
     if (argResults['pub']) {
       await pubGet(directory: appPath);
