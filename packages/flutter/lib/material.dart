@@ -6,9 +6,12 @@
 ///
 /// To use, import `package:flutter/material.dart`.
 ///
-/// See
-/// [material.google.com](https://material.google.com/)
-/// for an introduction to Material Design.
+/// See also:
+///
+///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///    for a catalog of commonly-used Flutter widgets.
+///  * [material.google.com](https://material.google.com/)
+///    for an introduction to Material Design.
 library material;
 
 export 'src/material/about.dart';

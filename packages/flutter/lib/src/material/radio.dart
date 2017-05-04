@@ -31,9 +31,8 @@ const double _kInnerRadius = 5.0;
 ///
 /// See also:
 ///
-///  * [CheckBox]
-///  * [Slider]
-///  * [Switch]
+///  * [Slider], for selecting a value in a range.
+///  * [Checkbox] and [Switch], for toggling a particular value on or off.
 ///  * <https://material.google.com/components/selection-controls.html#selection-controls-radio-button>
 class Radio<T> extends StatefulWidget {
   /// Creates a material design radio button.

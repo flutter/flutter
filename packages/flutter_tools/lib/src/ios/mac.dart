@@ -152,9 +152,10 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  injectPlugins();
+  final bool hasFlutterPlugins = injectPlugins();
 
-  await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+  if (hasFlutterPlugins)
+    await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -286,7 +287,9 @@ Please ensure that a Development Team is selected by:
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices\n
 Or run on an iOS simulator
-═══════════════════════════════════════════════════════════════════════════════════''');
+═══════════════════════════════════════════════════════════════════════════════════''',
+          emphasis: true,
+        );
       }
     }
   }
@@ -370,7 +373,8 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
         'Warning: CocoaPods version $minimumVersion or greater not installed. Skipping pod install.\n'
         '$noCocoaPodsConsequence\n'
         'To install:\n'
-        '$cocoaPodsInstallInstructions\n'
+        '$cocoaPodsInstallInstructions\n',
+        emphasis: true,
       );
       return;
     }
@@ -380,7 +384,8 @@ Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
         '$noCocoaPodsConsequence\n'
         'To initialize CocoaPods, run:\n'
         '  pod setup\n'
-        'once to finalize CocoaPods\' installation.'
+        'once to finalize CocoaPods\' installation.',
+        emphasis: true,
       );
       return;
     }

@@ -40,7 +40,10 @@ const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered ma
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
-final InternetAddress _kHost = InternetAddress.LOOPBACK_IP_V4;
+final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
+  InternetAddressType.IP_V4: InternetAddress.LOOPBACK_IP_V4,
+  InternetAddressType.IP_V6: InternetAddress.LOOPBACK_IP_V6,
+};
 
 /// Configure the `test` package to work with Flutter.
 ///
@@ -53,6 +56,7 @@ void installHook({
   bool debuggerMode: false,
   int observatoryPort,
   int diagnosticPort,
+  InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
@@ -62,6 +66,7 @@ void installHook({
       debuggerMode: debuggerMode,
       explicitObservatoryPort: observatoryPort,
       explicitDiagnosticPort: diagnosticPort,
+      host: _kHosts[serverType],
     ),
   );
 }
@@ -77,6 +82,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.debuggerMode,
     this.explicitObservatoryPort,
     this.explicitDiagnosticPort,
+    this.host,
   }) {
     assert(shellPath != null);
   }
@@ -86,6 +92,7 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool debuggerMode;
   final int explicitObservatoryPort;
   final int explicitDiagnosticPort;
+  final InternetAddress host;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
   // then spin up the engine in a subprocess. We pass the engine a Dart file
@@ -123,7 +130,10 @@ class _FlutterPlatform extends PlatformPlugin {
     return remoteChannel;
   }
 
-  Future<Null> _startTest(String testPath, StreamChannel<dynamic> controller, int ourTestCount) async {
+  Future<Null> _startTest(
+    String testPath,
+    StreamChannel<dynamic> controller,
+    int ourTestCount) async {
     printTrace('test $ourTestCount: starting test $testPath');
 
     dynamic outOfBandError; // error that we couldn't send to the harness that we need to send via our future
@@ -135,7 +145,7 @@ class _FlutterPlatform extends PlatformPlugin {
       controller.sink.done.whenComplete(() { controllerSinkClosed = true; });
 
       // Prepare our WebSocket server to talk to the engine subproces.
-      final HttpServer server = await HttpServer.bind(_kHost, 0);
+      final HttpServer server = await HttpServer.bind(host, 0);
       finalizers.add(() async {
         printTrace('test $ourTestCount: shutting down test harness socket server');
         await server.close(force: true);
@@ -171,7 +181,7 @@ class _FlutterPlatform extends PlatformPlugin {
       listenerFile.createSync();
       listenerFile.writeAsStringSync(_generateTestMain(
         testUrl: fs.path.toUri(fs.path.absolute(testPath)).toString(),
-        encodedWebsocketUrl: Uri.encodeComponent("ws://${_kHost.address}:${server.port}"),
+        encodedWebsocketUrl: Uri.encodeComponent(_getWebSocketUrl(server)),
       ));
 
       // Start the engine subprocess.
@@ -215,7 +225,7 @@ class _FlutterPlatform extends PlatformPlugin {
           if (debuggerMode) {
             printStatus('The test process has been started.');
             printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
-            printStatus('  http://${_kHost.address}:$detectedPort/');
+            printStatus('  http://${host.address}:$detectedPort/');
             printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
           } else {
             printTrace('test $ourTestCount: using observatory port $detectedPort from pid ${process.pid} to collect coverage');
@@ -333,7 +343,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (subprocessActive && collector != null) {
         printTrace('test $ourTestCount: collecting coverage');
-        await collector.collectCoverage(process, _kHost, processObservatoryPort);
+        await collector.collectCoverage(process, host, processObservatoryPort);
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
@@ -372,6 +382,12 @@ class _FlutterPlatform extends PlatformPlugin {
     }
     printTrace('test $ourTestCount: finished');
     return null;
+  }
+
+  String _getWebSocketUrl(HttpServer server) {
+    return host.type == InternetAddressType.IP_V4
+        ? "ws://${host.address}:${server.port}"
+        : "ws://[${host.address}]:${server.port}";
   }
 
   String _generateTestMain({
@@ -475,14 +491,14 @@ void main() {
     return processManager.start(command, environment: environment);
   }
 
-  String get observatoryPortString => 'Observatory listening on http://${_kHost.address}:';
-  String get diagnosticPortString => 'Diagnostic server listening on http://${_kHost.address}:';
-
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
     void reportObservatoryPort(int port),
   }) {
+    final String observatoryPortString = 'Observatory listening on http://${host.address}:';
+    final String diagnosticPortString = 'Diagnostic server listening on http://${host.address}:';
+
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
       stream.transform(UTF8.decoder)

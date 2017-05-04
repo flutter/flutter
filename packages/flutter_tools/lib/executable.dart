@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/version.dart';
 import 'package:intl/intl_standalone.dart' as intl;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
@@ -53,6 +52,7 @@ import 'src/run_hot.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
 import 'src/usage.dart';
+import 'src/version.dart';
 
 /// Main entry point for commands.
 ///

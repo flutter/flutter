@@ -41,9 +41,6 @@ export 'dart:io'
         // File              NO! Use `file_system.dart`
         // FileSystemEntity  NO! Use `file_system.dart`
         GZIP,
-        InternetAddress,
-        IOException,
-        IOSink,
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
@@ -51,6 +48,10 @@ export 'dart:io'
         HttpRequest,
         HttpServer,
         HttpStatus,
+        InternetAddress,
+        InternetAddressType,
+        IOException,
+        IOSink,
         // Link              NO! Use `file_system.dart`
         pid,
         // Platform          NO! use `platform.dart`

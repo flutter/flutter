@@ -44,7 +44,7 @@ class FlexibleSpaceBar extends StatefulWidget {
 
   /// Shown behind the [title] when expanded.
   ///
-  /// Typically an [AssetImage] widget with [AssetImage.fit] set to [BoxFit.cover].
+  /// Typically an [Image] widget with [Image.fit] set to [BoxFit.cover].
   final Widget background;
 
   /// Whether the title should be centered.

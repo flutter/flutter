@@ -53,12 +53,12 @@ class StringCodec implements MessageCodec<String> {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * null
-/// * [bool]s
-/// * [num]s
-/// * [String]s
-/// * [List]s of supported values
-/// * [Map]s from strings to supported values
+///  * null
+///  * [bool]s
+///  * [num]s
+///  * [String]s
+///  * [List]s of supported values
+///  * [Map]s from strings to supported values
 ///
 /// On Android, messages are decoded using the `org.json` library.
 /// On iOS, messages are decoded using the `NSJSONSerialization` library.
@@ -170,45 +170,45 @@ class JSONMethodCodec implements MethodCodec {
 ///
 /// Supported messages are acyclic values of these forms:
 ///
-/// * null
-/// * [bool]s
-/// * [num]s
-/// * [String]s
-/// * [Uint8List]s, [Int32List]s, [Int64List]s, [Float64List]s
-/// * [List]s of supported values
-/// * [Map]s from supported values to supported values
+///  * null
+///  * [bool]s
+///  * [num]s
+///  * [String]s
+///  * [Uint8List]s, [Int32List]s, [Int64List]s, [Float64List]s
+///  * [List]s of supported values
+///  * [Map]s from supported values to supported values
 ///
 /// On Android, messages are represented as follows:
 ///
-/// * null: null
-/// * [bool]: `java.lang.Boolean`
-/// * [int]: `java.lang.Integer` for values that are representable using 32-bit
-///   two's complement; otherwise, `java.lang.Long` for values that are
-///   representable using 64-bit two's complement; otherwise,
-///   `java.math.BigInteger`.
-/// * [double]: `java.lang.Double`
-/// * [String]: `java.lang.String`
-/// * [Uint8List]: `byte[]`
-/// * [Int32List]: `int[]`
-/// * [Int64List]: `long[]`
-/// * [Float64List]: `double[]`
-/// * [List]: `java.util.ArrayList`
-/// * [Map]: `java.util.HashMap`
+///  * null: null
+///  * [bool]: `java.lang.Boolean`
+///  * [int]: `java.lang.Integer` for values that are representable using 32-bit
+///    two's complement; otherwise, `java.lang.Long` for values that are
+///    representable using 64-bit two's complement; otherwise,
+///    `java.math.BigInteger`.
+///  * [double]: `java.lang.Double`
+///  * [String]: `java.lang.String`
+///  * [Uint8List]: `byte[]`
+///  * [Int32List]: `int[]`
+///  * [Int64List]: `long[]`
+///  * [Float64List]: `double[]`
+///  * [List]: `java.util.ArrayList`
+///  * [Map]: `java.util.HashMap`
 ///
 /// On iOS, messages are represented as follows:
 ///
-/// * null: nil
-/// * [bool]: `NSNumber numberWithBool:`
-/// * [int]: `NSNumber numberWithInt:` for values that are representable using
-///   32-bit two's complement; otherwise, `NSNumber numberWithLong:` for values
-///   that are representable using 64-bit two's complement; otherwise,
-///   `FlutterStandardBigInteger`.
-/// * [double]: `NSNumber numberWithDouble:`
-/// * [String]: `NSString`
-/// * [Uint8List], [Int32List], [Int64List], [Float64List]:
-///   `FlutterStandardTypedData`
-/// * [List]: `NSArray`
-/// * [Map]: `NSDictionary`
+///  * null: nil
+///  * [bool]: `NSNumber numberWithBool:`
+///  * [int]: `NSNumber numberWithInt:` for values that are representable using
+///    32-bit two's complement; otherwise, `NSNumber numberWithLong:` for values
+///    that are representable using 64-bit two's complement; otherwise,
+///    `FlutterStandardBigInteger`.
+///  * [double]: `NSNumber numberWithDouble:`
+///  * [String]: `NSString`
+///  * [Uint8List], [Int32List], [Int64List], [Float64List]:
+///    `FlutterStandardTypedData`
+///  * [List]: `NSArray`
+///  * [Map]: `NSDictionary`
 class StandardMessageCodec implements MessageCodec<dynamic> {
   // The codec serializes messages as outlined below. This format must
   // match the Android and iOS counterparts.

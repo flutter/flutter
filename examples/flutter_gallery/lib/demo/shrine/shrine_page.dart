@@ -39,10 +39,10 @@ class ShrinePage extends StatefulWidget {
 
 /// Defines the Scaffold, AppBar, etc that the demo pages have in common.
 class ShrinePageState extends State<ShrinePage> {
-  int _appBarElevation = 0;
+  double _appBarElevation = 0.0;
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    final int elevation = notification.metrics.extentBefore <= 0.0 ? 0 : 1;
+    final double elevation = notification.metrics.extentBefore <= 0.0 ? 0.0 : 1.0;
     if (elevation != _appBarElevation) {
       setState(() {
         _appBarElevation = elevation;

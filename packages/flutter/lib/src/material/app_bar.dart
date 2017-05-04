@@ -157,7 +157,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.actions,
     this.flexibleSpace,
     this.bottom,
-    this.elevation: 4,
+    this.elevation: 4.0,
     this.backgroundColor,
     this.brightness,
     this.iconTheme,
@@ -236,10 +236,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The z-coordinate at which to place this app bar.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 4, the appropriate elevation for app bars.
-  final int elevation;
+  final double elevation;
 
   /// The color to use for the app bar's material. Typically this should be set
   /// along with [brightness], [iconTheme], [textTheme].
@@ -321,20 +319,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  bool _hasDrawer = false;
-  bool _canPop = false;
-  bool _useCloseButton = false;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
-    _hasDrawer = scaffold?.hasDrawer ?? false;
-    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
-    _canPop = parentRoute?.canPop ?? false;
-    _useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
-  }
-
   void _handleDrawerButton() {
     Scaffold.of(context).openDrawer();
   }
@@ -343,6 +327,12 @@ class _AppBarState extends State<AppBar> {
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
     final ThemeData themeData = Theme.of(context);
+    final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
+    final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+
+    final bool hasDrawer = scaffold?.hasDrawer ?? false;
+    final bool canPop = parentRoute?.canPop ?? false;
+    final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
 
     IconThemeData appBarIconTheme = widget.iconTheme ?? themeData.primaryIconTheme;
     TextStyle centerStyle = widget.textTheme?.title ?? themeData.primaryTextTheme.title;
@@ -367,15 +357,15 @@ class _AppBarState extends State<AppBar> {
     final List<Widget> toolbarChildren = <Widget>[];
     Widget leading = widget.leading;
     if (leading == null) {
-      if (_hasDrawer) {
+      if (hasDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButton,
           tooltip: 'Open navigation menu' // TODO(ianh): Figure out how to localize this string
         );
       } else {
-        if (_canPop)
-          leading = _useCloseButton ? const CloseButton() : const BackButton();
+        if (canPop)
+          leading = useCloseButton ? const CloseButton() : const BackButton();
       }
     }
     if (leading != null) {
@@ -566,7 +556,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final List<Widget> actions;
   final Widget flexibleSpace;
   final PreferredSizeWidget bottom;
-  final int elevation;
+  final double elevation;
   final bool forceElevated;
   final Color backgroundColor;
   final Brightness brightness;
@@ -607,7 +597,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         actions: actions,
         flexibleSpace: flexibleSpace,
         bottom: bottom,
-        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4 : 0,
+        elevation: forceElevated || overlapsContent || (pinned && shrinkOffset > maxExtent - minExtent) ? elevation ?? 4.0 : 0.0,
         backgroundColor: backgroundColor,
         brightness: brightness,
         iconTheme: iconTheme,
@@ -774,15 +764,13 @@ class SliverAppBar extends StatefulWidget {
   /// The z-coordinate at which to place this app bar when it is above other
   /// content.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 4, the appropriate elevation for app bars.
   ///
   /// If [forceElevated] is false, the elevation is ignored when the app bar has
   /// no content underneath it. For example, if the app bar is [pinned] but no
   /// content is scrolled under it, or if it scrolls with the content, then no
   /// shadow is drawn, regardless of the value of [elevation].
-  final int elevation;
+  final double elevation;
 
   /// Whether to show the shadow appropriate for the [elevation] even if the
   /// content is not scrolled under the [AppBar].
@@ -838,8 +826,6 @@ class SliverAppBar extends StatefulWidget {
   ///
   /// This does not include the status bar height (which will be automatically
   /// included if [primary] is true).
-  ///
-  /// See also [AppBar.getExpandedHeightFor].
   final double expandedHeight;
 
   /// Whether the app bar should become visible as soon as the user scrolls

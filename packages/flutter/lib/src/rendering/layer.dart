@@ -645,7 +645,7 @@ class PhysicalModelLayer extends ContainerLayer {
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
-  int elevation;
+  double elevation;
 
   /// The background color.
   ///
@@ -657,7 +657,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.pushPhysicalModel(
       rrect: clipRRect.shift(layerOffset),
-      elevation: elevation.toDouble(),
+      elevation: elevation,
       color: color,
     );
     addChildrenToScene(builder, layerOffset);

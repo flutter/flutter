@@ -62,12 +62,7 @@ class DaemonCommand extends FlutterCommand {
       final int code = await daemon.onExit;
       if (code != 0)
         throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
-    }, onError: _handleError);
-  }
-
-  dynamic _handleError(dynamic error, StackTrace stackTrace) {
-    printError('Error from flutter daemon: $error', stackTrace: stackTrace);
-    return null;
+    });
   }
 }
 
@@ -76,7 +71,9 @@ typedef void DispatchCommand(Map<String, dynamic> command);
 typedef Future<dynamic> CommandHandler(Map<String, dynamic> args);
 
 class Daemon {
-  Daemon(Stream<Map<String, dynamic>> commandStream, this.sendCommand, {
+  Daemon(
+    Stream<Map<String, dynamic>> commandStream,
+    this.sendCommand, {
     this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout: false
@@ -87,7 +84,7 @@ class Daemon {
     _registerDomain(deviceDomain = new DeviceDomain(this));
 
     // Start listening.
-    commandStream.listen(
+    _commandSubscription = commandStream.listen(
       _handleRequest,
       onDone: () {
         if (!_onExitCompleter.isCompleted)
@@ -99,6 +96,7 @@ class Daemon {
   DaemonDomain daemonDomain;
   AppDomain appDomain;
   DeviceDomain deviceDomain;
+  StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
   final DaemonCommand daemonCommand;
@@ -143,10 +141,15 @@ class Daemon {
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
 
-  void shutdown() {
+  void shutdown({dynamic error}) {
+    _commandSubscription?.cancel();
     _domainMap.values.forEach((Domain domain) => domain.dispose());
-    if (!_onExitCompleter.isCompleted)
-      _onExitCompleter.complete(0);
+    if (!_onExitCompleter.isCompleted) {
+      if (error == null)
+        _onExitCompleter.complete(0);
+      else
+        _onExitCompleter.completeError(error);
+    }
   }
 }
 
@@ -539,6 +542,18 @@ class DeviceDomain extends Domain {
     if (!discoverer.supportsPlatform)
       return;
 
+    if (!discoverer.canListAnything) {
+      sendEvent(
+        'daemon.showMessage',
+        <String, String>{
+          'title': 'Unable to list devices',
+          'message':
+              'Unable to discover ${discoverer.name}. Please run '
+              '"flutter doctor" to diagnose potential issues',
+        },
+      );
+    }
+
     _discoverers.add(discoverer);
 
     discoverer.onAdded.listen(_onDeviceEvent('device.added'));
@@ -650,7 +665,8 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
-  stdout.writeln('[${JSON.encode(command, toEncodable: _jsonEncodeObject)}]');
+  final String encoded = JSON.encode(command, toEncodable: _jsonEncodeObject);
+  stdout.writeln('[$encoded]');
 }
 
 dynamic _jsonEncodeObject(dynamic object) {

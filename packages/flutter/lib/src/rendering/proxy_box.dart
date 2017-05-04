@@ -1198,7 +1198,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     RenderBox child,
     BoxShape shape,
     BorderRadius borderRadius: BorderRadius.zero,
-    int elevation,
+    double elevation,
     Color color,
   }) : _shape = shape,
        _borderRadius = borderRadius,
@@ -1235,9 +1235,9 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   }
 
   /// The z-coordinate at which to place this material.
-  int get elevation => _elevation;
-  int _elevation;
-  set elevation(int value) {
+  double get elevation => _elevation;
+  double _elevation;
+  set elevation(double value) {
     assert(value != null);
     if (_elevation == value)
       return;

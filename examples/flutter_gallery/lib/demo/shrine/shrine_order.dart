@@ -162,7 +162,7 @@ class _Heading extends StatelessWidget {
       height: (screenSize.height - kToolbarHeight) * 1.35,
       child: new Material(
         type: MaterialType.card,
-        elevation: 0,
+        elevation: 0.0,
         child: new Padding(
           padding: const EdgeInsets.only(left: 16.0, top: 18.0, right: 16.0, bottom: 24.0),
           child: new CustomMultiChildLayout(
@@ -302,7 +302,7 @@ class _OrderPageState extends State<OrderPage> {
                   .where((Product product) => product != widget.order.product)
                   .map((Product product) {
                     return new Card(
-                      elevation: 1,
+                      elevation: 1.0,
                       child: new Image.asset(
                         product.imageAsset,
                         fit: BoxFit.contain,

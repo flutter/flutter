@@ -14,7 +14,7 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(int elevation) {
+Widget buildMaterial(double elevation) {
   return new Center(
     child: new SizedBox(
       height: 100.0,
@@ -27,10 +27,8 @@ Widget buildMaterial(int elevation) {
   );
 }
 
-List<BoxShadow> getShadow(WidgetTester tester) {
-  final RenderDecoratedBox box = tester.renderObject(find.byType(DecoratedBox).first);
-  final BoxDecoration decoration = box.decoration;
-  return decoration.boxShadow;
+RenderPhysicalModel getShadow(WidgetTester tester) {
+  return tester.renderObject(find.byType(PhysicalModel));
 }
 
 class PaintRecorder extends CustomPainter {
@@ -115,67 +113,27 @@ void main() {
   });
 
   testWidgets('Shadows animate smoothly', (WidgetTester tester) async {
-    await tester.pumpWidget(buildMaterial(0));
-    final List<BoxShadow> shadowA = getShadow(tester);
+    // This code verifies that the PhysicalModel's elevation animates over
+    // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(9));
-    final List<BoxShadow> shadowB = getShadow(tester);
+    await tester.pumpWidget(buildMaterial(0.0));
+    final RenderPhysicalModel modelA = getShadow(tester);
+    expect(modelA.elevation, equals(0.0));
+
+    await tester.pumpWidget(buildMaterial(9.0));
+    final RenderPhysicalModel modelB = getShadow(tester);
+    expect(modelB.elevation, equals(0.0));
 
     await tester.pump(const Duration(milliseconds: 1));
-    final List<BoxShadow> shadowC = getShadow(tester);
+    final RenderPhysicalModel modelC = getShadow(tester);
+    expect(modelC.elevation, closeTo(0.0, 0.001));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
-    final List<BoxShadow> shadowD = getShadow(tester);
+    final RenderPhysicalModel modelD = getShadow(tester);
+    expect(modelD.elevation, isNot(closeTo(0.0, 0.001)));
 
     await tester.pump(kThemeChangeDuration);
-    final List<BoxShadow> shadowE = getShadow(tester);
-
-    // This code verifies the following:
-    //  1. When the elevation is zero, there's no shadow.
-    //  2. When the elevation isn't zero, there's three shadows.
-    //  3. When the elevation changes from 0 to 9, one millisecond later, the
-    //     shadows are still more or less indistinguishable from zero.
-    //  4. Have a kThemeChangeDuration later, they are distinguishable form
-    //     zero.
-    //  5. ...but still distinguishable from the actual 9 elevation.
-    //  6. After kThemeChangeDuration, the shadows are exactly the elevation 9
-    //     shadows.
-    // The point being to verify that the shadows animate, and do so
-    // continually, not in discrete increments (e.g. not jumping from elevation
-    // 0 to 1 to 2 to 3 and so forth).
-
-    // TODO(ianh): Port this test when we turn the physical model back on.
-
-    // 1
-    expect(shadowA, isNull);
-    expect(shadowB, isNull);
-    // 2
-    expect(shadowC, hasLength(3));
-    // 3
-    expect(shadowC[0].offset.dy, closeTo(0.0, 0.001));
-    expect(shadowC[1].offset.dy, closeTo(0.0, 0.001));
-    expect(shadowC[2].offset.dy, closeTo(0.0, 0.001));
-    expect(shadowC[0].blurRadius, closeTo(0.0, 0.001));
-    expect(shadowC[1].blurRadius, closeTo(0.0, 0.001));
-    expect(shadowC[2].blurRadius, closeTo(0.0, 0.001));
-    expect(shadowC[0].spreadRadius, closeTo(0.0, 0.001));
-    expect(shadowC[1].spreadRadius, closeTo(0.0, 0.001));
-    expect(shadowC[2].spreadRadius, closeTo(0.0, 0.001));
-    // 4
-    expect(shadowD[0].offset.dy, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[1].offset.dy, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[2].offset.dy, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[0].blurRadius, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[1].blurRadius, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[2].blurRadius, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[0].spreadRadius, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[1].spreadRadius, isNot(closeTo(0.0, 0.001)));
-    expect(shadowD[2].spreadRadius, isNot(closeTo(0.0, 0.001)));
-    // 5
-    expect(shadowD[0], isNot(shadowE[0]));
-    expect(shadowD[1], isNot(shadowE[1]));
-    expect(shadowD[2], isNot(shadowE[2]));
-    // 6
-    expect(shadowE, kElevationToShadow[9]);
+    final RenderPhysicalModel modelE = getShadow(tester);
+    expect(modelE.elevation, equals(9.0));
   });
 }

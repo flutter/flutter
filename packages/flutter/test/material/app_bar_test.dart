@@ -308,7 +308,6 @@ void main() {
     expect(find.text('A2'), findsOneWidget);
   });
 
-
   testWidgets('AppBar render at zero size', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -759,5 +758,25 @@ void main() {
     );
     expect(appBarTop(tester), 0.0);
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
+  });
+
+  testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.menu), findsNothing);
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          drawer: const Drawer(),
+          appBar: new AppBar(),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 }

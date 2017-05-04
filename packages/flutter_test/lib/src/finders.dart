@@ -7,10 +7,10 @@ import 'package:meta/meta.dart';
 
 import 'all_elements.dart';
 
-/// Signature for [CommonFinders.byPredicate].
+/// Signature for [CommonFinders.byWidgetPredicate].
 typedef bool WidgetPredicate(Widget widget);
 
-/// Signature for [CommonFinders.byElement].
+/// Signature for [CommonFinders.byElementPredicate].
 typedef bool ElementPredicate(Element element);
 
 /// Some frequently used widget [Finder]s.

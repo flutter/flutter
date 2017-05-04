@@ -44,7 +44,11 @@ Future<Null> main() async {
       // artificially high load to find out how much CPU each frame takes.
       // This differs from normal benchmarks which might look at how many
       // frames are missed, etc.
-      ui.window.onBeginFrame(new Duration(milliseconds: iterations * 16));
+      // We use Timer.run to ensure there's a microtask flush in between
+      // the two calls below.
+      Timer.run(() { ui.window.onBeginFrame(new Duration(milliseconds: iterations * 16)); });
+      Timer.run(() { ui.window.onDrawFrame(); });
+      await tester.idle(); // wait until the frame has run
       iterations += 1;
     }
     watch.stop();

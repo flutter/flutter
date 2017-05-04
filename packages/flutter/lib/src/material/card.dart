@@ -23,7 +23,7 @@ class Card extends StatelessWidget {
   const Card({
     Key key,
     this.color,
-    this.elevation: 2,
+    this.elevation: 2.0,
     this.child
   }) : super(key: key);
 
@@ -35,10 +35,8 @@ class Card extends StatelessWidget {
 
   /// The z-coordinate at which to place this card.
   ///
-  /// The following elevations have defined shadows: 1, 2, 3, 4, 6, 8, 9, 12, 16, 24
-  ///
   /// Defaults to 2, the appropriate elevation for cards.
-  final int elevation;
+  final double elevation;
 
   @override
   Widget build(BuildContext context) {

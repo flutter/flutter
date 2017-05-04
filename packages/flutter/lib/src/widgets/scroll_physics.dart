@@ -13,7 +13,7 @@ import 'overscroll_indicator.dart';
 import 'scroll_metrics.dart';
 import 'scroll_simulation.dart';
 
-export 'package:flutter/physics.dart' show Tolerance;
+export 'package:flutter/physics.dart' show Simulation, ScrollSpringSimulation, Tolerance;
 
 /// Determines the physics of a [Scrollable] widget.
 ///
