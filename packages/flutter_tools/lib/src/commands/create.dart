@@ -145,7 +145,7 @@ class CreateCommand extends FlutterCommand {
       projectPath: appPath,
       mode: BuildMode.debug,
       target: flx.defaultMainPath,
-      hasPlugins: false,
+      hasPlugins: generatePlugin,
     );
 
     if (argResults['pub']) {

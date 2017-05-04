@@ -52,8 +52,7 @@ void updateXcodeGeneratedProperties({
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
 
-  // If the project isn't using platform plugins, don't assume CocoaPods will be
-  // needed and depended on.
+  // Add dependency to CocoaPods' generated project only if plugns are used.
   if (hasPlugins)
     localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
 
