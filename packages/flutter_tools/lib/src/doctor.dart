@@ -422,7 +422,8 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<FileSystemEntity> installDirs = installPaths
-              .map((String installPath) => fs.directory(installPath).listSync())
+              .map((String installPath) => fs.directory(installPath))
+              .map((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
               .expand((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .where((FileSystemEntity mappedDir) => mappedDir is Directory);
       for (FileSystemEntity dir in installDirs) {
