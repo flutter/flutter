@@ -223,7 +223,7 @@ void Window::BeginFrame(ftl::TimePoint frameTime) {
                       Dart_NewInteger(microseconds),
                   });
 
-  tonic::DartMicrotaskQueue::RunMicrotasks();
+  tonic::DartMicrotaskQueue::GetForCurrentThread()->RunMicrotasks();
 
   DartInvokeField(library_.value(), "_drawFrame", {});
 }

@@ -172,7 +172,7 @@ void ScheduleMicrotask(Dart_NativeArguments args) {
   Dart_Handle closure = Dart_GetNativeArgument(args, 0);
   if (LogIfError(closure) || !Dart_IsClosure(closure))
     return;
-  tonic::DartMicrotaskQueue::ScheduleMicrotask(closure);
+  tonic::DartMicrotaskQueue::GetForCurrentThread()->ScheduleMicrotask(closure);
 }
 
 }  // namespace blink
