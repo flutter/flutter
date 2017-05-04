@@ -21,6 +21,13 @@ genrule {
     tool_files: ["unicode_emoji_h_gen.py"],
 }
 
+cc_library_headers {
+    name: "libminikin-headers-for-tests",
+    export_include_dirs: ["."],
+    shared_libs: ["libharfbuzz_ng"],
+    export_shared_lib_headers: ["libharfbuzz_ng"],
+}
+
 cc_library {
     name: "libminikin",
     host_supported: true,
