@@ -155,10 +155,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
 
   updateXcodeGeneratedProperties(
-    fs.currentDirectory.path,
-    mode,
-    target,
-    hasFlutterPlugins
+    projectPath: fs.currentDirectory.path,
+    mode: mode,
+    target: target,
+    hasPlugins: hasFlutterPlugins
   );
 
   final List<String> commands = <String>[

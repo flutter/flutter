@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
@@ -16,12 +18,12 @@ String flutterFrameworkDir(BuildMode mode) {
   return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
 }
 
-void updateXcodeGeneratedProperties(
-  String projectPath,
-  BuildMode mode,
-  String target,
-  bool hasPlugins,
-) {
+void updateXcodeGeneratedProperties({
+  @required String projectPath,
+  @required BuildMode mode,
+  @required String target,
+  @required bool hasPlugins,
+}) {
   final StringBuffer localsBuffer = new StringBuffer();
 
   localsBuffer.writeln('// This is a generated file; do not edit or check into version control.');

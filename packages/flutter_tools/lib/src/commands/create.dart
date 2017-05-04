@@ -142,10 +142,10 @@ class CreateCommand extends FlutterCommand {
     printStatus('');
 
     updateXcodeGeneratedProperties(
-      appPath,
-      BuildMode.debug,
-      flx.defaultMainPath,
-      false, // No plugins or CocoaPods by default.
+      projectPath: appPath,
+      mode: BuildMode.debug,
+      target: flx.defaultMainPath,
+      hasPlugins: false,
     );
 
     if (argResults['pub']) {
