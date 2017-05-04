@@ -29,9 +29,8 @@ TaskFunction createMicrobenchmarkTask() {
         final Directory appDir = dir(
             path.join(flutterDirectory.path, 'dev/benchmarks/microbenchmarks'));
         final Process flutterProcess = await inDirectory(appDir, () async {
-          if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+          if (deviceOperatingSystem == DeviceOperatingSystem.ios)
             await prepareProvisioningCertificates(appDir.path);
-          }
           return await _startFlutter(
             options: <String>[
               '--profile',
