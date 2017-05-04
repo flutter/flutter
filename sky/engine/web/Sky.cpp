@@ -56,7 +56,7 @@ namespace blink {
 namespace {
 
 void didProcessTask() {
-  tonic::DartMicrotaskQueue::RunMicrotasks();
+  tonic::DartMicrotaskQueue::GetForCurrentThread()->RunMicrotasks();
   // FIXME: Report memory usage to dart?
 }
 
@@ -131,11 +131,13 @@ void InitEngine(Platform* platform) {
   // this, initializing this lazily probably doesn't buy us much.
   WTF::UTF8Encoding();
 
+  tonic::DartMicrotaskQueue::StartForCurrentThread();
   addMessageLoopObservers();
 }
 
 void ShutdownEngine() {
   removeMessageLoopObservers();
+  tonic::DartMicrotaskQueue::GetForCurrentThread()->Destroy();
 
   // FIXME: Shutdown dart?
 

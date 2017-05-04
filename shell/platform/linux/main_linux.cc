@@ -103,7 +103,7 @@ void RunNonInteractive(ftl::CommandLine initial_command_line,
   if (error == tonic::kNoError)
     error = task_observer.last_error();
   if (error == tonic::kNoError)
-    error = tonic::DartMicrotaskQueue::GetLastError();
+    error = tonic::DartMicrotaskQueue::GetForCurrentThread()->GetLastError();
 
   // The script has completed and the engine may not be in a clean state,
   // so just stop the process.
