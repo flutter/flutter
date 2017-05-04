@@ -194,7 +194,20 @@ class FlutterPlugin implements Plugin<Project> {
                 throw new GradleException("Build variant must be one of \"debug\", \"profile\", or \"release\" but was \"${variant.name}\"")
             }
 
+            GenerateDependencies dependenciesTask = project.tasks.create("flutterDependencies${variant.name.capitalize()}", GenerateDependencies) {
+                flutterRoot this.flutterRoot
+                flutterExecutable this.flutterExecutable
+                buildMode variant.name
+                localEngine this.localEngine
+                localEngineSrcPath this.localEngineSrcPath
+                targetPath target
+                kernelFile kernel
+                sourceDir project.file(project.flutter.source)
+                intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
+            }
+
             FlutterTask flutterTask = project.tasks.create("flutterBuild${variant.name.capitalize()}", FlutterTask) {
+                dependsOn dependenciesTask
                 flutterRoot this.flutterRoot
                 flutterExecutable this.flutterExecutable
                 buildMode variant.name
@@ -222,7 +235,7 @@ class FlutterExtension {
     String target
 }
 
-class FlutterTask extends DefaultTask {
+abstract class BaseFlutterTask extends DefaultTask {
     File flutterRoot
     File flutterExecutable
     String buildMode
@@ -232,67 +245,18 @@ class FlutterTask extends DefaultTask {
     String targetPath
     @Optional @InputFile
     File kernelFile
-
     File sourceDir
-
-    @OutputDirectory
     File intermediateDir
 
-    CopySpec getAssets() {
-        return project.copySpec {
-            from "${intermediateDir}/app.flx"
-            if (buildMode != 'debug') {
-                from "${intermediateDir}/vm_snapshot_data"
-                from "${intermediateDir}/vm_snapshot_instr"
-                from "${intermediateDir}/isolate_snapshot_data"
-                from "${intermediateDir}/isolate_snapshot_instr"
-            }
-        }
-    }
-
-    FileCollection readDependencies(File dependenciesFile) {
-        if (dependenciesFile.exists()) {
-            try {
-                // Dependencies file has Makefile syntax:
-                //   <target> <files>: <source> <files> <separated> <by> <space>
-                String depText = dependenciesFile.text
-                return project.files(depText.split(': ')[1].split())
-            } catch (Exception e) {
-                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
-            }
-        }
-        return null
-    }
-
-    @InputFiles
-    FileCollection getSourceFiles() {
-        File dependenciesFile
+    @OutputFile
+    File getDependenciesFile() {
         if (buildMode != 'debug') {
-            dependenciesFile = project.file("${intermediateDir}/snapshot.d")
-        } else {
-            dependenciesFile = project.file("${intermediateDir}/snapshot_blob.bin.d")
+            return project.file("${intermediateDir}/snapshot.d")
         }
-        FileCollection sources = readDependencies(dependenciesFile)
-        if (sources != null) {
-            // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
-            // snapshots have to be rebuilt if it changes.
-            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
-            if (snapshotter != null) {
-                sources = sources.plus(snapshotter)
-            }
-            // Finally, add a dependency on pubspec.yaml as well.
-            return sources.plus(project.files('pubspec.yaml'))
-        }
-        // No dependencies file (or problems parsing it). Fall back to source files.
-        return project.fileTree(
-                dir: sourceDir,
-                exclude: ['android', 'ios'],
-                include: ['**/*.dart', 'pubspec.yaml']
-        )
+        return  project.file("${intermediateDir}/snapshot_blob.bin.d")
     }
 
-    @TaskAction
-    void build() {
+    void buildFlx() {
         if (!sourceDir.isDirectory()) {
             throw new GradleException("Invalid Flutter source directory: ${sourceDir}")
         }
@@ -337,5 +301,75 @@ class FlutterTask extends DefaultTask {
             }
             args "--working-dir", "${intermediateDir}/flx"
         }
+    }
+}
+
+class GenerateDependencies extends BaseFlutterTask {
+    @TaskAction
+    void build() {
+        File dependenciesFile = getDependenciesFile();
+        if (!dependenciesFile.exists()) {
+            buildFlx()
+        }
+    }
+}
+
+class FlutterTask extends BaseFlutterTask {
+    @OutputDirectory
+    File getOutputDirectory() {
+        return intermediateDir
+    }
+
+    CopySpec getAssets() {
+        return project.copySpec {
+            from "${intermediateDir}/app.flx"
+            if (buildMode != 'debug') {
+                from "${intermediateDir}/vm_snapshot_data"
+                from "${intermediateDir}/vm_snapshot_instr"
+                from "${intermediateDir}/isolate_snapshot_data"
+                from "${intermediateDir}/isolate_snapshot_instr"
+            }
+        }
+    }
+
+    FileCollection readDependencies(File dependenciesFile) {
+        if (dependenciesFile.exists()) {
+            try {
+                // Dependencies file has Makefile syntax:
+                //   <target> <files>: <source> <files> <separated> <by> <space>
+                String depText = dependenciesFile.text
+                return project.files(depText.split(': ')[1].split())
+            } catch (Exception e) {
+                logger.error("Error reading dependency file ${dependenciesFile}: ${e}")
+            }
+        }
+        return null
+    }
+
+    @InputFiles
+    FileCollection getSourceFiles() {
+        File dependenciesFile = getDependenciesFile()
+        FileCollection sources = readDependencies(dependenciesFile)
+        if (sources != null) {
+            // We have a dependencies file. Add a dependency on gen_snapshot as well, since the
+            // snapshots have to be rebuilt if it changes.
+            FileCollection snapshotter = readDependencies(project.file("${intermediateDir}/gen_snapshot.d"))
+            if (snapshotter != null) {
+                sources = sources.plus(snapshotter)
+            }
+            // Finally, add a dependency on pubspec.yaml as well.
+            return sources.plus(project.files('pubspec.yaml'))
+        }
+        // No dependencies file (or problems parsing it). Fall back to source files.
+        return project.fileTree(
+                dir: sourceDir,
+                exclude: ['android', 'ios'],
+                include: ['**/*.dart', 'pubspec.yaml']
+        )
+    }
+
+    @TaskAction
+    void build() {
+        buildFlx()
     }
 }

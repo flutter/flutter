@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
+import '../android/gradle.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
@@ -121,6 +122,9 @@ class CreateCommand extends FlutterCommand {
       if (argResults['pub'])
         await pubGet(directory: dirPath);
 
+      if (android_sdk.androidSdk != null)
+        gradle.updateLocalProperties(projectPath: dirPath);
+
       appPath = fs.path.join(dirPath, 'example');
       final String androidPluginIdentifier = templateContext['androidIdentifier'];
       final String exampleProjectName = projectName + '_example';
@@ -152,6 +156,9 @@ class CreateCommand extends FlutterCommand {
       await pubGet(directory: appPath);
       injectPlugins(directory: appPath);
     }
+
+    if (android_sdk.androidSdk != null)
+      gradle.updateLocalProperties(projectPath: appPath);
 
     printStatus('');
 
