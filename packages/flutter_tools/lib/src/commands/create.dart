@@ -92,7 +92,10 @@ class CreateCommand extends FlutterCommand {
     final bool generatePlugin = argResults['plugin'];
 
     final Directory projectDir = fs.directory(argResults.rest.first);
-    final String dirPath = fs.path.normalize(projectDir.absolute.path);
+    String dirPath = fs.path.normalize(projectDir.absolute.path);
+    // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
+    if (fs.path.basename(dirPath) == '.')
+      dirPath = fs.path.dirname(dirPath);
     final String projectName = _normalizeProjectName(fs.path.basename(dirPath));
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
