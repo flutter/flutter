@@ -4,17 +4,47 @@
 
 #include "flutter/content_handler/vulkan_rasterizer.h"
 
-#include <utility>
-
+#include <fcntl.h>
+#include <magenta/device/vfs.h>
 #include <unistd.h>
+
 #include <chrono>
 #include <thread>
+#include <utility>
 
+#include "lib/ftl/files/unique_fd.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/src/gpu/vk/GrVkUtil.h"
 
 namespace flutter_runner {
+namespace {
+
+constexpr char kDisplayDriverClass[] = "/dev/class/display";
+
+void WaitForFirstDisplayDriver() {
+  ftl::UniqueFD fd(open(kDisplayDriverClass, O_DIRECTORY | O_RDONLY));
+  if (fd.get() < 0) {
+    FTL_DLOG(ERROR) << "Failed to open " << kDisplayDriverClass;
+    return;
+  }
+
+  // Create the directory watch channel.
+  mx_handle_t watcher;
+  if (ioctl_vfs_watch_dir(fd.get(), &watcher) < 0) {
+    FTL_DLOG(ERROR) << "Failed to create directory watcher for "
+                    << kDisplayDriverClass;
+    return;
+  }
+
+  // Wait for 1 second for the display driver to appear before falling back to
+  // software.
+  mx_object_wait_one(watcher, MX_CHANNEL_READABLE | MX_CHANNEL_PEER_CLOSED,
+                     mx_deadline_after(MX_SEC(1)), nullptr);
+  mx_handle_close(watcher);
+}
+
+}  // namespace
 
 VulkanRasterizer::VulkanSurfaceProducer::VulkanSurfaceProducer() {
   valid_ = Initialize();
@@ -372,10 +402,7 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
 }
 
 VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {
-  // todo(SY-88) We need to not create this surface producer until
-  // the graphics driver finishes coming up. Not sure where thats going to
-  // happen eventually but for now we paper over the race by sleeping for 10 ms
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
+  WaitForFirstDisplayDriver();
   surface_producer_.reset(new VulkanSurfaceProducer());
 }
 
