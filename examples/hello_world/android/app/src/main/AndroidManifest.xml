@@ -22,7 +22,7 @@
          additional functionality it is fine to subclass or reimplement
          FlutterApplication and put your custom class here. -->
     <application android:name="io.flutter.app.FlutterApplication" android:label="hello_world" android:icon="@mipmap/ic_launcher">
-        <activity android:name="io.flutter.app.FlutterActivity"
+        <activity android:name=".MainActivity"
                   android:launchMode="singleTop"
                   android:theme="@android:style/Theme.Black.NoTitleBar"
                   android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
