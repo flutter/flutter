@@ -9,12 +9,32 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'theme.dart';
 
-/// Signature for callbacks with a BuildContext parameter.
+/// A "back" icon that's appropriate for the current [TargetPlatform].
 ///
-/// This type can be useful for widget callbacks. The context passed to the
-/// widget's build method can be passed along to callbacks that may need to look
-/// up an inherited widget or other context-specific resource.
-typedef void BuildContextCallback(BuildContext context);
+/// See also:
+///
+///  * [BackButton], an [IconButton] with a [BackButtonIcon] that
+///  * [IconButton], which is a more general widget for creating buttons with
+///    icons.
+class BackButtonIcon extends StatelessWidget {
+  const BackButtonIcon({ Key key }) : super(key: key);
+
+  /// Returns tha appropriate "back" icon for the given `platform`.
+  static IconData _getIconData(TargetPlatform platform) {
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return Icons.arrow_back;
+      case TargetPlatform.iOS:
+        return Icons.arrow_back_ios;
+    }
+    assert(false);
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) => new Icon(_getIconData(Theme.of(context).platform));
+}
 
 /// A material design back button.
 ///
@@ -28,15 +48,14 @@ typedef void BuildContextCallback(BuildContext context);
 /// initial route), the [BackButton] will not have any effect when pressed,
 /// which could frustrate the user.
 ///
-/// The default button pressed behavior can be overridden by specifying
-/// [onPressed].
-///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
 ///  * [AppBar], which automatically uses a [BackButton] in its
 ///    [AppBar.leading] slot when appropriate.
+///  * [BackButtonIcon], which is useful if you need to create a back button
+///    that responds differently being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with
 ///    icons.
 ///  * [CloseButton], an alternative which may be more appropriate for leaf
@@ -44,37 +63,15 @@ typedef void BuildContextCallback(BuildContext context);
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key key, this.onPressed }) : super(key: key);
-
-  /// If this property is non-null it's called when the back button is pressed.
-  /// If it's null then a method that pops that navigator is called:
-  /// `Navigator.of(context).maybePop()`.
-  final BuildContextCallback onPressed;
-
-  /// Returns tha appropriate "back" icon for the given `platform`.
-  static IconData getIconData(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return Icons.arrow_back;
-      case TargetPlatform.iOS:
-        return Icons.arrow_back_ios;
-    }
-    assert(false);
-    return null;
-  }
-
-  void _defaultOnPressed(BuildContext context) {
-    Navigator.of(context).maybePop();
-  }
+  const BackButton({ Key key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return new IconButton(
-      icon: new Icon(getIconData(Theme.of(context).platform)),
+      icon: const BackButtonIcon(),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
-        (onPressed ?? _defaultOnPressed)(context);
+        Navigator.of(context).maybePop();
       }
     );
   }
@@ -98,16 +95,7 @@ class BackButton extends StatelessWidget {
 ///  * [IconButton], to create other material design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
-  const CloseButton({ Key key, this.onPressed }) : super(key: key);
-
-  /// If this property is non-null it's called when the back button is pressed.
-  /// If it's null then a method that pops the navigator is called:
-  /// `Navigator.of(context).maybePop()`.
-  final BuildContextCallback onPressed;
-
-  void _defaultOnPressed(BuildContext context) {
-    Navigator.of(context).maybePop();
-  }
+  const CloseButton({ Key key }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -115,7 +103,7 @@ class CloseButton extends StatelessWidget {
       icon: const Icon(Icons.close),
       tooltip: 'Close', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
-        (onPressed ?? _defaultOnPressed)(context);
+        Navigator.of(context).maybePop();
       },
     );
   }
