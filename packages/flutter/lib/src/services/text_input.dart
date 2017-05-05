@@ -237,7 +237,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.done':
       return TextInputAction.done;
   }
-  throw new FlutterError('Unknow text input action: $action');
+  throw new FlutterError('Unknown text input action: $action');
 }
 
 class _TextInputClientHandler {
