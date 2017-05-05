@@ -78,7 +78,7 @@ String getGradleAppOutDirV2() {
 // Note: this call takes about a second to complete.
 String _calculateGradleAppOutDirV2() {
   final String gradle = ensureGradle();
-  ensureLocalProperties();
+  updateLocalProperties();
   try {
     final String properties = runCheckedSync(
       <String>[gradle, 'app:properties'],
@@ -141,28 +141,42 @@ String ensureGradle() {
   return gradle;
 }
 
-/// Create android/local.properties if needed.
-File ensureLocalProperties() {
-  final File localProperties = fs.file('android/local.properties');
-  if (!localProperties.existsSync()) {
-    localProperties.writeAsStringSync(
-        'sdk.dir=${escapePath(androidSdk.directory)}\n'
-        'flutter.sdk=${escapePath(Cache.flutterRoot)}\n'
-    );
+/// Create android/local.properties if needed, and update Flutter settings.
+void updateLocalProperties({String projectPath, String buildMode}) {
+  final File localProperties = (projectPath == null)
+      ? fs.file(fs.path.join('android', 'local.properties'))
+      : fs.file(fs.path.join(projectPath, 'android', 'local.properties'));
+  bool changed = false;
+
+  SettingsFile settings;
+  if (localProperties.existsSync()) {
+    settings = new SettingsFile.parseFromFile(localProperties);
+  } else {
+    settings = new SettingsFile();
+    settings.values['sdk.dir'] = escapePath(androidSdk.directory);
+    changed = true;
   }
-  return localProperties;
+  final String escapedRoot = escapePath(Cache.flutterRoot);
+  if (changed || settings.values['flutter.sdk'] != escapedRoot) {
+    settings.values['flutter.sdk'] = escapedRoot;
+    changed = true;
+  }
+  if (buildMode != null && settings.values['flutter.buildMode'] != buildMode) {
+    settings.values['flutter.buildMode']  = buildMode;
+    changed = true;
+  }
+
+  if (changed)
+    settings.writeContents(localProperties);
 }
 
 Future<Null> buildGradleProject(BuildMode buildMode, String target, String kernelPath) async {
-  final File localProperties = ensureLocalProperties();
   // Update the local.properties file with the build mode.
   // FlutterPlugin v1 reads local.properties to determine build mode. Plugin v2
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
   final String buildModeName = getModeName(buildMode);
-  final SettingsFile settings = new SettingsFile.parseFromFile(localProperties);
-  settings.values['flutter.buildMode'] = buildModeName;
-  settings.writeContents(localProperties);
+  updateLocalProperties(buildMode: buildModeName);
 
   injectPlugins();
 

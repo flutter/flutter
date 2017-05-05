@@ -151,6 +151,8 @@ class ItemListNotifier<T> {
 }
 
 class SettingsFile {
+  SettingsFile();
+
   SettingsFile.parse(String contents) {
     for (String line in contents.split('\n')) {
       line = line.trim();
