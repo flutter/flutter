@@ -63,10 +63,13 @@ void updateFileModificationTime(String path,
 }
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit([int exitCode]) {
-  return exitCode == null
-    ? throwsA(isToolExit)
-    : throwsA(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
+Matcher throwsToolExit({int exitCode, String message}) {
+  Matcher matcher = isToolExit;
+  if (exitCode != null)
+    matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
+  if (message != null)
+    matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+  return throwsA(matcher);
 }
 
 /// Matcher for [ToolExit]s.

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -121,13 +120,10 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      try {
-        await runner.run(<String>['create', projectDir.path, '--pub']);
-        fail('expected ToolExit exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode, 2);
-        expect(e.message, contains('Try moving --pub'));
-      }
+      expect(
+          runner.run(<String>['create', projectDir.path, '--pub']),
+          throwsToolExit(exitCode: 2, message: 'Try moving --pub')
+      );
     });
 
     // Verify that we fail with an error code when the file exists.
@@ -138,24 +134,20 @@ void main() {
       final File existingFile = fs.file("${projectDir.path.toString()}/bad");
       if (!existingFile.existsSync())
         existingFile.createSync(recursive: true);
-      try {
-        await runner.run(<String>['create', existingFile.path]);
-        fail('expected ToolExit exception');
-      } on ToolExit catch (e) {
-        expect(e.message, contains('file exists'));
-      }
+      expect(
+          runner.run(<String>['create', existingFile.path]),
+          throwsToolExit(message: 'file exists')
+      );
     });
 
     testUsingContext('fails when invalid package name', () async {
       Cache.flutterRoot = '../..';
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
-      try {
-        await runner.run(<String>['create', 'invalidName']);
-        fail('expected ToolExit exception');
-      } on ToolExit catch (e) {
-        expect(e.message, startsWith('"invalidName" is not a valid Dart package name.'));
-      }
+      expect(
+          runner.run(<String>['create', 'invalidName']),
+          throwsToolExit(message: '"invalidName" is not a valid Dart package name.')
+      );
     });
   });
 }
