@@ -20,6 +20,7 @@ import 'src/context.dart';
 void main() {
   group('create', () {
     Directory temp;
+    Directory projectDir;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -27,6 +28,7 @@ void main() {
 
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
+      projectDir = temp.childDirectory('flutter_project');
     });
 
     tearDown(() {
@@ -36,25 +38,25 @@ void main() {
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
       return _createAndAnalyzeProject(
-        temp,
+        projectDir,
         <String>[],
-        fs.path.join(temp.path, 'lib', 'main.dart'),
+        fs.path.join(projectDir.path, 'lib', 'main.dart'),
       );
     });
 
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
-        temp,
+        projectDir,
         <String>['--with-driver-test'],
-        fs.path.join(temp.path, 'lib', 'main.dart'),
+        fs.path.join(projectDir.path, 'lib', 'main.dart'),
       );
     });
 
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
-        temp,
+        projectDir,
         <String>['--plugin'],
-        fs.path.join(temp.path, 'example', 'lib', 'main.dart'),
+        fs.path.join(projectDir.path, 'example', 'lib', 'main.dart'),
       );
     });
 
@@ -65,21 +67,21 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', temp.path]);
+      await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
       void expectExists(String relPath) {
-        expect(fs.isFileSync('${temp.path}/$relPath'), true);
+        expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
       }
 
       expectExists('lib/main.dart');
-      for (FileSystemEntity file in temp.listSync(recursive: true)) {
+      for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {
           final String original = file.readAsStringSync();
 
           final Process process = await Process.start(
             sdkBinaryName('dartfmt'),
             <String>[file.path],
-            workingDirectory: temp.path,
+            workingDirectory: projectDir.path,
           );
           final String formatted =
               await process.stdout.transform(UTF8.decoder).join();
@@ -93,7 +95,7 @@ void main() {
           fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
       expectExists(xcodeConfigPath);
       final File xcodeConfigFile =
-          fs.file(fs.path.join(temp.path, xcodeConfigPath));
+          fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
       final String xcodeConfig = xcodeConfigFile.readAsStringSync();
       expect(xcodeConfig, contains('FLUTTER_ROOT='));
       expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
@@ -107,9 +109,9 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      await runner.run(<String>['create', '--no-pub', temp.path]);
+      await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-      await runner.run(<String>['create', '--no-pub', temp.path]);
+      await runner.run(<String>['create', '--no-pub', projectDir.path]);
     });
 
     // Verify that we help the user correct an option ordering issue
@@ -120,7 +122,7 @@ void main() {
       final CommandRunner<Null> runner = createTestCommandRunner(command);
 
       try {
-        await runner.run(<String>['create', temp.path, '--pub']);
+        await runner.run(<String>['create', projectDir.path, '--pub']);
         fail('expected ToolExit exception');
       } on ToolExit catch (e) {
         expect(e.exitCode, 2);
@@ -133,14 +135,26 @@ void main() {
       Cache.flutterRoot = '../..';
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
-      final File existingFile = fs.file("${temp.path.toString()}/bad");
+      final File existingFile = fs.file("${projectDir.path.toString()}/bad");
       if (!existingFile.existsSync())
-        existingFile.createSync();
+        existingFile.createSync(recursive: true);
       try {
         await runner.run(<String>['create', existingFile.path]);
         fail('expected ToolExit exception');
       } on ToolExit catch (e) {
         expect(e.message, contains('file exists'));
+      }
+    });
+
+    testUsingContext('fails when invalid package name', () async {
+      Cache.flutterRoot = '../..';
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      try {
+        await runner.run(<String>['create', 'invalidName']);
+        fail('expected ToolExit exception');
+      } on ToolExit catch (e) {
+        expect(e.message, startsWith('"invalidName" is not a valid Dart package name.'));
       }
     });
   });
