@@ -313,7 +313,7 @@ class _AllSectionsView extends AnimatedWidget {
              (midHeight - minHeight)).clamp(0.0, 1.0);
 
     double _indicatorOpacity(int index) {
-      return 1.0 - _selectedIndexDelta(index) * tColumnToRow * 0.5;
+      return 1.0 - _selectedIndexDelta(index) * 0.5;
     }
 
     double _titleOpacity(int index) {
@@ -369,16 +369,15 @@ class _AllSectionsView extends AnimatedWidget {
 // app bar's height is _kAppBarMidHeight and only one section heading is
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
-  _SnappingScrollPhysics({ ScrollPhysics parent, this.midScrollOffset }) : super(parent: parent);
+  _SnappingScrollPhysics({ ScrollPhysics parent, this.midScrollOffset }) : super(parent: parent) {
+    assert(midScrollOffset != null);
+  }
 
   final double midScrollOffset;
 
   @override
-  _SnappingScrollPhysics applyTo(ScrollPhysics parent) {
-    return new _SnappingScrollPhysics(
-      parent: parent,
-      midScrollOffset: midScrollOffset
-    );
+  _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return new _SnappingScrollPhysics(parent: buildParent(ancestor),  midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
@@ -436,6 +435,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   final ScrollController _scrollController = new ScrollController();
   final PageController _headingPageController = new PageController();
   final PageController _detailsPageController = new PageController();
+  ScrollPhysics _headingScrollPhysics = const NeverScrollableScrollPhysics();
   ValueNotifier<double> selectedIndex = new ValueNotifier<double>(0.0);
 
   @override
@@ -447,6 +447,22 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
         builder: _buildBody,
       ),
     );
+  }
+
+  // Only enable paging for the heading when the user has scrolled to midScrollOffset.
+  // Paging is enabled/disabled by setting the heading's PageView scroll physics.
+  bool _handleScrollNotification(ScrollNotification notification, double midScrollOffset) {
+    if (notification.depth == 0 && notification is ScrollUpdateNotification) {
+      final ScrollPhysics physics = _scrollController.position.pixels >= midScrollOffset
+       ? const PageScrollPhysics()
+       : const NeverScrollableScrollPhysics();
+      if (physics != _headingScrollPhysics) {
+        setState(() {
+          _headingScrollPhysics = physics;
+        });
+      }
+    }
+    return false;
   }
 
   void _maybeScroll(double midScrollOffset, int pageIndex, double xOffset) {
@@ -532,53 +548,59 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     return new SizedBox.expand(
       child: new Stack(
         children: <Widget>[
-          new CustomScrollView(
-            controller: _scrollController,
-            physics: new _SnappingScrollPhysics(midScrollOffset: appBarMidScrollOffset),
-            slivers: <Widget>[
-              // Start out below the status bar, gradually move to the top of the screen.
-              new _StatusBarPaddingSliver(
-                maxHeight: statusBarHeight,
-                scrollFactor: 7.0,
-              ),
-              // Section Headings
-              new SliverPersistentHeader(
-                pinned: true,
-                delegate: new _SliverAppBarDelegate(
-                  minHeight: _kAppBarMinHeight,
-                  maxHeight: appBarMaxHeight,
-                  child: new NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
-                      return _handlePageNotification(notification, _headingPageController, _detailsPageController);
-                    },
-                    child: new PageView(
-                      controller: _headingPageController,
-                      children: _allHeadingItems(appBarMaxHeight, appBarMidScrollOffset),
+          new NotificationListener<ScrollNotification>(
+            onNotification: (ScrollNotification notification) {
+              return _handleScrollNotification(notification, appBarMidScrollOffset);
+            },
+            child: new CustomScrollView(
+              controller: _scrollController,
+              physics: new _SnappingScrollPhysics(midScrollOffset: appBarMidScrollOffset),
+              slivers: <Widget>[
+                // Start out below the status bar, gradually move to the top of the screen.
+                new _StatusBarPaddingSliver(
+                  maxHeight: statusBarHeight,
+                  scrollFactor: 7.0,
+                ),
+                // Section Headings
+                new SliverPersistentHeader(
+                  pinned: true,
+                  delegate: new _SliverAppBarDelegate(
+                    minHeight: _kAppBarMinHeight,
+                    maxHeight: appBarMaxHeight,
+                    child: new NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification notification) {
+                        return _handlePageNotification(notification, _headingPageController, _detailsPageController);
+                      },
+                      child: new PageView(
+                        physics: _headingScrollPhysics,
+                        controller: _headingPageController,
+                        children: _allHeadingItems(appBarMaxHeight, appBarMidScrollOffset),
+                      ),
                     ),
                   ),
                 ),
-              ),
-              // Details
-              new SliverToBoxAdapter(
-                child: new SizedBox(
-                  height: 610.0,
-                  child: new NotificationListener<ScrollNotification>(
-                    onNotification: (ScrollNotification notification) {
-                      return _handlePageNotification(notification, _detailsPageController, _headingPageController);
-                    },
-                    child: new PageView(
-                      controller: _detailsPageController,
-                      children: allSections.map((Section section) {
-                        return new Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _detailItemsFor(section).toList(),
-                        );
-                      }).toList(),
+                // Details
+                new SliverToBoxAdapter(
+                  child: new SizedBox(
+                    height: 610.0,
+                    child: new NotificationListener<ScrollNotification>(
+                      onNotification: (ScrollNotification notification) {
+                        return _handlePageNotification(notification, _detailsPageController, _headingPageController);
+                      },
+                      child: new PageView(
+                        controller: _detailsPageController,
+                        children: allSections.map((Section section) {
+                          return new Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: _detailItemsFor(section).toList(),
+                          );
+                        }).toList(),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           new Positioned(
             top: statusBarHeight,

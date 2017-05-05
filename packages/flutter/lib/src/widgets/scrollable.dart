@@ -271,8 +271,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   bool _shouldUpdatePosition(Scrollable oldWidget) {
-    return widget.physics?.runtimeType != oldWidget.physics?.runtimeType
-        || widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
+    ScrollPhysics newPhysics = widget.physics;
+    ScrollPhysics oldPhysics = oldWidget.physics;
+    do {
+      if (newPhysics?.runtimeType != oldPhysics?.runtimeType)
+        return true;
+      newPhysics = newPhysics?.parent;
+      oldPhysics = oldPhysics?.parent;
+    } while (newPhysics != null || oldPhysics != null);
+
+    return widget.controller?.runtimeType != oldWidget.controller?.runtimeType;
   }
 
   @override
