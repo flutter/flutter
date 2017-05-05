@@ -78,7 +78,7 @@ class AnimatedList extends StatefulWidget {
 
   /// The number of items the list will start with.
   ///
-  /// The appareance of the initial items is not animated. They are
+  /// The appareance of the initial items is not animated. They
   /// are created, as needed, by [itemBuilder] with an animation paramter
   /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
