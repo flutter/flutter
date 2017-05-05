@@ -11,7 +11,7 @@ namespace shell {
 
 class DiagnosticServer {
  public:
-  static void Start(uint32_t port);
+  static void Start(uint32_t port, bool ipv6);
   static void HandleSkiaPictureRequest(Dart_Handle send_port);
 
  private:

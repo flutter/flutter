@@ -61,7 +61,7 @@ void ServiceIsolateHook(bool running_precompiled) {
   if (!running_precompiled) {
     const blink::Settings& settings = blink::Settings::Get();
     if (settings.enable_diagnostic)
-      DiagnosticServer::Start(settings.diagnostic_port);
+      DiagnosticServer::Start(settings.diagnostic_port, settings.ipv6);
   }
 }
 
@@ -135,6 +135,9 @@ void Shell::InitStandalone(ftl::CommandLine command_line,
           << settings.diagnostic_port;
     }
   }
+
+  settings.ipv6 =
+      command_line.HasOption(FlagForSwitch(Switch::IPv6));
 
   settings.start_paused =
       command_line.HasOption(FlagForSwitch(Switch::StartPaused));

@@ -11,13 +11,17 @@ import 'dart:typed_data';
 void handleSkiaPictureRequest(SendPort sendPort)
     native 'DiagnosticServer_HandleSkiaPictureRequest';
 
-void diagnosticServerStart(int port) {
-  HttpServer.bind('127.0.0.1', port).then((HttpServer server) {
+void diagnosticServerStart(int port, [bool ipv6 = false]) {
+  InternetAddress address = ipv6
+      ? InternetAddress.LOOPBACK_IP_V6
+      : InternetAddress.LOOPBACK_IP_V4;
+  HttpServer.bind(address, port).then((HttpServer server) {
     server.listen(dispatchRequest, cancelOnError: true);
 
-    String ip = server.address.address.toString();
+    String ip = address.address;
     String port = server.port.toString();
-    print('Diagnostic server listening on http://$ip:$port/');
+    String url = ipv6 ? 'http://[$ip]:$port/' : 'http://$ip:$port/';
+    print('Diagnostic server listening on $url');
   });
 }
 

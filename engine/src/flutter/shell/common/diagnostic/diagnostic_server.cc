@@ -61,7 +61,7 @@ void SendNull(Dart_Port port_id) {
 
 DART_NATIVE_CALLBACK_STATIC(DiagnosticServer, HandleSkiaPictureRequest);
 
-void DiagnosticServer::Start(uint32_t port) {
+void DiagnosticServer::Start(uint32_t port, bool ipv6) {
   if (!g_natives) {
     g_natives = new DartLibraryNatives();
     g_natives->Register({
@@ -92,7 +92,8 @@ void DiagnosticServer::Start(uint32_t port) {
 
   FTL_CHECK(!LogIfError(Dart_FinalizeLoading(false)));
 
-  DartInvokeField(Dart_RootLibrary(), "diagnosticServerStart", {ToDart(port)});
+  DartInvokeField(Dart_RootLibrary(), "diagnosticServerStart",
+                  {ToDart(port), ToDart(ipv6)});
 }
 
 void DiagnosticServer::HandleSkiaPictureRequest(Dart_Handle send_port) {
