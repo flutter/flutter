@@ -9,6 +9,13 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'theme.dart';
 
+/// Signature for callbacks with a BuildContext parameter.
+///
+/// This type can be useful for widget callbacks. The context passed to the
+/// widget's build method can be passed along to callbacks that may need to look
+/// up an inherited widget or other context-specific resource.
+typedef void BuildContextCallback(BuildContext context);
+
 /// A material design back button.
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
@@ -20,6 +27,9 @@ import 'theme.dart';
 /// popped. If that value is false (e.g., because the current route is the
 /// initial route), the [BackButton] will not have any effect when pressed,
 /// which could frustrate the user.
+///
+/// The default button pressed behavior can be overridden by specifying
+/// [onPressed].
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
@@ -34,7 +44,12 @@ import 'theme.dart';
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key key }) : super(key: key);
+  const BackButton({ Key key, this.onPressed }) : super(key: key);
+
+  /// If this property is non-null it's called when the back button is pressed.
+  /// If it's null then a method that pops that navigator is called:
+  /// `Navigator.of(context).maybePop()`.
+  final BuildContextCallback onPressed;
 
   /// Returns tha appropriate "back" icon for the given `platform`.
   static IconData getIconData(TargetPlatform platform) {
@@ -49,14 +64,18 @@ class BackButton extends StatelessWidget {
     return null;
   }
 
+  void _defaultOnPressed(BuildContext context) {
+    Navigator.of(context).maybePop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return new IconButton(
       icon: new Icon(getIconData(Theme.of(context).platform)),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
-        Navigator.of(context).maybePop();
-      },
+        (onPressed ?? _defaultOnPressed)(context);
+      }
     );
   }
 }
@@ -79,7 +98,16 @@ class BackButton extends StatelessWidget {
 ///  * [IconButton], to create other material design icon buttons.
 class CloseButton extends StatelessWidget {
   /// Creates a Material Design close button.
-  const CloseButton({ Key key }) : super(key: key);
+  const CloseButton({ Key key, this.onPressed }) : super(key: key);
+
+  /// If this property is non-null it's called when the back button is pressed.
+  /// If it's null then a method that pops the navigator is called:
+  /// `Navigator.of(context).maybePop()`.
+  final BuildContextCallback onPressed;
+
+  void _defaultOnPressed(BuildContext context) {
+    Navigator.of(context).maybePop();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +115,7 @@ class CloseButton extends StatelessWidget {
       icon: const Icon(Icons.close),
       tooltip: 'Close', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
-        Navigator.of(context).maybePop();
+        (onPressed ?? _defaultOnPressed)(context);
       },
     );
   }
