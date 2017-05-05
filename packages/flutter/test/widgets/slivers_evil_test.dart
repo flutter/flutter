@@ -47,7 +47,9 @@ class TestScrollPhysics extends ClampingScrollPhysics {
   const TestScrollPhysics({ ScrollPhysics parent }) : super(parent: parent);
 
   @override
-  TestScrollPhysics applyTo(ScrollPhysics parent) => new TestScrollPhysics(parent: parent);
+  TestScrollPhysics applyTo(ScrollPhysics ancestor) {
+    return new TestScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+  }
 
   @override
   Tolerance get tolerance => const Tolerance(velocity: 20.0, distance: 1.0);
