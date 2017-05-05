@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding;
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -19,7 +18,6 @@ import 'find.dart';
 import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
-import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
 
@@ -73,8 +71,6 @@ class FlutterDriverExtension {
       'set_frame_sync': _setFrameSync,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
-      'setInputText': _setInputText,
-      'submitInputText': _submitInputText,
       'waitFor': _waitFor,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
     });
@@ -87,8 +83,6 @@ class FlutterDriverExtension {
       'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
-      'setInputText': (Map<String, String> params) => new SetInputText.deserialize(params),
-      'submitInputText': (Map<String, String> params) => new SubmitInputText.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => new WaitUntilNoTransientCallbacks.deserialize(params),
     });
@@ -261,31 +255,6 @@ class FlutterDriverExtension {
     final Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
     return new ScrollResult();
-  }
-
-  Finder _findEditableText(SerializableFinder finder) {
-    return find.descendant(of: _createFinder(finder), matching: find.byType(EditableText));
-  }
-
-  EditableTextState _getEditableTextState(Finder finder) {
-    final StatefulElement element = finder.evaluate().single;
-    return element.state;
-  }
-
-  Future<SetInputTextResult> _setInputText(Command command) async {
-    final SetInputText setInputTextCommand = command;
-    final Finder target = await _waitForElement(_findEditableText(setInputTextCommand.finder));
-    final EditableTextState editable = _getEditableTextState(target);
-    editable.updateEditingValue(new TextEditingValue(text: setInputTextCommand.text));
-    return new SetInputTextResult();
-  }
-
-  Future<SubmitInputTextResult> _submitInputText(Command command) async {
-    final SubmitInputText submitInputTextCommand = command;
-    final Finder target = await _waitForElement(_findEditableText(submitInputTextCommand.finder));
-    final EditableTextState editable = _getEditableTextState(target);
-    editable.performAction(TextInputAction.done);
-    return new SubmitInputTextResult(editable.widget.controller.value.text);
   }
 
   Future<GetTextResult> _getText(Command command) async {
