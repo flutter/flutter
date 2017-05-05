@@ -7,11 +7,9 @@
 
 #import <Flutter/Flutter.h>
 
-#import "UrlLauncherPlugin.h"
 
 @interface PluginRegistry : NSObject
 
-@property (readonly, nonatomic) UrlLauncherPlugin *url_launcher;
 
 - (instancetype)initWithController:(FlutterViewController *)controller;
 

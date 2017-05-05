@@ -7,8 +7,6 @@
       <excludeFolder url="file://$MODULE_DIR$/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/build" />
       <excludeFolder url="file://$MODULE_DIR$/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/calculator/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/test/packages" />
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Dart Packages" level="project" />
