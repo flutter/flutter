@@ -31,6 +31,8 @@ void main() {
     const ScrollPhysics a = const TestScrollPhysics(name: 'a');
     const ScrollPhysics b = const TestScrollPhysics(name: 'b');
     const ScrollPhysics c = const TestScrollPhysics(name: 'c');
+    const ScrollPhysics d = const TestScrollPhysics(name: 'd');
+    const ScrollPhysics e = const TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);
@@ -41,5 +43,32 @@ void main() {
 
     final TestScrollPhysics abc = ab.applyTo(c);
     expect(abc.names, 'a b c');
+
+    final TestScrollPhysics de = d.applyTo(e);
+    expect(de.names, 'd e');
+
+    final TestScrollPhysics abcde = abc.applyTo(de);
+    expect(abcde.names, 'a b c d e');
+  });
+
+  test('ScrollPhysics subclasses applyTo()', () {
+    const ScrollPhysics bounce = const BouncingScrollPhysics();
+    const ScrollPhysics clamp = const ClampingScrollPhysics();
+    const ScrollPhysics never = const AlwaysScrollableScrollPhysics();
+    const ScrollPhysics always = const NeverScrollableScrollPhysics();
+
+    String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
+
+    expect(types(bounce.applyTo(clamp.applyTo(never.applyTo(always)))),
+      "BouncingScrollPhysics ClampingScrollPhysics AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics");
+
+    expect(types(clamp.applyTo(never.applyTo(always.applyTo(bounce)))),
+      "ClampingScrollPhysics AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics BouncingScrollPhysics");
+
+    expect(types(never.applyTo(always.applyTo(bounce.applyTo(clamp)))),
+      "AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics BouncingScrollPhysics ClampingScrollPhysics");
+
+    expect(types(always.applyTo(bounce.applyTo(clamp.applyTo(never)))),
+      "NeverScrollableScrollPhysics BouncingScrollPhysics ClampingScrollPhysics AlwaysScrollableScrollPhysics");
   });
 }

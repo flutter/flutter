@@ -234,7 +234,7 @@ class PageScrollPhysics extends ScrollPhysics {
 
   @override
   PageScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new PageScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new PageScrollPhysics(parent: buildParent(ancestor));
   }
 
   double _getPage(ScrollPosition position) {

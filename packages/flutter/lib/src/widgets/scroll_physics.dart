@@ -37,6 +37,18 @@ class ScrollPhysics {
   /// [ScrollPhysics] subclasses at runtime.
   final ScrollPhysics parent;
 
+  /// If [parent] is null then return ancestor, otherwise recursively build a
+  /// ScrollPhysics that has [ancestor] as its parent.
+  ///
+  /// This method is typically used to define [applyTo] methods like:
+  /// ```dart
+  /// FooScrollPhysics applyTo(ScrollPhysics ancestor) {
+  ///   return new FooScrollPhysics(parent: buildParent(ancestor));
+  /// }
+  /// ```
+  @protected
+  ScrollPhysics buildParent(ScrollPhysics ancestor) => parent?.applyTo(ancestor) ?? ancestor;
+
   /// If [parent] is null then return a [ScrollPhysics] with the same
   /// [runtimeType] where the [parent] has been replaced with the [ancestor].
   ///
@@ -45,10 +57,14 @@ class ScrollPhysics {
   /// existing chain of parents.
   ///
   /// The returned object will combine some of the behaviors from this
-  /// [ScrollPhysics] instance and some of the behaviors from the given
-  /// [ScrollPhysics] instance.
+  /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
+  ///
+  /// See also:
+  ///
+  ///   * [buildParent], a utility method that's often used to define [applyTo]
+  ///     methods for ScrollPhysics subclasses.
   ScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new ScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new ScrollPhysics(parent: buildParent(ancestor));
   }
 
   /// Used by [DragScrollActivity] and other user-driven activities to
@@ -205,7 +221,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   @override
   BouncingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new BouncingScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new BouncingScrollPhysics(parent: buildParent(ancestor));
   }
 
   /// The multiple applied to overscroll to make it appear that scrolling past
@@ -286,7 +302,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
 
   @override
   ClampingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new ClampingScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new ClampingScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override
@@ -370,7 +386,7 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new AlwaysScrollableScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
 
@@ -394,7 +410,7 @@ class NeverScrollableScrollPhysics extends ScrollPhysics {
 
   @override
   NeverScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new NeverScrollableScrollPhysics(parent: parent?.applyTo(ancestor) ?? ancestor);
+    return new NeverScrollableScrollPhysics(parent: buildParent(ancestor));
   }
 
   @override

@@ -377,10 +377,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 
   @override
   _SnappingScrollPhysics applyTo(ScrollPhysics ancestor) {
-    return new _SnappingScrollPhysics(
-      parent: parent?.applyTo(ancestor) ?? ancestor,
-      midScrollOffset: midScrollOffset,
-    );
+    return new _SnappingScrollPhysics(parent: buildParent(ancestor),  midScrollOffset: midScrollOffset);
   }
 
   Simulation _toMidScrollOffsetSimulation(double offset, double dragVelocity) {
