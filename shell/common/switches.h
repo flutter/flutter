@@ -44,6 +44,10 @@ DEF_SWITCH(DisableDiagnostic,
            "disable-diagnostic",
            "Disable the diagnostic server. The diagnostic server is never "
            "available in release mode.")
+DEF_SWITCH(IPv6,
+           "ipv6",
+           "Bind to the IPv6 localhost address for the Dart Observatory and "
+           "the diagnostic server.")
 DEF_SWITCH(EnableDartProfiling,
            "enable-dart-profiling",
            "Enable Dart profiling. Profiling information can be viewed from "

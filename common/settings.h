@@ -19,6 +19,7 @@ struct Settings {
   uint32_t observatory_port = 0;
   bool enable_diagnostic = false;
   uint32_t diagnostic_port = 0;
+  bool ipv6 = false;
   bool start_paused = false;
   bool trace_startup = false;
   bool endless_trace_buffer = false;
