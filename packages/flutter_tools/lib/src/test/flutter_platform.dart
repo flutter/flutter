@@ -490,7 +490,6 @@ void main() {
       'FLUTTER_TEST': 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
     };
-    print('$command');
     return processManager.start(command, environment: environment);
   }
 
