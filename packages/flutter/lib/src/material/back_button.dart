@@ -13,9 +13,11 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [BackButton], an [IconButton] with a [BackButtonIcon] that
-///  * [IconButton], which is a more general widget for creating buttons with
-///    icons.
+///  * [BackButton], an [IconButton] with a [BackButtonIcon] that calls
+///    [Navigator.maybePop] to return to the previous route.
+///  * [IconButton], which is a more general widget for creating buttons
+///    with icons.
+///  * [Icon], a material design icon.
 class BackButtonIcon extends StatelessWidget {
   const BackButtonIcon({ Key key }) : super(key: key);
 
@@ -55,7 +57,7 @@ class BackButtonIcon extends StatelessWidget {
 ///  * [AppBar], which automatically uses a [BackButton] in its
 ///    [AppBar.leading] slot when appropriate.
 ///  * [BackButtonIcon], which is useful if you need to create a back button
-///    that responds differently being pressed.
+///    that responds differently to being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with
 ///    icons.
 ///  * [CloseButton], an alternative which may be more appropriate for leaf

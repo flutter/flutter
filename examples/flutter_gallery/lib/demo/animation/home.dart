@@ -613,7 +613,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
             top: statusBarHeight,
             left: 0.0,
             child: new IconTheme(
-              data: new IconThemeData(color: Colors.white),
+              data: const IconThemeData(color: Colors.white),
               child: new IconButton(
                 icon: const BackButtonIcon(),
                 onPressed: () {
