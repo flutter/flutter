@@ -5,11 +5,8 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   // Override point for customization after application launch.
-  if ([super application:application didFinishLaunchingWithOptions:launchOptions]) {
-    [GeneratedPluginRegistrant registerWithRegistry:self];
-    return YES;
-  }
-  return NO;
+  [GeneratedPluginRegistrant registerWithRegistry:self];
+  return YES;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application {
