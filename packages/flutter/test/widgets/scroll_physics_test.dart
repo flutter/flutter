@@ -54,21 +54,25 @@ void main() {
   test('ScrollPhysics subclasses applyTo()', () {
     const ScrollPhysics bounce = const BouncingScrollPhysics();
     const ScrollPhysics clamp = const ClampingScrollPhysics();
-    const ScrollPhysics never = const AlwaysScrollableScrollPhysics();
-    const ScrollPhysics always = const NeverScrollableScrollPhysics();
+    const ScrollPhysics never = const NeverScrollableScrollPhysics();
+    const ScrollPhysics always = const AlwaysScrollableScrollPhysics();
+    const ScrollPhysics page = const PageScrollPhysics();
 
     String types(ScrollPhysics s) => s.parent == null ? '${s.runtimeType}' : '${s.runtimeType} ${types(s.parent)}';
 
-    expect(types(bounce.applyTo(clamp.applyTo(never.applyTo(always)))),
-      "BouncingScrollPhysics ClampingScrollPhysics AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics");
+    expect(types(bounce.applyTo(clamp.applyTo(never.applyTo(always.applyTo(page))))),
+      'BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics');
 
-    expect(types(clamp.applyTo(never.applyTo(always.applyTo(bounce)))),
-      "ClampingScrollPhysics AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics BouncingScrollPhysics");
+    expect(types(clamp.applyTo(never.applyTo(always.applyTo(page.applyTo(bounce))))),
+      'ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics');
 
-    expect(types(never.applyTo(always.applyTo(bounce.applyTo(clamp)))),
-      "AlwaysScrollableScrollPhysics NeverScrollableScrollPhysics BouncingScrollPhysics ClampingScrollPhysics");
+    expect(types(never.applyTo(always.applyTo(page.applyTo(bounce.applyTo(clamp))))),
+      'NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics');
 
-    expect(types(always.applyTo(bounce.applyTo(clamp.applyTo(never)))),
-      "NeverScrollableScrollPhysics BouncingScrollPhysics ClampingScrollPhysics AlwaysScrollableScrollPhysics");
+    expect(types(always.applyTo(page.applyTo(bounce.applyTo(clamp.applyTo(never))))),
+      'AlwaysScrollableScrollPhysics PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics');
+
+    expect(types(page.applyTo(bounce.applyTo(clamp.applyTo(never.applyTo(always))))),
+      'PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics');
   });
 }
