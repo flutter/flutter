@@ -26,7 +26,7 @@ import 'ticker_provider.dart';
 /// See [Navigator] for more explanation of how to use a Route
 /// with navigation, including code examples.
 ///
-/// See [material.MaterialPageRoute] for a route that replaces the
+/// See [MaterialPageRoute] for a route that replaces the
 /// entire screen with a platform-adaptive transition.
 abstract class Route<T> {
   /// The navigator that the route is in, if any.
