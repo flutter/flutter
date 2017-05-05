@@ -293,12 +293,12 @@ enum PaintingStyle {
   // in sync.
 
   /// Apply the [Paint] to the inside of the shape. For example, when
-  /// applied to the [Paint.drawCircle] call, this results in a disc
+  /// applied to the [Canvas.drawCircle] call, this results in a disc
   /// of the given size being painted.
   fill,
 
   /// Apply the [Paint] to the edge of the shape. For example, when
-  /// applied to the [Paint.drawCircle] call, this results is a hoop
+  /// applied to the [Canvas.drawCircle] call, this results is a hoop
   /// of the given size being painted. The line drawn on the edge will
   /// be the width given by the [Paint.strokeWidth] property.
   stroke,
@@ -591,7 +591,7 @@ class Paint {
 /// To obtain an Image object, use [decodeImageFromList].
 ///
 /// To draw an Image, use one of the methods on the [Canvas] class, such as
-/// [drawImage].
+/// [Canvas.drawImage].
 abstract class Image extends NativeFieldWrapperClass2 {
   /// The number of image pixels along the image's horizontal axis.
   int get width native "Image_width";
@@ -895,7 +895,7 @@ class ColorFilter {
   /// The output of this filter is then composited into the background according
   /// to the [Paint.blendMode], using the output of this filter as the source
   /// and the background as the destination.
-  ColorFilter.mode(Color color, BlendMode blendMode)
+  const ColorFilter.mode(Color color, BlendMode blendMode)
     : _color = color, _blendMode = blendMode;
 
   final Color _color;
@@ -994,11 +994,11 @@ Float32List _encodeTwoPoints(Offset pointA, Offset pointB) {
 /// A shader (as used by [Paint.shader]) that renders a color gradient.
 ///
 /// There are two useful types of gradients, created by [new Gradient.linear]
-/// and [new Griadent.radial].
+/// and [new Gradient.radial].
 class Gradient extends Shader {
   /// Creates a Gradient object that is not initialized.
   ///
-  /// Use the [Gradient.linear] or [Gradient.radial] constructors to
+  /// Use the [new Gradient.linear] or [new Gradient.radial] constructors to
   /// obtain a usable [Gradient] object.
   Gradient();
   void _constructor() native "Gradient_constructor";
@@ -1150,7 +1150,7 @@ class Vertices extends NativeFieldWrapperClass2 {
 enum PointMode {
   /// Draw each point separately.
   ///
-  /// If the [Paint.strokeCap] is [StrokeCat.round], then each point is drawn
+  /// If the [Paint.strokeCap] is [StrokeCap.round], then each point is drawn
   /// as a circle with the diameter of the [Paint.strokeWidth], filled as
   /// described by the [Paint] (ignoring [Paint.style]).
   ///
@@ -1527,9 +1527,26 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// [PictureRecorder].
   void drawPicture(Picture picture) native "Canvas_drawPicture";
 
-  /// Draws the text in the given paragraph into this canvas at the given offset.
+  /// Draws the text in the given [Paragraph] into this canvas at the given
+  /// [Offset].
   ///
-  /// Valid only after [Paragraph.layout] has been called on the paragraph.
+  /// The [Paragraph] object must have had [Paragraph.layout] called on it
+  /// first.
+  ///
+  /// To align the text, set the `textAlign` on the [ParagraphStyle] object
+  /// passed to the [new ParagraphBuilder] constructor. For more details see
+  /// [TextAlign] and the discussion at [new ParagraphStyle].
+  ///
+  /// If the text is left aligned or justified, the left margin will be at the
+  /// position specified by the `offset` argument's [Offset.dx] coordinate.
+  ///
+  /// If the text is right aligned or justified, the right margin will be at the
+  /// position described by adding the [ParagraphConstraints.width] given to
+  /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
+  ///
+  /// If the text is centered, the centering axis will be at the position
+  /// described by adding half of the [ParagraphConstraints.width] given to
+  /// [Paragraph.layout], to the `offset` argument's [Offset.dx] coordinate.
   void drawParagraph(Paragraph paragraph, Offset offset) {
     paragraph._paint(this, offset.dx, offset.dy);
   }
