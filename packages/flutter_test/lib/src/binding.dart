@@ -14,7 +14,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http;
-import 'package:meta/meta.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart' as test_package;
@@ -54,7 +53,7 @@ enum EnginePhase {
   flushSemantics,
 
   /// The final phase in the rendering library, wherein semantics information is
-  /// sent to the embedder. See [SemanticsNode.sendSemanticsUpdate].
+  /// sent to the embedder. See [SemanticsOwner.sendSemanticsUpdate].
   sendSemanticsUpdate,
 }
 

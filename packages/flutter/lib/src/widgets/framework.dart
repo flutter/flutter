@@ -688,16 +688,16 @@ typedef void StateSetter(VoidCallback fn);
 ///    subtree.
 ///  * During this time, a parent widget might rebuild and request that this
 ///    location in the tree update to display a new widget with the same
-///    [runtimeType] and [key]. When this happens, the framework will update the
-///    [widget] property to refer to the new widget and then call the
-///    [didUpdateWidget] method with the previous widget as an argument.
-///    [State] objects should override [didUpdateWidget] to respond to changes
-///    in their associated wiget (e.g., to start implicit animations).
-///    The framework always calls [build] after calling [didUpdateWidget], which
-///    means any calls to [setState] in [didUpdateWidget] are redundant.
+///    [runtimeType] and [Widget.key]. When this happens, the framework will
+///    update the [widget] property to refer to the new widget and then call the
+///    [didUpdateWidget] method with the previous widget as an argument. [State]
+///    objects should override [didUpdateWidget] to respond to changes in their
+///    associated wiget (e.g., to start implicit animations). The framework
+///    always calls [build] after calling [didUpdateWidget], which means any
+///    calls to [setState] in [didUpdateWidget] are redundant.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
-///    or [key]), the framework calls the [deactivate] method. Subclasses
+///    or [Widget.key]), the framework calls the [deactivate] method. Subclasses
 ///    should override this method to clean up any links between this object
 ///    and other elements in the tree (e.g. if you have provided an ancestor
 ///    with a pointer to a descendant's [RenderObject]).
@@ -3614,8 +3614,8 @@ class InheritedElement extends ProxyElement {
 ///
 /// [updateChild] should be called for children in their logical order. The
 /// order can matter; for example, if two of the children use [PageStorage]'s
-/// `writeState` feature in their build method (and neither has a [key]), then
-/// the state written by the first will be overwritten by the second.
+/// `writeState` feature in their build method (and neither has a [Widget.key]),
+/// then the state written by the first will be overwritten by the second.
 ///
 /// #### Dynamically determining the children during the build phase
 ///
@@ -3629,7 +3629,7 @@ class InheritedElement extends ProxyElement {
 /// the [update] method won't work: layout of this element's render object
 /// hasn't started yet at that point. Instead, the [update] method can mark the
 /// render object as needing layout (see [RenderObject.markNeedsLayout]), and
-/// then the render object's [RenderOBject.performLayout] method can call back
+/// then the render object's [RenderObject.performLayout] method can call back
 /// to the element to have it generate the widgets and call [updateChild]
 /// accordingly.
 ///

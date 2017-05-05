@@ -29,7 +29,7 @@ abstract class SemanticsActionHandler { // ignore: one_member_abstracts
   void performAction(SemanticsAction action);
 }
 
-/// The type of function returned by [RenderObject.getSemanticsAnnotators()].
+/// Signature for functions returned by [RenderObject.semanticsAnnotator].
 ///
 /// These callbacks are called with the [SemanticsNode] object that
 /// corresponds to the [RenderObject]. (One [SemanticsNode] can

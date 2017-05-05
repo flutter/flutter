@@ -1,11 +1,12 @@
 name: flutter_test
 dependencies:
-  quiver: ^0.24.0
-
   # The flutter tools depend on very specific internal implementation
   # details of the 'test' package, which change between versions, so
   # here we pin it precisely to avoid version skew across our packages.
   test: 0.12.20
+
+  # We use FakeAsync and other testing utilities.
+  quiver: ^0.24.0
 
   flutter:
     sdk: flutter
@@ -14,3 +15,9 @@ dependencies:
   # need to be able to unmangle the stack traces that it passed to
   # stack_trace. See https://github.com/dart-lang/test/issues/590
   stack_trace: any # use version expected by test package
+
+  # We override the createHttpClient in flutter with a MockClient.
+  http: any # use version expected by flutter
+
+  # Used by globalToLocal et al.
+  vector_math: any # use version expected by flutter
