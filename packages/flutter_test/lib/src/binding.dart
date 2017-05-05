@@ -767,6 +767,14 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     } else {
       _doDrawThisFrame = false;
     }
+  }
+
+  @override
+  void handleDrawFrame() {
+    assert(_doDrawThisFrame != null);
+    if (_doDrawThisFrame)
+      super.handleDrawFrame();
+    _doDrawThisFrame = null;
     _viewNeedsPaint = false;
     if (_expectingFrame) { // set during pump
       assert(_pendingFrame != null);
@@ -776,14 +784,6 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     } else {
       ui.window.scheduleFrame();
     }
-  }
-
-  @override
-  void handleDrawFrame() {
-    assert(_doDrawThisFrame != null);
-    if (_doDrawThisFrame)
-      super.handleDrawFrame();
-    _doDrawThisFrame = null;
   }
 
   @override
