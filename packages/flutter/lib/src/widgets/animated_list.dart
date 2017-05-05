@@ -178,8 +178,8 @@ class AnimatedList extends StatefulWidget {
 /// The state for a scrolling container that animates items when they are
 /// inserted or removed.
 ///
-/// When an item is inserted with [insertItem] an animation begins running.
-/// The animation is passed to [itemBuilder] whenever the item's widget
+/// When an item is inserted with [insertItem] an animation begins running. The
+/// animation is passed to [AnimatedList.itemBuilder] whenever the item's widget
 /// is needed.
 ///
 /// When an item is removed with [removeItem] its animation is reversed.
@@ -197,8 +197,8 @@ class AnimatedList extends StatefulWidget {
 /// listKey.currentState.insert(123);
 /// ```
 ///
-/// AnimatedList item input handlers can also refer to their [AnimatedListState]
-/// with the static [of] method.
+/// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
+/// with the static [AnimatedList.of] method.
 class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin {
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
@@ -259,7 +259,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   }
 
   /// Insert an item at [index] and start an animation that will be passed
-  /// to [itemBuilder] when the item is visible.
+  /// to [AnimatedList.itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
@@ -300,9 +300,9 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [itemBuilder]. However the item will still
-  /// appear in the list for [duration] and during that time [builder] must
-  /// construct its widget as needed.
+  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
+  /// item will still appear in the list for [duration] and during that time
+  /// [builder] must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or

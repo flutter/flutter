@@ -136,7 +136,7 @@ class ListTileTheme extends InheritedWidget {
 /// height based on their contents. If you are looking for a widget that allows
 /// for arbitrary layout in a row, consider [Row].
 ///
-/// List tiles are typically used in [MaterialList]s or in [Card]s.
+/// List tiles are typically used in [ListView]s, [Drawer]s, and [Card]s.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///

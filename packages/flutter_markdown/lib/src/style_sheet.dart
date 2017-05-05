@@ -80,7 +80,7 @@ class MarkdownStyleSheet {
   /// Creates a [MarkdownStyle] from the [TextStyle]s in the provided [ThemeData].
   ///
   /// This constructor uses larger fonts for the headings than in
-  /// [MarkdownStyle.fromTheme].
+  /// [new MarkdownStyle.fromTheme].
   factory MarkdownStyleSheet.largeFromTheme(ThemeData theme) {
     return new MarkdownStyleSheet(
       a: const TextStyle(color: Colors.blue),

@@ -137,9 +137,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   bool codesign: true
 }) async {
-  final String flutterProjectPath = fs.currentDirectory.path;
-  updateXcodeGeneratedProperties(flutterProjectPath, mode, target);
-
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
 
@@ -156,6 +153,13 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   if (hasFlutterPlugins)
     await _runPodInstall(appDirectory, flutterFrameworkDir(mode));
+
+  updateXcodeGeneratedProperties(
+    projectPath: fs.currentDirectory.path,
+    mode: mode,
+    target: target,
+    hasPlugins: hasFlutterPlugins
+  );
 
   final List<String> commands = <String>[
     '/usr/bin/env',

@@ -53,11 +53,11 @@ abstract class ViewportNotificationMixin extends Notification {
 ///    position to go outside its scroll bounds.
 ///  * Interspersed with the [ScrollUpdateNotification]s and
 ///    [OverscrollNotification]s are zero or more [UserScrollNotification]s,
-///    which indicate that the user has changed the direciton in which they are
+///    which indicate that the user has changed the direction in which they are
 ///    scrolling.
 ///  * A [ScrollEndNotification], which indicates that the widget has stopped
 ///    scrolling.
-///  * A [UserScrollNotification], with a [UserScrollNotification.direciton] of
+///  * A [UserScrollNotification], with a [UserScrollNotification.direction] of
 ///    [ScrollDirection.idle].
 ///
 /// Notifications bubble up through the tree, which means a given

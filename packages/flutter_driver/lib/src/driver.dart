@@ -19,7 +19,6 @@ import 'find.dart';
 import 'frame_sync.dart';
 import 'gesture.dart';
 import 'health.dart';
-import 'input.dart';
 import 'message.dart';
 import 'render_tree.dart';
 import 'timeline.dart';
@@ -325,24 +324,6 @@ class FlutterDriver {
   Future<Null> tap(SerializableFinder finder, {Duration timeout}) async {
     await _sendCommand(new Tap(finder, timeout: timeout));
     return null;
-  }
-
-  /// Sets the text value of the [TextField] widget located by [finder].
-  ///
-  /// This command invokes the `onChanged` handler of the `Input` widget with
-  /// the provided [text].
-  Future<Null> setInputText(SerializableFinder finder, String text, {Duration timeout}) async {
-    await _sendCommand(new SetInputText(finder, text, timeout: timeout));
-    return null;
-  }
-
-  /// Submits the current text value of the [TextField] widget located by [finder].
-  ///
-  /// This command invokes the `onSubmitted` handler of the [TextField] widget
-  /// and the returns the submitted text value.
-  Future<String> submitInputText(SerializableFinder finder, {Duration timeout}) async {
-    final Map<String, dynamic> json = await _sendCommand(new SubmitInputText(finder, timeout: timeout));
-    return json['text'];
   }
 
   /// Waits until [finder] locates the target.

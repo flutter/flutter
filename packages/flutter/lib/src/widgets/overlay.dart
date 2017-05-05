@@ -44,7 +44,7 @@ import 'ticker_provider.dart';
 /// overlay entry is still built even if it is not visible, set [maintainState]
 /// to true. This is more expensive, so should be done with care. In particular,
 /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-/// call [setState], the user's battery will be drained unnecessarily.
+/// call [State.setState], the user's battery will be drained unnecessarily.
 ///
 /// See also:
 ///
@@ -99,7 +99,7 @@ class OverlayEntry {
   /// overlay entry is still built even if it is not visible, set [maintainState]
   /// to true. This is more expensive, so should be done with care. In particular,
   /// if widgets in an overlay entry with [maintainState] set to true repeatedly
-  /// call [setState], the user's battery will be drained unnecessarily.
+  /// call [State.setState], the user's battery will be drained unnecessarily.
   ///
   /// This is used by the [Navigator] and [Route] objects to ensure that routes
   /// are kept around even when in the background, so that [Future]s promised
@@ -123,8 +123,8 @@ class OverlayEntry {
   /// This should only be called once.
   ///
   /// If this method is called while the [SchedulerBinding.schedulerPhase] is
-  /// [SchedulerBinding.persistentCallbacks], i.e. during the build, layout, or
-  /// paint phases (see [WidgetsBinding.beginFrame]), then the removal is
+  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.drawFrame]), then the removal is
   /// delayed until the post-frame callbacks phase. Otherwise the removal is
   /// done synchronously. This means that it is safe to call during builds, but
   /// also that if you do call this during a build, the UI will not update until
@@ -215,8 +215,8 @@ class Overlay extends StatefulWidget {
   /// To add entries to an [Overlay] that is already in the tree, use
   /// [Overlay.of] to obtain the [OverlayState] (or assign a [GlobalKey] to the
   /// [Overlay] widget and obtain the [OverlayState] via
-  /// [GlobalKey.currentState]), and then use [OverlayState.add] or
-  /// [OverlayState.addAll].
+  /// [GlobalKey.currentState]), and then use [OverlayState.insert] or
+  /// [OverlayState.insertAll].
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;

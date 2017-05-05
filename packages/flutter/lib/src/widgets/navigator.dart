@@ -64,7 +64,7 @@ abstract class Route<T> {
   void didReplace(Route<dynamic> oldRoute) { }
 
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
-  /// called by [Naviagtor.willPop].
+  /// called by [Navigator.willPop].
   ///
   /// By default, routes veto a pop if they're the first route in the history
   /// (i.e., if [isFirst]). This behavior prevents the user from popping the
@@ -72,7 +72,7 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  /// * [Form], which provides a [Form.onWillPop] callback that uses this mechanism.
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
@@ -156,7 +156,7 @@ abstract class Route<T> {
   /// If attempts to dismiss this route might be vetoed, for example because
   /// a [WillPopCallback] was defined for the route, then it may make sense
   /// to disable the pop gesture. For example, the iOS back gesture is disabled
-  /// when [ModalRoute.hasScopedWillCallback] is true.
+  /// when [ModalRoute.hasScopedWillPopCallback] is true.
   NavigationGestureController startPopGesture() => null;
 
   /// Whether this route is the top-most route on the navigator.
@@ -426,7 +426,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// because they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
-/// example: [showDialog], [showMenu], and [showBottomSheet]. These
+/// example: [showDialog], [showMenu], and [showModalBottomSheet]. These
 /// functions return their pushed route's Future as described above.
 /// Callers can await the returned value to take an action when the
 /// route is popped, or to discover the route's value.
@@ -527,8 +527,8 @@ class Navigator extends StatefulWidget {
   /// encloses the given context, and transitions to it.
   ///
   /// The new route and the previous route (if any) are notified (see
-  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
-  /// [Navigator.observer], it will be notified as well (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
+  /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
@@ -540,9 +540,9 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).push(route);
   }
 
-  /// Returns the value of the current route's `willPop` method. This method is
-  /// typically called before a user-initiated [pop]. For example on Android it's
-  /// called by the binding for the system's back button.
+  /// Returns the value of the current route's [Route.willPop] method. This
+  /// method is typically called before a user-initiated [pop]. For example on
+  /// Android it's called by the binding for the system's back button.
   ///
   /// See also:
   ///
@@ -791,8 +791,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Adds the given route to the navigator's history, and transitions to it.
   ///
   /// The new route and the previous route (if any) are notified (see
-  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has an
-  /// [Navigator.observer], it will be notified as well (see
+  /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
+  /// [Navigator.observers], they will be notified as well (see
   /// [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
@@ -991,7 +991,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// If there are any routes left on the history, the top remaining route is
   /// notified (see [Route.didPopNext]), and the method returns true. In that
-  /// case, if the [Navigator] has an [Navigator.observer], it will be notified
+  /// case, if the [Navigator] has any [Navigator.observers], they will be notified
   /// as well (see [NavigatorObserver.didPop]). Otherwise, if the popped route
   /// was the last route, the method returns false.
   ///

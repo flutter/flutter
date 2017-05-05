@@ -350,7 +350,7 @@ class AnimationController extends Animation<double>
   ///
   /// Defaults to repeating between the lower and upper bounds.
   ///
-  /// Returns a [TickerFuture] that never completes. The [TickerFuture.onCancel] future
+  /// Returns a [TickerFuture] that never completes. The [TickerFuture.orCancel] future
   /// completes with an error when the animation is stopped (e.g. with [stop]).
   ///
   /// The most recently returned [TickerFuture], if any, is marked as having been

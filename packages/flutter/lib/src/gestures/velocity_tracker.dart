@@ -125,7 +125,7 @@ class _PointAtTime {
   String toString() => '_PointAtTime($point at $time)';
 }
 
-/// Computes a pointer's velocity based on data from [PointerMove] events.
+/// Computes a pointer's velocity based on data from [PointerMoveEvent]s.
 ///
 /// The input data is provided by calling [addPosition]. Adding data is cheap.
 ///

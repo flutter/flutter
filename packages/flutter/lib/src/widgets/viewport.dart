@@ -61,7 +61,7 @@ class Viewport extends MultiChildRenderObjectWidget {
     assert(center == null || children.where((Widget child) => child.key == center).length == 1);
   }
 
-  /// The direction in which the [scrollOffset] increases.
+  /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
   /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
   /// offset of zero is at the top of the viewport and increases towards the
@@ -207,7 +207,7 @@ class ShrinkWrappingViewport extends MultiChildRenderObjectWidget {
     assert(offset != null);
   }
 
-  /// The direction in which the [scrollOffset] increases.
+  /// The direction in which the [offset]'s [ViewportOffset.pixels] increases.
   ///
   /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
   /// offset of zero is at the top of the viewport and increases towards the

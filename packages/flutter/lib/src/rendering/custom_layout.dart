@@ -38,7 +38,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentDataMixin<RenderBox> 
 /// Override [shouldRelayout] to determine when the layout of the children needs
 /// to be recomputed when the delegate changes.
 ///
-/// Used with [MultiChildCustomLayout], the widget for the
+/// Used with [CustomMultiChildLayout], the widget for the
 /// [RenderCustomMultiChildLayoutBox] render object.
 ///
 /// ## Example

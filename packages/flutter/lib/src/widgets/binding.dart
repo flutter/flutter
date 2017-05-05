@@ -154,7 +154,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeMetrics].
   ///
-  /// See [ui.window.onMetricsChanged].
+  /// See [window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
@@ -166,7 +166,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   ///
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
   ///
-  /// See [ui.window.onLocaleChanged].
+  /// See [Window.onLocaleChanged].
   void handleLocaleChanged() {
     dispatchLocaleChanged(ui.window.locale);
   }
@@ -293,7 +293,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [ui.window.onBeginFrame], invokes all the transient frame callbacks
+  /// with [window.onBeginFrame], invokes all the transient frame callbacks
   /// registered with [scheduleFrameCallback], in
   /// registration order. This includes all the [Ticker] instances that are
   /// driving [AnimationController] objects, which means all of the active
@@ -305,7 +305,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [ui.window.onDrawFrame], is called, which invokes all the persistent frame
+  /// [window.onDrawFrame], is called, which invokes all the persistent frame
   /// callbacks, of which the most notable is this method, [drawFrame], which
   /// proceeds as follows:
   ///
@@ -327,7 +327,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// [RenderObject.markNeedsPaint] for further details on marking an object
   /// dirty for paint.
   ///
-  /// 7. The compositing phase: The layer tree is turned into a [ui.Scene] and
+  /// 7. The compositing phase: The layer tree is turned into a [Scene] and
   /// sent to the GPU.
   ///
   /// 8. The semantics phase: All the dirty [RenderObject]s in the system have

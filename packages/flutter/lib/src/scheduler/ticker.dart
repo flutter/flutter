@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'binding.dart';
 
-/// Signature for the [onTick] constructor argument of the [Ticker] class.
+/// Signature for the callback passed to the [Ticker] class's constructor.
 ///
 /// The argument is the time that the object had spent enabled so far
 /// at the time of the callback being called.
@@ -54,7 +54,8 @@ abstract class TickerProvider {
 /// Tickers are driven by the [SchedulerBinding]. See
 /// [SchedulerBinding.scheduleFrameCallback].
 class Ticker {
-  /// Creates a ticker that will call [onTick] once per frame while running.
+  /// Creates a ticker that will call the provided callback once per frame while
+  /// running.
   ///
   /// An optional label can be provided for debugging purposes. That label
   /// will appear in the [toString] output in debug builds.

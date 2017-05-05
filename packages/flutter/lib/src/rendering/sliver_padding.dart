@@ -91,9 +91,9 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     return null;
   }
 
-  /// The total padding in the [constraints.axisDirection]. (In other words, for
-  /// a vertical downwards-growing list, the sum of the padding on the top and
-  /// bottom.)
+  /// The total padding in the [SliverConstraints.axisDirection]. (In other
+  /// words, for a vertical downwards-growing list, the sum of the padding on
+  /// the top and bottom.)
   ///
   /// Only valid after layout has started, since before layout the render object
   /// doesn't know what direction it will be laid out in.

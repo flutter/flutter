@@ -77,7 +77,9 @@ dependencies:
     '--footer', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
-    '--use-categories'
+    '--use-categories',
+    '--category-order',
+    'flutter,Dart Core,flutter_markdown,flutter_test,flutter_driver',
   ];
 
   for (String libraryRef in libraryRefs(diskPath: true)) {

@@ -18,7 +18,7 @@ import 'finders.dart';
 /// See also:
 ///
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsOneWidgets], when you want the finder to find exactly one widget.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 
@@ -33,7 +33,7 @@ const Matcher findsNothing = const _FindsWidgetMatcher(null, 0);
 /// See also:
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
-///  * [findsOneWidgets], when you want the finder to find exactly one widget.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
 ///  * [findsNWidgets], when you want the finder to find a specific number of widgets.
 const Matcher findsWidgets = const _FindsWidgetMatcher(1, null);
 
@@ -64,7 +64,7 @@ const Matcher findsOneWidget = const _FindsWidgetMatcher(1, 1);
 ///
 ///  * [findsNothing], when you want the finder to not find anything.
 ///  * [findsWidgets], when you want the finder to find one or more widgets.
-///  * [findsOneWidgets], when you want the finder to find exactly one widget.
+///  * [findsOneWidget], when you want the finder to find exactly one widget.
 Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 
 /// Asserts that the [Finder] locates the a single widget that has at
@@ -81,7 +81,7 @@ Matcher findsNWidgets(int n) => new _FindsWidgetMatcher(n, n);
 ///
 /// See also:
 ///
-///  * [isOnStage], the opposite.
+///  * [isOnstage], the opposite.
 const Matcher isOffstage = const _IsOffstage();
 
 /// Asserts that the [Finder] locates the a single widget that has no
@@ -89,7 +89,7 @@ const Matcher isOffstage = const _IsOffstage();
 ///
 /// See also:
 ///
-///  * [isOffStage], the opposite.
+///  * [isOffstage], the opposite.
 const Matcher isOnstage = const _IsOnstage();
 
 /// Asserts that the [Finder] locates the a single widget that has at
@@ -173,7 +173,7 @@ const Matcher isAssertionError = const isInstanceOf<AssertionError>();
 ///
 ///  * [closeTo], which is identical except that the epsilon argument is
 ///    required and not named.
-///  * [isInclusiveRange], which matches if the argument is in a specified
+///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
 Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
   return new _MoreOrLessEquals(value, epsilon);

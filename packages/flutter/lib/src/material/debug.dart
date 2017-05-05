@@ -12,7 +12,7 @@ import 'material.dart';
 /// only used in contexts where they can print ink onto some material.
 ///
 /// To call this function, use the following pattern, typically in the
-/// relevant Widget's [build] method:
+/// relevant Widget's build method:
 ///
 /// ```dart
 /// assert(debugCheckHasMaterial(context));

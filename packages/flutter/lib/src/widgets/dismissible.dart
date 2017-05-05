@@ -57,7 +57,7 @@ enum DismissDirection {
 /// is specified it is stacked behind the Dismissible's child and is exposed when
 /// the child moves.
 ///
-/// The widget calls the [onDimissed] callback either after its size has
+/// The widget calls the [onDismissed] callback either after its size has
 /// collapsed to zero (if [resizeDuration] is non-null) or immediately after
 /// the slide animation (if [resizeDuration] is null). If the Dismissible is a
 /// list item, it must have a key that distinguishes it from the other items and

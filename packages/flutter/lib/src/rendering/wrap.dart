@@ -214,7 +214,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   /// the cross axis.
   ///
   /// For example, if this is set to [WrapCrossAlignment.end], and the
-  /// [direction] is [WrapDirection.horizontal], then the children within each
+  /// [direction] is [Axis.horizontal], then the children within each
   /// run will have their bottom edges aligned to the bottom edge of the run.
   ///
   /// Defaults to [WrapCrossAlignment.start].

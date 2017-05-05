@@ -127,6 +127,15 @@ abstract class ScrollView extends StatelessWidget {
   /// ```dart
   ///   physics: const ScrollPhysics(),
   /// ```
+  ///
+  /// The physics can be changed dynamically (by providing a new object in a
+  /// subsequent build), but new physics will only take effect if the _class_ of
+  /// the provided object changes. Merely constructing a new instance with a
+  /// different configuration is insufficient to cause the physics to be
+  /// reapplied. (This is because the final object used is generated
+  /// dynamically, which can be relatively expensive, and it would be
+  /// inefficient to speculatively create this object each frame to see if the
+  /// physics should be updated.)
   final ScrollPhysics physics;
 
   /// Whether the extent of the scroll view in the [scrollDirection] should be

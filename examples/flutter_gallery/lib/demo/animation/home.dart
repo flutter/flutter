@@ -478,9 +478,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final Iterable<Widget> detailItems = section.details.map((SectionDetail detail) {
       return new SectionDetailView(detail: detail);
     });
-    return ListTile.divideTiles(context: context, tiles: detailItems).map((Widget item) {
-        return new SliverToBoxAdapter(child: item);
-    });
+    return ListTile.divideTiles(context: context, tiles: detailItems);
   }
 
   Iterable<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
@@ -571,8 +569,9 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
                     child: new PageView(
                       controller: _detailsPageController,
                       children: allSections.map((Section section) {
-                        return new CustomScrollView(
-                          slivers: _detailItemsFor(section).toList(),
+                        return new Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _detailItemsFor(section).toList(),
                         );
                       }).toList(),
                     ),
