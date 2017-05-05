@@ -29,7 +29,7 @@ typedef void PlatformMessageCallback(String name, ByteData data, PlatformMessage
 enum AppLifecycleState {
   /// The application is not currently visible to the user. When the
   /// application is in this state, the engine will not call the
-  /// [onBeginFrame] callback.
+  /// [Window.onBeginFrame] callback.
   paused,
 
   /// The application is visible to the user.
@@ -41,7 +41,7 @@ enum AppLifecycleState {
 /// interface, as exposed by [Window.padding].
 ///
 /// For a generic class that represents distances around a rectangle, see the
-/// [EdgeDims] class.
+/// [EdgeInsets] class.
 class WindowPadding {
   const WindowPadding._({ this.left, this.top, this.right, this.bottom });
 
@@ -173,17 +173,16 @@ class Window {
   /// times during a single [onBeginFrame] callback or called outside the scope
   /// of an [onBeginFrame], the call will be ignored.
   ///
-  /// To record graphical operations, first create a
-  /// [PictureRecorder], then construct a [Canvas], passing that
-  /// [PictureRecorder] to its constructor. After issuing all the
-  /// graphical operations, call the [endRecording] function on the
-  /// [PictureRecorder] to obtain the final [Picture] that represents
-  /// the issued graphical operations.
+  /// To record graphical operations, first create a [PictureRecorder], then
+  /// construct a [Canvas], passing that [PictureRecorder] to its constructor.
+  /// After issuing all the graphical operations, call the
+  /// [PictureRecorder.endRecording] function on the [PictureRecorder] to obtain
+  /// the final [Picture] that represents the issued graphical operations.
   ///
   /// Next, create a [SceneBuilder], and add the [Picture] to it using
-  /// [SceneBuilder.addPicture]. With the [SceneBuilder.build] method
-  /// you can then obtain a [Scene] object, which you can display to
-  /// the user via this [render] function.
+  /// [SceneBuilder.addPicture]. With the [SceneBuilder.build] method you can
+  /// then obtain a [Scene] object, which you can display to the user via this
+  /// [render] function.
   void render(Scene scene) native "Window_render";
 
   /// Whether the user has requested that [updateSemantics] be called when

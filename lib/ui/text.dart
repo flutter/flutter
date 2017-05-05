@@ -81,31 +81,35 @@ class FontWeight {
   }
 }
 
-/// Whether to align text horizontally
+/// Whether to align text horizontally.
 enum TextAlign {
-  /// Align the text on the left edge of the container
+  /// Align the text on the left edge of the container.
   left,
 
-  /// Align the text on the right edge of the container
+  /// Align the text on the right edge of the container.
   right,
 
-  /// Align the text in the center of the container
+  /// Align the text in the center of the container.
   center,
 
-  /// Stretch each line of text to fill the width of the container
-  justify
+  /// Stretch lines of text that end with a soft line break to fill the width of
+  /// the container.
+  ///
+  /// Lines that end with hard line breaks are left-aligned.
+  // TODO(ianh): for rtl, this should presumably change to start-aligned.
+  justify,
 }
 
-/// A horizontal line used for aligning text
+/// A horizontal line used for aligning text.
 enum TextBaseline {
-  // The horizontal line used to align the bottom of glyphs for alphabetic characters
+  // The horizontal line used to align the bottom of glyphs for alphabetic characters.
   alphabetic,
 
-  // The horizontal line used to align ideographic characters
+  // The horizontal line used to align ideographic characters.
   ideographic
 }
 
-/// A linear decoration to draw near the text
+/// A linear decoration to draw near the text.
 class TextDecoration {
   const TextDecoration._(this._mask);
 
@@ -424,18 +428,47 @@ Int32List _encodeParagraphStyle(TextAlign textAlign,
   return result;
 }
 
-/// An opaque object that determines the position of lines within a paragraph of text.
+/// An opaque object that determines the configuration used by
+/// [ParagraphBuilder] to position lines within a [Paragraph] of text.
 class ParagraphStyle {
   /// Creates a new ParagraphStyle object.
   ///
-  /// * `textAlign`: The alignment of the text within the lines of the paragraph.
-  /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
-  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
-  /// * `maxLines`: The maximum number of lines painted.
-  /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto).
-  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting the text.
-  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the font size.
-  /// * `ellipsis`: String used to ellipsize overflowing text.
+  /// * `textAlign`: The alignment of the text within the lines of the
+  ///   paragraph. If the last line is ellipsized (see `ellipsis` below), the
+  ///   alignment is applied to that line after it has been truncated but before
+  ///   the ellipsis has been added.
+   //   See: https://github.com/flutter/flutter/issues/9819
+  ///
+  /// * `fontWeight`: The typeface thickness to use when painting the text
+  ///   (e.g., bold).
+  ///
+  /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g.,
+  ///   italics).
+  ///
+  /// * `maxLines`: The maximum number of lines painted. Lines beyond this
+  ///   number are silently dropped. For example, if `maxLines` is 1, then only
+  ///   one line is rendered. If `maxLines` is null, but `ellipsis` is not null,
+  ///   then lines after the first one that overflows the width constraints are
+  ///   dropped. The width constraints are those set in the
+  ///   [ParagraphConstraints] object passed to the [Paragraph.layout] method.
+  ///
+  /// * `fontFamily`: The name of the font to use when painting the text (e.g.,
+  ///   Roboto).
+  ///
+  /// * `fontSize`: The size of glyphs (in logical pixels) to use when painting
+  ///   the text.
+  ///
+  /// * `lineHeight`: The minimum height of the line boxes, as a multiple of the
+  ///   font size.
+  ///
+  /// * `ellipsis`: String used to ellipsize overflowing text. If `maxLines` is
+  ///   not null, then the `ellipsis`, if any, is applied to the last rendered
+  ///   line, if that line overflows the width constraints. If `maxLines` is
+  ///   null, then the `ellipsis` is applied to the first line that overflows
+  ///   the width constraints, and subsequent lines are dropped. The width
+  ///   constraints are those set in the [ParagraphConstraints] object passed to
+  ///   the [Paragraph.layout] method. The empty string and the null value are
+  ///   considered equivalent and turn off this behavior.
   ParagraphStyle({
     TextAlign textAlign,
     FontWeight fontWeight,
@@ -444,7 +477,7 @@ class ParagraphStyle {
     String fontFamily,
     double fontSize,
     double lineHeight,
-    String ellipsis
+    String ellipsis,
   }) : _encoded = _encodeParagraphStyle(textAlign,
                                         fontWeight,
                                         fontStyle,
@@ -504,7 +537,7 @@ enum TextDirection {
   rtl,
 
   /// The text flows from left to right (e.g., English, French).
-  ltr
+  ltr,
 }
 
 /// A rectangle enclosing a run of text.
@@ -611,6 +644,9 @@ class TextPosition {
 /// Layout constraints for [Paragraph] objects.
 ///
 /// Instances of this class are typically used with [Paragraph.layout].
+///
+/// The only constraint that can be specified is the [width]. See the discussion
+/// at [width] for more details.
 class ParagraphConstraints {
   /// Creates constraints for laying out a pargraph.
   ///
@@ -623,9 +659,19 @@ class ParagraphConstraints {
   ///
   /// If possible, the paragraph will select a soft line break prior to reaching
   /// this width. If no soft line break is available, the paragraph will select
-  /// a hard line break prior to reaching this width.
+  /// a hard line break prior to reaching this width. If that would force a line
+  /// break without any characters having been placed (i.e. if the next
+  /// character to be laid out does not fit within the given width constraint)
+  /// then the next character is allowed to overflow the width constraint and a
+  /// forced line break is placed after it (even if an explicit line break
+  /// follows).
   ///
-  /// This width will also be used for positioning glyphs with [TextAlign].
+  /// The width influences how ellipses are applied. See the discussion at [new
+  /// ParagraphStyle] for more details.
+  ///
+  /// This width is also used to position glyphs according to the [TextAlign]
+  /// alignment described in the [ParagraphStyle] used when building the
+  /// [Paragraph] with a [ParagraphBuilder].
   final double width;
 
   bool operator ==(dynamic other) {
@@ -645,15 +691,15 @@ class ParagraphConstraints {
 /// A paragraph retains the size and position of each glyph in the text and can
 /// be efficiently resized and painted.
 ///
-/// To create a Paragraph object, use a [ParagraphBuilder].
+/// To create a [Paragraph] object, use a [ParagraphBuilder].
 ///
-/// Paragraph objects can be displayed on a [Canvas] using the
-/// [Canvas.drawParagraph] method.
+/// Paragraphs can be displayed on a [Canvas] using the [Canvas.drawParagraph]
+/// method.
 abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// Creates an uninitialized Paragraph object.
   ///
-  /// Calling the Paragraph constructor directly will not create a useable
-  /// object. To create a Paragraph object, use a [ParagraphBuilder].
+  /// Calling the [Paragraph] constructor directly will not create a useable
+  /// object. To create a [Paragraph] object, use a [ParagraphBuilder].
   Paragraph(); // (this constructor is here just so we can document it)
 
   /// The amount of horizontal space this paragraph occupies.
@@ -686,11 +732,18 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
   /// baseline of the first line, in logical pixels.
   double get ideographicBaseline native "Paragraph_ideographicBaseline";
 
-  /// True if there is more vertical content, but the text was truncated
-  /// because we reached [ParagraphStyle.maxLines] lines of text.
+  /// True if there is more vertical content, but the text was truncated, either
+  /// because we reached `maxLines` lines of text or because the `maxLines` was
+  /// null, `ellipsis` was not null, and one of the lines exceeded the width
+  /// constraint.
+  ///
+  /// See the discussion of the `maxLines` and `ellipsis` arguments at [new
+  /// ParagraphStyle].
   bool get didExceedMaxLines native "Paragraph_didExceedMaxLines";
 
   /// Computes the size and position of each glyph in the paragraph.
+  ///
+  /// The [ParagraphConstraints] control how wide the text is allowed to be.
   void layout(ParagraphConstraints constraints) => _layout(constraints.width);
   void _layout(double width) native "Paragraph_layout";
 
@@ -718,6 +771,19 @@ abstract class Paragraph extends NativeFieldWrapperClass2 {
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.
+///
+/// To set the paragraph's alignment, truncation, and ellipsising behavior, pass
+/// an appropriately-configured [ParagraphStyle] object to the [new
+/// ParagraphBuilder] constructor.
+///
+/// Then, call combinations of [pushStyle], [addText], and [pop] to add styled
+/// text to the object.
+///
+/// Finally, call [build] to obtain the constructed [Paragraph] object. After
+/// this point, the builder is no longer usable.
+///
+/// After constructing a [Paragraph], call [Paragraph.layout] on it and then
+/// paint it with [Canvas.drawParagraph].
 class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Creates a [ParagraphBuilder] object, which is used to create a
   /// [Paragraph].
@@ -743,7 +809,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// The text will be styled according to the current stack of text styles.
   void addText(String text) native "ParagraphBuilder_addText";
 
-  /// Applies the given paragraph style and returns a Paragraph containing the added text and associated styling.
+  /// Applies the given paragraph style and returns a [Paragraph] containing the
+  /// added text and associated styling.
   ///
   /// After calling this function, the paragraph builder object is invalid and
   /// cannot be used further.

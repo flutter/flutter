@@ -7,6 +7,8 @@ part of dart.ui;
 /// The possible actions that can be conveyed from the operating system
 /// accessibility APIs to a semantics node.
 class SemanticsAction {
+  const SemanticsAction._(this.index);
+
   static const int _kTapIndex = 1 << 0;
   static const int _kLongPressIndex = 1 << 1;
   static const int _kScrollLeftIndex = 1 << 2;
@@ -15,8 +17,6 @@ class SemanticsAction {
   static const int _kScrollDownIndex = 1 << 5;
   static const int _kIncreaseIndex = 1 << 6;
   static const int _kDecreaseIndex = 1 << 7;
-
-  const SemanticsAction._(this.index);
 
   /// The numerical value for this action.
   ///
@@ -173,10 +173,10 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   ///
   /// The `flags` are a bit field of [SemanticsFlags] that apply to this node.
   ///
-  /// The `actions` are a bit field of [SemanticsActions] that can be undertaken
+  /// The `actions` are a bit field of [SemanticsAction]s that can be undertaken
   /// by this node. If the user wishes to undertake one of these actions on this
   /// node, the [Window.onSemanticsAction] will be called with `id` and one of
-  /// the possible [SemanticsActions]. Because the semantics tree is maintained
+  /// the possible [SemanticsAction]s. Because the semantics tree is maintained
   /// asynchronously, the [Window.onSemanticsAction] callback might be called
   /// with an action that is no longer possible.
   ///
