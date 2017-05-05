@@ -177,7 +177,7 @@ class RenderFlow extends RenderBox
   /// Creates a render object for a flow layout.
   ///
   /// For optimal performance, consider using children that return true from
-  /// [isRepaintBounday].
+  /// [isRepaintBoundary].
   RenderFlow({
     List<RenderBox> children,
     @required FlowDelegate delegate

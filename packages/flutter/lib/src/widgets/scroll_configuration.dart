@@ -47,10 +47,10 @@ class ScrollBehavior {
     return null;
   }
 
-  /// The scroll physics to use for the given platform.
+  /// The scroll physics to use for the platform given by [getPlatform].
   ///
-  /// Used by [createScrollPosition] to get the scroll physics for newly created
-  /// scroll positions.
+  /// Defaults to [BouncingScrollPhysics] on iOS and [ClampingScrollPhysics] on
+  /// Android.
   ScrollPhysics getScrollPhysics(BuildContext context) {
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
@@ -93,6 +93,9 @@ class ScrollConfiguration extends InheritedWidget {
   final ScrollBehavior behavior;
 
   /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].
+  ///
+  /// If no [ScrollConfiguration] widget is in scope of the given `context`,
+  /// a default [ScrollBehavior] instance is returned.
   static ScrollBehavior of(BuildContext context) {
     final ScrollConfiguration configuration = context.inheritFromWidgetOfExactType(ScrollConfiguration);
     return configuration?.behavior ?? const ScrollBehavior();

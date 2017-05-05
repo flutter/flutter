@@ -9,7 +9,7 @@ import 'routes.dart';
 import 'will_pop_scope.dart';
 
 /// An optional container for grouping together multiple form field widgets
-/// (e.g. [Input] widgets).
+/// (e.g. [TextField] widgets).
 ///
 /// Each individual form field should be wrapped in a [FormField] widget, with
 /// the [Form] widget as a common ancestor of all of those. Call methods on

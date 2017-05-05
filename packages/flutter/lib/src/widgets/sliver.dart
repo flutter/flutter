@@ -421,7 +421,8 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///
 /// See also:
 ///
-///  * [SliverFixedExtentList], which has a configurable [itemExtent].
+///  * [SliverFixedExtentList], which has a configurable
+///    [SliverFixedExtentList.itemExtent].
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {

@@ -12,7 +12,7 @@ import 'routes.dart';
 ///
 /// See also:
 ///
-///  * [ModalRoute.addScopedWillPopCallback] and [ModalScope.removeScopedWillPopCallback],
+///  * [ModalRoute.addScopedWillPopCallback] and [ModalRoute.removeScopedWillPopCallback],
 ///    which this widget uses to register and unregister [onWillPop].
 class WillPopScope extends StatefulWidget {
   /// Creates a widget that registers a callback to veto attempts by the user to

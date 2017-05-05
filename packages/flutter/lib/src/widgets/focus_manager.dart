@@ -379,8 +379,8 @@ class FocusScopeNode extends Object with TreeDiagnosticsMixin {
 /// the root of the focus tree and tracking which [FocusNode] has the overall
 /// focus.
 ///
-/// The [FocusManager] is held by the [WidgetBinding] as
-/// [WidgetBinding.focusManager]. The [FocusManager] is rarely accessed
+/// The [FocusManager] is held by the [WidgetsBinding] as
+/// [WidgetsBinding.focusManager]. The [FocusManager] is rarely accessed
 /// directly. Instead, to find the [FocusScopeNode] for a given [BuildContext],
 /// use [FocusScope.of].
 ///
@@ -395,7 +395,7 @@ class FocusManager {
   /// Creates an object that manages the focus tree.
   ///
   /// This constructor is rarely called directly. To access the [FocusManager],
-  /// consider using [WidgetBinding.focusManager] instead.
+  /// consider using [WidgetsBinding.focusManager] instead.
   FocusManager() {
     rootScope._manager = this;
     assert(rootScope._firstChild == null);

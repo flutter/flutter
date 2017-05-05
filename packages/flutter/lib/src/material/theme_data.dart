@@ -327,7 +327,7 @@ class ThemeData {
   // ...this should be the "50-value of secondary app color".
   final Color secondaryHeaderColor;
 
-  /// The color of text selections in text fields, such as [Input].
+  /// The color of text selections in text fields, such as [TextField].
   final Color textSelectionColor;
 
   /// The color of the handles used to adjust what part of the text is currently selected.
@@ -344,10 +344,10 @@ class ThemeData {
   final Color indicatorColor;
 
   /// The color to use for hint text or placeholder text, e.g. in
-  /// [Input] fields.
+  /// [TextField] fields.
   final Color hintColor;
 
-  /// The color to use for input validation errors, e.g. in [Input] fields.
+  /// The color to use for input validation errors, e.g. in [TextField] fields.
   final Color errorColor;
 
   /// Text with a color that contrasts with the card and canvas colors.

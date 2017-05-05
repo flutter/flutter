@@ -16,7 +16,7 @@ import 'platform_channel.dart';
 ///
 /// See also:
 ///
-/// * [PlatformMessageChannel], which use [MessageCodec]s for communication
+/// * [MessageChannel], which use [MessageCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
@@ -99,9 +99,9 @@ class MethodCall {
 ///
 /// See also:
 ///
-/// * [PlatformMethodChannel], which use [MethodCodec]s for communication
+/// * [MethodChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
-/// * [PlatformEventChannel], which use [MethodCodec]s for communication
+/// * [EventChannel], which use [MethodCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] into binary.

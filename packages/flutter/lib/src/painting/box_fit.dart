@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' show Image; // to disambiguate mentions of Image in the dartdocs
 
 import 'package:flutter/foundation.dart';
 

@@ -22,10 +22,10 @@ import 'node.dart';
 /// different parents. The scene must be explicitly recomposited after such
 /// changes are made; the layer tree does not maintain its own dirty state.
 ///
-/// To composite the tree, create a [ui.SceneBuilder] object, pass it to the
+/// To composite the tree, create a [SceneBuilder] object, pass it to the
 /// root [Layer] object's [addToScene] method, and then call
-/// [ui.SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
-/// using [ui.window.render].
+/// [SceneBuilder.build] to obtain a [Scene]. A [Scene] can then be painted
+/// using [Window.render].
 ///
 /// See also:
 ///
@@ -334,7 +334,7 @@ class ContainerLayer extends Layer {
   ///
   /// This method is typically used by [addToScene] to insert the children into
   /// the scene. Subclasses of [ContainerLayer] typically override [addToScene]
-  /// to apply effects to the scene using the [ui.SceneBuilder] API, then insert
+  /// to apply effects to the scene using the [SceneBuilder] API, then insert
   /// their children using [addChildrenToScene], then reverse the aforementioned
   /// effects before returning from [addToScene].
   void addChildrenToScene(ui.SceneBuilder builder, Offset childOffset) {

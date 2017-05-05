@@ -280,7 +280,7 @@ class LocalHistoryEntry {
 /// opportunity to handle the pop internally. A LocalHistoryRoute handles the
 /// pop internally if its list of local history entries is non-empty. Rather
 /// than being removed as the current route, the most recent [LocalHistoryEntry]
-/// is removed from the list and its [onRemove] is called.
+/// is removed from the list and its [LocalHistoryEntry.onRemove] is called.
 abstract class LocalHistoryRoute<T> extends Route<T> {
   List<LocalHistoryEntry> _localHistory;
 
@@ -304,7 +304,8 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 
   /// Remove a local history entry from this route.
   ///
-  /// The entry's [onRemove] callback, if any, will be called synchronously.
+  /// The entry's [LocalHistoryEntry.onRemove] callback, if any, will be called
+  /// synchronously.
   void removeLocalHistoryEntry(LocalHistoryEntry entry) {
     assert(entry != null);
     assert(entry._owner == this);
@@ -806,7 +807,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// This callback runs asynchronously and it's possible that it will be called
-  /// after its route has been disposed. The callback should check [mounted]
+  /// after its route has been disposed. The callback should check [State.mounted]
   /// before doing anything.
   ///
   /// A typical application of this callback would be to warn the user about

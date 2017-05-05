@@ -17,7 +17,7 @@ class ColorSwatch extends Color {
 
   final Map<int, Color> _swatch;
 
-  /// Returns an element of the [swatch] table.
+  /// Returns an element of the swatch table.
   Color operator [](int index) => _swatch[index];
 
   @override
@@ -927,7 +927,7 @@ class Colors {
   ///
   /// See also:
   ///
-  /// * [yellowAccentAccent], the corresponding accent colors.
+  /// * [yellowAccent], the corresponding accent colors.
   /// * [Theme.of], which allows you to select colors from the current theme
   ///   rather than hard-coding colors in your build methods.
   static const MaterialColor yellow = const MaterialColor(

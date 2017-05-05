@@ -10,7 +10,7 @@ import 'dart:ui' as ui show Image, decodeImageFromList;
 ///
 /// This function attempts to interpret the given bytes an image. If successful,
 /// the returned [Future] resolves to the decoded image. Otherwise, the [Future]
-/// resolves to [null].
+/// resolves to null.
 Future<ui.Image> decodeImageFromList(Uint8List list) {
   final Completer<ui.Image> completer = new Completer<ui.Image>();
   ui.decodeImageFromList(list, completer.complete);

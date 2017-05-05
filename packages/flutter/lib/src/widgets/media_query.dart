@@ -35,7 +35,7 @@ class MediaQueryData {
   /// Creates data for a media query with explicit values.
   ///
   /// Consider using [MediaQueryData.fromWindow] to create data based on a
-  /// [ui.Window].
+  /// [Window].
   const MediaQueryData({
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
@@ -48,7 +48,7 @@ class MediaQueryData {
   /// If you use this, you should ensure that you also register for
   /// notifications so that you can update your [MediaQueryData] when the
   /// window's metrics change. For example, see
-  /// [WidgetsBindingObserver.didChangeMetrics] or [ui.window.onMetricsChanged].
+  /// [WidgetsBindingObserver.didChangeMetrics] or [Window.onMetricsChanged].
   MediaQueryData.fromWindow(ui.Window window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,

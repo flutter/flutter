@@ -82,7 +82,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(offset != null);
   }
 
-  /// The direction in which the [scrollOffset] increases.
+  /// The direction in which the [SliverConstraints.scrollOffset] increases.
   ///
   /// For example, if the [axisDirection] is [AxisDirection.down], a scroll
   /// offset of zero is at the top of the viewport and increases towards the
@@ -138,6 +138,56 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     super.detach();
   }
 
+  /// Throws an exception saying that the object does not support returning
+  /// intrinsic dimensions if, in checked mode, we are not in the
+  /// [RenderObject.debugCheckingIntrinsics] mode.
+  ///
+  /// This is used by [computeMinIntrinsicWidth] et al because viewports do not
+  /// generally support returning intrinsic dimensions. See the discussion at
+  /// [computeMinIntrinsicWidth].
+  @protected
+  bool debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        assert(this is! RenderShrinkWrappingViewport); // it has its own message
+        throw new FlutterError(
+          '$runtimeType does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require instantiating every child of '
+          'the viewport, which defeats the point of viewports being lazy.\n'
+          'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
+          'consider a RenderShrinkWrappingViewport render object (ShrinkWrappingViewport widget), '
+          'which achieves that effect without implementing the intrinsic dimension API.'
+        );
+      }
+      return true;
+    });
+    return true;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    assert(debugThrowIfNotCheckingIntrinsics());
+    return 0.0;
+  }
+
   @override
   bool get isRepaintBoundary => true;
 
@@ -161,8 +211,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///  * `remainingPaintExtent` is [SliverConstraints.remainingPaintExtent] to
   ///    pass the first child. The remaining paint extent is updated by the
   ///    [SliverGeometry.layoutExtent] for subsequent children.
-  ///  * `mainAxisExtent` is the [SliverConstraints.mainAxisExtent] to pass to
-  ///    each child.
+  ///  * `mainAxisExtent` is the [SliverConstraints.viewportMainAxisExtent] to
+  ///    pass to each child.
   ///  * `crossAxisExtent` is the [SliverConstraints.crossAxisExtent] to pass to
   ///    each child.
   ///  * `growthDirection` is the [SliverConstraints.growthDirection] to pass to
@@ -1022,6 +1072,24 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   void setupParentData(RenderObject child) {
     if (child.parentData is! SliverLogicalContainerParentData)
       child.parentData = new SliverLogicalContainerParentData();
+  }
+
+  @override
+  bool debugThrowIfNotCheckingIntrinsics() {
+    assert(() {
+      if (!RenderObject.debugCheckingIntrinsics) {
+        throw new FlutterError(
+          '$runtimeType does not support returning intrinsic dimensions.\n'
+          'Calculating the intrinsic dimensions would require instantiating every child of '
+          'the viewport, which defeats the point of viewports being lazy.\n'
+          'If you are merely trying to shrink-wrap the viewport in the main axis direction, '
+          'you should be able to achieve that effect by just giving the viewport loose '
+          'constraints, without needing to measure its intrinsic dimensions.'
+        );
+      }
+      return true;
+    });
+    return true;
   }
 
   // Out-of-band data computed during layout.

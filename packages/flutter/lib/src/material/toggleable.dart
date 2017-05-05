@@ -79,7 +79,7 @@ abstract class RenderToggleable extends RenderConstrainedBox implements Semantic
   /// The visual value of the control.
   ///
   /// When the control is inactive, the [value] is false and this animation has
-  /// the value 0.0. When the control is active, the value is [true] and this
+  /// the value 0.0. When the control is active, the value is true and this
   /// animation has the value 1.0. When the control is changing from inactive
   /// to active (or vice versa), [value] is the target value and this animation
   /// gradually updates from 0.0 to 1.0 (or vice versa).

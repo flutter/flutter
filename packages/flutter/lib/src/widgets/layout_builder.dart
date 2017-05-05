@@ -16,12 +16,12 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 /// Similar to the [Builder] widget except that the framework calls the [builder]
 /// function at layout time and provides the parent widget's constraints. This
 /// is useful when the parent constrains the child's size and doesn't depend on
-/// the child's intrinsic size. The LayoutBuilder's final size will match its
+/// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
-/// wrapping it in a [ScrollableViewport].
+/// wrapping it in a [SingleChildScrollView].
 ///
 /// See also:
 ///
@@ -168,8 +168,8 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
       if (!RenderObject.debugCheckingIntrinsics) {
         throw new FlutterError(
           'LayoutBuilder does not support returning intrinsic dimensions.\n'
-          'Calculating the intrinsic dimensions would require running the layout callback speculatively, '
-          'which might mutate the live render object tree.'
+          'Calculating the intrinsic dimensions would require running the layout '
+          'callback speculatively, which might mutate the live render object tree.'
         );
       }
       return true;

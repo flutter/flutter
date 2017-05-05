@@ -233,7 +233,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   /// Starts an animation to open the drawer.
   ///
-  /// Typically called by [Scaffold.openDrawer].
+  /// Typically called by [ScaffoldState.openDrawer].
   void open() {
     _controller.fling(velocity: 1.0);
   }

@@ -59,11 +59,11 @@ class FlutterLogo extends StatelessWidget {
   /// itself is drawn.
   final FlutterLogoStyle style;
 
-  /// The length of time for the animation if the [style], [swatch], or
+  /// The length of time for the animation if the [style], [colors], or
   /// [textColor] properties are changed.
   final Duration duration;
 
-  /// The curve for the logo animation if the [style], [swatch], or [textColor]
+  /// The curve for the logo animation if the [style], [colors], or [textColor]
   /// change.
   final Curve curve;
 

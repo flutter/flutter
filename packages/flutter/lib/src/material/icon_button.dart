@@ -96,9 +96,10 @@ class IconButton extends StatelessWidget {
 
   /// The icon to display inside the button.
   ///
-  /// The [size] and [color] of the icon is configured automatically based on
-  /// the properties of _this_ widget using an [IconTheme] and therefore should
-  /// not be explicitly given in the icon widget.
+  /// The [Icon.size] and [Icon.color] of the icon is configured automatically
+  /// based on the [iconSize] nad [color] properties of _this_ widget using an
+  /// [IconTheme] and therefore should not be explicitly given in the icon
+  /// widget.
   ///
   /// This property must not be null.
   ///

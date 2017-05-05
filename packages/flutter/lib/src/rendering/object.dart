@@ -556,23 +556,21 @@ abstract class Constraints {
   ///
   /// This might involve checks more detailed than [isNormalized].
   ///
-  /// For example, the [BoxConstraints] subclass verifies that the
-  /// constraints are not [NaN].
+  /// For example, the [BoxConstraints] subclass verifies that the constraints
+  /// are not [double.NAN].
   ///
-  /// If the `isAppliedConstraint` argument is true, then even
-  /// stricter rules are enforced. This argument is set to true when
-  /// checking constraints that are about to be applied to a
-  /// [RenderObject] during layout, as opposed to constraints that may
-  /// be further affected by other constraints. For example, the
-  /// asserts for verifying the validity of
-  /// [RenderConstrainedBox.additionalConstraints] do not set this
-  /// argument, but the asserts for verifying the argument passed to
-  /// the [layout] method do.
+  /// If the `isAppliedConstraint` argument is true, then even stricter rules
+  /// are enforced. This argument is set to true when checking constraints that
+  /// are about to be applied to a [RenderObject] during layout, as opposed to
+  /// constraints that may be further affected by other constraints. For
+  /// example, the asserts for verifying the validity of
+  /// [RenderConstrainedBox.additionalConstraints] do not set this argument, but
+  /// the asserts for verifying the argument passed to the [RenderObject.layout]
+  /// method do.
   ///
-  /// The `informationCollector` argument takes an optional callback
-  /// which is called when an exception is to be thrown. The collected
-  /// information is then included in the message after the error
-  /// line.
+  /// The `informationCollector` argument takes an optional callback which is
+  /// called when an exception is to be thrown. The collected information is
+  /// then included in the message after the error line.
   ///
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
@@ -1076,7 +1074,7 @@ class PipelineOwner {
   }
 
   final List<RenderObject> _nodesNeedingCompositingBitsUpdate = <RenderObject>[];
-  /// Updates the [needsCompositing] bits.
+  /// Updates the [RenderObject.needsCompositing] bits.
   ///
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
@@ -2102,8 +2100,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   bool _needsCompositing; // initialised in the constructor
   /// Whether we or one of our descendants has a compositing layer.
   ///
-  /// Only legal to call after [flushLayout] and [flushCompositingBits] have
-  /// been called.
+  /// Only legal to call after [PipelineOwner.flushLayout] and
+  /// [PipelineOwner.flushCompositingBits] have been called.
   bool get needsCompositing {
     assert(!_needsCompositingBitsUpdate); // make sure we don't use this bit when it is dirty
     return _needsCompositing;
@@ -2325,8 +2323,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   ///
   /// Do not call this function directly. If you wish to paint yourself, call
   /// [markNeedsPaint] instead to schedule a call to this function. If you wish
-  /// to paint one of your children, call one of the paint child functions on
-  /// the given context, such as [paintChild] or [paintChildWithClipRect].
+  /// to paint one of your children, call [PaintingContext.paintChild] on the
+  /// given `context`.
   ///
   /// When painting one of your children (via a paint child function on the
   /// given context), the current canvas held by the context might change
@@ -2374,7 +2372,12 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
     owner.requestVisualUpdate();
   }
 
-  /// Whether this RenderObject introduces a new box for accessibility purposes.
+  /// Whether this [RenderObject] introduces a new box for accessibility purposes.
+  ///
+  /// See also:
+  ///
+  ///  * [semanticsAnnotator], which fills in the [SemanticsNode] implied by
+  ///    setting [isSemanticBoundary] to true.
   bool get isSemanticBoundary => false;
 
   /// The bounding box, in the local coordinate system, of this
@@ -2388,8 +2391,8 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// The semantics of this render object.
   ///
   /// Exposed only for testing and debugging. To learn about the semantics of
-  /// render objects in production, register as a listener using
-  /// [SemanticsNode.addListener].
+  /// render objects in production, obtain a [SemanticsHandle] from
+  /// [PipelineOwner.ensureSemantics].
   ///
   /// Only valid when asserts are enabled. In release builds, always returns
   /// null.
@@ -2551,25 +2554,24 @@ abstract class RenderObject extends AbstractNode implements HitTestTarget {
   /// Returns a function that will annotate a [SemanticsNode] with the semantics
   /// of this [RenderObject].
   ///
-  /// To annotate a SemanticsNode for this node, return an annotator that
-  /// adds the annotations. When the behavior of the annotator would
-  /// change (e.g. the box is now checked rather than unchecked), call
-  /// [markNeedsSemanticsUpdate] to indicate to the rendering system
-  /// that the semantics tree needs to be rebuilt.
+  /// To annotate a [SemanticsNode] for this node, return an annotator that adds
+  /// the annotations. When the behavior of the annotator would change (e.g. the
+  /// box is now checked rather than unchecked), call [markNeedsSemanticsUpdate]
+  /// to indicate to the rendering system that the semantics tree needs to be
+  /// rebuilt.
   ///
-  /// To introduce a new SemanticsNode, set hasSemantics to true for
-  /// this object. The function returned by this function will be used
-  /// to annotate the SemanticsNode for this object.
+  /// To introduce a new [SemanticsNode], set [isSemanticBoundary] to true for
+  /// this object. The function returned by this function will be used to
+  /// annotate the [SemanticsNode] for this object.
   ///
-  /// Semantic annotations are persistent. Values set in one pass will
-  /// still be set in the next pass. Therefore it is important to
-  /// explicitly set fields to false once they are no longer true;
-  /// setting them to true when they are to be enabled, and not
-  /// setting them at all when they are not, will mean they remain set
-  /// once enabled once and will never get unset.
+  /// Semantic annotations are persistent. Values set in one pass will still be
+  /// set in the next pass. Therefore it is important to explicitly set fields
+  /// to false once they are no longer true; setting them to true when they are
+  /// to be enabled, and not setting them at all when they are not, will mean
+  /// they remain set once enabled once and will never get unset.
   ///
-  /// If the value return will change from null to non-null (or vice versa), and
-  /// [hasSemantics] isn't true, then the associated call to
+  /// If the return value will change from null to non-null (or vice versa), and
+  /// [isSemanticBoundary] isn't true, then the associated call to
   /// [markNeedsSemanticsUpdate] must not have `onlyChanges` set, as it is
   /// possible that the node should be entirely removed.
   SemanticsAnnotator get semanticsAnnotator => null;
