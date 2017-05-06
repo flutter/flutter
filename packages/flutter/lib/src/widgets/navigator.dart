@@ -22,6 +22,12 @@ import 'ticker_provider.dart';
 /// "routes" that are pushed on and popped off the navigator. Most routes have
 /// visual affordances, which they place in the navigators [Overlay] using one
 /// or more [OverlayEntry] objects.
+///
+/// See [Navigator] for more explanation of how to use a Route
+/// with navigation, including code examples.
+///
+/// See [MaterialPageRoute] for a route that replaces the
+/// entire screen with a platform-adaptive transition.
 abstract class Route<T> {
   /// The navigator that the route is in, if any.
   NavigatorState get navigator => _navigator;
@@ -351,7 +357,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```
 ///
 /// It usually isn't necessary to provide a widget that pops the Navigator
-/// in a route with a Scaffold because the Scaffold automatically adds a
+/// in a route with a [Scaffold] because the Scaffold automatically adds a
 /// 'back' button to its AppBar. Pressing the back button causes
 /// [Navigator.pop] to be called. On Android, pressing the system back
 /// button does the same thing.
@@ -359,7 +365,11 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ### Using named navigator routes
 ///
 /// Mobile apps often manage a large number of routes and it's often
-/// easiest to refer to them by name. The [MaterialApp] can be created
+/// easiest to refer to them by name. Route names, by convention,
+/// use a path-like structure (for example, '/a/b/c').
+/// The app's home page route is named '/' by default.
+///
+/// The [MaterialApp] can be created
 /// with a `Map<String, WidgetBuilder>` which maps from a route's name to
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
@@ -382,9 +392,6 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// ```dart
 /// Navigator.of(context).pushNamed('/b');
 /// ```
-///
-/// The app's home page route is named '/' by default and other routes are
-/// given pathnames by convention.
 ///
 /// ### Routes can return a value
 ///
