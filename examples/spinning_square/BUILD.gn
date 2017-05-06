@@ -6,4 +6,8 @@ import("//flutter/build/flutter_app.gni")
 
 flutter_app("spinning_square") {
   main_dart = "lib/main.dart"
+
+  deps = [
+    "//lib/flutter/packages/flutter",
+  ]
 }
