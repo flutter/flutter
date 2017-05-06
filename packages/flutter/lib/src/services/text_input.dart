@@ -47,7 +47,7 @@ class TextInputConfiguration {
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
     this.actionLabel,
-  });
+  }) : assert(inputType != null);
 
   /// For which type of information to optimize the text input control.
   final TextInputType inputType;
@@ -87,7 +87,9 @@ class TextEditingValue {
     this.text: '',
     this.selection: const TextSelection.collapsed(offset: -1),
     this.composing: TextRange.empty
-  });
+  }) : assert(text != null),
+       assert(selection != null),
+       assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
