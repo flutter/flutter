@@ -129,9 +129,18 @@ class Theme extends InheritedWidget {
   }
 }
 
-/// An animated value that interpolates [ThemeData]s.
+/// An interpolation between two [ThemeData]s.
+///
+/// This class specializes the interpolation of [Tween<ThemeData>] to call the
+/// [ThemeData.lerp] method.
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class ThemeDataTween extends Tween<ThemeData> {
-  /// Creates an interpolation between [begin] and [end].
+  /// Creates a [ThemeData] tween.
+  ///
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   ThemeDataTween({ ThemeData begin, ThemeData end }) : super(begin: begin, end: end);
 
   @override
