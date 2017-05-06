@@ -616,6 +616,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
               data: const IconThemeData(color: Colors.white),
               child: new IconButton(
                 icon: const BackButtonIcon(),
+                tooltip: 'Back',
                 onPressed: () {
                   _handleBackButton(appBarMidScrollOffset);
                 }
