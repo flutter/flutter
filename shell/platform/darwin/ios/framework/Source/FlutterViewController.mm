@@ -415,6 +415,17 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
                               arguments:@[ @(client), state ]];
 }
 
+- (void)performAction:(FlutterTextInputAction)action withClient:(int)client {
+  NSString* actionString;
+  switch (action) {
+    case FlutterTextInputActionDone:
+      actionString = @"TextInputAction.done";
+      break;
+  }
+  [_textInputChannel.get() invokeMethod:@"TextInputClient.performAction"
+                              arguments:@[ @(client), actionString ]];
+}
+
 #pragma mark - Orientation updates
 
 - (void)onOrientationPreferencesUpdated:(NSNotification*)notification {

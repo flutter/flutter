@@ -141,7 +141,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
     _enablesReturnKeyAutomatically = NO;
     _keyboardAppearance = UIKeyboardAppearanceDefault;
     _keyboardType = UIKeyboardTypeDefault;
-    _returnKeyType = UIReturnKeyDefault;
+    _returnKeyType = UIReturnKeyDone;
     _secureTextEntry = NO;
   }
 
@@ -242,6 +242,16 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
           updateEditingState:NO];
 
   [self updateEditingState];
+}
+
+- (BOOL)shouldChangeTextInRange:(UITextRange*)range replacementText:(NSString*)text {
+  if (self.returnKeyType == UIReturnKeyDone && [text isEqualToString:@"\n"]) {
+    [self resignFirstResponder];
+    [self removeFromSuperview];
+    [_textInputDelegate performAction:FlutterTextInputActionDone withClient:_textInputClient];
+    return NO;
+  }
+  return YES;
 }
 
 - (void)setMarkedText:(NSString*)markedText selectedRange:(NSRange)markedSelectedRange {
