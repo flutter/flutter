@@ -34,7 +34,7 @@ class ImageInfo {
   ///
   /// For example, if this is 2.0 it means that there are four image pixels for
   /// every one logical pixel, and the image's actual width and height (as given
-  /// by the [Image.width] and [Image.height] properties) are double the
+  /// by the [ui.Image.width] and [ui.Image.height] properties) are double the
   /// height and width that should be used when painting the image (e.g. in the
   /// arguments given to [Canvas.drawImage]).
   final double scale;

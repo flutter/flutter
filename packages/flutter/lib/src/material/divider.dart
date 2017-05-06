@@ -13,7 +13,7 @@ import 'theme.dart';
 ///
 /// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
 /// vertically. To create a one-pixel divider between items in a list, consider
-/// using [ListTile.divideItems], which is optimized for this case.
+/// using [ListTile.divideTiles], which is optimized for this case.
 ///
 /// The box's total height is controlled by [height]. The appropriate padding is
 /// automatically computed from the height.

@@ -154,7 +154,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeMetrics].
   ///
-  /// See [window.onMetricsChanged].
+  /// See [Window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
@@ -293,7 +293,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Each frame consists of the following phases:
   ///
   /// 1. The animation phase: The [handleBeginFrame] method, which is registered
-  /// with [window.onBeginFrame], invokes all the transient frame callbacks
+  /// with [Window.onBeginFrame], invokes all the transient frame callbacks
   /// registered with [scheduleFrameCallback], in
   /// registration order. This includes all the [Ticker] instances that are
   /// driving [AnimationController] objects, which means all of the active
@@ -305,7 +305,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// completed this frame.
   ///
   /// After [handleBeginFrame], [handleDrawFrame], which is registered with
-  /// [window.onDrawFrame], is called, which invokes all the persistent frame
+  /// [Window.onDrawFrame], is called, which invokes all the persistent frame
   /// callbacks, of which the most notable is this method, [drawFrame], which
   /// proceeds as follows:
   ///
@@ -331,7 +331,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// sent to the GPU.
   ///
   /// 8. The semantics phase: All the dirty [RenderObject]s in the system have
-  /// their semantics updated (see [RenderObject.SemanticsAnnotator]). This
+  /// their semantics updated (see [RenderObject.semanticsAnnotator]). This
   /// generates the [SemanticsNode] tree. See
   /// [RenderObject.markNeedsSemanticsUpdate] for further details on marking an
   /// object dirty for semantics.

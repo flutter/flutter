@@ -33,12 +33,12 @@ const Color _kBarrierColor = Colors.black54;
 ///    function.
 ///
 /// The [BottomSheet] widget itself is rarely used directly. Instead, prefer to
-/// create a persistent bottom sheet with [Scaffold.showBottomSheet] and a modal
+/// create a persistent bottom sheet with [ScaffoldState.showBottomSheet] and a modal
 /// bottom sheet with [showModalBottomSheet].
 ///
 /// See also:
 ///
-///  * [Scaffold.showBottomSheet]
+///  * [ScaffoldState.showBottomSheet]
 ///  * [showModalBottomSheet]
 ///  * <https://material.google.com/components/bottom-sheets.html>
 class BottomSheet extends StatefulWidget {
@@ -246,7 +246,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// A closely related widget is a persistent bottom sheet, which shows
 /// information that supplements the primary content of the app without
 /// preventing the use from interacting with the app. Persistent bottom sheets
-/// can be created and displayed with the [Scaffold.showBottomSheet] function.
+/// can be created and displayed with the [ScaffoldState.showBottomSheet] function.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.

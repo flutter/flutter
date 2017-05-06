@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
+import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
@@ -190,7 +190,8 @@ class RenderParagraph extends RenderBox {
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
 
-  /// Whether this paragraph currently has a [ui.Shader] for its overflow effect.
+  /// Whether this paragraph currently has a [ui.Shader] for its overflow
+  /// effect.
   ///
   /// Used to test this object. Not for use in production.
   @visibleForTesting

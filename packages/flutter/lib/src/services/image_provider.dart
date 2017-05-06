@@ -143,8 +143,9 @@ class ImageConfiguration {
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
-/// should be immutable and implement [operator ==] and [hashCode]. Subclasses should
-/// subclass a variant of [ImageProvider] with an explicit `T` type argument.
+/// should be immutable and implement the [==] operator and the [hashCode]
+/// getter. Subclasses should subclass a variant of [ImageProvider] with an
+/// explicit `T` type argument.
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
@@ -197,7 +198,7 @@ abstract class ImageProvider<T> {
   /// method will fetch. Different [ImageProvider]s given the same constructor
   /// arguments and [ImageConfiguration] objects should return keys that are
   /// '==' to each other (possibly by using a class for the key that itself
-  /// implements [operator ==]).
+  /// implements [==]).
   @protected
   Future<T> obtainKey(ImageConfiguration configuration);
 

@@ -361,7 +361,7 @@ class DragScrollActivity extends ScrollActivity {
 ///
 /// [BallisticScrollActivity] is also used to restore a scroll view to a valid
 /// scroll offset when the geometry of the scroll view changes. In these
-/// situations, the [simulation] typically starts with a zero velocity.
+/// situations, the [Simulation] typically starts with a zero velocity.
 ///
 /// See also:
 ///

@@ -70,7 +70,7 @@ abstract class Route<T> {
   void didReplace(Route<dynamic> oldRoute) { }
 
   /// Returns false if this route wants to veto a [Navigator.pop]. This method is
-  /// called by [Navigator.willPop].
+  /// called by [Navigator.maybePop].
   ///
   /// By default, routes veto a pop if they're the first route in the history
   /// (i.e., if [isFirst]). This behavior prevents the user from popping the
@@ -586,7 +586,7 @@ class Navigator extends StatefulWidget {
     return Navigator.of(context).pop(result);
   }
 
-  /// Calls [pop()] repeatedly until the predicate returns true.
+  /// Calls [pop] repeatedly until the predicate returns true.
   ///
   /// The predicate may be applied to the same route more than once if
   /// [Route.willHandlePopInternally] is true.
