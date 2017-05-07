@@ -490,7 +490,7 @@ class Size extends OffsetBase {
 
   /// Linearly interpolate between two sizes
   ///
-  /// If either size is null, this function interpolates from [Offset.zero].
+  /// If either size is null, this function interpolates from [Size.zero].
   static Size lerp(Size a, Size b, double t) {
     if (a == null && b == null)
       return null;
