@@ -1437,6 +1437,7 @@ FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterChannels.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCodecs.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec.mm

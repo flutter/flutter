@@ -8,6 +8,7 @@
 #import <UIKit/UIKit.h>
 
 #include "FlutterMacros.h"
+#include "FlutterPlugin.h"
 
 /**
  * UIApplicationDelegate subclass for simple apps that want default behavior.
@@ -23,7 +24,8 @@
  * code as necessary from FlutterAppDelegate.mm.
  */
 FLUTTER_EXPORT
-@interface FlutterAppDelegate : UIResponder<UIApplicationDelegate>
+@interface FlutterAppDelegate
+    : UIResponder<UIApplicationDelegate, FlutterPluginRegistry>
 
 @property(strong, nonatomic) UIWindow* window;
 
