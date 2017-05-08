@@ -19,7 +19,7 @@
 #include <cmath>
 #include <unicode/uchar.h>
 
-#include <android/log.h>
+#include <log/log.h>
 
 #include <minikin/GraphemeBreak.h>
 #include <minikin/Measurement.h>

@@ -17,6 +17,7 @@
 #ifndef MINIKIN_LAYOUT_UTILS_H
 #define MINIKIN_LAYOUT_UTILS_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 namespace minikin {

@@ -28,8 +28,6 @@
 #include <log/log.h>
 #include <utils/JenkinsHash.h>
 #include <utils/LruCache.h>
-#include <utils/Singleton.h>
-#include <utils/String16.h>
 
 #include <hb-icu.h>
 #include <hb-ot.h>
@@ -164,7 +162,7 @@ static unsigned int disabledDecomposeCompatibility(hb_unicode_funcs_t*, hb_codep
     return 0;
 }
 
-class LayoutEngine : public ::android::Singleton<LayoutEngine> {
+class LayoutEngine {
 public:
     LayoutEngine() {
         unicodeFunctions = hb_unicode_funcs_create(hb_icu_get_unicode_funcs());
@@ -178,6 +176,11 @@ public:
     hb_buffer_t* hbBuffer;
     hb_unicode_funcs_t* unicodeFunctions;
     LayoutCache layoutCache;
+
+    static LayoutEngine& getInstance() {
+        static LayoutEngine* instance = new LayoutEngine();
+        return *instance;
+    }
 };
 
 bool LayoutCacheKey::operator==(const LayoutCacheKey& other) const {
@@ -556,7 +559,7 @@ BidiText::BidiText(const uint16_t* buf, size_t start, size_t count, size_t bufSi
 void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
         const std::shared_ptr<FontCollection>& collection) {
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
 
     LayoutContext ctx;
     ctx.style = style;
@@ -575,7 +578,7 @@ void Layout::doLayout(const uint16_t* buf, size_t start, size_t count, size_t bu
 float Layout::measureText(const uint16_t* buf, size_t start, size_t count, size_t bufSize,
         int bidiFlags, const FontStyle &style, const MinikinPaint &paint,
         const std::shared_ptr<FontCollection>& collection, float* advances) {
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
 
     LayoutContext ctx;
     ctx.style = style;
@@ -1102,17 +1105,10 @@ void Layout::getBounds(MinikinRect* bounds) const {
 }
 
 void Layout::purgeCaches() {
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
     LayoutCache& layoutCache = LayoutEngine::getInstance().layoutCache;
     layoutCache.clear();
     purgeHbFontCacheLocked();
 }
 
 }  // namespace minikin
-
-// Unable to define the static data member outside of android.
-// TODO: introduce our own Singleton to drop android namespace.
-namespace android {
-ANDROID_SINGLETON_STATIC_INSTANCE(minikin::LayoutEngine);
-}  // namespace android
-

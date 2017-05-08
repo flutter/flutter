@@ -16,7 +16,7 @@
 
 #define LOG_TAG "Minikin"
 
-#include <android/log.h>
+#include <log/log.h>
 #include <gtest/gtest.h>
 
 #include "ICUTestBase.h"
