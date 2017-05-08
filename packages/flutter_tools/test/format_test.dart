@@ -2,12 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/format.dart';
 import 'package:test/test.dart';
 
@@ -27,17 +24,10 @@ void main() {
       temp.deleteSync(recursive: true);
     });
 
-    Future<Null> createProject() async {
-      final CreateCommand command = new CreateCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
-
-      await runner.run(<String>['create', '--no-pub', temp.path]);
-    }
-
     testUsingContext('a file', () async {
-      await createProject();
+      final String projectPath = await createProject(temp);
 
-      final File srcFile = fs.file(fs.path.join(temp.path, 'lib', 'main.dart'));
+      final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 

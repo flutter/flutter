@@ -145,7 +145,7 @@ void main() {
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       expect(
-          runner.run(<String>['create', 'invalidName']),
+          runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
           throwsToolExit(message: '"invalidName" is not a valid Dart package name.')
       );
     });

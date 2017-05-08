@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
-import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
-import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
 import 'package:test/test.dart';
 
@@ -50,18 +46,11 @@ void main() {
         temp.deleteSync(recursive: true);
       });
 
-      Future<Null> createProject() async {
-        final CreateCommand command = new CreateCommand();
-        final CommandRunner<Null> runner = createTestCommandRunner(command);
-        await runner.run(<String>['create', '--no-pub', temp.path]);
-      }
 
       testUsingContext('in project', () async {
-        await createProject();
-
-        final String proj = temp.path;
-        expect(findProjectRoot(proj), proj);
-        expect(findProjectRoot(fs.path.join(proj, 'lib')), proj);
+        final String projectPath = await createProject(temp);
+        expect(findProjectRoot(projectPath), projectPath);
+        expect(findProjectRoot(fs.path.join(projectPath, 'lib')), projectPath);
 
         final String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
@@ -69,8 +58,8 @@ void main() {
       });
 
       testUsingContext('outside project', () async {
-        await createProject();
-        expect(findProjectRoot(temp.parent.path), null);
+        final String projectPath = await createProject(temp);
+        expect(findProjectRoot(fs.directory(projectPath).parent.path), null);
         expect(findProjectRoot(Cache.flutterRoot), null);
       });
     });
