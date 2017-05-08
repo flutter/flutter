@@ -19,9 +19,9 @@
 #ifndef MINIKIN_INTERNAL_H
 #define MINIKIN_INTERNAL_H
 
-#include <hb.h>
+#include <mutex>
 
-#include <utils/Mutex.h>
+#include <hb.h>
 
 #include <minikin/MinikinFont.h>
 
@@ -31,7 +31,7 @@ namespace minikin {
 // Presently, that's implemented by through a global lock, and having
 // all external interfaces take that lock.
 
-extern android::Mutex gMinikinLock;
+extern std::mutex gMinikinLock;
 
 // Aborts if gMinikinLock is not acquired. Do nothing on the release build.
 void assertMinikinLocked();

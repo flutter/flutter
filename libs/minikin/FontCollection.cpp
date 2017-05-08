@@ -56,7 +56,7 @@ FontCollection::FontCollection(const vector<std::shared_ptr<FontFamily>>& typefa
 }
 
 void FontCollection::init(const vector<std::shared_ptr<FontFamily>>& typefaces) {
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
     mId = sNextId++;
     vector<uint32_t> lastChar;
     size_t nTypefaces = typefaces.size();
@@ -333,7 +333,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
         return false;
     }
 
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
 
     // Currently mRanges can not be used here since it isn't aware of the variation sequence.
     for (size_t i = 0; i < mVSFamilyVec.size(); i++) {

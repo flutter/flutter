@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright 2017 Google, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,12 @@
  * limitations under the License.
  */
 
-#include <minikin/MinikinFont.h>
-#include "HbFontCache.h"
-#include "MinikinInternal.h"
+#include <log/log.h>
 
-namespace minikin {
-
-MinikinFont::~MinikinFont() {
-    std::lock_guard<std::mutex> _l(gMinikinLock);
-    purgeHbFontLocked(this);
+int __android_log_error_write(int tag,
+                              const char* subTag,
+                              int32_t uid,
+                              const char* data,
+                              uint32_t dataLen) {
+  return 0;
 }
-
-}  // namespace minikin

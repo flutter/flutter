@@ -16,10 +16,10 @@
 
 #include "HbFontCache.h"
 
-#include <android/log.h>
+#include <log/log.h>
 #include <gtest/gtest.h>
-#include <utils/Mutex.h>
 
+#include <mutex>
 #include <memory>
 
 #include <hb.h>
@@ -33,7 +33,7 @@ namespace minikin {
 class HbFontCacheTest : public testing::Test {
 public:
     virtual void TearDown() {
-        android::AutoMutex _l(gMinikinLock);
+        std::lock_guard<std::mutex> _l(gMinikinLock);
         purgeHbFontCacheLocked();
     }
 };
@@ -48,7 +48,7 @@ TEST_F(HbFontCacheTest, getHbFontLockedTest) {
     std::shared_ptr<MinikinFontForTest> fontC(
             new MinikinFontForTest(kTestFontDir "BoldItalic.ttf"));
 
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
     // Never return NULL.
     EXPECT_NE(nullptr, getHbFontLocked(fontA.get()));
     EXPECT_NE(nullptr, getHbFontLocked(fontB.get()));
@@ -70,7 +70,7 @@ TEST_F(HbFontCacheTest, purgeCacheTest) {
     std::shared_ptr<MinikinFontForTest> minikinFont(
             new MinikinFontForTest(kTestFontDir "Regular.ttf"));
 
-    android::AutoMutex _l(gMinikinLock);
+    std::lock_guard<std::mutex> _l(gMinikinLock);
     hb_font_t* font = getHbFontLocked(minikinFont.get());
     ASSERT_NE(nullptr, font);
 
