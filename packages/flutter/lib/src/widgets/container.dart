@@ -16,10 +16,34 @@ import 'image.dart';
 /// not.
 ///
 /// Commonly used with [BoxDecoration].
-/// 
+///
+/// ## Sample code
+///
+/// This sample shows a radial gradient that draws a moon on a night sky:
+///
+/// ```dart
+/// new DecoratedBox(
+///   decoration: new BoxDecoration(
+///     gradient: new RadialGradient(
+///       center: const FractionalOffset(0.25, 0.3),
+///       radius: 0.15,
+///       colors: <Color>[
+///         const Color(0xFFEEEEEE),
+///         const Color(0xFF111133),
+///       ],
+///       stops: <double>[0.9, 1.0],
+///     ),
+///   ),
+/// ),
+/// ```
+///
 /// See also:
 ///
-/// * [DecoratedBoxTransition], the version of this class that animates on the [decoration] property.
+///  * [DecoratedBoxTransition], the version of this class that animates on the
+///    [decoration] property.
+///  * [Decoration], which you can extend to provide other effects with
+///    [DecoratedBox].
+///  * [CustomPaint], another way to draw custom effects from the widget layer.
 class DecoratedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that paints a [Decoration].
   ///

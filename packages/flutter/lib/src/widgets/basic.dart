@@ -198,10 +198,32 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// a child, they attempt to size themselves to the [size], which defaults to
 /// [Size.zero].
 ///
+/// ## Sample code
+///
+/// This example shows how the sample custom painter shown at [CustomPainter]
+/// could be used in a [CustomPaint] widget to display a background to some
+/// text.
+///
+/// ```dart
+/// new CustomPaint(
+///   painter: new Sky(),
+///   child: new Center(
+///     child: new Text(
+///       'Once upon a time...',
+///       style: const TextStyle(
+///         fontSize: 40.0,
+///         fontWeight: FontWeight.w900,
+///         color: const Color(0xFFFFFFFF),
+///       ),
+///     ),
+///   ),
+/// ),
+/// ```
+///
 /// See also:
 ///
-///  * [CustomPainter].
-///  * [Canvas].
+///  * [CustomPainter], the class to extend when creating custom painters.
+///  * [Canvas], the class that a custom painter uses to paint.
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
   const CustomPaint({ Key key, this.painter, this.foregroundPainter, this.size: Size.zero, Widget child })
