@@ -5,6 +5,8 @@
 #ifndef FLUTTER_FLUTTERPLUGIN_H_
 #define FLUTTER_FLUTTERPLUGIN_H_
 
+#import <UIKit/UIKit.h>
+
 #include "FlutterBinaryMessenger.h"
 #include "FlutterChannels.h"
 #include "FlutterCodecs.h"
