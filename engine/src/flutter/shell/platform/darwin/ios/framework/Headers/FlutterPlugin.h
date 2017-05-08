@@ -34,8 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
     didReceiveRemoteNotification:(NSDictionary*)userInfo
           fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler;
 - (BOOL)application:(UIApplication*)application
-            openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options;
+      handleOpenURL:(NSURL*)url;
 @end
 
 @protocol FlutterPluginRegistrar<NSObject>
