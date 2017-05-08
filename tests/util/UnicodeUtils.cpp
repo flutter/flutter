@@ -17,7 +17,7 @@
 #include <unicode/utf.h>
 #include <unicode/utf8.h>
 #include <cstdlib>
-#include <cutils/log.h>
+#include <log/log.h>
 #include <vector>
 #include <string>
 

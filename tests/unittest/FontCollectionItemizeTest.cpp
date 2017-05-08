@@ -18,12 +18,12 @@
 
 #include <memory>
 
-#include "FontLanguageListCache.h"
-#include "FontLanguage.h"
+#include "lib/txt/libs/minikin/FontLanguageListCache.h"
+#include "lib/txt/libs/minikin/FontLanguage.h"
 #include "FontTestUtils.h"
 #include "ICUTestBase.h"
 #include "MinikinFontForTest.h"
-#include "MinikinInternal.h"
+#include "lib/txt/libs/minikin/MinikinInternal.h"
 #include "UnicodeUtils.h"
 #include "minikin/FontFamily.h"
 

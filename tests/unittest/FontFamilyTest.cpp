@@ -19,10 +19,10 @@
 #include <log/log.h>
 #include <gtest/gtest.h>
 
-#include "FontLanguageListCache.h"
+#include "lib/txt/libs/minikin/FontLanguageListCache.h"
 #include "ICUTestBase.h"
 #include "MinikinFontForTest.h"
-#include "MinikinInternal.h"
+#include "lib/txt/libs/minikin/MinikinInternal.h"
 
 namespace minikin {
 

@@ -3,7 +3,10 @@
 # found in the LICENSE file.
 
 group("txt") {
+  testonly = true
+
   deps = [
     "libs/minikin",
+    "tests/unittest($host_toolchain)",
   ]
 }
