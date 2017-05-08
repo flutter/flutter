@@ -62,6 +62,10 @@ std::string VulkanResultToString(VkResult result) {
       return "VK_RESULT_RANGE_SIZE";
     case VK_RESULT_MAX_ENUM:
       return "VK_RESULT_MAX_ENUM";
+    case VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX:
+      return "VK_ERROR_INVALID_EXTERNAL_HANDLE_KHX";
+    case VK_ERROR_OUT_OF_POOL_MEMORY_KHR:
+      return "VK_ERROR_OUT_OF_POOL_MEMORY_KHR";
   }
   return "Unknown Error";
 }
