@@ -13,6 +13,7 @@ flutter_app("flutter_gallery") {
 
   deps = [
     "//lib/flutter/packages/flutter",
+    "//third_party/dart-pkg/pub/url_launcher",
   ]
 
   # TODO(chinmaygarde): Assets must be packaged in the FLX.
