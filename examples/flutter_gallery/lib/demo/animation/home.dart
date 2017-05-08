@@ -15,6 +15,8 @@ import 'sections.dart';
 import 'widgets.dart';
 
 const Color _kAppBackgroundColor = const Color(0xFF353662);
+const Duration _kScrollDuration = const Duration(milliseconds: 400);
+const Curve _kScrollCurve = Curves.fastOutSlowIn;
 
 // This app's contents start out at _kHeadingMaxHeight and they function like
 // an appbar. Initially the appbar occupies most of the screen and its section
@@ -449,6 +451,13 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     );
   }
 
+  void _handleBackButton(double midScrollOffset) {
+    if (_scrollController.offset >= midScrollOffset)
+      _scrollController.animateTo(0.0, curve: _kScrollCurve, duration: _kScrollDuration);
+    else
+      Navigator.of(context).maybePop();
+  }
+
   // Only enable paging for the heading when the user has scrolled to midScrollOffset.
   // Paging is enabled/disabled by setting the heading's PageView scroll physics.
   bool _handleScrollNotification(ScrollNotification notification, double midScrollOffset) {
@@ -466,18 +475,16 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
   }
 
   void _maybeScroll(double midScrollOffset, int pageIndex, double xOffset) {
-    const Duration duration = const Duration(milliseconds: 400);
-    const Curve curve = Curves.fastOutSlowIn;
     if (_scrollController.offset < midScrollOffset) {
       // Scroll the overall list to the point where only one section card shows.
       // At the same time scroll the PageViews to the page at pageIndex.
-      _headingPageController.animateToPage(pageIndex, curve: curve, duration: duration);
-      _scrollController.animateTo(midScrollOffset, curve: curve, duration: duration);
+      _headingPageController.animateToPage(pageIndex, curve: _kScrollCurve, duration: _kScrollDuration);
+      _scrollController.animateTo(midScrollOffset, curve: _kScrollCurve, duration: _kScrollDuration);
     } else {
       // One one section card is showing: scroll one page forward or back.
       final double centerX = _headingPageController.position.viewportDimension / 2.0;
       final int newPageIndex = xOffset > centerX ? pageIndex + 1 : pageIndex - 1;
-      _headingPageController.animateToPage(newPageIndex, curve: curve, duration: duration);
+      _headingPageController.animateToPage(newPageIndex, curve: _kScrollCurve, duration: _kScrollDuration);
     }
   }
 
@@ -605,9 +612,15 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
           new Positioned(
             top: statusBarHeight,
             left: 0.0,
-            child: const IconTheme(
+            child: new IconTheme(
               data: const IconThemeData(color: Colors.white),
-              child: const BackButton(),
+              child: new IconButton(
+                icon: const BackButtonIcon(),
+                tooltip: 'Back',
+                onPressed: () {
+                  _handleBackButton(appBarMidScrollOffset);
+                }
+              ),
             ),
           ),
         ],
