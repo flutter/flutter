@@ -294,7 +294,7 @@ class FadeTransition extends AnimatedWidget {
 /// An interpolation between two relative rects.
 ///
 /// This class specializes the interpolation of [Tween<RelativeRect>] to
-/// use [RelativeRect.tween].
+/// use [RelativeRect.lerp].
 ///
 /// See [Tween] for a discussion on how to use interpolation objects.
 class RelativeRectTween extends Tween<RelativeRect> {
