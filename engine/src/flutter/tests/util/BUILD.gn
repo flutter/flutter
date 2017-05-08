@@ -12,23 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-config("shims_config") {
+config("util_config") {
   include_dirs = [ "." ]
 }
 
-source_set("shims") {
+source_set("util") {
   sources = [
-    "log/log.h",
-    "log/log.cc",
-    "utils/JenkinsHash.cpp",
-    "utils/JenkinsHash.h",
-    "utils/LruCache.h",
-    "utils/TypeHelpers.h",
+    "FileUtils.cpp",
+    "FileUtils.h",
+    "FontTestUtils.cpp",
+    "FontTestUtils.h",
+    "MinikinFontForTest.cpp",
+    "MinikinFontForTest.h",
+    "UnicodeUtils.cpp",
+    "UnicodeUtils.h",
   ]
 
-  public_configs = [ ":shims_config" ]
+  public_configs = [ ":util_config" ]
 
   public_deps = [
-    "//lib/ftl",
+    "//lib/txt/libs/minikin",
+  ]
+
+  deps = [
+    "//third_party/libxml2",
   ]
 }

@@ -47,6 +47,7 @@ static_library("minikin") {
   public_configs = [ ":minikin_config" ]
 
   public_deps = [
+    "//lib/txt/shims",
     "//third_party/freetype2",
     "//third_party/harfbuzz",
     "//third_party/icu:icuuc",
@@ -54,6 +55,5 @@ static_library("minikin") {
 
   deps = [
     "//third_party/zlib",
-    "//lib/txt/shims",
   ]
 }

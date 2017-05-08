@@ -19,7 +19,7 @@
 #include <minikin/FontCollection.h>
 #include "FontTestUtils.h"
 #include "MinikinFontForTest.h"
-#include "MinikinInternal.h"
+#include "lib/txt/libs/minikin/MinikinInternal.h"
 
 namespace minikin {
 
