@@ -46,11 +46,15 @@ class TextInputConfiguration {
   /// The [inputType] argument must not be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
+    this.obscureText: false,
     this.actionLabel,
-  }) : assert(inputType != null);
+  }) : assert(inputType != null),
+       assert(obscureText != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  final bool obscureText;
 
   /// What text to display in the text input control's action button.
   final String actionLabel;
@@ -59,6 +63,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'inputType': inputType.toString(),
+      'obscureText': obscureText.toString(),
       'actionLabel': actionLabel,
     };
   }
