@@ -300,6 +300,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// The default implementation reads the value from the nearest [PageStorage]
   /// found from the [context]'s [ScrollContext.storageContext] property, and
   /// sets it using [correctPixels], if [pixels] is still null.
+  ///
+  /// This method is called from the constructor, so layout has not yet
+  /// occurred, and the viewport dimensions aren't yet known when it is called.
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {

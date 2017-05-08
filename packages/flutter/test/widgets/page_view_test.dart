@@ -398,4 +398,63 @@ void main() {
     await tester.pump();
     expect(changeIndex, 0);
   });
+
+  testWidgets('PageView can restore page',
+      (WidgetTester tester) async {
+    final PageController controller = new PageController();
+    final PageStorageBucket bucket = new PageStorageBucket();
+    await tester.pumpWidget(
+      new PageStorage(
+        bucket: bucket,
+        child: new PageView(
+          controller: controller,
+          children: <Widget>[
+            const Placeholder(),
+            const Placeholder(),
+            const Placeholder(),
+          ],
+        ),
+      ),
+    );
+    expect(controller.page, 0);
+    controller.jumpToPage(2);
+    expect(await tester.pumpAndSettle(const Duration(minutes: 1)), 1);
+    expect(controller.page, 2);
+    await tester.pumpWidget(
+      new PageStorage(
+        bucket: bucket,
+        child: new Container(),
+      ),
+    );
+    expect(() => controller.page, throwsAssertionError);
+    await tester.pumpWidget(
+      new PageStorage(
+        bucket: bucket,
+        child: new PageView(
+          controller: controller,
+          children: <Widget>[
+            const Placeholder(),
+            const Placeholder(),
+            const Placeholder(),
+          ],
+        ),
+      ),
+    );
+    expect(controller.page, 2);
+    await tester.pumpWidget(
+      new PageStorage(
+        bucket: bucket,
+        child: new PageView(
+          key: const Key('Check it again against your list and see consistency!'),
+          controller: controller,
+          children: <Widget>[
+            const Placeholder(),
+            const Placeholder(),
+            const Placeholder(),
+          ],
+        ),
+      ),
+    );
+    expect(controller.page, 0);
+  });
 }
