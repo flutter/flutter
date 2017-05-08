@@ -90,6 +90,7 @@ java_library("flutter_shell_java") {
     "io/flutter/plugin/common/MethodCall.java",
     "io/flutter/plugin/common/MethodChannel.java",
     "io/flutter/plugin/common/MethodCodec.java",
+    "io/flutter/plugin/common/PluginRegistry.java",
     "io/flutter/plugin/common/StandardMessageCodec.java",
     "io/flutter/plugin/common/StandardMethodCodec.java",
     "io/flutter/plugin/common/StringCodec.java",

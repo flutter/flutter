@@ -1427,6 +1427,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MessageCo
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCall.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/PluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCodec.java
