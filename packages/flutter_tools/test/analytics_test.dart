@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
+import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
@@ -80,12 +81,14 @@ void main() {
   group('analytics with mocks', () {
     Usage mockUsage;
     Clock mockClock;
+    Doctor mockDoctor;
     List<int> mockTimes;
 
     setUp(() {
       mockUsage = new MockUsage();
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = new MockClock();
+      mockDoctor = new MockDoctor();
       when(mockClock.now()).thenAnswer(
         (Invocation _) => new DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
       );
@@ -93,6 +96,7 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
+      when(mockDoctor.diagnose()).thenReturn(true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -101,10 +105,30 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), null]
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
       );
     }, overrides: <Type, Generator>{
       Clock: () => mockClock,
+      Doctor: () => mockDoctor,
+      Usage: () => mockUsage,
+    });
+
+    testUsingContext('doctor fail sends warning', () async {
+      mockTimes = <int>[1000, 2000];
+      when(mockDoctor.diagnose()).thenReturn(false);
+      final DoctorCommand command = new DoctorCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      await runner.run(<String>['doctor']);
+
+      verify(mockClock.now()).called(2);
+
+      expect(
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
+      );
+    }, overrides: <Type, Generator>{
+      Clock: () => mockClock,
+      Doctor: () => mockDoctor,
       Usage: () => mockUsage,
     });
   });
@@ -126,3 +150,5 @@ void main() {
 }
 
 class MockUsage extends Mock implements Usage {}
+
+class MockDoctor extends Mock implements Doctor {}

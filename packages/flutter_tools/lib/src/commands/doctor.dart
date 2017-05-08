@@ -15,7 +15,8 @@ class DoctorCommand extends FlutterCommand {
   final String description = 'Show information about the installed tooling.';
 
   @override
-  Future<Null> runCommand() async {
-    await doctor.diagnose();
+  Future<FlutterCommandResult> runCommand() async {
+    final bool success = await doctor.diagnose();
+    return new FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }
