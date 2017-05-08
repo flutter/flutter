@@ -285,8 +285,9 @@ class VersionCheckStamp {
       try {
         final dynamic json = JSON.decode(versionCheckStamp);
         if (json is Map) {
-          printTrace('Warning: expected version stamp to be a Map but found: $json');
           return fromJson(json);
+        } else {
+          printTrace('Warning: expected version stamp to be a Map but found: $json');
         }
       } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
