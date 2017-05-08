@@ -61,6 +61,9 @@ abstract class OperatingSystemUtils {
   }
 
   List<File> _which(String execName, {bool all: false});
+
+  /// Returns the separator between items in the PATH environment variable.
+  String get pathVarSeparator;
 }
 
 class _PosixUtils extends OperatingSystemUtils {
@@ -120,6 +123,9 @@ class _PosixUtils extends OperatingSystemUtils {
     }
     return _name;
   }
+
+  @override
+  String get pathVarSeparator => ':';
 }
 
 class _WindowsUtils extends OperatingSystemUtils {
@@ -193,6 +199,9 @@ class _WindowsUtils extends OperatingSystemUtils {
     }
     return _name;
   }
+
+  @override
+  String get pathVarSeparator => ';';
 }
 
 /// Find and return the project root directory relative to the specified
