@@ -63,7 +63,7 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Dialog action styles', (WidgetTester tester) async {
+  testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoDialogAction(
       isDestructive: true,
       child: const Text('Ok'),
@@ -73,5 +73,29 @@ void main() {
 
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
     expect(widget.style.color.alpha, lessThan(255));
+  });
+
+  testWidgets('Dialog default action styles', (WidgetTester tester) async {
+    await tester.pumpWidget(const CupertinoDialogAction(
+      isDefault: true,
+      child: const Text('Ok'),
+    ));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
+  testWidgets('Cannot be default and destructive', (WidgetTester tester) async {
+    await tester.pumpWidget(const CupertinoDialogAction(
+      isDefault: true,
+      isDestructive: true,
+      child: const Text('Ok'),
+    ));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
 }

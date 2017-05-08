@@ -191,6 +191,7 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({
     this.onPressed,
+    this.isDefault: false,
     this.isDestructive: false,
     @required this.child,
   }) : assert(child != null);
@@ -199,6 +200,11 @@ class CupertinoDialogAction extends StatelessWidget {
   ///
   /// If this is set to null, the button will be disabled.
   final VoidCallback onPressed;
+
+  /// Set to true if button is the default choice in the dialog.
+  ///
+  /// Default buttons are bolded.
+  final bool isDefault;
 
   /// Whether this action destroys an object.
   ///
@@ -217,6 +223,9 @@ class CupertinoDialogAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle;
+
+    if(isDefault)
+      style = style.copyWith(fontWeight: FontWeight.w600);
 
     if (isDestructive)
       style = style.copyWith(color: _kDestructiveActionColor);
