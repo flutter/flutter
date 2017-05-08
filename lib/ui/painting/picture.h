@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 #define FLUTTER_LIB_UI_PAINTING_PICTURE_H_
 
+#include "flutter/lib/ui/painting/image.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/core/SkPicture.h"
 
@@ -25,6 +26,8 @@ class Picture : public ftl::RefCountedThreadSafe<Picture>,
   static ftl::RefPtr<Picture> Create(sk_sp<SkPicture> picture);
 
   const sk_sp<SkPicture>& picture() const { return picture_; }
+
+  ftl::RefPtr<CanvasImage> toImage(int width, int height);
 
   void dispose();
 

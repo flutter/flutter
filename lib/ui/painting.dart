@@ -1649,6 +1649,15 @@ abstract class Picture extends NativeFieldWrapperClass2 {
   /// object. To create a Picture object, use a [PictureRecorder].
   Picture(); // (this constructor is here just so we can document it)
 
+  /// Creates an image from this picture.
+  /// 
+  /// The picture is rasterized using the number of pixels specified by the
+  /// given width and height.
+  /// 
+  /// Although the image is returned synchronously, the picture is actually
+  /// rasterized the first time the image is drawn and then cached.
+  Image toImage(int width, int height) native "Picture_toImage";
+
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   void dispose() native "Picture_dispose";
