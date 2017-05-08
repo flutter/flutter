@@ -10,16 +10,27 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
 import android.view.WindowManager;
+import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.PluginRegistry;
+import io.flutter.plugin.common.PluginRegistry.Registrar;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Base class for activities that use Flutter.
  */
-public class FlutterActivity extends Activity {
+public class FlutterActivity extends Activity implements PluginRegistry {
+    private final Map<String, Object> pluginMap = new LinkedHashMap<>(0);
+    private final List<RequestPermissionResultListener> requestPermissionResultListeners = new ArrayList<>(0);
+    private final List<ActivityResultListener> activityResultListeners = new ArrayList<>(0);
+    private final List<NewIntentListener> newIntentListeners = new ArrayList<>(0);
+    private final List<UserLeaveHintListener> userLeaveHintListeners = new ArrayList<>(0);
     private FlutterView flutterView;
 
     private String[] getArgsFromIntent(Intent intent) {
@@ -66,6 +77,26 @@ public class FlutterActivity extends Activity {
         setContentView(flutterView);
 
         onFlutterReady();
+    }
+
+    @Override
+    public boolean hasPlugin(String key) {
+        return pluginMap.containsKey(key);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T valuePublishedByPlugin(String pluginKey) {
+        return (T) pluginMap.get(pluginKey);
+    }
+
+    @Override
+    public Registrar registrarFor(String pluginKey) {
+        if (pluginMap.containsKey(pluginKey)) {
+            throw new IllegalStateException("Plugin key " + pluginKey + " is already in use");
+        }
+        pluginMap.put(pluginKey, null);
+        return new FlutterRegistrar(pluginKey);
     }
 
     /**
@@ -118,8 +149,39 @@ public class FlutterActivity extends Activity {
         }
     }
 
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        for (RequestPermissionResultListener listener : requestPermissionResultListeners) {
+            if (listener.onRequestPermissionResult(requestCode, permissions, grantResults)) {
+                return;
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        for (ActivityResultListener listener : activityResultListeners) {
+            if (listener.onActivityResult(requestCode, resultCode, data)) {
+                return;
+            }
+        }
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
-        loadIntent(intent);
+        if (!loadIntent(intent)) {
+            for (NewIntentListener listener : newIntentListeners) {
+                if (listener.onNewIntent(intent)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void onUserLeaveHint() {
+        for (UserLeaveHintListener listener : userLeaveHintListeners) {
+            listener.onUserLeaveHint();
+        }
     }
 
     public boolean loadIntent(Intent intent) {
@@ -159,4 +221,58 @@ public class FlutterActivity extends Activity {
         if (level == TRIM_MEMORY_RUNNING_LOW)
             flutterView.onMemoryPressure();
     }
+
+    private class FlutterRegistrar implements Registrar  {
+        private final String pluginKey;
+
+        FlutterRegistrar(String pluginKey) {
+            this.pluginKey = pluginKey;
+        }
+
+        public Activity activity() {
+            return FlutterActivity.this;
+        }
+
+        public BinaryMessenger messenger() {
+            return getFlutterView();
+        }
+
+        /**
+         * Publishes a value associated with the plugin being registered.
+         *
+         * <p>The published value is available to interested clients via
+         * {@link PluginRegistry#valuePublishedByPlugin(String)}.</p>
+         *
+         * <p>Publication should be done only when there is an interesting value
+         * to be shared with other code. This would typically be an instance of
+         * the plugin's main class itself that must be wired up to receive
+         * notifications or events from an Android API.
+         *
+         * <p>Overwrites any previously published value.</p>
+         */
+        public Registrar publish(Object value) {
+            pluginMap.put(pluginKey, value);
+            return this;
+        }
+
+        public Registrar addRequestPermissionResultListener(RequestPermissionResultListener listener) {
+            requestPermissionResultListeners.add(listener);
+            return this;
+        }
+
+        public Registrar addActivityResultListener(ActivityResultListener listener) {
+            activityResultListeners.add(listener);
+            return this;
+        }
+
+        public Registrar addNewIntentListener(NewIntentListener listener) {
+            newIntentListeners.add(listener);
+            return this;
+        }
+
+        public Registrar addUserLeaveHintListener(UserLeaveHintListener listener) {
+            userLeaveHintListeners.add(listener);
+            return this;
+        }
+    };
 }
