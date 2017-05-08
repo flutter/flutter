@@ -38,7 +38,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       parent: new ReverseAnimation(_controller),
       curve: Curves.fastOutSlowIn,
     );
-    _drawerDetailsPosition = new Tween<FractionalOffset>(
+    _drawerDetailsPosition = new FractionalOffsetTween(
       begin: const FractionalOffset(0.0, -1.0),
       end: const FractionalOffset(0.0, 0.0),
     ).animate(new CurvedAnimation(

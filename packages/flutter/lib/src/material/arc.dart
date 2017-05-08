@@ -3,17 +3,20 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show hashValues, lerpDouble;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/animation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
 // How close the begin and end points must be to an axis to be considered
 // vertical or horizontal.
 const double _kOnAxisDelta = 2.0;
 
-/// A [Tween] that animates an [Offset] along a circular arc.
+/// A [Tween] that interpolates an [Offset] along a circular arc.
+///
+/// This class specializes the interpolation of [Tween<Offset>] so that instead
+/// of a straight line, the intermediate points follow the arc of a circle in a
+/// manner consistent with material design principles.
 ///
 /// The arc's radius is related to the bounding box that contains the [begin]
 /// and [end] points. If the bounding box is taller than it is wide, then the
@@ -21,23 +24,27 @@ const double _kOnAxisDelta = 2.0;
 /// Otherwise the center of the circle will be aligned with the begin point.
 /// The arc's sweep is always less than or equal to 90 degrees.
 ///
-/// Unlike those of most Tweens, the [begin] and [end] members of a
-/// [MaterialPointArcTween] are immutable.
-///
 /// See also:
 ///
-/// * [MaterialRectArcTween]
+///  * [Tween], for a discussion on how to use interpolation objects.
+///  * [MaterialRectArcTween], which extends this concept to interpolating [Rect]s.
 class MaterialPointArcTween extends Tween<Offset> {
   /// Creates a [Tween] for animating [Offset]s along a circular arc.
   ///
-  /// The [begin] and [end] points are required, cannot be null, and are
-  /// immutable.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   MaterialPointArcTween({
-    @required Offset begin,
-    @required Offset end
-  }) : super(begin: begin, end: end) {
+    Offset begin,
+    Offset end,
+  }) : super(begin: begin, end: end);
+
+  bool _dirty = true;
+
+  void _initialize() {
     assert(begin != null);
     assert(end != null);
+
     // An explanation with a diagram can be found at https://goo.gl/vMSdRg
     final Offset delta = end - begin;
     final double deltaX = delta.dx.abs();
@@ -69,45 +76,85 @@ class MaterialPointArcTween extends Tween<Offset> {
           _endAngle = _beginAngle + sweepAngle() * (begin.dx - end.dx).sign;
         }
       }
+      assert(_beginAngle != null);
+      assert(_endAngle != null);
+    } else {
+      _beginAngle = null;
+      _endAngle = null;
+    }
+    _dirty = false;
+  }
+
+  /// The center of the circular arc, null if [begin] and [end] are horizontally or
+  /// vertically aligned, or if either is null.
+  Offset get center {
+    if (begin == null || end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _center;
+  }
+  Offset _center;
+
+  /// The radius of the circular arc, null if [begin] and [end] are horizontally or
+  /// vertically aligned, or if either is null.
+  double get radius {
+    if (begin == null || end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _radius;
+  }
+  double _radius;
+
+  /// The beginning of the arc's sweep in radians, measured from the positive x
+  /// axis. Positive angles turn clockwise.
+  ///
+  /// This will be null if [begin] and [end] are horizontally or vertically
+  /// aligned, or if either is null.
+  double get beginAngle {
+    if (begin == null || end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _beginAngle;
+  }
+  double _beginAngle;
+
+  /// The end of the arc's sweep in radians, measured from the positive x axis.
+  /// Positive angles turn clockwise.
+  ///
+  /// This will be null if [begin] and [end] are horizontally or vertically
+  /// aligned, or if either is null.
+  double get endAngle {
+    if (begin == null || end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _beginAngle;
+  }
+  double _endAngle;
+
+  @override
+  set begin(Offset value) {
+    if (value != begin) {
+      super.begin = value;
+      _dirty = true;
     }
   }
 
-  Offset _center;
-  double _radius;
-  double _beginAngle;
-  double _endAngle;
-
-  /// The center of the circular arc, null if [begin] and [end] are horiztonally or
-  /// vertically aligned.
-  Offset get center => _center;
-
-  /// The radius of the circular arc, null if begin and end are horiztonally or
-  /// vertically aligned.
-  double get radius => _radius;
-
-  /// The beginning of the arc's sweep in radians, measured from the positive X axis.
-  /// Positive angles turn clockwise. Null if begin and end are horiztonally or
-  /// vertically aligned.
-  double get beginAngle => _beginAngle;
-
-  /// The end of the arc's sweep in radians, measured from the positive X axis.
-  /// Positive angles turn clockwise.
-  double get endAngle => _beginAngle;
-
-  /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
-  @override
-  set begin(Offset value) {
-    assert(false); // not supported
-  }
-
-  /// Setting the arc's [end] parameter is not supported. Construct a new arc instead.
   @override
   set end(Offset value) {
-    assert(false); // not supported
+    if (value != end) {
+      super.end = value;
+      _dirty = true;
+    }
   }
 
   @override
   Offset lerp(double t) {
+    if (_dirty)
+      _initialize();
     if (t == 0.0)
       return begin;
     if (t == 1.0)
@@ -121,22 +168,8 @@ class MaterialPointArcTween extends Tween<Offset> {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! MaterialPointArcTween)
-      return false;
-    final MaterialPointArcTween typedOther = other;
-    return begin == typedOther.begin
-        && end == typedOther.end;
-  }
-
-  @override
-  int get hashCode => hashValues(begin, end);
-
-  @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
+    return '$runtimeType($begin \u2192 $end; center=$center, radius=$radius, beginAngle=$beginAngle, endAngle=$endAngle)';
   }
 }
 
@@ -176,44 +209,55 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   return maxValue;
 }
 
-/// A [Tween] that animates a [Rect] from [begin] to [end].
+/// A [Tween] that interpolates a [Rect] by having its opposite corners follow
+/// circular arcs.
 ///
-/// The rectangle corners whose diagonal is closest to the overall direction of
-/// the animation follow arcs defined with [MaterialPointArcTween].
+/// This class specializes the interpolation of [Tween<Rect>] so that instead of
+/// growing or shrinking linearly, opposite corners of the rectangle follow arcs
+/// in a manner consistent with material design principles.
 ///
-/// Unlike those of most Tweens, the [begin] and [end] members of a
-/// [MaterialPointArcTween] are immutable.
+/// Specifically, the rectangle corners whose diagonals are closest to the overall
+/// direction of the animation follow arcs defined with [MaterialPointArcTween].
 ///
 /// See also:
 ///
-/// * [MaterialPointArcTween]. the analogue for [Offset] interporation.
-/// * [RectTween], which does a linear rectangle interpolation.
+///  * [Tween], for a discussion on how to use interpolation objects.
+///  * [MaterialPointArcTween], the analogue for [Offset] interporation.
+///  * [RectTween], which does a linear rectangle interpolation.
 class MaterialRectArcTween extends RectTween {
   /// Creates a [Tween] for animating [Rect]s along a circular arc.
   ///
-  /// The [begin] and [end] points are required, cannot be null, and are
-  /// immutable.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   MaterialRectArcTween({
-    @required Rect begin,
-    @required Rect end
-  }) : super(begin: begin, end: end) {
+    Rect begin,
+    Rect end,
+  }) : super(begin: begin, end: end);
+
+  bool _dirty = true;
+
+  void _initialize() {
     assert(begin != null);
     assert(end != null);
     final Offset centersVector = end.center - begin.center;
-    _diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
+    final _Diagonal diagonal = _maxBy<_Diagonal>(_allDiagonals, (_Diagonal d) => _diagonalSupport(centersVector, d));
     _beginArc = new MaterialPointArcTween(
-      begin: _cornerFor(begin, _diagonal.beginId),
-      end: _cornerFor(end, _diagonal.beginId)
+      begin: _cornerFor(begin, diagonal.beginId),
+      end: _cornerFor(end, diagonal.beginId)
     );
     _endArc = new MaterialPointArcTween(
-      begin: _cornerFor(begin, _diagonal.endId),
-      end: _cornerFor(end, _diagonal.endId)
+      begin: _cornerFor(begin, diagonal.endId),
+      end: _cornerFor(end, diagonal.endId)
     );
+    _dirty = false;
   }
 
-  _Diagonal _diagonal;
-  MaterialPointArcTween _beginArc;
-  MaterialPointArcTween _endArc;
+  double _diagonalSupport(Offset centersVector, _Diagonal diagonal) {
+    final Offset delta = _cornerFor(begin, diagonal.endId) - _cornerFor(begin, diagonal.beginId);
+    final double length = delta.distance;
+    return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
+  }
 
   Offset _cornerFor(Rect rect, _CornerId id) {
     switch (id) {
@@ -225,34 +269,48 @@ class MaterialRectArcTween extends RectTween {
     return Offset.zero;
   }
 
-  double _diagonalSupport(Offset centersVector, _Diagonal diagonal) {
-    final Offset delta = _cornerFor(begin, diagonal.endId) - _cornerFor(begin, diagonal.beginId);
-    final double length = delta.distance;
-    return centersVector.dx * delta.dx / length + centersVector.dy * delta.dy / length;
-  }
-
   /// The path of the corresponding [begin], [end] rectangle corners that lead
   /// the animation.
-  MaterialPointArcTween get beginArc => _beginArc;
+  MaterialPointArcTween get beginArc {
+    if (begin == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _beginArc;
+  }
+  MaterialPointArcTween _beginArc;
 
   /// The path of the corresponding [begin], [end] rectangle corners that trail
   /// the animation.
-  MaterialPointArcTween get endArc => _endArc;
+  MaterialPointArcTween get endArc {
+    if (end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _endArc;
+  }
+  MaterialPointArcTween _endArc;
 
-  /// Setting the arc's [begin] parameter is not supported. Construct a new arc instead.
   @override
   set begin(Rect value) {
-    assert(false); // not supported
+    if (value != begin) {
+      super.begin = value;
+      _dirty = true;
+    }
   }
 
-  /// Setting the arc's [end] parameter is not supported. Construct a new arc instead.
   @override
   set end(Rect value) {
-    assert(false); // not supported
+    if (value != end) {
+      super.end = value;
+      _dirty = true;
+    }
   }
 
   @override
   Rect lerp(double t) {
+    if (_dirty)
+      _initialize();
     if (t == 0.0)
       return begin;
     if (t == 1.0)
@@ -261,21 +319,7 @@ class MaterialRectArcTween extends RectTween {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! MaterialRectArcTween)
-      return false;
-    final MaterialRectArcTween typedOther = other;
-    return begin == typedOther.begin
-        && end == typedOther.end;
-  }
-
-  @override
-  int get hashCode => hashValues(begin, end);
-
-  @override
   String toString() {
-    return '$runtimeType($begin \u2192 $end beginArc=$beginArc, endArc=$endArc)';
+    return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
   }
 }
