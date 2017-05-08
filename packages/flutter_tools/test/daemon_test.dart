@@ -216,6 +216,7 @@ void main() {
       final Map<String, dynamic> response = await responses.stream.first;
       expect(response['event'], 'daemon.showMessage');
       expect(response['params'], isMap);
+      expect(response['params'], containsPair('level', 'warning'));
       expect(response['params'], containsPair('title', 'Unable to list devices'));
       expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
     }, overrides: <Type, Generator>{
