@@ -156,11 +156,10 @@
 }
 
 - (BOOL)application:(UIApplication*)application
-            openURL:(NSURL*)url
-            options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
+      handleOpenURL:(NSURL*)url {
   for (id<FlutterPlugin> plugin in _pluginDelegates) {
     if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application openURL:url options:options]) {
+      if ([plugin application:application handleOpenURL:url]) {
         return YES;
       }
     }
