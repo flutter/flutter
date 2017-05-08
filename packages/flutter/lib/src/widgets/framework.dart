@@ -886,7 +886,8 @@ abstract class State<T extends StatefulWidget> {
   ///   setState(() {
   ///     _counter++;
   ///   });
-  ///   final String dir = await PathProvider.getApplicationDocumentsDirectory();
+  ///   Directory directory = await getApplicationDocumentsDirectory();
+  ///   final String dirName = directory.path;
   ///   await new File('$dir/counter.txt').writeAsString('$_counter');
   ///   return null;
   /// }
