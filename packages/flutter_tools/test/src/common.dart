@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:args/command_runner.dart';
 import 'package:test/test.dart';
 
@@ -9,6 +11,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
+import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
@@ -63,10 +66,13 @@ void updateFileModificationTime(String path,
 }
 
 /// Matcher for functions that throw [ToolExit].
-Matcher throwsToolExit([int exitCode]) {
-  return exitCode == null
-    ? throwsA(isToolExit)
-    : throwsA(allOf(isToolExit, (ToolExit e) => e.exitCode == exitCode));
+Matcher throwsToolExit({int exitCode, String message}) {
+  Matcher matcher = isToolExit;
+  if (exitCode != null)
+    matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
+  if (message != null)
+    matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+  return throwsA(matcher);
 }
 
 /// Matcher for [ToolExit]s.
@@ -81,3 +87,13 @@ Matcher throwsProcessExit([dynamic exitCode]) {
 
 /// Matcher for [ProcessExit]s.
 const Matcher isProcessExit = const isInstanceOf<ProcessExit>();
+
+/// Creates a flutter project in the [temp] directory.
+/// Returns the path to the flutter project.
+Future<String> createProject(Directory temp) async {
+  final String projectPath = fs.path.join(temp.path, 'flutter_project');
+  final CreateCommand command = new CreateCommand();
+  final CommandRunner<Null> runner = createTestCommandRunner(command);
+  await runner.run(<String>['create', '--no-pub', projectPath]);
+  return projectPath;
+}

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
+
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle.dart' as gradle;
@@ -96,7 +98,7 @@ class CreateCommand extends FlutterCommand {
     // TODO(goderbauer): Work-around for: https://github.com/dart-lang/path/issues/24
     if (fs.path.basename(dirPath) == '.')
       dirPath = fs.path.dirname(dirPath);
-    final String projectName = _normalizeProjectName(fs.path.basename(dirPath));
+    final String projectName = fs.path.basename(dirPath);
 
     String error =_validateProjectDir(dirPath, flutterRoot: flutterRoot);
     if (error != null)
@@ -235,14 +237,6 @@ Host platform code is in the android/ and ios/ directories under $relativePlugin
   }
 }
 
-String _normalizeProjectName(String name) {
-  name = name.replaceAll('-', '_').replaceAll(' ', '_');
-  // Strip any extension (like .dart).
-  if (name.contains('.'))
-    name = name.substring(0, name.indexOf('.'));
-  return name;
-}
-
 String _createAndroidIdentifier(String name) {
   return 'com.yourcompany.$name';
 }
@@ -283,6 +277,9 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return `null` if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
+  if (!package_names.isValidPackageName(projectName))
+    return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
+
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
       "package dependencies.";
