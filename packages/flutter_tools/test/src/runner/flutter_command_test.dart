@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
@@ -59,7 +60,7 @@ void main() {
       verify(clock.now()).called(2);
 
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null]
       );
     },
@@ -72,7 +73,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = 
+      final DummyFlutterCommand flutterCommand =
           new DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
@@ -82,31 +83,57 @@ void main() {
       Clock: () => clock,
       Usage: () => usage,
     });
-    
+
     testUsingContext('report additional FlutterCommandResult data', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
       final FlutterCommandResult commandResult = new FlutterCommandResult(
-        ExitStatus.fail,
+        ExitStatus.success,
         // nulls should be cleaned up.
         analyticsParameters: <String> ['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: new DateTime.fromMillisecondsSinceEpoch(1500)
       );
 
-      final DummyFlutterCommand flutterCommand = 
-          new DummyFlutterCommand(flutterCommandResult: commandResult);
+      final DummyFlutterCommand flutterCommand = new DummyFlutterCommand(
+        commandFunction: () async => commandResult
+      );
       await flutterCommand.run();
       verify(clock.now()).called(2);
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
         <dynamic>[
-          'flutter', 
-          'dummy', 
+          'flutter',
+          'dummy',
           const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
-          'fail-blah1-blah2-blah3',
+          'success-blah1-blah2-blah3',
         ],
-      );    
+      );
+    },
+    overrides: <Type, Generator>{
+      Clock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('report failed execution timing too', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand =
+          new DummyFlutterCommand(commandFunction: () async { throwToolExit('fail'); });
+
+      try {
+        await flutterCommand.run();
+        fail('Mock should make this fail');
+      } on ToolExit {
+        // Should have still checked time twice.
+        verify(clock.now()).called(2);
+
+        expect(
+          verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
+          <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), 'fail']
+        );
+      }
     },
     overrides: <Type, Generator>{
       Clock: () => clock,
@@ -117,16 +144,18 @@ void main() {
 
 }
 
+typedef Future<FlutterCommandResult> CommandFunction();
+
 class DummyFlutterCommand extends FlutterCommand {
 
   DummyFlutterCommand({
-    this.shouldUpdateCache : false, 
-    this.noUsagePath : false, 
-    this.flutterCommandResult
+    this.shouldUpdateCache : false,
+    this.noUsagePath : false,
+    this.commandFunction,
   });
 
   final bool noUsagePath;
-  final FlutterCommandResult flutterCommandResult;
+  final CommandFunction commandFunction;
 
   @override
   final bool shouldUpdateCache;
@@ -142,7 +171,7 @@ class DummyFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return flutterCommandResult;
+    return commandFunction == null ? null : commandFunction();
   }
 }
 
