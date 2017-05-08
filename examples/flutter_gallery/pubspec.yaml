@@ -6,7 +6,6 @@ dependencies:
 
   flutter:
     sdk: flutter
-  url_launcher: ^0.3.3
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:

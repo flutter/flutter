@@ -13,60 +13,104 @@ import 'text.dart';
 import 'ticker_provider.dart';
 
 /// An interpolation between two [BoxConstraints].
+///
+/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
+/// [BoxConstraints.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class BoxConstraintsTween extends Tween<BoxConstraints> {
-  /// Creates a box constraints tween.
+  /// Creates a [BoxConstraints] tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as a tight constraint of zero size.
   BoxConstraintsTween({ BoxConstraints begin, BoxConstraints end }) : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   BoxConstraints lerp(double t) => BoxConstraints.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Decoration]s.
+///
+/// This class specializes the interpolation of [Tween<BoxConstraints>] to use
+/// [Decoration.lerp].
+///
+/// Typically this will only have useful results if the [begin] and [end]
+/// decorations have the same type; decorations of differing types generally do
+/// not have a useful animation defined, and will just jump to the [end]
+/// immediately.
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class DecorationTween extends Tween<Decoration> {
   /// Creates a decoration tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties may be null. If both are null, then the
+  /// result is always null. If [end] is not null, then its lerping logic is
+  /// used (via [Decoration.lerpTo]). Otherwise, [begin]'s lerping logic is used
+  /// (via [Decoration.lerpFrom]).
   DecorationTween({ Decoration begin, Decoration end }) : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   Decoration lerp(double t) => Decoration.lerp(begin, end, t);
 }
 
 /// An interpolation between two [EdgeInsets]s.
+///
+/// This class specializes the interpolation of [Tween<EdgeInsets>] to use
+/// [EdgeInsets.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class EdgeInsetsTween extends Tween<EdgeInsets> {
-  /// Creates an edge insets tween.
+  /// Creates an [EdgeInsets] tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as an [EdgeInsets] with no inset.
   EdgeInsetsTween({ EdgeInsets begin, EdgeInsets end }) : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   EdgeInsets lerp(double t) => EdgeInsets.lerp(begin, end, t);
 }
 
 /// An interpolation between two [BorderRadius]s.
+///
+/// This class specializes the interpolation of [Tween<BorderRadius>] to use
+/// [BorderRadius.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class BorderRadiusTween extends Tween<BorderRadius> {
-  /// Creates a border radius tween.
+  /// Creates a [BorderRadius] tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as a right angle (no radius).
   BorderRadiusTween({ BorderRadius begin, BorderRadius end }) : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   BorderRadius lerp(double t) => BorderRadius.lerp(begin, end, t);
 }
 
 /// An interpolation between two [Matrix4]s.
 ///
+/// This class specializes the interpolation of [Tween<Matrix4>] to be
+/// appropriate for transformation matrices.
+///
 /// Currently this class works only for translations.
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class Matrix4Tween extends Tween<Matrix4> {
   /// Creates a [Matrix4] tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   Matrix4Tween({ Matrix4 begin, Matrix4 end }) : super(begin: begin, end: end);
 
   @override
   Matrix4 lerp(double t) {
+    assert(begin != null);
+    assert(end != null);
     // TODO(abarth): We should use [Matrix4.decompose] and animate the
     // decomposed parameters instead of just animating the translation.
     final Vector3 beginT = begin.getTranslation();
@@ -78,13 +122,21 @@ class Matrix4Tween extends Tween<Matrix4> {
 
 /// An interpolation between two [TextStyle]s.
 ///
+/// This class specializes the interpolation of [Tween<TextStyle>] to use
+/// [TextStyle.lerp].
+///
 /// This will not work well if the styles don't set the same fields.
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class TextStyleTween extends Tween<TextStyle> {
   /// Creates a text style tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
   TextStyleTween({ TextStyle begin, TextStyle end }) : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   TextStyle lerp(double t) => TextStyle.lerp(begin, end, t);
 }

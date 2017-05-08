@@ -293,16 +293,19 @@ class FadeTransition extends AnimatedWidget {
 
 /// An interpolation between two relative rects.
 ///
-/// This class specializes the interpolation of Tween<RelativeRect> to be
-/// appropriate for rectangles that are described in terms of offsets from
-/// other rectangles.
+/// This class specializes the interpolation of [Tween<RelativeRect>] to
+/// use [RelativeRect.tween].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
 class RelativeRectTween extends Tween<RelativeRect> {
-  /// Creates a relative rect tween.
+  /// Creates a [RelativeRect] tween.
   ///
-  /// The [begin] and [end] arguments must not be null.
+  /// The [begin] and [end] properties may be null; the null value
+  /// is treated as [RelativeRect.fill].
   RelativeRectTween({ RelativeRect begin, RelativeRect end })
     : super(begin: begin, end: end);
 
+  /// Returns the value this variable has at the given animation clock value.
   @override
   RelativeRect lerp(double t) => RelativeRect.lerp(begin, end, t);
 }
