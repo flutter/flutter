@@ -75,9 +75,10 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   }
 }
 
-const String _androidPluginRegistryTemplate = '''package io.flutter.plugin.common;
+const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
 
 {{#plugins}}
+import io.flutter.plugin.common.PluginRegistry;
 import {{package}}.{{class}};
 {{/plugins}}
 
@@ -110,7 +111,7 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
       new mustache.Template(_androidPluginRegistryTemplate).renderString(context);
   final String javaSourcePath = fs.path.join(directory, 'android', 'app', 'src', 'main', 'java');
   final Directory registryDirectory =
-      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugin', 'common'));
+      fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
   registryDirectory.createSync(recursive: true);
   final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
   registryFile.writeAsStringSync(pluginRegistry);
