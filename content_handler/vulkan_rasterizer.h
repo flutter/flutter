@@ -96,10 +96,16 @@ class VulkanRasterizer : public Rasterizer {
              static_cast<uint64_t>(height);
     }
 
+    // Note: the order here is very important. The proctable bust be destroyed
+    // last because it contains the function pointers for VkDestroyDevice and
+    // VkDestroyInstance. The backend context owns the VkDevice and the
+    // VkInstance, so it must be destroyed after the logical device and the
+    // application, which own other vulkan objects associated with the device
+    // and instance
     ftl::RefPtr<vulkan::VulkanProcTable> vk_;
-    std::unique_ptr<vulkan::VulkanApplication> application_;
-    std::unique_ptr<vulkan::VulkanDevice> logical_device_;
     sk_sp<GrVkBackendContext> backend_context_;
+    std::unique_ptr<vulkan::VulkanDevice> logical_device_;
+    std::unique_ptr<vulkan::VulkanApplication> application_;
     sk_sp<GrContext> context_;
 
     // These three containers hold surfaces in various stages of recycling

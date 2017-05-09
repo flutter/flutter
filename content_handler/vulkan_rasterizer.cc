@@ -393,6 +393,9 @@ bool VulkanRasterizer::VulkanSurfaceProducer::Initialize() {
   backend_context_->fFeatures = skia_features;
   backend_context_->fInterface.reset(interface.release());
 
+  logical_device_->ReleaseDeviceOwnership();
+  application_->ReleaseInstanceOwnership();
+
   context_.reset(GrContext::Create(
       kVulkan_GrBackend,
       reinterpret_cast<GrBackendContext>(backend_context_.get())));
