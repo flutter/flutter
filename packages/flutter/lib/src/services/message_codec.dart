@@ -16,7 +16,7 @@ import 'platform_channel.dart';
 ///
 /// See also:
 ///
-/// * [MessageChannel], which use [MessageCodec]s for communication
+/// * [BasicMessageChannel], which use [MessageCodec]s for communication
 ///   between Flutter and platform plugins.
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.

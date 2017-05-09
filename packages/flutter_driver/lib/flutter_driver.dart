@@ -33,8 +33,11 @@ export 'src/health.dart' show
 export 'src/message.dart' show
   Command,
   Result;
+export 'src/render_tree.dart' show
+  RenderTree;
 export 'src/timeline.dart' show
   Timeline,
   TimelineEvent;
 export 'src/timeline_summary.dart' show
-  TimelineSummary;
+  TimelineSummary,
+  kBuildBudget;

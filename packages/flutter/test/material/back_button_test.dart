@@ -32,4 +32,31 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
   });
+
+  testWidgets('BackButton icon', (WidgetTester tester) async {
+    final Key iOSKey = new UniqueKey();
+    final Key androidKey = new UniqueKey();
+
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Column(
+          children: <Widget>[
+            new Theme(
+              data: new ThemeData(platform: TargetPlatform.iOS),
+              child: new BackButtonIcon(key: iOSKey),
+            ),
+            new Theme(
+              data: new ThemeData(platform: TargetPlatform.android),
+              child: new BackButtonIcon(key: androidKey),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
+    final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
+    expect(iOSIcon == androidIcon, false);
+  });
 }

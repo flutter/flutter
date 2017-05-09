@@ -348,7 +348,7 @@ class EditableTextState extends State<EditableText> implements TextInputClient {
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType))
+      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType, obscureText: widget.obscureText))
         ..setEditingState(localValue);
     }
     _textInputConnection.show();

@@ -764,9 +764,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Animation<double> get secondaryAnimation => _secondaryAnimationProxy;
   ProxyAnimation _secondaryAnimationProxy;
 
-  /// Return the value of the first callback added with
-  /// [addScopedWillPopCallback] that returns false. Otherwise return
-  /// [super.willPop()].
+  /// Returns the value of the first callback added with
+  /// [addScopedWillPopCallback] that returns false. If they all return true,
+  /// returns the inherited method's result (see [Route.willPop]).
   ///
   /// Typically this method is not overridden because applications usually
   /// don't create modal routes directly, they use higher level primitives

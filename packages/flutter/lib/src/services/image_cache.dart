@@ -12,10 +12,10 @@ const int _kDefaultSize = 1000;
 /// size can be adjusted using [maximumSize]. Images that are actively in use
 /// (i.e. to which the application is holding references, either via
 /// [ImageStream] objects, [ImageStreamCompleter] objects, [ImageInfo] objects,
-/// or raw [Image] objects) may get evicted from the cache (and thus need to
-/// be refetched from the network if they are referenced in the [putIfAbsent]
-/// method), but the raw bits are kept in memory for as long as the application
-/// is using them.
+/// or raw [dart:ui.Image] objects) may get evicted from the cache (and thus
+/// need to be refetched from the network if they are referenced in the
+/// [putIfAbsent] method), but the raw bits are kept in memory for as long as
+/// the application is using them.
 ///
 /// The [putIfAbsent] method is the main entry-point to the cache API. It
 /// returns the previously cached [ImageStreamCompleter] for the given key, if

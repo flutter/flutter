@@ -13,7 +13,7 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
-/// For which type of information to optimize the text input control.
+/// The type of information for which to optimize the text input control.
 enum TextInputType {
   /// Optimize for textual information.
   text,
@@ -28,7 +28,7 @@ enum TextInputType {
   datetime,
 }
 
-/// A action the user has requested the text input control to perform.
+/// An action the user has requested the text input control to perform.
 enum TextInputAction {
   /// Complete the text input operation.
   done,
@@ -43,14 +43,21 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType] argument must not be null.
+  /// The [inputType] and [obscureText] arguments must not be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
+    this.obscureText: false,
     this.actionLabel,
-  });
+  }) : assert(inputType != null),
+       assert(obscureText != null);
 
-  /// For which type of information to optimize the text input control.
+  /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
+
+  /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// Defaults to false.
+  final bool obscureText;
 
   /// What text to display in the text input control's action button.
   final String actionLabel;
@@ -59,6 +66,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'inputType': inputType.toString(),
+      'obscureText': obscureText.toString(),
       'actionLabel': actionLabel,
     };
   }
@@ -87,7 +95,9 @@ class TextEditingValue {
     this.text: '',
     this.selection: const TextSelection.collapsed(offset: -1),
     this.composing: TextRange.empty
-  });
+  }) : assert(text != null),
+       assert(selection != null),
+       assert(composing != null);
 
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
@@ -237,7 +247,7 @@ TextInputAction _toTextInputAction(String action) {
     case 'TextInputAction.done':
       return TextInputAction.done;
   }
-  throw new FlutterError('Unknow text input action: $action');
+  throw new FlutterError('Unknown text input action: $action');
 }
 
 class _TextInputClientHandler {

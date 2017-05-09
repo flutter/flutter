@@ -22,12 +22,14 @@ void main() {
 
   group('analyze once', () {
     Directory tempDir;
+    String projectPath;
     File libMain;
 
     setUpAll(() {
       Cache.disableLocking();
       tempDir = fs.systemTempDirectory.createTempSync('analyze_once_test_').absolute;
-      libMain = fs.file(fs.path.join(tempDir.path, 'lib', 'main.dart'));
+      projectPath = fs.path.join(tempDir.path, 'flutter_project');
+      libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
     });
 
     tearDownAll(() {
@@ -38,7 +40,7 @@ void main() {
     testUsingContext('flutter create', () async {
       await runCommand(
         command: new CreateCommand(),
-        arguments: <String>['create', tempDir.path],
+        arguments: <String>['create', projectPath],
         statusTextContains: <String>[
           'All done!',
           'Your main program file is lib/main.dart',
@@ -50,7 +52,7 @@ void main() {
     // Analyze in the current directory - no arguments
     testUsingContext('flutter analyze working directory', () async {
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: tempDir),
+        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
@@ -86,7 +88,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: tempDir),
+        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
@@ -116,7 +118,7 @@ void main() {
 
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
-      final File optionsFile = fs.file(fs.path.join(tempDir.path, 'analysis_options.yaml'));
+      final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
       await optionsFile.writeAsString('''
   include: package:flutter/analysis_options_user.yaml
   linter:
@@ -126,7 +128,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: new AnalyzeCommand(workingDirectory: tempDir),
+        command: new AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',

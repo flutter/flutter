@@ -265,7 +265,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _updateMoveAnimation() {
-    _moveAnimation = new Tween<FractionalOffset>(
+    _moveAnimation = new FractionalOffsetTween(
       begin: FractionalOffset.topLeft,
       end: _directionIsXAxis ?
              new FractionalOffset(_dragExtent.sign, 0.0) :

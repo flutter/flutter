@@ -9,6 +9,35 @@ import 'icon_button.dart';
 import 'icons.dart';
 import 'theme.dart';
 
+/// A "back" icon that's appropriate for the current [TargetPlatform].
+///
+/// See also:
+///
+///  * [BackButton], an [IconButton] with a [BackButtonIcon] that calls
+///    [Navigator.maybePop] to return to the previous route.
+///  * [IconButton], which is a more general widget for creating buttons
+///    with icons.
+///  * [Icon], a material design icon.
+class BackButtonIcon extends StatelessWidget {
+  const BackButtonIcon({ Key key }) : super(key: key);
+
+  /// Returns tha appropriate "back" icon for the given `platform`.
+  static IconData _getIconData(TargetPlatform platform) {
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return Icons.arrow_back;
+      case TargetPlatform.iOS:
+        return Icons.arrow_back_ios;
+    }
+    assert(false);
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) => new Icon(_getIconData(Theme.of(context).platform));
+}
+
 /// A material design back button.
 ///
 /// A [BackButton] is an [IconButton] with a "back" icon appropriate for the
@@ -27,6 +56,8 @@ import 'theme.dart';
 ///
 ///  * [AppBar], which automatically uses a [BackButton] in its
 ///    [AppBar.leading] slot when appropriate.
+///  * [BackButtonIcon], which is useful if you need to create a back button
+///    that responds differently to being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with
 ///    icons.
 ///  * [CloseButton], an alternative which may be more appropriate for leaf
@@ -36,27 +67,14 @@ class BackButton extends StatelessWidget {
   /// target platform.
   const BackButton({ Key key }) : super(key: key);
 
-  /// Returns tha appropriate "back" icon for the given `platform`.
-  static IconData getIconData(TargetPlatform platform) {
-    switch (platform) {
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return Icons.arrow_back;
-      case TargetPlatform.iOS:
-        return Icons.arrow_back_ios;
-    }
-    assert(false);
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
     return new IconButton(
-      icon: new Icon(getIconData(Theme.of(context).platform)),
+      icon: const BackButtonIcon(),
       tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
       onPressed: () {
         Navigator.of(context).maybePop();
-      },
+      }
     );
   }
 }

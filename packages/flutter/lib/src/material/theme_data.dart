@@ -441,7 +441,11 @@ class ThemeData {
   }
 
   /// Linearly interpolate between two themes.
+  ///
+  /// The arguments must not be null.
   static ThemeData lerp(ThemeData begin, ThemeData end, double t) {
+    assert(begin != null);
+    assert(end != null);
     return new ThemeData.raw(
       brightness: t < 0.5 ? begin.brightness : end.brightness,
       primaryColor: Color.lerp(begin.primaryColor, end.primaryColor, t),

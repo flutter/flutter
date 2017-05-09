@@ -215,22 +215,22 @@ class _FlutterPlatform extends PlatformPlugin {
 
       // Pipe stdout and stderr from the subprocess to our printStatus console.
       // We also keep track of what observatory port the engine used, if any.
-      int processObservatoryPort;
+      Uri processObservatoryUri;
       _pipeStandardStreamsToConsole(
         process,
-        reportObservatoryPort: (int detectedPort) {
-          assert(processObservatoryPort == null);
+        reportObservatoryUri: (Uri detectedUri) {
+          assert(processObservatoryUri == null);
           assert(explicitObservatoryPort == null ||
-                 explicitObservatoryPort == detectedPort);
+                 explicitObservatoryPort == detectedUri.port);
           if (debuggerMode) {
             printStatus('The test process has been started.');
             printStatus('You can now connect to it using observatory. To connect, load the following Web site in your browser:');
-            printStatus('  http://${host.address}:$detectedPort/');
+            printStatus('  $detectedUri');
             printStatus('You should first set appropriate breakpoints, then resume the test in the debugger.');
           } else {
-            printTrace('test $ourTestCount: using observatory port $detectedPort from pid ${process.pid} to collect coverage');
+            printTrace('test $ourTestCount: using observatory uri $detectedUri from pid ${process.pid} to collect coverage');
           }
-          processObservatoryPort = detectedPort;
+          processObservatoryUri = detectedUri;
         },
         startTimeoutTimer: () {
           new Future<_InitialResult>.delayed(_kTestStartupTimeout).then((_) => timeout.complete());
@@ -343,7 +343,7 @@ class _FlutterPlatform extends PlatformPlugin {
 
       if (subprocessActive && collector != null) {
         printTrace('test $ourTestCount: collecting coverage');
-        await collector.collectCoverage(process, host, processObservatoryPort);
+        await collector.collectCoverage(process, processObservatoryUri);
       }
     } catch (error, stack) {
       printTrace('test $ourTestCount: error caught during test; ${controllerSinkClosed ? "reporting to console" : "sending to test framework"}');
@@ -475,6 +475,8 @@ void main() {
     } else {
       command.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
     }
+    if (host.type == InternetAddressType.IP_V6)
+      command.add('--ipv6');
     command.addAll(<String>[
       '--enable-dart-profiling',
       '--non-interactive',
@@ -494,10 +496,10 @@ void main() {
   void _pipeStandardStreamsToConsole(
     Process process, {
     void startTimeoutTimer(),
-    void reportObservatoryPort(int port),
+    void reportObservatoryUri(Uri uri),
   }) {
-    final String observatoryPortString = 'Observatory listening on http://${host.address}:';
-    final String diagnosticPortString = 'Diagnostic server listening on http://${host.address}:';
+    final String observatoryString = 'Observatory listening on ';
+    final String diagnosticServerString = 'Diagnostic server listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
@@ -511,16 +513,16 @@ void main() {
             } else if (line.startsWith('error: Unable to read Dart source \'package:test/')) {
               printTrace('Shell: $line');
               printError('\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n');
-            } else if (line.startsWith(observatoryPortString)) {
+            } else if (line.startsWith(observatoryString)) {
               printTrace('Shell: $line');
               try {
-                final int port = int.parse(line.substring(observatoryPortString.length, line.length - 1)); // last character is a slash
-                if (reportObservatoryPort != null)
-                  reportObservatoryPort(port);
+                final Uri uri = Uri.parse(line.substring(observatoryString.length));
+                if (reportObservatoryUri != null)
+                  reportObservatoryUri(uri);
               } catch (error) {
                 printError('Could not parse shell observatory port message: $error');
               }
-            } else if (line.startsWith(diagnosticPortString)) {
+            } else if (line.startsWith(diagnosticServerString)) {
               printTrace('Shell: $line');
             } else if (line != null) {
               printStatus('Shell: $line');

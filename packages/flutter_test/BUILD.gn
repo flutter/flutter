@@ -7,7 +7,7 @@ import("//build/dart/dart_package.gni")
 dart_package("flutter_test") {
   package_name = "flutter_test"
 
-  source_dir = "lib"
+  analysis_options = "//lib/flutter/.analysis_options"
 
   deps = [
     "//lib/flutter/packages/flutter",

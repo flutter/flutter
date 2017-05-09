@@ -28,9 +28,9 @@ class CoverageCollector {
   /// has been run to completion so that all coverage data has been recorded.
   ///
   /// The returned [Future] completes when the coverage is collected.
-  Future<Null> collectCoverage(Process process, InternetAddress host, int port) async {
+  Future<Null> collectCoverage(Process process, Uri observatoryUri) async {
     assert(process != null);
-    assert(port != null);
+    assert(observatoryUri != null);
 
     final int pid = process.pid;
     int exitCode;
@@ -40,16 +40,27 @@ class CoverageCollector {
     if (exitCode != null)
       throw new Exception('Failed to collect coverage, process terminated before coverage could be collected.');
 
-    printTrace('pid $pid (port $port): collecting coverage data...');
-    final Map<String, dynamic> data = await coverage.collect(host.address, port, false, false).timeout(
-      const Duration(seconds: 30),
-      onTimeout: () { throw new Exception('Failed to collect coverage, it took more than thirty seconds.'); },
-    );
-    printTrace('pid $pid (port $port): ${ exitCode != null ? "process terminated prematurely with exit code $exitCode; aborting" : "collected coverage data; merging..." }');
+    printTrace('pid $pid: collecting coverage data from $observatoryUri...');
+    final Map<String, dynamic> data = await coverage
+        .collect(observatoryUri, false, false)
+        .timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            throw new Exception('Failed to collect coverage, it took more than thirty seconds.');
+          },
+        );
+    printTrace(() {
+      final StringBuffer buf = new StringBuffer()
+          ..write('pid $pid ($observatoryUri): ')
+          ..write(exitCode == null
+              ? 'collected coverage data; merging...'
+              : 'process terminated prematurely with exit code $exitCode; aborting');
+      return buf.toString();
+    }());
     if (exitCode != null)
       throw new Exception('Failed to collect coverage, process terminated while coverage was being collected.');
     _addHitmap(coverage.createHitmap(data['coverage']));
-    printTrace('pid $pid (port $port): done merging coverage data into global coverage map.');
+    printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data

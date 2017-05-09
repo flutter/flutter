@@ -58,13 +58,15 @@ class AnimatedCrossFade extends StatefulWidget {
        assert(sizeCurve != null),
        super(key: key);
 
-  /// The child that is visible when [crossFadeState] is [showFirst]. It fades
-  /// out when transitioning [crossFadeState] from [CrossFadeState.showFirst] to
+  /// The child that is visible when [crossFadeState] is
+  /// [CrossFadeState.showFirst]. It fades out when transitioning
+  /// [crossFadeState] from [CrossFadeState.showFirst] to
   /// [CrossFadeState.showSecond] and vice versa.
   final Widget firstChild;
 
-  /// The child that is visible when [crossFadeState] is [showSecond]. It fades
-  /// in when transitioning [crossFadeState] from [CrossFadeState.showFirst] to
+  /// The child that is visible when [crossFadeState] is
+  /// [CrossFadeState.showSecond]. It fades in when transitioning
+  /// [crossFadeState] from [CrossFadeState.showFirst] to
   /// [CrossFadeState.showSecond] and vice versa.
   final Widget secondChild;
 

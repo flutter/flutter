@@ -31,16 +31,14 @@ enum ExitStatus {
 }
 
 /// [FlutterCommand]s' subclasses' [FlutterCommand.runCommand] can optionally
-/// provide a [FlutterCommandResult] to furnish additional information for 
+/// provide a [FlutterCommandResult] to furnish additional information for
 /// analytics.
 class FlutterCommandResult {
-  FlutterCommandResult(
+  const FlutterCommandResult(
     this.exitStatus, {
     this.analyticsParameters,
     this.endTimeOverride,
-  }) { 
-    assert(exitStatus != null); 
-  }
+  });
 
   final ExitStatus exitStatus;
 
@@ -49,10 +47,10 @@ class FlutterCommandResult {
   /// Do not add PII.
   final List<String> analyticsParameters;
 
-  /// Optional epoch time when the command's non-interactive wait time is 
+  /// Optional epoch time when the command's non-interactive wait time is
   /// complete during the command's execution. Use to measure user perceivable
-  /// latency without measuring user interaction time. 
-  /// 
+  /// latency without measuring user interaction time.
+  ///
   /// [FlutterCommand] will automatically measure and report the command's
   /// complete time if not overriden.
   final DateTime endTimeOverride;
@@ -153,31 +151,38 @@ abstract class FlutterCommand extends Command<Null> {
     if (flutterUsage.isFirstRun)
       flutterUsage.printWelcome();
 
-    final FlutterCommandResult commandResult = await verifyThenRunCommand();
+    FlutterCommandResult commandResult;
+    try {
+      commandResult = await verifyThenRunCommand();
+    } on ToolExit {
+      commandResult = const FlutterCommandResult(ExitStatus.fail);
+      rethrow;
+    } finally {
+      final DateTime endTime = clock.now();
+      printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
+      if (usagePath != null) {
+        final List<String> labels = <String>[];
+        if (commandResult?.exitStatus != null)
+          labels.add(getEnumName(commandResult.exitStatus));
+        if (commandResult?.analyticsParameters?.isNotEmpty ?? false)
+          labels.addAll(commandResult.analyticsParameters);
 
-    final DateTime endTime = clock.now();
-    printTrace("'flutter $name' took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.");
-    if (usagePath != null) {
-      final List<String> labels = <String>[];
-      if (commandResult?.exitStatus != null)
-        labels.add(getEnumName(commandResult.exitStatus));
-      if (commandResult?.analyticsParameters?.isNotEmpty ?? false)
-        labels.addAll(commandResult.analyticsParameters);
-
-      final String label = labels
-          .where((String label) => !isBlank(label))
-          .join('-');
-      flutterUsage.sendTiming(
-        'flutter', 
-        name, 
-        // If the command provides its own end time, use it. Otherwise report
-        // the duration of the entire execution.
-        (commandResult?.endTimeOverride ?? endTime).difference(startTime), 
-        // Report in the form of `success-[parameter1-parameter2]`, all of which
-        // can be null if the command doesn't provide a FlutterCommandResult.
-        label: label == '' ? null : label,
-      );
+        final String label = labels
+            .where((String label) => !isBlank(label))
+            .join('-');
+        flutterUsage.sendTiming(
+          'flutter',
+          name,
+          // If the command provides its own end time, use it. Otherwise report
+          // the duration of the entire execution.
+          (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+          // Report in the form of `success-[parameter1-parameter2]`, all of which
+          // can be null if the command doesn't provide a FlutterCommandResult.
+          label: label == '' ? null : label,
+        );
+      }
     }
+
   }
 
   /// Perform validation then call [runCommand] to execute the command.
@@ -202,11 +207,11 @@ abstract class FlutterCommand extends Command<Null> {
     final String commandPath = await usagePath;
     if (commandPath != null)
       flutterUsage.sendCommand(commandPath);
-    return runCommand();
+    return await runCommand();
   }
 
   /// Subclasses must implement this to execute the command.
-  /// Optionally provide a [FlutterCommandResult] to send more details about the 
+  /// Optionally provide a [FlutterCommandResult] to send more details about the
   /// execution for analytics.
   Future<FlutterCommandResult> runCommand();
 

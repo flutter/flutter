@@ -839,10 +839,11 @@ class RenderBackdropFilter extends RenderProxyBox {
     assert(filter != null);
   }
 
-  /// The image filter to apply to the existing painted content before painting the child.
+  /// The image filter to apply to the existing painted content before painting
+  /// the child.
   ///
-  /// For example, consider using [ui.ImageFilter.blur] to create a backdrop
-  /// blur effect
+  /// For example, consider using [new ui.ImageFilter.blur] to create a backdrop
+  /// blur effect.
   ui.ImageFilter get filter => _filter;
   ui.ImageFilter _filter;
   set filter(ui.ImageFilter value) {

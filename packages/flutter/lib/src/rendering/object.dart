@@ -533,7 +533,7 @@ class PaintingContext {
 ///   [BoxConstraints.debugAssertIsValid] for an example of the detailed checks
 ///   that can be made.
 ///
-/// * The [operator ==] and [hashCode] members, so that constraints can be
+/// * The [==] operator and the [hashCode] getter, so that constraints can be
 ///   compared for equality. If a render object is given constraints that are
 ///   equal, then the rendering library will avoid laying the object out again
 ///   if it is not dirty.
