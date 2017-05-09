@@ -7,24 +7,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  testWidgets('TwoLevelList default control', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const TwoLevelList()));
-
-    await tester.pumpWidget(
-      new Material(
-        child: new Center(
-          child: new TwoLevelList(
-            children: <Widget>[
-              const TwoLevelSublist(
-                title: const Text('Title'),
-              )
-            ]
-          )
-        )
-      )
-    );
-  });
-
   testWidgets('TwoLevelList basics', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
     final Key sublistKey = new UniqueKey();
@@ -34,18 +16,18 @@ void main() {
       '/': (_) {
         return new Material(
           child: new SingleChildScrollView(
-            child: new TwoLevelList(
+            child: new Column(
               children: <Widget>[
-                new TwoLevelListItem(title: const Text('Top'), key: topKey),
-                new TwoLevelSublist(
+                new ListTile(title: const Text('Top'), key: topKey),
+                new ExpansionTile(
                   key: sublistKey,
                   title: const Text('Sublist'),
                   children: <Widget>[
-                    const TwoLevelListItem(title: const Text('0')),
-                    const TwoLevelListItem(title: const Text('1'))
+                    const ListTile(title: const Text('0')),
+                    const ListTile(title: const Text('1'))
                   ]
                 ),
-                new TwoLevelListItem(title: const Text('Bottom'), key: bottomKey)
+                new ListTile(title: const Text('Bottom'), key: bottomKey)
               ]
             )
           )
@@ -85,23 +67,23 @@ void main() {
     expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
   });
 
-  testWidgets('onOpenChanged callback', (WidgetTester tester) async {
+  testWidgets('onExpansionChanged callback', (WidgetTester tester) async {
     bool didChangeOpen;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (_) {
         return new Material(
           child: new SingleChildScrollView(
-            child: new TwoLevelList(
+            child: new Column(
               children: <Widget>[
-                new TwoLevelSublist(
+                new ExpansionTile(
                   title: const Text('Sublist'),
-                  onOpenChanged: (bool opened) {
+                  onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
                   children: <Widget>[
-                    const TwoLevelListItem(title: const Text('0')),
-                    const TwoLevelListItem(title: const Text('1'))
+                    const ListTile(title: const Text('0')),
+                    const ListTile(title: const Text('1'))
                   ]
                 ),
               ]
