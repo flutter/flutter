@@ -8,14 +8,14 @@ import 'package:test/test.dart';
 void main() {
   group('TextInputConfiguration', () {
     test('sets expected defaults', () {
-      TextInputConfiguration configuration = const TextInputConfiguration();
+      final TextInputConfiguration configuration = const TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
       expect(configuration.obscureText, false);
       expect(configuration.actionLabel, null);
     });
 
     test('serializes to JSON', () async {
-      TextInputConfiguration configuration = const TextInputConfiguration(
+      final TextInputConfiguration configuration = const TextInputConfiguration(
         inputType: TextInputType.number,
         obscureText: true,
         actionLabel: 'xyzzy'
