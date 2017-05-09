@@ -22,7 +22,7 @@ void main() {
       );
       final Map<String, dynamic> json = configuration.toJSON();
       expect(json['inputType'], 'TextInputType.number');
-      expect(json['obscureText'], 'true');
+      expect(json['obscureText'], true);
       expect(json['actionLabel'], 'xyzzy');
     });
   });
