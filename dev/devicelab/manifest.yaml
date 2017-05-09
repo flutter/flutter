@@ -158,6 +158,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  e2e:
+    description: >
+      Runs end-to-end Flutter tests on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   # iOS on-device tests
 
   channels_integration_test_ios:
@@ -218,6 +225,13 @@ tasks:
       Verifies that Flutter View can be used from an iOS project.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+
+  e2e_ios:
+    description: >
+      Runs end-to-end Flutter tests on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   # Tests running on Windows host
 
