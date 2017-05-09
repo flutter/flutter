@@ -66,7 +66,7 @@ class TextInputConfiguration {
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'inputType': inputType.toString(),
-      'obscureText': obscureText.toString(),
+      'obscureText': obscureText,
       'actionLabel': actionLabel,
     };
   }
