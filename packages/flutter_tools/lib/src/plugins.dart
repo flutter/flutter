@@ -77,8 +77,8 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
 
-{{#plugins}}
 import io.flutter.plugin.common.PluginRegistry;
+{{#plugins}}
 import {{package}}.{{class}};
 {{/plugins}}
 
