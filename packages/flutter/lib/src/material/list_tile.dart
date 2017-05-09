@@ -13,27 +13,6 @@ import 'icon_theme_data.dart';
 import 'ink_well.dart';
 import 'theme.dart';
 
-/// The kind of list tiles contained in a material design list.
-///
-/// See also:
-///
-///  * [ListTile]
-///  * [kListTileExtent]
-///  * <https://material.google.com/components/lists.html#lists-specs>
-enum MaterialListType {
-  /// A list tile that contains a single line of text.
-  oneLine,
-
-  /// A list tile that contains a [CircleAvatar] followed by a single line of text.
-  oneLineWithAvatar,
-
-  /// A list tile that contains two lines of text.
-  twoLine,
-
-  /// A list tile that contains three lines of text.
-  threeLine,
-}
-
 /// Defines the title font used for [ListTile] descendants of a [ListTileTheme].
 ///
 /// List tiles that appear in a [Drawer] use the theme's [TextTheme.body2]
@@ -46,21 +25,6 @@ enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
   drawer,
 }
-
-/// The vertical extent of the different types of material list tiles.
-///
-/// See also:
-///
-///  * [MaterialListType]
-///  * [ListTile]
-///  * [kListTileExtent]
-///  * <https://material.google.com/components/lists.html#lists-specs>
-Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>{
-  MaterialListType.oneLine: 48.0,
-  MaterialListType.oneLineWithAvatar: 56.0,
-  MaterialListType.twoLine: 72.0,
-  MaterialListType.threeLine: 88.0,
-};
 
 /// An inherited widget that defines  color and style parameters for [ListTile]s
 /// in this widget's subtree.

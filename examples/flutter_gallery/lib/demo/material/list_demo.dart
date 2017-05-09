@@ -4,6 +4,20 @@
 
 import 'package:flutter/material.dart';
 
+enum _MaterialListType {
+  /// A list tile that contains a single line of text.
+  oneLine,
+
+  /// A list tile that contains a [CircleAvatar] followed by a single line of text.
+  oneLineWithAvatar,
+
+  /// A list tile that contains two lines of text.
+  twoLine,
+
+  /// A list tile that contains three lines of text.
+  threeLine,
+}
+
 class ListDemo extends StatefulWidget {
   const ListDemo({ Key key }) : super(key: key);
 
@@ -17,7 +31,7 @@ class _ListDemoState extends State<ListDemo> {
   static final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
 
   PersistentBottomSheetController<Null> _bottomSheet;
-  MaterialListType _itemType = MaterialListType.threeLine;
+  _MaterialListType _itemType = _MaterialListType.threeLine;
   bool _dense = false;
   bool _showAvatars = true;
   bool _showIcons = false;
@@ -27,7 +41,7 @@ class _ListDemoState extends State<ListDemo> {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
-  void changeItemType(MaterialListType type) {
+  void changeItemType(_MaterialListType type) {
     setState(() {
       _itemType = type;
     });
@@ -47,8 +61,8 @@ class _ListDemoState extends State<ListDemo> {
             new ListTile(
               dense: true,
               title: const Text('One-line'),
-              trailing: new Radio<MaterialListType>(
-                value: _showAvatars ? MaterialListType.oneLineWithAvatar : MaterialListType.oneLine,
+              trailing: new Radio<_MaterialListType>(
+                value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
                 groupValue: _itemType,
                 onChanged: changeItemType,
               )
@@ -56,8 +70,8 @@ class _ListDemoState extends State<ListDemo> {
             new ListTile(
               dense: true,
               title: const Text('Two-line'),
-              trailing: new Radio<MaterialListType>(
-                value: MaterialListType.twoLine,
+              trailing: new Radio<_MaterialListType>(
+                value: _MaterialListType.twoLine,
                 groupValue: _itemType,
                 onChanged: changeItemType,
               )
@@ -65,8 +79,8 @@ class _ListDemoState extends State<ListDemo> {
             new ListTile(
               dense: true,
               title: const Text('Three-line'),
-              trailing: new Radio<MaterialListType>(
-                value: MaterialListType.threeLine,
+              trailing: new Radio<_MaterialListType>(
+                value: _MaterialListType.threeLine,
                 groupValue: _itemType,
                 onChanged: changeItemType,
               ),
@@ -143,15 +157,15 @@ class _ListDemoState extends State<ListDemo> {
 
   Widget buildListTile(BuildContext context, String item) {
     Widget secondary;
-    if (_itemType == MaterialListType.twoLine) {
+    if (_itemType == _MaterialListType.twoLine) {
       secondary = const Text("Additional item information.");
-    } else if (_itemType == MaterialListType.threeLine) {
+    } else if (_itemType == _MaterialListType.threeLine) {
       secondary = const Text(
         "Even more additional list item information appears on line three.",
       );
     }
     return new ListTile(
-      isThreeLine: _itemType == MaterialListType.threeLine,
+      isThreeLine: _itemType == _MaterialListType.threeLine,
       dense: _dense,
       leading: _showAvatars ? new CircleAvatar(child: new Text(item)) : null,
       title: new Text('This item represents $item.'),
@@ -165,14 +179,14 @@ class _ListDemoState extends State<ListDemo> {
     final String layoutText = _dense ? " \u2013 Dense" : "";
     String itemTypeText;
     switch (_itemType) {
-      case MaterialListType.oneLine:
-      case MaterialListType.oneLineWithAvatar:
+      case _MaterialListType.oneLine:
+      case _MaterialListType.oneLineWithAvatar:
         itemTypeText = 'Single-line';
         break;
-      case MaterialListType.twoLine:
+      case _MaterialListType.twoLine:
         itemTypeText = 'Two-line';
         break;
-      case MaterialListType.threeLine:
+      case _MaterialListType.threeLine:
         itemTypeText = 'Three-line';
         break;
     }
