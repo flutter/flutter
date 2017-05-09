@@ -67,7 +67,7 @@ void main() {
     expect(getY(bottomKey) - getY(sublistKey), greaterThan(getHeight(bottomKey)));
   });
 
-  testWidgets('onOpenChanged callback', (WidgetTester tester) async {
+  testWidgets('onExpansionChanged callback', (WidgetTester tester) async {
     bool didChangeOpen;
 
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -78,7 +78,7 @@ void main() {
               children: <Widget>[
                 new ExpansionTile(
                   title: const Text('Sublist'),
-                  onOpenChanged: (bool opened) {
+                  onExpansionChanged: (bool opened) {
                     didChangeOpen = opened;
                   },
                   children: <Widget>[

@@ -24,8 +24,10 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///
 /// See also:
 ///
+///  * [ListTile], useful for creating expansion tile [children] when the
+///    expansion tile represents a sublist.
 ///  * The "Expand/collapse" section of
-///    <https://material.io/guidelines/components/lists-controls.html>
+///    <https://material.io/guidelines/components/lists-controls.html>.
 class ExpansionTile extends StatefulWidget {
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
   /// the tile to reveal or hide the [children].
@@ -34,7 +36,7 @@ class ExpansionTile extends StatefulWidget {
     this.leading,
     @required this.title,
     this.backgroundColor,
-    this.onOpenChanged,
+    this.onExpansionChanged,
     this.children: const <Widget>[],
   }) : super(key: key);
 
@@ -53,7 +55,7 @@ class ExpansionTile extends StatefulWidget {
   /// When the tile starts expanding, this function is called with the value
   /// `true`. When the tile starts collapsing, this function is called with
   /// the value false.
-  final ValueChanged<bool> onOpenChanged;
+  final ValueChanged<bool> onExpansionChanged;
 
   /// The widgets that are displayed when the tile expands.
   ///
@@ -102,7 +104,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     super.dispose();
   }
 
-  void _handleOnTap() {
+  void _handleTap() {
     setState(() {
       _isExpanded = !_isExpanded;
       if (_isExpanded)
@@ -111,44 +113,48 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         _controller.reverse();
       PageStorage.of(context)?.writeState(context, _isExpanded);
     });
-    if (widget.onOpenChanged != null)
-      widget.onOpenChanged(_isExpanded);
+    if (widget.onExpansionChanged != null)
+      widget.onExpansionChanged(_isExpanded);
   }
 
   Widget _buildChildren(BuildContext context, Widget child) {
+    final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation);
+    final Color titleColor = _headerColor.evaluate(_easeInAnimation);
+
     return new Container(
       decoration: new BoxDecoration(
         color: _backgroundColor.evaluate(_easeOutAnimation),
         border: new Border(
-          top: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation)),
-          bottom: new BorderSide(color: _borderColor.evaluate(_easeOutAnimation))
+          top: new BorderSide(color: borderSideColor),
+          bottom: new BorderSide(color: borderSideColor),
         )
       ),
       child: new Column(
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           IconTheme.merge(
             data: new IconThemeData(color: _iconColor.evaluate(_easeInAnimation)),
             child: new ListTile(
-              onTap: _handleOnTap,
+              onTap: _handleTap,
               leading: widget.leading,
               title: new DefaultTextStyle(
-                style: Theme.of(context).textTheme.subhead.copyWith(color: _headerColor.evaluate(_easeInAnimation)),
-                child: widget.title
+                style: Theme.of(context).textTheme.subhead.copyWith(color: titleColor),
+                child: widget.title,
               ),
               trailing: new RotationTransition(
                 turns: _iconTurns,
-                child: const Icon(Icons.expand_more)
-              )
-            )
+                child: const Icon(Icons.expand_more),
+              ),
+            ),
           ),
           new ClipRect(
             child: new Align(
               heightFactor: _easeInAnimation.value,
-              child: new Column(children: widget.children)
-            )
-          )
-        ]
-      )
+              child: child,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -168,7 +174,8 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
     return new AnimatedBuilder(
       animation: _controller.view,
-      builder: _buildChildren
+      builder: _buildChildren,
+      child: new Column(children: widget.children),
     );
   }
 }
