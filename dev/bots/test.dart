@@ -100,7 +100,6 @@ Future<Null> main() async {
     );
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_markdown'));
     await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
 
     await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));

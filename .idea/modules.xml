@@ -7,7 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/packages/flutter/flutter.iml" filepath="$PROJECT_DIR$/packages/flutter/flutter.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/flutter_driver/flutter_driver.iml" filepath="$PROJECT_DIR$/packages/flutter_driver/flutter_driver.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/flutter_gallery/flutter_gallery.iml" filepath="$PROJECT_DIR$/examples/flutter_gallery/flutter_gallery.iml" />
-      <module fileurl="file://$PROJECT_DIR$/packages/flutter_markdown/flutter_markdown.iml" filepath="$PROJECT_DIR$/packages/flutter_markdown/flutter_markdown.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/flutter_test/flutter_test.iml" filepath="$PROJECT_DIR$/packages/flutter_test/flutter_test.iml" />
       <module fileurl="file://$PROJECT_DIR$/packages/flutter_tools/flutter_tools.iml" filepath="$PROJECT_DIR$/packages/flutter_tools/flutter_tools.iml" />
       <module fileurl="file://$PROJECT_DIR$/examples/hello_world/hello_world.iml" filepath="$PROJECT_DIR$/examples/hello_world/hello_world.iml" />
