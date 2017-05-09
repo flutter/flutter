@@ -43,7 +43,7 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType] argument must not be null.
+  /// The [inputType] and [obscureText] arguments must not be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
     this.obscureText: false,
@@ -54,6 +54,9 @@ class TextInputConfiguration {
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
 
+  /// Whether to hide the text being edited (e.g., for passwords).
+  ///
+  /// Defaults to false.
   final bool obscureText;
 
   /// What text to display in the text input control's action button.
