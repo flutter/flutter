@@ -33,7 +33,7 @@ class FlutterErrorDetails {
     this.stackFilter,
     this.informationCollector,
     this.silent: false
-  }) : assert(exception != null);
+  });
 
   /// The exception. Often this will be an [AssertionError], maybe specifically
   /// a [FlutterError]. However, this could be any value at all.

@@ -189,7 +189,14 @@ class SliverConstraints extends Constraints {
     @required this.remainingPaintExtent,
     @required this.crossAxisExtent,
     @required this.viewportMainAxisExtent,
-  });
+  }) : assert(axisDirection != null),
+       assert(growthDirection != null),
+       assert(userScrollDirection != null),
+       assert(scrollOffset != null),
+       assert(overlap != null),
+       assert(remainingPaintExtent != null),
+       assert(crossAxisExtent != null),
+       assert(viewportMainAxisExtent != null);
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -469,7 +476,13 @@ class SliverGeometry {
     bool visible,
     this.hasVisualOverflow: false,
     this.scrollOffsetCorrection: 0.0
-  }) : layoutExtent = layoutExtent ?? paintExtent,
+  }) : assert(scrollExtent != null),
+       assert(paintExtent != null),
+       assert(paintOrigin != null),
+       assert(maxPaintExtent != null),
+       assert(hasVisualOverflow != null),
+       assert(scrollOffsetCorrection != null),
+       layoutExtent = layoutExtent ?? paintExtent,
        hitTestExtent = hitTestExtent ?? paintExtent,
        visible = visible ?? paintExtent > 0.0;
 
@@ -635,7 +648,9 @@ class SliverHitTestEntry extends HitTestEntry {
   const SliverHitTestEntry(RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,
-  }) : super(target);
+  }) : assert(mainAxisPosition != null),
+       assert(crossAxisPosition != null),
+       super(target);
 
   @override
   RenderSliver get target => super.target;

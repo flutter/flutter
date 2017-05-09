@@ -229,6 +229,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   TextBaseline get textBaseline => _textBaseline;
   TextBaseline _textBaseline;
   set textBaseline(TextBaseline value) {
+    assert(_crossAxisAlignment != CrossAxisAlignment.baseline || value != null);
     if (_textBaseline != value) {
       _textBaseline = value;
       markNeedsLayout();

@@ -21,11 +21,15 @@ class TextRange {
   const TextRange({
     @required this.start,
     @required this.end
-  });
+  }) : assert(start != null && start >= -1),
+       assert(end != null && end >= -1);
 
   /// A text range that starts and ends at offset.
+  ///
+  /// The [offset] argument must be non-null and greater than or equal to -1.
   const TextRange.collapsed(int offset)
-    : start = offset,
+    : assert(offset != null && offset >= -1),
+      start = offset,
       end = offset;
 
   /// A text range that contains nothing and is not in the text.
