@@ -993,7 +993,7 @@ class LinearGradient extends Gradient {
 ///  * [CustomPainter], which shows how to use the above sample code in a custom
 ///    painter.
 class RadialGradient extends Gradient {
-  /// Creates a radial graident.
+  /// Creates a radial gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
@@ -1003,7 +1003,10 @@ class RadialGradient extends Gradient {
     this.colors,
     this.stops,
     this.tileMode: TileMode.clamp,
-  });
+  }) : assert(center != null),
+       assert(radius != null),
+       assert(colors != null),
+       assert(tileMode != null);
 
   /// The center of the gradient, as an offset into the unit square
   /// describing the gradient which will be mapped onto the paint box.
@@ -1265,7 +1268,7 @@ class DecorationImage {
     this.centerSlice,
     this.colorFilter,
     this.alignment,
-  });
+  }) : assert(image != null);
 
   /// The image to be painted into the decoration.
   final ImageProvider image;
