@@ -53,7 +53,7 @@ class SawTooth extends Curve {
   /// Creates a sawtooth curve.
   ///
   /// The [count] argument must not be null.
-  const SawTooth(this.count);
+  const SawTooth(this.count) : assert(count != null);
 
   /// The number of repetitions of the sawtooth pattern in the unit interval.
   final int count;
@@ -84,7 +84,10 @@ class Interval extends Curve {
   /// Creates an interval curve.
   ///
   /// The arguments must not be null.
-  const Interval(this.begin, this.end, { this.curve: Curves.linear });
+  const Interval(this.begin, this.end, { this.curve: Curves.linear })
+      : assert(begin != null),
+        assert(end != null),
+        assert(curve != null);
 
   /// The largest value for which this interval is 0.0.
   ///
@@ -128,7 +131,7 @@ class Threshold extends Curve {
   /// Creates a threshold curve.
   ///
   /// The [threshold] argument must not be null.
-  const Threshold(this.threshold);
+  const Threshold(this.threshold) : assert(threshold != null);
 
   /// The value before which the curve is 0.0 and after which the curve is 1.0.
   ///
@@ -163,7 +166,11 @@ class Cubic extends Curve {
   /// cubic curves in [Curves].
   ///
   /// The [a], [b], [c], and [d] arguments must not be null.
-  const Cubic(this.a, this.b, this.c, this.d);
+  const Cubic(this.a, this.b, this.c, this.d)
+      : assert(a != null),
+        assert(b != null),
+        assert(c != null),
+        assert(d != null);
 
   /// The x coordinate of the first control point.
   ///
@@ -229,7 +236,7 @@ class FlippedCurve extends Curve {
   /// Creates a flipped curve.
   ///
   /// The [curve] argument must not be null.
-  const FlippedCurve(this.curve);
+  const FlippedCurve(this.curve) : assert(curve != null);
 
   /// The curve that is being flipped.
   final Curve curve;
