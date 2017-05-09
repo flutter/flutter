@@ -353,8 +353,10 @@ class UserHeader extends StatelessWidget {
             padding: const EdgeInsets.only(right: 8.0),
             child: new Image(
               image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
-              width: 32.0,
-              height: 32.0
+              style: const ImageStyle(
+                width: 32.0,
+                height: 32.0
+              )
             )
           ),
           new Expanded(

@@ -65,7 +65,7 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned.fill(
                     child: new Image.asset(
                       destination.assetName,
-                      fit: BoxFit.cover,
+                      style: const ImageStyle(fit: BoxFit.cover),
                     ),
                   ),
                   new Positioned(

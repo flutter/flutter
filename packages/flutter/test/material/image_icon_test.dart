@@ -37,7 +37,7 @@ void main() {
 
     final Image image = tester.widget(find.byType(Image));
     expect(image, isNotNull);
-    expect(image.color.alpha, equals(128));
+    expect(image.style.color.alpha, equals(128));
   });
 
   testWidgets('ImageIcon sizing - no theme, explicit size', (WidgetTester tester) async {

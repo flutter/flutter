@@ -99,7 +99,10 @@ class _CardDataItem extends StatelessWidget {
             new SizedBox(
               width: 144.0,
               height: 144.0,
-              child: new Image.asset(data.imageAsset, fit: BoxFit.contain),
+              child: new Image.asset(
+                data.imageAsset,
+                style: const ImageStyle(fit: BoxFit.contain),
+              ),
             ),
             new Center(
               child: new Text(data.title, style: Theme.of(context).textTheme.title),

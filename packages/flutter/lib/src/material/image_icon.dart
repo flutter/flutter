@@ -68,11 +68,13 @@ class ImageIcon extends StatelessWidget {
 
     return new Image(
       image: image,
-      width: iconSize,
-      height: iconSize,
-      color: iconColor,
-      fit: BoxFit.scaleDown,
-      alignment: FractionalOffset.center
+      style: new ImageStyle(
+        width: iconSize,
+        height: iconSize,
+        color: iconColor,
+        fit: BoxFit.scaleDown,
+        alignment: FractionalOffset.center
+      ),
     );
   }
 

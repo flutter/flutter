@@ -218,7 +218,10 @@ class _PestoLogoState extends State<PestoLogo> {
           children: <Widget>[
             new Positioned.fromRect(
               rect: _imageRectTween.lerp(widget.t),
-              child: new Image.asset(_kSmallLogoImage, fit: BoxFit.contain),
+              child: new Image.asset(
+                _kSmallLogoImage,
+                style: const ImageStyle(fit: BoxFit.contain),
+              ),
             ),
             new Positioned.fromRect(
               rect: _textRectTween.lerp(widget.t),
@@ -254,7 +257,10 @@ class RecipeCard extends StatelessWidget {
           children: <Widget>[
             new Hero(
               tag: recipe.imagePath,
-              child: new Image.asset(recipe.imagePath, fit: BoxFit.contain)
+              child: new Image.asset(
+                recipe.imagePath,
+                style: const ImageStyle(fit: BoxFit.contain),
+              ),
             ),
             new Expanded(
               child: new Row(
@@ -263,8 +269,10 @@ class RecipeCard extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     child: new Image.asset(
                       recipe.ingredientsImagePath,
-                      width: 48.0,
-                      height: 48.0,
+                      style: const ImageStyle(
+                        width: 48.0,
+                        height: 48.0,
+                      ),
                     ),
                   ),
                   new Expanded(
@@ -325,7 +333,9 @@ class _RecipePageState extends State<RecipePage> {
               tag: widget.recipe.imagePath,
               child: new Image.asset(
                 widget.recipe.imagePath,
-                fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
+                style: new ImageStyle(
+                  fit: fullWidth ? BoxFit.fitWidth : BoxFit.cover,
+                ),
               ),
             ),
           ),
@@ -434,10 +444,12 @@ class RecipeSheet extends StatelessWidget {
                   verticalAlignment: TableCellVerticalAlignment.middle,
                   child: new Image.asset(
                     recipe.ingredientsImagePath,
-                    width: 32.0,
-                    height: 32.0,
-                    alignment: FractionalOffset.centerLeft,
-                    fit: BoxFit.scaleDown
+                    style: const ImageStyle(
+                      width: 32.0,
+                      height: 32.0,
+                      alignment: FractionalOffset.centerLeft,
+                      fit: BoxFit.scaleDown,
+                    ),
                   )
                 ),
                 new TableCell(

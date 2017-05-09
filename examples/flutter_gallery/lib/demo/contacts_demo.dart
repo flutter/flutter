@@ -155,8 +155,10 @@ class ContactsDemoState extends State<ContactsDemo> {
                   children: <Widget>[
                     new Image.asset(
                       'packages/flutter_gallery_assets/ali_connors.jpg',
-                      fit: BoxFit.cover,
-                      height: _appBarHeight,
+                      style: new ImageStyle(
+                        fit: BoxFit.cover,
+                        height: _appBarHeight,
+                      ),
                     ),
                     // This gradient ensures that the toolbar icons are distinct
                     // against the background image.

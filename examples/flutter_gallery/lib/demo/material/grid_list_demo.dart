@@ -130,7 +130,10 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
           transform: new Matrix4.identity()
             ..translate(_offset.dx, _offset.dy)
             ..scale(_scale),
-          child: new Image.asset(widget.photo.assetName, fit: BoxFit.cover),
+          child: new Image.asset(
+            widget.photo.assetName,
+            style: const ImageStyle(fit: BoxFit.cover),
+          ),
         ),
       ),
     );
@@ -178,7 +181,10 @@ class GridDemoPhotoItem extends StatelessWidget {
       child: new Hero(
         key: new Key(photo.assetName),
         tag: photo.tag,
-        child: new Image.asset(photo.assetName, fit: BoxFit.cover)
+        child: new Image.asset(
+          photo.assetName,
+          style: const ImageStyle(fit: BoxFit.cover),
+        )
       )
     );
 
