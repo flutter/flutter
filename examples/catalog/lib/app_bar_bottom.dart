@@ -89,12 +89,12 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
         title: const Text('AppBar Bottom Widget'),
         leading: new IconButton(
             tooltip: 'Previous choice',
-          icon: new Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () { _nextPage(-1); },
         ),
         actions: <Widget>[
           new IconButton(
-            icon: new Icon(Icons.arrow_forward),
+            icon: const Icon(Icons.arrow_forward),
             tooltip: 'Next choice',
             onPressed: () { _nextPage(1); },
           ),
