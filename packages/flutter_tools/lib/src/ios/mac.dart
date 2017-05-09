@@ -145,6 +145,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
+  final String developmentTeam = _getCodeSigningIdentityDevelopmentTeam(app);
+
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
@@ -170,6 +172,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     '-configuration', 'Release',
     'ONLY_ACTIVE_ARCH=YES',
   ];
+
+  if (developmentTeam != null)
+    commands.add('DEVELOPMENT_TEAM=$developmentTeam');
 
   final List<FileSystemEntity> contents = fs.directory(app.appDirectory).listSync();
   for (FileSystemEntity entity in contents) {
@@ -352,6 +357,87 @@ bool _checkXcodeVersion() {
     return false;
   }
   return true;
+}
+
+final RegExp _securityFindIdentityIdentityExtractionPattern = new RegExp(r'^\s+\d+\).+"(.+)"$');
+final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'".*\(([a-zA-Z0-9]+)\)"');
+final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
+
+/// Given a [BuildableIOSApp], this will try to find valid code signing
+/// identities in the user's keychain prompting a choice if multiple are found.
+///
+/// Will return null if none are found, if the user cancels or if the XCode
+/// project has a development team set in the project's build settings.
+String _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) {
+  if (iosApp.buildSettings == null)
+    return null;
+
+  // If the user already has it set in the project build settings itself,
+  // continue with that.
+  if (iosApp.buildSettings['DEVELOPMENT_TEAM'] != null
+      || iosApp.buildSettings['PROVISIONING_PROFILE'] != null)
+    return null;
+
+  // If the user's environment is missing the tools needed to find and read
+  // certificates, abandon. Tools should be pre-equipped on macOS.
+  if (!exitsHappy(<String>['which', 'security'])
+      || !exitsHappy(<String>['which', 'openssl']))
+    return null;
+
+  final List<String> validCodeSigningIdentities = runCheckedSync(<String>[
+    'security',
+    'find-identity',
+    '-p codesigning',
+    '-v',
+  ])
+      .split('\n')
+      .map<String>((String outputLine) {
+        final Iterable<Match> validIdentityCN =
+            outputLine.allMatches(_securityFindIdentityIdentityExtractionPattern);
+        return validIdentityCN.isNotEmpty && validIdentityCN.first.groupCount == 1
+            ? validIdentityCN.first.group(0)
+            : null;
+      })
+      .where((String identityCN) => identityCN != null);
+
+  final String signingIdentity = _chooseSigningIdentity(validCodeSigningIdentities);
+
+  // If none are chosen.
+  if (signingIdentity == null)
+    return null;
+
+  final String signingCertificateId =
+      _securityFindIdentityCertificateCnExtractionPattern.stringMatch(signingIdentity);
+
+  // If `security`'s output format changes, we'd have to update this
+  if (signingCertificateId == null)
+    return null;
+
+  return _certificateOrganizationalUnitExtractionPattern.stringMatch(
+    runCheckedSync(<String>[
+      'security',
+      'find-certificate',
+      '-c $signingCertificateId',
+      '-p',
+      '|',
+      'openssl',
+      'x509',
+      '-subject',
+    ])
+  );
+}
+
+String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
+  // The user has no valid code signing identities.
+  // TODO(xster): we should show more specific instructions here and have the
+  // user go into XCode, sign in with Apple ID and either download the profiles
+  // or go through the developer account setup flow.
+  if (validCodeSigningIdentities.isEmpty)
+    return null;
+
+  // TODO(xster): let the user choose one.
+  if (validCodeSigningIdentities.length >= 1)
+    return validCodeSigningIdentities.first;
 }
 
 final String noCocoaPodsConsequence = '''

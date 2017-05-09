@@ -77,11 +77,10 @@ Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
 
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
-String substituteXcodeVariables(String str, String xcodeProjPath, String target) {
+String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
   final Iterable<Match> matches = _varExpr.allMatches(str);
   if (matches.isEmpty)
     return str;
 
-  final Map<String, String> settings = getXcodeBuildSettings(xcodeProjPath, target);
-  return str.replaceAllMapped(_varExpr, (Match m) => settings[m[1]] ?? m[0]);
+  return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
 }
