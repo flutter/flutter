@@ -232,7 +232,8 @@ class DefaultTabController extends StatefulWidget {
     @required this.length,
     this.initialIndex: 0,
     @required this.child,
-  }) : super(key: key);
+  }) : assert(initialIndex != null),
+       super(key: key);
 
   /// The total number of tabs. Must be greater than one.
   final int length;

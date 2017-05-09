@@ -69,7 +69,11 @@ class IconButton extends StatelessWidget {
     this.disabledColor,
     @required this.onPressed,
     this.tooltip
-  }) : super(key: key);
+  }) : assert(iconSize != null),
+       assert(padding != null),
+       assert(alignment != null),
+       assert(icon != null),
+       super(key: key);
 
   /// The size of the icon inside the button.
   ///
