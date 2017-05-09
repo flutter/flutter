@@ -20,7 +20,7 @@ void main() {
         obscureText: true,
         actionLabel: 'xyzzy'
       );
-      Map<String, dynamic> json = configuration.toJSON();
+      final Map<String, dynamic> json = configuration.toJSON();
       expect(json['inputType'], 'TextInputType.number');
       expect(json['obscureText'], 'true');
       expect(json['actionLabel'], 'xyzzy');
