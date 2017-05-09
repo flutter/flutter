@@ -548,6 +548,7 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
+  _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
   [_view setTextInputClient:client];
   [_view reloadInputViews];
 }
