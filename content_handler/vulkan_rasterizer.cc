@@ -130,8 +130,8 @@ VulkanRasterizer::VulkanSurfaceProducer::CreateSurface(uint32_t width,
 
   SkSurfaceProps props(SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
-  auto sk_surface = SkSurface::MakeFromBackendRenderTarget(
-      context_.get(), desc, SkColorSpace::MakeSRGB(), &props);
+  auto sk_surface = SkSurface::MakeFromBackendRenderTarget(context_.get(), desc,
+                                                           nullptr, &props);
   if (!sk_surface) {
     FTL_LOG(ERROR) << "MakeFromBackendRenderTarget Failed";
     return nullptr;
