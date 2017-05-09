@@ -13,7 +13,7 @@ class Velocity {
   /// Creates a velocity.
   ///
   /// The [pixelsPerSecond] argument must not be null.
-  const Velocity({ this.pixelsPerSecond });
+  const Velocity({ this.pixelsPerSecond }) : assert(pixelsPerSecond != null);
 
   /// A velocity that isn't moving at all.
   static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
@@ -87,12 +87,17 @@ class Velocity {
 ///    useful velocity operations.
 class VelocityEstimate {
   /// Creates a dimensional velocity estimate.
+  ///
+  /// [pixelsPerSecond], [confidence], [duration], and [offset] must not be null.
   const VelocityEstimate({
     this.pixelsPerSecond,
     this.confidence,
     this.duration,
     this.offset,
-  });
+  }) : assert(pixelsPerSecond != null),
+       assert(confidence != null),
+       assert(duration != null),
+       assert(offset != null);
 
   /// The number of pixels per second of velocity in the x and y directions.
   final Offset pixelsPerSecond;
@@ -116,7 +121,9 @@ class VelocityEstimate {
 }
 
 class _PointAtTime {
-  const _PointAtTime(this.point, this.time);
+  const _PointAtTime(this.point, this.time)
+      : assert(point != null),
+        assert(time != null);
 
   final Duration time;
   final Offset point;
