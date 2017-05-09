@@ -154,7 +154,9 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     this.initialPage: 0,
     double viewportFraction: 1.0,
     ScrollPosition oldPosition,
-  }) : _viewportFraction = viewportFraction, super(
+  }) : _viewportFraction = viewportFraction,
+       _pageToUseOnStartup = initialPage.toDouble(),
+       super(
     physics: physics,
     context: context,
     initialPixels: null,
@@ -166,6 +168,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
   }
 
   final int initialPage;
+  double _pageToUseOnStartup;
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -198,7 +201,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     if (pixels == null) {
       final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
       if (value != null)
-        correctPixels(getPixelsFromPage(value));
+        _pageToUseOnStartup = value;
     }
   }
 
@@ -207,7 +210,7 @@ class _PagePosition extends ScrollPositionWithSingleContext {
     final double oldViewportDimensions = this.viewportDimension;
     final bool result = super.applyViewportDimension(viewportDimension);
     final double oldPixels = pixels;
-    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? initialPage.toDouble() : getPageFromPixels(oldPixels, oldViewportDimensions);
+    final double page = (oldPixels == null || oldViewportDimensions == 0.0) ? _pageToUseOnStartup : getPageFromPixels(oldPixels, oldViewportDimensions);
     final double newPixels = getPixelsFromPage(page);
     if (newPixels != oldPixels) {
       correctPixels(newPixels);
