@@ -73,21 +73,24 @@ public class TextInputPlugin implements MethodCallHandler {
         }
     }
 
-    private static int inputTypeFromTextInputType(String inputType) {
+    private static int inputTypeFromTextInputType(String inputType, boolean obscureText) {
         if (inputType.equals("TextInputType.datetime"))
             return InputType.TYPE_CLASS_DATETIME;
         if (inputType.equals("TextInputType.number"))
             return InputType.TYPE_CLASS_NUMBER;
         if (inputType.equals("TextInputType.phone"))
             return InputType.TYPE_CLASS_PHONE;
-        return InputType.TYPE_CLASS_TEXT;
+        return obscureText
+          ? InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
+          : InputType.TYPE_CLASS_TEXT;
     }
 
     public InputConnection createInputConnection(FlutterView view, EditorInfo outAttrs)
         throws JSONException {
         if (mClient == 0)
             return null;
-        outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"));
+        outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"),
+            mConfiguration.optBoolean("obscureText"));
         outAttrs.actionLabel = mConfiguration.getString("actionLabel");
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, this,
