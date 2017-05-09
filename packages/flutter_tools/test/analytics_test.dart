@@ -93,7 +93,7 @@ void main() {
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose()).thenReturn(true);
+      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(true);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -112,7 +112,7 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose()).thenReturn(false);
+      when(mockDoctor.diagnose(androidLicenses: false)).thenReturn(false);
       final DoctorCommand command = new DoctorCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);

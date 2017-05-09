@@ -32,7 +32,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
   static const String _kJdkDownload = 'https://www.oracle.com/technetwork/java/javase/downloads/';
 
   /// First try Java bundled with Android Studio, then sniff JAVA_HOME, then fallback to PATH.
-  String _findJavaBinary() {
+  static String _findJavaBinary() {
 
     if (android_studio.javaPath != null)
       return fs.path.join(android_studio.javaPath, 'bin', 'java');
@@ -162,5 +162,33 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     // Success.
     return new ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
+  }
+
+  /// Run the Android SDK manager tool in order to accept SDK licenses.
+  static Future<bool> runLicenseManager() async {
+    if (androidSdk == null) {
+      printStatus('Unable to locate Android SDK.');
+      return false;
+    }
+
+    // If we can locate Java, then add it to the path used to run the Android SDK manager.
+    final Map<String, String> sdkManagerEnv = <String, String>{};
+    final String javaBinary = _findJavaBinary();
+    if (javaBinary != null) {
+      sdkManagerEnv['PATH'] =
+          platform.environment['PATH'] + os.pathVarSeparator + fs.path.dirname(javaBinary);
+    }
+
+    final Process process = await Process.start(
+      fs.path.join(androidSdk.directory, 'tools', 'bin', 'sdkmanager'),
+      <String>['--licenses'],
+      environment: sdkManagerEnv,
+    );
+    stdout.addStream(process.stdout);
+    stderr.addStream(process.stderr);
+    process.stdin.addStream(stdin);
+
+    final int exitCode = await process.exitCode;
+    return exitCode == 0;
   }
 }

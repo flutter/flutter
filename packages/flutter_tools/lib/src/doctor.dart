@@ -106,7 +106,10 @@ class Doctor {
   }
 
   /// Print verbose information about the state of installed tooling.
-  Future<bool> diagnose() async {
+  Future<bool> diagnose({ bool androidLicenses: false }) async {
+    if (androidLicenses)
+      return AndroidWorkflow.runLicenseManager();
+
     bool doctorResult = true;
 
     for (DoctorValidator validator in validators) {
