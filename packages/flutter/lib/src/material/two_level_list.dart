@@ -31,6 +31,7 @@ enum MaterialListType {
 
 /// This constant is deprecated. The [ListTile] class sizes itself based on
 /// its content and [ListTileTheme].
+@deprecated
 Map<MaterialListType, double> kListTileExtent = const <MaterialListType, double>{
   MaterialListType.oneLine: 48.0,
   MaterialListType.oneLineWithAvatar: 56.0,
