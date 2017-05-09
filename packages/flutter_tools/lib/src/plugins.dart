@@ -77,26 +77,20 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
 
-import io.flutter.app.FlutterActivity;
-
 {{#plugins}}
+import io.flutter.plugin.common.PluginRegistry;
 import {{package}}.{{class}};
 {{/plugins}}
 
 /**
  * Generated file. Do not edit.
  */
-
-public class PluginRegistry {
+public final class GeneratedPluginRegistrant {
+  public static void registerWith(PluginRegistry registry) {
 {{#plugins}}
-    public {{class}} {{name}};
+    {{class}}.registerWith(registry.registrarFor("{{package}}.{{class}}"));
 {{/plugins}}
-
-    public void registerAll(FlutterActivity activity) {
-{{#plugins}}
-        {{name}} = {{class}}.register(activity);
-{{/plugins}}
-    }
+  }
 }
 ''';
 
@@ -119,7 +113,7 @@ void _writeAndroidPluginRegistry(String directory, List<Plugin> plugins) {
   final Directory registryDirectory =
       fs.directory(fs.path.join(javaSourcePath, 'io', 'flutter', 'plugins'));
   registryDirectory.createSync(recursive: true);
-  final File registryFile = registryDirectory.childFile('PluginRegistry.java');
+  final File registryFile = registryDirectory.childFile('GeneratedPluginRegistrant.java');
   registryFile.writeAsStringSync(pluginRegistry);
 }
 
