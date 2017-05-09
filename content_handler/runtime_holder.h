@@ -12,6 +12,7 @@
 #include "application/services/application_environment.fidl.h"
 #include "application/services/service_provider.fidl.h"
 #include "apps/mozart/services/input/input_connection.fidl.h"
+#include "apps/mozart/services/input/text_input.fidl.h"
 #include "apps/mozart/services/views/view_manager.fidl.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
@@ -29,7 +30,8 @@ class Rasterizer;
 
 class RuntimeHolder : public blink::RuntimeDelegate,
                       public mozart::ViewListener,
-                      public mozart::InputListener {
+                      public mozart::InputListener,
+                      public mozart::InputMethodEditorClient {
  public:
   RuntimeHolder();
   ~RuntimeHolder();
@@ -61,11 +63,17 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void OnInvalidation(mozart::ViewInvalidationPtr invalidation,
                       const OnInvalidationCallback& callback) override;
 
+  // |mozart::InputMethodEditorClient| implementation:
+  void DidUpdateState(mozart::TextInputStatePtr state,
+                      mozart::InputEventPtr event) override;
+
   ftl::WeakPtr<RuntimeHolder> GetWeakPtr();
 
   void InitRootBundle(std::vector<char> bundle);
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
-  void HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  bool HandleAssetPlatformMessage(ftl::RefPtr<blink::PlatformMessage> message);
+  bool HandleTextInputPlatformMessage(
+      ftl::RefPtr<blink::PlatformMessage> message);
 
   void InitFidlInternal();
   void InitMozartInternal();
@@ -100,6 +108,11 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   OnInvalidationCallback deferred_invalidation_callback_;
   bool is_ready_to_draw_ = false;
   int outstanding_requests_ = 0;
+
+  mozart::TextInputServicePtr text_input_service_;
+  mozart::InputMethodEditorPtr input_method_editor_;
+  fidl::Binding<mozart::InputMethodEditorClient> text_input_binding_;
+  int current_text_input_client_ = 0;
 
   ftl::WeakPtrFactory<RuntimeHolder> weak_factory_;
 

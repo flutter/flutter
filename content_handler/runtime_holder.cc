@@ -41,6 +41,8 @@ constexpr char kKernelKey[] = "kernel_blob.bin";
 constexpr char kSnapshotKey[] = "snapshot_blob.bin";
 constexpr char kDylibKey[] = "libapp.so";
 constexpr char kAssetChannel[] = "flutter/assets";
+constexpr char kKeyEventChannel[] = "flutter/keyevent";
+constexpr char kTextInputChannel[] = "flutter/textinput";
 
 // Maximum number of frames in flight.
 constexpr int kMaxPipelineDepth = 3;
@@ -88,6 +90,7 @@ blink::PointerData::DeviceKind GetKindFromPointerType(
 RuntimeHolder::RuntimeHolder()
     : view_listener_binding_(this),
       input_listener_binding_(this),
+      text_input_binding_(this),
       weak_factory_(this) {}
 
 RuntimeHolder::~RuntimeHolder() {
@@ -192,13 +195,17 @@ void RuntimeHolder::CreateView(
                             std::move(view_listener), script_uri);
 
   app::ServiceProviderPtr view_services;
-  view_->GetServiceProvider(GetProxy(&view_services));
+  view_->GetServiceProvider(fidl::GetProxy(&view_services));
 
   // Listen for input events.
-  ConnectToService(view_services.get(), GetProxy(&input_connection_));
+  ConnectToService(view_services.get(), fidl::GetProxy(&input_connection_));
   mozart::InputListenerPtr input_listener;
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetEventListener(std::move(input_listener));
+
+  // Enable once MZRT-40 is fixed.
+  // ConnectToService(view_services.get(),
+  // fidl::GetProxy(&text_input_service_));
 
   mozart::ScenePtr scene;
   view_->CreateScene(fidl::GetProxy(&scene));
@@ -279,8 +286,11 @@ void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
 void RuntimeHolder::HandlePlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   if (message->channel() == kAssetChannel) {
-    HandleAssetPlatformMessage(std::move(message));
-    return;
+    if (HandleAssetPlatformMessage(std::move(message)))
+      return;
+  } else if (message->channel() == kTextInputChannel) {
+    if (HandleTextInputPlatformMessage(std::move(message)))
+      return;
   }
   if (auto response = message->response())
     response->CompleteEmpty();
@@ -329,11 +339,11 @@ void RuntimeHolder::InitRootBundle(std::vector<char> bundle) {
       GetUnzipperProviderForRootBundle());
 }
 
-void RuntimeHolder::HandleAssetPlatformMessage(
+bool RuntimeHolder::HandleAssetPlatformMessage(
     ftl::RefPtr<blink::PlatformMessage> message) {
   ftl::RefPtr<blink::PlatformMessageResponse> response = message->response();
   if (!response)
-    return;
+    return false;
   const auto& data = message->data();
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
@@ -343,6 +353,94 @@ void RuntimeHolder::HandleAssetPlatformMessage(
   } else {
     response->CompleteEmpty();
   }
+  return true;
+}
+
+bool RuntimeHolder::HandleTextInputPlatformMessage(
+    ftl::RefPtr<blink::PlatformMessage> message) {
+  const auto& data = message->data();
+
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
+  if (document.HasParseError() || !document.IsObject())
+    return false;
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || !method->value.IsString())
+    return false;
+
+  if (method->value == "TextInput.show") {
+    // TODO(abarth): How do we tell Mozart to show the keyboard?
+  } else if (method->value == "TextInput.hide") {
+    // TODO(abarth): How do we tell Mozart to hide the keyboard?
+  } else if (method->value == "TextInput.setClient") {
+    current_text_input_client_ = 0;
+    if (text_input_binding_.is_bound())
+      text_input_binding_.Close();
+    input_method_editor_ = nullptr;
+
+    auto args = root.FindMember("args");
+    if (args == root.MemberEnd() || !args->value.IsArray() ||
+        args->value.Size() != 2)
+      return false;
+    const auto& configuration = args->value[1];
+    if (!configuration.IsObject())
+      return false;
+    // TODO(abarth): Read the keyboard type form the configuration.
+    current_text_input_client_ = args->value[0].GetInt();
+    text_input_service_->GetInputMethodEditor(
+        mozart::KeyboardType::TEXT, mozart::TextInputState::New(),
+        text_input_binding_.NewBinding(),
+        fidl::GetProxy(&input_method_editor_));
+  } else if (method->value == "TextInput.setEditingState") {
+    if (input_method_editor_) {
+      auto args_it = root.FindMember("args");
+      if (args_it == root.MemberEnd() || !args_it->value.IsObject())
+        return false;
+      const auto& args = args_it->value;
+      mozart::TextInputStatePtr state = mozart::TextInputState::New();
+      state->selection = mozart::TextSelection::New();
+      state->composing = mozart::TextRange::New();
+      // TODO(abarth): Deserialize state.
+      auto text = args.FindMember("text");
+      if (text != args.MemberEnd() && text->value.IsString())
+        state->text = text->value.GetString();
+      auto selection_base = args.FindMember("selectionBase");
+      if (selection_base != args.MemberEnd() && selection_base->value.IsInt())
+        state->selection->base = selection_base->value.GetInt();
+      auto selection_extent = args.FindMember("selectionExtent");
+      if (selection_extent != args.MemberEnd() &&
+          selection_extent->value.IsInt())
+        state->selection->extent = selection_extent->value.GetInt();
+      auto selection_affinity = args.FindMember("selectionAffinity");
+      if (selection_affinity != args.MemberEnd() &&
+          selection_affinity->value.IsString() &&
+          selection_affinity->value == "TextAffinity.upstream")
+        state->selection->affinity = mozart::TextAffinity::UPSTREAM;
+      else
+        state->selection->affinity = mozart::TextAffinity::DOWNSTREAM;
+      // We ignore selectionIsDirectional because that concept doesn't exist on
+      // Fuchsia.
+      auto composing_base = args.FindMember("composingBase");
+      if (composing_base != args.MemberEnd() && selection_base->value.IsInt())
+        state->composing->start = composing_base->value.GetInt();
+      auto composing_extent = args.FindMember("composingExtent");
+      if (composing_extent != args.MemberEnd() &&
+          composing_extent->value.IsInt())
+        state->composing->end = composing_extent->value.GetInt();
+      input_method_editor_->SetState(std::move(state));
+    }
+  } else if (method->value == "TextInput.clearClient") {
+    current_text_input_client_ = 0;
+    if (text_input_binding_.is_bound())
+      text_input_binding_.Close();
+    input_method_editor_ = nullptr;
+  } else {
+    FTL_DLOG(ERROR) << "Unknown " << kTextInputChannel << " method "
+                    << method->value.GetString();
+  }
+
+  return false;
 }
 
 blink::UnzipperProvider RuntimeHolder::GetUnzipperProviderForRootBundle() {
@@ -418,7 +516,7 @@ void RuntimeHolder::OnEvent(mozart::InputEventPtr event,
           reinterpret_cast<const uint8_t*>(buffer.GetString());
       runtime_->DispatchPlatformMessage(
           ftl::MakeRefCounted<blink::PlatformMessage>(
-              "flutter/keyevent",
+              kKeyEventChannel,
               std::vector<uint8_t>(data, data + buffer.GetSize()), nullptr));
       handled = true;
     }
@@ -462,6 +560,52 @@ void RuntimeHolder::OnInvalidation(mozart::ViewInvalidationPtr invalidation,
   // (such as size) if it prematurely acks the frame but takes too long
   // to handle it.
   callback();
+}
+
+void RuntimeHolder::DidUpdateState(mozart::TextInputStatePtr state,
+                                   mozart::InputEventPtr event) {
+  rapidjson::Document document;
+  auto& allocator = document.GetAllocator();
+
+  rapidjson::Value encoded_state(rapidjson::kObjectType);
+  encoded_state.AddMember("text", state->text.get(), allocator);
+  encoded_state.AddMember("selectionBase", state->selection->base, allocator);
+  encoded_state.AddMember("selectionExtent", state->selection->extent,
+                          allocator);
+  switch (state->selection->affinity) {
+    case mozart::TextAffinity::UPSTREAM:
+      encoded_state.AddMember("selectionAffinity",
+                              rapidjson::Value("TextAffinity.upstream"),
+                              allocator);
+      break;
+    case mozart::TextAffinity::DOWNSTREAM:
+      document.AddMember("selectionAffinity",
+                         rapidjson::Value("TextAffinity.downstream"),
+                         allocator);
+      break;
+  }
+  encoded_state.AddMember("selectionIsDirectional", true, allocator);
+  encoded_state.AddMember("composingBase", state->composing->start, allocator);
+  encoded_state.AddMember("composingExtent", state->composing->end, allocator);
+
+  rapidjson::Value args(rapidjson::kArrayType);
+  args.PushBack(current_text_input_client_, allocator);
+  args.PushBack(encoded_state, allocator);
+
+  document.SetObject();
+  document.AddMember("method",
+                     rapidjson::Value("TextInputClient.updateEditingState"),
+                     allocator);
+  document.AddMember("args", args, allocator);
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  document.Accept(writer);
+
+  const uint8_t* data = reinterpret_cast<const uint8_t*>(buffer.GetString());
+  runtime_->DispatchPlatformMessage(ftl::MakeRefCounted<blink::PlatformMessage>(
+      kTextInputChannel, std::vector<uint8_t>(data, data + buffer.GetSize()),
+      nullptr));
 }
 
 ftl::WeakPtr<RuntimeHolder> RuntimeHolder::GetWeakPtr() {
