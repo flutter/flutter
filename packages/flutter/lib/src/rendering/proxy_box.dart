@@ -1811,6 +1811,41 @@ class RenderFractionalTranslation extends RenderProxyBox {
 ///
 /// The [hitTest] method is called when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
+///
+/// ## Sample code
+///
+/// This sample extends the same code shown for [RadialGradient] to create a
+/// custom painter that paints a sky.
+///
+/// ```dart
+/// class Sky extends CustomPainter {
+///   @override
+///   void paint(Canvas canvas, Size size) {
+///     var rect = Offset.zero & size;
+///     var gradient = new RadialGradient(
+///       center: const FractionalOffset(0.7, 0.2),
+///       radius: 0.2,
+///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
+///       stops: [0.4, 1.0],
+///     );
+///     canvas.drawRect(
+///       rect,
+///       new Paint()..shader = gradient.createShader(rect),
+///     );
+///   }
+///
+///   @override
+///   bool shouldRepaint(CustomPainter oldDelegate) => false;
+/// }
+/// ```
+///
+/// See also:
+///
+///  * [Canvas], the class that a custom painter uses to paint.
+///  * [CustomPaint], the widget that uses [CustomPainter], and whose sample
+///    code shows how to use the above `Sky` class.
+///  * [RadialGradient], whose sample code section shows a different take
+///    on the sample code above.
 abstract class CustomPainter extends Listenable {
   /// Creates a custom painter.
   ///
