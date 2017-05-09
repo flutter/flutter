@@ -100,8 +100,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
   String get gradlePath => _gradlePath;
 
-  String get gradleExecutable => fs.path
-      .join(_gradlePath, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle');
+  String get gradleExecutable => isValid
+      ? fs.path.join(_gradlePath, 'bin', platform.isWindows ? 'gradle.bat' : 'gradle')
+      : null;
 
   String get javaPath => _javaPath;
 
