@@ -15,6 +15,7 @@
 namespace vulkan {
 
 bool IsDebuggingEnabled();
+bool ValidationLayerInfoMessagesEnabled();
 
 std::vector<std::string> InstanceLayersToEnable(const VulkanProcTable& vk);
 
