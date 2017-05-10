@@ -231,3 +231,23 @@ config("precompiled_headers") {
     cflags = [ "/FI$precompiled_header" ]
   }
 }
+
+# rtti ------------------------------------------------------------------------
+#
+# Allows turning Run-Time Type Identification on or off.
+
+config("rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR" ]
+  }
+}
+
+config("no_rtti") {
+  if (is_win) {
+    cflags_cc = [ "/GR-" ]
+  } else {
+    rtti_flags = [ "-fno-rtti" ]
+    cflags_cc = rtti_flags
+    cflags_objcc = rtti_flags
+  }
+}
