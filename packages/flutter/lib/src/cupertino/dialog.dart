@@ -235,6 +235,7 @@ class CupertinoDialogAction extends StatelessWidget {
 
     return new GestureDetector(
       onTap: onPressed,
+      behavior: HitTestBehavior.opaque,
       child: new Center(
         child: new DefaultTextStyle(
           style: style,
