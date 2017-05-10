@@ -195,7 +195,7 @@ class AsyncSnapshot<T> {
   const AsyncSnapshot.nothing() : this._(ConnectionState.none, null, null);
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [data].
-  const AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null);
+  AsyncSnapshot.withData(ConnectionState state, T data) : this._(state, data, null); // not const because https://github.com/dart-lang/sdk/issues/29432
 
   /// Creates an [AsyncSnapshot] in the specified [state] and with the specified [error].
   const AsyncSnapshot.withError(ConnectionState state, Object error) : this._(state, null, error);
@@ -274,12 +274,12 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// of the following snapshots that includes the last one (the one with
 /// ConnectionState.done):
 ///
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 0)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 1)`
 /// * ...
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
 ///
 /// The actual sequence of invocations of [build] depends on the relative timing
 /// of events produced by the stream and the build rate of the Flutter pipeline.
@@ -287,8 +287,8 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// Changing the [StreamBuilder] configuration to another stream during event
 /// generation introduces snapshot pairs of the form
 ///
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
-/// * `const AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.none, 5)`
+/// * `AsyncSnapshot<int>.withData(ConnectionState.waiting, 5)`
 ///
 /// The latter will be produced only when the new stream is non-null. The former
 /// only when the old stream is non-null.
@@ -356,14 +356,14 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// For a future that completes successfully with data, the [builder] may
 /// be called with either both or only the latter of the following snapshots:
 ///
-/// * `const AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `const AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.done, 'some data')`
 ///
 /// For a future completing with an error, the [builder] may be called with
 /// either both or only the latter of:
 ///
-/// * `const AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-/// * `const AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+/// * `AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
 ///
 /// The data and error fields of the snapshot change only as the connection
 /// state field transitions from `waiting` to `done`, and they will be retained
@@ -371,8 +371,8 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// old future has already completed successfully with data as above, changing
 /// configuration to a new future results in snapshot pairs of the form:
 ///
-/// * `const AsyncSnapshot<String>.withData(ConnectionState.none, 'some data')`
-/// * `const AsyncSnapshot<String>.withData(ConnectionState.waiting, 'some data')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.none, 'some data')`
+/// * `AsyncSnapshot<String>.withData(ConnectionState.waiting, 'some data')`
 ///
 /// In general, the latter will be produced only when the new future is
 /// non-null. The former only when the old future is non-null.
