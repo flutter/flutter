@@ -22,6 +22,8 @@ const String kHelp = 'help';
 const String kYamlVersionPrefix = 'version: ';
 const String kDev = '-dev';
 
+enum VersionKind { dev, release }
+
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -43,7 +45,7 @@ void main(List<String> args) {
   final bool brokeTest = argResults[kBrokeTest];
   final bool brokeDriver = argResults[kBrokeDriver];
   final bool brokeAnything = brokeSdk || brokeFramework || brokeTest || brokeDriver;
-  final bool release = argResults[kMarkRelease];
+  final VersionKind level = argResults[kMarkRelease] ? VersionKind.release : VersionKind.dev;
   final bool help = argResults[kHelp];
 
   if (help) {
@@ -52,6 +54,7 @@ void main(List<String> args) {
     exit(0);
   }
 
+  final bool release = level == VersionKind.release;
   if ((brokeAnything && release) || (brokeAnything && increment) || (release && increment)) {
     print('You can either increment all the version numbers (--$kIncrement), indicate that some packages have had breaking changes (--broke-*), or switch to release mode (--$kMarkRelease).');
     print('You cannot combine these, however.');
@@ -65,19 +68,19 @@ void main(List<String> args) {
 
   if (increment || brokeAnything)
     sdk.increment(brokeAnything);
-  sdk.setMode(release);
+  sdk.setMode(level);
 
   if (increment || brokeFramework)
     framework.increment(brokeFramework);
-  framework.setMode(release);
+  framework.setMode(level);
 
   if (increment || brokeTest)
     test.increment(brokeTest);
-  test.setMode(release);
+  test.setMode(level);
 
   if (increment || brokeDriver)
     driver.increment(brokeDriver);
-  driver.setMode(release);
+  driver.setMode(level);
 
   sdk.write();
   framework.write();
@@ -99,7 +102,7 @@ abstract class Version {
   final List<int> version = <int>[];
 
   @protected
-  bool dev;
+  VersionKind level;
 
   @protected
   bool dirty = false;
@@ -108,8 +111,8 @@ abstract class Version {
   void read();
 
   void interpret(String value) {
-    dev = value.endsWith(kDev);
-    if (dev)
+    level = value.endsWith(kDev) ? VersionKind.dev : VersionKind.release;
+    if (level == VersionKind.dev)
       value = value.substring(0, value.length - kDev.length);
     version.addAll(value.split('.').map<int>(int.parse));
   }
@@ -125,9 +128,9 @@ abstract class Version {
     dirty = true;
   }
 
-  void setMode(bool release) {
-    if (release != !dev) {
-      dev = !release;
+  void setMode(VersionKind value) {
+    if (value != level) {
+      level = value;
       dirty = true;
     }
   }
@@ -135,7 +138,7 @@ abstract class Version {
   void write();
 
   @override
-  String toString() => version.join('.') + (dev ? kDev : '');
+  String toString() => version.join('.') + (level == VersionKind.dev ? kDev : '');
 }
 
 class PubSpecVersion extends Version {
