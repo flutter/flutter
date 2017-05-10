@@ -351,7 +351,7 @@ class UserHeader extends StatelessWidget {
         children: <Widget>[
           new Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: new Image(
+            child: const Image(
               image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
               height: 32.0
@@ -409,7 +409,7 @@ class ItemImageBox extends StatelessWidget {
               children: <Widget>[
                 new SizedBox(
                   height: 230.0,
-                  child: new Image(
+                  child: const Image(
                     image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
                   )
                 ),

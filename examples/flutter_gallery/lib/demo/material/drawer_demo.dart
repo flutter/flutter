@@ -93,10 +93,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             new UserAccountsDrawerHeader(
               accountName: const Text('Zach Widget'),
               accountEmail: const Text('zach.widget@example.com'),
-              currentAccountPicture: new CircleAvatar(backgroundImage: const AssetImage(_kAsset0)),
-              otherAccountsPictures: <Widget>[
-                new CircleAvatar(backgroundImage: const AssetImage(_kAsset1)),
-                new CircleAvatar(backgroundImage: const AssetImage(_kAsset2)),
+              currentAccountPicture: const CircleAvatar(backgroundImage: const AssetImage(_kAsset0)),
+              otherAccountsPictures: const <Widget>[
+                const CircleAvatar(backgroundImage: const AssetImage(_kAsset1)),
+                const CircleAvatar(backgroundImage: const AssetImage(_kAsset2)),
               ],
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
@@ -166,7 +166,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 height: 100.0,
                 decoration: new BoxDecoration(
                   shape: BoxShape.circle,
-                  image: new DecorationImage(
+                  image: const DecorationImage(
                     image: const AssetImage(_kAsset0),
                   ),
                 ),
