@@ -167,6 +167,23 @@
   return NO;
 }
 
+- (BOOL)application:(UIApplication*)application
+            openURL:(NSURL*)url
+  sourceApplication:(NSString*)sourceApplication
+         annotation:(id)annotation {
+  for (id<FlutterPlugin> plugin in _pluginDelegates) {
+    if ([plugin respondsToSelector:_cmd]) {
+      if ([plugin application:application
+                      openURL:url
+            sourceApplication:sourceApplication
+                   annotation:annotation]) {
+        return YES;
+      }
+    }
+  }
+  return NO;
+}
+
 - (NSObject<FlutterPluginRegistrar>*)registrarForPlugin:(NSString*)pluginKey {
   NSAssert(self.pluginPublications[pluginKey] == nil, @"Duplicate plugin key: %@", pluginKey);
   self.pluginPublications[pluginKey] = [NSNull null];

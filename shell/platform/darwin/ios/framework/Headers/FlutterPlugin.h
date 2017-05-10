@@ -87,7 +87,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
 
- - Returns: `YES` if this plugin handles request.
+ - Returns: `YES` if this plugin handles the request.
  */
 - (BOOL)application:(UIApplication*)application
     didReceiveRemoteNotification:(NSDictionary*)userInfo
@@ -96,10 +96,20 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
 
- - Returns: `YES` if this plugin handles request.
+ - Returns: `YES` if this plugin handles the request.
  */
 - (BOOL)application:(UIApplication*)application
       handleOpenURL:(NSURL*)url;
+
+/**
+ Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
+
+  - Returns: `YES` if this plugin handles the request.
+*/
+- (BOOL)application:(UIApplication*)application
+            openURL:(NSURL*)url
+  sourceApplication:(NSString*)sourceApplication
+         annotation:(id)annotation;
 @end
 
 /**
