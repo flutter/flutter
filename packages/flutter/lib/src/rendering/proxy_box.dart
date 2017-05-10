@@ -2627,13 +2627,12 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     GestureDragUpdateCallback onHorizontalDragUpdate,
     GestureDragUpdateCallback onVerticalDragUpdate,
     this.scrollFactor: 0.8
-  }) : _onTap = onTap,
+  }) : assert(scrollFactor != null),
+       _onTap = onTap,
        _onLongPress = onLongPress,
        _onHorizontalDragUpdate = onHorizontalDragUpdate,
        _onVerticalDragUpdate = onVerticalDragUpdate,
-       super(child) {
-    assert(scrollFactor != null);
-  }
+       super(child);
 
    /// Called when the user taps on the render object.
   GestureTapCallback get onTap => _onTap;

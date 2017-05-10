@@ -354,9 +354,9 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   /// Creates a delegate that makes grid layouts with tiles that have a maximum
   /// cross-axis extent.
   ///
-  /// All of the arguments must not be null. The `maxCrossAxisExtent` and
-  /// `mainAxisSpacing`, and `crossAxisSpacing` arguments must not be negative.
-  /// The `childAspectRatio` argument must be greater than zero.
+  /// All of the arguments must not be null. The [maxCrossAxisExtent] and
+  /// [mainAxisSpacing], and [crossAxisSpacing] arguments must not be negative.
+  /// The [childAspectRatio] argument must be greater than zero.
   const SliverGridDelegateWithMaxCrossAxisExtent({
     @required this.maxCrossAxisExtent,
     this.mainAxisSpacing: 0.0,
