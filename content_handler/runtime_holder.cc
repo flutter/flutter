@@ -203,9 +203,7 @@ void RuntimeHolder::CreateView(
   input_listener_binding_.Bind(GetProxy(&input_listener));
   input_connection_->SetEventListener(std::move(input_listener));
 
-  // Enable once MZRT-40 is fixed.
-  // ConnectToService(view_services.get(),
-  // fidl::GetProxy(&text_input_service_));
+  ConnectToService(view_services.get(), fidl::GetProxy(&text_input_service_));
 
   mozart::ScenePtr scene;
   view_->CreateScene(fidl::GetProxy(&scene));
