@@ -16,7 +16,7 @@ dependencies:
   intl: '>=0.14.0 <0.15.0'
   json_rpc_2: ^2.0.0
   json_schema: 1.0.6
-  linter: 0.1.30
+  linter: 0.1.31
   meta: ^1.0.5
   mustache: ^0.2.5
   package_config: '>=0.1.5 <2.0.0'
