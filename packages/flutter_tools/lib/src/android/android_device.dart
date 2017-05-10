@@ -541,7 +541,7 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
       continue;
 
     // Skip lines about adb server and client version not matching
-    if (line.startsWith('adb server version')) {
+    if (line.startsWith(new RegExp(r'adb server (version|is out of date)'))) {
       printStatus(line);
       continue;
     }
