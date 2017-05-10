@@ -7,6 +7,7 @@ group("txt") {
 
   deps = [
     "libs/minikin",
+    "src",
     "tests/unittest($host_toolchain)",
   ]
 }

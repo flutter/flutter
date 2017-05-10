@@ -96,20 +96,8 @@ public:
     virtual void GetBounds(MinikinRect* bounds, uint32_t glyph_id,
         const MinikinPaint &paint) const = 0;
 
-    // Override if font can provide access to raw data
-    virtual const void* GetFontData() const {
+    virtual hb_face_t* CreateHarfBuzzFace() const {
         return nullptr;
-    }
-
-    // Override if font can provide access to raw data
-    virtual size_t GetFontSize() const {
-        return 0;
-    }
-
-    // Override if font can provide access to raw data.
-    // Returns index within OpenType collection
-    virtual int GetFontIndex() const {
-        return 0;
     }
 
     virtual const std::vector<minikin::FontVariation>& GetAxes() const = 0;
