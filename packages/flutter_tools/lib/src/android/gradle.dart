@@ -133,9 +133,8 @@ String ensureGradle() {
   String gradle = locateProjectGradlew();
   if (gradle == null) {
     gradle = locateSystemGradle();
-    if (gradle == null) {
+    if (gradle == null)
       throwToolExit('Unable to locate gradle. Please install Android Studio.');
-    }
   }
   printTrace('Using gradle from $gradle.');
   return gradle;

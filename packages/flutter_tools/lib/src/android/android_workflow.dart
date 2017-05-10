@@ -104,7 +104,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       } else {
         messages.add(new ValidationMessage.error(
           'Unable to locate Android SDK.\n'
-          'Install Android Studio from https://developer.android.com/studio/index.html.\n'
+          'Install Android Studio from: https://developer.android.com/studio/index.html\n'
           'On first launch it will assist you in installing the Android SDK components.\n'
           '(or visit https://flutter.io/setup/#android-setup for detailed instructions).\n'
           'If Android SDK has been installed to a custom location, set \$$kAndroidHome to that location.'
