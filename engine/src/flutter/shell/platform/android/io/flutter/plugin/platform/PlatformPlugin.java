@@ -11,13 +11,10 @@ import android.content.ClipDescription;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
 import android.os.Build;
 import android.view.HapticFeedbackConstants;
 import android.view.SoundEffectConstants;
 import android.view.View;
-
-import io.flutter.util.PathUtils;
 
 import io.flutter.plugin.common.ActivityLifecycleListener;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -53,9 +50,6 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
             } else if (method.equals("HapticFeedback.vibrate")) {
                 vibrateHapticFeedback();
                 result.success(null);
-            } else if (method.equals("UrlLauncher.launch")) {
-                launchURL((String) arguments);
-                result.success(null);
             } else if (method.equals("SystemChrome.setPreferredOrientations")) {
                 setSystemChromePreferredOrientations((JSONArray) arguments);
                 result.success(null);
@@ -76,10 +70,6 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
             } else if (method.equals("Clipboard.setData")) {
                 setClipboardData((JSONObject) arguments);
                 result.success(null);
-            } else if (method.equals("PathProvider.getTemporaryDirectory")) {
-                result.success(getPathProviderTemporaryDirectory());
-            } else if (method.equals("PathProvider.getApplicationDocumentsDirectory")) {
-                result.success(getPathProviderApplicationDocumentsDirectory());
             } else {
                 result.notImplemented();
             }
@@ -98,16 +88,6 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
     private void vibrateHapticFeedback() {
         View view = mActivity.getWindow().getDecorView();
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-    }
-
-    private void launchURL(String url) {
-        try {
-            Intent launchIntent = new Intent(Intent.ACTION_VIEW);
-            launchIntent.setData(Uri.parse(url));
-            mActivity.startActivity(launchIntent);
-        } catch (java.lang.Exception exception) {
-            // Ignore parsing or ActivityNotFound errors
-        }
     }
 
     private void setSystemChromePreferredOrientations(JSONArray orientations) throws JSONException {
@@ -210,14 +190,6 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
         ClipboardManager clipboard = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("text label?", data.getString("text"));
         clipboard.setPrimaryClip(clip);
-    }
-
-    private String getPathProviderTemporaryDirectory() {
-        return mActivity.getCacheDir().getPath();
-    }
-
-    private String getPathProviderApplicationDocumentsDirectory() {
-        return PathUtils.getDataDirectory(mActivity);
     }
 
     @Override
