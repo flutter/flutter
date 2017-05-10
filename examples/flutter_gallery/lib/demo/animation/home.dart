@@ -373,7 +373,7 @@ class _AllSectionsView extends AnimatedWidget {
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
   _SnappingScrollPhysics({
     ScrollPhysics parent,
-    @required this.midScrollOffset
+    @required this.midScrollOffset,
   }) : assert(midScrollOffset != null),
        super(parent: parent);
 
