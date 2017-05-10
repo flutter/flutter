@@ -838,6 +838,12 @@ class LinearGradient extends Gradient {
 
   /// How this gradient should tile the plane beyond in the region before
   /// [begin] and after [end].
+  ///
+  /// For details, see [TileMode].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
   final TileMode tileMode;
 
   @override
@@ -1053,6 +1059,12 @@ class RadialGradient extends Gradient {
 
   /// How this gradient should tile the plane beyond the outer ring at [radius]
   /// pixels from the [center].
+  ///
+  /// For details, see [TileMode].
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
   final TileMode tileMode;
 
   @override
