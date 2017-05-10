@@ -17,7 +17,11 @@ class HSVColor {
   ///
   /// All the arguments must not be null and be in their respective ranges. See
   /// the fields for each parameter for a description of their ranges.
-  const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value);
+  const HSVColor.fromAHSV(this.alpha, this.hue, this.saturation, this.value)
+      : assert(alpha != null),
+        assert(hue != null),
+        assert(saturation != null),
+        assert(value != null);
 
   /// Alpha, from 0.0 to 1.0.
   final double alpha;

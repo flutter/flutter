@@ -137,6 +137,7 @@ class ListTile extends StatelessWidget {
   }) : assert(isThreeLine != null),
        assert(enabled != null),
        assert(selected != null),
+       assert(!isThreeLine || subtitle != null),
        super(key: key);
 
   /// A widget to display before the title.

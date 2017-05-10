@@ -17,7 +17,7 @@ abstract class MergeableMaterialItem {
   /// const constructors so that they can be used in const expressions.
   ///
   /// The argument is the [key], which must not be null.
-  const MergeableMaterialItem(this.key);
+  const MergeableMaterialItem(this.key) : assert(key != null);
 
   /// The key for this item of the list.
   ///

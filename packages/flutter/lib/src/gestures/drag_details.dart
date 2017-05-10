@@ -100,6 +100,7 @@ class DragUpdateDetails {
     this.primaryDelta,
     @required this.globalPosition
   }) {
+    assert(delta != null);
     assert(primaryDelta == null
         || (primaryDelta == delta.dx && delta.dy == 0.0)
         || (primaryDelta == delta.dy && delta.dx == 0.0));

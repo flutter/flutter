@@ -40,7 +40,7 @@ class DataColumn {
     this.tooltip,
     this.numeric: false,
     this.onSort
-  });
+  }) : assert(label != null);
 
   /// The column heading.
   ///
@@ -92,7 +92,7 @@ class DataRow {
     this.selected: false,
     this.onSelectChanged,
     this.cells
-  });
+  }) : assert(cells != null);
 
   /// Creates the configuration for a row of a [DataTable], deriving
   /// the key from a row index.
@@ -103,7 +103,8 @@ class DataRow {
     this.selected: false,
     this.onSelectChanged,
     this.cells
-  }) : key = new ValueKey<int>(index);
+  }) : assert(cells != null),
+       key = new ValueKey<int>(index);
 
   /// A [Key] that uniquely identifies this row. This is used to
   /// ensure that if a row is added or removed, any stateful widgets
@@ -167,7 +168,7 @@ class DataCell {
     this.placeholder: false,
     this.showEditIcon: false,
     this.onTap,
-  });
+  }) : assert(child != null);
 
   /// A cell that has no content and has zero width and height.
   static final DataCell empty = new DataCell(new Container(width: 0.0, height: 0.0));

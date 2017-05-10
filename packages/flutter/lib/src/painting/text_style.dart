@@ -26,7 +26,7 @@ class TextStyle {
     this.decoration,
     this.decorationColor,
     this.decorationStyle
-  });
+  }) : assert(inherit != null);
 
   /// Whether null values are replaced with their value in an ancestor text style (e.g., in a [TextSpan] tree).
   final bool inherit;
