@@ -150,9 +150,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  A registry of Flutter iOS plugins.
 
- Plugins are identified by unique string keys. It is strongly advised to use
- inverted domain names such as `com.mycompany.myproject.MyPlugin` as keys
- to avoid clashes.
+ Plugins are identified by unique string keys, typically the name of the
+ plugin's main class.
  */
 @protocol FlutterPluginRegistry<NSObject>
 /**
