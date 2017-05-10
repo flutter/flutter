@@ -1,4 +1,4 @@
-Signature: 13d311111675c34fd68a7c59482515f9
+Signature: 7de420d82fa2a3a403288ce9dbfc1ce7
 
 UNUSED LICENSES:
 
@@ -24732,7 +24732,6 @@ FILE: ../../../third_party/skia/experimental/expectations/skp/Test-Mac10.8-MacMi
 FILE: ../../../third_party/skia/experimental/expectations/skp/Test-Mac10.8-MacMini4.1-GeForce320M-x86_64-Debug/renderskp-rtree.json
 FILE: ../../../third_party/skia/experimental/expectations/skp/Test-Ubuntu12-ShuttleA-GTX660-x86-Release/renderskp-defaults.json
 FILE: ../../../third_party/skia/experimental/expectations/skp/Test-Ubuntu12-ShuttleA-GTX660-x86-Release/renderskp-grid.json
-FILE: ../../../third_party/skia/experimental/go-skia/skia.go
 FILE: ../../../third_party/skia/experimental/iOSSampleApp/Shared/SkOptionListController.h
 FILE: ../../../third_party/skia/experimental/iOSSampleApp/Shared/SkOptionListController.mm
 FILE: ../../../third_party/skia/experimental/iOSSampleApp/Shared/SkOptionsTableViewController.h
@@ -26050,6 +26049,10 @@ FILE: ../../../third_party/skia/example/mac/HelloWorldNSView.mm
 FILE: ../../../third_party/skia/experimental/GLFWTest/glfw_main.cpp
 FILE: ../../../third_party/skia/experimental/SimpleiOSApp/SimpleApp.mm
 FILE: ../../../third_party/skia/experimental/c-api-example/skia-c-example.c
+FILE: ../../../third_party/skia/experimental/go-demo/main.go
+FILE: ../../../third_party/skia/experimental/go-skia/ctypes.go
+FILE: ../../../third_party/skia/experimental/go-skia/skia.go
+FILE: ../../../third_party/skia/experimental/go-skia/types.go
 FILE: ../../../third_party/skia/experimental/iOSSampleApp/SkSampleUIView.mm
 FILE: ../../../third_party/skia/experimental/tools/coreGraphicsPdf2png.cpp
 FILE: ../../../third_party/skia/gm/SkAnimTimer.h
@@ -26338,9 +26341,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrLatticeOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrMeshDrawOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectPerspectiveOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAStrokeRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAStrokeRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrOp.cpp
@@ -26753,6 +26753,7 @@ FILE: ../../../third_party/skia/bench/CubicKLMBench.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzCanvas.cpp
 FILE: ../../../third_party/skia/gm/bitmaptiled.cpp
 FILE: ../../../third_party/skia/gm/crbug_691386.cpp
+FILE: ../../../third_party/skia/gm/crosscontextimage.cpp
 FILE: ../../../third_party/skia/gm/encode-alpha-jpeg.cpp
 FILE: ../../../third_party/skia/gm/etc1.cpp
 FILE: ../../../third_party/skia/gm/gammaencodedpremul.cpp
@@ -26804,6 +26805,8 @@ FILE: ../../../third_party/skia/src/effects/shadows/SkAmbientShadowMaskFilter.h
 FILE: ../../../third_party/skia/src/effects/shadows/SkSpotShadowMaskFilter.cpp
 FILE: ../../../third_party/skia/src/effects/shadows/SkSpotShadowMaskFilter.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurface.cpp
+FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.cpp
+FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.cpp
@@ -26819,8 +26822,8 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLExternalTextureData.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLSemaphore.h
 FILE: ../../../third_party/skia/src/gpu/instanced/InstancedOp.cpp
 FILE: ../../../third_party/skia/src/gpu/instanced/InstancedOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrNewNonAAFillRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrNewNonAAFillRectOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrNonAAFillRectOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSemaphoreOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
