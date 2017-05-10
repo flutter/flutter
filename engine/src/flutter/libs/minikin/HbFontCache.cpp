@@ -102,13 +102,7 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
         return hb_font_reference(font);
     }
 
-    hb_face_t* face;
-    const void* buf = minikinFont->GetFontData();
-    size_t size = minikinFont->GetFontSize();
-    hb_blob_t* blob = hb_blob_create(reinterpret_cast<const char*>(buf), size,
-        HB_MEMORY_MODE_READONLY, nullptr, nullptr);
-    face = hb_face_create(blob, minikinFont->GetFontIndex());
-    hb_blob_destroy(blob);
+    hb_face_t* face = minikinFont->CreateHarfBuzzFace();
 
     hb_font_t* parent_font = hb_font_create(face);
     hb_ot_font_set_funcs(parent_font);
