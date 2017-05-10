@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JSON;
+import 'dart:convert' show JSON, UTF8;
 
 import 'package:meta/meta.dart';
 
@@ -145,7 +145,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final String developmentTeam = _getCodeSigningIdentityDevelopmentTeam(app);
+  final String developmentTeam = await _getCodeSigningIdentityDevelopmentTeam(app);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -359,8 +359,8 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-final RegExp _securityFindIdentityIdentityExtractionPattern = new RegExp(r'^\s+\d+\).+"(.+)"$');
-final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'".*\(([a-zA-Z0-9]+)\)"');
+final RegExp _securityFindIdentityIdentityExtractionPattern = new RegExp(r'^\s*\d+\).+"(.+)"$');
+final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
 
 /// Given a [BuildableIOSApp], this will try to find valid code signing
@@ -368,7 +368,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 ///
 /// Will return null if none are found, if the user cancels or if the XCode
 /// project has a development team set in the project's build settings.
-String _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) {
+Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
   if (iosApp.buildSettings == null)
     return null;
 
@@ -387,18 +387,16 @@ String _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) {
   final List<String> validCodeSigningIdentities = runCheckedSync(<String>[
     'security',
     'find-identity',
-    '-p codesigning',
+    '-p',
+    'codesigning',
     '-v',
   ])
       .split('\n')
       .map<String>((String outputLine) {
-        final Iterable<Match> validIdentityCN =
-            outputLine.allMatches(_securityFindIdentityIdentityExtractionPattern);
-        return validIdentityCN.isNotEmpty && validIdentityCN.first.groupCount == 1
-            ? validIdentityCN.first.group(0)
-            : null;
+        return _securityFindIdentityIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
       })
-      .where((String identityCN) => identityCN != null);
+      .where((String identityCN) => identityCN != null)
+      .toList();
 
   final String signingIdentity = _chooseSigningIdentity(validCodeSigningIdentities);
 
@@ -407,24 +405,36 @@ String _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) {
     return null;
 
   final String signingCertificateId =
-      _securityFindIdentityCertificateCnExtractionPattern.stringMatch(signingIdentity);
+      _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
 
   // If `security`'s output format changes, we'd have to update this
   if (signingCertificateId == null)
     return null;
 
-  return _certificateOrganizationalUnitExtractionPattern.stringMatch(
-    runCheckedSync(<String>[
-      'security',
-      'find-certificate',
-      '-c $signingCertificateId',
-      '-p',
-      '|',
-      'openssl',
-      'x509',
-      '-subject',
-    ])
-  );
+  final String signingCertificate = runCheckedSync(<String>[
+    'security',
+    'find-certificate',
+    '-c',
+    signingCertificateId,
+    '-p',
+  ]);
+
+  final Process opensslProcess = await Process.start('openssl', <String>['x509', '-subject']);
+  opensslProcess.stdin
+      ..write(signingCertificate)
+      ..close();
+
+  String opensslOutput;
+  opensslProcess.stdout
+      .transform<String>(UTF8.decoder)
+      .listen((String output) { opensslOutput = output; });
+  opensslProcess.stderr.drain<String>();
+
+  if (await opensslProcess.exitCode != 0) {
+    return null;
+  }
+
+  return _certificateOrganizationalUnitExtractionPattern.firstMatch(opensslOutput)?.group(1);
 }
 
 String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
@@ -438,6 +448,8 @@ String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
   // TODO(xster): let the user choose one.
   if (validCodeSigningIdentities.length >= 1)
     return validCodeSigningIdentities.first;
+
+  return null;
 }
 
 final String noCocoaPodsConsequence = '''
