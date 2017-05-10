@@ -212,11 +212,25 @@ class FlutterDriver {
         });
       }
 
+      /// Tells the Dart VM Service to notify us about "Isolate" events.
+      ///
+      /// This is a workaround for an issue in package:vm_service_client, which
+      /// subscribes to the "Isolate" stream lazily upon subscription, which
+      /// results in lost events.
+      ///
+      /// Details: https://github.com/dart-lang/vm_service_client/issues/17
+      Future<Null> enableIsolateStreams() async {
+        await connection.peer.sendRequest('streamListen', <String, String>{
+          'streamId': 'Isolate',
+        });
+      }
+
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
       // it to be registered.
-      final Future<dynamic> whenResumed = resumeLeniently();
+      await enableIsolateStreams();
       final Future<dynamic> whenServiceExtensionReady = waitForServiceExtension();
+      final Future<dynamic> whenResumed = resumeLeniently();
       await whenResumed;
 
       try {
