@@ -69,12 +69,12 @@ void main() {
   });
 
   test('SliverGeometry', () {
-    expect(const SliverGeometry().debugAssertIsValid, isTrue);
+    expect(const SliverGeometry().debugAssertIsValid(), isTrue);
     expect(() {
-      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid;
+      const SliverGeometry(layoutExtent: 10.0, paintExtent: 9.0).debugAssertIsValid();
     }, throwsFlutterError);
     expect(() {
-      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid;
+      const SliverGeometry(paintExtent: 9.0, maxPaintExtent: 8.0).debugAssertIsValid();
     }, throwsFlutterError);
   });
 }
