@@ -196,7 +196,7 @@ class Color {
 /// can be used to blend the pixels. The image below shows the effects
 /// of these modes.
 ///
-/// [![Open Skia fiddle to view image.](https://flutter.github.io/assets-for-api-docs/transfer_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
+/// [![Open Skia fiddle to view image.](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
 ///
 /// See [Paint.blendMode].
 enum BlendMode {
@@ -950,15 +950,54 @@ class ImageFilter extends NativeFieldWrapperClass2 {
 abstract class Shader extends NativeFieldWrapperClass2 { }
 
 /// Defines what happens at the edge of the gradient.
+///
+/// A gradient is defined along a finite inner area. In the case of a linear
+/// gradient, it's between the parallel lines that are orthogonal to the line
+/// drawn between two points. In the case of radial gradients, it's the disc
+/// that covers the circle centered on a particular point up to a given radius.
+///
+/// This enum is used to define how the gradient should paint the regions
+/// outside that defined inner area.
+///
+/// See also:
+///
+///  * [painting.Gradient], the superclass for [LinearGradient] and
+///    [RadialGradient], as used by [BoxDecoration] et al, which works in
+///    relative coordinates and can create a [Shader] representing the gradient
+///    for a particular [Rect] on demand.
+///  * [dart:ui.Gradient], the low-level class used when dealing with the
+///    [Paint.shader] property directly, with its [new Gradient.linear] and [new
+///    Gradient.radial] constructors.
 enum TileMode {
   /// Edge is clamped to the final color.
+  ///
+  /// The gradient will paint the all the regions outside the inner area with
+  /// the color of the point closest to that region.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
   clamp,
 
-  /// Edge is repeated from first color to last.
-  repeated,
-
   /// Edge is mirrored from last color to first.
+  ///
+  /// This is as if the stop points from 0.0 to 1.0 were then repeated backwards
+  /// from 2.0 to 1.0, then forwards from 2.0 to 3.0, then backwards again from
+  /// 4.0 to 3.0, and so forth (and for linear gradients, similarly from in the
+  /// negative direction).
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
   mirror,
+
+  /// Edge is repeated from first color to last.
+  ///
+  /// This is as if the stop points from 0.0 to 1.0 were then repeated from 1.0
+  /// to 2.0, 2.0 to 3.0, and so forth (and for linear gradients, similarly from
+  /// -1.0 to 0.0, -2.0 to -1.0, etc).
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
+  repeated,
 }
 
 Int32List _encodeColorList(List<Color> colors) {
@@ -1011,7 +1050,11 @@ class Gradient extends Shader {
   /// `color` must therefore only have two entries).
   ///
   /// The behavior before `from` and after `to` is described by the `tileMode`
-  /// argument.
+  /// argument. For details, see the [TileMode] enum.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_linear.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_linear.png)
   ///
   /// If `from`, `to`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
@@ -1021,7 +1064,7 @@ class Gradient extends Shader {
     Offset to,
     List<Color> colors, [
     List<double> colorStops = null,
-    TileMode tileMode = TileMode.clamp
+    TileMode tileMode = TileMode.clamp,
   ]) {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
@@ -1041,16 +1084,21 @@ class Gradient extends Shader {
   /// `color` must therefore only have two entries).
   ///
   /// The behavior before and after the radius is described by the `tileMode`
-  /// argument.
+  /// argument. For details, see the [TileMode] enum.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_clamp_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_mirror_radial.png)
+  /// ![](https://flutter.github.io/assets-for-api-docs/dart-ui/tile_mode_repeated_radial.png)
   ///
   /// If `center`, `radius`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
   /// [NoSuchMethodError].
   Gradient.radial(Offset center,
                   double radius,
-                  List<Color> colors,
-                  [List<double> colorStops = null,
-                  TileMode tileMode = TileMode.clamp]) {
+                  List<Color> colors, [
+                  List<double> colorStops = null,
+                  TileMode tileMode = TileMode.clamp,
+  ]) {
     _validateColorStops(colors, colorStops);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : new Float32List.fromList(colorStops);
