@@ -166,7 +166,7 @@ TEST(GraphemeBreak, rules) {
     EXPECT_TRUE(IsBreak("U+1F3F4 U+E0067 U+E0062 U+E0073 U+E0063 U+E0074 U+E007F | 'a'"));
 }
 
-TEST(GraphemeBreak, tailoring) {
+TEST(GraphemeBreak, DISABLED_tailoring) {
     // control characters that we interpret as "extend"
     EXPECT_FALSE(IsBreak("'a' | U+00AD"));  // soft hyphen
     EXPECT_FALSE(IsBreak("'a' | U+200B"));  // zwsp
@@ -229,7 +229,7 @@ TEST(GraphemeBreak, tailoring) {
     EXPECT_TRUE(IsBreak("U+0628 U+200D | U+2764"));
 }
 
-TEST(GraphemeBreak, emojiModifiers) {
+TEST(GraphemeBreak, DISABLED_emojiModifiers) {
     EXPECT_FALSE(IsBreak("U+261D | U+1F3FB"));  // white up pointing index + modifier
     EXPECT_FALSE(IsBreak("U+270C | U+1F3FB"));  // victory hand + modifier
     EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FB"));  // boy + modifier
@@ -286,7 +286,7 @@ TEST(GraphemeBreak, emojiModifiers) {
     EXPECT_TRUE(IsBreak("U+1F466 | U+1F400"));  // boy + rat
 }
 
-TEST(GraphemeBreak, genderBalancedEmoji) {
+TEST(GraphemeBreak, DISABLED_genderBalancedEmoji) {
     // U+1F469 is WOMAN, U+200D is ZWJ, U+1F4BC is BRIEFCASE.
     EXPECT_FALSE(IsBreak("U+1F469 | U+200D U+1F4BC"));
     EXPECT_FALSE(IsBreak("U+1F469 U+200D | U+1F4BC"));
