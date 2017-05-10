@@ -5,7 +5,7 @@ set -e
 # the root of the flutter repository.
 
 # Install dartdoc.
-pub global activate dartdoc 0.11.0
+pub global activate dartdoc 0.11.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
