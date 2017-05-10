@@ -91,7 +91,8 @@ public class TextInputPlugin implements MethodCallHandler {
             return null;
         outAttrs.inputType = inputTypeFromTextInputType(mConfiguration.getString("inputType"),
             mConfiguration.optBoolean("obscureText"));
-        outAttrs.actionLabel = mConfiguration.getString("actionLabel");
+        if (!mConfiguration.isNull("actionLabel"))
+          outAttrs.actionLabel = mConfiguration.getString("actionLabel");
         outAttrs.imeOptions = EditorInfo.IME_ACTION_DONE | EditorInfo.IME_FLAG_NO_FULLSCREEN;
         InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, this,
             mFlutterChannel);
