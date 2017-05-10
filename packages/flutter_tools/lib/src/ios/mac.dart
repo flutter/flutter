@@ -145,7 +145,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     return new XcodeBuildResult(success: false);
   }
 
-  final String developmentTeam = await _getCodeSigningIdentityDevelopmentTeam(app);
+  String developmentTeam;
+  if (codesign && mode != BuildMode.release && buildForDevice)
+    developmentTeam = await _getCodeSigningIdentityDevelopmentTeam(app);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -359,12 +361,14 @@ bool _checkXcodeVersion() {
   return true;
 }
 
-final RegExp _securityFindIdentityIdentityExtractionPattern = new RegExp(r'^\s*\d+\).+"(.+)"$');
+final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
+    new RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
 final RegExp _securityFindIdentityCertificateCnExtractionPattern = new RegExp(r'.*\(([a-zA-Z0-9]+)\)');
 final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=([a-zA-Z0-9]+)');
 
-/// Given a [BuildableIOSApp], this will try to find valid code signing
-/// identities in the user's keychain prompting a choice if multiple are found.
+/// Given a [BuildableIOSApp], this will try to find valid development code
+/// signing identities in the user's keychain prompting a choice if multiple
+/// are found.
 ///
 /// Will return null if none are found, if the user cancels or if the XCode
 /// project has a development team set in the project's build settings.
@@ -393,7 +397,7 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
   ])
       .split('\n')
       .map<String>((String outputLine) {
-        return _securityFindIdentityIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
+        return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
       })
       .where((String identityCN) => identityCN != null)
       .toList();
@@ -403,6 +407,8 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
   // If none are chosen.
   if (signingIdentity == null)
     return null;
+
+  printStatus('Signing iOS app for deployment using developer identity: "$signingIdentity"');
 
   final String signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
@@ -446,7 +452,7 @@ String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
     return null;
 
   // TODO(xster): let the user choose one.
-  if (validCodeSigningIdentities.length >= 1)
+  if (validCodeSigningIdentities.isNotEmpty)
     return validCodeSigningIdentities.first;
 
   return null;
