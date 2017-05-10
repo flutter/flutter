@@ -102,7 +102,8 @@ Future<TestStepResult> resultOfHandshake(
   dynamic error,
 ) async {
   assert(message != nothing);
-  while (received.length < 2) received.add(nothing);
+  while (received.length < 2)
+    received.add(nothing);
   TestStatus status;
   if (!_deepEquals(messageEcho, message) ||
       received.length != 2 ||
@@ -136,11 +137,16 @@ String _toString(dynamic message) {
 }
 
 bool _deepEquals(dynamic a, dynamic b) {
-  if (a == b) return true;
-  if (a is double && a.isNaN) return b is double && b.isNaN;
-  if (a is ByteData) return b is ByteData && _deepEqualsByteData(a, b);
-  if (a is List) return b is List && _deepEqualsList(a, b);
-  if (a is Map) return b is Map && _deepEqualsMap(a, b);
+  if (a == b)
+    return true;
+  if (a is double && a.isNaN)
+    return b is double && b.isNaN;
+  if (a is ByteData)
+    return b is ByteData && _deepEqualsByteData(a, b);
+  if (a is List)
+    return b is List && _deepEqualsList(a, b);
+  if (a is Map)
+    return b is Map && _deepEqualsMap(a, b);
   return false;
 }
 
@@ -152,17 +158,21 @@ bool _deepEqualsByteData(ByteData a, ByteData b) {
 }
 
 bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
-  if (a.length != b.length) return false;
+  if (a.length != b.length)
+    return false;
   for (int i = 0; i < a.length; i++) {
-    if (!_deepEquals(a[i], b[i])) return false;
+    if (!_deepEquals(a[i], b[i]))
+      return false;
   }
   return true;
 }
 
 bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
-  if (a.length != b.length) return false;
+  if (a.length != b.length)
+    return false;
   for (dynamic key in a.keys) {
-    if (!b.containsKey(key) || !_deepEquals(a[key], b[key])) return false;
+    if (!b.containsKey(key) || !_deepEquals(a[key], b[key]))
+      return false;
   }
   return true;
 }
