@@ -86,7 +86,7 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Cannot be default and destructive', (WidgetTester tester) async {
+  testWidgets('Default and destructive style', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoDialogAction(
       isDefault: true,
       isDestructive: true,
