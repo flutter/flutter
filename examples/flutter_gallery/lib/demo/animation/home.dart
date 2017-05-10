@@ -371,9 +371,11 @@ class _AllSectionsView extends AnimatedWidget {
 // app bar's height is _kAppBarMidHeight and only one section heading is
 // visible.
 class _SnappingScrollPhysics extends ClampingScrollPhysics {
-  _SnappingScrollPhysics({ ScrollPhysics parent, this.midScrollOffset }) : super(parent: parent) {
-    assert(midScrollOffset != null);
-  }
+  _SnappingScrollPhysics({
+    ScrollPhysics parent,
+    @required this.midScrollOffset,
+  }) : assert(midScrollOffset != null),
+       super(parent: parent);
 
   final double midScrollOffset;
 
