@@ -91,7 +91,7 @@ class DataRow {
     this.key,
     this.selected: false,
     this.onSelectChanged,
-    this.cells
+    @required this.cells
   }) : assert(cells != null);
 
   /// Creates the configuration for a row of a [DataTable], deriving
@@ -102,7 +102,7 @@ class DataRow {
     int index,
     this.selected: false,
     this.onSelectChanged,
-    this.cells
+    @required this.cells
   }) : assert(cells != null),
        key = new ValueKey<int>(index);
 

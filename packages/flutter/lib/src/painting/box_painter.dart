@@ -786,7 +786,7 @@ class LinearGradient extends Gradient {
   const LinearGradient({
     this.begin: FractionalOffset.centerLeft,
     this.end: FractionalOffset.centerRight,
-    this.colors,
+    @required this.colors,
     this.stops,
     this.tileMode: TileMode.clamp,
   }) : assert(begin != null),
@@ -1000,7 +1000,7 @@ class RadialGradient extends Gradient {
   const RadialGradient({
     this.center: FractionalOffset.center,
     this.radius: 0.5,
-    this.colors,
+    @required this.colors,
     this.stops,
     this.tileMode: TileMode.clamp,
   }) : assert(center != null),
@@ -1262,7 +1262,7 @@ class DecorationImage {
   ///
   /// The [image] argument must not be null.
   const DecorationImage({
-    this.image,
+    @required this.image,
     this.fit,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,

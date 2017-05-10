@@ -4,6 +4,8 @@
 
 import 'dart:ui' show Offset;
 
+import 'package:flutter/foundation.dart';
+
 import 'lsq_solver.dart';
 
 export 'dart:ui' show Offset;
@@ -13,7 +15,9 @@ class Velocity {
   /// Creates a velocity.
   ///
   /// The [pixelsPerSecond] argument must not be null.
-  const Velocity({ this.pixelsPerSecond }) : assert(pixelsPerSecond != null);
+  const Velocity({
+    @required this.pixelsPerSecond,
+  }) : assert(pixelsPerSecond != null);
 
   /// A velocity that isn't moving at all.
   static const Velocity zero = const Velocity(pixelsPerSecond: Offset.zero);
@@ -90,10 +94,10 @@ class VelocityEstimate {
   ///
   /// [pixelsPerSecond], [confidence], [duration], and [offset] must not be null.
   const VelocityEstimate({
-    this.pixelsPerSecond,
-    this.confidence,
-    this.duration,
-    this.offset,
+    @required this.pixelsPerSecond,
+    @required this.confidence,
+    @required this.duration,
+    @required this.offset,
   }) : assert(pixelsPerSecond != null),
        assert(confidence != null),
        assert(duration != null),

@@ -20,9 +20,9 @@ import 'package:flutter/material.dart';
 class CardItem extends StatelessWidget {
   CardItem({
     Key key,
-    this.animation,
+    @required this.animation,
     this.onTap,
-    this.item,
+    @required this.item,
     this.selected: false
   }) : super(key: key) {
     assert(animation != null);
