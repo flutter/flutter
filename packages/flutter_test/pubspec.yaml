@@ -1,4 +1,5 @@
 name: flutter_test
+version: 0.0.2
 dependencies:
   # The flutter tools depend on very specific internal implementation
   # details of the 'test' package, which change between versions, so

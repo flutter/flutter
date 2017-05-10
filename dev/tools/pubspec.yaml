@@ -6,4 +6,5 @@ dependencies:
   args: ^0.13.4
   http: ^0.11.3+12
   intl: ^0.14.0
+  meta: ^1.0.5
   path: ^1.4.0
