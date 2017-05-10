@@ -11,6 +11,7 @@ class DoctorCommand extends FlutterCommand {
   DoctorCommand() {
     argParser.addFlag('android-licenses',
       defaultsTo: false,
+      negatable: false,
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
   }
