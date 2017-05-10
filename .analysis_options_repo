@@ -64,12 +64,24 @@ linter:
 
     # === style rules ===
     - always_declare_return_types
+    # - always_put_control_body_on_new_line # not yet tested
+    # - always_require_non_null_named_parameters # not yet tested
     - always_specify_types
     - annotate_overrides
+    # - avoid_annotating_with_dynamic # not yet tested
     - avoid_as
+    # - avoid_catches_without_on_clauses # not yet tested
+    # - avoid_catching_errors # not yet tested
+    # - avoid_classes_with_only_static_members # not yet tested
     # - avoid_function_literals_in_foreach_calls # not yet tested
     - avoid_init_to_null
+    # - avoid_null_checks_in_equality_operators # not yet tested
+    # - avoid_positional_boolean_parameters # not yet tested
     - avoid_return_types_on_setters
+    # - avoid_returning_null # not yet tested
+    # - avoid_returning_this # not yet tested
+    # - avoid_setters_without_getters # not yet tested
+    # - avoid_types_on_closure_parameters # not yet tested
     - await_only_futures
     - camel_case_types
     # - cascade_invocations # not yet tested
@@ -78,6 +90,7 @@ linter:
     - empty_catches
     - empty_constructor_bodies
     - implementation_imports
+    # - join_return_with_assignment # not yet tested
     - library_names
     - library_prefixes
     - non_constant_identifier_names
@@ -90,11 +103,14 @@ linter:
     # - parameter_assignments # we do this commonly
     - prefer_adjacent_string_concatenation
     - prefer_collection_literals
+    # - prefer_conditional_assignment # not yet tested
     - prefer_const_constructors
+    # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     # - prefer_final_fields # https://github.com/dart-lang/linter/issues/506
     - prefer_final_locals
+    # - prefer_foreach # not yet tested
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested
@@ -114,7 +130,12 @@ linter:
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
+    # - unnecessary_overrides # not yet tested
     - unnecessary_this
+    # - use_rethrow_when_possible # not yet tested
+    # - use_setters_to_change_properties # not yet tested
+    # - use_string_buffers # not yet tested
+    # - use_to_and_as_if_applicable # not yet tested
 
     # === pub rules ===
     - package_names
