@@ -926,6 +926,9 @@ abstract class CustomClipper<T> {
   /// [shouldReclip] returns false or if the [shouldReclip] method is never
   /// called at all (e.g. if the box changes size).
   bool shouldReclip(covariant CustomClipper<T> oldClipper);
+
+  @override
+  String toString() => '$runtimeType';
 }
 
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
@@ -1190,32 +1193,39 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 
 /// Creates a physical model layer that clips its children to a rounded
 /// rectangle.
+///
+/// A physical model layer casts a shadow based on its [elevation].
 class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   /// Creates a rounded-rectangular clip.
   ///
-  /// The [borderRadius] defaults to [BorderRadius.zero], i.e. a rectangle with
-  /// right-angled corners.
+  /// The [color] is required.
+  ///
+  /// The [shape], [elevation], and [color] must not be null.
   RenderPhysicalModel({
     RenderBox child,
-    BoxShape shape,
-    BorderRadius borderRadius: BorderRadius.zero,
-    double elevation,
-    Color color,
+    BoxShape shape: BoxShape.rectangle,
+    BorderRadius borderRadius,
+    double elevation: 0.0,
+    @required Color color,
   }) : _shape = shape,
        _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
        super(child: child) {
-    if (shape == BoxShape.rectangle)
-      assert(_borderRadius != null);
+    assert(shape != null);
+    assert(elevation != null);
+    assert(color != null);
   }
 
   /// The shape of the layer.
+  ///
+  /// Defaults to [BoxShape.rectangle]. The [borderRadius] affects the corners
+  /// of the rectangle.
   BoxShape get shape => _shape;
   BoxShape _shape;
   set shape(BoxShape value) {
     assert(value != null);
-    if (_shape == value)
+    if (shape == value)
       return;
     _shape = value;
     _markNeedsClip();
@@ -1225,11 +1235,14 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   ///
   /// Values are clamped so that horizontal and vertical radii sums do not
   /// exceed width/height.
+  ///
+  /// This property is ignored if the [shape] is not [BoxShape.rectangle].
+  ///
+  /// The value null is treated like [BorderRadius.zero].
   BorderRadius get borderRadius => _borderRadius;
   BorderRadius _borderRadius;
   set borderRadius(BorderRadius value) {
-    assert(value != null);
-    if (_borderRadius == value)
+    if (borderRadius == value)
       return;
     _borderRadius = value;
     _markNeedsClip();
@@ -1240,7 +1253,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   double _elevation;
   set elevation(double value) {
     assert(value != null);
-    if (_elevation == value)
+    if (elevation == value)
       return;
     _elevation = value;
     markNeedsPaint();
@@ -1251,7 +1264,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   Color _color;
   set color(Color value) {
     assert(value != null);
-    if (_color == value)
+    if (color == value)
       return;
     _color = value;
     markNeedsPaint();
@@ -1259,8 +1272,9 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
 
   @override
   RRect get _defaultClip {
+    assert(hasSize);
     if (_shape == BoxShape.rectangle) {
-      return _borderRadius.toRRect(Offset.zero & size);
+      return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
     } else {
       final Rect rect = Offset.zero & size;
       return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
@@ -1282,8 +1296,17 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      context.pushPhysicalModel(needsCompositing, offset, _clip.outerRect, _clip, _elevation, _color, super.paint);
+      context.pushPhysicalModel(needsCompositing, offset, _clip.outerRect, _clip, elevation, color, super.paint);
     }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('shape: $shape');
+    description.add('borderRadius: $borderRadius');
+    description.add('elevation: ${elevation.toStringAsFixed(1)}');
+    description.add('color: $color');
   }
 }
 

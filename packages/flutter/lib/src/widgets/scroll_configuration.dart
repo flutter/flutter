@@ -73,6 +73,9 @@ class ScrollBehavior {
   /// [ScrollConfiguration] will rebuild using the new [ScrollBehavior]. If this
   /// method returns false, the rebuilds might be optimized away.
   bool shouldNotify(covariant ScrollBehavior oldDelegate) => false;
+
+  @override
+  String toString() => '$runtimeType';
 }
 
 /// Controls how [Scrollable] widgets behave in a subtree.
@@ -106,5 +109,11 @@ class ScrollConfiguration extends InheritedWidget {
     assert(behavior != null);
     return behavior.runtimeType != oldWidget.behavior.runtimeType
         || (behavior != oldWidget.behavior && behavior.shouldNotify(oldWidget.behavior));
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('behavior: $behavior');
   }
 }

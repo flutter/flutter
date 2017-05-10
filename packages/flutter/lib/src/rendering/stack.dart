@@ -526,8 +526,9 @@ class RenderStack extends RenderBox
   @override
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
-    description.add('overflow: $overflow');
     description.add('alignment: $alignment');
+    description.add('fit: $fit');
+    description.add('overflow: $overflow');
   }
 }
 

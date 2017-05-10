@@ -173,7 +173,7 @@ class Material extends StatefulWidget {
   void debugFillDescription(List<String> description) {
     super.debugFillDescription(description);
     description.add('$type');
-    description.add('elevation: $elevation');
+    description.add('elevation: ${elevation.toStringAsFixed(1)}');
     if (color != null)
       description.add('color: $color');
     if (textStyle != null) {

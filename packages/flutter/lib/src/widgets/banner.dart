@@ -207,6 +207,15 @@ class Banner extends StatelessWidget {
       child: child,
     );
   }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    description.add('"$message"');
+    description.add('$location');
+    description.add('$color');
+    '$textStyle'.split('\n').map((String value) => 'text $value').forEach(description.add);
+  }
 }
 
 /// Displays a [Banner] saying "SLOW MODE" when running in checked mode.
@@ -233,5 +242,16 @@ class CheckedModeBanner extends StatelessWidget {
       return true;
     });
     return result;
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    String message = 'disabled';
+    assert(() {
+      message = '"SLOW MODE"';
+      return true;
+    });
+    description.add(message);
   }
 }

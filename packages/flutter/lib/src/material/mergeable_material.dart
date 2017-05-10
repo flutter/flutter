@@ -120,7 +120,7 @@ class MergeableMaterial extends StatefulWidget {
   @override
   String toString() {
     return 'MergeableMaterial('
-      'key: $key, mainAxis: $mainAxis, elevation: $elevation'
+      'key: $key, mainAxis: $mainAxis, elevation: ${elevation.toStringAsFixed(1)}'
     ')';
   }
 
