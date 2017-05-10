@@ -352,7 +352,7 @@ class UserHeader extends StatelessWidget {
           new Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: new Image(
-              image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
+              image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
               height: 32.0
             )
@@ -410,7 +410,7 @@ class ItemImageBox extends StatelessWidget {
                 new SizedBox(
                   height: 230.0,
                   child: new Image(
-                    image: new AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
+                    image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
                   )
                 ),
                 new Theme(
