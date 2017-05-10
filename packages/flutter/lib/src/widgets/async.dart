@@ -295,7 +295,7 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 ///
 /// The stream may produce errors, resulting in snapshots of the form
 ///
-/// * `const AsyncSnapshot.withError(ConnectionState.active, 'some error')`
+/// * `AsyncSnapshot<int>.withError(ConnectionState.active, 'some error')`
 ///
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
