@@ -378,8 +378,12 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (iosApp.buildSettings['DEVELOPMENT_TEAM'] != null
-      || iosApp.buildSettings['PROVISIONING_PROFILE'] != null)
+  if (iosApp.buildSettings['DEVELOPMENT_TEAM'] != null) {
+    printStatus('Automatically signing iOS for device deployment using specified development team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}');
+    return null;
+  }
+
+  if (iosApp.buildSettings['PROVISIONING_PROFILE'] != null)
     return null;
 
   // If the user's environment is missing the tools needed to find and read
@@ -409,7 +413,7 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
   if (signingIdentity == null)
     return null;
 
-  printStatus('Signing iOS app for deployment using developer identity: "$signingIdentity"');
+  printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
   final String signingCertificateId =
       _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
