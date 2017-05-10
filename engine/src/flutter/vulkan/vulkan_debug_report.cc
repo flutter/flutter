@@ -201,7 +201,11 @@ OnVulkanDebugReportCallback(VkDebugReportFlagsEXT flags,
   stream << "-----------------------------------------------------------------";
 
   if (flags & kVulkanErrorFlags) {
-    FTL_DCHECK(false) << stream.str();
+    if (ValidationErrorsFatal()) {
+      FTL_DCHECK(false) << stream.str();
+    } else {
+      FTL_LOG(ERROR) << stream.str();
+    }
   } else {
     FTL_LOG(INFO) << stream.str();
   }

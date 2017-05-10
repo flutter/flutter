@@ -23,6 +23,14 @@ bool ValidationLayerInfoMessagesEnabled() {
   return false;
 }
 
+bool ValidationErrorsFatal() {
+#if OS_FUCHSIA
+  return false;
+#endif
+
+  return true;
+}
+
 static std::vector<std::string> InstanceOrDeviceLayersToEnable(
     const VulkanProcTable& vk,
     VkPhysicalDevice physical_device) {
