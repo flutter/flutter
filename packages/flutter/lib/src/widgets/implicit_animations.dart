@@ -761,7 +761,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     super.debugFillDescription(description);
     description.add('shape: $shape');
     description.add('borderRadius: $borderRadius');
-    description.add('elevation: $elevation');
+    description.add('elevation: ${elevation.toStringAsFixed(1)}');
     description.add('color: $color');
     description.add('animateColor: $animateColor');
   }

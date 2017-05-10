@@ -136,6 +136,46 @@ class BorderRadius {
 
   @override
   String toString() {
+    if (topLeft == topRight &&
+        topRight == bottomRight &&
+        bottomRight == bottomLeft) {
+      if (topLeft == Radius.zero)
+        return 'BorderRadius.zero';
+      if (topLeft.x == topLeft.y)
+        return 'BorderRadius.circular(${topLeft.x.toStringAsFixed(1)})';
+      return 'BorderRadius.all($topLeft)';
+    }
+    if (topLeft == Radius.zero ||
+        topRight == Radius.zero ||
+        bottomLeft == Radius.zero ||
+        bottomRight == Radius.zero) {
+      final StringBuffer result = new StringBuffer();
+      result.write('BorderRadius.only(');
+      bool comma = false;
+      if (topLeft != Radius.zero) {
+        result.write('topLeft: $topLeft');
+        comma = true;
+      }
+      if (topRight != Radius.zero) {
+        if (comma)
+          result.write(', ');
+        result.write('topRight: $topRight');
+        comma = true;
+      }
+      if (bottomLeft != Radius.zero) {
+        if (comma)
+          result.write(', ');
+        result.write('bottomLeft: $bottomLeft');
+        comma = true;
+      }
+      if (bottomRight != Radius.zero) {
+        if (comma)
+          result.write(', ');
+        result.write('bottomRight: $bottomRight');
+      }
+      result.write(')');
+      return result.toString();
+    }
     return 'BorderRadius($topLeft, $topRight, $bottomRight, $bottomLeft)';
   }
 }
