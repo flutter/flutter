@@ -288,7 +288,7 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
           !checkBuildSettings.stdout?.contains(new RegExp(r'\bPROVISIONING_PROFILE\b')) == true) {
         printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
-Building an iOS app requires a selected Development Team with a Provisioning Profile
+Building a deployable iOS app requires a selected Development Team with a Provisioning Profile
 Please ensure that a Development Team is selected by:
   1- Opening the Flutter project's Xcode target with
        open ios/Runner.xcworkspace
@@ -370,7 +370,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 /// signing identities in the user's keychain prompting a choice if multiple
 /// are found.
 ///
-/// Will return null if none are found, if the user cancels or if the XCode
+/// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
 Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
   if (iosApp.buildSettings == null)
@@ -400,6 +400,7 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
         return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
       })
       .where((String identityCN) => identityCN != null)
+      .toSet() // Unique.
       .toList();
 
   final String signingIdentity = _chooseSigningIdentity(validCodeSigningIdentities);
@@ -445,11 +446,27 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
 
 String _chooseSigningIdentity(List<String> validCodeSigningIdentities) {
   // The user has no valid code signing identities.
-  // TODO(xster): we should show more specific instructions here and have the
-  // user go into XCode, sign in with Apple ID and either download the profiles
-  // or go through the developer account setup flow.
-  if (validCodeSigningIdentities.isEmpty)
-    return null;
+  if (validCodeSigningIdentities.isEmpty) {
+    printError(
+      '''
+═══════════════════════════════════════════════════════════════════════════════════
+No valid code signing certificates were found
+Please ensure that you have a valid Development Team with valid iOS Development Certificates
+associated with your Apple ID by:
+  1- Opening the Xcode application
+  2- Go to Xcode->Preferences->Accounts
+  3- Make sure that you're signed in with your Apple ID via the '+' button on the bottom left
+  4- Make sure that you have development certificates available by signing up to Apple
+     Developer Program and/or downloading available profiles as needed.
+For more information, please visit:
+  https://developer.apple.com/library/content/documentation/IDEs/Conceptual/AppDistributionGuide/MaintainingCertificates/MaintainingCertificates.html
+
+Or run on an iOS simulator without code signing
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true
+    );
+    throwToolExit('No development certificates available to code sign app for device deployment');
+  }
 
   // TODO(xster): let the user choose one.
   if (validCodeSigningIdentities.isNotEmpty)
