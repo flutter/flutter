@@ -349,10 +349,10 @@ class UserHeader extends StatelessWidget {
       child: new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Padding(
+          const Padding(
             padding: const EdgeInsets.only(right: 8.0),
-            child: new Image(
-              image: new AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
+            child: const Image(
+              image: const AssetImage('packages/flutter_gallery_assets/ali_connors_sml.png'),
               width: 32.0,
               height: 32.0
             )
@@ -407,10 +407,10 @@ class ItemImageBox extends StatelessWidget {
           children: <Widget>[
             new Stack(
               children: <Widget>[
-                new SizedBox(
+                const SizedBox(
                   height: 230.0,
-                  child: new Image(
-                    image: new AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
+                  child: const Image(
+                    image: const AssetImage('packages/flutter_gallery_assets/top_10_australian_beaches.png')
                   )
                 ),
                 new Theme(

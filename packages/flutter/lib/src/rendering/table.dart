@@ -121,7 +121,7 @@ class FixedColumnWidth extends TableColumnWidth {
   /// Creates a column width based on a fixed number of logical pixels.
   ///
   /// The [value] argument must not be null.
-  const FixedColumnWidth(this.value);
+  const FixedColumnWidth(this.value) : assert(value != null);
 
   /// The width the column should occupy in logical pixels.
   final double value;
@@ -148,7 +148,7 @@ class FractionColumnWidth extends TableColumnWidth {
   /// maxWidth.
   ///
   /// The [value] argument must not be null.
-  const FractionColumnWidth(this.value);
+  const FractionColumnWidth(this.value) : assert(value != null);
 
   /// The fraction of the table's constraints' maxWidth that this column should
   /// occupy.
@@ -184,7 +184,7 @@ class FlexColumnWidth extends TableColumnWidth {
   /// the other columns have been laid out.
   ///
   /// The [value] argument must not be null.
-  const FlexColumnWidth([this.value = 1.0]);
+  const FlexColumnWidth([this.value = 1.0]) : assert(value != null);
 
   /// The reaction of the of the remaining space once all the other columns have
   /// been laid out that this column should occupy.

@@ -151,7 +151,11 @@ class SliverGridRegularTileLayout extends SliverGridLayout {
     @required this.crossAxisStride,
     @required this.childMainAxisExtent,
     @required this.childCrossAxisExtent,
-  });
+  }) : assert(crossAxisCount != null && crossAxisCount > 0),
+       assert(mainAxisStride != null && mainAxisStride >= 0),
+       assert(crossAxisStride != null && crossAxisStride >= 0),
+       assert(childMainAxisExtent != null && childMainAxisExtent >= 0),
+       assert(childCrossAxisExtent != null && childCrossAxisExtent >= 0);
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
@@ -272,7 +276,10 @@ class SliverGridDelegateWithFixedCrossAxisCount extends SliverGridDelegate {
     this.mainAxisSpacing: 0.0,
     this.crossAxisSpacing: 0.0,
     this.childAspectRatio: 1.0,
-  });
+  }) : assert(crossAxisCount != null && crossAxisCount > 0),
+       assert(mainAxisSpacing != null && mainAxisSpacing >= 0),
+       assert(crossAxisSpacing != null && crossAxisSpacing >= 0),
+       assert(childAspectRatio != null && childAspectRatio > 0);
 
   /// The number of children in the cross axis.
   final int crossAxisCount;
@@ -347,15 +354,18 @@ class SliverGridDelegateWithMaxCrossAxisExtent extends SliverGridDelegate {
   /// Creates a delegate that makes grid layouts with tiles that have a maximum
   /// cross-axis extent.
   ///
-  /// All of the arguments must not be null. The `maxCrossAxisExtent` and
-  /// `crossAxisSpacing` arguments must not be negative. The `crossAxisCount`
-  /// and `childAspectRatio` arguments must be greater than zero.
+  /// All of the arguments must not be null. The [maxCrossAxisExtent] and
+  /// [mainAxisSpacing], and [crossAxisSpacing] arguments must not be negative.
+  /// The [childAspectRatio] argument must be greater than zero.
   const SliverGridDelegateWithMaxCrossAxisExtent({
     @required this.maxCrossAxisExtent,
     this.mainAxisSpacing: 0.0,
     this.crossAxisSpacing: 0.0,
     this.childAspectRatio: 1.0,
-  });
+  }) : assert(maxCrossAxisExtent != null && maxCrossAxisExtent >= 0),
+       assert(mainAxisSpacing != null && mainAxisSpacing >= 0),
+       assert(crossAxisSpacing != null && crossAxisSpacing >= 0),
+       assert(childAspectRatio != null && childAspectRatio > 0);
 
   /// The maximum extent of tiles in the cross axis.
   ///

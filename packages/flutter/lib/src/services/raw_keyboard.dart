@@ -42,7 +42,11 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode: 0,
     this.scanCode: 0,
     this.metaState: 0,
-  });
+  }) : assert(flags != null),
+       assert(codePoint != null),
+       assert(keyCode != null),
+       assert(scanCode != null),
+       assert(metaState != null);
 
   /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getFlags()>
   final int flags;
@@ -67,12 +71,14 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
-  /// The [hidUsage] and [codePoint] arguments must not be null.
+  /// The [hidUsage], [codePoint], and [modifiers] arguments must not be null.
   const RawKeyEventDataFuchsia({
     this.hidUsage: 0,
     this.codePoint: 0,
     this.modifiers: 0,
-  });
+  }) : assert(hidUsage != null),
+       assert(codePoint != null),
+       assert(modifiers != null);
 
   /// The USB HID usage.
   ///
@@ -84,7 +90,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// If there is no Unicode code point, this value is zero.
   final int codePoint;
 
-  /// The modifiers that we present when the key event occured.
+  /// The modifiers that we present when the key event occurred.
   ///
   /// See <https://fuchsia.googlesource.com/mozart/+/master/services/input/input_event_constants.fidl>
   /// for the numerical values of the modifiers.
