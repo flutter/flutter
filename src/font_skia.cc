@@ -84,7 +84,7 @@ hb_face_t* FontSkia::CreateHarfBuzzFace() const {
   return hb_face_create_for_tables(GetTable, typeface_.get(), 0);
 }
 
-const sk_sp<SkTypeface>& FontSkia::GetSkTypeface() {
+const sk_sp<SkTypeface>& FontSkia::GetSkTypeface() const {
   return typeface_;
 }
 
