@@ -158,6 +158,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  integration_ui:
+    description: >
+      Runs end-to-end Flutter tests on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   # iOS on-device tests
 
   channels_integration_test_ios:
@@ -220,6 +227,13 @@ tasks:
 #    stage: devicelab_ios
 #    required_agent_capabilities: ["has-ios-device"]
 #    flaky: true    
+
+  integration_ui_ios:
+    description: >
+      Runs end-to-end Flutter tests on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   # Tests running on Windows host
 

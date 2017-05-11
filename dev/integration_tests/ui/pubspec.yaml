@@ -1,0 +1,14 @@
+name: integration_ui
+description: Flutter non-plugin UI integration tests.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  test: any
+flutter:
+  uses-material-design: true
