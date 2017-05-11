@@ -396,13 +396,9 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       || !exitsHappy(<String>['which', 'openssl']))
     return null;
 
-  final List<String> validCodeSigningIdentities = runCheckedSync(<String>[
-    'security',
-    'find-identity',
-    '-p',
-    'codesigning',
-    '-v',
-  ])
+  final List<String> findIdentityCommand =
+      <String>['security', 'find-identity', '-p', 'codesigning', '-v'];
+  final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
       .split('\n')
       .map<String>((String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
@@ -426,15 +422,13 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
   if (signingCertificateId == null)
     return null;
 
-  final String signingCertificate = runCheckedSync(<String>[
-    'security',
-    'find-certificate',
-    '-c',
-    signingCertificateId,
-    '-p',
-  ]);
+  final String signingCertificate = runCheckedSync(
+    <String>['security', 'find-certificate', '-c', signingCertificateId, '-p']
+  );
 
-  final Process opensslProcess = await runCommand(<String>['openssl', 'x509', '-subject']);
+  final Process opensslProcess = await runCommand(
+    <String>['openssl', 'x509', '-subject']
+  );
   opensslProcess.stdin
       ..write(signingCertificate)
       ..close();
