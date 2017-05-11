@@ -7,6 +7,8 @@ dependencies:
   flutter_driver:
     sdk: flutter
 dev_dependencies:
-  test: 0.12.20
+  flutter_test:
+    sdk: flutter
+  test: any
 flutter:
   uses-material-design: true
