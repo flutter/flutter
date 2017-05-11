@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert' show JSON, UTF8;
 
 import 'package:meta/meta.dart';
+import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -378,12 +379,12 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
 
   // If the user already has it set in the project build settings itself,
   // continue with that.
-  if (iosApp.buildSettings['DEVELOPMENT_TEAM'] != null) {
+  if (isNotEmpty(iosApp.buildSettings['DEVELOPMENT_TEAM'])) {
     printStatus('Automatically signing iOS for device deployment using specified development team in Xcode project: ${iosApp.buildSettings['DEVELOPMENT_TEAM']}');
     return null;
   }
 
-  if (iosApp.buildSettings['PROVISIONING_PROFILE'] != null)
+  if (isNotEmpty(iosApp.buildSettings['PROVISIONING_PROFILE']))
     return null;
 
   // If the user's environment is missing the tools needed to find and read
@@ -403,7 +404,7 @@ Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) asy
       .map<String>((String outputLine) {
         return _securityFindIdentityDeveloperIdentityExtractionPattern.firstMatch(outputLine)?.group(1);
       })
-      .where((String identityCN) => identityCN != null)
+      .where((String identityCN) => isNotEmpty(identityCN))
       .toSet() // Unique.
       .toList();
 
