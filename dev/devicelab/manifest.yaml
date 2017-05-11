@@ -158,7 +158,7 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
-  e2e:
+  integration_ui:
     description: >
       Runs end-to-end Flutter tests on Android.
     stage: devicelab
@@ -228,7 +228,7 @@ tasks:
 #    required_agent_capabilities: ["has-ios-device"]
 #    flaky: true    
 
-  e2e_ios:
+  integration_ui_ios:
     description: >
       Runs end-to-end Flutter tests on iOS.
     stage: devicelab_ios
