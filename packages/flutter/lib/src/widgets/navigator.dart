@@ -58,7 +58,7 @@ abstract class Route<T> {
   ///
   /// The returned value resolves when the push transition is complete.
   @protected
-  Future<Null> didPush() => new Future<Null>.value();
+  TickerFuture didPush() => new TickerFuture.complete();
 
   /// When this route is popped (see [Navigator.pop]) if the result isn't
   /// specified or if it's null, this value will be used instead.
@@ -894,7 +894,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       newRoute._navigator = this;
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
-      newRoute.didPush().then<Null>((Null value) {
+      newRoute.didPush().whenCompleteOrCancel(() {
         // The old route's exit is not animated. We're assuming that the
         // new route completely obscures the old one.
         if (mounted) {
