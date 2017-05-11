@@ -19,6 +19,11 @@ const String kDocRoot = 'dev/docs/doc';
 /// at the root of docs.flutter.io. We are keeping the files inside of
 /// docs.flutter.io/flutter for now, so we need to manipulate paths
 /// a bit. See https://github.com/flutter/flutter/issues/3900 for more info.
+///
+/// This will only work on UNIX systems, not Windows. It requires that 'git' be
+/// in your path. It requires that 'flutter' has been run previously. It uses
+/// the version of Dart downloaded by the 'flutter' tool in this repository and
+/// will crash if that is absent.
 Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -50,11 +55,13 @@ dependencies:
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
   // Run pub.
-  Process process = await Process.start('pub', <String>['get'],
+  Process process = await Process.start(
+    '../../bin/cache/dart-sdk/bin/pub',
+    <String>['get'],
     workingDirectory: 'dev/docs',
     environment: <String, String>{
-      'FLUTTER_ROOT': Directory.current.path
-    }
+      'FLUTTER_ROOT': Directory.current.path,
+    },
   );
   printStream(process.stdout);
   printStream(process.stderr);
@@ -65,8 +72,11 @@ dependencies:
   createFooter('dev/docs/lib/footer.html');
 
   // Verify which version of dartdoc we're using.
-  final ProcessResult result = Process.runSync('pub',
-    <String>['global', 'run', 'dartdoc', '--version']);
+  final ProcessResult result = Process.runSync(
+    '../../bin/cache/dart-sdk/bin/pub',
+    <String>['global', 'run', 'dartdoc', '--version'],
+    workingDirectory: 'dev/docs',
+  );
   print('\n${result.stdout}');
 
   // Generate the documentation.
@@ -87,7 +97,11 @@ dependencies:
     args.add(libraryRef);
   }
 
-  process = await Process.start('pub', args, workingDirectory: 'dev/docs');
+  process = await Process.start(
+    '../../bin/cache/dart-sdk/bin/pub',
+    args,
+    workingDirectory: 'dev/docs',
+  );
   printStream(process.stdout);
   printStream(process.stderr);
   final int exitCode = await process.exitCode;
