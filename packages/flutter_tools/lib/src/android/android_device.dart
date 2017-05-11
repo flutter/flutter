@@ -26,6 +26,7 @@ import 'android.dart';
 import 'android_sdk.dart';
 
 const String _defaultAdbPath = 'adb';
+const String _installFailedNoCertificates = 'INSTALL_PARSE_FAILED_NO_CERTIFICATES';
 
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('Android devices');
@@ -244,7 +245,15 @@ class AndroidDevice extends Device {
       return false;
 
     final Status status = logger.startProgress('Installing ${apk.apkPath}...', expectSlowOperation: true);
-    final RunResult installResult = await runAsync(adbCommandForDevice(<String>['install', '-r', apk.apkPath]));
+    final List<String> adbCommand = adbCommandForDevice(<String>['install', '-r', apk.apkPath]);
+    RunResult installResult = await runAsync(adbCommand);
+    if (installResult.stdout.contains(_installFailedNoCertificates) ||
+        installResult.stderr.contains(_installFailedNoCertificates)) {
+      // TODO(goderbauer): retry as workaround for transient INSTALL_PARSE_FAILED_NO_CERTIFICATES error,
+      //     see https://github.com/flutter/flutter/issues/8605.
+      printTrace('Error INSTALL_PARSE_FAILED_NO_CERTIFICATES occurred. Retrying...');
+      installResult = await runAsync(adbCommand);
+    }
     status.stop();
     // Some versions of adb exit with exit code 0 even on failure :(
     // Parsing the output to check for failures.
