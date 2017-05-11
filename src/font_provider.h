@@ -27,20 +27,20 @@
 
 namespace txt {
 
-class FontCollection {
+class FontProvider {
  public:
-  static FontCollection& GetDefaultFontCollection();
+  static FontProvider& GetDefault();
 
-  FontCollection();
+  FontProvider();
 
-  ~FontCollection();
+  ~FontProvider();
 
-  std::shared_ptr<minikin::FontCollection> GetAndroidFontCollectionForFamily(
+  std::shared_ptr<minikin::FontCollection> GetFontCollectionForFamily(
       const std::string& family);
 
  private:
   // TODO(chinmaygarde): Caches go here.
-  FTL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
+  FTL_DISALLOW_COPY_AND_ASSIGN(FontProvider);
 };
 
 }  // namespace txt
