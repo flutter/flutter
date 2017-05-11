@@ -384,7 +384,7 @@ class BoxConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
     assert(() {
       void throwError(String message) {

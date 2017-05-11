@@ -397,21 +397,31 @@ class SliverConstraints extends Constraints {
   @override
   bool debugAssertIsValid({
     bool isAppliedConstraint: false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
-    // TODO(ianh): make these show pretty errors
-    assert(axis != null);
-    assert(growthDirection != null);
-    assert(scrollOffset != null);
-    assert(overlap != null);
-    assert(remainingPaintExtent != null);
-    assert(crossAxisExtent != null);
-    assert(viewportMainAxisExtent != null);
-    assert(scrollOffset >= 0.0);
-    assert(crossAxisExtent >= 0.0);
-    assert(viewportMainAxisExtent >= 0.0);
-    assert(remainingPaintExtent >= 0.0);
-    assert(isNormalized); // should be redundant with earlier checks
+    assert(() {
+      void verify(bool check, String message) {
+        if (check)
+          return;
+        final StringBuffer information = new StringBuffer();
+        if (informationCollector != null)
+          informationCollector(information);
+        throw new FlutterError('$runtimeType is not valid: $message\n${information}The offending constraints were:\n  $this');
+      }
+      verify(axis != null, 'The "axis" is null.');
+      verify(growthDirection != null, 'The "growthDirection" is null.');
+      verify(scrollOffset != null, 'The "scrollOffset" is null.');
+      verify(overlap != null, 'The "overlap" is null.');
+      verify(remainingPaintExtent != null, 'The "remainingPaintExtent" is null.');
+      verify(crossAxisExtent != null, 'The "crossAxisExtent" is null.');
+      verify(viewportMainAxisExtent != null, 'The "viewportMainAxisExtent" is null.');
+      verify(scrollOffset >= 0.0, 'The "scrollOffset" is negative.');
+      verify(crossAxisExtent >= 0.0, 'The "crossAxisExtent" is negative.');
+      verify(viewportMainAxisExtent >= 0.0, 'The "viewportMainAxisExtent" is negative.');
+      verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
+      verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
+      return true;
+    });
     return true;
   }
 
@@ -566,39 +576,46 @@ class SliverGeometry {
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
-  bool get debugAssertIsValid {
-    assert(scrollExtent != null);
-    assert(scrollExtent >= 0.0);
-    assert(paintExtent != null);
-    assert(paintExtent >= 0.0);
-    assert(paintOrigin != null);
-    assert(layoutExtent != null);
-    assert(layoutExtent >= 0.0);
+  bool debugAssertIsValid({
+    InformationCollector informationCollector,
+  }) {
     assert(() {
+      void verify(bool check, String message) {
+        if (check)
+          return;
+        final StringBuffer information = new StringBuffer();
+        if (informationCollector != null)
+          informationCollector(information);
+        throw new FlutterError('$runtimeType is not valid: $message\n$information');
+      }
+      verify(scrollExtent != null, 'The "scrollExtent" is null.');
+      verify(scrollExtent >= 0.0, 'The "scrollExtent" is negative.');
+      verify(paintExtent != null, 'The "paintExtent" is null.');
+      verify(paintExtent >= 0.0, 'The "paintExtent" is negative.');
+      verify(paintOrigin != null, 'The "paintOrigin" is null.');
+      verify(layoutExtent != null, 'The "layoutExtent" is null.');
+      verify(layoutExtent >= 0.0, 'The "layoutExtent" is negative.');
       if (layoutExtent > paintExtent) {
-        throw new FlutterError(
-          'SliverGeometry has a layoutExtent that exceeds its paintExtent.\n' +
-          _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent)
+        verify(false,
+          'The "layoutExtent" exceeds the "paintExtent".\n' +
+          _debugCompareFloats('paintExtent', paintExtent, 'layoutExtent', layoutExtent),
         );
       }
-      return true;
-    });
-    assert(maxPaintExtent != null);
-    assert(() {
+      verify(maxPaintExtent != null, 'The "maxPaintExtent" is null.');
       if (maxPaintExtent < paintExtent) {
-        throw new FlutterError(
-          'SliverGeometry has a maxPaintExtent that is less than its paintExtent.\n' +
+        verify(false,
+          'The "maxPaintExtent" is less than the "paintExtent".\n' +
           _debugCompareFloats('maxPaintExtent', maxPaintExtent, 'paintExtent', paintExtent) +
           'By definition, a sliver can\'t paint more than the maximum that it can paint!'
         );
       }
+      verify(hitTestExtent != null, 'The "hitTestExtent" is null.');
+      verify(hitTestExtent >= 0.0, 'The "hitTestExtent" is negative.');
+      verify(visible != null, 'The "visible" property is null.');
+      verify(hasVisualOverflow != null, 'The "hasVisualOverflow" is null.');
+      verify(scrollOffsetCorrection != null, 'The "scrollOffsetCorrection" is null.');
       return true;
     });
-    assert(hitTestExtent != null);
-    assert(hitTestExtent >= 0.0);
-    assert(visible != null);
-    assert(hasVisualOverflow != null);
-    assert(scrollOffsetCorrection != null);
     return true;
   }
 
@@ -837,7 +854,12 @@ abstract class RenderSliver extends RenderObject {
 
   @override
   void debugAssertDoesMeetConstraints() {
-    assert(geometry.debugAssertIsValid);
+    assert(geometry.debugAssertIsValid(
+      informationCollector: (StringBuffer information) {
+        information.writeln('The RenderSliver that returned the offending geometry was:');
+        information.writeln('  ${toStringShallow('\n  ')}');
+      },
+    ));
     assert(() {
       if (geometry.paintExtent > constraints.remainingPaintExtent) {
         throw new FlutterError(
