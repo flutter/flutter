@@ -147,7 +147,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   String developmentTeam;
   if (codesign && mode != BuildMode.release && buildForDevice)
-    developmentTeam = await _getCodeSigningIdentityDevelopmentTeam(app);
+    developmentTeam = await getCodeSigningIdentityDevelopmentTeam(app);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -372,7 +372,7 @@ final RegExp _certificateOrganizationalUnitExtractionPattern = new RegExp(r'OU=(
 ///
 /// Will return null if none are found, if the user cancels or if the Xcode
 /// project has a development team set in the project's build settings.
-Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
+Future<String> getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) async{
   if (iosApp.buildSettings == null)
     return null;
 
@@ -430,7 +430,7 @@ Future<String> _getCodeSigningIdentityDevelopmentTeam(BuildableIOSApp iosApp) as
     '-p',
   ]);
 
-  final Process opensslProcess = await Process.start('openssl', <String>['x509', '-subject']);
+  final Process opensslProcess = await runCommand(<String>['openssl', 'x509', '-subject']);
   opensslProcess.stdin
       ..write(signingCertificate)
       ..close();
