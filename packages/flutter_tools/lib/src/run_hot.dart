@@ -375,7 +375,7 @@ class HotRunner extends ResidentRunner {
         await _restartFromSources();
         timer.stop();
         status.cancel();
-        printStatus('Restarted app in ${getElapsedAsSeconds(timer.elapsed)}.');
+        printStatus('Restarted app in ${getElapsedAsMilliseconds(timer.elapsed)}.');
         return OperationResult.ok;
       } catch (error) {
         status.cancel();
@@ -412,7 +412,7 @@ class HotRunner extends ResidentRunner {
     }
 
     if (!_isPaused()) {
-      printStatus('Refreshing active FlutterViews before reloading.');
+      printTrace('Refreshing active FlutterViews before reloading.');
       await refreshViews();
     }
 
@@ -528,8 +528,8 @@ class HotRunner extends ResidentRunner {
         await view.uiIsolate.flutterReassemble();
       } on TimeoutException {
         reassembleTimedOut = true;
-        printTrace("Reassembling ${view.uiIsolate.name} took too long. ");
-        printStatus("Hot reloading ${view.uiIsolate.name} took too long. Hot reload may have failed.");
+        printTrace("Reassembling ${view.uiIsolate.name} took too long.");
+        printStatus("Hot reloading ${view.uiIsolate.name} took too long; the reload may have failed.");
         continue;
       } catch (error) {
         reassembleAndScheduleErrors = true;
