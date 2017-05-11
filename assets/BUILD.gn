@@ -13,9 +13,12 @@ source_set("assets") {
   ]
 
   deps = [
-    "//flutter/fml",
+    "//flutter/glue",
     "//lib/ftl",
     "//lib/zip",
+  ]
+
+  public_deps = [
     "//third_party/zlib:minizip",
   ]
 }
