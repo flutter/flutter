@@ -190,18 +190,13 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
                object:nil];
 
   [center addObserver:self
-             selector:@selector(keyboardFrameDidChange:)
-                 name:UIKeyboardDidShowNotification
+             selector:@selector(keyboardWillChangeFrame:)
+                 name:UIKeyboardWillChangeFrameNotification
                object:nil];
 
   [center addObserver:self
              selector:@selector(keyboardWillBeHidden:)
                  name:UIKeyboardWillHideNotification
-               object:nil];
-
-  [center addObserver:self
-             selector:@selector(keyboardFrameDidChange:)
-                 name:UIKeyboardDidChangeFrameNotification
                object:nil];
 
   [center addObserver:self
@@ -399,7 +394,7 @@ static inline PointerChangeMapperPhase PointerChangePhaseFromUITouchPhase(UITouc
 
 #pragma mark - Keyboard events
 
-- (void)keyboardFrameDidChange:(NSNotification*)notification {
+- (void)keyboardWillChangeFrame:(NSNotification*)notification {
   NSDictionary* info = [notification userInfo];
   CGFloat bottom =
       CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
