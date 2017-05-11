@@ -27,7 +27,7 @@ void main() {
                           child: const Text('Cancel'),
                         ),
                         new CupertinoDialogAction(
-                          isDestructive: true,
+                          isDestructiveAction: true,
                           onPressed: () {
                             didDelete = true;
                             Navigator.pop(context);
@@ -65,7 +65,7 @@ void main() {
 
   testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoDialogAction(
-      isDestructive: true,
+      isDestructiveAction: true,
       child: const Text('Ok'),
     ));
 
@@ -77,7 +77,7 @@ void main() {
 
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoDialogAction(
-      isDefault: true,
+      isDefaultAction: true,
       child: const Text('Ok'),
     ));
 
@@ -88,8 +88,8 @@ void main() {
 
   testWidgets('Default and destructive style', (WidgetTester tester) async {
     await tester.pumpWidget(const CupertinoDialogAction(
-      isDefault: true,
-      isDestructive: true,
+      isDefaultAction: true,
+      isDestructiveAction: true,
       child: const Text('Ok'),
     ));
 
