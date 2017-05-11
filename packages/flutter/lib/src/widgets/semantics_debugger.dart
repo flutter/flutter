@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 import 'dart:ui' show SemanticsFlags;
+import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -31,7 +32,7 @@ class SemanticsDebugger extends StatefulWidget {
   _SemanticsDebuggerState createState() => new _SemanticsDebuggerState();
 }
 
-class _SemanticsDebuggerState extends State<SemanticsDebugger> {
+class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindingObserver {
   _SemanticsClient _client;
 
   @override
@@ -43,6 +44,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
     // the BuildContext.
     _client = new _SemanticsClient(WidgetsBinding.instance.pipelineOwner)
       ..addListener(_update);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -50,7 +52,15 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
     _client
       ..removeListener(_update)
       ..dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
+  }
+
+  @override
+  void didChangeMetrics() {
+    setState(() {
+      // The root transform may have changed, we have to repaint.
+    });
   }
 
   void _update() {
@@ -71,8 +81,10 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
   Offset _lastPointerDownLocation;
   void _handlePointerDown(PointerDownEvent event) {
     setState(() {
-      _lastPointerDownLocation = event.position;
+      _lastPointerDownLocation = event.position * ui.window.devicePixelRatio;
     });
+    // TODO(ianh): Use a gesture recognizer so that we can reset the
+    // _lastPointerDownLocation when none of the other gesture recognizers win.
   }
 
   void _handleTap() {
@@ -129,7 +141,8 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
       foregroundPainter: new _SemanticsDebuggerPainter(
         _pipelineOwner,
         _client.generation,
-        _lastPointerDownLocation
+        _lastPointerDownLocation, // in physical pixels
+        ui.window.devicePixelRatio,
       ),
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
@@ -142,10 +155,10 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> {
           behavior: HitTestBehavior.opaque,
           child: new IgnorePointer(
             ignoringSemantics: false,
-            child: widget.child
-          )
-        )
-      )
+            child: widget.child,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -293,11 +306,12 @@ void _paint(Canvas canvas, SemanticsNode node, int rank) {
 }
 
 class _SemanticsDebuggerPainter extends CustomPainter {
-  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition);
+  const _SemanticsDebuggerPainter(this.owner, this.generation, this.pointerPosition, this.devicePixelRatio);
 
   final PipelineOwner owner;
   final int generation;
-  final Offset pointerPosition;
+  final Offset pointerPosition; // in physical pixels
+  final double devicePixelRatio;
 
   SemanticsNode get _rootSemanticsNode {
     return owner.semanticsOwner?.rootSemanticsNode;
@@ -306,13 +320,16 @@ class _SemanticsDebuggerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final SemanticsNode rootNode = _rootSemanticsNode;
+    canvas.save();
+    canvas.scale(1.0 / devicePixelRatio, 1.0 / devicePixelRatio);
     if (rootNode != null)
       _paint(canvas, rootNode, _findDepth(rootNode));
     if (pointerPosition != null) {
       final Paint paint = new Paint();
       paint.color = const Color(0x7F0090FF);
-      canvas.drawCircle(pointerPosition, 10.0, paint);
+      canvas.drawCircle(pointerPosition, 10.0 * devicePixelRatio, paint);
     }
+    canvas.restore();
   }
 
   @override
