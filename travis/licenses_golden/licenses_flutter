@@ -1367,6 +1367,8 @@ FILE: ../../../flutter/content_handler/vulkan_rasterizer.cc
 FILE: ../../../flutter/content_handler/vulkan_rasterizer.h
 FILE: ../../../flutter/flow/layers/physical_model_layer.cc
 FILE: ../../../flutter/flow/layers/physical_model_layer.h
+FILE: ../../../flutter/flow/paint_utils.cc
+FILE: ../../../flutter/flow/paint_utils.h
 FILE: ../../../flutter/fml/icu_util.cc
 FILE: ../../../flutter/fml/icu_util.h
 FILE: ../../../flutter/fml/mapping.cc

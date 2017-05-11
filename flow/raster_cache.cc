@@ -4,11 +4,10 @@
 
 #include "flutter/flow/raster_cache.h"
 
-#include <stdlib.h>
-
 #include <vector>
 
 #include "flutter/common/threads.h"
+#include "flutter/flow/paint_utils.h"
 #include "flutter/glue/trace_event.h"
 #include "lib/ftl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
@@ -24,46 +23,6 @@ static bool isWorthRasterizing(SkPicture* picture) {
   // TODO(abarth): We should find a better heuristic here that lets us avoid
   // wasting memory on trivial layers that are easy to re-rasterize every frame.
   return picture->approximateOpCount() > 10;
-}
-
-static sk_sp<SkShader> CreateCheckerboardShader(SkColor c1,
-                                                SkColor c2,
-                                                int size) {
-  SkBitmap bm;
-  bm.allocN32Pixels(2 * size, 2 * size);
-  bm.eraseColor(c1);
-  bm.eraseArea(SkIRect::MakeLTRB(0, 0, size, size), c2);
-  bm.eraseArea(SkIRect::MakeLTRB(size, size, 2 * size, 2 * size), c2);
-  return SkShader::MakeBitmapShader(bm, SkShader::kRepeat_TileMode,
-                                    SkShader::kRepeat_TileMode);
-}
-
-static void DrawCheckerboard(SkCanvas* canvas,
-                             SkColor c1,
-                             SkColor c2,
-                             int size) {
-  SkPaint paint;
-  paint.setShader(CreateCheckerboardShader(c1, c2, size));
-  canvas->drawPaint(paint);
-}
-
-static void DrawCheckerboard(SkCanvas* canvas, const SkRect& rect) {
-  // Draw a checkerboard
-  canvas->save();
-  canvas->clipRect(rect);
-
-  auto checkerboard_color =
-      SkColorSetARGBInline(64, rand() % 256, rand() % 256, rand() % 256);
-
-  DrawCheckerboard(canvas, checkerboard_color, 0x00000000, 12);
-  canvas->restore();
-
-  // Stroke the drawn area
-  SkPaint debugPaint;
-  debugPaint.setStrokeWidth(8);
-  debugPaint.setColor(SkColorSetA(checkerboard_color, 255));
-  debugPaint.setStyle(SkPaint::kStroke_Style);
-  canvas->drawRect(rect, debugPaint);
 }
 
 RasterCache::RasterCache() : checkerboard_images_(false), weak_factory_(this) {}

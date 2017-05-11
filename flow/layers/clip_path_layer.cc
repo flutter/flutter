@@ -37,8 +37,7 @@ void ClipPathLayer::Paint(PaintContext& context) {
   TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
   FTL_DCHECK(!needs_system_composite());
 
-  SkAutoCanvasRestore save(&context.canvas, false);
-  context.canvas.saveLayer(&paint_bounds(), nullptr);
+  Layer::AutoSaveLayer save(context, paint_bounds(), nullptr);
   context.canvas.clipPath(clip_path_, true);
   PaintChildren(context);
 }

@@ -76,6 +76,10 @@ class LayerTree {
     checkerboard_raster_cache_images_ = checkerboard;
   }
 
+  void set_checkerboard_offscreen_layers(bool checkerboard) {
+    checkerboard_offscreen_layers_ = checkerboard;
+  }
+
  private:
   SkISize frame_size_;  // Physical pixels.
   uint32_t scene_version_;
@@ -83,6 +87,7 @@ class LayerTree {
   ftl::TimeDelta construction_time_;
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
+  bool checkerboard_offscreen_layers_;
 
   FTL_DISALLOW_COPY_AND_ASSIGN(LayerTree);
 };

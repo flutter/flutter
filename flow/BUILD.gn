@@ -36,6 +36,8 @@ source_set("flow") {
     "layers/shader_mask_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
+    "paint_utils.cc",
+    "paint_utils.h",
     "process_info.h",
     "raster_cache.cc",
     "raster_cache.h",

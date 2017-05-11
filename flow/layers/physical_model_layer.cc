@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/physical_model_layer.h"
 
+#include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/utils/SkShadowUtils.h"
 
 #if defined(OS_FUCHSIA)
@@ -69,6 +70,8 @@ void PhysicalModelLayer::Paint(PaintContext& context) {
   }
   context.canvas.clipRRect(rrect_, true);
   PaintChildren(context);
+  if (context.checkerboard_offscreen_layers && !rrect_.isRect())
+    DrawCheckerboard(&context.canvas, rrect_.getBounds());
 }
 
 void PhysicalModelLayer::DrawShadow(SkCanvas* canvas, const SkPath& path,

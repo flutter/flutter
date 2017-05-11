@@ -17,8 +17,7 @@ void ColorFilterLayer::Paint(PaintContext& context) {
   SkPaint paint;
   paint.setColorFilter(std::move(color_filter));
 
-  SkAutoCanvasRestore save(&context.canvas, false);
-  context.canvas.saveLayer(&paint_bounds(), &paint);
+  Layer::AutoSaveLayer(context, paint_bounds(), nullptr);
   PaintChildren(context);
 }
 

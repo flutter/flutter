@@ -4,6 +4,7 @@
 
 #include "flutter/flow/layers/layer.h"
 
+#include "flutter/flow/paint_utils.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 
 namespace flow {
@@ -25,5 +26,27 @@ void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 #if defined(OS_FUCHSIA)
 void Layer::UpdateScene(SceneUpdateContext& context, mozart::Node* container) {}
 #endif
+
+Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
+                                    const SkRect& bounds,
+                                    const SkPaint* paint)
+    : paint_context_(paint_context),
+      bounds_(bounds) {
+  paint_context_.canvas.saveLayer(bounds_, paint);
+}
+
+Layer::AutoSaveLayer::AutoSaveLayer(const PaintContext& paint_context,
+                                    const SkCanvas::SaveLayerRec& layer_rec)
+    : paint_context_(paint_context),
+      bounds_(*layer_rec.fBounds) {
+  paint_context_.canvas.saveLayer(layer_rec);
+}
+
+Layer::AutoSaveLayer::~AutoSaveLayer() {
+  if (paint_context_.checkerboard_offscreen_layers) {
+    DrawCheckerboard(&paint_context_.canvas, bounds_);
+  }
+  paint_context_.canvas.restore();
+}
 
 }  // namespace flow

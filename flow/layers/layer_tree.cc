@@ -13,7 +13,8 @@ LayerTree::LayerTree()
     : frame_size_{},
       scene_version_(0),
       rasterizer_tracing_threshold_(0),
-      checkerboard_raster_cache_images_(false) {}
+      checkerboard_raster_cache_images_(false),
+      checkerboard_offscreen_layers_(false) {}
 
 LayerTree::~LayerTree() {}
 
@@ -52,7 +53,8 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame) {
   Layer::PaintContext context = {frame.canvas(), frame.context().frame_time(),
                                  frame.context().engine_time(),
-                                 frame.context().memory_usage()};
+                                 frame.context().memory_usage(),
+                                 checkerboard_offscreen_layers_};
   TRACE_EVENT0("flutter", "LayerTree::Paint");
   root_layer_->Paint(context);
 }

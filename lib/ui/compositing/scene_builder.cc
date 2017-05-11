@@ -52,6 +52,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, addChildScene)                    \
   V(SceneBuilder, addPerformanceOverlay)            \
   V(SceneBuilder, setRasterizerTracingThreshold)    \
+  V(SceneBuilder, setCheckerboardOffscreenLayers) \
   V(SceneBuilder, setCheckerboardRasterCacheImages) \
   V(SceneBuilder, build)
 
@@ -66,7 +67,8 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
 SceneBuilder::SceneBuilder()
     : m_currentLayer(nullptr),
       m_currentRasterizerTracingThreshold(0),
-      m_checkerboardRasterCacheImages(false) {
+      m_checkerboardRasterCacheImages(false),
+      m_checkerboardOffscreenLayers(false) {
   m_cullRects.push(SkRect::MakeLargest());
 }
 
@@ -261,12 +263,17 @@ void SceneBuilder::setCheckerboardRasterCacheImages(bool checkerboard) {
   m_checkerboardRasterCacheImages = checkerboard;
 }
 
+void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
+  m_checkerboardOffscreenLayers = checkerboard;
+}
+
 ftl::RefPtr<Scene> SceneBuilder::build() {
   m_currentLayer = nullptr;
   int32_t threshold = m_currentRasterizerTracingThreshold;
   m_currentRasterizerTracingThreshold = 0;
   ftl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold,
-                                           m_checkerboardRasterCacheImages);
+                                           m_checkerboardRasterCacheImages,
+                                           m_checkerboardOffscreenLayers);
   ClearDartWrapper();
   return scene;
 }

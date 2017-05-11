@@ -252,6 +252,12 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// interested in using this feature, please contact [flutter-dev](https://groups.google.com/forum/#!forum/flutter-dev).
   void setCheckerboardRasterCacheImages(bool checkerboard) native "SceneBuilder_setCheckerboardRasterCacheImages";
 
+  /// Sets whether the compositor should checkerboard layers that are rendered
+  /// to offscreen bitmaps.
+  ///
+  /// This is only useful for debugging purposes.
+  void setCheckerboardOffscreenLayers(bool checkerboard) native "SceneBuilder_setCheckerboardOffscreenLayers";
+
   /// Finishes building the scene.
   ///
   /// Returns a [Scene] containing the objects that have been added to
