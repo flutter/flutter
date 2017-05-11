@@ -22,7 +22,7 @@ void main() {
       await driver.waitFor(heightText);
 
       // Measure the initial height.
-      String startHeight = await driver.getText(heightText);
+      final String startHeight = await driver.getText(heightText);
 
       // Focus the text field to show the keyboard.
       final SerializableFinder defaultTextField = find.byValueKey(keys.kDefaultTextField);
@@ -37,7 +37,7 @@ void main() {
       await new Future<Null>.delayed(const Duration(seconds: 1));
 
       // Measure the final height.
-      String endHeight = await driver.getText(heightText);
+      final String endHeight = await driver.getText(heightText);
 
       expect(endHeight, startHeight);
     });
