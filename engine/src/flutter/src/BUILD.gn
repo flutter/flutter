@@ -14,13 +14,22 @@
 
 static_library("src") {
   sources = [
-    "font_collection.cc",
-    "font_collection.h",
+    "font_provider.cc",
+    "font_provider.h",
     "font_skia.cc",
     "font_skia.h",
+    "font_style.h",
+    "font_weight.h",
+    "paragraph_builder.cc",
+    "paragraph_builder.h",
+    "paragraph_style.h",
+    "styled_runs.h",
+    "text_align.h",
+    "text_style.h",
   ]
 
   deps = [
+    "//lib/ftl",
     "//lib/txt/libs/minikin",
     "//third_party/skia",
   ]

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "lib/txt/src/font_collection.h"
+#include "lib/txt/src/font_provider.h"
 
 #include <mutex>
 
@@ -31,28 +31,28 @@ bool IsItalic(SkFontStyle::Slant slant) {
 
 }  // namespace
 
-FontCollection& FontCollection::GetDefaultFontCollection() {
-  static FontCollection* collection = nullptr;
+FontProvider& FontProvider::GetDefault() {
+  static FontProvider* provider = nullptr;
   static std::once_flag once;
-  std::call_once(once, []() { collection = new FontCollection(); });
-  return *collection;
+  std::call_once(once, []() { provider = new FontProvider(); });
+  return *provider;
 }
 
-FontCollection::FontCollection() = default;
+FontProvider::FontProvider() = default;
 
-FontCollection::~FontCollection() = default;
+FontProvider::~FontProvider() = default;
 
 std::shared_ptr<minikin::FontCollection>
-FontCollection::GetAndroidFontCollectionForFamily(const std::string& family) {
+FontProvider::GetFontCollectionForFamily(const std::string& family) {
   // Get the Skia font manager.
-  auto skia_font_manager = SkFontMgr::RefDefault();
-  FTL_DCHECK(skia_font_manager != nullptr);
+  auto font_manager = SkFontMgr::RefDefault();
+  FTL_DCHECK(font_manager != nullptr);
 
   // Ask Skia to resolve a font style set for a font family name.
   // FIXME(chinmaygarde): The name "Hevetica" is hardcoded because CoreText
   // crashes when passed a null string. This seems to be a bug in Skia as
   // SkFontMgr explicitly says passing in nullptr gives the default font.
-  auto font_style_set = skia_font_manager->matchFamily(
+  auto font_style_set = font_manager->matchFamily(
       family.length() == 0 ? "Helvetica" : family.c_str());
   FTL_DCHECK(font_style_set != nullptr);
 
@@ -64,9 +64,9 @@ FontCollection::GetAndroidFontCollectionForFamily(const std::string& family) {
         sk_ref_sp<SkTypeface>(font_style_set->createTypeface(i));
     auto typeface = std::make_shared<FontSkia>(std::move(skia_typeface));
 
-    SkFontStyle skia_font_style;
-    font_style_set->getStyle(i, &skia_font_style, nullptr);
-    minikin::FontStyle style(skia_font_style.weight(), IsItalic(skia_font_style.slant()));
+    SkFontStyle font_style;
+    font_style_set->getStyle(i, &font_style, nullptr);
+    minikin::FontStyle style(font_style.weight(), IsItalic(font_style.slant()));
 
     fonts.push_back(minikin::Font(std::move(typeface), style));
   }
